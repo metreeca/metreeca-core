@@ -35,12 +35,6 @@
 	<name>Metreeca Backend Adapters</name>
 	<description>Backend adapter kits.</description>
 
-	<properties>
-
-		<rdf4j.version>3.0.1</rdf4j.version> <!-- shared among rdf-based modules ;(BOM clashes with GCP)-->
-
-	</properties>
-
 	<modules>
 
 		<module>metreeca-gcp</module>

@@ -89,6 +89,8 @@
 
 	<modules>
 
+		<module>bom</module>
+
 		<module>metreeca-tree</module>
 		<module>metreeca-rest</module>
 		<module>metreeca-gate</module>
@@ -102,6 +104,9 @@
 
 		<java.version>1.8</java.version>
 		<maven.version>3.3</maven.version>
+
+		<rdf4j.version>3.0.1</rdf4j.version>
+		<gcp.version>0.115.0-alpha</gcp.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
