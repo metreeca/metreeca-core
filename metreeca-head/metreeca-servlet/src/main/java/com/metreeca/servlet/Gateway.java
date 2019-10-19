@@ -122,13 +122,13 @@ public abstract class Gateway implements Filter {
 
 
 	private Storage storage(final ServletContext context) {
-		return name -> {
+		return path -> {
 
-			if ( name == null ) {
-				throw new NullPointerException("null name");
+			if ( path == null ) {
+				throw new NullPointerException("null path");
 			}
 
-			return new File((File)context.getAttribute(ServletContext.TEMPDIR), name);
+			return new File((File)context.getAttribute(ServletContext.TEMPDIR), path);
 		};
 	}
 

@@ -35,13 +35,13 @@ import java.util.function.Supplier;
 	 * the process in the host filesystem
 	 */
 	public static Supplier<Storage> storage() {
-		return () -> name -> {
+		return () -> path -> {
 
-			if ( name == null ) {
-				throw new NullPointerException("null name");
+			if ( path == null ) {
+				throw new NullPointerException("null path");
 			}
 
-			return new File(System.getProperty("user.dir"), name);
+			return new File(System.getProperty("user.dir"), path);
 		};
 	}
 
@@ -49,15 +49,15 @@ import java.util.function.Supplier;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Locates a file storage area.
+	 * Locates a file.
 	 *
-	 * @param name the name of the storage area to be located
+	 * @param path the path of the file to be located
 	 *
-	 * @return a file providing access to the named storage area
+	 * @return the file identified by {@code path}
 	 *
-	 * @throws NullPointerException     if {@code name} is null
-	 * @throws IllegalArgumentException if {@code name} is not a valid system-specific filename
+	 * @throws NullPointerException     if {@code path} is null
+	 * @throws IllegalArgumentException if {@code path} is not a valid system-specific file path
 	 */
-	public File area(final String name);
+	public File file(final String path);
 
 }
