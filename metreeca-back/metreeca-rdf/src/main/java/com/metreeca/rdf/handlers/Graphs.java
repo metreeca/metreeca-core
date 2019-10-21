@@ -102,7 +102,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
-						.cause("missing target graph parameter")
+						.notes("missing target graph parameter")
 				).accept(consumer);
 
 
@@ -177,7 +177,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
-						.cause("missing target graph parameter")
+						.notes("missing target graph parameter")
 				).accept(consumer);
 
 
@@ -218,7 +218,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
-								.cause("I/O while reading RDF payload: see server logs for details")
+								.notes("I/O while reading RDF payload: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -229,7 +229,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(new Failure()
 								.status(Response.BadRequest)
 								.error("payload-malformed")
-								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
+								.notes("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
 								.cause(e)
 						).accept(consumer);
 
@@ -240,7 +240,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to update graph: see server logs for details")
+								.notes("unable to update graph: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -264,7 +264,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
-						.cause("missing target graph parameter")
+						.notes("missing target graph parameter")
 				).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
@@ -293,7 +293,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to delete graph: see server logs for details")
+								.notes("unable to delete graph: see server logs for details")
 						).accept(consumer);
 
 					}
@@ -319,7 +319,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("parameter-missing")
-						.cause("missing target graph parameter")
+						.notes("missing target graph parameter")
 				).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
@@ -357,7 +357,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("payload-unreadable")
-								.cause("I/O while reading RDF payload: see server logs for details")
+								.notes("I/O while reading RDF payload: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 
@@ -368,7 +368,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(new Failure()
 								.status(Response.BadRequest)
 								.error("payload-malformed")
-								.cause("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
+								.notes("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
 								.cause(e)
 						).accept(consumer);
 
@@ -379,7 +379,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(new Failure()
 								.status(Response.InternalServerError)
 								.error("update-aborted")
-								.cause("unable to update graph: see server logs for details")
+								.notes("unable to update graph: see server logs for details")
 								.cause(e)
 						).accept(consumer);
 

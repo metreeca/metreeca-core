@@ -72,7 +72,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 					request.reply(new Failure()
 							.status(Response.BadRequest)
 							.error("parameter-missing")
-							.cause("missing query/update parameter")
+							.notes("missing query/update parameter")
 					).accept(consumer);
 
 				} else if ( operation instanceof Query && !queryable(request.roles())
@@ -102,7 +102,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 					request.reply(new Failure()
 							.status(Response.NotImplemented)
 							.error("operation-unsupported")
-							.cause(operation.getClass().getName())
+							.notes(operation.getClass().getName())
 					).accept(consumer);
 
 				}
@@ -112,6 +112,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("query-malformed")
+						.notes(e.getMessage())
 						.cause(e)
 				).accept(consumer);
 
@@ -120,6 +121,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				request.reply(new Failure()
 						.status(Response.BadRequest)
 						.error("request-malformed")
+						.notes(e.getMessage())
 						.cause(e)
 				).accept(consumer);
 
@@ -128,6 +130,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				request.reply(new Failure()
 						.status(Response.NotImplemented)
 						.error("operation-unsupported")
+						.notes(e.getMessage())
 						.cause(e)
 				).accept(consumer);
 
@@ -138,6 +141,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("query-evaluation")
+						.notes(e.getMessage())
 						.cause(e)
 				).accept(consumer);
 
@@ -146,6 +150,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("update-evaluation")
+						.notes(e.getMessage())
 						.cause(e)
 				).accept(consumer);
 
@@ -154,6 +159,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("response-error")
+						.notes(e.getMessage())
 						.cause(e)
 				).accept(consumer);
 
@@ -162,6 +168,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				request.reply(new Failure()
 						.status(Response.InternalServerError)
 						.error("repository-error")
+						.notes(e.getMessage())
 						.cause(e)
 				).accept(consumer);
 
