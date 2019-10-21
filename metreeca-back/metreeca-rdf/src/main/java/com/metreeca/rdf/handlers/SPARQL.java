@@ -36,8 +36,7 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Map;
-
-import static java.lang.Boolean.parseBoolean;
+import java.util.Optional;
 
 
 /**
@@ -172,16 +171,15 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	private Operation operation(final Request request, final RepositoryConnection connection) {
 
-		final String query=request.parameter("query").orElse("");
-		final String update=request.parameter("update").orElse("");
-		final String infer=request.parameter("infer").orElse("");
+		final Optional<String> query=request.parameter("query");
+		final Optional<String> update=request.parameter("update");
+		final Optional<String> infer=request.parameter("infer");
 
 		final Collection<String> basics=request.parameters("default-graph-uri");
 		final Collection<String> nameds=request.parameters("named-graph-uri");
 
-		final Operation operation=!query.isEmpty() ? connection.prepareQuery(query)
-				: !update.isEmpty() ? connection.prepareUpdate(update)
-				: null;
+		final Operation operation=query.isPresent() ? connection.prepareQuery(query.get())
+				: update.map(connection::prepareUpdate).orElse(null);
 
 		if ( operation != null ) {
 
@@ -193,7 +191,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 			operation.setDataset(dataset);
 			operation.setMaxExecutionTime(timeout());
-			operation.setIncludeInferred(infer.isEmpty() || parseBoolean(infer));
+			operation.setIncludeInferred(infer.map(Boolean::parseBoolean).orElse(true));
 
 		}
 
