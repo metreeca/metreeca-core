@@ -55,10 +55,11 @@ import static java.lang.String.format;
 /**
  * SPARQL 1.1 Graph Store endpoint handler.
  *
- * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the shared {@linkplain Graph graph}.</p>
+ * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the shared {@linkplain Graph
+ * graph}.</p>
  *
- * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
- * to users in the {@linkplain Values#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
+ * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are disabled,
+ * unless otherwise specified.</p>
  *
  * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
  */
@@ -104,7 +105,6 @@ public final class Graphs extends Endpoint<Graphs> {
 						.error("parameter-missing")
 						.notes("missing target graph parameter")
 				).accept(consumer);
-
 
 			} else if ( !queryable(request.roles()) ) {
 
@@ -179,7 +179,6 @@ public final class Graphs extends Endpoint<Graphs> {
 						.error("parameter-missing")
 						.notes("missing target graph parameter")
 				).accept(consumer);
-
 
 			} else if ( !updatable(request.roles()) ) {
 

@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf.handlers;
 
-import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rdf.services.GraphTest;
@@ -51,6 +50,8 @@ import static java.util.stream.Collectors.toCollection;
 
 
 final class GraphsTest {
+
+	private static final Object Root=new Object();
 
 	private static final Statement First=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 	private static final Statement Rest=statement(RDF.NIL, RDF.VALUE, RDF.REST);
@@ -97,7 +98,7 @@ final class GraphsTest {
 
 
 	private Graphs endpoint() {
-		return new Graphs();
+		return new Graphs().query(Root).update(Root);
 	}
 
 	private Request request() {
@@ -119,7 +120,7 @@ final class GraphsTest {
 	}
 
 	private Request authenticated(final Request request) {
-		return request.roles(Values.root);
+		return request.roles(Root);
 	}
 
 

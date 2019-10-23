@@ -111,17 +111,6 @@ public final class Values {
 	public static final String Internal="app:/terms#";
 
 
-	/**
-	 * Anonymous user/role.
-	 */
-	public static final IRI none=iri(Internal, "none");
-
-	/**
-	 * Super user/role.
-	 */
-	public static final IRI root=iri(Internal, "root");
-
-
 	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI IRIType=iri(Internal, "iri"); // datatype IRI for IRI references

@@ -17,13 +17,10 @@
 
 package com.metreeca.rdf.handlers;
 
-import com.metreeca.rdf.Values;
 import com.metreeca.rdf.services.Graph;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.services.Logger;
-
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.*;
 
@@ -39,8 +36,8 @@ import static java.util.Collections.singleton;
  *
  * <p>Provides a standard SPARQL 1.1 endpoint exposing the contents of the shared {@linkplain Graph graph}.</p>
  *
- * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are restricted
- * to users in the {@linkplain Values#root root} {@linkplain Request#roles() role}, unless otherwise specified.</p>
+ * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are disabled,
+ * unless otherwise specified.</p>
  *
  * @see <a href="https://www.w3.org/TR/2013/REC-sparql11-overview-20130321/">SPARQL 1.1 Overview</a>
  */
@@ -48,8 +45,8 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	private int timeout=60; // endpoint operations timeout [s]
 
-	private Set<IRI> query=singleton(Values.root); // roles enabled for query operations
-	private Set<IRI> update=singleton(Values.root); // roles enabled for update operations
+	private Set<Object> query=singleton(new Object()); // roles enabled for query operations (unmatchable by default)
+	private Set<Object> update=singleton(new Object()); // roles enabled for update operations (unmatchable by default)
 
 	private final Graph graph=service(Graph.graph());
 	private final Logger logger=service(Logger.logger());
@@ -118,7 +115,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public T query(final IRI... roles) {
+	public T query(final Object... roles) {
 		return query(asList(roles));
 	}
 
@@ -132,7 +129,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public T query(final Collection<? extends IRI> roles) {
+	public T query(final Collection<?> roles) {
 
 		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");
@@ -153,7 +150,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public T update(final IRI... roles) {
+	public T update(final Object... roles) {
 		return update(asList(roles));
 	}
 
@@ -167,7 +164,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public T update(final Collection<? extends IRI> roles) {
+	public T update(final Collection<?> roles) {
 
 		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");

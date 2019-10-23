@@ -51,12 +51,14 @@ import static java.util.stream.Collectors.toList;
 
 final class SPARQLTest {
 
+	private static final Object Root=new Object();
+
 	private static final Statement First=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 	private static final Statement Rest=statement(RDF.NIL, RDF.VALUE, RDF.REST);
 
 
 	private SPARQL endpoint() {
-		return new SPARQL();
+		return new SPARQL().query(Root).update(Root);
 	}
 
 
@@ -74,7 +76,7 @@ final class SPARQLTest {
 	}
 
 	private Request authenticated(final Request request) {
-		return request.roles(Values.root);
+		return request.roles(Root);
 	}
 
 
