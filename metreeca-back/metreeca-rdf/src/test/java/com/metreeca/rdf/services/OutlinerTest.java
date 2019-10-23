@@ -30,6 +30,7 @@ import java.util.Collection;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
+import static com.metreeca.tree.Shape.focus;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
@@ -84,7 +85,7 @@ final class OutlinerTest {
 
 
 	@Test void testResolveReferencesToTarget() {
-		assertThat(outline(field(RDF.VALUE, all(Shape.Target)), RDF.FIRST))
+		assertThat(outline(field(RDF.VALUE, all(focus())), RDF.FIRST))
 				.as("value union")
 				.isEqualTo(decode("rdf:first rdf:value rdf:first."));
 	}

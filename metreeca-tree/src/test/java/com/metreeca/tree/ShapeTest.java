@@ -19,7 +19,7 @@ package com.metreeca.tree;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.tree.Shape.relative;
+import static com.metreeca.tree.Shape.focus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,29 +30,34 @@ final class ShapeTest {
 
 		final String target="http://example.org/collection/member/nested";
 
-		assertThat(relative().apply(target))
+		assertThat(focus().resolve(target))
 				.as("target")
 				.isEqualTo(target);
 
-		assertThat(relative(".").apply(target))
+		assertThat(focus(".").resolve(target))
 				.as("member w/o trailing slash")
 				.isEqualTo("http://example.org/collection/member");
 
-		assertThat(relative("./").apply(target))
+		assertThat(focus("./").resolve(target))
 				.as("member w/ trailing slash")
 				.isEqualTo("http://example.org/collection/member/");
 
-		assertThat(relative("..").apply(target))
+		assertThat(focus("..").resolve(target))
 				.as("collection w/o trailing slash")
 				.isEqualTo("http://example.org/collection");
 
-		assertThat(relative("../").apply(target))
+		assertThat(focus("../").resolve(target))
 				.as("collection w/ trailing slash")
 				.isEqualTo("http://example.org/collection/");
 
-		assertThat(relative("../sibling").apply(target))
+		assertThat(focus("../sibling").resolve(target))
 				.as("sibling")
 				.isEqualTo("http://example.org/collection/sibling");
+
+
+		assertThat(focus("sibling").resolve("/collection/member"))
+				.as("relative target")
+				.isEqualTo("/collection/sibling");
 
 	}
 

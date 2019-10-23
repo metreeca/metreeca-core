@@ -32,8 +32,8 @@ import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.tree.shapes.All.all;
 
 import static java.util.Arrays.asList;
@@ -76,12 +76,12 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return sources.stream()
 				.filter(source -> source instanceof Resource)
-				.map(source -> statement((Resource)source, RDF.TYPE, iri(clazz.getName())));
+				.map(source -> statement((Resource)source, RDF.TYPE, RDFFormat.iri(clazz.getName())));
 	}
 
 	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=iri(field.getName());
+		final IRI iri=RDFFormat.iri(field.getName());
 		final Shape shape=field.getShape();
 
 		return Stream.concat(
@@ -117,7 +117,9 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 
 	private Stream<Value> values(final Stream<Object> objects) {
-		return objects.flatMap(o -> o.equals(Shape.Target) ? sources.stream() : Stream.of(RDFFormat.value(o)));
+		return objects.flatMap(o -> o instanceof Shape.Focus
+				? sources.stream().map(s -> s instanceof IRI? iri(((Shape.Focus)o).resolve(s.stringValue())) : RDFFormat.value(s))
+				: Stream.of(RDFFormat.value(o)));
 	}
 
 }

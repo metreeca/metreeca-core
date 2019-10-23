@@ -56,6 +56,7 @@ import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.format;
 import static com.metreeca.rdf.Values.integer;
 import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
@@ -63,6 +64,7 @@ import static com.metreeca.rdf.services.Snippets.*;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.tree.Shape.pass;
+import static com.metreeca.tree.Shape.focus;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
@@ -108,8 +110,8 @@ abstract class GraphProcessor {
 	private Shape anchor(final IRI resource, final Shape shape) {
 		return pass(shape) ? resource.stringValue().endsWith("/")
 
-				? field(inverse(LDP.CONTAINS), Shape.Target) // holders default to ldp:BasicContainer
-				: all(Shape.Target) // members default to self
+				? field(inverse(LDP.CONTAINS), focus()) // holders default to ldp:BasicContainer
+				: all(focus()) // members default to self
 
 				: shape;
 	}
@@ -170,11 +172,15 @@ abstract class GraphProcessor {
 
 
 		private Value value(final Object value) {
-			return value.equals(Shape.Target) ? resource : RDFFormat.value(value);
+			return value instanceof Shape.Focus
+					? iri(((Shape.Focus)value).resolve(resource.stringValue()))
+					: RDFFormat.value(value);
 		}
 
 		private Set<Value> values(final Collection<Object> values) {
-			return values.stream().map(this::value).collect(toSet());
+			return values.stream()
+					.map(this::value)
+					.collect(toSet());
 		}
 
 

@@ -135,11 +135,15 @@ final class GraphValidator extends GraphProcessor {
 
 
 		private Value value(final Object value) {
-			return value.equals(Shape.Target) ? resource : RDFFormat.value(value);
+			return value instanceof Shape.Focus
+					? iri(((Shape.Focus)value).resolve(resource.stringValue()))
+					: RDFFormat.value(value);
 		}
 
-		private Set<Value> values(final Set<Object> values) {
-			return values.stream().map(this::value).collect(toSet());
+		private Set<Value> values(final Collection<Object> values) {
+			return values.stream()
+					.map(this::value)
+					.collect(toSet());
 		}
 
 

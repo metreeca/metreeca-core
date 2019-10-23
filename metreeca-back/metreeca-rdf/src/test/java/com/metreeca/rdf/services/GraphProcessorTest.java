@@ -43,6 +43,7 @@ import static com.metreeca.tree.Order.decreasing;
 import static com.metreeca.tree.Order.increasing;
 import static com.metreeca.tree.Shape.convey;
 import static com.metreeca.tree.Shape.filter;
+import static com.metreeca.tree.Shape.focus;
 import static com.metreeca.tree.queries.Items.items;
 import static com.metreeca.tree.queries.Stats.stats;
 import static com.metreeca.tree.queries.Terms.terms;
@@ -389,7 +390,7 @@ final class GraphProcessorTest {
 		exec(() -> assertThat(query(
 
 				item("/employees-basic/"), items(and(
-						filter().then(field(inverse(LDP.CONTAINS), Shape.Target)),
+						filter().then(field(inverse(LDP.CONTAINS), focus())),
 						convey().then(field(RDFS.LABEL))
 				))
 
