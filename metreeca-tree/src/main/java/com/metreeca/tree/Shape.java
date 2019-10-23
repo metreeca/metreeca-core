@@ -19,6 +19,7 @@ package com.metreeca.tree;
 
 import com.metreeca.tree.shapes.*;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -31,6 +32,7 @@ import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.When.when;
 
 import static java.util.Arrays.asList;
+import static java.util.function.UnaryOperator.identity;
 
 
 /**
@@ -190,6 +192,27 @@ public interface Shape {
 	public static Guard convey() { return mode(Convey); }
 
 	public static Guard filter() { return mode(Filter); }
+
+
+	//// Relative IRIs /////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Function<String, String> relative() {
+		return relative("");
+	}
+
+	public static Function<String, String> relative(final String iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		final Function<String, String> resolve=path -> URI.create(path).resolve(iri).toString();
+		final Function<String, String> convert=path -> path.endsWith("/")? path.substring(0, path.length()-1) : path;
+
+		return iri.isEmpty() ? identity()
+				: iri.endsWith("/") ? resolve
+				: resolve.andThen(convert);
+	}
 
 
 	//// Evaluation ////////////////////////////////////////////////////////////////////////////////////////////////////

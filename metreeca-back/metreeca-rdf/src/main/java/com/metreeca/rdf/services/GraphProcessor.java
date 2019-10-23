@@ -106,10 +106,11 @@ abstract class GraphProcessor {
 
 
 	private Shape anchor(final IRI resource, final Shape shape) {
-		return pass(shape)
-				? resource.stringValue().endsWith("/")
+		return pass(shape) ? resource.stringValue().endsWith("/")
+
 				? field(inverse(LDP.CONTAINS), Shape.Target) // holders default to ldp:BasicContainer
 				: all(Shape.Target) // members default to self
+
 				: shape;
 	}
 
