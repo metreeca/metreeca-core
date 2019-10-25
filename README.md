@@ -1,7 +1,7 @@
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/metreeca-link.svg)](https://search.maven.org/search?q=com.metreeca)
+[![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/metreeca-link.svg)](https://search.maven.org/artifact/com.metreeca/metreeca-link/)
 
-# Metreeca/Link
+# metreeca/link - a model-driven linked data framework
 
 Metreeca/Link is an open source Java framework enabling rapid model-driven development of RESTful linked data services.
 
