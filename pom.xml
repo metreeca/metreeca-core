@@ -27,7 +27,7 @@
 	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Metreeca Linked Data Framework</name>
+	<name>Metreeca Model-Driven Linked Data Framework</name>
 	<description>A declarative model-driven framework for rapid linked data service development.</description>
 	<url>https://github.com/metreeca/link</url>
 	<inceptionYear>2013</inceptionYear>
@@ -246,35 +246,26 @@
 
 			</plugin>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
+			<plugin> <!-- https://github.com/metreeca/mark -->
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
+				<groupId>com.metreeca</groupId>
+				<artifactId>mark-maven-plugin</artifactId>
+				<version>0.0.0-SNAPSHOT</version>
 
 				<executions>
 					<execution>
 
-						<id>copy-jekyll-configuration</id>
-						<inherited>false</inherited>
+						<id>generate-docs</id>
 						<phase>site</phase>
+						<inherited>false</inherited> <!-- !!! -->
 
 						<goals>
-							<goal>copy-resources</goal>
+							<goal>build</goal>
 						</goals>
 
 						<configuration>
-
-							<outputDirectory>${basedir}/docs</outputDirectory>
-							<overwrite>true</overwrite>
-
-							<resources>
-								<resource>
-									<directory>${basedir}/docs/_resources</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-
+							<source>_docs</source>
+							<target>docs</target>
 						</configuration>
 
 					</execution>
@@ -383,13 +374,7 @@
 						<configuration>
 							<filesets>
 								<fileset>
-									<directory>docs/_site</directory>
-								</fileset>
-								<fileset>
-									<directory>docs/javadocs</directory>
-								</fileset>
-								<fileset>
-									<directory>docs/reports</directory>
+									<directory>docs/</directory>
 								</fileset>
 							</filesets>
 						</configuration>

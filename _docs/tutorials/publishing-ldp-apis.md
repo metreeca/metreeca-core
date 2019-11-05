@@ -26,13 +26,13 @@ To get started, set up a Java 1.8 project, adding required dependencies for the 
     <dependency>
         <groupId>com.metreeca</groupId>
         <artifactId>metreeca-j2ee</artifactId>
-        <version>{{ page.version }}</version>
+        <version>${project.version}</version>
     </dependency>
 
     <dependency>
 	    <groupId>com.metreeca</groupId>
 	    <artifactId>metreeca-rdf4j</artifactId>
-        <version>{{ page.version }}</version>
+        <version>${project.version}</version>
     </dependency>
 
     <dependency>
