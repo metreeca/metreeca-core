@@ -5,15 +5,22 @@
     <file url="file://$PROJECT_DIR$/bom" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-back" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-gcp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-gcp/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-rdf" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-rdf/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-rdf/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-rdf4j" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-stardog" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-stardog/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-back/metreeca-virtuoso" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-gate" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-gate/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-head" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-head/metreeca-servlet" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-head/metreeca-servlet/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-rest" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/metreeca-tree" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/metreeca-tree/src/main/java" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
