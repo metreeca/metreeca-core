@@ -48,6 +48,12 @@
 			<version>1.1.4</version>
 		</dependency>
 
+		<dependency> <!-- TagSoup SAX HTML Parser -->
+			<groupId>org.ccil.cowan.tagsoup</groupId>
+			<artifactId>tagsoup</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+
 	</dependencies>
 
 </project>
