@@ -32,7 +32,6 @@ import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
 
-import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.compile;
 
 
@@ -49,7 +48,7 @@ public final class XMLFormat extends Format<Document> {
 	/**
 	 * A pattern matching XML-based MIME types, for instance {@code application/rss+xml}.
 	 */
-	public static final Pattern MIMEPattern=compile("^(?:.*/(?:.*\\+)?xml|text/html)(?:;.*)?$", CASE_INSENSITIVE);
+	public static final Pattern MIMEPattern=compile("(?i)^(?:.*/(?:.*\\+)?xml|text/html)(?:\\s*;.*)?$");
 
 
 	/**

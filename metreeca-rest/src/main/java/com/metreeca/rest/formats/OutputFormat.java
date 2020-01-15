@@ -32,7 +32,7 @@ import static com.metreeca.rest.Result.Value;
 public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>> {
 
 	/**
-	 * The default MIME type for binary outbound raw message bodies.
+	 * The default MIME type for binary outbound raw message bodies ({@value}).
 	 */
 	public static final String MIME="application/octet-stream";
 
@@ -62,7 +62,7 @@ public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>>
 	}
 
 	/**
-	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
+	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Consumer<Supplier<OutputStream>> value) {
 		return message.header("~Content-Type", MIME);

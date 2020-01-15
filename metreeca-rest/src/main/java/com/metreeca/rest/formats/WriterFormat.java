@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 
 	/**
-	 * The default MIME type for outbound textual message bodies.
+	 * The default MIME type for outbound textual message bodies ({@value}).
 	 */
 	private static final String MIME="text/plain";
 
@@ -68,7 +68,7 @@ public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 	 * body to the accepted output stream using the character encoding specified in its {@code Content-Type} header or
 	 * the {@linkplain StandardCharsets#UTF_8 default charset} if none is specified.</p>
 	 *
-	 * <p>Sets the {@code Content-Type} header of {@code message} to {@link #MIME}, if not already set.</p>
+	 * <p>Sets the {@code Content-Type} header of {@code message} to {@link #MIME}, unless already defined.</p>
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Consumer<Supplier<Writer>> value) {
 		return message

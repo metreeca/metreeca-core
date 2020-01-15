@@ -48,6 +48,12 @@ import static java.util.stream.Collectors.toList;
  */
 public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
+	/**
+	 * The default MIME type for multipart message bodies ({@value}).
+	 */
+	public static final String MIME="multipart/mixed";
+
+
 	private static final byte[] Dashes="--".getBytes(UTF_8);
 	private static final byte[] CRLF="\r\n".getBytes(UTF_8);
 	private static final byte[] Colon=": ".getBytes(UTF_8);
@@ -210,7 +216,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 		final String type=message
 				.header("Content-Type") // custom value
-				.orElse("multipart/mixed"); // fallback value
+				.orElse(MIME); // fallback value
 
 		final byte[] boundary; // compute boundary
 

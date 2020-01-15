@@ -47,14 +47,14 @@ import static java.util.Collections.singletonMap;
 public final class JSONFormat extends Format<JsonObject> {
 
 	/**
-	 * The default MIME type for JSON message bodies.
+	 * The default MIME type for JSON message bodies ({@value}).
 	 */
 	public static final String MIME="application/json";
 
 	/**
 	 * A pattern matching JSON-based MIME types, for instance {@code application/ld+json}.
 	 */
-	public static final Pattern MIMEPattern=Pattern.compile("^application/(.*\\+)?json$");
+	public static final Pattern MIMEPattern=Pattern.compile("(?i)^application/(.*\\+)?json(?:\\s*;.*)?$");
 
 
 	private static final JsonWriterFactory JsonWriters=Json
@@ -198,11 +198,12 @@ public final class JSONFormat extends Format<JsonObject> {
 
 	/**
 	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
-	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}.
+	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
+	 * defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
 		return message
-				.header("Content-Type", MIME)
+				.header("~Content-Type", MIME)
 				.body(writer, target -> {
 					try (
 							final Writer writer=target.get();

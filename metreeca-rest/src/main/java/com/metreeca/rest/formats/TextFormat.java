@@ -18,7 +18,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.Codecs;
 
 import java.io.*;
 
@@ -30,6 +29,12 @@ import static com.metreeca.rest.formats.WriterFormat.writer;
  * Textual body format.
  */
 public final class TextFormat extends Format<String> {
+
+	/**
+	 * The default MIME type for textual message bodies ({@value}).
+	 */
+	public static final String MIME="text/plain";
+
 
 	/**
 	 * Creates a textual format.
@@ -71,18 +76,21 @@ public final class TextFormat extends Format<String> {
 
 	/**
 	 * Configures the {@link WriterFormat} body of {@code message} to write the textual {@code value} to the output
-	 * stream supplied by the accepted output stream supplier.
+	 * stream supplied by the accepted output stream supplier and sets the {@code Content-Type} header to {@value
+	 * #MIME}, unless already defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final String value) {
-		return message.body(writer, target -> {
-			try (final Writer output=target.get()) {
+		return message
+				.header("~Content-Type", MIME)
+				.body(writer, target -> {
+					try (final Writer output=target.get()) {
 
-				output.write(value);
+						output.write(value);
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 }

@@ -18,7 +18,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.Codecs;
 
 import java.io.*;
 
@@ -30,6 +29,12 @@ import static com.metreeca.rest.formats.OutputFormat.output;
  * Binary body format.
  */
 public final class DataFormat extends Format<byte[]> {
+
+	/**
+	 * The default MIME type for binary message bodies ({@value}).
+	 */
+	public static final String MIME="application/octet-stream";
+
 
 	/**
 	 * Creates a binary body format.
@@ -75,18 +80,21 @@ public final class DataFormat extends Format<byte[]> {
 
 	/**
 	 * Configures the {@link OutputFormat} body of {@code message} to write the binary {@code value} to the output
-	 * stream supplied by the accepted output stream supplier.
+	 * stream supplied by the accepted output stream supplier and sets the {@code Content-Type} header to {@value
+	 * #MIME}, unless already defined.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final byte[] value) {
-		return message.body(output, target -> {
-			try (final OutputStream output=target.get()) {
+	@Override public <M extends Message<M>> M set(final M message, final byte... value) {
+		return message
+				.header("~Content-Type", MIME)
+				.body(output, target -> {
+					try (final OutputStream output=target.get()) {
 
-				output.write(value);
+						output.write(value);
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 }
