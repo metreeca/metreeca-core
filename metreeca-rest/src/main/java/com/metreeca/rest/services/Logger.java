@@ -152,7 +152,7 @@ public abstract class Logger {
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
 	 * @param message the message for the trace entry
 	 */
-	public void error(final Object source, final String message) { error(source, () -> message); }
+	public final void error(final Object source, final String message) { error(source, () -> message); }
 
 	/**
 	 * Adds an error trace entry.
@@ -160,7 +160,7 @@ public abstract class Logger {
 	 * @param source  the source object for the trace entry or {@code null} for global trace entries
 	 * @param message the message supplier for the trace entry
 	 */
-	public void error(final Object source, final Supplier<String> message) {
+	public final void error(final Object source, final Supplier<String> message) {
 		entry(Level.Error, source, message, null);
 	}
 
