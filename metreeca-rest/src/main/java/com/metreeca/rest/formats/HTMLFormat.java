@@ -20,9 +20,10 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
 
+import org.ccil.cowan.tagsoup.Parser;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
+import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.util.regex.Pattern;
@@ -46,45 +47,27 @@ import static java.util.regex.Pattern.compile;
 
 
 /**
- * XML body format.
+ * HTML body format.
  */
-public final class XMLFormat extends Format<Document> {
+public final class HTMLFormat extends Format<Document> {
 
 	/**
-	 * The default MIME type for XML message bodies ({@value}).
+	 * The default MIME type for HTML message bodies ({@value}).
 	 */
-	public static final String MIME="application/xml";
+	public static final String MIME="text/html";
 
 	/**
-	 * A pattern matching XML-based MIME types, for instance {@code application/rss+xml}.
+	 * A pattern matching the HTML MIME type.
 	 */
-	public static final Pattern MIMEPattern=compile("(?i)^.*/(?:.*\\+)?xml(?:\\s*;.*)?$");
+	public static final Pattern MIMEPattern=compile("(?i)^(?:text/html)(?:\\s*;.*)?$");
 
 
 	/**
-	 * Creates an XML body format.
+	 * Creates an HTML body format.
 	 *
-	 * @return the new XML body format
+	 * @return the new HTML body format
 	 */
-	public static XMLFormat xml() {return new XMLFormat(null);}
-
-	/**
-	 * Creates an XML body format using a custom SAX parser.
-	 *
-	 * @param parser the custom SAX parser
-	 *
-	 * @return the new XML body format
-	 *
-	 * @throws NullPointerException if {@code parser} is null
-	 */
-	public static XMLFormat xml(final XMLReader parser) {
-
-		if ( parser == null ) {
-			throw new NullPointerException("null parser");
-		}
-
-		return new XMLFormat(parser);
-	}
+	public static HTMLFormat html() { return new HTMLFormat(); }
 
 
 	private static final DocumentBuilderFactory builders=DocumentBuilderFactory.newInstance();
@@ -118,20 +101,15 @@ public final class XMLFormat extends Format<Document> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final XMLReader parser;
-
-
-	private XMLFormat(final XMLReader parser) {
-		this.parser=parser;
-	}
+	private HTMLFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional XML body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
-	 * matched by {@link #MIMEPattern}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * @return the optional HTML body representation of {@code message}, as retrieved from the reader supplied by its
+	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is {@link
+	 * #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<Document, Failure> get(final Message<?> message) {
 
@@ -154,15 +132,22 @@ public final class XMLFormat extends Format<Document> {
 
 						document.setDocumentURI(message.item());
 
+						final Parser parser=new Parser();
+
+						parser.setFeature(Parser.namespacesFeature, false);
+
 						transformer().transform(
 
-								parser != null ? new SAXSource(parser, input) : new SAXSource(input),
-
+								new SAXSource(parser, input),
 								new DOMResult(document)
 
 						);
 
 						return Value(document);
+
+					} catch ( final SAXException e ) {
+
+						throw new UnsupportedOperationException("unable to configure HTML parser", e);
 
 					} catch ( final TransformerException e ) {
 
@@ -178,14 +163,14 @@ public final class XMLFormat extends Format<Document> {
 
 				: Error(new Failure()
 				.status(Response.UnsupportedMediaType)
-				.notes("missing XML body")
+				.notes("missing HTML body")
 
 		);
 	}
 
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the XML {@code value} to the
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the HML {@code value} to the
 	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
 	 * defined.
 	 */
@@ -195,14 +180,14 @@ public final class XMLFormat extends Format<Document> {
 				.body(writer(), target -> {
 					try (final Writer writer=target.get()) {
 
-						transformer().transform(
+						transformer().transform( // !!! format as HTML
 								new DOMSource(value, message.item()),
 								new StreamResult(writer)
 						);
 
 					} catch ( final TransformerException e ) {
 
-						throw new RuntimeException("unable to format XML body", e);
+						throw new RuntimeException("unable to format HTML body", e);
 
 					} catch ( final IOException e ) {
 
