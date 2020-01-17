@@ -20,7 +20,6 @@ package com.metreeca.rdf.services;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rdf.formats.RDFOptimizer;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
@@ -63,7 +62,6 @@ final class GraphCreatorTest {
 					.map(new Redactor(Shape.Role, v -> true))
 					.map(new Redactor(Shape.Task, v -> true))
 					.map(new Redactor(Shape.Area, Shape.Detail))
-					.map(new RDFOptimizer())
 	);
 
 
