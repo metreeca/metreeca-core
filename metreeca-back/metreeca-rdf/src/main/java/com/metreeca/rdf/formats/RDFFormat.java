@@ -291,9 +291,9 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	/**
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
-	 * accepted output stream and sets the {@code Content-Type} header to the MIME type of the RDF serialization
-	 * selected according to the {@code Accept} header of the request associated to the message, if one is present, or
-	 * to {@code "text/turtle"}, otherwise.
+	 * accepted output stream and, unless already defined, sets the {@code Content-Type} header to the MIME type of the
+	 * RDF serialization selected according to the {@code Accept} header of the request associated to the message, if
+	 * one is present, or to {@code "text/turtle"}, otherwise.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Collection<Statement> value) {
 
@@ -306,7 +306,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 				// try to set content type to the actual type requested even if it's not the default one
 
-				.header("Content-Type", types.stream()
+				.header("~Content-Type", types.stream()
 						.filter(type -> registry.getFileFormatForMIMEType(type).isPresent())
 						.findFirst()
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
