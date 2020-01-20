@@ -23,7 +23,6 @@ import com.metreeca.rest.*;
 import org.ccil.cowan.tagsoup.Parser;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.util.regex.Pattern;
@@ -132,22 +131,14 @@ public final class HTMLFormat extends Format<Document> {
 
 						document.setDocumentURI(message.item());
 
-						final Parser parser=new Parser();
-
-						parser.setFeature(Parser.namespacesFeature, false);
-
 						transformer().transform(
 
-								new SAXSource(parser, input),
+								new SAXSource(new Parser(), input),
 								new DOMResult(document)
 
 						);
 
 						return Value(document);
-
-					} catch ( final SAXException e ) {
-
-						throw new UnsupportedOperationException("unable to configure HTML parser", e);
 
 					} catch ( final TransformerException e ) {
 
