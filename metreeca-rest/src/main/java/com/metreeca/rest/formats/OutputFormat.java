@@ -32,7 +32,7 @@ import static com.metreeca.rest.Result.Value;
 public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>> {
 
 	/**
-	 * The default MIME type for binary outbound raw message bodies ({@value}).
+	 * The default MIME type for binary raw message bodies ({@value}).
 	 */
 	public static final String MIME="application/octet-stream";
 

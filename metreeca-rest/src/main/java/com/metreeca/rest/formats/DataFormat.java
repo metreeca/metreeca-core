@@ -31,12 +31,6 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 public final class DataFormat extends Format<byte[]> {
 
 	/**
-	 * The default MIME type for binary message bodies ({@value}).
-	 */
-	public static final String MIME="application/octet-stream";
-
-
-	/**
 	 * Creates a binary body format.
 	 *
 	 * @return a new binary body format
@@ -79,13 +73,24 @@ public final class DataFormat extends Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} body of {@code message} to write the binary {@code value} to the output
-	 * stream supplied by the accepted output stream supplier and sets the {@code Content-Type} header to {@value
-	 * #MIME}, unless already defined.
+	 * Configures a message to hold a binary body representation.
+	 *
+	 * <ul>
+	 *
+	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the binary {@code value};</li>
+	 *
+	 * <li>the {@link OutputFormat} body of {@code message} is configured to write the binary {@code value} to the
+	 * output stream supplied by the accepted output stream supplier.</li>
+	 *
+	 * </ul>
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final byte... value) {
 		return message
-				.header("~Content-Type", MIME)
+
+				.body(input, () ->
+						new ByteArrayInputStream(value)
+				)
+
 				.body(output, target -> {
 					try (final OutputStream output=target.get()) {
 
