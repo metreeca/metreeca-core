@@ -36,7 +36,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 
-import static com.metreeca.rest.Failure.malformed;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -68,6 +67,99 @@ public final class HTMLFormat extends Format<Document> {
 	 */
 	public static HTMLFormat html() { return new HTMLFormat(); }
 
+
+	/**
+	 * Parses an HTML document.
+	 *
+	 * @param reader the reader the HTML document is to be parsed from
+	 * @param base   the base URL for the HTML document to be parsed
+	 *
+	 * @return a value result containing the parsed HTML document, if {@code reader} was successfully parsed; an error
+	 * result containg the parse exception, otherwise
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static Result<Document, Exception> html(final Reader reader, final String base) {
+
+		if ( reader == null ) {
+			throw new NullPointerException("null reader");
+		}
+
+		if ( base == null ) {
+			throw new NullPointerException("null base URL");
+		}
+
+		try {
+
+			final InputSource input=new InputSource();
+
+			input.setSystemId(base);
+			input.setCharacterStream(reader);
+
+			final Document document=builder().newDocument();
+
+			document.setDocumentURI(base);
+
+			transformer().transform(
+
+					new SAXSource(new Parser(), input),
+					new DOMResult(document)
+
+			);
+
+			return Value(document);
+
+		} catch ( final TransformerException e ) {
+
+			return Error(e);
+
+		}
+	}
+
+	/**
+	 * Writes an HTML document.
+	 *
+	 * @param writer   the writer the HTML document is to be writen to
+	 * @param base     the base URL for the HTML document to be writenn
+	 * @param document the HTML document to be written
+	 *
+	 * @return a value result containing the target {@code writer}, if {@code document} was successfully written; an
+	 * error result containg the write exception, otherwise
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static <W extends Writer> Result<W, Exception> html(final W writer, final String base, final Document document) {
+
+		if ( writer == null ) {
+			throw new NullPointerException("null writer");
+		}
+
+		if ( base == null ) {
+			throw new NullPointerException("null base");
+		}
+
+		if ( document == null ) {
+			throw new NullPointerException("null document");
+		}
+
+		try {
+
+			transformer().transform( // !!! format as HTML
+					new DOMSource(document, base),
+					new StreamResult(writer)
+			);
+
+			return Value(writer);
+
+		} catch ( final TransformerException e ) {
+
+			return Error(e);
+
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final DocumentBuilderFactory builders=DocumentBuilderFactory.newInstance();
 	private static final TransformerFactory transformers=TransformerFactory.newInstance();
@@ -122,27 +214,7 @@ public final class HTMLFormat extends Format<Document> {
 
 					try (final Reader reader=source.get()) {
 
-						final InputSource input=new InputSource();
-
-						input.setSystemId(message.item());
-						input.setCharacterStream(reader);
-
-						final Document document=builder().newDocument();
-
-						document.setDocumentURI(message.item());
-
-						transformer().transform(
-
-								new SAXSource(new Parser(), input),
-								new DOMResult(document)
-
-						);
-
-						return Value(document);
-
-					} catch ( final TransformerException e ) {
-
-						return Error(malformed(e));
+						return html(reader, message.item()).error(Failure::malformed);
 
 					} catch ( final IOException e ) {
 
@@ -169,16 +241,14 @@ public final class HTMLFormat extends Format<Document> {
 		return message
 				.header("~Content-Type", MIME)
 				.body(writer(), target -> {
+
 					try (final Writer writer=target.get()) {
 
-						transformer().transform( // !!! format as HTML
-								new DOMSource(value, message.item()),
-								new StreamResult(writer)
-						);
+						html(writer, message.item(), value).error().ifPresent(e -> {
 
-					} catch ( final TransformerException e ) {
+							throw new RuntimeException("unable to format HTML body", e);
 
-						throw new RuntimeException("unable to format HTML body", e);
+						});
 
 					} catch ( final IOException e ) {
 
