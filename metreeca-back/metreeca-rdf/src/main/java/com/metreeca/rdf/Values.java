@@ -30,15 +30,15 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQueries;
+import java.time.temporal.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.ZoneOffset.UTC;
+import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
@@ -188,26 +188,28 @@ public final class Values {
 
 	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static String uuid() {
+		return randomUUID().toString();
+	}
+
+	public static String uuid(final String text) {
+		return text == null ? null : nameUUIDFromBytes(text.getBytes(UTF_8)).toString();
+	}
+
+
 	public static Namespace namespace(final String prefix, final String name) {
-
-		if ( prefix == null ) {
-			throw new NullPointerException("null prefix");
-		}
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return new SimpleNamespace(prefix, name);
+		return prefix == null || name == null ? null : new SimpleNamespace(prefix, name);
 	}
 
 
 	public static Statement statement(final Resource subject, final IRI predicate, final Value object) {
-		return factory.createStatement(subject, predicate, object);
+		return subject == null || predicate == null || object == null ? null
+				: factory.createStatement(subject, predicate, object);
 	}
 
 	public static Statement statement(final Resource subject, final IRI predicate, final Value object, final Resource context) {
-		return factory.createStatement(subject, predicate, object, context);
+		return subject == null || predicate == null || object == null ? null
+				: factory.createStatement(subject, predicate, object, context);
 	}
 
 
@@ -249,38 +251,20 @@ public final class Values {
 
 
 	public static IRI iri() {
-		return factory.createIRI("urn:uuid:", randomUUID().toString());
+		return factory.createIRI("urn:uuid:", uuid());
 	}
 
 	public static IRI iri(final String iri) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		return factory.createIRI(iri);
+		return iri == null ? null : factory.createIRI(iri);
 	}
 
 	public static IRI iri(final String space, final String name) {
-
-		if ( space == null ) {
-			throw new NullPointerException("null space");
-		}
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return factory.createIRI(space, space.endsWith("/") && name.startsWith("/") ? name.substring(1) : name);
+		return space == null || name == null ? null
+				: factory.createIRI(space, space.endsWith("/") && name.startsWith("/") ? name.substring(1) : name);
 	}
 
 
 	public static IRI internal(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
 		return iri(Internal, name);
 	}
 
@@ -290,18 +274,14 @@ public final class Values {
 	 *
 	 * @param iri the IRI identifying the predicate
 	 *
-	 * @return a inverse predicate IRI identified by the textual value of {@code iri}, if {@code iri} is an {@linkplain
-	 * #direct(IRI) predicate}; a direct predicate IRI identified by the textual value of {@code iri}, otherwise
-	 *
-	 * @throws NullPointerException if {@code iri} is null
+	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri}, if
+	 * {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual value of
+	 * {@code iri}, otherwise
 	 */
 	public static IRI inverse(final IRI iri) { // !!! remove
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		return iri instanceof Inverse ? factory.createIRI(iri.stringValue()) : new Inverse(iri.stringValue());
+		return iri == null ? null
+				: iri instanceof Inverse ? factory.createIRI(iri.stringValue())
+				: new Inverse(iri.stringValue());
 	}
 
 
@@ -394,29 +374,11 @@ public final class Values {
 	}
 
 	public static Literal literal(final String value, final String lang) {
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		if ( lang == null ) {
-			throw new NullPointerException("null lang");
-		}
-
-		return factory.createLiteral(value, lang);
+		return value == null || lang == null? null : factory.createLiteral(value, lang);
 	}
 
 	public static Literal literal(final String value, final IRI datatype) {
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		if ( datatype == null ) {
-			throw new NullPointerException("null datatype");
-		}
-
-		return factory.createLiteral(value, datatype);
+		return value == null || datatype == null? null : factory.createLiteral(value, datatype);
 	}
 
 
@@ -438,11 +400,12 @@ public final class Values {
 	 * specified by {@code millis}
 	 */
 	public static Literal time(final boolean millis) {
-		return time(Instant.now().toEpochMilli(), millis);
+		return time(Instant.now(), millis);
 	}
 
+
 	/**
-	 * Creates a date-time literal for the current time.
+	 * Creates a date-time literal for a specific time.
 	 *
 	 * @param time the time to be converted represented as the number of milliseconds from the epoch of
 	 *             1970-01-01T00:00:00Z
@@ -450,7 +413,7 @@ public final class Values {
 	 * @return an {@code xsd:dateTime} literal representing {@code time} with second precision
 	 */
 	public static Literal time(final long time) {
-		return time(time, false);
+		return time(Instant.ofEpochMilli(time), false);
 	}
 
 	/**
@@ -464,24 +427,36 @@ public final class Values {
 	 * specified by {@code millis}
 	 */
 	public static Literal time(final long time, final boolean millis) {
-		return literal(DateTimeFormatter
-				.ofPattern(millis ? "yyyy-MM-dd'T'HH:mm:ssX" : "yyyy-MM-dd'T'HH:mm:ss.SSSX")
-				.withZone(ZoneOffset.UTC)
-				.format(Instant.ofEpochMilli(time)), XMLSchema.DATETIME);
+		return time(Instant.ofEpochMilli(time), millis);
 	}
 
 
-	public static Literal uuid() {
-		return literal(randomUUID().toString());
+	/**
+	 * Creates a date-instant literal for a specific instant.
+	 *
+	 * @param instant the instant to be converted
+	 *
+	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant} is
+	 * not null; {@code null}, otherwise
+	 */
+	public static Literal time(final Instant instant) {
+		return time(instant, false);
 	}
 
-	public static Literal uuid(final String text) {
-
-		if ( text == null ) {
-			throw new NullPointerException("null text");
-		}
-
-		return literal(nameUUIDFromBytes(text.getBytes(UTF_8)).toString());
+	/**
+	 * Creates a date-instant literal for a specific instant.
+	 *
+	 * @param instant the instant to be converted
+	 * @param millis  if {@code true}, includes milliseconds in the literal textual representation
+	 *
+	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second or millisecond precision as
+	 * specified by {@code millis}, if {@code instant} is not null; {@code null}, otherwise
+	 */
+	public static Literal time(final Instant instant, final boolean millis) {
+		return instant == null ? null : literal(
+				ISO_DATE_TIME.format(instant.truncatedTo(millis ? ChronoUnit.MILLIS : ChronoUnit.SECONDS).atZone(UTC)),
+				XMLSchema.DATETIME
+		);
 	}
 
 
