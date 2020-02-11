@@ -136,28 +136,6 @@ public final class Codecs {
 
 	//// Resources /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static URL resource(final Object master, final String resource) {
-
-		if ( master == null ) {
-			throw new NullPointerException("null master");
-		}
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		final Class<?> clazz=master instanceof Class ? (Class<?>)master : master.getClass();
-
-		final URL url=clazz.getResource(resource.startsWith(".") ? clazz.getSimpleName()+resource : resource);
-
-		if ( url == null ) {
-			throw new MissingResourceException(
-					format("unknown resource [%s:%s]", clazz.getName(), resource), clazz.getName(), resource);
-		}
-
-		return url;
-	}
-
 	public static InputStream input(final Object master, final String resource) {
 
 		if ( master == null ) {
@@ -169,14 +147,70 @@ public final class Codecs {
 		}
 
 		try {
-			return resource(master, resource).openStream();
+
+			final Class<?> clazz=master instanceof Class ? (Class<?>)master : master.getClass();
+
+			final URL url=clazz.getResource(resource.startsWith(".") ? clazz.getSimpleName()+resource : resource);
+
+			if ( url == null ) {
+				throw new MissingResourceException(
+						format("unknown resource [%s:%s]", clazz.getName(), resource),
+						clazz.getName(),
+						resource
+				);
+			}
+
+			return url.openStream();
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	public static Reader reader(final Object master, final String resource) {
+
+		if ( master == null ) {
+			throw new NullPointerException("null master");
+		}
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		return reader(input(master, resource));
+	}
+
+	/**
+	 * Retrieves the binary content of a class resource.
+	 *
+	 * @param master   the target class or an instance of the target class for the resource to be read
+	 * @param resource the path of the resource to be read, relative to the target class
+	 *
+	 * @return the binary content of the given {@code resource}
+	 *
+	 * @throws MissingResourceException if {@code resource} is not available
+	 */
+	public static byte[] data(final Object master, final String resource) {
+
+		if ( master == null ) {
+			throw new NullPointerException("null master");
+		}
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		try (final InputStream input=input(master, resource)) {
+
+			return data(input);
+
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
 	/**
-	 * Retrieves the text of a class resource.
+	 * Retrieves the textual content of a class resource.
 	 *
 	 * @param master   the target class or an instance of the target class for the resource to be read
 	 * @param resource the path of the resource to be read, relative to the target class
@@ -195,7 +229,13 @@ public final class Codecs {
 			throw new NullPointerException("null resource");
 		}
 
-		return text(reader(input(master, resource)));
+		try (final Reader reader=reader(master, resource)) {
+
+			return text(reader);
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 
@@ -291,7 +331,7 @@ public final class Codecs {
 	}
 
 
-	public static byte[] data(final InputStream input) throws UncheckedIOException {
+	public static byte[] data(final InputStream input)  {
 
 		if ( input == null ) {
 			throw new NullPointerException("null input");
@@ -304,7 +344,7 @@ public final class Codecs {
 		}
 	}
 
-	public static String text(final Reader reader) throws UncheckedIOException {
+	public static String text(final Reader reader)  {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -380,7 +420,7 @@ public final class Codecs {
 	}
 
 
-	public static <T extends OutputStream> T data(final T output, final byte... data) throws UncheckedIOException {
+	public static <T extends OutputStream> T data(final T output, final byte... data)  {
 
 		if ( output == null ) {
 			throw new NullPointerException("null output");
@@ -397,7 +437,7 @@ public final class Codecs {
 		}
 	}
 
-	public static <T extends Writer> T text(final T writer, final String text) throws UncheckedIOException {
+	public static <T extends Writer> T text(final T writer, final String text)  {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
@@ -415,7 +455,7 @@ public final class Codecs {
 	}
 
 
-	public static <T extends OutputStream> T data(final T output, final InputStream input) throws UncheckedIOException {
+	public static <T extends OutputStream> T data(final T output, final InputStream input)  {
 
 		if ( output == null ) {
 			throw new NullPointerException("null output");
@@ -440,7 +480,7 @@ public final class Codecs {
 		}
 	}
 
-	public static <T extends Writer> T text(final T writer, final Reader reader) throws UncheckedIOException {
+	public static <T extends Writer> T text(final T writer, final Reader reader)  {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
