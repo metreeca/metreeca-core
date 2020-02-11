@@ -30,7 +30,6 @@ import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParsingException;
 
-import static com.metreeca.rest.Failure.malformed;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -68,6 +67,63 @@ public final class JSONFormat extends Format<JsonObject> {
 	 */
 	public static JSONFormat json() {
 		return new JSONFormat();
+	}
+
+
+	/**
+	 * Parses a JSON object.
+	 *
+	 * @param reader the reader the JSON object is to be parsed from
+	 *
+	 * @return a value result containing the parsed JSON object, if {@code reader} was successfully parsed; an error
+	 * result containg the parse exception, otherwise
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static Result<JsonObject, Exception> json(final Reader reader) {
+
+		if ( reader == null ) {
+			throw new NullPointerException("null reader");
+		}
+
+		try (final JsonReader jsonReader=Json.createReader(reader)) {
+
+			return Value(jsonReader.readObject());
+
+		} catch ( final JsonParsingException e ) {
+
+			return Error(e);
+
+		}
+	}
+
+	/**
+	 * Writes a JSON object.
+	 *
+	 * @param writer   the writer the JSON document is to be written to
+	 * @param object the JSON object to be written
+	 *
+	 * @return the target {@code writer}
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static <W extends Writer> W json(final W writer, final JsonObject object) {
+
+		if ( writer == null ) {
+			throw new NullPointerException("null writer");
+		}
+
+		if ( object == null ) {
+			throw new NullPointerException("null object");
+		}
+
+		try (final JsonWriter jsonWriter=JsonWriters.createWriter(writer)) {
+
+			jsonWriter.write(object);
+
+			return writer;
+
+		}
 	}
 
 
@@ -169,31 +225,30 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
-		return message.headers("Content-Type").stream().anyMatch(type -> MIMEPattern.matcher(type).matches())
 
-				? message.body(reader).process(source -> {
+		return message
+				.headers("Content-Type").stream()
+				.anyMatch(type -> MIMEPattern.matcher(type).matches())
 
-			try (
-					final Reader reader=source.get();
-					final JsonReader jsonReader=Json.createReader(reader)
-			) {
+				? message
+				.body(reader)
+				.process(source -> {
 
-				return Value(jsonReader.readObject());
+					try (final Reader reader=source.get()) {
 
-			} catch ( final JsonParsingException e ) {
+						return json(reader).error(Failure::malformed);
 
-				return Error(malformed(e));
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-
-		})
+				})
 
 				: Error(new Failure()
 				.status(Response.UnsupportedMediaType)
 				.notes("missing JSON body")
 		);
+
 	}
 
 	/**
@@ -205,16 +260,15 @@ public final class JSONFormat extends Format<JsonObject> {
 		return message
 				.header("~Content-Type", MIME)
 				.body(writer, target -> {
-					try (
-							final Writer writer=target.get();
-							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
-					) {
 
-						jsonWriter.write(value);
+					try (final Writer writer=target.get()) {
+
+						json(writer, value);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
+
 				});
 	}
 

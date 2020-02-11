@@ -119,8 +119,8 @@ public final class HTMLFormat extends Format<Document> {
 	/**
 	 * Writes an HTML document.
 	 *
-	 * @param writer   the writer the HTML document is to be writen to
-	 * @param base     the base URL for the HTML document to be writenn
+	 * @param writer   the writer the HTML document is to be written to
+	 * @param base     the base URL for the HTML document to be written
 	 * @param document the HTML document to be written
 	 *
 	 * @return a value result containing the target {@code writer}, if {@code document} was successfully written; an
@@ -229,6 +229,7 @@ public final class HTMLFormat extends Format<Document> {
 				.notes("missing HTML body")
 
 		);
+
 	}
 
 
