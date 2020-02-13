@@ -26,6 +26,8 @@ import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
@@ -252,6 +254,14 @@ public final class Values {
 
 	public static IRI iri() {
 		return factory.createIRI("urn:uuid:", uuid());
+	}
+
+	public static IRI iri(final URI uri) {
+		return uri == null ? null : factory.createIRI(uri.toString());
+	}
+
+	public static IRI iri(final URL url) {
+		return url == null ? null : factory.createIRI(url.toString());
 	}
 
 	public static IRI iri(final String iri) {
