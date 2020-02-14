@@ -119,6 +119,7 @@ public final class HTMLFormat extends Format<Document> {
 	/**
 	 * Writes an HTML document.
 	 *
+	 * @param <W> the type of the {@code writer} the HTML document is to be written to
 	 * @param writer   the writer the HTML document is to be written to
 	 * @param base     the base URL for the HTML document to be written
 	 * @param document the HTML document to be written

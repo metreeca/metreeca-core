@@ -100,6 +100,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	/**
 	 * Writes a JSON object.
 	 *
+	 * @param <W> the type of the {@code writer} the JSON document is to be written to
 	 * @param writer   the writer the JSON document is to be written to
 	 * @param object the JSON object to be written
 	 *
