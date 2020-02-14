@@ -17,59 +17,44 @@
   If not, see <http://www.gnu.org/licenses/>.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.metreeca</groupId>
-        <artifactId>metreeca-back</artifactId>
-        <version>0.0.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>metreeca-back</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>metreeca-gcp</artifactId>
-    <version>0.0.0-SNAPSHOT</version>
+	<artifactId>metreeca-gcp</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
 
-    <name>Metreeca Google Cloud Platform Adapter</name>
-    <description>Adapter kit for Google Cloud.</description>
+	<name>Metreeca Google Cloud Platform Adapter</name>
+	<description>Adapter kit for Google Cloud.</description>
 
-    <dependencyManagement>
-        <dependencies>
+	<dependencies>
 
-            <dependency> <!-- https://search.maven.org/search?q=a:google-cloud-bom -->
-                <groupId>com.google.cloud</groupId>
-                <artifactId>google-cloud-bom</artifactId>
-                <version>${gcp.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rest</artifactId>
+		</dependency>
 
-        </dependencies>
-    </dependencyManagement>
-
-    <dependencies>
-
-	    <dependency>
-		    <groupId>com.metreeca</groupId>
-		    <artifactId>metreeca-rest</artifactId>
-            <version>0.0.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-datastore</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-datastore</artifactId>
+		</dependency>
 
 
-        <dependency>
-            <groupId>com.metreeca</groupId>
-            <artifactId>metreeca-rest</artifactId>
-            <version>0.0.0-SNAPSHOT</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rest</artifactId>
+			<version>${project.version}</version>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
 </project>
