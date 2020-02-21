@@ -37,6 +37,7 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
+import static com.metreeca.feed.Feed.guard;
 import static com.metreeca.rdf.Values.uuid;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.JSONFormat.json;
@@ -154,7 +155,7 @@ public final class MeaningCloud<V> implements Extractor<V> {
 					reference.matter=object.getJsonObject("sementity").getString("type");
 					reference.weight=Integer.parseInt(object.getString("relevance"))/100.0;
 
-					reference.target=URI.create(Optional
+					reference.target=Optional
 							.ofNullable(object.getJsonArray("semld_list"))
 							.orElse(JsonValue.EMPTY_JSON_ARRAY)
 							.stream()
@@ -162,8 +163,8 @@ public final class MeaningCloud<V> implements Extractor<V> {
 							.map(MeaningCloud::dbpedia)
 							.filter(Objects::nonNull)
 							.findFirst()
-							.orElseGet(() -> "urn:uuid"+uuid(reference.matter+"/"+reference.normal))
-					);
+							.map(guard(URI::create))
+							.orElseGet(() -> URI.create("urn:uuid"+uuid(reference.matter+"/"+reference.normal)));
 
 					return reference;
 
