@@ -184,7 +184,7 @@
 
 			<!-- Exported BOMs -->
 
-			<dependency>
+			<dependency> <!-- https://search.maven.org/artifact/org.eclipse.rdf4j/rdf4j-bom -->
 				<groupId>org.eclipse.rdf4j</groupId>
 				<artifactId>rdf4j-bom</artifactId>
 				<version>3.1.0</version>
@@ -192,10 +192,10 @@
 				<scope>import</scope>
 			</dependency>
 
-			<dependency> <!-- https://search.maven.org/search?q=a:google-cloud-bom -->
+			<dependency> <!-- https://search.maven.org/artifact/com.google.cloud/libraries-bom -->
 				<groupId>com.google.cloud</groupId>
-				<artifactId>google-cloud-bom</artifactId>
-				<version>0.122.0-alpha</version>
+				<artifactId>libraries-bom</artifactId>
+				<version>4.1.1</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
