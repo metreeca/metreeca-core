@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Google Cloud Datastore.
  *
- * <p>Manages task execution on Cloud Datastore.</p>
+ * <p>Manages task execution on Google Cloud Datastore.</p>
  *
  * <p>Nested task executions on the datastore from the same thread will share the same transaction through a {@link
  * ThreadLocal} context variable.</p>

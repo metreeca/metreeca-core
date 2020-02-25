@@ -40,7 +40,7 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 
 
 /**
- * Datastore entity body format.
+ * Google Cloud Datastore entity body format.
  */
 public final class EntityFormat extends Format<Entity> {
 

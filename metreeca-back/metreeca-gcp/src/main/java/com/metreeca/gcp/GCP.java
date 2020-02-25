@@ -19,7 +19,7 @@ package com.metreeca.gcp;
 
 
 /**
- * Standard Google Cloud Platform vocabulary.
+ * Google Cloud standard vocabulary.
  */
 public final class GCP {
 
