@@ -20,7 +20,10 @@ package com.metreeca.rdf4j;
 import com.metreeca.rdf.services.Graph;
 
 import org.eclipse.rdf4j.IsolationLevel;
+import org.eclipse.rdf4j.http.client.SPARQLProtocolSession;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
+
+import java.util.function.Consumer;
 
 import static org.eclipse.rdf4j.IsolationLevels.NONE;
 
@@ -36,7 +39,8 @@ import static org.eclipse.rdf4j.IsolationLevels.NONE;
  */
 public final class RDF4JSPARQL extends Graph { // ;( namespace ops silently ignored
 
-	{ isolation(NONE); } // ;( no transaction support
+	private Consumer<SPARQLProtocolSession> customizer=session -> {};
+
 
 	/**
 	 * Creates an RDF4J SPARQL graph.
@@ -47,12 +51,7 @@ public final class RDF4JSPARQL extends Graph { // ;( namespace ops silently igno
 	 * @throws NullPointerException if {@code url} is null
 	 */
 	public RDF4JSPARQL(final String url) {
-
-		if ( url == null ) {
-			throw new NullPointerException("null endpoint url");
-		}
-
-		repository(new SPARQLRepository(url));
+		this(url, url);
 	}
 
 	/**
@@ -75,7 +74,18 @@ public final class RDF4JSPARQL extends Graph { // ;( namespace ops silently igno
 			throw new NullPointerException("null update endpoint URL");
 		}
 
-		repository(new SPARQLRepository(query, update));
+		repository(new SPARQLRepository(query, update) {
+
+			@Override protected SPARQLProtocolSession createHTTPClient() {
+
+				final SPARQLProtocolSession session=super.createHTTPClient();
+
+				customizer.accept(session);
+
+				return session;
+			}
+
+		}).isolation(NONE); // ;( no transaction support
 	}
 
 
@@ -109,6 +119,27 @@ public final class RDF4JSPARQL extends Graph { // ;( namespace ops silently igno
 		if ( !usr.isEmpty() || !pwd.isEmpty() ) {
 			repository.setUsernameAndPassword(usr, pwd);
 		}
+
+		return this;
+	}
+
+
+	/**
+	 * Configures the SPARQL session customizer.
+	 *
+	 * @param customizer the customizer for the SPARQL session; takes as argument the SPARQL session to be customized
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if {@code customizer} is {@code null}
+	 */
+	public RDF4JSPARQL session(final Consumer<SPARQLProtocolSession> customizer) {
+
+		if ( customizer == null ) {
+			throw new NullPointerException("null customizer");
+		}
+
+		this.customizer=customizer;
 
 		return this;
 	}
