@@ -19,7 +19,10 @@ package com.metreeca.rdf4j;
 
 import com.metreeca.rdf.services.Graph;
 
+import org.eclipse.rdf4j.http.client.RDF4JProtocolSession;
 import org.eclipse.rdf4j.repository.http.HTTPRepository;
+
+import java.util.function.Consumer;
 
 
 /**
@@ -28,6 +31,9 @@ import org.eclipse.rdf4j.repository.http.HTTPRepository;
  * <p>Manages task execution on a remote RDF4J {@link HTTPRepository}.</p>
  */
 public final class RDF4JRemote extends Graph {
+
+	private Consumer<RDF4JProtocolSession> customizer=session -> {};
+
 
 	/**
 	 * Creates an RDF4J remote graph.
@@ -43,7 +49,18 @@ public final class RDF4JRemote extends Graph {
 			throw new NullPointerException("null url");
 		}
 
-		repository(new HTTPRepository(url));
+		repository(new HTTPRepository(url){
+
+			@Override protected RDF4JProtocolSession createHTTPClient() {
+
+				final RDF4JProtocolSession session=super.createHTTPClient();
+
+				customizer.accept(session);
+
+				return session;
+			}
+
+		});
 	}
 
 
@@ -79,6 +96,27 @@ public final class RDF4JRemote extends Graph {
 		if ( !usr.isEmpty() || !pwd.isEmpty() ) {
 			repository.setUsernameAndPassword(usr, pwd);
 		}
+
+		return this;
+	}
+
+
+	/**
+	 * Configures the RDF4J session customizer.
+	 *
+	 * @param customizer the customizer for the RDF4J session; takes as argument the RDF4J session to be customized
+	 *
+	 * @return this graph store
+	 *
+	 * @throws NullPointerException if {@code customizer} is {@code null}
+	 */
+	public RDF4JRemote session(final Consumer<RDF4JProtocolSession> customizer) {
+
+		if ( customizer == null ) {
+			throw new NullPointerException("null customizer");
+		}
+
+		this.customizer=customizer;
 
 		return this;
 	}
