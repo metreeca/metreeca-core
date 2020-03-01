@@ -164,7 +164,7 @@ public final class MeaningCloud<V> implements Extractor<V> {
 							.filter(Objects::nonNull)
 							.findFirst()
 							.map(guard(URI::create))
-							.orElseGet(() -> URI.create("urn:uuid"+uuid(reference.matter+"/"+reference.normal)));
+							.orElseGet(() -> URI.create("urn:uuid:"+uuid(reference.matter+"/"+reference.normal)));
 
 					return reference;
 
