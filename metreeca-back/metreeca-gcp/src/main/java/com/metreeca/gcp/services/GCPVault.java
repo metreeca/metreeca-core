@@ -37,6 +37,8 @@ import java.util.Optional;
  *
  * <p><strong>Warning</strong> / Only letters, numbers, underscores and hyphens are supported in secret {@linkplain
  * #get(String) ids} </p>
+ *
+ * @see <a href="https://cloud.google.com/secret-manager/docs">Google Cloud Plaform - Secret Manager</a>
  */
 public final class GCPVault implements Vault, AutoCloseable {
 
