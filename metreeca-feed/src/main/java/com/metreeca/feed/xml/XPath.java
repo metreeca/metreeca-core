@@ -26,15 +26,19 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import static javax.xml.XMLConstants.XMLNS_ATTRIBUTE;
+
 
 public final class XPath {
+
+	public static final String DefaultPrefix="_";
+
 
 	private static final String HTMLPrefix="html";
 	private static final String HTMLUri="http://www.w3.org/1999/xhtml";
@@ -135,14 +139,22 @@ public final class XPath {
 
 			final Node attribute=attributes.item(i);
 
-			if ( XMLConstants.XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) {
+			if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName())  ) { // default namespace
+
+				namespaces.put(DefaultPrefix, attribute.getNodeValue());
+
+			} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix())  ) { // prefixed namespace
+
 				namespaces.put(attribute.getLocalName(), attribute.getNodeValue());
+
 			}
+
 		}
 
-		if ( HTMLUri.equals(root.getNamespaceURI())) {
-			namespaces.putIfAbsent(HTMLPrefix, HTMLUri);
-		}
+		final String namespace=root.getNamespaceURI();
+
+		namespaces.computeIfAbsent(DefaultPrefix, prefix -> namespace);
+		namespaces.computeIfAbsent(HTMLPrefix,  prefix -> HTMLUri.equals(namespace)? namespace : null);
 
 		xpath.setNamespaceContext(new NamespaceContext() {
 
