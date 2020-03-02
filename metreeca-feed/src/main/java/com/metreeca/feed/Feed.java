@@ -162,14 +162,9 @@ public final class Feed<T> implements Stream<T> {
 				: from(StreamSupport.stream(new BatchSpliterator<>(size, stream.spliterator()), stream.isParallel()));
 	}
 
-
 	public void sink() {
-		sink(feed -> feed.forEach(item -> {}));
-	}
-
-	public void sink(final Consumer<? super Feed<T>> consumer) {
 		try (final Feed<T> feed=this) {
-			service(logger()).info(feed, format("processed in %,d ms", time(() -> consumer.accept(feed))));
+			service(logger()).info(feed, format("processed in %,d ms", time(() -> feed.forEach(t -> {}))));
 		}
 	}
 
