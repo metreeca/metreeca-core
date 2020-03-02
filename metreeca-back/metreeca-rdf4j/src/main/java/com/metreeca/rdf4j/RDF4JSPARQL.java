@@ -21,6 +21,8 @@ import com.metreeca.rdf.services.Graph;
 
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.http.client.SPARQLProtocolSession;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
 import java.util.function.Consumer;
@@ -83,6 +85,10 @@ public final class RDF4JSPARQL extends Graph { // ;( namespace ops silently igno
 				customizer.accept(session);
 
 				return session;
+			}
+
+			@Override public RepositoryConnection getConnection() throws RepositoryException {
+				return new RDF4JSPARAQLConnection(super.getConnection());
 			}
 
 		}).isolation(NONE); // ;( no transaction support

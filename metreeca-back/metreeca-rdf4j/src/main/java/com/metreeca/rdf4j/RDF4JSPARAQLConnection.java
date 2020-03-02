@@ -1,23 +1,24 @@
 /*
- * Copyright © 2020 Metreeca srl. All rights reserved.
+ * Copyright © 2019-2020 Metreeca srl. All rights reserved.
  */
 
-package com.metreeca.rdf.services;
+package com.metreeca.rdf4j;
 
 import org.eclipse.rdf4j.IsolationLevel;
-import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.Update;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
 
 
-final class GraphConnection extends RepositoryConnectionWrapper {
+/**
+ * ;(rdf4j Patches commit on read-only txns (see https://github.com/eclipse/rdf4j/issues/1960)
+ */
+final class RDF4JSPARAQLConnection extends RepositoryConnectionWrapper {
 
 	private boolean dirty; // true if an update operation was executed in the current txn
 
 
-	GraphConnection(final RepositoryConnection connection) {
+	RDF4JSPARAQLConnection(final RepositoryConnection connection) {
 		super(connection.getRepository(), connection);
 	}
 
@@ -67,18 +68,18 @@ final class GraphConnection extends RepositoryConnectionWrapper {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Not logged to the curent txn  /////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Update prepareUpdate(final String update) {
-		try { return super.prepareUpdate(update); } finally { dirty=true; }
-	}
-
-	@Override public Update prepareUpdate(final QueryLanguage ql, final String update) {
-		try { return super.prepareUpdate(ql, update); } finally { dirty=true; }
-	}
-
-	@Override public Update prepareUpdate(final QueryLanguage ql, final String update, final String baseURI) {
-		try { return super.prepareUpdate(ql, update, baseURI); } finally { dirty=true; }
-	}
+	//@Override public Update prepareUpdate(final String update) {
+	//	try { return super.prepareUpdate(update); } finally { dirty=true; }
+	//}
+	//
+	//@Override public Update prepareUpdate(final QueryLanguage ql, final String update) {
+	//	try { return super.prepareUpdate(ql, update); } finally { dirty=true; }
+	//}
+	//
+	//@Override public Update prepareUpdate(final QueryLanguage ql, final String update, final String baseURI) {
+	//	try { return super.prepareUpdate(ql, update, baseURI); } finally { dirty=true; }
+	//}
 
 }
