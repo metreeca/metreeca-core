@@ -17,7 +17,6 @@
 
 package com.metreeca.feed.nlp;
 
-import java.net.URI;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -26,7 +25,8 @@ import java.util.stream.Stream;
 
 	public static final class Reference {
 
-		public URI target;
+		public String target;
+		public String matter;
 
 		public String normal;
 		public String anchor;
@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 		public int offset;
 		public int length;
 
-		public String matter;
 		public double weight;
 
 	}

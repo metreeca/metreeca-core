@@ -23,7 +23,6 @@ import com.metreeca.feed.net.Parse;
 import com.metreeca.feed.net.Query;
 import com.metreeca.feed.text.Text;
 
-import java.net.URI;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Objects;
@@ -37,7 +36,6 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
-import static com.metreeca.feed.Feed.guard;
 import static com.metreeca.rdf.Values.uuid;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.JSONFormat.json;
@@ -146,15 +144,6 @@ public final class MeaningCloud<V> implements Extractor<V> {
 
 					final Reference reference=new Reference();
 
-					reference.normal=object.getString("form");
-					reference.anchor=variant.getString("form");
-
-					reference.offset=Integer.parseInt(variant.getString("inip"));
-					reference.length=Integer.parseInt(variant.getString("endp"))-reference.offset;
-
-					reference.matter=object.getJsonObject("sementity").getString("type");
-					reference.weight=Integer.parseInt(object.getString("relevance"))/100.0;
-
 					reference.target=Optional
 							.ofNullable(object.getJsonArray("semld_list"))
 							.orElse(JsonValue.EMPTY_JSON_ARRAY)
@@ -163,8 +152,17 @@ public final class MeaningCloud<V> implements Extractor<V> {
 							.map(MeaningCloud::dbpedia)
 							.filter(Objects::nonNull)
 							.findFirst()
-							.map(guard(URI::create))
-							.orElseGet(() -> URI.create("urn:uuid:"+uuid(reference.matter+"/"+reference.normal)));
+							.orElseGet(() -> "urn:uuid:"+uuid(reference.matter+"/"+reference.normal));
+
+					reference.matter=object.getJsonObject("sementity").getString("type");
+
+					reference.normal=object.getString("form");
+					reference.anchor=variant.getString("form");
+
+					reference.offset=Integer.parseInt(variant.getString("inip"));
+					reference.length=Integer.parseInt(variant.getString("endp"))-reference.offset;
+
+					reference.weight=Integer.parseInt(object.getString("relevance"))/100.0;
 
 					return reference;
 
