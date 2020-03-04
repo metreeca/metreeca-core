@@ -19,6 +19,7 @@ package com.metreeca.tree.shapes;
 
 import com.metreeca.tree.Shape;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
  */
 public final class Like implements Shape {
 
-	private static final Pattern WordsPattern =Pattern.compile("^|\\W+");
+	private static final Pattern StemPattern=Pattern.compile("\\w+");
 
 
 	public static Like like(final String keywords) {
@@ -49,10 +50,6 @@ public final class Like implements Shape {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
-		}
-
-		if ( text.isEmpty() ) { // !!! test after normalization
-			throw new IllegalArgumentException("empty pattern");
 		}
 
 		this.text=text;
@@ -72,7 +69,14 @@ public final class Like implements Shape {
 	 * @return a regular expression matching strings matched by this like constraint
 	 */
 	public String toExpression() {
-		return "(?i:"+WordsPattern.matcher(text).replaceAll(".*\\\\b")+")";
+
+		final StringBuilder builder=new StringBuilder(text.length()).append("(?i:.*");
+
+		for(final Matcher matcher=StemPattern.matcher(text); matcher.find(); ) {
+			builder.append("\\b").append(matcher.group()).append(".*");
+		}
+
+		return builder.append(")").toString();
 	}
 
 
