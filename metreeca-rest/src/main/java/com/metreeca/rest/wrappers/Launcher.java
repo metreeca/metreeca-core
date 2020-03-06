@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gate.wrappers;
+package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
@@ -53,10 +53,13 @@ public final class Launcher implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Handler wrap(final Handler handler) { // delegate only resources actually managed by handler
-		return request -> handler.handle(request).flatMap(response ->
-				response.status() > 0 && request.method().equals(Request.GET) && request.interactive() ?
-						interactive.handle(request) : consumer -> consumer.accept(response)
+	@Override public Handler wrap(final Handler handler) {
+		return request -> handler.handle(request).flatMap(response
+				-> response.status() > 0 // delegate only resources actually managed by handler
+				&& request.method().equals(Request.GET)
+				&& request.interactive()
+				? interactive.handle(request)
+				: consumer -> consumer.accept(response)
 		);
 	}
 
