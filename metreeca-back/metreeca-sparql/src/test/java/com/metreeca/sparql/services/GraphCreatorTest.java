@@ -18,8 +18,8 @@
 package com.metreeca.sparql.services;
 
 
-import com.metreeca.sparql.Values;
-import com.metreeca.sparql.ValuesTest;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
@@ -32,14 +32,14 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.ValueAssert.assertThat;
-import static com.metreeca.sparql.Values.literal;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.ValuesTest.decode;
-import static com.metreeca.sparql.ValuesTest.item;
-import static com.metreeca.sparql.ValuesTest.term;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.ValueAssert.assertThat;
+import static com.metreeca.rdf.Values.literal;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.ValuesTest.decode;
+import static com.metreeca.rdf.ValuesTest.item;
+import static com.metreeca.rdf.ValuesTest.term;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.sparql.services.Graph.graph;
 import static com.metreeca.sparql.services.GraphTest.exec;
 import static com.metreeca.sparql.services.GraphTest.model;

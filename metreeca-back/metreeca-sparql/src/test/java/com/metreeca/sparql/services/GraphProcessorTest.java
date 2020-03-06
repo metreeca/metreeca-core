@@ -17,7 +17,7 @@
 
 package com.metreeca.sparql.services;
 
-import com.metreeca.sparql.Values;
+import com.metreeca.rdf.Values;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
@@ -33,9 +33,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.Values.*;
-import static com.metreeca.sparql.ValuesTest.*;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.sparql.services.GraphTest.model;
 import static com.metreeca.sparql.services.GraphTest.tuples;
 import static com.metreeca.rest.Context.service;

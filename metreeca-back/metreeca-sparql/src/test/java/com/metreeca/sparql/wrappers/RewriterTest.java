@@ -17,8 +17,8 @@
 
 package com.metreeca.sparql.wrappers;
 
-import com.metreeca.sparql.Values;
-import com.metreeca.sparql.ValuesTest;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 
@@ -31,12 +31,12 @@ import java.util.Optional;
 
 import javax.json.Json;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.Values.inverse;
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.ValuesTest.decode;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.ValuesTest.decode;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.OK;

@@ -27,7 +27,7 @@ import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
 
-import static com.metreeca.sparql.Values.iri;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.sparql.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;

@@ -17,8 +17,8 @@
 
 package com.metreeca.sparql.services;
 
-import com.metreeca.sparql.Values;
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -41,9 +41,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.*;
 
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.literal;
-import static com.metreeca.sparql.Values.time;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.literal;
+import static com.metreeca.rdf.Values.time;
 import static com.metreeca.rest.Context.service;
 
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
