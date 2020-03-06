@@ -17,7 +17,7 @@
 
 package com.metreeca.sparql.handlers;
 
-import com.metreeca.sparql.ValuesTest;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.sparql.services.Graph;
 import com.metreeca.sparql.services.GraphTest;
 import com.metreeca.rest.Request;
@@ -34,11 +34,11 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.ValuesTest.encode;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.ValuesTest.encode;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.sparql.services.GraphTest.exec;
 import static com.metreeca.sparql.services.GraphTest.export;
 import static com.metreeca.rest.Context.service;

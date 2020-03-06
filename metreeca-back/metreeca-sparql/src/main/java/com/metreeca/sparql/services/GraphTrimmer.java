@@ -17,7 +17,7 @@
 
 package com.metreeca.sparql.services;
 
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.Failure;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
@@ -34,11 +34,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static com.metreeca.sparql.Values.direct;
-import static com.metreeca.sparql.Values.inverse;
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.formats.RDFFormat.iri;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
