@@ -17,7 +17,7 @@
 
 package com.metreeca.stardog;
 
-import com.metreeca.rdf.services.Graph;
+import com.metreeca.sparql.services.Graph;
 
 import com.complexible.stardog.api.ConnectionConfiguration;
 import com.complexible.stardog.rdf4j.StardogRepository;
@@ -25,7 +25,7 @@ import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.model.IRI;
 
-import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.sparql.Values.iri;
 
 import static org.eclipse.rdf4j.IsolationLevels.READ_COMMITTED;
 

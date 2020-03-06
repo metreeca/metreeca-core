@@ -39,7 +39,7 @@
 
 		<module>metreeca-gcp</module>
 
-		<module>metreeca-rdf</module>
+		<module>metreeca-sparql</module>
 		<module>metreeca-rdf4j</module>
 		<module>metreeca-virtuoso</module>
 		<module>metreeca-stardog</module>
