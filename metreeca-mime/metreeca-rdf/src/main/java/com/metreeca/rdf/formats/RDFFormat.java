@@ -19,7 +19,7 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
-import com.metreeca.sparql.wrappers.Rewriter;
+import com.metreeca.rdf.wrappers.Rewriter;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.formats.OutputFormat;

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.sparql.wrappers;
+package com.metreeca.rdf.wrappers;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
@@ -49,8 +49,8 @@ import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singleton;

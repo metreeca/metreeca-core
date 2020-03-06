@@ -19,4 +19,4 @@
  * RDF wrappers.
  */
 
-package com.metreeca.sparql.wrappers;
+package com.metreeca.rdf.wrappers;

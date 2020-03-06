@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.sparql.wrappers;
+package com.metreeca.rdf.wrappers;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
