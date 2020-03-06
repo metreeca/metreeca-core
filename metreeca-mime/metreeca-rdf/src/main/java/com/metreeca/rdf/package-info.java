@@ -16,16 +16,16 @@
  */
 
 /**
- * SPARQL tools.
+ * RDF tools.
  *
  * <p>Requires the following Maven dependency in your project:</p>
  *
  * <pre>{@code
  * <dependency>
  *      <groupId>com.metreeca</groupId>
- *      <artifactId>metreeca-sparql</artifactId>
+ *      <artifactId>metreeca-rdf</artifactId>
  *      <version>${project.version}</version>
  * </dependency>}</pre>
  */
 
-package com.metreeca.sparql;
+package com.metreeca.rdf;

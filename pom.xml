@@ -95,6 +95,7 @@
 		<module>metreeca-rest</module>
 		<module>metreeca-gate</module>
 
+		<module>metreeca-mime</module>
 		<module>metreeca-head</module>
 		<module>metreeca-back</module>
 
@@ -334,8 +335,16 @@
 									<packages>com.metreeca.gate*</packages>
 								</group>
 								<group>
+									<title>Format Adapters</title>
+									<packages>
+										com.metreeca.rdf*
+									</packages>
+								</group>
+								<group>
 									<title>Server Adapters</title>
-									<packages>com.metreeca.servlet*</packages>
+									<packages>
+										com.metreeca.servlet*
+									</packages>
 								</group>
 								<group>
 									<title>Backend Adapters</title>

@@ -25,15 +25,15 @@
 
 	<parent>
 		<groupId>com.metreeca</groupId>
-		<artifactId>metreeca-back</artifactId>
+		<artifactId>metreeca-mime</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>metreeca-sparql</artifactId>
+	<artifactId>metreeca-rdf</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca SPARQL Adapter</name>
-	<description>Adapter kit for SPARQL repositories.</description>
+	<name>Metreeca RDF Format Adapter</name>
+	<description>Adapter kit for RDF data.</description>
 
 	<dependencyManagement>
 		<dependencies>
@@ -53,25 +53,24 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rdf</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-repository-api</artifactId>
+			<artifactId>rdf4j-rio-nquads</artifactId>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-queryalgebra-evaluation</artifactId>
+			<artifactId>rdf4j-rio-trig</artifactId>
 		</dependency>
 
-		<dependency> <!-- required to support metreeca/self -->
+		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-queryresultio-sparqljson</artifactId>
+			<artifactId>rdf4j-rio-trix</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
@@ -86,18 +85,6 @@
 			<artifactId>metreeca-tree</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-repository-sail</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-sail-memory</artifactId>
 			<scope>test</scope>
 		</dependency>
 
