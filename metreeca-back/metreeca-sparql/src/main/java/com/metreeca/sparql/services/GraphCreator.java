@@ -18,7 +18,7 @@
 package com.metreeca.sparql.services;
 
 
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -28,9 +28,9 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.Collection;
 import java.util.UUID;
 
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.sparql.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;

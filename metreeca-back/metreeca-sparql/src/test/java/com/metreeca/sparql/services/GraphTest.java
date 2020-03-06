@@ -38,11 +38,11 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.literal;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.ValuesTest.*;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.literal;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.sparql.services.Graph.auto;
 import static com.metreeca.sparql.services.Graph.graph;
 import static com.metreeca.rest.Context.service;

@@ -18,7 +18,7 @@
 package com.metreeca.sparql.services;
 
 
-import com.metreeca.sparql.ValuesTest;
+import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -27,9 +27,9 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.ValuesTest.small;
-import static com.metreeca.sparql.ValuesTest.term;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.ValuesTest.small;
+import static com.metreeca.rdf.ValuesTest.term;
 import static com.metreeca.sparql.services.GraphTest.exec;
 import static com.metreeca.sparql.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;

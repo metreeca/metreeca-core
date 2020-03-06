@@ -17,8 +17,8 @@
 
 package com.metreeca.sparql.services;
 
-import com.metreeca.sparql.Values;
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import java.util.function.Supplier;
 
-import static com.metreeca.sparql.Values.iri;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.sparql.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.Shape.multiple;

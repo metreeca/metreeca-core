@@ -17,7 +17,7 @@
 
 package com.metreeca.sparql.services;
 
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
@@ -33,8 +33,8 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.sparql.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.NotFound;

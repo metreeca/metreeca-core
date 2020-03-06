@@ -17,7 +17,7 @@
 
 package com.metreeca.sparql.services;
 
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.And;
@@ -30,10 +30,10 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static com.metreeca.sparql.Values.direct;
-import static com.metreeca.sparql.Values.inverse;
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.statement;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.tree.shapes.All.all;
 
 import static java.util.Arrays.asList;

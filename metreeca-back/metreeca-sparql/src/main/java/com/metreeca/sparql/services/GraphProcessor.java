@@ -17,8 +17,8 @@
 
 package com.metreeca.sparql.services;
 
-import com.metreeca.sparql.Values;
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query;
@@ -45,21 +45,21 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.sparql.Values.BNodeType;
-import static com.metreeca.sparql.Values.IRIType;
-import static com.metreeca.sparql.Values.LiteralType;
-import static com.metreeca.sparql.Values.ResourceType;
-import static com.metreeca.sparql.Values.ValueType;
-import static com.metreeca.sparql.Values.bnode;
-import static com.metreeca.sparql.Values.compare;
-import static com.metreeca.sparql.Values.direct;
-import static com.metreeca.sparql.Values.format;
-import static com.metreeca.sparql.Values.integer;
-import static com.metreeca.sparql.Values.inverse;
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.literal;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.formats.RDFFormat.iri;
+import static com.metreeca.rdf.Values.BNodeType;
+import static com.metreeca.rdf.Values.IRIType;
+import static com.metreeca.rdf.Values.LiteralType;
+import static com.metreeca.rdf.Values.ResourceType;
+import static com.metreeca.rdf.Values.ValueType;
+import static com.metreeca.rdf.Values.bnode;
+import static com.metreeca.rdf.Values.compare;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.format;
+import static com.metreeca.rdf.Values.integer;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.literal;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.sparql.services.Snippets.*;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;

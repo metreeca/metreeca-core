@@ -17,7 +17,7 @@
 
 package com.metreeca.sparql.handlers;
 
-import com.metreeca.sparql.Formats;
+import com.metreeca.rdf.Formats;
 import com.metreeca.sparql.services.Graph;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.OutputFormat;

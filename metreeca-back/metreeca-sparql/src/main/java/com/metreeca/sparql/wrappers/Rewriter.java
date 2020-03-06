@@ -17,8 +17,8 @@
 
 package com.metreeca.sparql.wrappers;
 
-import com.metreeca.sparql.Values;
-import com.metreeca.sparql.formats.RDFFormat;
+import com.metreeca.rdf.Values;
+import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.*;
@@ -31,9 +31,9 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.sparql.Values.direct;
-import static com.metreeca.sparql.Values.inverse;
-import static com.metreeca.sparql.Values.iri;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;

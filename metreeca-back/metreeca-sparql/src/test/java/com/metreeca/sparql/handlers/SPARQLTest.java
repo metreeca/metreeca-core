@@ -17,7 +17,7 @@
 
 package com.metreeca.sparql.handlers;
 
-import com.metreeca.sparql.Values;
+import com.metreeca.rdf.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.JSONAssert;
@@ -32,9 +32,9 @@ import java.util.function.Consumer;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.sparql.services.GraphTest.exec;
 import static com.metreeca.sparql.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;

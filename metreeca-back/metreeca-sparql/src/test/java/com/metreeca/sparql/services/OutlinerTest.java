@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.sparql.ModelAssert.assertThat;
-import static com.metreeca.sparql.Values.inverse;
-import static com.metreeca.sparql.ValuesTest.decode;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.tree.Shape.focus;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;

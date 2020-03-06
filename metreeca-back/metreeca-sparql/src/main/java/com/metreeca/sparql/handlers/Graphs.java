@@ -17,8 +17,8 @@
 
 package com.metreeca.sparql.handlers;
 
-import com.metreeca.sparql.Formats;
-import com.metreeca.sparql.Values;
+import com.metreeca.rdf.Formats;
+import com.metreeca.rdf.Values;
 import com.metreeca.sparql.services.Graph;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
@@ -40,9 +40,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.metreeca.sparql.Values.iri;
-import static com.metreeca.sparql.Values.statement;
-import static com.metreeca.sparql.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tree.Shape.only;
