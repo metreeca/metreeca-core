@@ -13,12 +13,12 @@ import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
 /**
  * ;(rdf4j Patches commit on read-only txns (see https://github.com/eclipse/rdf4j/issues/1960)
  */
-final class RDF4JSPARAQLConnection extends RepositoryConnectionWrapper {
+final class RDF4JSPARQLConnection extends RepositoryConnectionWrapper {
 
 	private boolean dirty; // true if an update operation was executed in the current txn
 
 
-	RDF4JSPARAQLConnection(final RepositoryConnection connection) {
+	RDF4JSPARQLConnection(final RepositoryConnection connection) {
 		super(connection.getRepository(), connection);
 	}
 

@@ -88,7 +88,7 @@ public final class RDF4JSPARQL extends Graph { // ;( namespace ops silently igno
 			}
 
 			@Override public RepositoryConnection getConnection() throws RepositoryException {
-				return new RDF4JSPARAQLConnection(super.getConnection());
+				return new RDF4JSPARQLConnection(super.getConnection());
 			}
 
 		}).isolation(NONE); // ;( no transaction support

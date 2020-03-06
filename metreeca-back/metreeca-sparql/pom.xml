@@ -47,11 +47,6 @@
 			<artifactId>rdf4j-repository-api</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-queryalgebra-evaluation</artifactId>
-		</dependency>
-
 		<dependency> <!-- required to support metreeca/self -->
 			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-queryresultio-sparqljson</artifactId>
