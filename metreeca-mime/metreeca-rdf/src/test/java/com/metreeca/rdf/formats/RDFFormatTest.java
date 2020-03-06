@@ -143,7 +143,7 @@ final class RDFFormatTest {
 
 					.body(rdf())
 
-					.value(value -> Assertions.assertThat(value).isEmpty())
+					.value(value -> assertThat(value).isEmpty())
 					.error(error -> fail("unexpected error {"+error+"}"))
 			);
 		}
@@ -160,7 +160,7 @@ final class RDFFormatTest {
 
 					.body(rdf())
 
-					.value(statements -> Assertions.assertThat(statements)
+					.value(statements -> assertThat(statements)
 							.isIsomorphicTo(decode("<app://local/container> ldp:contains <app://local/resource> ."))
 					)
 

@@ -147,14 +147,14 @@ public final class ValuesTest {
 
 
 	public static final Map<String, String> Prefixes=unmodifiableMap(Stream.of(
-			Assertions.entry("", Namespace),
-			Assertions.entry("app", Internal),
-			Assertions.entry("birt", Namespace),
-			Assertions.entry("rdf", RDF.NAMESPACE),
-			Assertions.entry("rdfs", RDFS.NAMESPACE),
-			Assertions.entry("xsd", XMLSchema.NAMESPACE),
-			Assertions.entry("ldp", LDP.NAMESPACE),
-			Assertions.entry("skos", SKOS.NAMESPACE)
+			entry("", Namespace),
+			entry("app", Internal),
+			entry("birt", Namespace),
+			entry("rdf", RDF.NAMESPACE),
+			entry("rdfs", RDFS.NAMESPACE),
+			entry("xsd", XMLSchema.NAMESPACE),
+			entry("ldp", LDP.NAMESPACE),
+			entry("skos", SKOS.NAMESPACE)
 	).collect(toMap(MapEntry::getKey, MapEntry::getValue)));
 
 	private static final String TurtlePrefixes=Prefixes.entrySet().stream()

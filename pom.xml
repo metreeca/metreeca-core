@@ -143,6 +143,15 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<!-- Format Adapters -->
+
+			<dependency>
+				<groupId>com.metreeca</groupId>
+				<artifactId>metreeca-rdf</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+
 			<!-- Server Adapters -->
 
 			<dependency>
@@ -161,7 +170,7 @@
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-rdf</artifactId>
+				<artifactId>metreeca-sparql</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
