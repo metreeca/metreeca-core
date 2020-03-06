@@ -108,6 +108,7 @@
 		<module>metreeca-gate</module>
 		<module>metreeca-feed</module>
 
+		<module>metreeca-mime</module>
 		<module>metreeca-head</module>
 		<module>metreeca-back</module>
 
@@ -432,25 +433,30 @@
 									<packages>com.metreeca.feed*</packages>
 								</group>
 								<group>
-									<title>Server Adapters</title>
-									<packages>com.metreeca.servlet*</packages>
+									<title>Format Adapters</title>
+									<packages>
+										com.metreeca.rdf*
+									</packages>
 								</group>
 								<group>
-									<title>RDF/SPARQL Adapters</title>
+									<title>Server Adapters</title>
 									<packages>
-										com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*
+										com.metreeca.servlet*
 									</packages>
 								</group>
-								<!--<group>
-									<title>Google Cloud Platform Adapters</title>
+								<group>
+									<title>Backend Adapters</title>
 									<packages>
-										com.metreeca.gcp*
+										com.metreeca.rdf*<!--
+										-->:com.metreeca.rdf4j*<!--
+										-->:com.metreeca.virtuoso*<!--
+										-->:com.metreeca.stardog*
 									</packages>
-								</group>-->
+								</group>
 							</groups>
 
-							<excludePackageNames>
-								com.metreeca.gcp;com.metreeca.gcp* <!-- colon-separated patterns -->
+							<excludePackageNames> <!-- colon-separated patterns -->
+								com.metreeca.gcp;com.metreeca.gcp*
 							</excludePackageNames>
 
 						</configuration>

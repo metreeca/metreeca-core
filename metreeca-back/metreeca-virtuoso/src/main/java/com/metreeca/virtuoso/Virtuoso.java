@@ -18,7 +18,7 @@
 package com.metreeca.virtuoso;
 
 
-import com.metreeca.rdf.services.Graph;
+import com.metreeca.sparql.services.Graph;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.MalformedQueryException;
