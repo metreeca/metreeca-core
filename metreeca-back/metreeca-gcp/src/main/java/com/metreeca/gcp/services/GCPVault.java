@@ -17,6 +17,7 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.gcp.GCP;
 import com.metreeca.rest.services.Vault;
 
 import com.google.api.gax.rpc.NotFoundException;
@@ -32,8 +33,7 @@ import java.util.Optional;
 /**
  * Google Cloud secret vault.
  *
- * <p>Retrieves secrets handled by the Google Cloud Platform <a href="https://cloud.google.com/secret-manager/docs">secret
- * manager</a> service.</p>
+ * <p>Retrieves secrets managed by the Google Cloud Platform secret manager service.</p>
  *
  * <p><strong>Warning</strong> / Only letters, numbers, underscores and hyphens are supported in secret {@linkplain
  * #get(String) ids} </p>
@@ -41,11 +41,6 @@ import java.util.Optional;
  * @see <a href="https://cloud.google.com/secret-manager/docs">Google Cloud Plaform - Secret Manager</a>
  */
 public final class GCPVault implements Vault, AutoCloseable {
-
-	private static final String Project=System.getenv("GOOGLE_CLOUD_PROJECT");
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final SecretManagerServiceClient client;
 
@@ -71,7 +66,7 @@ public final class GCPVault implements Vault, AutoCloseable {
 		}
 
 		final AccessSecretVersionRequest request=AccessSecretVersionRequest.newBuilder()
-				.setName(SecretVersionName.of(Project, id, "latest").toString())
+				.setName(SecretVersionName.of(GCP.Project, id, "latest").toString())
 				.build();
 
 		try {

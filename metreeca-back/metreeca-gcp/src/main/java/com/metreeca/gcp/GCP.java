@@ -23,6 +23,12 @@ package com.metreeca.gcp;
  */
 public final class GCP {
 
+	/**
+	 * The GCP project identifier.
+	 */
+	public static final String Project=System.getenv("GOOGLE_CLOUD_PROJECT");
+
+
 	//// System Classes ////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String Resource="Resource";
