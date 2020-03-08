@@ -17,9 +17,7 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -27,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
 
 
 /**
@@ -44,20 +41,19 @@ public final class Bearer implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final BiFunction<Long, String, Optional<Wrapper>> authenticator;
+	private final BiFunction<String, Request, Optional<Request>> authenticator;
 
 
 	/**
 	 * Creates a bearer token authenticator
 	 *
-	 * @param authenticator the delegated authentication service; takes as argument a timestamp for the operation and
-	 *                      the bearer token presented with the request; must return an optional wrapper for
-	 *                      pre/post-processing the request on successful token validation or an empty optional
-	 *                      otherwise
+	 * @param authenticator the delegated authentication service; takes as argument the bearer token presented with the
+	 *                      request and the request itself; returns an optional configured request on successful token
+	 *                      validation or an empty optional otherwise
 	 *
 	 * @throws NullPointerException if {@code authenticator} is null
 	 */
-	public Bearer(final BiFunction<Long, String, Optional<Wrapper>> authenticator) {
+	public Bearer(final BiFunction<String, Request, Optional<Request>> authenticator) {
 
 		if ( authenticator == null ) {
 			throw new NullPointerException("null authenticator");
@@ -108,11 +104,11 @@ public final class Bearer implements Wrapper {
 
 					// bearer token > authenticate
 
-					.map(token -> authenticator.apply(currentTimeMillis(), token)
+					.map(token -> authenticator.apply(token, request)
 
 							// authenticated > handle request
 
-							.map(wrapper -> wrapper.wrap(handler).handle(request))
+							.map(handler::handle)
 
 							// not authenticated > report error
 

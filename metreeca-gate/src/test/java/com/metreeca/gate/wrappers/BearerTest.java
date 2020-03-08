@@ -35,7 +35,7 @@ final class BearerTest {
 
 
 	private Bearer bearer() {
-		return new Bearer((now, token) -> token.equals("token")? Optional.of(handler -> handler) : Optional.empty());
+		return new Bearer( (token, request) -> token.equals("token")? Optional.of(request) : Optional.empty());
 	}
 
 	private Handler handler(final int status) {
