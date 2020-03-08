@@ -456,10 +456,7 @@
 								<group>
 									<title>Backend Adapters</title>
 									<packages>
-										com.metreeca.rdf*<!--
-										-->:com.metreeca.rdf4j*<!--
-										-->:com.metreeca.virtuoso*<!--
-										-->:com.metreeca.stardog*
+										com.metreeca.rdf4j*
 									</packages>
 								</group>
 							</groups>

@@ -19,7 +19,7 @@ package com.metreeca.feed.rdf;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rest.services.Logger;
-import com.metreeca.sparql.services.Graph;
+import com.metreeca.rdf4j.services.Graph;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;

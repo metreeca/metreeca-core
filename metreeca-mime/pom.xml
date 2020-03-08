@@ -41,4 +41,14 @@
 
 	</modules>
 
+	<dependencies>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rest</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+		</dependency>
+
+	</dependencies>
+
 </project>

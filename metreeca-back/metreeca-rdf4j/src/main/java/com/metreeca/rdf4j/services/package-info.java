@@ -16,16 +16,7 @@
  */
 
 /**
- * RDF4J SPARQL tools.
- *
- * <p>Requires the following Maven dependency in your project:</p>
- *
- * <pre>{@code
- * <dependency>
- *      <groupId>com.metreeca</groupId>
- *      <artifactId>metreeca-rdf4j</artifactId>
- *      <version>${project.version}</version>
- * </dependency>}</pre>
+ * RDF4J SPARQL shared services.
  */
 
-package com.metreeca.rdf4j;
+package com.metreeca.rdf4j.services;

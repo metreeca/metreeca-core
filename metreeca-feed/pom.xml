@@ -36,6 +36,11 @@
 
 	<dependencies>
 
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rest</artifactId>
+		</dependency>
+
 		<dependency> <!-- !!! remove -->
 			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-rdf4j</artifactId>
