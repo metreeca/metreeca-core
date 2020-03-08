@@ -27,7 +27,9 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public final class Limit {
 
-	public static final Supplier<Limit> Service=() -> new Limit(0, Duration.ZERO);
+	public static Supplier<Limit> limit() {
+		return () -> new Limit(0, Duration.ZERO);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

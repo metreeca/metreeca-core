@@ -35,7 +35,7 @@ import static java.time.Instant.now;
 
 @FunctionalInterface public interface Cache {
 
-	public static final Supplier<Cache> Service=None::new;
+	public static Supplier<Cache> cache() { return None::new; }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

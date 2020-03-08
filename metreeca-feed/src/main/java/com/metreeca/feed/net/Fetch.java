@@ -46,8 +46,8 @@ import static java.util.stream.Collectors.toMap;
 
 public final class Fetch implements Function<Request, Optional<Response>> {
 
-	private Cache cache=service(Cache.Service);
-	private Limit limit=service(Limit.Service);
+	private Cache cache=service(Cache.cache());
+	private Limit limit=service(Limit.limit());
 
 	private final Logger logger=service(logger());
 
