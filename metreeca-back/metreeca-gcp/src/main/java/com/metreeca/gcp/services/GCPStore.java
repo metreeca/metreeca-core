@@ -9,10 +9,11 @@ import com.metreeca.rest.services.Store;
 
 import com.google.cloud.storage.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.Channels;
-import java.util.function.BiFunction;
+import java.nio.file.NoSuchFileException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +34,13 @@ public final class GCPStore implements Store {
 
 	private static final Pattern IdPattern=Pattern
 			.compile("(?:https://storage\\.cloud\\.google\\.com/|gs://)(?<bucket>[^/]+)/(?<object>[^/]+)");
+
+
+	@FunctionalInterface private static interface Task<R> {
+
+		public R exec(final String bucket, final String object) throws IOException;
+
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +64,7 @@ public final class GCPStore implements Store {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public InputStream read(final String id) {
+	@Override public InputStream read(final String id) throws IOException {
 
 		if ( id == null ) {
 			throw new NullPointerException("null id");
@@ -65,7 +73,7 @@ public final class GCPStore implements Store {
 		return exec(id, this::read);
 	}
 
-	@Override public OutputStream write(final String id) {
+	@Override public OutputStream write(final String id) throws IOException {
 
 		if ( id == null ) {
 			throw new NullPointerException("null id");
@@ -75,19 +83,19 @@ public final class GCPStore implements Store {
 	}
 
 
-	private <V> V exec(final String id, final BiFunction<String, String, V> task) {
+	private <V> V exec(final String id, final Task<V> task) throws IOException {
 
 		final Matcher matcher=IdPattern.matcher(id);
 
 		return matcher.matches()
-				? task.apply(matcher.group("bucket"), matcher.group("object"))
-				: task.apply(GCP.Project+".appspot.com", id);
+				? task.exec(matcher.group("bucket"), matcher.group("object"))
+				: task.exec(GCP.Project+".appspot.com", id);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public InputStream read(final String bucket, final String object) {
+	public InputStream read(final String bucket, final String object) throws IOException {
 
 		if ( bucket == null ) {
 			throw new NullPointerException("null bucket");
@@ -97,10 +105,22 @@ public final class GCPStore implements Store {
 			throw new NullPointerException("null object");
 		}
 
-		return Channels.newInputStream(storage.get(BlobId.of(bucket, object)).reader());
+		try {
+
+			final Blob blob=storage.get(BlobId.of(bucket, object));
+
+			if ( blob == null ) {
+				throw new NoSuchFileException(String.format("gs://%s/%s", bucket, object));
+			}
+
+			return Channels.newInputStream(blob.reader());
+
+		} catch ( final StorageException e ) {
+			throw new IOException(e);
+		}
 	}
 
-	public OutputStream write(final String bucket, final String object) {
+	public OutputStream write(final String bucket, final String object) throws IOException {
 
 		if ( bucket == null ) {
 			throw new NullPointerException("null bucket");
@@ -110,7 +130,13 @@ public final class GCPStore implements Store {
 			throw new NullPointerException("null object");
 		}
 
-		return Channels.newOutputStream(storage.create(BlobInfo.newBuilder(bucket, object).build()).writer());
+		try {
+
+			return Channels.newOutputStream(storage.create(BlobInfo.newBuilder(bucket, object).build()).writer());
+
+		} catch ( final StorageException e ) {
+			throw new IOException(e);
+		}
 	}
 
 }
