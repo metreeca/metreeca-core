@@ -17,7 +17,6 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.gcp.GCP;
 import com.metreeca.rest.services.Vault;
 
 import com.google.api.gax.rpc.NotFoundException;
@@ -42,11 +41,19 @@ import java.util.Optional;
  */
 public final class GCPVault implements Vault, AutoCloseable {
 
+	/**
+	 * The GCP project identifier.
+	 */
+	private static final String Project=System.getenv("GOOGLE_CLOUD_PROJECT");
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final SecretManagerServiceClient client;
 
 
 	/**
-	 * Creates a new Google CLoud secret vault.
+	 * Creates a new Google Cloud secret vault.
 	 */
 	public GCPVault() {
 		try {
@@ -66,7 +73,7 @@ public final class GCPVault implements Vault, AutoCloseable {
 		}
 
 		final AccessSecretVersionRequest request=AccessSecretVersionRequest.newBuilder()
-				.setName(SecretVersionName.of(GCP.Project, id, "latest").toString())
+				.setName(SecretVersionName.of(Project, id, "latest").toString())
 				.build();
 
 		try {

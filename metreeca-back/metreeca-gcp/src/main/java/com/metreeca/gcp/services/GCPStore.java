@@ -4,7 +4,6 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.gcp.GCP;
 import com.metreeca.rest.services.Store;
 
 import com.google.cloud.storage.*;
@@ -89,7 +88,7 @@ public final class GCPStore implements Store {
 
 		return matcher.matches()
 				? task.exec(matcher.group("bucket"), matcher.group("object"))
-				: task.exec(GCP.Project+".appspot.com", id);
+				: task.exec(storage.getOptions().getProjectId()+".appspot.com", id);
 	}
 
 
