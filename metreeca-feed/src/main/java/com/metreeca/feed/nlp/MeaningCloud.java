@@ -136,13 +136,25 @@ public final class MeaningCloud<V> implements Extractor<V> {
 	private Stream<Reference> entity(final JsonObject object) {
 
 		return Optional
+
 				.ofNullable(object.getJsonArray("variant_list"))
 				.orElse(JsonValue.EMPTY_JSON_ARRAY)
 				.stream()
 				.map(JsonValue::asJsonObject)
-				.map(variant -> {
+
+				.map(variant -> { // :-o beware of setter ordering when using reference values as defaults…
 
 					final Reference reference=new Reference();
+
+					reference.normal=object.getString("form");
+					reference.anchor=variant.getString("form");
+
+					reference.offset=Integer.parseInt(variant.getString("inip"));
+					reference.length=Integer.parseInt(variant.getString("endp"))-reference.offset;
+
+					reference.weight=Integer.parseInt(object.getString("relevance"))/100.0;
+
+					reference.matter=object.getJsonObject("sementity").getString("type");
 
 					reference.target=Optional
 							.ofNullable(object.getJsonArray("semld_list"))
@@ -153,16 +165,6 @@ public final class MeaningCloud<V> implements Extractor<V> {
 							.filter(Objects::nonNull)
 							.findFirst()
 							.orElseGet(() -> "urn:uuid:"+uuid(reference.matter+"/"+reference.normal));
-
-					reference.matter=object.getJsonObject("sementity").getString("type");
-
-					reference.normal=object.getString("form");
-					reference.anchor=variant.getString("form");
-
-					reference.offset=Integer.parseInt(variant.getString("inip"));
-					reference.length=Integer.parseInt(variant.getString("endp"))-reference.offset;
-
-					reference.weight=Integer.parseInt(object.getString("relevance"))/100.0;
 
 					return reference;
 
