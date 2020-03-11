@@ -106,7 +106,6 @@
 		<module>metreeca-tree</module>
 		<module>metreeca-rest</module>
 		<module>metreeca-gate</module>
-		<module>metreeca-feed</module>
 
 		<module>metreeca-mime</module>
 		<module>metreeca-head</module>
@@ -134,12 +133,6 @@
 			<dependency>
 				<groupId>com.metreeca</groupId>
 				<artifactId>metreeca-gate</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-feed</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -436,10 +429,6 @@
 								<group>
 									<title>REST IAM Framework</title>
 									<packages>com.metreeca.gate*</packages>
-								</group>
-								<group>
-									<title>Data Integration Engine</title>
-									<packages>com.metreeca.feed*</packages>
 								</group>
 								<group>
 									<title>Format Adapters</title>
