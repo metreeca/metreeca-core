@@ -109,7 +109,7 @@ public final class Upload implements Consumer<Collection<Statement>> {
 		final long stop=System.currentTimeMillis();
 
 		logger.info(this, String.format(
-				"uploaded <%d> statements to %s in %d ms", model.size(), contexts, Math.max(stop-start, 1)
+				"uploaded <%,d> statements to <%s> in <%,d> ms", model.size(), contexts, Math.max(stop-start, 1)
 		));
 
 	}

@@ -67,7 +67,7 @@ public final class GraphQuery implements Function<String, Stream<Statement>> {
 			final long stop=System.currentTimeMillis();
 
 			logger.info(this, String.format(
-					"executed graph query in %d ms", max(stop-start, 1)
+					"executed in <%,d> ms", max(stop-start, 1)
 			));
 
 			return statements.parallelStream();

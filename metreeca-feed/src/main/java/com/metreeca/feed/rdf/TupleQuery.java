@@ -67,7 +67,7 @@ public final class TupleQuery implements Function<String, Stream<BindingSet>> {
 			final long stop=System.currentTimeMillis();
 
 			logger.info(this, String.format(
-					"executed tuple query in %d ms", max(stop-start, 1)
+					"executed in <%,d> ms", max(stop-start, 1)
 			));
 
 			return bindings.parallelStream();
