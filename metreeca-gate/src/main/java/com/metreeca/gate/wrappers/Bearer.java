@@ -19,10 +19,12 @@ package com.metreeca.gate.wrappers;
 
 import com.metreeca.rest.*;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 
@@ -44,8 +46,40 @@ public final class Bearer implements Wrapper {
 	private final BiFunction<String, Request, Optional<Request>> authenticator;
 
 
+
 	/**
-	 * Creates a bearer token authenticator
+	 * Creates a key-based bearer token authenticator.
+	 *
+	 * @param key the fixed key to be presented as bearer token
+	 * @param roles a collection of values uniquely identifying the roles to be {@linkplain Request#role(Object...)
+	 *              assigned} to the request user on successful {@code key} validation
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
+	 * @throws IllegalArgumentException if {@code key} is empty
+	 */
+	public Bearer(final String key, final Object... roles) {
+
+		this((token, request) -> token.equals(key)
+				? Optional.of(request.roles(roles))
+				: Optional.empty()
+		);
+
+		if ( key == null ) {
+			throw new NullPointerException("null key");
+		}
+
+		if ( key.isEmpty() ) {
+			throw new IllegalArgumentException("empty key");
+		}
+
+		if ( roles == null || Stream.of(roles).anyMatch(Objects::isNull)) {
+			throw new NullPointerException("null roles");
+		}
+
+	}
+
+	/**
+	 * Creates a bearer token authenticator.
 	 *
 	 * @param authenticator the delegated authentication service; takes as argument the bearer token presented with the
 	 *                      request and the request itself; returns an optional configured request on successful token

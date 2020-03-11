@@ -219,8 +219,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of values uniquely identifying the roles attributed to the request {@linkplain #user()
-	 *              user}
+	 * @param roles a collection of values uniquely identifying the roles {@linkplain #roles(Object...) assigned} to the
+	 *              request {@linkplain #user() user}
 	 *
 	 * @return this request
 	 *
@@ -233,8 +233,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of IRIs uniquely identifying the roles attributed to the request {@linkplain #user()
-	 *              user}
+	 * @param roles a collection of IRIs uniquely identifying the roles {@linkplain #roles(Collection) assigned} to the
+	 *              request {@linkplain #user() user}
 	 *
 	 * @return this request
 	 *
