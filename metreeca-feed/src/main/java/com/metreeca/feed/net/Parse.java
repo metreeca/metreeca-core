@@ -32,6 +32,7 @@ import static com.metreeca.rest.services.Logger.logger;
 public final class Parse<R> implements Function<Message<?>, Optional<R>> {
 
 	private final Format<R> format;
+
 	private final Logger logger=service(logger());
 
 

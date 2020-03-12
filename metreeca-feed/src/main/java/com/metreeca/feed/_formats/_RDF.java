@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -34,23 +35,36 @@ public final class _RDF {
 
 	public static final class Cell implements Value {
 
-		private final Resource subject;
-
-		private final Model model=new LinkedHashModel();
+		private static final long serialVersionUID=3100418201450076593L;
 
 
-		public Cell(final Resource subject) {
+		private final Resource focus;
+		private final Model model;
 
-			if ( subject == null ) {
+
+		public Cell(final Resource focus) {
+
+			if ( focus == null ) {
 				throw new NullPointerException("null subject");
 			}
 
-			this.subject=subject;
+			this.focus=focus;
+			this.model=new LinkedHashModel();
+		}
+
+		public Cell(final Resource focus, final Collection<Statement> model) {
+
+			if ( focus == null ) {
+				throw new NullPointerException("null subject");
+			}
+
+			this.focus=focus;
+			this.model=new LinkedHashModel(model);
 		}
 
 
 		public Resource focus() {
-			return subject;
+			return focus;
 		}
 
 		public Model model() {
@@ -66,12 +80,12 @@ public final class _RDF {
 
 			if ( object instanceof Cell ) {
 
-				model.add(subject, predicate, ((Cell)object).subject);
+				model.add(focus, predicate, ((Cell)object).focus);
 				model.addAll(((Cell)object).model);
 
 			} else if ( object != null ) {
 
-				model.add(subject, predicate, object);
+				model.add(focus, predicate, object);
 
 			}
 
@@ -109,13 +123,13 @@ public final class _RDF {
 
 
 		@Override public String stringValue() {
-			return subject.stringValue();
+			return focus.stringValue();
 		}
 
 		@Override public String toString() {
 			try (final StringWriter writer=new StringWriter()) {
 
-				Rio.write(model, writer, subject.stringValue(), RDFFormat.TURTLE);
+				Rio.write(model, writer, focus.stringValue(), RDFFormat.TURTLE);
 
 				return writer.toString();
 
