@@ -25,11 +25,12 @@ import org.eclipse.rdf4j.rio.Rio;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 
-public final class RDF {
+public final class _RDF {
 
 	public static final class Cell implements Value {
 
@@ -114,10 +115,12 @@ public final class RDF {
 		@Override public String toString() {
 			try (final StringWriter writer=new StringWriter()) {
 
-				Rio.write(model, writer, RDFFormat.TURTLE);
+				Rio.write(model, writer, subject.stringValue(), RDFFormat.TURTLE);
 
 				return writer.toString();
 
+			} catch ( final URISyntaxException e ) {
+				throw new RuntimeException(e);
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
@@ -128,6 +131,6 @@ public final class RDF {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RDF() {}
+	private _RDF() {}
 
 }

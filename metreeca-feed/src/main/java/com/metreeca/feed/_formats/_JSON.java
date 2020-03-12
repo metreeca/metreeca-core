@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 
-public final class JSON {
+public final class _JSON {
 
 	private static JsonValue value(final java.lang.Object value) {
 
@@ -90,7 +90,7 @@ public final class JSON {
 	}
 
 	private static JsonValue value(final Optional<?> optional) {
-		return optional.map(JSON::value).orElse(null);
+		return optional.map(_JSON::value).orElse(null);
 	}
 
 
@@ -154,6 +154,6 @@ public final class JSON {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSON() {}
+	private _JSON() {}
 
 }
