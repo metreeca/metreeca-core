@@ -27,6 +27,8 @@ import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.*;
 
@@ -50,6 +52,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
+import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -262,6 +265,19 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 						@Override public <T> Codec set(final RioSetting<T> setting, final T value) {
 
 							parser.set(setting, value);
+
+							//  ;(dbpedia) ignore malformed rdf:langString literals
+
+							if ( BasicParserSettings.VERIFY_DATATYPE_VALUES.equals(setting) && FALSE.equals(value) ) {
+								parser.setValueFactory(new SimpleValueFactory() {
+
+									@Override public Literal createLiteral(final String value, final IRI datatype) {
+										return RDF.LANGSTRING.equals(datatype) ?
+												createLiteral(value) : super.createLiteral(value, datatype);
+									}
+
+								});
+							}
 
 							return this;
 
