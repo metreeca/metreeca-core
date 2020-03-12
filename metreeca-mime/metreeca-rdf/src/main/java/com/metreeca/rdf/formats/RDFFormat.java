@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.json.*;
 
@@ -57,6 +58,14 @@ import static java.util.Collections.singletonList;
  * RDF body format.
  */
 public final class RDFFormat extends Format<Collection<Statement>> {
+
+	/**
+	 * Custom header providing the external base for on-demand RDF body rewriting.
+	 *
+	 * @see Rewriter
+	 */
+	public static final String ExternalBase="-External-Base"; // !!! review/remove/hide
+
 
 	/**
 	 * The plain <a href="http://www.json.org/">JSON</a> file format.
@@ -103,22 +112,48 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	/**
-	 * Custom header providing the external base for on-demand RDF body rewriting.
-	 *
-	 * @see Rewriter
-	 */
-	public static final String ExternalBase="-External-Base"; // !!! review/remove/hide
-
-
 	/**
 	 * Creates an RDF body format.
 	 *
 	 * @return a new RDF body format
 	 */
 	public static RDFFormat rdf() {
-		return new RDFFormat();
+		return rdf(codec -> {});
+	}
+
+	/**
+	 * Creates a customized RDF body format.
+	 *
+	 * @param customizer the RDF parsers/writers customizer; takes as argument a customizable RDF codec
+	 *
+	 * @return a new customized RDF body format
+	 */
+	public static RDFFormat rdf(final Consumer<Codec> customizer) {
+
+		if ( customizer == null ) {
+			throw new NullPointerException("null customizer");
+		}
+
+		return new RDFFormat(customizer);
+	}
+
+
+	/**
+	 * Customizable RDF codec.
+	 */
+	@FunctionalInterface public static interface Codec {
+
+		/**
+		 * Configures a setting for this configurable codec
+		 *
+		 * @param setting the setting to be configured
+		 * @param value   the value for {@code setting}
+		 * @param <T>     the type of the {@code setting} value
+		 *
+		 * @return this codec
+		 */
+		public <T> Codec set(final RioSetting<T> setting, T value);
+
 	}
 
 
@@ -168,13 +203,18 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	private final Consumer<Codec> customizer;
+
 	private final InputFormat input=input();
 	private final OutputFormat output=output();
 
 	private final JsonObject context=service(context());
 
 
-	private RDFFormat() {}
+	private RDFFormat(final Consumer<Codec> customizer) {
+		this.customizer=customizer;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,6 +257,16 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 					parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
 					parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
+
+					customizer.accept(new Codec() {
+						@Override public <T> Codec set(final RioSetting<T> setting, final T value) {
+
+							parser.set(setting, value);
+
+							return this;
+
+						}
+					});
 
 					final ParseErrorCollector errorCollector=new ParseErrorCollector();
 
@@ -329,6 +379,16 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 						writer.set(RioShape, shape);
 						writer.set(RioFocus, focus);
 						writer.set(RioContext, context);
+
+						customizer.accept(new Codec() {
+							@Override public <T> Codec set(final RioSetting<T> setting, final T value) {
+
+								writer.set(setting, value);
+
+								return this;
+
+							}
+						});
 
 						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);
 
