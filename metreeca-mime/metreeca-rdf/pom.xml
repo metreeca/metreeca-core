@@ -44,6 +44,11 @@
 
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-rdfxml</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-rio-nquads</artifactId>
 		</dependency>
 

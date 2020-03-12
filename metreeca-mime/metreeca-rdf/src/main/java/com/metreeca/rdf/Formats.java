@@ -113,7 +113,8 @@ public final class Formats {
 
 						.map(type -> type.equals("*/*") ? Optional.of(fallback)
 								: type.endsWith("/*") ? match(type, registry.getKeys())
-								: registry.getFileFormatForMIMEType(type))
+								: registry.getFileFormatForMIMEType(type)
+						)
 
 						.filter(Optional::isPresent)
 						.map(Optional::get)
