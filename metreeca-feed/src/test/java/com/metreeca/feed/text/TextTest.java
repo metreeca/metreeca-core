@@ -39,9 +39,9 @@ final class TextTest {
 		exec(() -> Feed.of("test")
 
 				.flatMap(new Text<String>("{base}:{x}{y}")
-						.parameter("base", Stream::of)
-						.parameter("x", string -> Stream.of("1", "2"))
-						.parameter("y", string -> Stream.of("2", "3"))
+						.values("base", Stream::of)
+						.values("x", string -> Stream.of("1", "2"))
+						.values("y", string -> Stream.of("2", "3"))
 				)
 
 				.pipe(items -> {

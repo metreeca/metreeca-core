@@ -106,9 +106,9 @@ public final class MeaningCloud<V> implements Extractor<V> {
 								+"&txt=%{text}"
 						)
 
-						.parameter("key", key)
-						.parameter("time", _v -> Stream.of(ISO_OFFSET_DATE_TIME.format(time.apply(_v).atOffset(UTC))))
-						.parameter("text", _v -> Stream.of(text.apply(_v)))
+						.value("key", key)
+						.value("time", _v -> ISO_OFFSET_DATE_TIME.format(time.apply(_v).atOffset(UTC)))
+						.value("text", _v -> text.apply(_v))
 
 				)
 

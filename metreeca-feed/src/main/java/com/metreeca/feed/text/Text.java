@@ -18,9 +18,7 @@
 package com.metreeca.feed.text;
 
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -49,7 +47,33 @@ public final class Text<V> implements Function<V, Stream<String>> {
 	}
 
 
-	public Text<V> parameter(final String name, final Object... values) {
+	public Text<V> value(final String name, final Object value) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return values(name, v -> Stream.of(value)
+				.filter(Objects::nonNull)
+				.map(Object::toString)
+		);
+	}
+
+	public Text<V> value(final String name, final Function<V, String> expression) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( expression == null ) {
+			throw new NullPointerException("null expression");
+		}
+
+		return values(name, v -> Stream.of(expression.apply(v)));
+	}
+
+
+	public Text<V> values(final String name, final Object... values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -59,13 +83,39 @@ public final class Text<V> implements Function<V, Stream<String>> {
 			throw new NullPointerException("null values");
 		}
 
-		return parameter(name, unit -> Stream.of(values)
+		return values(name, Stream.of(values));
+	}
+
+	public Text<V> values(final String name, final Collection<Object> values) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values(name, values.stream());
+	}
+
+	public Text<V> values(final String name, final Stream<Object> values) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values(name, v -> values
 				.filter(Objects::nonNull)
 				.map(Object::toString)
 		);
 	}
 
-	public Text<V> parameter(final String name, final Function<V, Stream<String>> expression) {
+	public Text<V> values(final String name, final Function<V, Stream<String>> expression) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
