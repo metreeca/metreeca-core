@@ -26,33 +26,19 @@ import static com.metreeca.rest.formats.JSONFormat.json;
 /**
  * DBpedia Lookup service.
  *
- * @param <V>
- *
  * @see <a href="https://github.com/dbpedia/lookup">DBpedia Lookup</a>
  */
-public final class DBpedia<V> implements Function<V, Feed<Cell>> {
+public final class DBpedia implements Function<String, Feed<Cell>> {
 
 	private static final Limit limit=new Limit(2);
 
-	private Function<V, String> text=v -> "";
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public DBpedia<V> text(final Function<V, String> text) {
+	@Override public Feed<Cell> apply(final String query) {
+		return Feed.of(limit.apply(query))
 
-		if ( text == null ) {
-			throw new NullPointerException("null text getter");
-		}
-
-		this.text=text;
-
-		return this;
-	}
-
-
-	@Override public Feed<Cell> apply(final V v) {
-		return Feed.of(limit.apply(v))
-
-				.flatMap(new Text<V>
+				.flatMap(new Text<String>
 
 						(
 								"http://lookup.dbpedia.org/api/search/KeywordSearch"
@@ -61,7 +47,7 @@ public final class DBpedia<V> implements Function<V, Feed<Cell>> {
 										+"&MaxHits=10"
 						)
 
-						.value("query", text)
+						.value("query", query)
 
 				)
 
