@@ -117,7 +117,7 @@ import static java.time.Instant.now;
 
 					if ( alive ) {
 
-						logger.info(this, format("retrieving <%s>", key));
+						logger.info(Cache.class, format("retrieving <%s>", key));
 
 						return Files.newInputStream(file);
 
