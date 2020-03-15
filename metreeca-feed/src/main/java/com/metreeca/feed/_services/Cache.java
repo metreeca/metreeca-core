@@ -18,6 +18,7 @@
 package com.metreeca.feed._services;
 
 import com.metreeca.rest.Codecs;
+import com.metreeca.rest.services.Logger;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -27,8 +28,10 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.services.Storage.storage;
 
+import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
 
@@ -64,9 +67,10 @@ import static java.time.Instant.now;
 
 	public static final class File implements Cache {
 
-		private final Path path=service(storage()).file("cache").toPath();
-
 		private Duration ttl=Duration.ZERO;
+
+		private final Path path=service(storage()).file("cache").toPath();
+		private final Logger logger=service(logger());
 
 
 		public File ttl(final Duration ttl) {
@@ -112,6 +116,8 @@ import static java.time.Instant.now;
 							&& Files.getLastModifiedTime(file).toInstant().plus(ttl).isAfter(now());
 
 					if ( alive ) {
+
+						logger.info(this, format("retrieving <%s>", key));
 
 						return Files.newInputStream(file);
 
