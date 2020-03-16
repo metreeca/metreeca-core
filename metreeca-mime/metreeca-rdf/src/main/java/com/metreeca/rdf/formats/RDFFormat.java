@@ -266,7 +266,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 							parser.set(setting, value);
 
-							//  ;(dbpedia) ignore malformed rdf:langString literals
+							//  ;(dbpedia) ignore malformed rdf:langString literals (https://github.com/eclipse/rdf4j/issues/2004)
 
 							if ( BasicParserSettings.VERIFY_DATATYPE_VALUES.equals(setting) && FALSE.equals(value) ) {
 								parser.setValueFactory(new SimpleValueFactory() {
