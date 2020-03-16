@@ -187,7 +187,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
 			}
 
-			final int code=connection.getResponseCode();
+			final int code=connection.getResponseCode(); // !!! handle http > https redirection
 
 			return new Response(throttled)
 
