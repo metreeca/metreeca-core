@@ -103,6 +103,17 @@ public final class _RDF {
 			return this;
 		}
 
+		public Cell insert(final IRI predicate, final Iterable<? extends Value> objects) {
+
+			if ( predicate != null && objects != null ) {
+				for (final Value object : objects) {
+					insert(predicate, object);
+				}
+			}
+
+			return this;
+		}
+
 		public Cell insert(final IRI predicate, final Optional<? extends Value> object) {
 
 			if ( predicate != null && object != null ) {
