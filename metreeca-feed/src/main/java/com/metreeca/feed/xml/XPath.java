@@ -23,6 +23,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -31,6 +33,8 @@ import javax.xml.namespace.QName;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 import static javax.xml.XMLConstants.XMLNS_ATTRIBUTE;
 
@@ -42,6 +46,8 @@ public final class XPath {
 
 	private static final String HTMLPrefix="html";
 	private static final String HTMLUri="http://www.w3.org/1999/xhtml";
+
+	private static final Pattern EntityPattern=Pattern.compile("&#(?<hex>x?)(?<code>\\d+);", CASE_INSENSITIVE);
 
 
 	private static final XPathFactory factory=XPathFactory.newInstance();
@@ -103,6 +109,40 @@ public final class XPath {
 	}
 
 
+	/**
+	 * Decodes XML numeric entities.
+	 *
+	 * @param text the text to be decoded
+	 *
+	 * @return a version of {@code text} where XML numeric entities (for instance {@code &#x2019;} or {@code &#8220;})
+	 * are replaced with the corresponding Unicode characters
+	 *
+	 * @throws NullPointerException if {@code text} is null
+	 */
+	public static String decode(final CharSequence text) {
+
+		if ( text == null ) {
+			throw new NullPointerException("null text");
+		}
+
+		final StringBuffer buffer=new StringBuffer(text.length());
+		final Matcher matcher=EntityPattern.matcher(text);
+
+		while ( matcher.find() ) {
+
+			matcher.appendReplacement(buffer, "");
+
+			buffer.append(Character.toChars(
+					Integer.parseInt(matcher.group("code"), matcher.group("hex").isEmpty() ? 10 : 16)
+			));
+		}
+
+		matcher.appendTail(buffer);
+
+		return buffer.toString();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Node node;
@@ -139,11 +179,11 @@ public final class XPath {
 
 			final Node attribute=attributes.item(i);
 
-			if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName())  ) { // default namespace
+			if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName()) ) { // default namespace
 
 				namespaces.put(DefaultPrefix, attribute.getNodeValue());
 
-			} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix())  ) { // prefixed namespace
+			} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) { // prefixed namespace
 
 				namespaces.put(attribute.getLocalName(), attribute.getNodeValue());
 
@@ -154,7 +194,7 @@ public final class XPath {
 		final String namespace=root.getNamespaceURI();
 
 		namespaces.computeIfAbsent(DefaultPrefix, prefix -> namespace);
-		namespaces.computeIfAbsent(HTMLPrefix,  prefix -> HTMLUri.equals(namespace)? namespace : null);
+		namespaces.computeIfAbsent(HTMLPrefix, prefix -> HTMLUri.equals(namespace) ? namespace : null);
 
 		xpath.setNamespaceContext(new NamespaceContext() {
 
