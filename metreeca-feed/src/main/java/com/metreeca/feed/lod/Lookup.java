@@ -33,6 +33,7 @@ public final class Lookup implements Function<String, Optional<Cell>> {
 
 				.flatMap(new Parse<>(rdf(codec -> codec
 
+						.set(BasicParserSettings.VERIFY_URI_SYNTAX, false)
 						.set(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES, false)
 						.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, false)
 						.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, false)
