@@ -43,7 +43,8 @@ public final class Upload implements Consumer<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Graph graph=service(Graph.graph());
+	private Graph graph; // on-demand initialization
+
 	private Resource[] contexts=DefaultContexts;
 
 	private final AtomicBoolean clear=new AtomicBoolean();
@@ -89,7 +90,7 @@ public final class Upload implements Consumer<Collection<Statement>> {
 
 		final long start=System.currentTimeMillis();
 
-		graph.exec(connection -> {
+		(graph != null ? graph : (graph=service(Graph.graph()))).exec(connection -> {
 
 			if ( clear.getAndSet(false) ) {
 

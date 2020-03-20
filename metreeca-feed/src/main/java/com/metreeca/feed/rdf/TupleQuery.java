@@ -37,7 +37,7 @@ import static java.lang.Math.max;
 
 public final class TupleQuery implements Function<String, Stream<BindingSet>> {
 
-	private Graph graph=service(Graph.graph());
+	private Graph graph; // on-demand initialization
 
 	private final Logger logger=service(logger());
 
@@ -55,7 +55,7 @@ public final class TupleQuery implements Function<String, Stream<BindingSet>> {
 
 
 	@Override public Stream<BindingSet> apply(final String query) {
-		return graph.exec(connection -> {
+		return (graph != null ? graph : (graph=service(Graph.graph()))).exec(connection -> {
 
 			final long start=System.currentTimeMillis();
 
