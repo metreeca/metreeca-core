@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import static com.metreeca.rest.Context.service;
@@ -48,6 +49,7 @@ public final class Upload implements Consumer<Collection<Statement>> {
 	private Resource[] contexts=DefaultContexts;
 
 	private final AtomicBoolean clear=new AtomicBoolean();
+	private final AtomicLong count=new AtomicLong();
 
 	private final Logger logger=service(logger());
 
@@ -109,8 +111,11 @@ public final class Upload implements Consumer<Collection<Statement>> {
 
 		final long stop=System.currentTimeMillis();
 
+		final int count=model.size();
+		final long total=this.count.addAndGet(count);
+
 		logger.info(this, String.format(
-				"uploaded <%,d> statements to <%s> in <%,d> ms", model.size(), contexts, Math.max(stop-start, 1)
+				"uploaded <%,d / %,d> statements to <%s> in <%,d> ms", count, total, contexts, Math.max(stop-start, 1)
 		));
 
 	}
