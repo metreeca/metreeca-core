@@ -44,16 +44,6 @@ public final class Feed<T> implements Stream<T> {
 		return from(Stream.of(item));
 	}
 
-	public static <T> Feed<T> from(final Stream<T> stream) {
-
-		if ( stream == null ) {
-			throw new NullPointerException("null stream");
-		}
-
-		return stream instanceof Feed ? (Feed<T>)stream : new Feed<>(stream);
-	}
-
-
 	@SafeVarargs public static <T> Feed<T> of(final T... items) {
 
 		if ( items == null ) {
@@ -61,6 +51,35 @@ public final class Feed<T> implements Stream<T> {
 		}
 
 		return from(Stream.of(items));
+	}
+
+
+	public static <T> Feed<T> from(final Collection<T> collection) {
+
+		if ( collection == null ) {
+			throw new NullPointerException("null collection");
+		}
+
+		return from(collection.parallelStream());
+	}
+
+	@SafeVarargs public static <T> Feed<T> from(final Collection<T>... collections) {
+
+		if ( collections == null ) {
+			throw new NullPointerException("null collections");
+		}
+
+		return from(Arrays.stream(collections).flatMap(Collection::parallelStream));
+	}
+
+
+	public static <T> Feed<T> from(final Stream<T> stream) {
+
+		if ( stream == null ) {
+			throw new NullPointerException("null stream");
+		}
+
+		return stream instanceof Feed ? (Feed<T>)stream : new Feed<>(stream);
 	}
 
 	@SafeVarargs public static <T> Feed<T> from(final Stream<T>... streams) {
