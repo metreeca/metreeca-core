@@ -27,6 +27,7 @@ import static com.metreeca.rest.services.Logger.time;
 
 import static java.lang.String.format;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
@@ -128,6 +129,29 @@ public final class Feed<T> implements Stream<T> {
 
 	public <R> Feed<R> tryMap(final Function<? super T, Optional<R>> mapper) {
 		return from(stream.map(mapper).filter(Optional::isPresent).map(Optional::get));
+	}
+
+
+	public <K> Feed<Map.Entry<K, List<T>>> groupBy(final Function<T, K> classifier ) {
+
+		if ( classifier == null ) {
+			throw new NullPointerException("null classifier");
+		}
+
+		return from(collect(groupingBy(classifier)).entrySet().parallelStream());
+	}
+
+	public <K, V> Feed<Map.Entry<K, V>> groupBy(final Function<T, K> classifier, final Collector<T, ?, V> downstream ) {
+
+		if ( classifier == null ) {
+			throw new NullPointerException("null classifier");
+		}
+
+		if ( downstream == null ) {
+			throw new NullPointerException("null downstream collector");
+		}
+
+		return from(collect(groupingBy(classifier, downstream)).entrySet().parallelStream());
 	}
 
 
