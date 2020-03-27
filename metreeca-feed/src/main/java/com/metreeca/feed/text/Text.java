@@ -47,6 +47,15 @@ public final class Text<V> implements Function<V, Stream<String>> {
 	}
 
 
+	public Text<V> value(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return values(name, v -> Stream.of(v.toString()));
+	}
+
 	public Text<V> value(final String name, final Object value) {
 
 		if ( name == null ) {
