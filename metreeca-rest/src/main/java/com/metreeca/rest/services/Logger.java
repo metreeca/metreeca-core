@@ -284,7 +284,7 @@ public abstract class Logger {
 
 		@Override public String format(final LogRecord record) {
 
-			return String.format(Locale.ROOT, "%3s %s: %s%s\n",
+			return String.format(Locale.ROOT, "%3s %-12s %s%s\n",
 					level(record.getLevel()),
 					name(record.getLoggerName()),
 					message(record.getMessage()),
