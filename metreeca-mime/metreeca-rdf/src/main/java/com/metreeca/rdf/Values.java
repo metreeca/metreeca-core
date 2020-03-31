@@ -31,7 +31,6 @@ import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.*;
 import java.util.*;
 import java.util.function.Predicate;
@@ -476,6 +475,10 @@ public final class Values {
 		return value instanceof IRI ? Optional.of(value.stringValue()) : Optional.empty();
 	}
 
+	public static Optional<String> string(final Value value) {
+		return value instanceof Literal ? Optional.of(value.stringValue()) : Optional.empty();
+	}
+
 
 	public static Optional<BigInteger> integer(final Value value) {
 		try {
@@ -507,12 +510,12 @@ public final class Values {
 
 		} else if ( literal.getDatatype().equals(XMLSchema.DATETIME) ) {
 
-			final DateTimeFormatter formatter=DateTimeFormatter.ISO_DATE_TIME;
-			final TemporalAccessor accessor=formatter.parse(literal.stringValue());
+			final TemporalAccessor accessor=ISO_DATE_TIME.parse(literal.stringValue());
 
 			return Optional.of(Instant.from(accessor.isSupported(ChronoField.INSTANT_SECONDS)
 					? Instant.from(accessor)
-					: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault())));
+					: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault())
+			));
 
 		} else { // !!! review
 			throw new UnsupportedOperationException("unsupported temporal datatype ["+literal.getDatatype()+"]");
@@ -526,7 +529,8 @@ public final class Values {
 	public static Optional<LocalDate> localDate(final Literal value) { // !!! review/complete
 		return Optional.ofNullable(value != null && value.getDatatype().equals(XMLSchema.DATETIME)
 				? ISO_LOCAL_DATE_TIME.parse(value.stringValue()).query(TemporalQueries.localDate())
-				: null); // !!! review
+				: null // !!! review
+		);
 	}
 
 
