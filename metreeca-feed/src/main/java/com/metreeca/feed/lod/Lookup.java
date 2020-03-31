@@ -4,7 +4,7 @@
 
 package com.metreeca.feed.lod;
 
-import com.metreeca.feed._formats._RDF.Cell;
+import com.metreeca.rdf.Cell;
 import com.metreeca.feed.net.Fetch;
 import com.metreeca.feed.net.Parse;
 import com.metreeca.feed.net.Query;
