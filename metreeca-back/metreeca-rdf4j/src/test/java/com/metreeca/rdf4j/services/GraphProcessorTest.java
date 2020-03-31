@@ -635,7 +635,7 @@ final class GraphProcessorTest {
 		@Test void testLike() {
 			exec(() -> assertThat(query(
 
-					Root, items(field(RDFS.LABEL, like("ger bo")))
+					Root, items(field(RDFS.LABEL, like("ger bo", true)))
 
 			)).isIsomorphicTo(graph(
 

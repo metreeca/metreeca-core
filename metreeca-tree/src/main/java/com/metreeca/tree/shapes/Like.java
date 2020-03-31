@@ -19,6 +19,8 @@ package com.metreeca.tree.shapes;
 
 import com.metreeca.tree.Shape;
 
+import java.text.Normalizer;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,16 +30,17 @@ import java.util.regex.Pattern;
  *
  * <p>States that the lexical representation of each term in the focus set matches the given full-text keywords.</p>
  *
- * <p>sequences of word characters are matched case-insensitively as word stemsin the order the appear within keywords;
- * non-word characters are ignored.</p>
+ * <p>Sequences of word characters are matched case-insensitively either as whole words or word stems in the order they
+ * appear within keywords; non-word characters are ignored.</p>
  */
 public final class Like implements Shape {
 
-	private static final Pattern StemPattern=Pattern.compile("\\w+");
+	private static final Pattern WordPattern=Pattern.compile("\\w+");
+	private static final Pattern MarkPattern=Pattern.compile("\\p{M}");
 
 
-	public static Like like(final String keywords) {
-		return new Like(keywords);
+	public static Like like(final String keywords, final boolean stemming) {
+		return new Like(keywords, stemming);
 	}
 
 
@@ -45,14 +48,17 @@ public final class Like implements Shape {
 
 	private final String text;
 
+	private final boolean stemming;
 
-	private Like(final String text) {
+
+	private Like(final String text, final boolean stemming) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
 		}
 
 		this.text=text;
+		this.stemming=stemming;
 	}
 
 
@@ -72,11 +78,23 @@ public final class Like implements Shape {
 
 		final StringBuilder builder=new StringBuilder(text.length()).append("(?i:.*");
 
-		for(final Matcher matcher=StemPattern.matcher(text); matcher.find(); ) {
-			builder.append("\\b").append(matcher.group()).append(".*");
+		for (final Matcher matcher=WordPattern.matcher(normalize(text)); matcher.find(); ) {
+			builder.append("\\b").append(matcher.group()).append(stemming ? "" : "\\b").append(".*");
 		}
 
 		return builder.append(")").toString();
+	}
+
+	public Predicate<String> toMatcher() {
+
+		final Pattern pattern=Pattern.compile(toExpression());
+
+		return string -> pattern.matcher(normalize(string)).matches();
+	}
+
+
+	private String normalize(final CharSequence string) {
+		return MarkPattern.matcher(Normalizer.normalize(string, Normalizer.Form.NFD)).replaceAll("");
 	}
 
 
@@ -102,7 +120,7 @@ public final class Like implements Shape {
 	}
 
 	@Override public String toString() {
-		return "like("+text+")";
+		return "like("+(stemming? "stemming" : "")+text+")";
 	}
 
 }

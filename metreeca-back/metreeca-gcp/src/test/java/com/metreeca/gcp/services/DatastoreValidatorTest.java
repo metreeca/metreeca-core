@@ -249,7 +249,7 @@ final class DatastoreValidatorTest extends DatastoreTestBase {
 	@Test void testValidateLike() {
 		exec(() -> {
 
-			final Shape shape=like("ex.org");
+			final Shape shape=like("ex.org", true);
 
 			assertThat(validate(shape, StringValue.of("<http://exampe.org/>"))).isTrue();
 			assertThat(validate(shape, StringValue.of("<http://exampe.com/>"))).isFalse();

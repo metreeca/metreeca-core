@@ -444,7 +444,7 @@ final class QueryParser {
 
 	private Shape like(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
-				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString())
+				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString(), true)
 				: error("pattern is not a string");
 	}
 

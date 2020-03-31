@@ -275,7 +275,7 @@ final class QueryParserTest {
 
 		items("{ '~': 'words' }", shape, items -> assertThat(items.getShape())
 				.as("like")
-				.isEqualTo(filter(shape, like("words")))
+				.isEqualTo(filter(shape, like("words", true)))
 		);
 
 
@@ -507,7 +507,7 @@ final class QueryParserTest {
 
 		items("~head=keyword", shape, items -> {
 
-			assertThat(items.getShape()).isEqualTo(filter(shape, field("head", like("keyword"))));
+			assertThat(items.getShape()).isEqualTo(filter(shape, field("head", like("keyword", true))));
 
 		});
 

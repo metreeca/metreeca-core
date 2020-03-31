@@ -317,7 +317,7 @@ final class GraphValidatorTest {
 	@Test void testValidateLike() {
 		exec(() -> {
 
-			final Shape shape=like("ex.org");
+			final Shape shape=like("ex.org", true);
 
 			assertThat(validate(shape, "<http://exampe.org/>")).hasValue();
 			assertThat(validate(shape, "<http://exampe.com/>")).hasError();

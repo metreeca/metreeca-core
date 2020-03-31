@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class LikeTest {
 
 	private String expression(final String keywords) {
-		return like(keywords).toExpression();
+		return like(keywords, true).toExpression();
 	}
 
 
