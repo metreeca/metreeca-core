@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toMap;
 public final class Fetch implements Function<Request, Optional<Response>> {
 
 	private Cache cache=service(Cache.cache());
-	private Limit limit=service(Limit.limit());
+	private Limit<Request> limit=service(Limit.limit());
 
 	private final Logger logger=service(logger());
 
@@ -63,7 +63,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 		return this;
 	}
 
-	public Fetch limit(final Limit limit) {
+	public Fetch limit(final Limit<Request> limit) {
 
 		if ( limit == null ) {
 			throw new NullPointerException("null limit");

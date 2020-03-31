@@ -20,15 +20,19 @@ package com.metreeca.feed._services;
 import java.time.Duration;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
-public final class Limit {
+/**
+ * Rate limit.
+ */
+public final class Limit<T> implements UnaryOperator<T> {
 
-	public static Supplier<Limit> limit() {
-		return () -> new Limit(0, Duration.ZERO);
+	public static <V> Supplier<Limit<V>> limit() {
+		return () -> new Limit<>(0, Duration.ZERO);
 	}
 
 
@@ -64,7 +68,7 @@ public final class Limit {
 	}
 
 
-	public <T> T apply(final T t) {
+	public T apply(final T t) {
 		if ( period.isZero() ) { return t; } else {
 
 			while ( true ) {
