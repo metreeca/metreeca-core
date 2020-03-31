@@ -20,6 +20,8 @@ package com.metreeca.rest.services;
 
 import java.io.*;
 import java.util.Locale;
+import java.util.function.BiConsumer;
+import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.logging.*;
 import java.util.regex.Pattern;
@@ -124,11 +126,42 @@ public abstract class Logger {
 	/**
 	 * Times the execution of a task.
 	 *
-	 * @param task the task whose execution is to be timed
+	 * @param consumer the timing consumer; takes as arguments the {@code task} execution time in milliseconds
+	 * @param task     the task whose execution is to be timed
+	 */
+	public static void time(final LongConsumer consumer, final Runnable task) {
+
+		if ( consumer == null ) {
+			throw new NullPointerException("null consumer");
+		}
+
+		if ( task == null ) {
+			throw new NullPointerException("null task");
+		}
+
+		time((t, v) -> consumer.accept(t), () -> {
+
+			task.run();
+
+			return null;
+
+		});
+	}
+
+	/**
+	 * Times the execution of a task.
+	 *
+	 * @param <V>      the type of the task return value
+	 * @param consumer the timing consumer; takes as arguments the {@code task} execution time in milliseconds and its return value
+	 * @param task     the task whose execution is to be timed
 	 *
 	 * @return the {@code task} execution time in milliseconds
 	 */
-	public static long time(final Runnable task) {
+	public static <V> V time(final BiConsumer<Long, V> consumer, final Supplier<V> task) {
+
+		if ( consumer == null ) {
+			throw new NullPointerException("null consumer");
+		}
 
 		if ( task == null ) {
 			throw new NullPointerException("null task");
@@ -136,11 +169,13 @@ public abstract class Logger {
 
 		final long start=System.currentTimeMillis();
 
-		task.run();
+		final V value=task.get();
 
 		final long stop=System.currentTimeMillis();
 
-		return Math.max(stop-start, 1);
+		consumer.accept(Math.max(stop-start, 1), value);
+
+		return value;
 	}
 
 
