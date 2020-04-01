@@ -207,7 +207,7 @@ public final class Feed<T> implements Stream<T> {
 
 	public void sink() {
 		try (final Feed<T> feed=this) {
-			time(t -> service(logger()).info(feed, format("processed in %,d ms", t)), () -> feed.forEach(t -> {}));
+			time(() -> feed.forEach(t -> {})).apply(t -> service(logger()).info(feed, format("processed in %,d ms", t)));
 		}
 	}
 
