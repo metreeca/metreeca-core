@@ -17,22 +17,20 @@
 
 package com.metreeca.feed.rdf;
 
-import com.metreeca.rest.services.Logger;
 import com.metreeca.rdf4j.services.Graph;
+import com.metreeca.rest.services.Logger;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.QueryLanguage;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
+import static com.metreeca.rest.services.Logger.time;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.asList;
-
-import static java.lang.Math.max;
 
 
 public final class GraphQuery implements Function<String, Stream<Statement>> {
@@ -56,22 +54,14 @@ public final class GraphQuery implements Function<String, Stream<Statement>> {
 
 	@Override public Stream<Statement> apply(final String query) {
 		return (graph != null ? graph : (graph=service(Graph.graph()))).exec(connection -> {
+			return time(() ->
 
-			final long start=System.currentTimeMillis();
+					asList(connection // statements must be retrieved inside txn
+							.prepareGraphQuery(QueryLanguage.SPARQL, query, null)
+							.evaluate()
+					).parallelStream()
 
-			final List<Statement> statements=asList(connection // statements must be retrieved inside txn
-					.prepareGraphQuery(QueryLanguage.SPARQL, query, null)
-					.evaluate()
-			);
-
-			final long stop=System.currentTimeMillis();
-
-			logger.info(this, String.format(
-					"executed in <%,d> ms", max(stop-start, 1)
-			));
-
-			return statements.parallelStream();
-
+			).apply((t, v) -> logger.info(this, String.format("executed in <%,d> ms", t)));
 		});
 	}
 

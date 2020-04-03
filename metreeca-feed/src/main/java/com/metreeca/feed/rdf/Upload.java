@@ -17,12 +17,12 @@
 
 package com.metreeca.feed.rdf;
 
-import com.metreeca.rdf.Values;
-import com.metreeca.rest.services.Logger;
 import com.metreeca.rdf4j.services.Graph;
+import com.metreeca.rest.services.Logger;
 
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +33,9 @@ import java.util.function.Consumer;
 
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
+import static com.metreeca.rest.services.Logger.time;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
 
@@ -87,36 +89,30 @@ public final class Upload implements Consumer<Collection<Statement>> {
 	@Override public void accept(final Collection<Statement> model) {
 
 		final String contexts=this.contexts.length == 0 ? "default context" : Arrays.stream(this.contexts)
-				.map(Values::format)
+				.map(Value::stringValue)
 				.collect(joining(", "));
 
-		final long start=System.currentTimeMillis();
-
 		(graph != null ? graph : (graph=service(Graph.graph()))).exec(connection -> {
+			time(() -> {
 
-			if ( clear.getAndSet(false) ) {
+				if ( clear.getAndSet(false) ) {
 
-				connection.clear(this.contexts);
+					connection.clear(this.contexts);
 
-				logger.info(this, String.format(
-						"cleared %s", contexts
-				));
-			}
+					logger.info(this, format(
+							"cleared <%s>", contexts
+					));
+				}
 
-			if ( !model.isEmpty() ) {
-				connection.add(model, this.contexts);
-			}
+				if ( !model.isEmpty() ) {
+					connection.add(model, this.contexts);
+				}
 
+			}).apply(t -> logger.info(this, format(
+					"uploaded <%,d / %,d> statements to <%s> in <%,d> ms",
+					model.size(), count.addAndGet(model.size()), contexts, t
+			)));
 		});
-
-		final long stop=System.currentTimeMillis();
-
-		final int count=model.size();
-		final long total=this.count.addAndGet(count);
-
-		logger.info(this, String.format(
-				"uploaded <%,d / %,d> statements to <%s> in <%,d> ms", count, total, contexts, Math.max(stop-start, 1)
-		));
 
 	}
 
