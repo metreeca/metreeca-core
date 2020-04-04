@@ -17,51 +17,26 @@
 
 package com.metreeca.feed.rdf;
 
-import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.services.Logger;
-
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.query.QueryLanguage;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.services.Logger.time;
 
 import static org.eclipse.rdf4j.common.iteration.Iterations.asList;
+import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 
-public final class GraphQuery implements Function<String, Stream<Statement>> {
-
-	private Graph graph; // on-demand initialization
-
-	private final Logger logger=service(logger());
-
-
-	public GraphQuery graph(final Graph graph) {
-
-		if ( graph == null ) {
-			throw new NullPointerException("null graph");
-		}
-
-		this.graph=graph;
-
-		return this;
-	}
-
+public final class GraphQuery extends Operation<GraphQuery> implements Function<String, Stream<Statement>> {
 
 	@Override public Stream<Statement> apply(final String query) {
-		return (graph != null ? graph : (graph=service(Graph.graph()))).exec(connection -> {
-			return time(() ->
+		return graph().exec(connection -> {
+			return time(() -> // statements must be retrieved inside txn
 
-					asList(connection // statements must be retrieved inside txn
-							.prepareGraphQuery(QueryLanguage.SPARQL, query, null)
-							.evaluate()
-					).parallelStream()
+					asList(configure(connection.prepareGraphQuery(SPARQL, query)).evaluate()).parallelStream()
 
-			).apply((t, v) -> logger.info(this, String.format("executed in <%,d> ms", t)));
+			).apply((t, v) -> logger().info(this, String.format("executed in <%,d> ms", t)));
 		});
 	}
 

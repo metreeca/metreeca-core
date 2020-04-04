@@ -17,26 +17,27 @@
 
 package com.metreeca.feed.rdf;
 
-import org.eclipse.rdf4j.query.BindingSet;
-
-import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
 import static com.metreeca.rest.services.Logger.time;
 
-import static org.eclipse.rdf4j.common.iteration.Iterations.asList;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 
-public final class TupleQuery extends Operation<TupleQuery> implements Function<String, Stream<BindingSet>> {
+public final class Update extends Operation<Update> implements Consumer<String> {
 
-	@Override public Stream<BindingSet> apply(final String query) {
-		return graph().exec(connection -> {
-			return time(() -> // bindings must be retrieved inside txn
+	@Override public void accept(final String update) {
 
-					asList(connection.prepareTupleQuery(SPARQL, query).evaluate()).parallelStream()
+		if ( update == null ) {
+			throw new NullPointerException("null update");
+		}
 
-			).apply((t, v) -> logger().info(this, String.format("executed in <%,d> ms", t)));
+		graph().exec(connection -> {
+			return time(() ->
+
+					configure(connection.prepareUpdate(SPARQL, update)).execute()
+
+			).apply(t -> logger().info(this, String.format("executed in <%,d> ms", t)));
 		});
 	}
 
