@@ -33,7 +33,7 @@ public final class Update extends Operation<Update> implements Consumer<String> 
 		}
 
 		graph().exec(connection -> {
-			return time(() ->
+			time(() ->
 
 					configure(connection.prepareUpdate(SPARQL, update)).execute()
 
