@@ -35,7 +35,7 @@ public final class Update extends Operation<Update> implements Consumer<String> 
 		graph().exec(connection -> {
 			time(() ->
 
-					configure(connection.prepareUpdate(SPARQL, update)).execute()
+					configure(connection.prepareUpdate(SPARQL, update, base())).execute()
 
 			).apply(t -> logger().info(this, String.format("executed in <%,d> ms", t)));
 		});

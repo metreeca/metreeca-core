@@ -34,7 +34,7 @@ public final class TupleQuery extends Operation<TupleQuery> implements Function<
 		return graph().exec(connection -> {
 			return time(() -> // bindings must be retrieved inside txn
 
-					asList(configure(connection.prepareTupleQuery(SPARQL, query)).evaluate()).parallelStream()
+					asList(configure(connection.prepareTupleQuery(SPARQL, query, base())).evaluate()).parallelStream()
 
 			).apply((t, v) -> logger().info(this, String.format("executed in <%,d> ms", t)));
 		});

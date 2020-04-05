@@ -34,7 +34,7 @@ public final class GraphQuery extends Operation<GraphQuery> implements Function<
 		return graph().exec(connection -> {
 			return time(() -> // statements must be retrieved inside txn
 
-					asList(configure(connection.prepareGraphQuery(SPARQL, query)).evaluate()).parallelStream()
+					asList(configure(connection.prepareGraphQuery(SPARQL, query, base())).evaluate()).parallelStream()
 
 			).apply((t, v) -> logger().info(this, String.format("executed in <%,d> ms", t)));
 		});

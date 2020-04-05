@@ -19,9 +19,12 @@ import static com.metreeca.rest.Context.service;
 public abstract class Operation<T extends Operation<T>> {
 
 	private Graph graph;
-	private SimpleDataset dataset;
+
+	private String base;
 	private Boolean inferred;
 	private Integer timeout;
+
+	private SimpleDataset dataset;
 
 	private final Map<String, Value> bindings=new HashMap<>();
 
@@ -37,9 +40,14 @@ public abstract class Operation<T extends Operation<T>> {
 		return graph != null ? graph : (graph=service(Graph.graph()));
 	}
 
+	protected String base() {
+		return base;
+	}
+
 	protected Logger logger() {
 		return logger;
 	}
+
 
 	private SimpleDataset dataset() {
 		return dataset != null ? dataset : (dataset=new SimpleDataset());
@@ -67,6 +75,32 @@ public abstract class Operation<T extends Operation<T>> {
 		}
 
 		this.graph=graph;
+
+		return self();
+	}
+
+
+	public T base(final String base) {
+
+		if ( base == null ) {
+			throw new NullPointerException("null base");
+		}
+
+		this.base=base;
+
+		return self();
+	}
+
+	public T inferred(final boolean inferred) {
+
+		this.inferred=inferred;
+
+		return self();
+	}
+
+	public T timeout(final int timeout) {
+
+		this.timeout=timeout;
 
 		return self();
 	}
@@ -112,21 +146,6 @@ public abstract class Operation<T extends Operation<T>> {
 		}
 
 		dataset().setDefaultInsertGraph(graph);
-
-		return self();
-	}
-
-
-	public T inferred(final boolean inferred) {
-
-		this.inferred=inferred;
-
-		return self();
-	}
-
-	public T timeout(final int timeout) {
-
-		this.timeout=timeout;
 
 		return self();
 	}
