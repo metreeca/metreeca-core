@@ -21,11 +21,6 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Logger.logger;
-import static com.metreeca.rest.services.Logger.time;
-
-import static java.lang.String.format;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
@@ -203,12 +198,6 @@ public final class Feed<T> implements Stream<T> {
 
 		return size == 0 ? of(stream.collect(toList()))
 				: from(StreamSupport.stream(new BatchSpliterator<>(size, stream.spliterator()), stream.isParallel()));
-	}
-
-	public void sink() {
-		try (final Feed<T> feed=this) {
-			time(() -> feed.forEach(t -> {})).apply(t -> service(logger()).info(feed, format("processed in %,d ms", t)));
-		}
 	}
 
 

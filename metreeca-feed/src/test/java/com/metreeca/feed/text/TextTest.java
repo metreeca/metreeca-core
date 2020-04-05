@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static java.util.stream.Collectors.toList;
+
 
 final class TextTest {
 
@@ -36,28 +38,26 @@ final class TextTest {
 
 
 	@Test void test() {
-		exec(() -> Feed.of("test")
+		exec(() -> assertThat
 
-				.flatMap(new Text<String>("{base}:{x}{y}")
-						.values("base", Stream::of)
-						.values("x", string -> Stream.of("1", "2"))
-						.values("y", string -> Stream.of("2", "3"))
+				(Feed
+						.of("test")
+
+						.flatMap(new Text<String>("{base}:{x}{y}")
+								.values("base", Stream::of)
+								.values("x", string -> Stream.of("1", "2"))
+								.values("y", string -> Stream.of("2", "3"))
+						)
+
+						.collect(toList())
 				)
 
-				.pipe(items -> {
-
-					assertThat(items).containsExactlyInAnyOrder(
-							"test:12",
-							"test:13",
-							"test:22",
-							"test:23"
-					);
-
-					return Stream.empty();
-
-				})
-
-				.sink()
+				.containsExactlyInAnyOrder(
+						"test:12",
+						"test:13",
+						"test:22",
+						"test:23"
+				)
 
 		);
 	}
