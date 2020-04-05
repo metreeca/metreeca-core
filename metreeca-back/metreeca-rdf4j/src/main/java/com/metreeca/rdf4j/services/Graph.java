@@ -70,9 +70,6 @@ public final class Graph implements AutoCloseable {
 	}
 
 
-	private static final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();
-
-
 	//// Graph-Based Functions /////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -365,6 +362,8 @@ public final class Graph implements AutoCloseable {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Repository repository;
+
+	private final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();
 
 
 	/**
