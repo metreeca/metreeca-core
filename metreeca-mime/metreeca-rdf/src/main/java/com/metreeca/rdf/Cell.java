@@ -26,6 +26,8 @@ import org.eclipse.rdf4j.rio.Rio;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Optional;
@@ -79,6 +81,25 @@ public final class Cell implements Value {
 
 		return value(predicate).flatMap(Values::string);
 	}
+
+	public Optional<BigInteger> integer(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return value(predicate).flatMap(Values::integer);
+	}
+
+	public Optional<BigDecimal> decimal(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return value(predicate).flatMap(Values::decimal);
+	}
+
 
 	public Optional<Value> value(final IRI predicate) {
 
