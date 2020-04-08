@@ -33,11 +33,15 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.metreeca.rdf.Path.direct;
+
 
 public final class Cell implements Value {
 
 	private static final long serialVersionUID=3100418201450076593L;
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Resource focus;
 	private final Model model;
@@ -73,14 +77,26 @@ public final class Cell implements Value {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public Optional<String> string(final IRI predicate) {
 
 		if ( predicate == null ) {
 			throw new NullPointerException("null predicate");
 		}
 
-		return value(predicate).flatMap(Values::string);
+		return string(direct(predicate));
 	}
+
+	public Optional<String> string(final Path path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return value(path).flatMap(Values::string);
+	}
+
 
 	public Optional<BigInteger> integer(final IRI predicate) {
 
@@ -107,18 +123,34 @@ public final class Cell implements Value {
 			throw new NullPointerException("null predicate");
 		}
 
-		return values(predicate).findFirst();
+		return value(direct(predicate));
 	}
 
-	public Stream<Value> values(final IRI predicate) {
+	public Optional<Value> value(final Path path) {
 
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
+		if ( path == null ) {
+			throw new NullPointerException("null path");
 		}
 
-		return model.stream().filter(s -> s.getPredicate().equals(predicate)).map(Statement::getObject);
+		return values(path).findFirst();
 	}
 
+
+	public Stream<Value> values(final IRI predicate) {
+		return values(direct(predicate));
+	}
+
+	public Stream<Value> values(final Path path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return path.follow(focus, model);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Cell insert(final IRI predicate, final Value object) {
 
@@ -180,6 +212,8 @@ public final class Cell implements Value {
 		return this;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public String stringValue() {
 		return focus.stringValue();
