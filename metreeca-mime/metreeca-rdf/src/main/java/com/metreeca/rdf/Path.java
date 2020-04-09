@@ -9,7 +9,10 @@ import org.eclipse.rdf4j.model.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
 
 
 @FunctionalInterface public interface Path {
@@ -53,7 +56,7 @@ import java.util.stream.Stream;
 			throw new NullPointerException("null paths");
 		}
 
-		return union(Arrays.stream(predicates).map(Path::direct));
+		return union(Arrays.stream(predicates).map(Path::direct).collect(Collectors.toList()));
 	}
 
 	public static Path union(final Path... paths) {
@@ -62,16 +65,16 @@ import java.util.stream.Stream;
 			throw new NullPointerException("null paths");
 		}
 
-		return union(Arrays.stream(paths));
+		return union(asList(paths));
 	}
 
-	public static Path union(final Stream<Path> paths) {
+	public static Path union(final Collection<Path> paths) {
 
 		if ( paths == null ) {
 			throw new NullPointerException("null paths");
 		}
 
-		return (subject, model) -> paths
+		return (subject, model) -> paths.stream()
 
 				.peek(path -> { if ( path == null ) { throw new NullPointerException("null path"); } })
 
