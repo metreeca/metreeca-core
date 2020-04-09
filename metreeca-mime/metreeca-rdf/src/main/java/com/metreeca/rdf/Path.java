@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 			throw new NullPointerException("null predicate");
 		}
 
-		return (subject, model) -> model
+		return (subject, model) -> model.stream()
 
 				.peek(statement -> { if ( statement == null ) { throw new NullPointerException("null statement"); } })
 
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 			throw new NullPointerException("null predicate");
 		}
 
-		return (subject, model) -> model
+		return (subject, model) -> model.stream()
 
 				.peek(statement -> { if ( statement == null ) { throw new NullPointerException("null statement"); } })
 
@@ -81,20 +81,6 @@ import java.util.stream.Stream;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Stream<Value> follow(final Resource subject, final Stream<Statement> model);
-
-	public default Stream<Value> follow(final Resource subject, final Collection<Statement> model) {
-
-		if ( subject == null ) {
-			throw new NullPointerException("null subject");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		return follow(subject, model.stream());
-
-	}
+	public Stream<Value> follow(final Resource subject, final Collection<Statement> model);
 
 }
