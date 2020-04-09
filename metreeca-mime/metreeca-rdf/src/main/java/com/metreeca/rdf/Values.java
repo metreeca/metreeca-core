@@ -23,10 +23,16 @@ import org.eclipse.rdf4j.model.impl.SimpleNamespace;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -35,7 +41,6 @@ import java.time.temporal.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
@@ -44,7 +49,6 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 import static java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.joining;
 
 
 /**
@@ -537,10 +541,25 @@ public final class Values {
 	//// Formatters ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String format(final Iterable<Statement> statements) {
-		return statements == null ? null : StreamSupport.stream(statements.spliterator(), false)
-				.map(Values::format)
-				.collect(joining("\n"));
+		return format(statements, null);
 	}
+
+	public static String format(final Iterable<Statement> statements, final String base) {
+		if ( statements == null ) { return null; } else {
+			try (final StringWriter writer=new StringWriter()) {
+
+				Rio.write(statements, writer, base, RDFFormat.TURTLE);
+
+				return writer.toString();
+
+			} catch ( final URISyntaxException e ) {
+				throw new RuntimeException(e);
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		}
+	}
+
 
 	public static String format(final Statement statement) {
 		return statement == null ? null

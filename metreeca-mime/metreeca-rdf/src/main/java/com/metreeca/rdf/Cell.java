@@ -20,25 +20,26 @@ package com.metreeca.rdf;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.model.vocabulary.DC;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Path.direct;
+import static com.metreeca.rdf.Path.union;
+import static com.metreeca.rdf.Values.iri;
 
 
 public final class Cell implements Value {
 
 	private static final long serialVersionUID=3100418201450076593L;
+
+	private static final Path label=union(RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name"));
+	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, iri("http://schema.org/", "description"));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -220,17 +221,9 @@ public final class Cell implements Value {
 	}
 
 	@Override public String toString() {
-		try (final StringWriter writer=new StringWriter()) {
-
-			Rio.write(model, writer, focus.stringValue(), RDFFormat.TURTLE);
-
-			return writer.toString();
-
-		} catch ( final URISyntaxException e ) {
-			throw new RuntimeException(e);
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
+		return focus
+				+string(label).map(l -> " : "+l).orElse("")
+				+string(notes).map(l -> " / "+l).orElse("");
 	}
 
 }
