@@ -136,6 +136,31 @@ public final class Codecs {
 
 	//// Resources /////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static URL resource(final Object master, final String resource) {
+
+		if ( master == null ) {
+			throw new NullPointerException("null master");
+		}
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		final Class<?> clazz=master instanceof Class ? (Class<?>)master : master.getClass();
+
+		final URL url=clazz.getResource(resource.startsWith(".") ? clazz.getSimpleName()+resource : resource);
+
+		if ( url == null ) {
+			throw new MissingResourceException(
+					format("unknown resource [%s:%s]", clazz.getName(), resource),
+					clazz.getName(),
+					resource
+			);
+		}
+
+		return url;
+	}
+
 	public static InputStream input(final Object master, final String resource) {
 
 		if ( master == null ) {
@@ -148,19 +173,7 @@ public final class Codecs {
 
 		try {
 
-			final Class<?> clazz=master instanceof Class ? (Class<?>)master : master.getClass();
-
-			final URL url=clazz.getResource(resource.startsWith(".") ? clazz.getSimpleName()+resource : resource);
-
-			if ( url == null ) {
-				throw new MissingResourceException(
-						format("unknown resource [%s:%s]", clazz.getName(), resource),
-						clazz.getName(),
-						resource
-				);
-			}
-
-			return url.openStream();
+			return resource(master, resource).openStream();
 
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
