@@ -6,30 +6,29 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="metreeca-rest" />
         <module name="metreeca-feed" />
-        <module name="metreeca-tree" />
+        <module name="metreeca-rdf" />
         <module name="metreeca-gcp" />
-        <module name="metreeca-rdf4j" />
-        <module name="metreeca-stardog" />
-        <module name="metreeca-servlet" />
-        <module name="metreeca-virtuoso" />
         <module name="metreeca-gate" />
+        <module name="metreeca-servlet" />
+        <module name="metreeca-rest" />
+        <module name="metreeca-rdf4j" />
+        <module name="metreeca-tree" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="Link" target="1.8" />
-      <module name="metreeca-bom" target="1.8" />
+      <module name="metreeca-back" target="1.8" />
       <module name="metreeca-feed" target="1.8" />
       <module name="metreeca-gate" target="1.8" />
       <module name="metreeca-gcp" target="1.8" />
+      <module name="metreeca-head" target="1.8" />
+      <module name="metreeca-link" target="1.8" />
+      <module name="metreeca-mime" target="1.8" />
+      <module name="metreeca-rdf" target="1.8" />
       <module name="metreeca-rdf4j" target="1.8" />
       <module name="metreeca-rest" target="1.8" />
       <module name="metreeca-servlet" target="1.8" />
-      <module name="metreeca-sparql" target="1.8" />
-      <module name="metreeca-stardog" target="1.8" />
       <module name="metreeca-tree" target="1.8" />
-      <module name="metreeca-virtuoso" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
