@@ -56,7 +56,7 @@ public final class Feed<T> implements Stream<T> {
 			throw new NullPointerException("null collection");
 		}
 
-		return from(collection.parallelStream());
+		return from(collection.stream());
 	}
 
 	@SafeVarargs public static <T> Feed<T> from(final Collection<T>... collections) {
@@ -65,7 +65,7 @@ public final class Feed<T> implements Stream<T> {
 			throw new NullPointerException("null collections");
 		}
 
-		return from(Arrays.stream(collections).flatMap(Collection::parallelStream));
+		return from(Arrays.stream(collections).flatMap(Collection::stream));
 	}
 
 
@@ -133,7 +133,7 @@ public final class Feed<T> implements Stream<T> {
 			throw new NullPointerException("null classifier");
 		}
 
-		return from(collect(groupingBy(classifier)).entrySet().parallelStream());
+		return from(collect(groupingBy(classifier)).entrySet().stream());
 	}
 
 	public <K, V> Feed<Map.Entry<K, V>> groupBy(final Function<T, K> classifier, final Collector<T, ?, V> downstream ) {
@@ -146,7 +146,7 @@ public final class Feed<T> implements Stream<T> {
 			throw new NullPointerException("null downstream collector");
 		}
 
-		return from(collect(groupingBy(classifier, downstream)).entrySet().parallelStream());
+		return from(collect(groupingBy(classifier, downstream)).entrySet().stream());
 	}
 
 
@@ -165,7 +165,7 @@ public final class Feed<T> implements Stream<T> {
 
 				!pending.isEmpty();
 
-				pending=processor.apply(from(pending.parallelStream()))
+				pending=processor.apply(from(pending.stream()))
 						.filter(value -> !loop.contains(value))
 						.collect(toCollection(LinkedHashSet::new))
 
@@ -175,7 +175,7 @@ public final class Feed<T> implements Stream<T> {
 
 		}
 
-		return from(loop.parallelStream());
+		return from(loop.stream());
 	}
 
 	public Feed<T> iter(final int steps, final Function<? super Feed<T>, ? extends Stream<T>> processor) {
