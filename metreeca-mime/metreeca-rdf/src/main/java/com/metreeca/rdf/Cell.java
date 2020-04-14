@@ -34,12 +34,15 @@ import static com.metreeca.rdf.Path.union;
 import static com.metreeca.rdf.Values.iri;
 
 
-public final class Cell implements Value {
+public final class Cell implements Resource {
 
 	private static final long serialVersionUID=3100418201450076593L;
 
-	private static final Path label=union(RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name"));
-	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, iri("http://schema.org/", "description"));
+	private static final IRI SchemaName = iri("http://schema.org/", "name");
+	private static final IRI SchemaDescription = iri("http://schema.org/", "description");
+
+	private static final Path label=union(RDFS.LABEL, DC.TITLE, SchemaName);
+	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

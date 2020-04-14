@@ -6,14 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="metreeca-tree" />
         <module name="metreeca-feed" />
         <module name="metreeca-rdf" />
         <module name="metreeca-gcp" />
-        <module name="metreeca-gate" />
+        <module name="metreeca-rdf4j" />
         <module name="metreeca-servlet" />
         <module name="metreeca-rest" />
-        <module name="metreeca-rdf4j" />
-        <module name="metreeca-tree" />
+        <module name="metreeca-gate" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
