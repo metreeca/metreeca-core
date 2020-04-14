@@ -83,6 +83,23 @@ public final class Cell implements Resource {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public boolean contains(final IRI predicate, final Value object) {
+
+		if (predicate == null) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if (object == null) {
+			throw new NullPointerException("null object");
+		}
+
+		return model.parallelStream().anyMatch(statement
+				-> statement.getPredicate().equals(predicate)
+				&& statement.getObject().equals(object)
+		);
+	}
+
+
 	public Optional<String> string(final IRI predicate) {
 
 		if ( predicate == null ) {
