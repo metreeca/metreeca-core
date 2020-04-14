@@ -26,6 +26,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -116,6 +117,25 @@ public final class Cell implements Resource {
 		}
 
 		return value(path).flatMap(Values::string);
+	}
+
+
+	public Stream<String> strings(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return strings(direct(predicate));
+	}
+
+	public Stream<String> strings(final Path path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return values(path).map(v -> Values.string(v).orElse(null)).filter(Objects::nonNull);
 	}
 
 
