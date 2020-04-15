@@ -122,13 +122,22 @@ public final class Feed<T> implements Stream<T> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	public <R> Feed<R> tryMap(final Function<? super T, Optional<R>> mapper) {
+	public <R> Feed<R> optMap(final Function<? super T, Optional<R>> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
 		}
 
 		return from(stream.map(mapper).filter(Optional::isPresent).map(Optional::get));
+	}
+
+	public <R> Feed<R> bagMap(final Function<? super T, ? extends Collection<R>> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return from(stream.map(mapper).flatMap(Collection::stream));
 	}
 
 
