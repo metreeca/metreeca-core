@@ -123,6 +123,11 @@ public final class Feed<T> implements Stream<T> {
 
 
 	public <R> Feed<R> tryMap(final Function<? super T, Optional<R>> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
 		return from(stream.map(mapper).filter(Optional::isPresent).map(Optional::get));
 	}
 
@@ -150,11 +155,22 @@ public final class Feed<T> implements Stream<T> {
 	}
 
 
-	public <R> Feed<R> pipe(final Function<? super Feed<T>, ? extends Stream<R>> processor) {
-		return from(processor.apply(this));
+	public Feed<Collection<T>> batch(final int size) {
+
+		if ( size < 0 ) {
+			throw new IllegalArgumentException("negative batch size");
+		}
+
+		return size == 0 ? of(stream.collect(toList()))
+				: from(StreamSupport.stream(new BatchSpliterator<>(size, stream.spliterator()), stream.isParallel()));
 	}
 
-	public Feed<T> loop(final Function<? super Feed<T>, ? extends Stream<T>> processor) {
+
+	public Feed<T> loop(final Function<? super Feed<T>, ? extends Stream<T>> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
 
 		final Collection<T> loop=new LinkedHashSet<>(); // preserve order
 
@@ -165,7 +181,7 @@ public final class Feed<T> implements Stream<T> {
 
 				!pending.isEmpty();
 
-				pending=processor.apply(from(pending.stream()))
+				pending=mapper.apply(from(pending.stream()))
 						.filter(value -> !loop.contains(value))
 						.collect(toCollection(LinkedHashSet::new))
 
@@ -178,26 +194,42 @@ public final class Feed<T> implements Stream<T> {
 		return from(loop.stream());
 	}
 
-	public Feed<T> iter(final int steps, final Function<? super Feed<T>, ? extends Stream<T>> processor) {
+	public Feed<T> iter(final int steps, final Function<? super Feed<T>, ? extends Stream<T>> mapper) {
+
+		if ( steps < 0 ) {
+			throw new IllegalArgumentException("negative steps count");
+		}
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
 
 		Feed<T> iter=this;
 
 		for (int n=0; n < steps; ++n) {
-			iter=from(processor.apply(iter.parallel()));
+			iter=from(mapper.apply(iter.parallel()));
 		}
 
 		return iter;
 	}
 
 
-	public Feed<Collection<T>> batch(final int size) {
+	public <R> Feed<R> pipe(final Function<? super Feed<T>, ? extends Stream<R>> mapper) {
 
-		if ( size < 0 ) {
-			throw new IllegalArgumentException("illegal batch size {"+size+"}");
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
 		}
 
-		return size == 0 ? of(stream.collect(toList()))
-				: from(StreamSupport.stream(new BatchSpliterator<>(size, stream.spliterator()), stream.isParallel()));
+		return from(mapper.apply(this));
+	}
+
+	public void sink(final Consumer<? super Feed<T>> consumer) {
+
+		if ( consumer == null ) {
+			throw new NullPointerException("null consumer");
+		}
+
+		consumer.accept(this);
 	}
 
 
