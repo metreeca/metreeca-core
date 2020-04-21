@@ -660,7 +660,11 @@ public final class Values {
 	}
 
 
-	private static String quote(final CharSequence text) {
+	public static String quote(final CharSequence text) {
+
+		if ( text == null ) {
+			throw new NullPointerException("null text");
+		}
 
 		final StringBuilder builder=new StringBuilder(text.length()+text.length()/10);
 
