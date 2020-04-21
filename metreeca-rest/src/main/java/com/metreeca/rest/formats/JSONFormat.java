@@ -76,7 +76,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * @param reader the reader the JSON object is to be parsed from
 	 *
 	 * @return a value result containing the parsed JSON object, if {@code reader} was successfully parsed; an error
-	 * result containg the parse exception, otherwise
+	 * result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */

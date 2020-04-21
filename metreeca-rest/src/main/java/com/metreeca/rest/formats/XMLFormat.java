@@ -19,13 +19,9 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
-
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
-
-import java.io.*;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,13 +31,13 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Failure.malformed;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static java.util.regex.Pattern.compile;
 
 
@@ -87,6 +83,83 @@ public final class XMLFormat extends Format<Document> {
 	}
 
 
+	/**
+	 * Parses a XML document.
+	 *
+	 * @param input the input stream the XML document is to be parsed from
+	 *
+	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error result containing the parse exception, otherwise
+	 *
+	 * @throws NullPointerException if {@code input} is null
+	 */
+	public static Result<Document, Exception> xml(final InputStream input) {
+
+		if ( input == null ) {
+			throw new NullPointerException("null input");
+		}
+
+		return xml(input, null);
+	}
+
+	/**
+	 * Parses a XML document.
+	 *
+	 * @param input the input stream the XML document is to be parsed from
+	 * @param base  the base URL for the XML document to be parsed
+	 *
+	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error result containing the parse exception, otherwise
+	 *
+	 * @throws NullPointerException if {@code input} is null
+	 */
+	public static Result<Document, Exception> xml(final InputStream input, final String base) {
+
+		if ( input == null ) {
+			throw new NullPointerException("null input");
+		}
+
+		final InputSource source=new InputSource();
+
+		source.setSystemId(base);
+		source.setByteStream(input);
+
+		return xml(new SAXSource(source));
+	}
+
+	/**
+	 * Parses a XML document.
+	 *
+	 * @param source the source the XML document is to be parsed from
+	 *
+	 * @return a value result containing the parsed XML document, if {@code source} was successfully parsed; an error result containing the parse exception, otherwise
+	 *
+	 * @throws NullPointerException if {@code source} is null
+	 */
+	public static Result<Document, Exception> xml(final Source source) {
+
+		if ( source == null ) {
+			throw new NullPointerException("null source");
+		}
+
+		try {
+
+			final Document document=builder().newDocument();
+
+			document.setDocumentURI(source.getSystemId());
+
+			transformer().transform(source, new DOMResult(document));
+
+			return Value(document);
+
+		} catch ( final TransformerException e ) {
+
+			return Error(e);
+
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private static final DocumentBuilderFactory builders=DocumentBuilderFactory.newInstance();
 	private static final TransformerFactory transformers=TransformerFactory.newInstance();
 
@@ -129,9 +202,7 @@ public final class XMLFormat extends Format<Document> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional XML body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
-	 * matched by {@link #MIMEPattern}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * @return the optional XML body representation of {@code message}, as retrieved from the reader supplied by its {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is matched by {@link #MIMEPattern}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<Document, Failure> get(final Message<?> message) {
 
@@ -141,32 +212,20 @@ public final class XMLFormat extends Format<Document> {
 
 				? message
 				.body(reader())
-				.process(source -> {
+				.process(supplier -> {
 
-					try (final Reader reader=source.get()) {
+					try ( final Reader reader=supplier.get() ) {
 
 						final InputSource input=new InputSource();
 
 						input.setSystemId(message.item());
 						input.setCharacterStream(reader);
 
-						final Document document=builder().newDocument();
+						final SAXSource source=parser != null ? new SAXSource(parser, input) : new SAXSource(input);
 
-						document.setDocumentURI(message.item());
+						source.setSystemId(message.item());
 
-						transformer().transform(
-
-								parser != null ? new SAXSource(parser, input) : new SAXSource(input),
-
-								new DOMResult(document)
-
-						);
-
-						return Value(document);
-
-					} catch ( final TransformerException e ) {
-
-						return Error(malformed(e));
+						return xml(source).error(Failure::malformed);
 
 					} catch ( final IOException e ) {
 
@@ -185,31 +244,35 @@ public final class XMLFormat extends Format<Document> {
 
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the XML {@code value} to the
-	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
-	 * defined.
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the XML {@code value} to the writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Document value) {
 		return message
 				.header("~Content-Type", MIME)
-				.body(writer(), target -> {
-					try (final Writer writer=target.get()) {
+				.body(writer(), supplier -> {
+					try ( final Writer writer=supplier.get() ) {
 
-						transformer().transform(
-								new DOMSource(value, message.item()),
-								new StreamResult(writer)
-						);
+						final StreamResult result=new StreamResult(writer);
+						final Source source=new DOMSource(value);
 
-					} catch ( final TransformerException e ) {
+						source.setSystemId(message.item());
+						result.setSystemId(message.item());
 
-						throw new RuntimeException("unable to format XML body", e);
+						try {
+
+							transformer().transform(source, result);
+
+						} catch ( final TransformerException e ) {
+
+							throw new RuntimeException("unable to format XML body", e);
+
+						}
 
 					} catch ( final IOException e ) {
 
 						throw new UncheckedIOException(e);
 
 					}
-
 				});
 	}
 
