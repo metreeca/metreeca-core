@@ -71,6 +71,7 @@ public final class XPath {
 		return node -> new XPath(node).strings(path);
 	}
 
+
 	public static Function<Node, Stream<String>> Links(final String path) {
 
 		if ( path == null ) {
@@ -79,6 +80,26 @@ public final class XPath {
 
 		return node -> new XPath(node).links(path);
 	}
+
+
+	public static Function<Node, Optional<Element>> Element(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return node -> new XPath(node).element(path);
+	}
+
+	public static Function<Node, Stream<Element>> Elements(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return node -> new XPath(node).elements(path);
+	}
+
 
 	public static Function<Node, Optional<Node>> Node(final String path) {
 
@@ -271,6 +292,29 @@ public final class XPath {
 		}
 
 		return nodes(path).map(Node::getTextContent).map(s -> base == null ? s : base.resolve(s).toString());
+	}
+
+
+	public Optional<Element> element(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return node(path)
+				.filter(node -> node instanceof Element)
+				.map(node -> (Element)node);
+	}
+
+	public Stream<Element> elements(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return nodes(path)
+				.filter(node -> node instanceof Element)
+				.map(node -> (Element)node);
 	}
 
 
