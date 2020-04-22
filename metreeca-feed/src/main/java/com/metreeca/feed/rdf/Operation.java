@@ -108,8 +108,8 @@ public abstract class Operation<T extends Operation<T>> {
 
 	public T dflt(final IRI... graphs) {
 
-		if ( graph == null || Arrays.stream(graphs).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null graph");
+		if ( graphs == null || Arrays.stream(graphs).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null graphs");
 		}
 
 		Arrays.stream(graphs).forEach(g -> dataset().addDefaultGraph(g));
@@ -119,8 +119,8 @@ public abstract class Operation<T extends Operation<T>> {
 
 	public T named(final IRI... graphs) {
 
-		if ( graph == null || Arrays.stream(graphs).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null graph");
+		if ( graphs == null || Arrays.stream(graphs).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null graphs");
 		}
 
 		Arrays.stream(graphs).forEach(g -> dataset().addNamedGraph(g));
@@ -130,8 +130,8 @@ public abstract class Operation<T extends Operation<T>> {
 
 	public T remove(final IRI... graphs) {
 
-		if ( graph == null || Arrays.stream(graphs).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null graph");
+		if ( graphs == null || Arrays.stream(graphs).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null graphs");
 		}
 
 		Arrays.stream(graphs).forEach(g -> dataset().addDefaultRemoveGraph(g));
