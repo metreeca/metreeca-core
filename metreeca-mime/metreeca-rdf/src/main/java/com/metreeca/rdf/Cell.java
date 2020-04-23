@@ -35,7 +35,7 @@ import static com.metreeca.rdf.Path.union;
 import static com.metreeca.rdf.Values.iri;
 
 
-public final class Cell implements Resource {
+public final class Cell implements Resource { // !!! frozen
 
 	private static final long serialVersionUID=3100418201450076593L;
 
@@ -258,6 +258,18 @@ public final class Cell implements Resource {
 
 	@Override public String stringValue() {
 		return focus.stringValue();
+	}
+
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Cell
+				&& focus.equals(((Cell)object).focus)
+				&& model.equals(((Cell)object).model);
+	}
+
+	@Override public int hashCode() {
+		return focus.hashCode()
+				^model.hashCode();
 	}
 
 	@Override public String toString() {
