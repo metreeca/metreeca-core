@@ -28,11 +28,15 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Path.direct;
 import static com.metreeca.rdf.Path.union;
 import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.statement;
 
 
 public final class Cell implements Resource { // !!! frozen
@@ -76,6 +80,25 @@ public final class Cell implements Resource { // !!! frozen
 	public Resource focus() {
 		return focus;
 	}
+
+	public Cell focus(final Resource focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		final UnaryOperator<Value> rewriter=value -> value.equals(this.focus)? focus : value;
+
+		return new Cell(focus, model.stream()
+				.map(statement ->statement(
+						(Resource)rewriter.apply(statement.getSubject()),
+						(IRI)rewriter.apply(statement.getPredicate()),
+						rewriter.apply(statement.getObject())
+				))
+				.collect(Collectors.toList())
+		);
+	}
+
 
 	public Model model() {
 		return model.unmodifiable();
