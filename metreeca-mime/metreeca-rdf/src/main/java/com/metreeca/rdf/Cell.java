@@ -82,6 +82,15 @@ public final class Cell implements Resource { // !!! frozen
 	}
 
 
+	public Optional<String> label() {
+		return string(label);
+	}
+
+	public Optional<String> notes() {
+		return string(notes);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public boolean contains(final IRI predicate, final Value object) {
@@ -274,8 +283,8 @@ public final class Cell implements Resource { // !!! frozen
 
 	@Override public String toString() {
 		return focus
-				+string(label).map(l -> " : "+l).orElse("")
-				+string(notes).map(l -> " / "+l).orElse("");
+				+label().map(l -> " : "+l).orElse("")
+				+notes().map(l -> " / "+l).orElse("");
 	}
 
 }
