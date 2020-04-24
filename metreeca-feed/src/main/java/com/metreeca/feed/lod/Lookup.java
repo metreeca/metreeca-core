@@ -4,16 +4,16 @@
 
 package com.metreeca.feed.lod;
 
-import com.metreeca.rdf.Cell;
 import com.metreeca.feed.net.Fetch;
 import com.metreeca.feed.net.Parse;
 import com.metreeca.feed.net.Query;
-
+import com.metreeca.rdf.Cell;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.metreeca.rdf.Cell.cell;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 
@@ -40,7 +40,7 @@ public final class Lookup implements Function<String, Optional<Cell>> {
 
 				)))
 
-				.map(model -> new Cell(iri(iri), model));
+				.map(model -> cell(iri(iri)).insert(model).get());
 	}
 
 }

@@ -19,23 +19,27 @@
 package com.metreeca.rdf;
 
 import com.metreeca.rdf.vocabularies.Schema;
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.DC;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Path.direct;
 import static com.metreeca.rdf.Path.union;
 import static com.metreeca.rdf.Values.statement;
+import static java.util.Collections.unmodifiableCollection;
 
 
 public final class Cell implements Resource {
@@ -46,30 +50,25 @@ public final class Cell implements Resource {
 	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, Schema.DESCRIPTION);
 
 
+	public static Builder cell(final Resource focus) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		return new Builder(focus, new LinkedHashSet<>());
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Resource focus;
-	private final Model model;
+	private final Collection<Statement> model;
 
 
-	public Cell(final Resource focus) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null subject");
-		}
-
+	private Cell(final Resource focus, final Collection<Statement> model) {
 		this.focus=focus;
-		this.model=new LinkedHashModel();
-	}
-
-	public Cell(final Resource focus, final Collection<Statement> model) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null subject");
-		}
-
-		this.focus=focus;
-		this.model=new LinkedHashModel(model);
+		this.model=unmodifiableCollection(model);
 	}
 
 
@@ -77,29 +76,12 @@ public final class Cell implements Resource {
 		return focus;
 	}
 
-	public Cell focus(final Resource focus) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		final UnaryOperator<Value> rewriter=value -> value.equals(this.focus) ? focus : value;
-
-		return new Cell(focus, model.stream()
-				.map(statement -> statement(
-						(Resource)rewriter.apply(statement.getSubject()),
-						(IRI)rewriter.apply(statement.getPredicate()),
-						rewriter.apply(statement.getObject())
-				))
-				.collect(Collectors.toList())
-		);
+	public Collection<Statement> model() {
+		return model;
 	}
 
 
-	public Model model() {
-		return model.unmodifiable();
-	}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Optional<String> label() {
 		return string(label);
@@ -107,25 +89,6 @@ public final class Cell implements Resource {
 
 	public Optional<String> notes() {
 		return string(notes);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public boolean contains(final IRI predicate, final Value object) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		if ( object == null ) {
-			throw new NullPointerException("null object");
-		}
-
-		return model.parallelStream().anyMatch(statement
-				-> statement.getPredicate().equals(predicate)
-				&& statement.getObject().equals(object)
-		);
 	}
 
 
@@ -221,69 +184,6 @@ public final class Cell implements Resource {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Cell insert(final IRI predicate, final Value object) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		if ( object instanceof Cell ) {
-
-			model.add(focus, predicate, ((Cell)object).focus);
-			model.addAll(((Cell)object).model);
-
-		} else if ( object != null ) {
-
-			model.add(focus, predicate, object);
-
-		}
-
-		return this;
-	}
-
-	public Cell insert(final IRI predicate, final Value... objects) {
-
-		if ( predicate != null && objects != null ) {
-			for (final Value object : objects) {
-				insert(predicate, object);
-			}
-		}
-
-		return this;
-	}
-
-	public Cell insert(final IRI predicate, final Iterable<? extends Value> objects) {
-
-		if ( predicate != null && objects != null ) {
-			for (final Value object : objects) {
-				insert(predicate, object);
-			}
-		}
-
-		return this;
-	}
-
-	public Cell insert(final IRI predicate, final Optional<? extends Value> object) {
-
-		if ( predicate != null && object != null ) {
-			object.ifPresent(value -> insert(predicate, value));
-		}
-
-		return this;
-	}
-
-	public Cell insert(final IRI predicate, final Stream<? extends Value> objects) {
-
-		if ( predicate != null && objects != null ) {
-			objects.forEach(value -> insert(predicate, value));
-		}
-
-		return this;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Override public String stringValue() {
 		return focus.stringValue();
 	}
@@ -304,6 +204,107 @@ public final class Cell implements Resource {
 		return focus
 				+label().map(l -> " : "+l).orElse("")
 				+notes().map(l -> " / "+l).orElse("");
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final class Builder implements Supplier<Cell> {
+
+		private final Resource focus;
+		private final Collection<Statement> model;
+
+
+		private Builder(final Resource focus, final Collection<Statement> model) {
+			this.focus=focus;
+			this.model=model;
+		}
+
+
+		@Override public Cell get() {
+			return new Cell(focus, model);
+		}
+
+
+		public Builder insert(final Iterable<Statement> model) {
+
+			if ( model == null ) {
+				throw new NullPointerException("null model");
+			}
+
+			for (final Statement statement : model) {
+
+				if ( statement == null ) {
+					throw new NullPointerException("null model statement");
+				}
+
+				this.model.add(statement);
+			}
+
+			return this;
+		}
+
+
+		public Builder insert(final IRI predicate, final Value object) {
+
+			if ( predicate == null ) {
+				throw new NullPointerException("null predicate");
+			}
+
+			if ( object instanceof Cell ) {
+
+				model.add(statement(focus, predicate, ((Cell)object).focus));
+				model.addAll(((Cell)object).model);
+
+			} else if ( object != null ) {
+
+				model.add(statement(focus, predicate, object));
+
+			}
+
+			return this;
+		}
+
+		public Builder insert(final IRI predicate, final Value... objects) {
+
+			if ( predicate != null && objects != null ) {
+				for (final Value object : objects) {
+					insert(predicate, object);
+				}
+			}
+
+			return this;
+		}
+
+		public Builder insert(final IRI predicate, final Iterable<? extends Value> objects) {
+
+			if ( predicate != null && objects != null ) {
+				for (final Value object : objects) {
+					insert(predicate, object);
+				}
+			}
+
+			return this;
+		}
+
+		public Builder insert(final IRI predicate, final Optional<? extends Value> object) {
+
+			if ( predicate != null && object != null ) {
+				object.ifPresent(value -> insert(predicate, value));
+			}
+
+			return this;
+		}
+
+		public Builder insert(final IRI predicate, final Stream<? extends Value> objects) {
+
+			if ( predicate != null && objects != null ) {
+				objects.forEach(value -> insert(predicate, value));
+			}
+
+			return this;
+		}
+
 	}
 
 }
