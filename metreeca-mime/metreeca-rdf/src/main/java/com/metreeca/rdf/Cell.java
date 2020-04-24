@@ -18,6 +18,7 @@
 
 package com.metreeca.rdf;
 
+import com.metreeca.rdf.vocabularies.Schema;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.DC;
@@ -28,26 +29,21 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Path.direct;
 import static com.metreeca.rdf.Path.union;
-import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 
 
-public final class Cell implements Resource { // !!! frozen
+public final class Cell implements Resource {
 
 	private static final long serialVersionUID=3100418201450076593L;
 
-	private static final IRI SchemaName = iri("http://schema.org/", "name");
-	private static final IRI SchemaDescription = iri("http://schema.org/", "description");
-
-	private static final Path label=union(RDFS.LABEL, DC.TITLE, SchemaName);
-	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription);
+	private static final Path label=union(RDFS.LABEL, DC.TITLE, Schema.NAME);
+	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, Schema.DESCRIPTION);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,10 +83,10 @@ public final class Cell implements Resource { // !!! frozen
 			throw new NullPointerException("null focus");
 		}
 
-		final UnaryOperator<Value> rewriter=value -> value.equals(this.focus)? focus : value;
+		final UnaryOperator<Value> rewriter=value -> value.equals(this.focus) ? focus : value;
 
 		return new Cell(focus, model.stream()
-				.map(statement ->statement(
+				.map(statement -> statement(
 						(Resource)rewriter.apply(statement.getSubject()),
 						(IRI)rewriter.apply(statement.getPredicate()),
 						rewriter.apply(statement.getObject())
@@ -118,11 +114,11 @@ public final class Cell implements Resource { // !!! frozen
 
 	public boolean contains(final IRI predicate, final Value object) {
 
-		if (predicate == null) {
+		if ( predicate == null ) {
 			throw new NullPointerException("null predicate");
 		}
 
-		if (object == null) {
+		if ( object == null ) {
 			throw new NullPointerException("null object");
 		}
 
