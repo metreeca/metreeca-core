@@ -22,9 +22,7 @@ import java.util.function.*;
 import java.util.stream.*;
 
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 
 /**
@@ -141,7 +139,7 @@ public final class Feed<T> implements Stream<T> {
 	}
 
 
-	public <K> Feed<Map.Entry<K, List<T>>> groupBy(final Function<T, K> classifier ) {
+	public <K> Feed<Map.Entry<K, List<T>>> groupBy(final Function<T, K> classifier) {
 
 		if ( classifier == null ) {
 			throw new NullPointerException("null classifier");
@@ -150,7 +148,7 @@ public final class Feed<T> implements Stream<T> {
 		return from(collect(groupingBy(classifier)).entrySet().stream());
 	}
 
-	public <K, V> Feed<Map.Entry<K, V>> groupBy(final Function<T, K> classifier, final Collector<T, ?, V> downstream ) {
+	public <K, V> Feed<Map.Entry<K, V>> groupBy(final Function<T, K> classifier, final Collector<T, ?, V> downstream) {
 
 		if ( classifier == null ) {
 			throw new NullPointerException("null classifier");

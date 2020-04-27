@@ -26,6 +26,7 @@ import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UncheckedIOException;
@@ -34,6 +35,9 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
@@ -65,7 +69,8 @@ public final class Values {
 	/**
 	 * A pattern matching IRI components.
 	 *
-	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
+	 * @see
+	 * <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
 	 * 		Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
 	public static final Pattern IRIPattern=Pattern.compile("^"
@@ -88,6 +93,17 @@ public final class Values {
 	}
 
 
+	/*
+	 * The random number generator used by this class to create random values.
+	 *
+	 * In a holder class to defer initialization.
+	 */
+	private static final class Random {
+
+		private static final SecureRandom generator=new SecureRandom();
+
+	}
+
 	private static final class Inverse extends SimpleIRI {
 
 		private static final long serialVersionUID=7576383707001017160L;
@@ -109,7 +125,7 @@ public final class Values {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Internal namespace for local references and predicates (<code>{@value}</code>).
@@ -117,7 +133,7 @@ public final class Values {
 	public static final String Internal="app:/terms#";
 
 
-	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
+	//// Extended Datatypes ///////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final IRI IRIType=iri(Internal, "iri"); // datatype IRI for IRI references
 	public static final IRI BNodeType=iri(Internal, "bnode"); // datatype IRI for blank nodes
@@ -126,13 +142,13 @@ public final class Values {
 	public static final IRI ValueType=iri(Internal, "value"); // abstract datatype IRI for values
 
 
-	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Constants ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final Literal True=literal(true);
 	public static final Literal False=literal(false);
 
 
-	//// Accessors /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Accessors ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static boolean is(final Value value, final IRI datatype) {
 		return value != null && (type(value).equals(datatype)
@@ -147,7 +163,8 @@ public final class Values {
 	 *
 	 * @param iri the IRI identifying the predicate
 	 *
-	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link #inverse(IRI)} predicate
+	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
+	 *        #inverse(IRI)} predicate
 	 *
 	 * @throws NullPointerException if {@code iri } is null
 	 */
@@ -191,7 +208,7 @@ public final class Values {
 	}
 
 
-	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Factories ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String uuid() {
 		return randomUUID().toString();
@@ -199,6 +216,30 @@ public final class Values {
 
 	public static String uuid(final String text) {
 		return text == null ? null : nameUUIDFromBytes(text.getBytes(UTF_8)).toString();
+	}
+
+
+	public static String md5() {
+
+		final byte[] bytes=new byte[16];
+
+		Random.generator.nextBytes(bytes);
+
+		return DatatypeConverter
+				.printHexBinary(bytes)
+				.toLowerCase(Locale.ROOT);
+	}
+
+	public static String md5(final String text) {
+		try {
+
+			return text == null ? null : DatatypeConverter
+					.printHexBinary(MessageDigest.getInstance("MD5").digest(text.getBytes(UTF_8)))
+					.toLowerCase(Locale.ROOT);
+
+		} catch ( final NoSuchAlgorithmException unexpected ) {
+			throw new InternalError(unexpected);
+		}
 	}
 
 
@@ -271,6 +312,10 @@ public final class Values {
 		return iri == null ? null : factory.createIRI(iri);
 	}
 
+	public static IRI iri(final IRI space, final String name) {
+		return  space == null || name == null ? null : iri(space.stringValue(), name);
+	}
+
 	public static IRI iri(final String space, final String name) {
 		return space == null || name == null ? null
 				: factory.createIRI(space, space.endsWith("/") && name.startsWith("/") ? name.substring(1) : name);
@@ -287,7 +332,9 @@ public final class Values {
 	 *
 	 * @param iri the IRI identifying the predicate
 	 *
-	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri}, if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual value of {@code iri}, otherwise
+	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri} ,
+	 * 		if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
+	 * 		value of {@code iri}, otherwise
 	 */
 	public static IRI inverse(final IRI iri) { // !!! remove
 		return iri == null ? null
@@ -407,7 +454,8 @@ public final class Values {
 	 *
 	 * @param millis if {@code true}, milliseconds are included in the literal textual representation
 	 *
-	 * @return an {@code xsd:dateTime} literal representing the current system with second or millisecond precision as specified by {@code millis}
+	 * @return an {@code xsd:dateTime} literal representing the current system with second or millisecond precision as
+	 * 		specified by {@code millis}
 	 */
 	public static Literal time(final boolean millis) {
 		return time(Instant.now(), millis);
@@ -417,7 +465,8 @@ public final class Values {
 	/**
 	 * Creates a date-time literal for a specific time.
 	 *
-	 * @param time the time to be converted represented as the number of milliseconds from the epoch of 1970-01-01T00:00:00Z
+	 * @param time the time to be converted represented as the number of milliseconds from the epoch of
+	 *             1970-01-01T00:00:00Z
 	 *
 	 * @return an {@code xsd:dateTime} literal representing {@code time} with second precision
 	 */
@@ -428,10 +477,12 @@ public final class Values {
 	/**
 	 * Creates a date-time literal for a specific time.
 	 *
-	 * @param time   the time to be converted represented as the number of milliseconds from the epoch of 1970-01-01T00:00:00Z
+	 * @param time   the time to be converted represented as the number of milliseconds from the epoch of
+	 *               1970-01-01T00:00:00Z
 	 * @param millis if {@code true}, includes milliseconds in the literal textual representation
 	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code time} with second or millisecond precision as specified by {@code millis}
+	 * @return an {@code xsd:dateTime} literal representing {@code time} with second or millisecond precision as
+	 * 		specified by {@code millis}
 	 */
 	public static Literal time(final long time, final boolean millis) {
 		return time(Instant.ofEpochMilli(time), millis);
@@ -443,7 +494,8 @@ public final class Values {
 	 *
 	 * @param instant the instant to be converted
 	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant} is not null; {@code null}, otherwise
+	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant }
+	 * 		is not null; {@code null}, otherwise
 	 */
 	public static Literal time(final Instant instant) {
 		return time(instant, false);
@@ -455,7 +507,8 @@ public final class Values {
 	 * @param instant the instant to be converted
 	 * @param millis  if {@code true}, includes milliseconds in the literal textual representation
 	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second or millisecond precision as specified by {@code millis}, if {@code instant} is not null; {@code null}, otherwise
+	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second or millisecond precision as
+	 * 		specified by {@code millis}, if {@code instant} is not null; {@code null}, otherwise
 	 */
 	public static Literal time(final Instant instant, final boolean millis) {
 		return instant == null ? null : literal(
@@ -465,7 +518,7 @@ public final class Values {
 	}
 
 
-	///// Converters ///////////////////////////////////////////////////////////////////////////////////////////////////
+	///// Converters //////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Optional<String> iri(final Value value) {
 		return value instanceof IRI ? Optional.of(value.stringValue()) : Optional.empty();
@@ -530,7 +583,7 @@ public final class Values {
 	}
 
 
-	//// Formatters ////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Formatters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String format(final Iterable<Statement> statements) {
 		return format(statements, null);
