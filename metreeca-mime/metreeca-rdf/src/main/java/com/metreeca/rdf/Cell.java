@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Path.direct;
 import static com.metreeca.rdf.Path.union;
+import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.statement;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableCollection;
@@ -263,12 +264,26 @@ public final class Cell implements Resource {
 
 			if ( object instanceof Cell ) {
 
-				model.add(statement(focus, predicate, ((Cell)object).focus));
-				model.addAll(((Cell)object).model);
+				final Cell cell=(Cell)object;
+
+				model.add(Values.direct(predicate)
+						? statement(focus, predicate, cell.focus)
+						: statement(cell.focus, inverse(predicate), focus)
+				);
+
+				model.addAll(cell.model);
 
 			} else if ( object != null ) {
 
-				model.add(statement(focus, predicate, object));
+				if ( Values.direct(predicate) ) {
+
+					model.add(statement(focus, predicate, object));
+
+				} else if ( object instanceof Resource ){
+
+					model.add(statement((Resource)object, inverse(predicate), focus));
+
+				}
 
 			}
 
