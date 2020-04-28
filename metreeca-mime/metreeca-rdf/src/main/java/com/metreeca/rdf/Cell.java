@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import static com.metreeca.rdf.Path.direct;
 import static com.metreeca.rdf.Path.union;
 import static com.metreeca.rdf.Values.statement;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableCollection;
 
 
@@ -56,7 +57,16 @@ public final class Cell implements Resource {
 			throw new NullPointerException("null focus");
 		}
 
-		return new Builder(focus, new LinkedHashSet<>());
+		return new Builder(focus, emptySet());
+	}
+
+	public static Builder cell(final Cell cell) {
+
+		if ( cell == null ) {
+			throw new NullPointerException("null cell");
+		}
+
+		return new Builder(cell.focus, cell.model);
 	}
 
 
@@ -217,7 +227,7 @@ public final class Cell implements Resource {
 
 		private Builder(final Resource focus, final Collection<Statement> model) {
 			this.focus=focus;
-			this.model=model;
+			this.model=new LinkedHashSet<>(model);
 		}
 
 
