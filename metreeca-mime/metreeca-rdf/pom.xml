@@ -40,7 +40,6 @@
         <dependency>
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-json</artifactId>
-            <version>0.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>  <!-- !!! required for ValueComparator / remove -->
@@ -76,7 +75,7 @@
         <dependency>
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-tree</artifactId>
-            <version>0.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -84,7 +83,7 @@
         <dependency>
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-rest</artifactId>
-            <version>0.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -92,7 +91,7 @@
         <dependency>
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-json</artifactId>
-            <version>0.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
