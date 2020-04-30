@@ -17,7 +17,8 @@
 
 package com.metreeca.rest.services;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 
@@ -32,17 +33,19 @@ import java.util.function.Supplier;
 	 * Retrieves the default storage factory.
 	 *
 	 * @return the default storage factory, which provides access to files stored in the current working directory of
-	 * the
-	 * 		process in the host filesystem
+	 * the process in the host filesystem
 	 */
 	public static Supplier<Storage> storage() {
+
+		final Path cwd=Paths.get("").toAbsolutePath();
+
 		return () -> path -> {
 
 			if ( path == null ) {
 				throw new NullPointerException("null path");
 			}
 
-			return new File(System.getProperty("user.dir"), path);
+			return cwd.resolve(path);
 		};
 	}
 
@@ -50,15 +53,15 @@ import java.util.function.Supplier;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Locates a file.
+	 * Resolves a path.
 	 *
-	 * @param path the path of the file to be located
+	 * @param path the path to be resolved
 	 *
-	 * @return the file identified by {@code path}
+	 * @return the path resolved from {@code path}
 	 *
 	 * @throws NullPointerException     if {@code path} is null
 	 * @throws IllegalArgumentException if {@code path} is not a valid system-specific file path
 	 */
-	public File file(final String path);
+	public Path path(final Path path);
 
 }

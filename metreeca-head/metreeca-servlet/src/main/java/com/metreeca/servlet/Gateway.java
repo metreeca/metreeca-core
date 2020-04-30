@@ -28,6 +28,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -124,13 +125,16 @@ public abstract class Gateway implements Filter {
 
 
 	private Storage storage(final ServletContext context) {
+
+		final Path root=((File)context.getAttribute(ServletContext.TEMPDIR)).toPath();
+
 		return path -> {
 
 			if ( path == null ) {
 				throw new NullPointerException("null path");
 			}
 
-			return new File((File)context.getAttribute(ServletContext.TEMPDIR), path);
+			return root.resolve(path);
 		};
 	}
 

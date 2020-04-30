@@ -23,6 +23,7 @@ import com.metreeca.rest.services.Logger;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -68,7 +69,7 @@ import static java.time.Instant.now;
 
 		private Duration ttl=Duration.ZERO;
 
-		private final Path path=service(storage()).file("cache").toPath();
+		private final Path path=service(storage()).path(Paths.get("cache"));
 		private final Logger logger=service(logger());
 
 

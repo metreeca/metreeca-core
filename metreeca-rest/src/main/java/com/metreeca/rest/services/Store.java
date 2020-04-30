@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -49,7 +50,7 @@ public interface Store {
 	public static Supplier<Store> store() {
 		return () -> new Store() {
 
-			private final Path path=service(storage()).file("store").toPath();
+			private final Path path=service(storage()).path(Paths.get("store"));
 
 
 			@Override public InputStream read(final String id) throws IOException {

@@ -72,7 +72,7 @@ final class RDFJSONParserTest {
 	}
 
 
-	private JsonValue json(final Object json) {
+	@SuppressWarnings("unchecked") private JsonValue json(final Object json) {
 		return json instanceof Map ? Json.createObjectBuilder((Map<String, Object>)json).build()
 				: json instanceof Collection ? Json.createArrayBuilder((Collection<?>)json).build()
 				: null;
