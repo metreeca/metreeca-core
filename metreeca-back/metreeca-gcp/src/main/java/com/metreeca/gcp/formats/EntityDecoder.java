@@ -19,7 +19,7 @@ package com.metreeca.gcp.formats;
 
 import com.metreeca.gcp.GCP;
 import com.metreeca.gcp.services.Datastore;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.Timestamp;
@@ -35,8 +35,8 @@ import javax.json.*;
 
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.formats.JSONFormat.context;
-import static com.metreeca.rest.formats.JSONFormat.resolver;
+import static com.metreeca.json.formats.JSONFormat.context;
+import static com.metreeca.json.formats.JSONFormat.resolver;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Datatype.datatype;

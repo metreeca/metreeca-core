@@ -17,7 +17,7 @@
 
 package com.metreeca.gcp.formats;
 
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.datastore.*;
@@ -29,8 +29,8 @@ import java.util.function.Function;
 import javax.json.*;
 
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.formats.JSONFormat.aliaser;
-import static com.metreeca.rest.formats.JSONFormat.context;
+import static com.metreeca.json.formats.JSONFormat.aliaser;
+import static com.metreeca.json.formats.JSONFormat.context;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.fields;
 

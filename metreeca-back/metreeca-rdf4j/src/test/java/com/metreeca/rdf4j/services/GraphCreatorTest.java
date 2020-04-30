@@ -45,7 +45,7 @@ import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.filter;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;

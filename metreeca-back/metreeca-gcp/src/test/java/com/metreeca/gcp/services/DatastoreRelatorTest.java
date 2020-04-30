@@ -21,7 +21,7 @@ import com.metreeca.gcp.GCP;
 import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import com.google.cloud.datastore.*;

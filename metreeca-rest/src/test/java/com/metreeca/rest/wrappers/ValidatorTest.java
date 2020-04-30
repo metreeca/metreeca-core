@@ -22,8 +22,7 @@ import com.metreeca.rest.*;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
-
+import static com.metreeca.rest.formats.WriterFormat.writer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
@@ -66,9 +65,7 @@ final class ValidatorTest {
 
 						.accept(response -> assertThat(response)
 								.hasStatus(Response.UnprocessableEntity)
-								.hasBody(json(), json -> assertThat(json)
-										.containsKey("error")
-								)
+								.hasBody(writer())
 						)
 		);
 	}

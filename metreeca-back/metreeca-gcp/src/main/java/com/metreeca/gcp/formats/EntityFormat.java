@@ -20,7 +20,7 @@ package com.metreeca.gcp.formats;
 import com.metreeca.gcp.GCP;
 import com.metreeca.gcp.services.Datastore;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.probes.Redactor;
@@ -36,7 +36,7 @@ import javax.json.JsonValue;
 
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.json.formats.JSONFormat.json;
 
 
 /**

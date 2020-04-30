@@ -35,7 +35,7 @@ import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.rdf.formats.RDFJSONTest.entry;
 import static com.metreeca.rdf.formats.RDFJSONTest.map;
 import static com.metreeca.rdf.formats.RDFJSONTest.object;
-import static com.metreeca.rest.formats.JSONAssert.assertThat;
+import static com.metreeca.json.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;

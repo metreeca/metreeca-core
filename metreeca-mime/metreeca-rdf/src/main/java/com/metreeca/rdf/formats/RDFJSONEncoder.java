@@ -18,7 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
@@ -37,7 +37,7 @@ import javax.json.*;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
-import static com.metreeca.rest.formats.JSONFormat.aliaser;
+import static com.metreeca.json.formats.JSONFormat.aliaser;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;

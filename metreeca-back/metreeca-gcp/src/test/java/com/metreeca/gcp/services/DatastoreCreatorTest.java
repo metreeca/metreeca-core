@@ -32,7 +32,7 @@ import javax.json.JsonValue;
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;

@@ -17,6 +17,7 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.JSONAssert;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Or;
@@ -39,11 +40,11 @@ import java.util.function.Function;
 
 import javax.json.*;
 
+import static com.metreeca.json.JSONAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.rdf.formats.RDFJSONTest.*;
-import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.multiple;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;

@@ -22,7 +22,7 @@ import com.metreeca.gcp.formats.EntityFormat;
 import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.rest.services.Logger;
 import com.metreeca.tree.Order;
 import com.metreeca.tree.Query.Probe;

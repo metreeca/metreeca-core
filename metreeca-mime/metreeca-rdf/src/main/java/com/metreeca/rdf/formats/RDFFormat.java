@@ -17,6 +17,7 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.wrappers.Rewriter;
@@ -42,12 +43,12 @@ import java.util.function.Consumer;
 
 import javax.json.*;
 
+import static com.metreeca.json.formats.JSONFormat.context;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;

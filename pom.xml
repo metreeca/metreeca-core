@@ -106,7 +106,6 @@
 		<module>metreeca-tree</module>
 		<module>metreeca-rest</module>
 		<module>metreeca-gate</module>
-		<module>metreeca-feed</module>
 
 		<module>metreeca-mime</module>
 		<module>metreeca-head</module>
@@ -137,13 +136,19 @@
 				<version>${project.version}</version>
 			</dependency>
 
+			<!-- Format Adapters -->
+
 			<dependency>
 				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-feed</artifactId>
+				<artifactId>metreeca-xml</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
-			<!-- Format Adapters -->
+			<dependency>
+				<groupId>com.metreeca</groupId>
+				<artifactId>metreeca-json</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>com.metreeca</groupId>

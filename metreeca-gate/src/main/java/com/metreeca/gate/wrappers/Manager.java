@@ -19,7 +19,7 @@ package com.metreeca.gate.wrappers;
 
 import com.metreeca.gate.*;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.rest.services.Clock;
 import com.metreeca.rest.services.Logger;
@@ -41,7 +41,7 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.rest.services.Clock.clock;
 import static com.metreeca.rest.services.Logger.logger;
 

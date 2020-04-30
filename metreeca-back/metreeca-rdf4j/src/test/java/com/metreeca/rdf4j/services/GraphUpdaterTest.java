@@ -33,7 +33,7 @@ import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.convey;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.Field.field;

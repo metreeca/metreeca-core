@@ -19,7 +19,7 @@ package com.metreeca.gcp.services;
 
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Context;
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.json.formats.JSONFormat;
 
 import com.google.cloud.datastore.*;
 import com.google.cloud.datastore.testing.LocalDatastoreHelper;
@@ -38,7 +38,7 @@ import javax.json.JsonValue;
 
 import static com.metreeca.gcp.services.Datastore.datastore;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.formats.JSONFormat.context;
+import static com.metreeca.json.formats.JSONFormat.context;
 
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableCollection;
