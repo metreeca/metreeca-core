@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._actions;
+package com.metreeca.rest.actions;
 
 
 import com.metreeca.rest.Context;
@@ -35,7 +35,7 @@ final class TextTest {
 	}
 
 
-	@Test void test() {
+	@Test void testGenerateCartesianProduct() {
 		exec(() -> assertThat
 
 				(Feed

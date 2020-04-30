@@ -16,7 +16,7 @@
  */
 
 /**
- * Basic body formats.
+ * Basic data processing actions.
  */
 
-package com.metreeca.rest.formats;
+package com.metreeca.rest.actions;

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._actions;
+package com.metreeca.rest.actions;
 
 import org.junit.jupiter.api.Test;
 

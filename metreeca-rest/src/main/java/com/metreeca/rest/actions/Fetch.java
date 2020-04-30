@@ -15,14 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._actions;
+package com.metreeca.rest.actions;
 
 
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest._services.Cache;
-import com.metreeca.rest._services.Limit;
 import com.metreeca.rest.services.Logger;
 
 import java.io.*;
@@ -46,7 +45,6 @@ import static java.util.stream.Collectors.toMap;
 public final class Fetch implements Function<Request, Optional<Response>> {
 
 	private Cache cache=service(Cache.cache());
-	private Limit<Request> limit=service(Limit.limit());
 
 	private final Logger logger=service(logger());
 
@@ -67,8 +65,6 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 		if ( limit == null ) {
 			throw new NullPointerException("null limit");
 		}
-
-		this.limit=limit;
 
 		return this;
 	}
@@ -118,10 +114,8 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 	private Response fetch(final Request request) {
 		try {
 
-			final Request throttled=limit.apply(request);
-
-			final String method=throttled.method();
-			final String item=throttled.item();
+			final String method=request.method();
+			final String item=request.item();
 
 			logger.info(this, format("fetching <%s>", item));
 
@@ -136,12 +130,12 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 			// !!! connection.setReadTimeout();
 			// !!! connection.setIfModifiedSince();
 
-			if ( !throttled.header("Accept").isPresent() ) {
+			if ( !request.header("Accept").isPresent() ) {
 				connection.addRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9;*/*;q=0"
 						+".1");
 			}
 
-			if ( !throttled.header("User-Agent").isPresent() ) {
+			if ( !request.header("User-Agent").isPresent() ) {
 				connection.addRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2)"
 						+" AppleWebKit/537.36 (KHTML, like Gecko)"
 						+" Chrome/79.0.3945.130"
@@ -149,7 +143,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 				);
 			}
 
-			throttled.headers().forEach((name, values) -> values.forEach(value ->
+			request.headers().forEach((name, values) -> values.forEach(value ->
 					connection.addRequestProperty(name, value)
 			));
 
@@ -189,7 +183,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
 			final int code=connection.getResponseCode(); // !!! handle http > https redirection
 
-			return new Response(throttled)
+			return new Response(request)
 
 					.status(code)
 

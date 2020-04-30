@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._services;
+package com.metreeca.rest.actions;
 
 import java.time.Duration;
 import java.util.concurrent.BlockingQueue;
@@ -34,12 +34,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 public final class Limit<T> implements UnaryOperator<T> {
 
-	public static <V> Supplier<Limit<V>> limit() {
-		return () -> new Limit<>(0, Duration.ZERO);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Duration period;
 
