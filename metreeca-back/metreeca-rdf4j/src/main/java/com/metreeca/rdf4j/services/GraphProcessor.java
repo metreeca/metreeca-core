@@ -29,12 +29,14 @@ import com.metreeca.tree.queries.Items;
 import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.queries.Terms;
 import com.metreeca.tree.shapes.*;
-
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
@@ -63,14 +65,13 @@ import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf4j.services.Snippets.*;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
-import static com.metreeca.tree.Shape.pass;
 import static com.metreeca.tree.Shape.focus;
+import static com.metreeca.tree.Shape.pass;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Or.or;
-
 import static java.lang.Math.max;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -198,7 +199,8 @@ abstract class GraphProcessor {
 			final Collection<Statement> model=new LinkedHashSet<>();
 			final Collection<Statement> template=new ArrayList<>();
 
-			// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve ordering
+			// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve 
+			// ordering
 
 			final Shape pattern=convey(shape);
 			final Shape selector=anchor(resource, filter(shape));
@@ -226,7 +228,8 @@ abstract class GraphProcessor {
 							(Snippet)(source, identifiers) -> Stream
 									.concat(
 											Stream.of(identifiers.apply(root, root)), /// always project root
-											pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s), template::add))
+											pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s),
+													template::add))
 									)
 									.distinct()
 									.sorted()
@@ -272,8 +275,10 @@ abstract class GraphProcessor {
 						final Resource subject=statement.getSubject();
 						final Value object=statement.getObject();
 
-						final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) : subject;
-						final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) : object;
+						final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) :
+								subject;
+						final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) :
+								object;
 
 						if ( source instanceof Resource && target != null ) {
 							model.add(statement((Resource)source, statement.getPredicate(), target));
@@ -394,7 +399,8 @@ abstract class GraphProcessor {
 							+"\n"
 							+"\t{path}\n"
 							+"\n"
-							+"\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as ?type)\n"
+							+"\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as "
+							+"?type)\n"
 							+"\n"
 							+"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
 
@@ -578,7 +584,8 @@ abstract class GraphProcessor {
 			return snippet(orders.stream()
 					.filter(order -> !order.getPath().isEmpty()) // root already retrieved
 					.map(order -> snippet(
-							"optional { {root} {path} {order} }\n", var(root), path(order.getPath().stream().map(RDFFormat::iri).collect(toList())), var(order))
+							"optional { {root} {path} {order} }\n", var(root),
+							path(order.getPath().stream().map(RDFFormat::iri).collect(toList())), var(order))
 					)
 			);
 		}
@@ -770,7 +777,8 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Any any) { // singleton universal constraints handled by field probe
 
-				// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
+				// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! 
+				// performance?
 
 				return any.getValues().size() > 1 ? values(source, values(any.getValues())) : nothing();
 

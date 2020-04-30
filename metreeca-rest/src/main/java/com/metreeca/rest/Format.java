@@ -19,15 +19,13 @@ package com.metreeca.rest;
 
 import com.metreeca.tree.Shape;
 
+import javax.json.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.json.*;
-
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.tree.shapes.Field.fields;
-
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -105,11 +103,13 @@ public abstract class Format<V> {
 				: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
 				: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
 				: value instanceof JsonString ? ((JsonString)value).getString()
-				: value instanceof JsonArray ? ((JsonArray)value).stream().map(v -> value(base, shape, v)).collect(toList())
-				: value instanceof JsonObject ? ((JsonObject)value).entrySet().stream().collect(toMap(Map.Entry::getKey, e -> Optional
-				.ofNullable(fields(shape).get(e.getKey()))
-				.map(nested -> value(base, nested, e.getValue()))
-				.orElseThrow(() -> new JsonException("unknown field {"+e.getKey()+"}"))
+				: value instanceof JsonArray ?
+				((JsonArray)value).stream().map(v -> value(base, shape, v)).collect(toList())
+				: value instanceof JsonObject ? ((JsonObject)value).entrySet().stream().collect(toMap(Map.Entry::getKey
+				, e -> Optional
+						.ofNullable(fields(shape).get(e.getKey()))
+						.map(nested -> value(base, nested, e.getValue()))
+						.orElseThrow(() -> new JsonException("unknown field {"+e.getKey()+"}"))
 		))
 				: null;
 	}
@@ -133,7 +133,7 @@ public abstract class Format<V> {
 	 * @param message the message whose body representation managed by this body format is to be retrieved
 	 *
 	 * @return a value providing access to the body representation managed by this body format, if it was possible to
-	 * derive one from {@code message}; an error providing access to the processing failure, otherwise
+	 * 		derive one from {@code message}; an error providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */

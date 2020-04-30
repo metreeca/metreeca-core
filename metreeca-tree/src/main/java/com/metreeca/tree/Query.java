@@ -17,7 +17,9 @@
 
 package com.metreeca.tree;
 
-import com.metreeca.tree.queries.*;
+import com.metreeca.tree.queries.Items;
+import com.metreeca.tree.queries.Stats;
+import com.metreeca.tree.queries.Terms;
 
 import java.util.function.Function;
 

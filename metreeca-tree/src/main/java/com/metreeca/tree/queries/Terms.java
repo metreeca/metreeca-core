@@ -53,7 +53,7 @@ public final class Terms implements Query {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( path == null || path.stream().anyMatch(Objects::isNull)) {
+		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null path or path step");
 		}
 

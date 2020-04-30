@@ -19,7 +19,6 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -30,17 +29,14 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.JsonValue;
 
+import static com.metreeca.json.JSONAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
-import static com.metreeca.rdf.formats.RDFJSONTest.entry;
-import static com.metreeca.rdf.formats.RDFJSONTest.map;
-import static com.metreeca.rdf.formats.RDFJSONTest.object;
-import static com.metreeca.json.JSONAssert.assertThat;
+import static com.metreeca.rdf.formats.RDFJSONTest.*;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -99,7 +95,7 @@ final class RDFJSONEncoderTest {
 							entry("id", "_:x"),
 							entry("value", map(
 									entry("value", map(
-											entry("id","_:x")
+											entry("id", "_:x")
 									))
 							))
 					)));

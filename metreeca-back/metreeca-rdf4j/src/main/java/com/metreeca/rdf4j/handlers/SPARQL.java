@@ -19,16 +19,21 @@ package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.rest.handlers.Worker;
-
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.RDFWriterFactory;
+import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -221,7 +226,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
 				.body(OutputFormat.output(), target -> {
-					try (final OutputStream output=target.get()) {
+					try ( final OutputStream output=target.get() ) {
 
 						factory.getWriter(output).handleBoolean(result);
 
@@ -244,7 +249,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
 				.body(OutputFormat.output(), target -> {
-					try (final OutputStream output=target.get()) {
+					try ( final OutputStream output=target.get() ) {
 
 						final TupleQueryResultWriter writer=factory.getWriter(output);
 
@@ -275,7 +280,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
 				.body(OutputFormat.output(), target -> {
-					try (final OutputStream output=target.get()) {
+					try ( final OutputStream output=target.get() ) {
 
 						final RDFWriter writer=factory.getWriter(output);
 
@@ -299,7 +304,8 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				}));
 	}
 
-	private Future<Response> process(final Request request, final Update update, final RepositoryConnection connection) {
+	private Future<Response> process(final Request request, final Update update,
+			final RepositoryConnection connection) {
 
 		update.execute();
 
@@ -311,7 +317,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
 				.body(OutputFormat.output(), target -> {
-					try (final OutputStream output=target.get()) {
+					try ( final OutputStream output=target.get() ) {
 						factory.getWriter(output).handleBoolean(true);
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);

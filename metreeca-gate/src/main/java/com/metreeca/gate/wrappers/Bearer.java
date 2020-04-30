@@ -17,7 +17,10 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.Wrapper;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -46,15 +49,14 @@ public final class Bearer implements Wrapper {
 	private final BiFunction<String, Request, Optional<Request>> authenticator;
 
 
-
 	/**
 	 * Creates a key-based bearer token authenticator.
 	 *
-	 * @param key the fixed key to be presented as bearer token
+	 * @param key   the fixed key to be presented as bearer token
 	 * @param roles a collection of values uniquely identifying the roles to be {@linkplain Request#role(Object...)
 	 *              assigned} to the request user on successful {@code key} validation
 	 *
-	 * @throws NullPointerException if {@code roles} is null or contains a {@code null} value
+	 * @throws NullPointerException     if {@code roles} is null or contains a {@code null} value
 	 * @throws IllegalArgumentException if {@code key} is empty
 	 */
 	public Bearer(final String key, final Object... roles) {
@@ -72,7 +74,7 @@ public final class Bearer implements Wrapper {
 			throw new IllegalArgumentException("empty key");
 		}
 
-		if ( roles == null || Stream.of(roles).anyMatch(Objects::isNull)) {
+		if ( roles == null || Stream.of(roles).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");
 		}
 
@@ -110,7 +112,7 @@ public final class Bearer implements Wrapper {
 
 	/**
 	 * @return a wrapper adding authentication challenge to unauthorized responses, unless already provided by nested
-	 * authorization schemes
+	 * 		authorization schemes
 	 */
 	private Wrapper challenger() {
 		return handler -> request -> handler.handle(request).map(response ->

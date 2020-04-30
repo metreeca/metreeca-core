@@ -20,9 +20,7 @@ package com.metreeca.tree.shapes;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 

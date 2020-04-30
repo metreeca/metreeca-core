@@ -53,8 +53,9 @@ public final class Aliaser implements Wrapper, Handler {
 	 * Creates a resource aliaser.
 	 *
 	 * @param resolver the resource resolving function; takes as argument a request and returns the canonical IRI for
-	 *                 the aliased request {@linkplain Request#item() item}, if one was identified, or an empty
-	 *                 optional, otherwise
+	 *                   the
+	 *                 aliased request {@linkplain Request#item() item}, if one was identified, or an empty optional,
+	 *                 otherwise
 	 *
 	 * @throws NullPointerException if {@code resolver} is null or returns a null value
 	 */

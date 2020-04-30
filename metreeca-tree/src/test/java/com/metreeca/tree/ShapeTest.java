@@ -20,7 +20,6 @@ package com.metreeca.tree;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.tree.Shape.focus;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 

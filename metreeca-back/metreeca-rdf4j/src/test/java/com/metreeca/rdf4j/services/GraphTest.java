@@ -22,8 +22,10 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -34,23 +36,22 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
 import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.Values.literal;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf4j.services.Graph.auto;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public final class GraphTest {
@@ -66,7 +67,7 @@ public final class GraphTest {
 
 	public static void exec(final Runnable... tasks) {
 		new Context()
-				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())) )
+				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 				.exec(tasks)
 				.clear();
 	}

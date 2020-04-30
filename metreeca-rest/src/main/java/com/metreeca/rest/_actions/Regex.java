@@ -27,8 +27,7 @@ import java.util.stream.Stream;
 
 
 /**
- * {@link Pattern}
- * {@link Character}
+ * {@link Pattern} {@link Character}
  */
 public final class Regex {
 
@@ -127,7 +126,7 @@ public final class Regex {
 		return match(regex, matcher -> matcher.group(group));
 	}
 
-	public <R> Optional<R> match(final String regex, final Function <Matcher, R> mapper) {
+	public <R> Optional<R> match(final String regex, final Function<Matcher, R> mapper) {
 
 		if ( regex == null ) {
 			throw new NullPointerException("null regex");
@@ -137,7 +136,7 @@ public final class Regex {
 			throw new NullPointerException("null mapper");
 		}
 
-		return evaluate(regex, matcher -> Optional.ofNullable(matcher.matches()? mapper.apply(matcher) : null));
+		return evaluate(regex, matcher -> Optional.ofNullable(matcher.matches() ? mapper.apply(matcher) : null));
 	}
 
 
@@ -154,7 +153,7 @@ public final class Regex {
 		return matches(regex, matcher -> matcher.group(group));
 	}
 
-	public  <R> Stream<R> matches(final String regex, final Function <Matcher, R> mapper) {
+	public <R> Stream<R> matches(final String regex, final Function<Matcher, R> mapper) {
 
 		if ( regex == null ) {
 			throw new NullPointerException("null regex");
@@ -178,7 +177,7 @@ public final class Regex {
 	}
 
 
-	public  String replace(final String regex, final String replacement) {
+	public String replace(final String regex, final String replacement) {
 
 		if ( regex == null ) {
 			throw new NullPointerException("null regex");

@@ -19,7 +19,6 @@ package com.metreeca.tree.probes;
 
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Guard;
-
 import org.junit.jupiter.api.Test;
 
 import java.util.function.UnaryOperator;
@@ -29,7 +28,6 @@ import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Guard.guard;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 

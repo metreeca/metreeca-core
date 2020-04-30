@@ -20,7 +20,6 @@ package com.metreeca.rdf4j.actions;
 import java.util.function.Consumer;
 
 import static com.metreeca.rest.services.Logger.time;
-
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 

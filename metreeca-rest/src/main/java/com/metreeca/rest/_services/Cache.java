@@ -30,7 +30,6 @@ import java.util.function.Supplier;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.services.Storage.storage;
-
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
@@ -127,7 +126,7 @@ import static java.time.Instant.now;
 
 						if ( input instanceof TransientInputStream ) { return input; } else {
 
-							try (final OutputStream output=Files.newOutputStream(file)) {
+							try ( final OutputStream output=Files.newOutputStream(file) ) {
 
 								Codecs.data(output, input);
 

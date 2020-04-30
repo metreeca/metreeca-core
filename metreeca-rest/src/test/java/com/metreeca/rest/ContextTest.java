@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.Context.service;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

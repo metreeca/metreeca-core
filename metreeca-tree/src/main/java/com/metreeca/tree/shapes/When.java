@@ -66,7 +66,7 @@ public final class When implements Shape {
 			throw new NullPointerException("null fail shape");
 		}
 
-		if ( test.map(new FilteringProbe())) {
+		if ( test.map(new FilteringProbe()) ) {
 			throw new UnsupportedOperationException("test shape are limited to non-filtering constraints");
 		}
 

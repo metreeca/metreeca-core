@@ -34,7 +34,6 @@ import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Clock.clock;
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.lang.String.format;
 import static java.util.regex.Pattern.compile;
 
@@ -99,7 +98,8 @@ public final class Protector implements Wrapper {
 	 *
 	 * <li>{@code HTTP} requests are temporarily redirected to {@code HTTPS};</li>
 	 *
-	 * <li>the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security">Strict-Transport-Security</a>
+	 * <li>the
+	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security">Strict-Transport-Security</a>
 	 * header is set on responses with the provided {@code max-age} value, unless already defined by nested
 	 * handlers;</li>
 	 *
@@ -151,8 +151,10 @@ public final class Protector implements Wrapper {
 	 * header is set as a fallback measure with the {@value XSSDefault} value, unless already defined by nested
 	 * handlers;</li>
 	 *
-	 * <li>if the policy includes the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src">default-src
-	 * 'self'</a> directive, the <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy">Referrer-Policy</a>
+	 * <li>if the policy includes the
+	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/default-src">default-src
+	 * 'self'</a> directive, the
+	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy">Referrer-Policy</a>
 	 * header is set on responses with the {@code same-origin} value, unless already defined by nested handlers.</li>
 	 *
 	 * </ul>
@@ -178,8 +180,9 @@ public final class Protector implements Wrapper {
 	/**
 	 * Configures cookie-based XSRF protection.
 	 *
-	 * @param cookie enables {@linkplain #cookie(long) cookie}-based XSRF protection with a default cookie lease equal
-	 *               to {@value #CookieDefault} milliseconds, if true; disables it, otherwise
+	 * @param cookie enables {@linkplain #cookie(long) cookie}-based XSRF protection with a default cookie lease 
+	 *                  equal to
+	 *               {@value #CookieDefault} milliseconds, if true; disables it, otherwise
 	 *
 	 * @return this protector
 	 */
@@ -268,11 +271,12 @@ public final class Protector implements Wrapper {
 	//// XSS ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper xss() {
-		return handler -> request -> policy.isEmpty() ? handler.handle(request) : handler.handle(request).map(response -> response
-				.header("~Content-Security-Policy", policy)
-				.header("~Referrer-Policy", SelfPolicyPattern.matcher(policy).find() ? "same-origin" : "")
-				.header("~X-XSS-Protection", XSSDefault)
-		);
+		return handler -> request -> policy.isEmpty() ? handler.handle(request) :
+				handler.handle(request).map(response -> response
+						.header("~Content-Security-Policy", policy)
+						.header("~Referrer-Policy", SelfPolicyPattern.matcher(policy).find() ? "same-origin" : "")
+						.header("~X-XSS-Protection", XSSDefault)
+				);
 	}
 
 

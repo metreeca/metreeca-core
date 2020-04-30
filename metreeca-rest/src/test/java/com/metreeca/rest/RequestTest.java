@@ -19,9 +19,8 @@ package com.metreeca.rest;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.Collections.emptySet;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class RequestTest {

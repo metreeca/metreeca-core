@@ -17,13 +17,12 @@
 
 package com.metreeca.json;
 
+import javax.json.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import javax.json.*;
 
 
 public final class JSON {

@@ -20,11 +20,13 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.*;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +43,7 @@ import static com.metreeca.rdf4j.services.GraphTest.tuples;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.tree.Order.decreasing;
 import static com.metreeca.tree.Order.increasing;
-import static com.metreeca.tree.Shape.convey;
-import static com.metreeca.tree.Shape.filter;
-import static com.metreeca.tree.Shape.focus;
+import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.queries.Items.items;
 import static com.metreeca.tree.queries.Stats.stats;
 import static com.metreeca.tree.queries.Terms.terms;
@@ -68,11 +68,9 @@ import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.Pattern.pattern;
 import static com.metreeca.tree.shapes.When.when;
-
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import static java.util.stream.Collectors.toList;
 
 
 final class GraphProcessorTest {
@@ -793,7 +791,8 @@ final class GraphProcessorTest {
 							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\t?office :employee ?employee, ?value filter (?value in (<employees/1002>, <employees/1056>))\n"
+							+"\t?office :employee ?employee, ?value filter (?value in (<employees/1002>, "
+							+"<employees/1056>))\n"
 							+"\n"
 							+"}"
 

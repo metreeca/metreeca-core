@@ -17,13 +17,10 @@
 
 package com.metreeca.xml.actions;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.xml.actions.XPath.decode;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 final class XPathTest {

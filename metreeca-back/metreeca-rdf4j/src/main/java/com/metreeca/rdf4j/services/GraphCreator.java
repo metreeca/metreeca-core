@@ -19,8 +19,10 @@ package com.metreeca.rdf4j.services;
 
 
 import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.*;
-
+import com.metreeca.rest.Codecs;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -36,7 +38,6 @@ import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.internal;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-
 import static java.util.stream.Collectors.toList;
 
 

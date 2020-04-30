@@ -24,7 +24,6 @@ import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Meta.*;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 

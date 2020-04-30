@@ -33,10 +33,7 @@ import java.util.stream.Stream;
 import static com.metreeca.rest.Codecs.writer;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
-
-import static java.nio.file.StandardOpenOption.APPEND;
-import static java.nio.file.StandardOpenOption.CREATE;
-import static java.nio.file.StandardOpenOption.WRITE;
+import static java.nio.file.StandardOpenOption.*;
 
 
 public final class Dump<V> implements Function<Stream<V>, Stream<String>>, Consumer<Stream<V>> {
@@ -78,7 +75,7 @@ public final class Dump<V> implements Function<Stream<V>, Stream<String>>, Consu
 
 		objects.forEachOrdered(object -> {
 
-			try (final Writer writer=writer(Files.newOutputStream(path, WRITE, APPEND))) {
+			try ( final Writer writer=writer(Files.newOutputStream(path, WRITE, APPEND)) ) {
 
 				Codecs.text(writer, object.toString());
 

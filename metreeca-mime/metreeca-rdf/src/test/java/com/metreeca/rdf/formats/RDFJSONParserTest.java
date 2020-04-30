@@ -19,7 +19,6 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
-
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
@@ -33,6 +32,8 @@ import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import javax.json.JsonValue;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UncheckedIOException;
@@ -43,26 +44,19 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import javax.json.Json;
-import javax.json.JsonValue;
-
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.term;
-import static com.metreeca.rdf.formats.RDFJSONTest.entry;
-import static com.metreeca.rdf.formats.RDFJSONTest.list;
-import static com.metreeca.rdf.formats.RDFJSONTest.map;
+import static com.metreeca.rdf.formats.RDFJSONTest.*;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Meta.alias;
-
+import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import static java.util.stream.Collectors.toMap;
 
 
 final class RDFJSONParserTest {
@@ -128,7 +122,8 @@ final class RDFJSONParserTest {
 				.as("preserve bnode id")
 				.allMatch(statement -> statement.getObject().equals(bnode("x")));
 
-		Assertions.assertThat(rdf(map(entry("id", "_:x"), entry(first, "_:x")), null, field(RDF.FIRST, datatype(BNodeType))))
+		Assertions.assertThat(rdf(map(entry("id", "_:x"), entry(first, "_:x")), null, field(RDF.FIRST,
+				datatype(BNodeType))))
 				.as("preserve bnode id / shorthand")
 				.allMatch(statement -> statement.getObject().equals(bnode("x")));
 
@@ -172,11 +167,13 @@ final class RDFJSONParserTest {
 				.as("integer")
 				.isEqualTo(decode("[] rdf:first 1 ."));
 
-		assertThat(rdf(map(entry("id", ""), entry(first, map(entry("value", "1"), entry("type", XMLSchema.INT.stringValue()))))))
+		assertThat(rdf(map(entry("id", ""), entry(first, map(entry("value", "1"), entry("type",
+				XMLSchema.INT.stringValue()))))))
 				.as("numeric")
 				.isEqualTo(decode("[] rdf:first '1'^^xsd:int ."));
 
-		assertThat(rdf(map(entry("id", ""), entry(first, map(entry("value", "text"), entry("type", term("type").stringValue()))))))
+		assertThat(rdf(map(entry("id", ""), entry(first, map(entry("value", "text"), entry("type",
+				term("type").stringValue()))))))
 				.as("custom")
 				.isEqualTo(decode("[] rdf:first 'text'^^:type ."));
 
@@ -516,7 +513,7 @@ final class RDFJSONParserTest {
 	}
 
 	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
-		try (final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString())) {
+		try ( final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString()) ) {
 
 			final StatementCollector collector=new StatementCollector();
 

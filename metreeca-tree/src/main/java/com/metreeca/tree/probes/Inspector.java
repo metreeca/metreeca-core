@@ -18,11 +18,13 @@
 package com.metreeca.tree.probes;
 
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.*;
+import com.metreeca.tree.shapes.And;
+import com.metreeca.tree.shapes.Field;
+import com.metreeca.tree.shapes.Or;
+import com.metreeca.tree.shapes.When;
 
 
 /**
- *
  * <p>Generates a result by inspecting shapes; concrete implementations:</p>
  *
  * <ul>

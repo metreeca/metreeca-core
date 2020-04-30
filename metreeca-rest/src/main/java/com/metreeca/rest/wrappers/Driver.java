@@ -25,7 +25,6 @@ import com.metreeca.tree.probes.Redactor;
 import java.util.Optional;
 
 import static com.metreeca.rest.formats.TextFormat.text;
-
 import static java.lang.String.format;
 
 
@@ -53,7 +52,8 @@ import static java.lang.String.format;
  *
  * <ul>
  *
- * <li>redacting the shape {@linkplain Message#shape() associated} to incoming request according to the task to be performed;</li>
+ * <li>redacting the shape {@linkplain Message#shape() associated} to incoming request according to the task to be 
+ * performed;</li>
  *
  * <li>{@linkplain Message#shape() associating} a shape to outgoing responses in order to drive further processing
  * (e.g. JSON body mapping).</li>
@@ -65,7 +65,7 @@ import static java.lang.String.format;
  * driver wrapper on behalf of nested handlers.</p>
  *
  * @see <a href="https://www.w3.org/TR/ldp/#ldpr-resource">Linked Data Platform 1.0 - § 4.2.1.6 Resource -
- * ldp:constrainedBy</a>
+ * 		ldp:constrainedBy</a>
  */
 public final class Driver implements Wrapper {
 

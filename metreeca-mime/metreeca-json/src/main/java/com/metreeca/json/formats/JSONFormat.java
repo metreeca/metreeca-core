@@ -21,22 +21,23 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.rest.formats.WriterFormat;
 
-import java.io.*;
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonParsingException;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-import javax.json.*;
-import javax.json.stream.JsonGenerator;
-import javax.json.stream.JsonParsingException;
-
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static java.util.Collections.singletonMap;
 
 
@@ -78,7 +79,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * @param reader the reader the JSON object is to be parsed from
 	 *
 	 * @return a value result containing the parsed JSON object, if {@code reader} was successfully parsed; an error
-	 * result containing the parse exception, otherwise
+	 * 		result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
@@ -88,7 +89,7 @@ public final class JSONFormat extends Format<JsonObject> {
 			throw new NullPointerException("null reader");
 		}
 
-		try (final JsonReader jsonReader=Json.createReader(reader)) {
+		try ( final JsonReader jsonReader=Json.createReader(reader) ) {
 
 			return Value(jsonReader.readObject());
 
@@ -102,8 +103,8 @@ public final class JSONFormat extends Format<JsonObject> {
 	/**
 	 * Writes a JSON object.
 	 *
-	 * @param <W> the type of the {@code writer} the JSON document is to be written to
-	 * @param writer   the writer the JSON document is to be written to
+	 * @param <W>    the type of the {@code writer} the JSON document is to be written to
+	 * @param writer the writer the JSON document is to be written to
 	 * @param object the JSON object to be written
 	 *
 	 * @return the target {@code writer}
@@ -120,7 +121,7 @@ public final class JSONFormat extends Format<JsonObject> {
 			throw new NullPointerException("null object");
 		}
 
-		try (final JsonWriter jsonWriter=JsonWriters.createWriter(writer)) {
+		try ( final JsonWriter jsonWriter=JsonWriters.createWriter(writer) ) {
 
 			jsonWriter.write(object);
 
@@ -170,7 +171,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * @param context the JSON-LD context property names are to be aliased against
 	 *
 	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
-	 * property name if no alias is found
+	 * 		property name if no alias is found
 	 *
 	 * @throws NullPointerException if {@code context} is null
 	 */
@@ -196,8 +197,9 @@ public final class JSONFormat extends Format<JsonObject> {
 	 *
 	 * @param context the JSON-LD context property names are to be resolved against
 	 *
-	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m defaulting
-	 * to the alias if no property name is found
+	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m
+	 * defaulting to
+	 * 		the alias if no property name is found
 	 *
 	 * @throws NullPointerException if {@code context} is null
 	 */
@@ -224,8 +226,9 @@ public final class JSONFormat extends Format<JsonObject> {
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is equal
-	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 *        {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header
+	 *        is equal
+	 * 		to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
 
@@ -237,7 +240,7 @@ public final class JSONFormat extends Format<JsonObject> {
 				.body(reader)
 				.process(source -> {
 
-					try (final Reader reader=source.get()) {
+					try ( final Reader reader=source.get() ) {
 
 						return json(reader).error(Failure::malformed);
 
@@ -264,7 +267,7 @@ public final class JSONFormat extends Format<JsonObject> {
 				.header("~Content-Type", MIME)
 				.body(writer, target -> {
 
-					try (final Writer writer=target.get()) {
+					try ( final Writer writer=target.get() ) {
 
 						json(writer, value);
 

@@ -69,8 +69,7 @@ public final class Values {
 	/**
 	 * A pattern matching IRI components.
 	 *
-	 * @see
-	 * <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
 	 * 		Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
 	public static final Pattern IRIPattern=Pattern.compile("^"
@@ -253,7 +252,8 @@ public final class Values {
 				: factory.createStatement(subject, predicate, object);
 	}
 
-	public static Statement statement(final Resource subject, final IRI predicate, final Value object, final Resource context) {
+	public static Statement statement(final Resource subject, final IRI predicate, final Value object,
+			final Resource context) {
 		return subject == null || predicate == null || object == null ? null
 				: factory.createStatement(subject, predicate, object, context);
 	}
@@ -313,7 +313,7 @@ public final class Values {
 	}
 
 	public static IRI iri(final IRI space, final String name) {
-		return  space == null || name == null ? null : iri(space.stringValue(), name);
+		return space == null || name == null ? null : iri(space.stringValue(), name);
 	}
 
 	public static IRI iri(final String space, final String name) {
@@ -332,9 +332,11 @@ public final class Values {
 	 *
 	 * @param iri the IRI identifying the predicate
 	 *
-	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri} ,
-	 * 		if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
-	 * 		value of {@code iri}, otherwise
+	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri}
+	 * , if
+	 *        {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
+	 *        value of
+	 *        {@code iri}, otherwise
 	 */
 	public static IRI inverse(final IRI iri) { // !!! remove
 		return iri == null ? null
@@ -494,8 +496,9 @@ public final class Values {
 	 *
 	 * @param instant the instant to be converted
 	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant }
-	 * 		is not null; {@code null}, otherwise
+	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant
+	 * } is
+	 * 		not null; {@code null}, otherwise
 	 */
 	public static Literal time(final Instant instant) {
 		return time(instant, false);

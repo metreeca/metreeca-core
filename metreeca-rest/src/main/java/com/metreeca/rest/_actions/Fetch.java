@@ -18,11 +18,11 @@
 package com.metreeca.rest._actions;
 
 
-import com.metreeca.rest._services.Cache;
-import com.metreeca.rest._services.Limit;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+import com.metreeca.rest._services.Cache;
+import com.metreeca.rest._services.Limit;
 import com.metreeca.rest.services.Logger;
 
 import java.io.*;
@@ -39,7 +39,6 @@ import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 
@@ -103,7 +102,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 	private Response cache(final Request request) {
 		if ( cache instanceof Cache.None ) { return fetch(request); } else {
 
-			try (final InputStream input=cache.retrieve(request.item(), () -> fetch(request).map(this::encode))) {
+			try ( final InputStream input=cache.retrieve(request.item(), () -> fetch(request).map(this::encode)) ) {
 
 				return decode(request, input);
 
@@ -138,7 +137,8 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 			// !!! connection.setIfModifiedSince();
 
 			if ( !throttled.header("Accept").isPresent() ) {
-				connection.addRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9;*/*;q=0.1");
+				connection.addRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9;*/*;q=0"
+						+".1");
 			}
 
 			if ( !throttled.header("User-Agent").isPresent() ) {
@@ -161,7 +161,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
 						target -> {
 
-							try (final InputStream input=target.get()) {
+							try ( final InputStream input=target.get() ) {
 
 								return Codecs.data(connection.getOutputStream(), input);
 
@@ -202,7 +202,8 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 						try {
 
 							return Optional
-									.ofNullable(code/100 == 2 ? connection.getInputStream() : connection.getErrorStream())
+									.ofNullable(code/100 == 2 ? connection.getInputStream() :
+											connection.getErrorStream())
 									.orElseGet(Codecs::input);
 
 						} catch ( final IOException e ) {
@@ -263,10 +264,11 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
 	private Response decode(final Request request, final InputStream input) {
 
-		try (final ObjectInputStream serialized=new ObjectInputStream(input)) {
+		try ( final ObjectInputStream serialized=new ObjectInputStream(input) ) {
 
 			final int status=serialized.readInt();
-			final Map<String, ? extends Collection<String>> headers=(Map<String, ? extends Collection<String>>)serialized.readObject();
+			final Map<String, ? extends Collection<String>> headers=
+					(Map<String, ? extends Collection<String>>)serialized.readObject();
 			final byte[] body=(byte[])serialized.readObject();
 
 			return new Response(request)

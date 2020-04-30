@@ -42,11 +42,11 @@ import java.util.function.Supplier;
 	/**
 	 * Verifies a secret.
 	 *
-	 * @param user a handle identifying the user the secret belongs to
+	 * @param user   a handle identifying the user the secret belongs to
 	 * @param secret the secret to be verified
 	 *
 	 * @return {@code true}, if {@code secret} conforms to the well-formedness rules defined by this policy; {@code
-	 * false}, otherwise
+	 * 		false}, otherwise
 	 *
 	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
 	 */

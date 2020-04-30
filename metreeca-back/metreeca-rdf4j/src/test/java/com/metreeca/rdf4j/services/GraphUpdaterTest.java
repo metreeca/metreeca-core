@@ -21,19 +21,16 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.rdf.ValuesTest.small;
-import static com.metreeca.rdf.ValuesTest.term;
+import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.convey;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.Field.field;

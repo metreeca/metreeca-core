@@ -21,13 +21,13 @@ import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
@@ -37,10 +37,7 @@ import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.json.formats.JSONFormat.json;
-import static com.metreeca.tree.Shape.convey;
-import static com.metreeca.tree.Shape.filter;
-import static com.metreeca.tree.Shape.member;
+import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.shapes.Field.field;
 
 
@@ -88,7 +85,7 @@ final class GraphRelatorTest {
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.hasStatement(iri(response.item()), LDP.CONTAINS, null)
 									.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
-											+ "where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
+											+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
 							)
 					)
 			);

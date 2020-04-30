@@ -24,11 +24,10 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class FormatsTest {
@@ -44,7 +43,8 @@ final class FormatsTest {
 
 		assertThat(emptyList()).as("empty").isEqualTo(Formats.types(""));
 		assertThat(singletonList("text/turtle")).as("single").isEqualTo(Formats.types("text/turtle"));
-		assertThat(asList("text/turtle", "text/plain")).as("multiple").isEqualTo(Formats.types("text/turtle, text/plain"));
+		assertThat(asList("text/turtle", "text/plain")).as("multiple").isEqualTo(Formats.types("text/turtle, "
+				+"text/plain"));
 
 		assertThat(singletonList("*/*")).as("wildcard").isEqualTo(Formats.types("*/*"));
 		assertThat(singletonList("text/*")).as("type wildcard").isEqualTo(Formats.types("text/*"));
@@ -55,9 +55,11 @@ final class FormatsTest {
 
 		assertThat(emptyList()).as("empty").isEqualTo(Formats.types(""));
 
-		assertThat(asList("text/turtle", "text/plain")).as("single").isEqualTo(Formats.types("text/turtle, text/plain"));
+		assertThat(asList("text/turtle", "text/plain")).as("single").isEqualTo(Formats.types("text/turtle, "
+				+"text/plain"));
 
-		assertThat(asList("text/turtle", "text/plain", "text/csv")).as("multiple").isEqualTo(Formats.types("text/turtle, text/plain", "text/csv"));
+		assertThat(asList("text/turtle", "text/plain", "text/csv")).as("multiple").isEqualTo(Formats.types("text"
+				+"/turtle, text/plain", "text/csv"));
 
 	}
 
@@ -66,17 +68,21 @@ final class FormatsTest {
 		assertThat(singletonList("text/plain")).as("normalize case").isEqualTo(Formats.types("text/Plain"));
 		assertThat(singletonList("text/plain")).as("ignores spaces").isEqualTo(Formats.types(" text/plain ; q = 0.3"));
 
-		assertThat(asList("text/turtle", "text/plain", "text/csv")).as("lenient separators").isEqualTo(Formats.types("text/turtle, text/plain\ttext/csv"));
+		assertThat(asList("text/turtle", "text/plain", "text/csv")).as("lenient separators").isEqualTo(Formats.types(
+				"text/turtle, text/plain\ttext/csv"));
 
 	}
 
 	@Test void testSortOnQuality() {
 
-		assertThat(asList("text/plain", "text/turtle")).as("sorted").isEqualTo(Formats.types("text/turtle;q=0.1, text/plain;q=0.2"));
+		assertThat(asList("text/plain", "text/turtle")).as("sorted").isEqualTo(Formats.types("text/turtle;q=0.1, "
+				+"text/plain;q=0.2"));
 
-		assertThat(asList("text/plain", "text/turtle")).as("sorted with default values").isEqualTo(Formats.types("text/turtle;q=0.1, text/plain"));
+		assertThat(asList("text/plain", "text/turtle")).as("sorted with default values").isEqualTo(Formats.types("text"
+				+"/turtle;q=0.1, text/plain"));
 
-		assertThat(asList("text/plain", "text/turtle")).as("sorted with corrupt values").isEqualTo(Formats.types("text/turtle;q=x, text/plain"));
+		assertThat(asList("text/plain", "text/turtle")).as("sorted with corrupt values").isEqualTo(Formats.types("text"
+				+"/turtle;q=x, text/plain"));
 
 	}
 
@@ -87,8 +93,10 @@ final class FormatsTest {
 
 		assertThat((Object)Binary).as("none matching").isSameAs(service(RDFFormat.BINARY, "text/none"));
 		assertThat((Object)Turtle).as("single matching").isSameAs(service(RDFFormat.BINARY, "text/turtle"));
-		assertThat((Object)Turtle).as("leading matching").isSameAs(service(RDFFormat.BINARY, "text/turtle", "text/plain"));
-		assertThat((Object)Turtle).as("trailing matching").isSameAs(service(RDFFormat.BINARY, "text/none", "text/turtle"));
+		assertThat((Object)Turtle).as("leading matching").isSameAs(service(RDFFormat.BINARY, "text/turtle", "text/plain"
+		));
+		assertThat((Object)Turtle).as("trailing matching").isSameAs(service(RDFFormat.BINARY, "text/none", "text/turtle"
+		));
 
 		assertThat((Object)Binary).as("wildcard").isSameAs(service(RDFFormat.BINARY, "*/*, text/plain;q=0.1"));
 		assertThat((Object)Turtle).as("type pattern").isSameAs(service(RDFFormat.BINARY, "text/*, text/plain;q=0.1"));

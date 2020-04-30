@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 	 * Retrieves the default loader factory.
 	 *
 	 * @return the default loader factory, which retrieves system resources from the classpath through {@link
-	 * ClassLoader#getResourceAsStream(String)}
+	 *        ClassLoader#getResourceAsStream(String)}
 	 */
 	public static Supplier<Loader> loader() {
 		return () -> path -> {
@@ -56,7 +56,8 @@ import java.util.function.Supplier;
 	 *             filesystem-like slash-separated hierarchical structure is recommended
 	 *
 	 * @return an optional input stream for reading the required resource, if one is available at {@code path};  an
-	 * empty optional, otherwise
+	 * empty
+	 * 		optional, otherwise
 	 *
 	 * @throws NullPointerException     if {@code path} is null
 	 * @throws IllegalArgumentException if {@code path} syntax is illegal according to source-specific rules

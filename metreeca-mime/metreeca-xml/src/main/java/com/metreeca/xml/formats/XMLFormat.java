@@ -90,7 +90,8 @@ public final class XMLFormat extends Format<Document> {
 	 *
 	 * @param input the input stream the XML document is to be parsed from
 	 *
-	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error result containing the parse exception, otherwise
+	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error
+	 * 		result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if {@code input} is null
 	 */
@@ -109,7 +110,8 @@ public final class XMLFormat extends Format<Document> {
 	 * @param input the input stream the XML document is to be parsed from
 	 * @param base  the base URL for the XML document to be parsed
 	 *
-	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error result containing the parse exception, otherwise
+	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error
+	 * 		result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if {@code input} is null
 	 */
@@ -132,7 +134,8 @@ public final class XMLFormat extends Format<Document> {
 	 *
 	 * @param source the source the XML document is to be parsed from
 	 *
-	 * @return a value result containing the parsed XML document, if {@code source} was successfully parsed; an error result containing the parse exception, otherwise
+	 * @return a value result containing the parsed XML document, if {@code source} was successfully parsed; an error
+	 * 		result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if {@code source} is null
 	 */
@@ -204,7 +207,10 @@ public final class XMLFormat extends Format<Document> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional XML body representation of {@code message}, as retrieved from the reader supplied by its {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is matched by {@link #MIMEPattern}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * @return the optional XML body representation of {@code message}, as retrieved from the reader supplied by its
+	 *        {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
+	 * 		matched by {@link #MIMEPattern}; a failure reporting the {@link Response#UnsupportedMediaType} status,
+	 * 		otherwise
 	 */
 	@Override public Result<Document, Failure> get(final Message<?> message) {
 
@@ -246,7 +252,10 @@ public final class XMLFormat extends Format<Document> {
 
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the XML {@code value} to the writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the XML {@code value} to the 
+	 * writer
+	 * supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
+	 * defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Document value) {
 		return message

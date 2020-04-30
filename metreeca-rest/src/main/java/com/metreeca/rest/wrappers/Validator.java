@@ -24,7 +24,6 @@ import java.util.LinkedHashSet;
 import java.util.function.Function;
 
 import static com.metreeca.tree.Trace.trace;
-
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 

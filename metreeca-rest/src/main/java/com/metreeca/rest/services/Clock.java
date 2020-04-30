@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 	 * Retrieves the default clock factory.
 	 *
 	 * @return the default clock factory, which provides access to the default {@linkplain System#currentTimeMillis()
-	 * system time}
+	 * 		system time}
 	 */
 	public static Supplier<Clock> clock() {
 		return () -> System::currentTimeMillis;

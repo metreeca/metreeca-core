@@ -23,8 +23,10 @@ import com.metreeca.rest.Message;
 import com.metreeca.rest.Result;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.shapes.*;
-
+import com.metreeca.tree.shapes.And;
+import com.metreeca.tree.shapes.Field;
+import com.metreeca.tree.shapes.Or;
+import com.metreeca.tree.shapes.When;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -39,7 +41,6 @@ import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;

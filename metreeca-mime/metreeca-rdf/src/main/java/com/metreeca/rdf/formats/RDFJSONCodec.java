@@ -20,18 +20,22 @@ package com.metreeca.rdf.formats;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
 import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.shapes.*;
-
+import com.metreeca.tree.shapes.And;
+import com.metreeca.tree.shapes.Field;
+import com.metreeca.tree.shapes.Or;
+import com.metreeca.tree.shapes.When;
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.tree.shapes.Meta.alias;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;

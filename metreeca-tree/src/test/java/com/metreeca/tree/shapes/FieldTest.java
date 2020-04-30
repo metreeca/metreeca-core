@@ -29,11 +29,9 @@ import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class FieldTest {
@@ -117,12 +115,11 @@ final class FieldTest {
 	}
 
 
-
-	private  <K, V>  Map<K, V> map(final Map.Entry<K, V> ...entries) {
+	private <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
 		return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	private <K, V>  Map.Entry<K, V> entry(final K key, final V value) {
+	private <K, V> Map.Entry<K, V> entry(final K key, final V value) {
 		return new SimpleImmutableEntry<>(key, value);
 	}
 

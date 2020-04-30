@@ -20,7 +20,10 @@ package com.metreeca.tree.shapes;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -58,7 +61,7 @@ public final class Guard implements Shape {
 			throw new NullPointerException("null axis");
 		}
 
-		if ( values == null ||  values.stream().anyMatch(Objects::isNull) ) {
+		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
 

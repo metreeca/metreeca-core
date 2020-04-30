@@ -17,12 +17,10 @@
 
 package com.metreeca.rest._actions;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.Collections.singletonMap;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class TextTemplateTest {

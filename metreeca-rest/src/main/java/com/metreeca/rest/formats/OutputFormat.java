@@ -17,7 +17,10 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
+import com.metreeca.rest.Result;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;

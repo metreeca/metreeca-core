@@ -18,17 +18,14 @@
 package com.metreeca.rest._actions;
 
 
-import com.metreeca.rest.Feed;
 import com.metreeca.rest.Context;
-
-import org.assertj.core.api.Assertions;
+import com.metreeca.rest.Feed;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class TextTest {

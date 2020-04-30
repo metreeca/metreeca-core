@@ -24,10 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.util.regex.Pattern;
 
 import static com.metreeca.gate.policies.ComboPolicy.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.lang.Character.UnicodeBlock.BASIC_LATIN;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ComboPolicyTest {

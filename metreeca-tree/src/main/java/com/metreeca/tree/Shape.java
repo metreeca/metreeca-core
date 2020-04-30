@@ -30,7 +30,6 @@ import static com.metreeca.tree.shapes.In.in;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.When.when;
-
 import static java.util.Arrays.asList;
 
 
@@ -202,7 +201,7 @@ public interface Shape {
 	 * @param iri the relative IRI of the focus value
 	 *
 	 * @return a focus value resolving {@code iri} against the target IRI of a shape-driven operation; trailing slashes
-	 * in the resolved IRI are removed unless {@code iri} includes one
+	 * 		in the resolved IRI are removed unless {@code iri} includes one
 	 *
 	 * @throws NullPointerException if {@code iri} is null
 	 */
@@ -229,7 +228,7 @@ public interface Shape {
 	 * @param shape the shape to be tested
 	 *
 	 * @return {@code true} if {@code shape} is equal to an {@linkplain And#and() empty conjunction}, ignoring
-	 * {@linkplain Meta annotations}; {@code false} otherwise
+	 *        {@linkplain Meta annotations}; {@code false} otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -248,7 +247,7 @@ public interface Shape {
 	 * @param shape the shape to be tested
 	 *
 	 * @return {@code true} if {@code shape} is equal to an {@linkplain Or#or() empty disjunction}, ignoring {@linkplain
-	 * Meta annotations}; {@code false} otherwise
+	 *        Meta annotations}; {@code false} otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -267,7 +266,7 @@ public interface Shape {
 	 * @param shape the shape to be tested
 	 *
 	 * @return {@code true} if {@code shape} is equal either to an {@linkplain And#and() empty conjunction} or to an
-	 * {@linkplain Or#or() empty disjunction}, ignoring {@linkplain Meta annotations}; {@code false} otherwise
+	 *        {@linkplain Or#or() empty disjunction}, ignoring {@linkplain Meta annotations}; {@code false} otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -303,7 +302,7 @@ public interface Shape {
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
 	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
-	 * shapes}
+	 * 		shapes}
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
@@ -317,7 +316,7 @@ public interface Shape {
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
 	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
-	 * shapes}
+	 * 		shapes}
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
@@ -365,7 +364,7 @@ public interface Shape {
 		 * @param focus the focus value to be chained to this focus value
 		 *
 		 * @return a combined focus value sequentially resolving target IRIs against {@code focus} and this focus value,
-		 * in order
+		 * 		in order
 		 *
 		 * @throws NullPointerException if {@code focus} is null
 		 */

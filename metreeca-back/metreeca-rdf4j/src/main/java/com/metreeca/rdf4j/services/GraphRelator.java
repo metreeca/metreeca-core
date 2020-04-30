@@ -18,13 +18,15 @@
 package com.metreeca.rdf4j.services;
 
 import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.queries.Items;
 import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.queries.Terms;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -81,9 +83,10 @@ final class GraphRelator extends GraphProcessor {
 
 							final Collection<Statement> model=fetch(connection, item, query);
 
-							// containers are currently virtual and respond always with 200 OK even if not described in the graph
+							// containers are currently virtual and respond always with 200 OK even if not described in
+							// the graph
 
-							return resource && model.isEmpty()? response.status(NotFound) : response
+							return resource && model.isEmpty() ? response.status(NotFound) : response
 
 									// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 

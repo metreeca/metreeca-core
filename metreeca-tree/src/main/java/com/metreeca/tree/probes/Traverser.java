@@ -17,8 +17,8 @@
 
 package com.metreeca.tree.probes;
 
-import com.metreeca.tree.shapes.*;
 import com.metreeca.tree.Shape;
+import com.metreeca.tree.shapes.*;
 
 
 /**

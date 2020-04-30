@@ -18,7 +18,6 @@
 package com.metreeca.rest;
 
 import com.metreeca.tree.Shape;
-
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 
@@ -30,7 +29,6 @@ import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.rest.services.Logger.clip;
 import static com.metreeca.tree.shapes.And.and;
-
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -210,7 +208,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final Shape shape=actual.shape();
 
-		if ( !and().equals(shape)) {
+		if ( !and().equals(shape) ) {
 			failWithMessage("expected message to have no shape but has <%s>", shape);
 		}
 

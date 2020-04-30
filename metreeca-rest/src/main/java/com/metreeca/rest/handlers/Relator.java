@@ -34,9 +34,11 @@ import static com.metreeca.tree.Shape.*;
  * <ul>
  * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Shape#Relate} task and {@linkplain Shape#Holder}/{@linkplain Shape#Digest} areas, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
+ * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
+ * resources;</li>
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
- * <li>engine-assisted response shape/payload {@linkplain Engine#trim(Message) trimming}, considering shapes as above.</li>
+ * <li>engine-assisted response shape/payload {@linkplain Engine#trim(Message) trimming}, considering shapes as above
+ * .</li>
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>

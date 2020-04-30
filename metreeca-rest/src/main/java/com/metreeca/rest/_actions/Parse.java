@@ -52,7 +52,8 @@ public final class Parse<R> implements Function<Message<?>, Optional<R>> {
 
 			logger.error(this,
 					String.format("unable to parse message body as <%s>", format.getClass().getName()),
-					new RuntimeException(error.toString(), parse.cause().orElse(null)) // !!! review formatting // !!! avoid newlines in log
+					new RuntimeException(error.toString(), parse.cause().orElse(null)) // !!! review formatting // !!!
+					// avoid newlines in log
 			);
 
 			return Optional.empty();

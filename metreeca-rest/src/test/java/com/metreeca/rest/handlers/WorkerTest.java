@@ -19,7 +19,6 @@ package com.metreeca.rest.handlers;
 
 
 import com.metreeca.rest.*;
-
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -28,7 +27,6 @@ import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -40,7 +38,7 @@ final class WorkerTest {
 				.status(Response.OK)
 
 				.body(writer(), target -> {
-					try (final Writer writer=target.get()) {
+					try ( final Writer writer=target.get() ) {
 						writer.write("body");
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -48,7 +46,7 @@ final class WorkerTest {
 				})
 
 				.body(output(), target -> {
-					try (final OutputStream output=target.get()) {
+					try ( final OutputStream output=target.get() ) {
 						output.write("body".getBytes());
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);

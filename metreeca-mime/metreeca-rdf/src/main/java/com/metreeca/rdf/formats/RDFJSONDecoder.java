@@ -17,14 +17,14 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rdf.Values;
 import com.metreeca.json.formats.JSONFormat;
+import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
+import javax.json.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -34,14 +34,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import javax.json.*;
-
+import static com.metreeca.json.formats.JSONFormat.resolver;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
-import static com.metreeca.json.formats.JSONFormat.resolver;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
-
 import static java.util.stream.Collectors.toMap;
 
 
@@ -84,7 +81,8 @@ abstract class RDFJSONDecoder {
 
 
 	protected Resource resource(final String id) {
-		return id.isEmpty() ? Values.bnode() : id.startsWith("_:") ? Values.bnode(id.substring(2)) : Values.iri(resolve(id));
+		return id.isEmpty() ? Values.bnode() : id.startsWith("_:") ? Values.bnode(id.substring(2)) :
+				Values.iri(resolve(id));
 	}
 
 	protected Resource bnode() {
@@ -180,7 +178,8 @@ abstract class RDFJSONDecoder {
 		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Stream::concat));
 	}
 
-	protected Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape, final Resource focus) {
+	protected Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape,
+			final Resource focus) {
 		return value instanceof JsonArray ? value(value.asJsonArray(), shape, focus)
 				: value instanceof JsonObject ? value(value.asJsonObject(), shape, focus)
 				: value instanceof JsonString ? value((JsonString)value, shape)
@@ -195,7 +194,8 @@ abstract class RDFJSONDecoder {
 		return error("unsupported JSON value <"+array+">");
 	}
 
-	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape, final Resource focus) {
+	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape,
+			final Resource focus) {
 
 		String id=null;
 		String value=null;
@@ -275,7 +275,8 @@ abstract class RDFJSONDecoder {
 	}
 
 
-	private Map.Entry<Value, Stream<Statement>> properties(final JsonObject object, final Shape shape, final Resource source) {
+	private Map.Entry<Value, Stream<Statement>> properties(final JsonObject object, final Shape shape,
+			final Resource source) {
 
 		final Map<Object, Shape> fields=fields(shape);
 
@@ -299,7 +300,8 @@ abstract class RDFJSONDecoder {
 
 					final Statement edge=direct(property) ? statement(source, property, target)
 							: target instanceof Resource ? statement((Resource)target, inverse(property), source)
-							: error(String.format("target for inverse property is not a resource [%s: %s]", label, entry));
+							: error(String.format("target for inverse property is not a resource [%s: %s]", label,
+							entry));
 
 					return Stream.concat(Stream.of(edge), model);
 

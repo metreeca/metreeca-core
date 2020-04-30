@@ -19,6 +19,11 @@ package com.metreeca.xml.actions;
 
 import org.w3c.dom.*;
 
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.namespace.QName;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -28,14 +33,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.namespace.QName;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
-
 import static javax.xml.XMLConstants.XMLNS_ATTRIBUTE;
 
 
@@ -136,7 +134,7 @@ public final class XPath {
 	 * @param text the text to be decoded
 	 *
 	 * @return a version of {@code text} where XML numeric entities (for instance {@code &#x2019;} or {@code &#8220;})
-	 * are replaced with the corresponding Unicode characters
+	 * 		are replaced with the corresponding Unicode characters
 	 *
 	 * @throws NullPointerException if {@code text} is null
 	 */

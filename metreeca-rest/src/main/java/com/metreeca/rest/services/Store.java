@@ -44,7 +44,7 @@ public interface Store {
 	 * Retrieves the default store factory.
 	 *
 	 * @return the default store factory, which stores data blobs in the {@code store} folder of the {@linkplain Storage
-	 * system file storage}.
+	 * 		system file storage}.
 	 */
 	public static Supplier<Store> store() {
 		return () -> new Store() {

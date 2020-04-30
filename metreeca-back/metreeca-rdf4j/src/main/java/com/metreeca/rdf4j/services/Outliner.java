@@ -23,19 +23,17 @@ import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.And;
 import com.metreeca.tree.shapes.Clazz;
 import com.metreeca.tree.shapes.Field;
-
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.tree.shapes.All.all;
-
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 
@@ -88,8 +86,10 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 				all(shape).map(targets -> values(targets.stream()).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
-						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
-						: target instanceof Resource ? Stream.of(statement((Resource)target, inverse(iri), source)) : Stream.empty()
+						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) :
+						Stream.empty()
+						: target instanceof Resource ? Stream.of(statement((Resource)target, inverse(iri), source)) :
+						Stream.empty()
 
 				))).orElse(Stream.empty()),
 
@@ -118,7 +118,8 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 	private Stream<Value> values(final Stream<Object> objects) {
 		return objects.flatMap(o -> o instanceof Shape.Focus
-				? sources.stream().map(s -> s instanceof IRI? iri(((Shape.Focus)o).resolve(s.stringValue())) : RDFFormat.value(s))
+				? sources.stream().map(s -> s instanceof IRI ? iri(((Shape.Focus)o).resolve(s.stringValue())) :
+				RDFFormat.value(s))
 				: Stream.of(RDFFormat.value(o)));
 	}
 

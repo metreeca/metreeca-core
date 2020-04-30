@@ -62,7 +62,8 @@ public abstract class ComboPolicy implements Policy {
 		return between(0, maximum, counter);
 	}
 
-	public static Policy between(final long minimum, final long maximum, final BiFunction<String, String, Long> counter) {
+	public static Policy between(final long minimum, final long maximum,
+			final BiFunction<String, String, Long> counter) {
 		return (user, secret) -> {
 
 			final long count=counter.apply(user, secret);

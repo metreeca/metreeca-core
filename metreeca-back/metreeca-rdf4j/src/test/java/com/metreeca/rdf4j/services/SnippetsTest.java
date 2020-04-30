@@ -23,10 +23,8 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf4j.services.Snippets.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class SnippetsTest {

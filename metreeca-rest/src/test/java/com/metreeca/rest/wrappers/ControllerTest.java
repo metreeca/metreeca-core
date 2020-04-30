@@ -18,17 +18,15 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ControllerTest {
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.exec(tasks)
 				.clear();

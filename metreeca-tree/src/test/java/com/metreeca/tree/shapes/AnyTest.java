@@ -24,10 +24,8 @@ import java.util.stream.Stream;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
 import static com.metreeca.tree.shapes.Or.or;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class AnyTest {

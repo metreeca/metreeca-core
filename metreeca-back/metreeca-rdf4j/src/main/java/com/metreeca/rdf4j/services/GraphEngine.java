@@ -22,7 +22,6 @@ import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
@@ -32,9 +31,7 @@ import java.util.function.Supplier;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.tree.Shape.multiple;
-import static com.metreeca.tree.Shape.optional;
-import static com.metreeca.tree.Shape.required;
+import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
@@ -147,13 +144,15 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <li>the request is expected to include a member resource {@linkplain Message#shape() shape};</li>
 	 *
-	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be created
+	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be 
+	 * created
 	 * matched by the shape using the request {@linkplain Request#item() item} as subject;</li>
 	 *
 	 * <li>the resource to be created is assigned a unique IRI based on the stem of the the request IRI and the value
 	 * of the {@code Slug} request header, if one is found, or a random UUID, otherwise;</li>
 	 *
-	 * <li>the request RDF body is rewritten to the assigned IRI and stored into the shared {@linkplain Graph graph};</li>
+	 * <li>the request RDF body is rewritten to the assigned IRI and stored into the shared {@linkplain Graph graph}
+	 * ;</li>
 	 *
 	 * <li>the target container identified by the request item is connected to the newly created resource as required
 	 * by the LDP container profile identified by the filtering constraints in the request shape;</li>
@@ -220,7 +219,8 @@ public final class GraphEngine implements Engine {
 	 *
 	 * </ul>
 	 *
-	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item IRI:</p>
+	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item 
+	 * IRI:</p>
 	 *
 	 * <ul>
 	 *
@@ -274,13 +274,15 @@ public final class GraphEngine implements Engine {
 	 *
 	 * </ul>
 	 *
-	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item IRI:</p>
+	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item 
+	 * IRI:</p>
 	 *
 	 * <ul>
 	 *
 	 * <li>the request is expected to include a member resource {@linkplain Message#shape() shape};</li>
 	 *
-	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be updated
+	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be 
+	 * updated
 	 * matched by the shape;</li>
 	 *
 	 * <li>the existing RDF description of the target resource matched by the request shape
@@ -327,7 +329,8 @@ public final class GraphEngine implements Engine {
 	 *
 	 * </ul>
 	 *
-	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item IRI:</p>
+	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item 
+	 * IRI:</p>
 	 *
 	 * <ul>
 	 *

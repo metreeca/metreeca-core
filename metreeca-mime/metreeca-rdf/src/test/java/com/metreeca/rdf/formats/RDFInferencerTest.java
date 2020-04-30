@@ -19,7 +19,6 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Test;
@@ -41,10 +40,8 @@ import static com.metreeca.tree.shapes.Meta.hint;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class RDFInferencerTest {
@@ -120,18 +117,21 @@ final class RDFInferencerTest {
 
 		assertImplies("nested shapes are expanded",
 				field(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(field(s.getName(), and(and(s.getShape(), i), datatype(Values.ResourceType))), datatype(Values.ResourceType))
+				(s, i) -> and(field(s.getName(), and(and(s.getShape(), i), datatype(Values.ResourceType))),
+						datatype(Values.ResourceType))
 		);
 	}
 
 	@Test void testConjunction() {
 		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(Stream.concat(s.getShapes().stream(), Stream.of(i)).collect(toList()))); // outer and() stripped by optimization
+				(s, i) -> and(Stream.concat(s.getShapes().stream(), Stream.of(i)).collect(toList()))); // outer and()
+		// stripped by optimization
 	}
 
 	@Test void testDisjunction() {
 		assertImplies("nested shapes are expanded", or(clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(Stream.concat(s.getShapes().stream(), Stream.of(i)).collect(toList()))); // outer or() stripped by optimization
+				(s, i) -> and(Stream.concat(s.getShapes().stream(), Stream.of(i)).collect(toList()))); // outer or()
+		// stripped by optimization
 	}
 
 	@Test void testOption() { // !!! uncomment when filtering constraints are accepted by when()

@@ -20,7 +20,10 @@ package com.metreeca.rest;
 
 import org.assertj.core.api.Assertions;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +40,7 @@ public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 
 			request.body(input()).value().ifPresent(supplier -> { // cache input
 
-				try (final InputStream stream=supplier.get()) {
+				try ( final InputStream stream=supplier.get() ) {
 
 					final byte[] data=Codecs.data(stream);
 

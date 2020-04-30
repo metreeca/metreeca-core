@@ -22,10 +22,12 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.services.Logger;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import static com.metreeca.rest.Context.service;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.disjoint;
 import static java.util.Collections.singleton;

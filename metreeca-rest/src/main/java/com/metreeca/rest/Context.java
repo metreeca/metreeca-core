@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.lang.String.format;
 
 
@@ -48,7 +47,7 @@ public final class Context {
 	 * @param <T>     the type of the shared service created by {@code factory}
 	 *
 	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
-	 * #set(Supplier, Supplier) specified}
+	 *        #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
@@ -93,7 +92,7 @@ public final class Context {
 	 * @param <T>     the type of the shared service created by {@code factory}
 	 *
 	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
-	 * #set(Supplier, Supplier) specified}
+	 *        #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
@@ -224,8 +223,9 @@ public final class Context {
 	 * Executes a set of task using shared ervices managed by this context.
 	 *
 	 * <p>During task execution, shared services may be retrieved from this context through the static {@linkplain
-	 * #service(Supplier) service locator} method of the Context class. The context used by the service locator method
-	 * is managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
+	 * #service(Supplier) service locator} method of the Context class. The context used by the service locator 
+	 * method is
+	 * managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
 	 * thread.</p>
 	 *
 	 * @param tasks the tasks to be executed

@@ -102,9 +102,10 @@ public interface Engine {
 	 * @param <M>     the type of {@code message}
 	 *
 	 * @return a value providing access to the given {@code message} with an updated payload, if its engine-specific
-	 * {@linkplain Message#body(Format) payload} is well-formed and compatible with its {@linkplain Message#shape()
-	 * shape}; an error providing access to a failure possibly {@linkplain Failure#trace(Trace) containing} a validation
-	 * trace, otherwise
+	 *        {@linkplain Message#body(Format) payload} is well-formed and compatible with its
+	 *        {@linkplain Message#shape()
+	 * 		shape}; an error providing access to a failure possibly {@linkplain Failure#trace(Trace) containing} a
+	 * 		validation trace, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
@@ -120,8 +121,9 @@ public interface Engine {
 	 * @param message the message whose engine-specific payload is to be validated
 	 *
 	 * @return a value providing access to {@code message}, if its engine-specific {@linkplain Message#body(Format)
-	 * payload} is well-formed and compatible with its {@linkplain Message#shape() shape}; an error providing access to
-	 * a failure possibly {@linkplain Failure#trace(Trace) containing} a validation trace, otherwise
+	 * 		payload} is well-formed and compatible with its {@linkplain Message#shape() shape}; an error providing
+	 * 		access to
+	 * 		a failure possibly {@linkplain Failure#trace(Trace) containing} a validation trace, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
@@ -155,7 +157,7 @@ public interface Engine {
 	 * @param request a retrieval request for the managed linked data resource
 	 *
 	 * @return a lazy response generated for the managed linked data resource in reaction to the retrieval {@code
-	 * request}
+	 * 		request}
 	 *
 	 * @throws NullPointerException if {@code request} is null
 	 */

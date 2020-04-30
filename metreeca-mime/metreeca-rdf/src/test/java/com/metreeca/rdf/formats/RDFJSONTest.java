@@ -19,29 +19,28 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
-
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import java.util.AbstractMap;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Meta.alias;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class RDFJSONTest {
@@ -57,7 +56,6 @@ final class RDFJSONTest {
 	}
 
 
-
 	@SafeVarargs static <T> List<T> list(final T... items) {
 		return asList(items);
 	}
@@ -66,7 +64,7 @@ final class RDFJSONTest {
 		return emptyMap();
 	}
 
-	@SafeVarargs  static <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
+	@SafeVarargs static <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
 		return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
@@ -80,8 +78,6 @@ final class RDFJSONTest {
 	private Map<IRI, String> aliases(final Shape shape) {
 		return RDFJSONCodec.aliases(shape);
 	}
-
-
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

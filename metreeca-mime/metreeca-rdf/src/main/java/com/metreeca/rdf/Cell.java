@@ -24,7 +24,6 @@ import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.DC;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.math.BigDecimal;
@@ -279,7 +278,7 @@ public final class Cell implements Resource {
 
 					model.add(statement(focus, predicate, object));
 
-				} else if ( object instanceof Resource ){
+				} else if ( object instanceof Resource ) {
 
 					model.add(statement((Resource)object, inverse(predicate), focus));
 

@@ -111,7 +111,6 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 	}
 
 
-
 	public JSONAssert doesNotHaveField(final String name) {
 
 		if ( name == null ) {

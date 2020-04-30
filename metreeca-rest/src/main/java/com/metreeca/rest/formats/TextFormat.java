@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 
@@ -58,12 +57,12 @@ public final class TextFormat extends Format<String> {
 
 	/**
 	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
-	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
-	 * otherwise
+	 * 		supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
+	 * 		otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
 		return message.body(reader).value(source -> {
-			try (final Reader reader=source.get()) {
+			try ( final Reader reader=source.get() ) {
 
 				return Codecs.text(reader);
 
@@ -108,7 +107,7 @@ public final class TextFormat extends Format<String> {
 				.body(reader, () -> new StringReader(value))
 
 				.body(writer, target -> {
-					try (final Writer output=target.get()) {
+					try ( final Writer output=target.get() ) {
 
 						output.write(value);
 

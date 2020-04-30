@@ -18,7 +18,6 @@
 package com.metreeca.rdf4j.services;
 
 import com.metreeca.rdf.Values;
-
 import org.eclipse.rdf4j.model.IRI;
 
 import java.io.IOException;
@@ -32,7 +31,6 @@ import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.inverse;
-
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyIterator;
 

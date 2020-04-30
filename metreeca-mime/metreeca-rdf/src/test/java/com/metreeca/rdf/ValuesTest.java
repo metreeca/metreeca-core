@@ -18,14 +18,16 @@
 package com.metreeca.rdf;
 
 import com.metreeca.tree.Shape;
-
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.*;
-import org.eclipse.rdf4j.rio.*;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.RDFParserRegistry;
+import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +35,10 @@ import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.*;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.*;
@@ -47,13 +52,11 @@ import static com.metreeca.tree.shapes.MaxLength.maxLength;
 import static com.metreeca.tree.shapes.Meta.meta;
 import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.Pattern.pattern;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
-
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 
 public final class ValuesTest {
@@ -212,7 +215,7 @@ public final class ValuesTest {
 		}
 
 		return DatasetCache.computeIfAbsent(resource.toExternalForm(), key -> {
-			try (final InputStream input=resource.openStream()) {
+			try ( final InputStream input=resource.openStream() ) {
 				return Rio.parse(input, base, RDFFormat.TURTLE).unmodifiable();
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -240,7 +243,8 @@ public final class ValuesTest {
 		return decode(rdf, format, Base);
 	}
 
-	public static Model decode(final String rdf, final RDFFormat format, final String base) { // includes default base/prefixes
+	public static Model decode(final String rdf, final RDFFormat format, final String base) { // includes default
+		// base/prefixes
 
 		if ( rdf == null ) {
 			throw new NullPointerException("null rdf");

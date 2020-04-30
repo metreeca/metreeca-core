@@ -17,23 +17,24 @@
 
 package com.metreeca.servlet;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.services.Loader;
 import com.metreeca.rest.services.Storage;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
 import static java.util.Objects.requireNonNull;
@@ -53,7 +54,8 @@ import static java.util.Objects.requireNonNull;
  * <li>intercepts HTTP requests and handles them using a linked data {@linkplain Handler handler} loaded from the
  * shared tool tray;</li>
  *
- * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data server.</li>
+ * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data server
+ * .</li>
  *
  * </ul>
  */
@@ -91,7 +93,7 @@ public abstract class Gateway implements Filter {
 
 		} catch ( final Throwable t ) {
 
-			try (final StringWriter message=new StringWriter()) {
+			try ( final StringWriter message=new StringWriter() ) {
 
 				t.printStackTrace(new PrintWriter(message));
 

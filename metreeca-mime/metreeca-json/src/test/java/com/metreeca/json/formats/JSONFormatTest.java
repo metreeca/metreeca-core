@@ -18,19 +18,18 @@
 package com.metreeca.json.formats;
 
 import com.metreeca.rest.Request;
-
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.io.*;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 
 import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -52,7 +51,8 @@ final class JSONFormatTest {
 				.header("content-type", JSONFormat.MIME)
 				.body(reader(), () -> new StringReader(TestJSON.toString()));
 
-		assertEquals(TestJSON, request.body(json()).value().orElseGet(() -> org.assertj.core.api.Assertions.fail("no json representation")));
+		assertEquals(TestJSON, request.body(json()).value().orElseGet(() -> org.assertj.core.api.Assertions.fail("no "
+				+"json representation")));
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
@@ -70,7 +70,7 @@ final class JSONFormatTest {
 		assertEquals(TestJSON, request.body(writer())
 
 				.value(client -> {
-					try (final StringWriter writer=new StringWriter()) {
+					try ( final StringWriter writer=new StringWriter() ) {
 
 						client.accept(() -> writer);
 

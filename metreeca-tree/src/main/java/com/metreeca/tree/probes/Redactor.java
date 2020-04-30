@@ -27,7 +27,6 @@ import java.util.function.Predicate;
 
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Or.or;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.disjoint;
 

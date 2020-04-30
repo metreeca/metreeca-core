@@ -17,11 +17,9 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.json.JSONAssert;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Or;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -32,13 +30,15 @@ import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import javax.json.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
-
-import javax.json.*;
 
 import static com.metreeca.json.JSONAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
@@ -309,7 +309,8 @@ final class RDFJSONWriterTest {
 						entry("rest", "y")
 				)),
 				write(
-						decode("_:focus rdf:first 'x'; rdf:rest 'y'."), // invalid shape (forces content on both branches)
+						decode("_:focus rdf:first 'x'; rdf:rest 'y'."), // invalid shape (forces content on both 
+						// branches)
 						bnode("focus"),
 						Or.or(
 								field(RDF.FIRST, required()),
@@ -431,8 +432,9 @@ final class RDFJSONWriterTest {
 		return write(model, focus, shape, ValuesTest.Base);
 	}
 
-	private JsonStructure write(final Iterable<Statement> model, final Resource focus, final Shape shape, final String base) {
-		try (final StringWriter buffer=new StringWriter(1000)) {
+	private JsonStructure write(final Iterable<Statement> model, final Resource focus, final Shape shape,
+			final String base) {
+		try ( final StringWriter buffer=new StringWriter(1000) ) {
 
 			final RDFWriter writer=new RDFJSONWriter(buffer, base);
 
@@ -442,7 +444,7 @@ final class RDFJSONWriterTest {
 
 			Rio.write(model, writer);
 
-			try (final JsonReader reader=Json.createReader(new StringReader(buffer.toString()))) {
+			try ( final JsonReader reader=Json.createReader(new StringReader(buffer.toString())) ) {
 				return reader.read();
 			}
 

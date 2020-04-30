@@ -19,7 +19,6 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,6 @@ import static com.metreeca.tree.shapes.Meta.label;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -117,7 +115,6 @@ final class RDFOptimizerTest {
 		assertThat(optimize(any())).as("empty").isEqualTo(or());
 
 	}
-
 
 
 	@Test void testOptimizeFields() {

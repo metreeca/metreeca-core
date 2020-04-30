@@ -53,14 +53,15 @@ public final class DataFormat extends Format<byte[]> {
 
 	/**
 	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing error,
-	 * otherwise
+	 * 		stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing
+	 * 		error,
+	 * 		otherwise
 	 */
 	@Override public Result<byte[], Failure> get(final Message<?> message) {
 		return message.body(input).value(
 
 				source -> {
-					try (final InputStream input=source.get()) {
+					try ( final InputStream input=source.get() ) {
 
 						return Codecs.data(input);
 
@@ -77,7 +78,8 @@ public final class DataFormat extends Format<byte[]> {
 	 *
 	 * <ul>
 	 *
-	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the binary {@code value};</li>
+	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the binary
+	 * {@code value};</li>
 	 *
 	 * <li>the {@link OutputFormat} body of {@code message} is configured to write the binary {@code value} to the
 	 * output stream supplied by the accepted output stream supplier.</li>
@@ -92,7 +94,7 @@ public final class DataFormat extends Format<byte[]> {
 				)
 
 				.body(output, target -> {
-					try (final OutputStream output=target.get()) {
+					try ( final OutputStream output=target.get() ) {
 
 						output.write(value);
 

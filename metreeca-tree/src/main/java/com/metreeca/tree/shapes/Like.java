@@ -120,7 +120,7 @@ public final class Like implements Shape {
 	}
 
 	@Override public String toString() {
-		return "like("+(stemming? "stemming" : "")+text+")";
+		return "like("+(stemming ? "stemming" : "")+text+")";
 	}
 
 }

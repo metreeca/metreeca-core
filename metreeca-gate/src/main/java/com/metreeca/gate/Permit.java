@@ -17,9 +17,8 @@
 
 package com.metreeca.gate;
 
-import java.util.*;
-
 import javax.json.Json;
+import java.util.*;
 
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
@@ -44,9 +43,10 @@ public final class Permit {
 	 * Creates a user permit.
 	 *
 	 * @param id      an opaque handle uniquely identifying the user at the time the permit was created; must be
-	 *                accepted as a handle for {@linkplain Roster#lookup(String) looking up} the user in the roster;
-	 *                must change on credential and account status updates and user {@linkplain Roster#login(String,
-	 *                String) login}/{@linkplain Roster#logout(String) logout}
+	 *                   accepted
+	 *                as a handle for {@linkplain Roster#lookup(String) looking up} the user in the roster; must change
+	 *                on credential and account status updates and user {@linkplain Roster#login(String, String)
+	 *                login}/{@linkplain Roster#logout(String) logout}
 	 * @param user    an id uniquely identifying the user
 	 * @param roles   a set of ids uniquely identifying the roles attributed to the user
 	 * @param profile a front-end profile for the user, providing information such as name, email, picture and
@@ -55,7 +55,8 @@ public final class Permit {
 	 *
 	 * @throws NullPointerException if any of the arguments is null or contains null values
 	 */
-	public Permit(final String id, final String user, final Collection<Object> roles, final Map<String, Object> profile) {
+	public Permit(final String id, final String user, final Collection<Object> roles,
+			final Map<String, Object> profile) {
 
 		if ( id == null ) {
 			throw new NullPointerException("null hash");

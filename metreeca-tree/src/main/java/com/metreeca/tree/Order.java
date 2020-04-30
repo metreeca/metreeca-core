@@ -56,7 +56,7 @@ public final class Order {
 
 	private Order(final List<?> path, final boolean inverse) {
 
-		if ( path == null || path.stream().anyMatch(Objects::isNull)) {
+		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null path or path step");
 		}
 

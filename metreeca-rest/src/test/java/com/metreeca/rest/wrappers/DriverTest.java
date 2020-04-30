@@ -20,7 +20,6 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
-
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.RequestAssert.assertThat;
@@ -31,7 +30,6 @@ import static com.metreeca.tree.Shape.*;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 

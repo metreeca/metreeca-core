@@ -17,16 +17,14 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.MessageMock;
 import com.metreeca.rest.Codecs;
-
+import com.metreeca.rest.MessageMock;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 

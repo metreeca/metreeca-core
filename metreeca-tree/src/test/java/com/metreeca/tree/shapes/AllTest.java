@@ -23,10 +23,8 @@ import java.util.stream.Stream;
 
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.util.stream.Collectors.toSet;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class AllTest {

@@ -20,11 +20,13 @@ package com.metreeca.rdf4j.handlers;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -35,7 +37,10 @@ import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.rio.*;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,7 +53,6 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tree.Shape.only;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
-
 import static java.lang.String.format;
 
 
@@ -116,7 +120,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				final Collection<Statement> model=new ArrayList<>();
 
 				graph().exec(connection -> {
-					try (final RepositoryResult<Resource> contexts=connection.getContextIDs()) {
+					try ( final RepositoryResult<Resource> contexts=connection.getContextIDs() ) {
 						while ( contexts.hasNext() ) {
 
 							final Resource context=contexts.next();
@@ -151,7 +155,7 @@ public final class Graphs extends Endpoint<Graphs> {
 							))
 
 							.body(output(), _target -> {
-								try (final OutputStream output=_target.get()) {
+								try ( final OutputStream output=_target.get() ) {
 									connection.export(factory.getWriter(output), context);
 								} catch ( final IOException e ) {
 									throw new UncheckedIOException(e);
@@ -197,9 +201,9 @@ public final class Graphs extends Endpoint<Graphs> {
 				);
 
 				graph().exec(connection -> {
-					try (final InputStream input=request.body(this.input).value() // binary format >> no rewriting
+					try ( final InputStream input=request.body(this.input).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-							.get()) {
+							.get() ) {
 
 						final boolean exists=exists(connection, context);
 
@@ -337,9 +341,9 @@ public final class Graphs extends Endpoint<Graphs> {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
 				graph().exec(connection -> {
-					try (final InputStream input=request.body(this.input).value() // binary format >> no rewriting
+					try ( final InputStream input=request.body(this.input).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-							.get()) {
+							.get() ) {
 
 						final boolean exists=exists(connection, context);
 
@@ -406,7 +410,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 	private boolean exists(final RepositoryConnection connection, final Resource context) {
 
-		try (final RepositoryResult<Resource> contexts=connection.getContextIDs()) {
+		try ( final RepositoryResult<Resource> contexts=connection.getContextIDs() ) {
 
 			while ( contexts.hasNext() ) {
 				if ( contexts.next().equals(context) ) { return true; }

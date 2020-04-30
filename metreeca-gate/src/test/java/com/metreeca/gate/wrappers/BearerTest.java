@@ -18,7 +18,6 @@
 package com.metreeca.gate.wrappers;
 
 import com.metreeca.rest.*;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +34,7 @@ final class BearerTest {
 
 
 	private Bearer bearer() {
-		return new Bearer( (token, request) -> token.equals("token")? Optional.of(request) : Optional.empty());
+		return new Bearer((token, request) -> token.equals("token") ? Optional.of(request) : Optional.empty());
 	}
 
 	private Handler handler(final int status) {
@@ -208,7 +207,7 @@ final class BearerTest {
 		}
 
 		@Test void testUnauthorized() {
-				exec(() -> bearer()
+			exec(() -> bearer()
 
 					.wrap(handler(Response.Unauthorized))
 

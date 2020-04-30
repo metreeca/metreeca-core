@@ -25,7 +25,6 @@ import java.util.Optional;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-
 import static java.lang.Math.abs;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptySet;
@@ -37,7 +36,7 @@ public final class RosterMock implements Roster {
 	private final Map<String, String> users=new HashMap<>(); // id > secret
 
 
-	@SafeVarargs public RosterMock(final Map.Entry<String, String> ...entries) {
+	@SafeVarargs public RosterMock(final Map.Entry<String, String>... entries) {
 		for (final Map.Entry<String, String> entry : entries) {
 
 			users.put(entry.getKey(), entry.getValue());

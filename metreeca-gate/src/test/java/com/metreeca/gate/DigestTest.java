@@ -19,7 +19,6 @@ package com.metreeca.gate;
 
 
 import com.metreeca.rest.Context;
-
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +30,7 @@ public abstract class DigestTest {
 	protected abstract Digest digest();
 
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.exec(tasks)
 				.clear();

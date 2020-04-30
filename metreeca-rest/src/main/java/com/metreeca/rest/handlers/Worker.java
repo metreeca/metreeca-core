@@ -18,7 +18,10 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

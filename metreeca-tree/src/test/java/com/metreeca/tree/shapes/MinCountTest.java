@@ -23,11 +23,9 @@ import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class MinCountTest {

@@ -17,13 +17,14 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.*;
-
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.RequestAssert;
+import com.metreeca.rest.Response;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
-
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
@@ -163,7 +164,7 @@ final class RouterTest {
 						.as("placeholder values saved as parameters")
 						.hasParameter("head", "one")
 						.hasParameter("tail", "two")
-		);
+				);
 
 		new Router().path("/{}/{}", handler())
 				.handle(request("/one/two"))
@@ -172,7 +173,7 @@ final class RouterTest {
 								request -> request.parameters().isEmpty(),
 								"empty placeholders ignored")
 						)
-		);
+				);
 
 	}
 

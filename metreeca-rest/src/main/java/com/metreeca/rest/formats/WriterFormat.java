@@ -17,17 +17,19 @@
 
 package com.metreeca.rest.formats;
 
+import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Format;
 import com.metreeca.rest.Message;
-import com.metreeca.rest.Codecs;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 
@@ -64,9 +66,9 @@ public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 	/**
 	 * Configures a message to hold a textual output body.
 	 *
-	 * <p>Configures the {@linkplain OutputFormat raw binary output body} of {@code message} to write the textual message
-	 * body to the accepted output stream using the character encoding specified in its {@code Content-Type} header or
-	 * the {@linkplain StandardCharsets#UTF_8 default charset} if none is specified.</p>
+	 * <p>Configures the {@linkplain OutputFormat raw binary output body} of {@code message} to write the textual
+	 * message body to the accepted output stream using the character encoding specified in its {@code Content-Type}
+	 * header or the {@linkplain StandardCharsets#UTF_8 default charset} if none is specified.</p>
 	 *
 	 * <p>Sets the {@code Content-Type} header of {@code message} to {@link #MIME}, unless already defined.</p>
 	 */
@@ -77,7 +79,7 @@ public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 
 				.body(output, source -> {
 
-					try (final OutputStream output=source.get()) {
+					try ( final OutputStream output=source.get() ) {
 
 						value.accept(() -> Codecs.writer(output, message.charset().orElse(UTF_8.name())));
 

@@ -54,7 +54,7 @@ public abstract class Delegator implements Handler {
 	 *
 	 * @return this delegator
 	 *
-	 * @throws NullPointerException if {@code delegate} is null
+	 * @throws NullPointerException     if {@code delegate} is null
 	 * @throws IllegalArgumentException if {@code delegate} is equal to this handler
 	 */
 	protected Delegator delegate(final Handler delegate) {

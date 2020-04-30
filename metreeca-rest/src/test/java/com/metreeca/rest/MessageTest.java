@@ -25,12 +25,10 @@ import java.util.function.Function;
 import static com.metreeca.rest.MessageAssert.assertThat;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.TextFormat.text;
-
+import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
-
-import static java.util.Collections.emptySet;
 
 
 public final class MessageTest {

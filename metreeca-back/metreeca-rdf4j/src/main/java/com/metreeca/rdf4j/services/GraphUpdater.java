@@ -23,7 +23,6 @@ import com.metreeca.rest.Future;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;

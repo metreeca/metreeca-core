@@ -18,7 +18,6 @@
 package com.metreeca.rdf4j.services;
 
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -35,7 +34,6 @@ import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.Field.field;
-
 import static java.util.stream.Collectors.toSet;
 
 

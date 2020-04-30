@@ -17,8 +17,10 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
-
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +31,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 
 final class AliaserTest {
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.exec(tasks)
 				.clear();

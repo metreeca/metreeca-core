@@ -17,32 +17,34 @@
 
 package com.metreeca.xml.formats;
 
-import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
-
 import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.rest.formats.WriterFormat;
 import org.ccil.cowan.tagsoup.Parser;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
-import java.io.*;
-import java.util.regex.Pattern;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.io.Writer;
+import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static java.util.regex.Pattern.compile;
 
 
@@ -77,7 +79,7 @@ public final class HTMLFormat extends Format<Document> {
 	 * @param base   the base URL for the HTML document to be parsed
 	 *
 	 * @return a value result containing the parsed HTML document, if {@code reader} was successfully parsed; an error
-	 * result containg the parse exception, otherwise
+	 * 		result containg the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
@@ -121,17 +123,18 @@ public final class HTMLFormat extends Format<Document> {
 	/**
 	 * Writes an HTML document.
 	 *
-	 * @param <W> the type of the {@code writer} the HTML document is to be written to
+	 * @param <W>      the type of the {@code writer} the HTML document is to be written to
 	 * @param writer   the writer the HTML document is to be written to
 	 * @param base     the base URL for the HTML document to be written
 	 * @param document the HTML document to be written
 	 *
 	 * @return a value result containing the target {@code writer}, if {@code document} was successfully written; an
-	 * error result containg the write exception, otherwise
+	 * 		error result containg the write exception, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public static <W extends Writer> Result<W, Exception> html(final W writer, final String base, final Document document) {
+	public static <W extends Writer> Result<W, Exception> html(final W writer, final String base,
+			final Document document) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
@@ -202,8 +205,8 @@ public final class HTMLFormat extends Format<Document> {
 
 	/**
 	 * @return the optional HTML body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is {@link
-	 * #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 *        {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
+	 *        {@link #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
 	@Override public Result<Document, Failure> get(final Message<?> message) {
 
@@ -215,7 +218,7 @@ public final class HTMLFormat extends Format<Document> {
 				.body(reader())
 				.process(source -> {
 
-					try (final Reader reader=source.get()) {
+					try ( final Reader reader=source.get() ) {
 
 						return html(reader, message.item()).error(Failure::malformed);
 
@@ -237,8 +240,9 @@ public final class HTMLFormat extends Format<Document> {
 
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the HML {@code value} to the
-	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the HML {@code value} to the 
+	 * writer
+	 * supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
 	 * defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Document value) {
@@ -246,7 +250,7 @@ public final class HTMLFormat extends Format<Document> {
 				.header("~Content-Type", MIME)
 				.body(writer(), target -> {
 
-					try (final Writer writer=target.get()) {
+					try ( final Writer writer=target.get() ) {
 
 						html(writer, message.item(), value).error().ifPresent(e -> {
 

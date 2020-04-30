@@ -25,7 +25,6 @@ import com.metreeca.rest.Result;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.Trace;
 import com.metreeca.tree.shapes.*;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -37,8 +36,14 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.Values.compare;
+import static com.metreeca.rdf.Values.direct;
+import static com.metreeca.rdf.Values.format;
+import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.is;
+import static com.metreeca.rdf.Values.pattern;
+import static com.metreeca.rdf.Values.text;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.Graph.graph;
@@ -46,11 +51,9 @@ import static com.metreeca.rdf4j.services.Snippets.source;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Failure.invalid;
 import static com.metreeca.tree.Trace.trace;
-
-import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
-
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
+import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 
 final class GraphValidator extends GraphProcessor {
@@ -87,8 +90,10 @@ final class GraphValidator extends GraphProcessor {
 
 					.collect(toMap(
 
-							statement -> statement.getSubject().equals(resource) ? "unexpected property {"+format(statement.getPredicate())+"}"
-									: statement.getObject().equals(resource) ? "unexpected property {^"+format(statement.getPredicate())+"}"
+							statement -> statement.getSubject().equals(resource) ?
+									"unexpected property {"+format(statement.getPredicate())+"}"
+									: statement.getObject().equals(resource) ?
+									"unexpected property {^"+format(statement.getPredicate())+"}"
 									: "statement outside shape envelope",
 
 							Collections::singleton,

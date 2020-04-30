@@ -24,7 +24,6 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -32,25 +31,22 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValueAssert.assertThat;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.rdf.ValuesTest.item;
-import static com.metreeca.rdf.ValuesTest.term;
+import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.json.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.filter;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.field;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 

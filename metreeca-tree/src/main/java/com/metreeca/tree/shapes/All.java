@@ -20,7 +20,10 @@ package com.metreeca.tree.shapes;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;

@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.json.formats.JSONFormat;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.wrappers.Rewriter;
@@ -25,23 +24,30 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
-import org.eclipse.rdf4j.rio.helpers.*;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
+import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
+import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
+import org.eclipse.rdf4j.rio.helpers.RioSettingImpl;
 
-import java.io.*;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-
-import javax.json.*;
 
 import static com.metreeca.json.formats.JSONFormat.context;
 import static com.metreeca.rdf.Values.statement;
@@ -50,12 +56,10 @@ import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-
-import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
-
 import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
 
 /**
@@ -224,18 +228,20 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
-		return new RDFJSONDecoder(base, context) {}.path(path, shape); // !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.path(path, shape); // !!! pass base as argument and factor decoder
+		// instance
 	}
 
 	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
-		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey(); // !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey(); // !!! pass base as argument
+		// and factor decoder instance
 	}
 
 
 	/**
 	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
-	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
-	 * status, otherwise
+	 * 		representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
+	 * 		status, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
 		return message.body(input).fold(
@@ -267,7 +273,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 							parser.set(setting, value);
 
-							//  ;(dbpedia) ignore malformed rdf:langString literals (https://github.com/eclipse/rdf4j/issues/2004)
+							//  ;(dbpedia) ignore malformed rdf:langString literals (https://github
+							//  .com/eclipse/rdf4j/issues/2004)
 
 							if ( BasicParserSettings.VERIFY_DATATYPE_VALUES.equals(setting) && FALSE.equals(value) ) {
 								parser.setValueFactory(new SimpleValueFactory() {
@@ -308,7 +315,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 					});
 
-					try (final InputStream input=supplier.get()) {
+					try ( final InputStream input=supplier.get() ) {
 
 						parser.parse(input, base); // resolve relative IRIs wrt the request focus
 
@@ -360,7 +367,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
 	 * accepted output stream and, unless already defined, sets the {@code Content-Type} header to the MIME type of the
 	 * RDF serialization selected according to the {@code Accept} header of the request associated to the message, if
-	 * one is present, or to {@code "text/turtle"}, otherwise.
+	 * one
+	 * is present, or to {@code "text/turtle"}, otherwise.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Collection<Statement> value) {
 
@@ -389,9 +397,10 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 					final String internal=message.request().base();
 					final String external=message.header(ExternalBase).orElse(internal); // made available by Rewriter
 
-					try (final OutputStream output=target.get()) {
+					try ( final OutputStream output=target.get() ) {
 
-						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response focus
+						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response
+						// focus
 
 						writer.set(RioShape, shape);
 						writer.set(RioFocus, focus);
@@ -421,7 +430,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Iterable<Statement> rewrite(final String source, final String target, final Iterable<Statement> statements) {
+	private Iterable<Statement> rewrite(final String source, final String target,
+			final Iterable<Statement> statements) {
 		return () -> new Iterator<Statement>() {
 
 			private final Iterator<Statement> iterator=statements.iterator();

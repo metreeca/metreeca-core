@@ -21,20 +21,16 @@ import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
 import java.io.*;
 import java.util.Optional;
 
-import javax.json.Json;
-
 import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.RequestAssert.assertThat;
@@ -47,13 +43,11 @@ import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.field;
-
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.singleton;
 
 
 final class RewriterTest {
@@ -235,7 +229,7 @@ final class RewriterTest {
 
 						consumer -> {
 
-							try (final ByteArrayOutputStream stream=new ByteArrayOutputStream()) {
+							try ( final ByteArrayOutputStream stream=new ByteArrayOutputStream() ) {
 
 								consumer.accept(() -> stream);
 
@@ -299,7 +293,7 @@ final class RewriterTest {
 
 						value -> {
 
-							try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
+							try ( final ByteArrayOutputStream buffer=new ByteArrayOutputStream() ) {
 
 								value.accept(() -> buffer);
 

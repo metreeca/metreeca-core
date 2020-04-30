@@ -17,14 +17,14 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rdf.Values;
 import com.metreeca.json.formats.JSONFormat;
+import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
+import javax.json.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -32,16 +32,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
-import javax.json.*;
-
+import static com.metreeca.json.formats.JSONFormat.aliaser;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
-import static com.metreeca.json.formats.JSONFormat.aliaser;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
-
 import static java.util.stream.Collectors.toCollection;
 
 
@@ -100,7 +97,8 @@ abstract class RDFJSONEncoder {
 		final Object datatype=datatype(shape).orElse(null);
 		final Map<Object, Shape> fields=fields(shape);
 
-		final boolean inlineable=IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype);
+		final boolean inlineable=
+				IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype);
 
 
 		final String id=id(resource);
@@ -188,7 +186,8 @@ abstract class RDFJSONEncoder {
 					: datatype.equals(XMLSchema.INTEGER) ? json(literal.integerValue())
 					: datatype.equals(XMLSchema.DECIMAL) ? json(literal.decimalValue())
 					: datatype.equals(RDF.LANGSTRING) ? json(literal, literal.getLanguage().orElse(""))
-					: datatype(shape).isPresent() ? Json.createValue(literal.stringValue()) // only lexical value if type is known
+					: datatype(shape).isPresent() ? Json.createValue(literal.stringValue()) // only lexical value if
+					// type is known
 					: json(literal, datatype);
 
 		} catch ( final IllegalArgumentException ignored ) { // malformed literals

@@ -280,13 +280,18 @@ public final class Feed<T> implements Stream<T> {
 
 	@Override public <A> A[] toArray(final IntFunction<A[]> generator) { return stream.toArray(generator); }
 
-	@Override public T reduce(final T identity, final BinaryOperator<T> accumulator) { return stream.reduce(identity, accumulator); }
+	@Override public T reduce(final T identity, final BinaryOperator<T> accumulator) {
+		return stream.reduce(identity,
+				accumulator);
+	}
 
 	@Override public Optional<T> reduce(final BinaryOperator<T> accumulator) { return stream.reduce(accumulator); }
 
-	@Override public <U> U reduce(final U identity, final BiFunction<U, ? super T, U> accumulator, final BinaryOperator<U> combiner) { return stream.reduce(identity, accumulator, combiner); }
+	@Override public <U> U reduce(final U identity, final BiFunction<U, ? super T, U> accumulator,
+			final BinaryOperator<U> combiner) { return stream.reduce(identity, accumulator, combiner); }
 
-	@Override public <R> R collect(final Supplier<R> supplier, final BiConsumer<R, ? super T> accumulator, final BiConsumer<R, R> combiner) { return stream.collect(supplier, accumulator, combiner); }
+	@Override public <R> R collect(final Supplier<R> supplier, final BiConsumer<R, ? super T> accumulator,
+			final BiConsumer<R, R> combiner) { return stream.collect(supplier, accumulator, combiner); }
 
 	@Override public <R, A> R collect(final Collector<? super T, A, R> collector) { return stream.collect(collector); }
 

@@ -19,31 +19,28 @@ package com.metreeca.rdf.formats;
 
 
 import com.metreeca.tree.Shape;
-
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFWriter;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import javax.json.JsonWriterFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Collection;
 
-import javax.json.*;
-
 import static com.metreeca.rdf.formats.RDFFormat.*;
-import static com.metreeca.rdf.formats.RDFFormat.RioContext;
-import static com.metreeca.rdf.formats.RDFFormat.RioFocus;
 import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
 import static com.metreeca.rest.Codecs.writer;
 import static com.metreeca.tree.Shape.pass;
-
 import static java.util.Collections.singletonMap;
-
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 
@@ -115,7 +112,7 @@ public final class RDFJSONWriter extends AbstractRDFWriter {
 			final Shape shape=config.get(RioShape);
 			final JsonObject context=config.get(RioContext);
 
-			final Shape driver=shape == null || pass(shape)? null : driver(shape);
+			final Shape driver=shape == null || pass(shape) ? null : driver(shape);
 
 			final JsonValue json=new RDFJSONEncoder(base, context) {}.json(model, driver, focus);
 

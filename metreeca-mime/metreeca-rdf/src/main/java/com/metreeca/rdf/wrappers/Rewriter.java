@@ -22,7 +22,6 @@ import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.*;
-
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Collection;
@@ -31,9 +30,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
@@ -49,7 +46,6 @@ import static com.metreeca.tree.shapes.MinExclusive.minExclusive;
 import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -156,7 +152,8 @@ public final class Rewriter implements Wrapper {
 
 				.shape(engine.rewrite(request.shape()))
 
-				.header(RDFFormat.ExternalBase, request.base()); // make the external base available to rewriting in RDFBody
+				.header(RDFFormat.ExternalBase, request.base()); // make the external base available to rewriting in
+		// RDFBody
 
 	}
 
@@ -173,7 +170,7 @@ public final class Rewriter implements Wrapper {
 			final String rewritten=engine.rewrite(decoded);
 
 			matcher.appendReplacement(buffer,
-					encoded.equals(decoded)? rewritten : Codecs.encode(rewritten) // re-encode only if actually encoded
+					encoded.equals(decoded) ? rewritten : Codecs.encode(rewritten) // re-encode only if actually encoded
 			);
 		}
 

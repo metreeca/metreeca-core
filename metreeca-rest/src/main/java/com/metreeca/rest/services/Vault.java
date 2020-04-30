@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 	 * Retrieves the default vault factory.
 	 *
 	 * @return the default vault factory, which retrieves parameters from {@linkplain System#getProperties() system
-	 * properties}
+	 * 		properties}
 	 */
 	public static Supplier<Vault> vault() {
 		return () -> id -> Optional.ofNullable(System.getProperty(id));
@@ -47,7 +47,7 @@ import java.util.function.Supplier;
 	 * @param id the unique identifier of the parameter to be retrieved
 	 *
 	 * @return an optional containing the value of the parameter identified by {@code id}, if one is present in the
-	 * vault; an empty optional, otherwise
+	 * 		vault; an empty optional, otherwise
 	 *
 	 * @throws NullPointerException if {@code id} is null
 	 */

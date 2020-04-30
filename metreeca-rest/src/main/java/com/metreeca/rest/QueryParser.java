@@ -25,12 +25,11 @@ import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.queries.Terms;
 import com.metreeca.tree.shapes.*;
 
+import javax.json.*;
 import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
-
-import javax.json.*;
 
 import static com.metreeca.rest.Codecs.decode;
 import static com.metreeca.tree.Order.decreasing;
@@ -38,7 +37,6 @@ import static com.metreeca.tree.Order.increasing;
 import static com.metreeca.tree.queries.Items.items;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.fields;
-
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -109,7 +107,8 @@ final class QueryParser {
 		final int offset=offset(json);
 		final int limit=limit(json);
 
-		final Shape filtered=and(shape, Shape.filter().then(filter)) // mark as filtering only >> don't include in results
+		final Shape filtered=and(shape, Shape.filter().then(filter)) // mark as filtering only >> don't include in
+				// results
 				.map(new Optimizer());
 
 		return terms != null ? Terms.terms(filtered, terms)
