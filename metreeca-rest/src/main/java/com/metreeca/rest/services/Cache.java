@@ -15,10 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._services;
+package com.metreeca.rest.services;
 
 import com.metreeca.rest.Codecs;
-import com.metreeca.rest.services.Logger;
 
 import java.io.*;
 import java.nio.file.Files;

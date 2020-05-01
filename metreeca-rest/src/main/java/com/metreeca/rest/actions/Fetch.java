@@ -21,7 +21,7 @@ package com.metreeca.rest.actions;
 import com.metreeca.rest.Codecs;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest._services.Cache;
+import com.metreeca.rest.services.Cache;
 import com.metreeca.rest.services.Logger;
 
 import java.io.*;
