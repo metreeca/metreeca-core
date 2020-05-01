@@ -17,8 +17,6 @@
 
 package com.metreeca.rest.services;
 
-import com.metreeca.rest.Result;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -28,11 +26,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.services.Storage.storage;
 import static java.lang.String.format;
@@ -57,7 +54,26 @@ import static java.time.Instant.now;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Result<Supplier<InputStream>, Supplier<OutputStream>> retrieve(final String key);
+	/**
+	 * Retrieves an item from this cache.
+	 *
+	 * @param key     the key of the item to be retrieved
+	 * @param decoder a function decoding a cached item from its binary representation; takes as argument an input
+	 *                stream for reading the binary representation of the item to be retrieved and is expected to
+	 *                return a non null object of type {@code T}
+	 * @param encoder a function encoding an item to be cached to its binary representation; takes as argument an
+	 *                output stream for writing the binary representation of the item to be cached and is expected
+	 *                to return a non null object of type {@code T}
+	 * @param <T>     the type of the cached items
+	 *
+	 * @return an object of type {@code T}, returned either from the {@code decoder}, if a binary blob matching {@code
+	 * key} was found in the cache, or by the {@code encoder}, otherwise
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public <T> T retrieve(final String key,
+			final Function<InputStream, T> decoder, final Function<OutputStream, T> encoder
+	);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,12 +109,20 @@ import static java.time.Instant.now;
 		}
 
 
-		@Override public Result<Supplier<InputStream>, Supplier<OutputStream>> retrieve(
-				final String key
+		@Override public <T> T retrieve(
+				final String key, final Function<InputStream, T> decoder, final Function<OutputStream, T> encoder
 		) {
 
 			if ( key == null ) {
 				throw new NullPointerException("null key");
+			}
+
+			if ( decoder == null ) {
+				throw new NullPointerException("null decoder");
+			}
+
+			if ( encoder == null ) {
+				throw new NullPointerException("null encoder");
 			}
 
 			// !!! inter-process locking using FileLock (https://stackoverflow.com/q/128038/739773)
@@ -118,31 +142,23 @@ import static java.time.Instant.now;
 
 						logger.info(Cache.class, format("retrieving <%s>", key));
 
-						return Value(() -> {
-							try {
+						try ( final InputStream input=Files.newInputStream(file) ) {
 
-								return Files.newInputStream(file);
+							return decoder.apply(input);
 
-							} catch ( final IOException e ) {
-
-								throw new UncheckedIOException(e);
-
-							}
-						});
+						}
 
 					} else {
 
-						return Error(() -> {
-							try {
+						try ( final OutputStream output=Files.newOutputStream(file) ) {
 
-								return Files.newOutputStream(file);
+							return encoder.apply(output);
 
-							} catch ( final IOException e ) {
+						} finally {
 
-								throw new UncheckedIOException(e);
+							if ( Files.size(file) == 0 ) { Files.delete(file); }
 
-							}
-						});
+						}
 
 					}
 

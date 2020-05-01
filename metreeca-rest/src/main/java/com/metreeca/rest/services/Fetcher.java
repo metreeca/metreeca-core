@@ -167,78 +167,54 @@ import static java.util.stream.Collectors.toMap;
 
 
 		@Override public Response apply(final Request request) {
-			return request.method().equals(GET) ? cache.retrieve(request.item()).fold(
+			return request.method().equals(GET) ? cache.retrieve(request.item(),
 
-					hit -> {
-						try ( final InputStream input=hit.get() ) {
+					input -> decode(request, input),
+					output -> encode(delegate.apply(request), output)
 
-							return decode(input, request);
+			) : delegate.apply(request);
+		}
 
-						} catch ( final IOException e ) {
 
-							throw new UncheckedIOException(e);
+		private Response encode(final Response response, final OutputStream output) {
 
-						}
-					},
+			if ( response.success() ) {
+				response.body(data()).fold(
 
-					miss -> {
+						value -> {
 
-						final Response response=delegate.apply(request);
+							try (
+									final ObjectOutputStream serialized=new ObjectOutputStream(output);
+							) {
 
-						if ( response.success() ) {
-							try ( final OutputStream output=miss.get() ) {
+								serialized.writeInt(response.status());
+								serialized.writeObject(response.headers());
+								serialized.writeObject(value);
+								serialized.flush();
 
-								encode(output, response);
+								return this;
 
 							} catch ( final IOException e ) {
 
 								throw new UncheckedIOException(e);
 
 							}
-						}
 
-						return response;
+						},
 
-					}
+						error -> {
 
-			) : delegate.apply(request);
-		}
-
-
-		private void encode(final OutputStream output, final Response response) {
-			response.body(data()).fold(
-
-					value -> {
-
-						try (
-								final ObjectOutputStream serialized=new ObjectOutputStream(output);
-						) {
-
-							serialized.writeInt(response.status());
-							serialized.writeObject(response.headers());
-							serialized.writeObject(value);
-							serialized.flush();
-
-							return this;
-
-						} catch ( final IOException e ) {
-
-							throw new UncheckedIOException(e);
+							throw new UncheckedIOException(new IOException(error.toString())); // !!! review
 
 						}
 
-					},
+				);
+			}
 
-					error -> {
-
-						throw new UncheckedIOException(new IOException(error.toString())); // !!! review
-
-					}
-
-			);
+			return response;
 		}
 
-		@SuppressWarnings("unchecked") private Response decode(final InputStream input, final Request request) {
+		@SuppressWarnings("unchecked") private Response decode(final Request request, final InputStream input) {
 			try ( final ObjectInputStream serialized=new ObjectInputStream(input) ) {
 
 				final int status=serialized.readInt();
