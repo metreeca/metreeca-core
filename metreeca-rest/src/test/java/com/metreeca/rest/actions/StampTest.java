@@ -24,14 +24,60 @@ import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class TextTest {
+final class StampTest {
 
 	private void exec(final Runnable task) {
 		new Context().exec(task).clear();
+	}
+
+
+	private Stream<String> fill(final String template, final String name, final String value) {
+		return new Stamp<String>(template).value(name, value).apply(value);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testPlainVariables() {
+
+		assertThat(fill("head name:{name} tail", "name", "value"))
+				.as("matched")
+				.containsExactly("head name:value tail");
+
+		assertThat(fill("head name:{name} tail", "none", "value"))
+				.as("unmatched")
+				.containsExactly("head name: tail");
+
+	}
+
+	@Test void testMultipleVariables() {
+
+		assertThat(fill("name:text", "name", "value"))
+				.as("no variables")
+				.containsExactly("name:text");
+
+		assertThat(fill("one:{one}, two:{two}", "one", "value"))
+				.as("multiple variables")
+				.containsExactly("one:value, two:");
+
+	}
+
+	@Test void testModifiers() {
+
+		assertThat(fill("http://{name}.com/?%{name}", "name", "a+b"))
+				.as("encoded")
+				.containsExactly("http://a+b.com/?a%2Bb");
+
+		assertThat(fill("\\{name}={name}", "name", "value"))
+				.as("escaped")
+				.containsExactly("{name}=value");
+
+
 	}
 
 
@@ -41,7 +87,7 @@ final class TextTest {
 				(Feed
 						.of("test")
 
-						.flatMap(new Text<String>("{base}:{x}{y}")
+						.flatMap(new Stamp<String>("{base}:{x}{y}")
 								.values("base", Stream::of)
 								.values("x", string -> Stream.of("1", "2"))
 								.values("y", string -> Stream.of("2", "3"))

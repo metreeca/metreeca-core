@@ -33,6 +33,9 @@ import static com.metreeca.rest.services.Logger.logger;
 import static java.lang.String.format;
 
 
+/**
+ * Resource fetching.
+ */
 public final class Fetch implements Function<Request, Optional<Response>> {
 
 	private Function<Request, Request> limit=new Limit<>(0);
@@ -42,7 +45,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
 
 	/**
-	 * Configures the rate limit for this fetcher (default={@code no limit})
+	 * Configures the rate limit for this fetcher (default to no limit)
 	 *
 	 * @param limit the rate limit for this fetcher
 	 *

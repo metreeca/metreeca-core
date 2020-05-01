@@ -18,39 +18,45 @@
 package com.metreeca.rest.actions;
 
 
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 
-/**
- * Focus switching task.
- *
- * <p>Generates a stream of parametrized units.</p>
- */
-public final class Text<V> implements Function<V, Stream<String>> {
+public final class Stamp<V> implements Function<V, Stream<String>> {
 
-	private final TextTemplate template;
+	private static final Pattern PlaceholderPattern=Pattern.compile("(?<modifier>[\\\\%])?\\{(?<name>\\w+)}");
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final String template;
 
 	private final Map<String, Function<V, Stream<String>>> parameters=new LinkedHashMap<>();
 
 
-	public Text(final String template) {
+	public Stamp(final String template) {
 
 		if ( template == null ) {
 			throw new NullPointerException("null template");
 		}
 
-		this.template=new TextTemplate(template);
+		this.template=template;
 	}
 
 
-	public Text<V> value(final String name) {
+	public Stamp<V> value(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -59,7 +65,7 @@ public final class Text<V> implements Function<V, Stream<String>> {
 		return values(name, v -> Stream.of(v.toString()));
 	}
 
-	public Text<V> value(final String name, final Object value) {
+	public Stamp<V> value(final String name, final Object value) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -71,7 +77,7 @@ public final class Text<V> implements Function<V, Stream<String>> {
 		);
 	}
 
-	public Text<V> value(final String name, final Function<V, String> expression) {
+	public Stamp<V> value(final String name, final Function<V, String> expression) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -85,7 +91,7 @@ public final class Text<V> implements Function<V, Stream<String>> {
 	}
 
 
-	public Text<V> values(final String name, final Object... values) {
+	public Stamp<V> values(final String name, final Object... values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -98,7 +104,7 @@ public final class Text<V> implements Function<V, Stream<String>> {
 		return values(name, Stream.of(values));
 	}
 
-	public Text<V> values(final String name, final Collection<Object> values) {
+	public Stamp<V> values(final String name, final Collection<Object> values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -111,7 +117,7 @@ public final class Text<V> implements Function<V, Stream<String>> {
 		return values(name, values.stream());
 	}
 
-	public Text<V> values(final String name, final Stream<Object> values) {
+	public Stamp<V> values(final String name, final Stream<Object> values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -127,7 +133,7 @@ public final class Text<V> implements Function<V, Stream<String>> {
 		);
 	}
 
-	public Text<V> values(final String name, final Function<V, Stream<String>> expression) {
+	public Stamp<V> values(final String name, final Function<V, Stream<String>> expression) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -143,9 +149,23 @@ public final class Text<V> implements Function<V, Stream<String>> {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public Stream<String> apply(final V item) {
 
-		// compute the cartesian product of parameter values computed on value
+		// fill template
+
+		return stream(item).map(this::fill);
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*
+	 * Produces the cartesian product of parameter values computed on an item.
+	 */
+	private Stream<Function<String, String>> stream(final V item) {
 
 		Stream<Function<String, String>> resolvers=Stream.of(key -> null);
 
@@ -154,7 +174,7 @@ public final class Text<V> implements Function<V, Stream<String>> {
 			final String name=entry.getKey();
 			final Function<V, Stream<String>> expression=entry.getValue();
 
-			resolvers=resolvers.parallel().flatMap(resolver -> requireNonNull(expression.apply(item))
+			resolvers=resolvers.flatMap(resolver -> requireNonNull(expression.apply(item))
 					.filter(Objects::nonNull)
 					.map(value -> key ->
 							key.equals(name) ? value : resolver.apply(key)
@@ -162,10 +182,45 @@ public final class Text<V> implements Function<V, Stream<String>> {
 
 		}
 
-		// fill template
+		return resolvers;
+	}
 
-		return resolvers.parallel().map(template::fill);
+	/*
+	 * Fills in the template.
+	 */
+	private String fill(final Function<String, String> resolver) {
 
+		final StringBuilder builder=new StringBuilder(template.length());
+		final Matcher matcher=PlaceholderPattern.matcher(template);
+
+		int index=0;
+
+		while ( matcher.find() ) {
+
+			final String modifier=matcher.group("modifier");
+			final String name=matcher.group("name");
+
+			final String value=resolver.apply(name);
+
+			try {
+
+				builder.append(template, index, matcher.start()).append(
+						"\\".equals(modifier) ? matcher.group().substring(1)
+								: "%".equals(modifier) ? URLEncoder.encode(value, UTF_8.name())
+								: value != null ? value
+								: ""
+				);
+
+			} catch ( final UnsupportedEncodingException unexpected ) {
+				throw new UncheckedIOException(unexpected);
+			}
+
+			index=matcher.end();
+		}
+
+		builder.append(template.substring(index));
+
+		return builder.toString();
 	}
 
 }

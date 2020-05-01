@@ -26,9 +26,9 @@ import static java.util.stream.Collectors.*;
 
 
 /**
- * Data integration feed.
+ * Data processing feed.
  *
- * <p>Handles a sequence of items to be processed by a data integration pipeline.</p>
+ * <p>Handles a sequence of data items to be processed by a pipeline.</p>
  *
  * @param <T> the type of the item included in the feed
  */
