@@ -17,6 +17,8 @@
 
 package com.metreeca.rest.services;
 
+import com.metreeca.rest.Context;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,12 +26,11 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Storage.storage;
+import static com.metreeca.rest.Context.storage;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.*;
 
@@ -44,10 +45,10 @@ public interface Store {
 	/**
 	 * Retrieves the default store factory.
 	 *
-	 * @return the default store factory, which creates {@link StorageStore} instances
+	 * @return the default store factory, which creates {@link FileStore} instances
 	 */
 	public static Supplier<Store> store() {
-		return StorageStore::new;
+		return FileStore::new;
 	}
 
 
@@ -89,11 +90,11 @@ public interface Store {
 	/**
 	 * Storage blob store.
 	 *
-	 * <p>Stores data blobs in the {@code store} folder of the {@linkplain Storage system file storage}.</p>>
+	 * <p>Stores data blobs in the {@code store} folder of the system file {@linkplain Context#storage storage}.</p>>
 	 */
-	public static class StorageStore implements Store {
+	public static class FileStore implements Store {
 
-		private final Path path=service(storage()).path(Paths.get("store"));
+		private final Path path=service(storage()).resolve("store");
 
 
 		@Override public InputStream read(final String id) throws IOException {

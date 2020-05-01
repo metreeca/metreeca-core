@@ -19,6 +19,8 @@ package com.metreeca.rest;
 
 import com.metreeca.rest.services.Logger;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,6 +40,16 @@ public final class Context {
 
 	private static final ThreadLocal<Context> context=new ThreadLocal<>();
 
+	/**
+	 * Retrieves the default storage factory.
+	 *
+	 * @return the default storage factory, which returns the current working directory of the process in the host
+	 * filesystem
+	 */
+	public static Supplier<Path> storage() {
+		return () -> Paths.get("").toAbsolutePath();
+	}
+
 
 	/**
 	 * {@linkplain #get(Supplier) Retrieves} a shared service from the current context.
@@ -47,7 +59,7 @@ public final class Context {
 	 * @param <T>     the type of the shared service created by {@code factory}
 	 *
 	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
-	 *        #set(Supplier, Supplier) specified}
+	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
@@ -92,7 +104,7 @@ public final class Context {
 	 * @param <T>     the type of the shared service created by {@code factory}
 	 *
 	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
-	 *        #set(Supplier, Supplier) specified}
+	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is null
 	 */
@@ -223,7 +235,7 @@ public final class Context {
 	 * Executes a set of task using shared ervices managed by this context.
 	 *
 	 * <p>During task execution, shared services may be retrieved from this context through the static {@linkplain
-	 * #service(Supplier) service locator} method of the Context class. The context used by the service locator 
+	 * #service(Supplier) service locator} method of the Context class. The context used by the service locator
 	 * method is
 	 * managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
 	 * thread.</p>

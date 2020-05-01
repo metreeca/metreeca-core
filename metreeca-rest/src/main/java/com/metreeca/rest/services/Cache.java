@@ -17,13 +17,14 @@
 
 package com.metreeca.rest.services;
 
+import com.metreeca.rest.Context;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.UUID;
 import java.util.function.Function;
@@ -31,7 +32,7 @@ import java.util.function.Supplier;
 
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
-import static com.metreeca.rest.services.Storage.storage;
+import static com.metreeca.rest.Context.storage;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
@@ -47,9 +48,9 @@ import static java.time.Instant.now;
 	/**
 	 * Retrieves the default cache factory.
 	 *
-	 * @return the default cache factory, which creates {@link StorageCache} instances
+	 * @return the default cache factory, which creates {@link FileCache} instances
 	 */
-	public static Supplier<Cache> cache() { return StorageCache::new; }
+	public static Supplier<Cache> cache() { return FileCache::new; }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,17 +82,17 @@ import static java.time.Instant.now;
 	/**
 	 * Storage blob cache.
 	 *
-	 * <p>Caches data blobs in the {@code cache} folder of the {@linkplain Storage system file storage}.</p>>
+	 * <p>Caches data blobs in the {@code cache} folder of the system file {@linkplain Context#storage storage}.</p>>
 	 */
-	public static final class StorageCache implements Cache {
+	public static final class FileCache implements Cache {
 
 		private Duration ttl=Duration.ZERO; // no expiry
 
-		private final Path path=service(storage()).path(Paths.get("cache"));
+		private final Path path=service(storage()).resolve("cache");
 		private final Logger logger=service(logger());
 
 
-		public StorageCache ttl(final Duration ttl) {
+		public FileCache ttl(final Duration ttl) {
 
 			if ( ttl == null ) {
 				throw new NullPointerException("null ttl");

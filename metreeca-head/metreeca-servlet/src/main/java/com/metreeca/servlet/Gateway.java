@@ -22,7 +22,6 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.services.Loader;
-import com.metreeca.rest.services.Storage;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -87,7 +86,7 @@ public abstract class Gateway implements Filter {
 
 			this.context
 
-					.set(Storage.storage(), () -> storage(context))
+					.set(Context.storage(), () -> storage(context))
 					.set(Loader.loader(), () -> loader(context))
 
 					.get(handler); // force handler loading during filter initialization
@@ -124,18 +123,8 @@ public abstract class Gateway implements Filter {
 	}
 
 
-	private Storage storage(final ServletContext context) {
-
-		final Path root=((File)context.getAttribute(ServletContext.TEMPDIR)).toPath();
-
-		return path -> {
-
-			if ( path == null ) {
-				throw new NullPointerException("null path");
-			}
-
-			return root.resolve(path);
-		};
+	private Path storage(final ServletContext context) {
+		return ((File)context.getAttribute(ServletContext.TEMPDIR)).toPath();
 	}
 
 	private Loader loader(final ServletContext context) {
