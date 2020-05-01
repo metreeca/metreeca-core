@@ -37,62 +37,17 @@ import static java.nio.file.StandardOpenOption.*;
 /**
  * Blob store.
  *
- * <p>Provides access to dedicated system store for binary data blobs.</p>
+ * <p>Provides access to a dedicated system store for binary data blobs.</p>
  */
 public interface Store {
 
 	/**
 	 * Retrieves the default store factory.
 	 *
-	 * @return the default store factory, which stores data blobs in the {@code store} folder of the {@linkplain Storage
-	 * 		system file storage}.
+	 * @return the default store factory, which creates {@link StorageStore} instances
 	 */
 	public static Supplier<Store> store() {
-		return () -> new Store() {
-
-			private final Path path=service(storage()).path(Paths.get("store"));
-
-
-			@Override public InputStream read(final String id) throws IOException {
-
-				if ( id == null ) {
-					throw new NullPointerException("null id");
-				}
-
-				return Files.newInputStream(path.resolve(id), READ);
-			}
-
-			@Override public OutputStream write(final String id) throws IOException {
-
-				if ( id == null ) {
-					throw new NullPointerException("null id");
-				}
-
-				final Path blob=path.resolve(UUID.randomUUID().toString());
-
-				return new FilterOutputStream(Files.newOutputStream(blob, CREATE_NEW, WRITE)) {
-
-					@Override public void close() throws IOException {
-						try {
-
-							super.close();
-
-							Files.move(blob, path.resolve(id), REPLACE_EXISTING);
-
-						} catch ( final Throwable e ) {
-
-							Files.deleteIfExists(blob);
-
-							throw e;
-
-						}
-					}
-
-				};
-
-			}
-
-		};
+		return StorageStore::new;
 	}
 
 
@@ -127,5 +82,59 @@ public interface Store {
 	 * @throws IOException              if an I/O exception occurs while opening the output stream
 	 */
 	public OutputStream write(final String id) throws IOException;
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Storage blob store.
+	 *
+	 * <p>Stores data blobs in the {@code store} folder of the {@linkplain Storage system file storage}.</p>>
+	 */
+	public static class StorageStore implements Store {
+
+		private final Path path=service(storage()).path(Paths.get("store"));
+
+
+		@Override public InputStream read(final String id) throws IOException {
+
+			if ( id == null ) {
+				throw new NullPointerException("null id");
+			}
+
+			return Files.newInputStream(path.resolve(id), READ);
+		}
+
+		@Override public OutputStream write(final String id) throws IOException {
+
+			if ( id == null ) {
+				throw new NullPointerException("null id");
+			}
+
+			final Path blob=path.resolve(UUID.randomUUID().toString());
+
+			return new FilterOutputStream(Files.newOutputStream(blob, CREATE_NEW, WRITE)) {
+
+				@Override public void close() throws IOException {
+					try {
+
+						super.close();
+
+						Files.move(blob, path.resolve(id), REPLACE_EXISTING);
+
+					} catch ( final Throwable e ) {
+
+						Files.deleteIfExists(blob);
+
+						throw e;
+
+					}
+				}
+
+			};
+
+		}
+
+	}
 
 }

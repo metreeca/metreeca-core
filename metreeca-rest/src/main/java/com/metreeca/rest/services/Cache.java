@@ -17,9 +17,12 @@
 
 package com.metreeca.rest.services;
 
-import com.metreeca.rest.Codecs;
+import com.metreeca.rest.Result;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,6 +31,8 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.services.Storage.storage;
 import static java.lang.String.format;
@@ -35,71 +40,65 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
 
 
+/**
+ * Blob cache.
+ *
+ * <p>Provides access to a dedicated system cache for binary data blobs.</p>
+ */
 @FunctionalInterface public interface Cache {
 
-	public static Supplier<Cache> cache() { return None::new; }
+	/**
+	 * Retrieves the default cache factory.
+	 *
+	 * @return the default cache factory, which creates {@link StorageCache} instances
+	 */
+	public static Supplier<Cache> cache() { return StorageCache::new; }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public InputStream retrieve(final String key, final Supplier<InputStream> source);
+	public Result<Supplier<InputStream>, Supplier<OutputStream>> retrieve(final String key);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class None implements Cache {
+	/**
+	 * Storage blob cache.
+	 *
+	 * <p>Caches data blobs in the {@code cache} folder of the {@linkplain Storage system file storage}.</p>>
+	 */
+	public static final class StorageCache implements Cache {
 
-		@Override public InputStream retrieve(final String key, final Supplier<InputStream> source) {
-
-			if ( key == null ) {
-				throw new NullPointerException("null key");
-			}
-
-			if ( source == null ) {
-				throw new NullPointerException("null source");
-			}
-
-			return source.get();
-		}
-
-	}
-
-	public static final class File implements Cache {
-
-		private Duration ttl=Duration.ZERO;
+		private Duration ttl=Duration.ZERO; // no expiry
 
 		private final Path path=service(storage()).path(Paths.get("cache"));
 		private final Logger logger=service(logger());
 
 
-		public File ttl(final Duration ttl) {
+		public StorageCache ttl(final Duration ttl) {
 
 			if ( ttl == null ) {
 				throw new NullPointerException("null ttl");
 			}
 
 			if ( ttl.isNegative() ) {
-				throw new IllegalArgumentException("negative ttl {"+ttl+"}");
+				throw new IllegalArgumentException("negative ttl");
 			}
 
 			synchronized ( path ) {
-
 				this.ttl=ttl;
-
-				return this;
-
 			}
+
+			return this;
 		}
 
 
-		@Override public InputStream retrieve(final String key, final Supplier<InputStream> source) {
+		@Override public Result<Supplier<InputStream>, Supplier<OutputStream>> retrieve(
+				final String key
+		) {
 
 			if ( key == null ) {
 				throw new NullPointerException("null key");
-			}
-
-			if ( source == null ) {
-				throw new NullPointerException("null source");
 			}
 
 			// !!! inter-process locking using FileLock (https://stackoverflow.com/q/128038/739773)
@@ -111,34 +110,39 @@ import static java.time.Instant.now;
 							.createDirectories(path)
 							.resolve(UUID.nameUUIDFromBytes(key.getBytes(UTF_8)).toString());
 
-					final boolean alive=Files.exists(file)
-							&& Files.getLastModifiedTime(file).toInstant().plus(ttl).isAfter(now());
+					final boolean alive=Files.exists(file) && (
+							ttl.isZero() || Files.getLastModifiedTime(file).toInstant().plus(ttl).isAfter(now())
+					);
 
 					if ( alive ) {
 
 						logger.info(Cache.class, format("retrieving <%s>", key));
 
-						return Files.newInputStream(file);
-
-					} else {
-
-						final InputStream input=source.get();
-
-						if ( input instanceof TransientInputStream ) { return input; } else {
-
-							try ( final OutputStream output=Files.newOutputStream(file) ) {
-
-								Codecs.data(output, input);
+						return Value(() -> {
+							try {
 
 								return Files.newInputStream(file);
 
-							} finally {
+							} catch ( final IOException e ) {
 
-								input.close();
+								throw new UncheckedIOException(e);
 
 							}
+						});
 
-						}
+					} else {
+
+						return Error(() -> {
+							try {
+
+								return Files.newOutputStream(file);
+
+							} catch ( final IOException e ) {
+
+								throw new UncheckedIOException(e);
+
+							}
+						});
 
 					}
 
@@ -150,15 +154,6 @@ import static java.time.Instant.now;
 			}
 
 		}
-
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final class TransientInputStream extends FilterInputStream {
-
-		public TransientInputStream(final InputStream input) { super(input); }
 
 	}
 

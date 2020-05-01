@@ -34,7 +34,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
  */
 public final class Limit<T> implements UnaryOperator<T> {
 
-
 	private final Duration period;
 
 	private final BlockingQueue<Token> tokens=new DelayQueue<>();
@@ -65,8 +64,10 @@ public final class Limit<T> implements UnaryOperator<T> {
 	}
 
 
-	public T apply(final T t) {
-		if ( period.isZero() ) { return t; } else {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public T apply(final T t) {
+		if ( tokens.isEmpty() || period.isZero() ) { return t; } else {
 
 			while ( true ) {
 				try {

@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 
 /**
- * System file storage.
+ * File storage.
  *
  * <p>Provides access to system-specific file storage areas.</p>
  */
