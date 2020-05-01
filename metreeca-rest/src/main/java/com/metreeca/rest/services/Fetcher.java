@@ -7,7 +7,6 @@ import com.metreeca.rest.Response;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -176,18 +175,50 @@ import static java.util.stream.Collectors.toMap;
 	 *
 	 * <p>Caches resources fetched by a delegate fetcher.</p>
 	 */
-	public static final class CachingFetcher implements Fetcher { // !!! check caching headers
+	public static final class CacheFetcher implements Fetcher { // !!! check caching headers
 
 		private Cache cache=service(Cache.cache());
 		private Fetcher delegate=service(fetcher());
 
 
-		public void setCache(final Cache cache) {
+		/**
+		 * Configures the cache for this fetcher (defaults to the {@link Cache#cache() shared cache}).
+		 *
+		 * @param cache the cache for this fetcher
+		 *
+		 * @return this fetcher
+		 *
+		 * @throws NullPointerException if {@code cache} is null
+		 */
+		public CacheFetcher cache(final Cache cache) {
+
+			if ( cache == null ) {
+				throw new NullPointerException("null cache");
+			}
+
 			this.cache=cache;
+
+			return this;
 		}
 
-		public void setDelegate(final Fetcher delegate) {
+		/**
+		 * Configures the delegate for this fetcher (defaults to the {@link #fetcher() shared fetcher}).
+		 *
+		 * @param delegate the delegate for this fetcher
+		 *
+		 * @return this fetcher
+		 *
+		 * @throws NullPointerException if {@code delegate} is null
+		 */
+		public CacheFetcher delegate(final Fetcher delegate) {
+
+			if ( delegate == null ) {
+				throw new NullPointerException("null delegate");
+			}
+
 			this.delegate=delegate;
+
+			return this;
 		}
 
 
