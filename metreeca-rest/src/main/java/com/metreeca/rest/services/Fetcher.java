@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Request.GET;
@@ -70,16 +71,20 @@ import static java.util.stream.Collectors.toMap;
 				// !!! connection.setReadTimeout();
 				// !!! connection.setIfModifiedSince();
 
+				if ( !request.header("User-Agent").isPresent() ) {
+					connection.addRequestProperty("User-Agent", "Metreeca/Link (https://github.com/metreeca/link)");
+				}
+
+				if ( !request.header("Accept-Encoding").isPresent() ) {
+					connection.addRequestProperty("Accept-Encoding", "gzip");
+				}
+
 				if ( !request.header("Accept").isPresent() ) {
 					connection.addRequestProperty("Accept", "text/html,"
 							+"application/xhtml+xml,"
 							+"application/xml;q=0.9;"
 							+"*/*;q=0.1"
 					);
-				}
-
-				if ( !request.header("User-Agent").isPresent() ) {
-					connection.addRequestProperty("User-Agent", "metreeca/link HTTP client");
 				}
 
 				request.headers().forEach((name, values) -> values.forEach(value ->
@@ -133,8 +138,21 @@ import static java.util.stream.Collectors.toMap;
 							try {
 
 								return Optional
-										.ofNullable(code/100 == 2 ? connection.getInputStream() :
-												connection.getErrorStream())
+
+										.ofNullable(code/100 == 2
+												? connection.getInputStream()
+												: connection.getErrorStream()
+										)
+
+										.map(input -> {
+											try {
+												return "gzip".equals(connection.getContentEncoding()) ?
+														new GZIPInputStream(input) : input;
+											} catch ( final IOException e ) {
+												throw new UncheckedIOException(e);
+											}
+										})
+
 										.orElseGet(Codecs::input);
 
 							} catch ( final IOException e ) {
@@ -160,10 +178,17 @@ import static java.util.stream.Collectors.toMap;
 	 */
 	public static final class CachingFetcher implements Fetcher { // !!! check caching headers
 
-		private final Duration ttl=Duration.ZERO;
-
 		private Cache cache=service(Cache.cache());
 		private Fetcher delegate=service(fetcher());
+
+
+		public void setCache(final Cache cache) {
+			this.cache=cache;
+		}
+
+		public void setDelegate(final Fetcher delegate) {
+			this.delegate=delegate;
+		}
 
 
 		@Override public Response apply(final Request request) {
