@@ -33,7 +33,7 @@ import static com.metreeca.rest.Context.service;
 
 public abstract class Operation<T extends Operation<T>> {
 
-	private Graph graph;
+	private Graph graph=service(Graph.graph());
 
 	private String base;
 	private Boolean inferred;
@@ -52,7 +52,7 @@ public abstract class Operation<T extends Operation<T>> {
 
 
 	protected Graph graph() {
-		return graph != null ? graph : (graph=service(Graph.graph()));
+		return graph;
 	}
 
 	protected String base() {

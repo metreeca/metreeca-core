@@ -31,8 +31,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.Context.storage;
+import static com.metreeca.rest.services.Logger.logger;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
@@ -92,6 +92,17 @@ import static java.time.Instant.now;
 		private final Logger logger=service(logger());
 
 
+		/**
+		 * Configures the time-to-live for this cache (default={@link Duration#ZERO}).
+		 *
+		 * @param ttl the time-to-live for items stored in this cache; if {@link Duration#isZero() zero}, items will be
+		 *            retained indefinitely
+		 *
+		 * @return this cache
+		 *
+		 * @throws NullPointerException     if {@code ttl} is null
+		 * @throws IllegalArgumentException if {@code ttl} is negative
+		 */
 		public FileCache ttl(final Duration ttl) {
 
 			if ( ttl == null ) {

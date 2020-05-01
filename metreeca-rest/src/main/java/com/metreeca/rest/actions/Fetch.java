@@ -20,20 +20,13 @@ package com.metreeca.rest.actions;
 
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.services.Cache;
 import com.metreeca.rest.services.Fetcher;
 import com.metreeca.rest.services.Logger;
 
-import java.io.*;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Request.GET;
-import static com.metreeca.rest.formats.DataFormat.data;
-import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.rest.services.Fetcher.fetcher;
 import static com.metreeca.rest.services.Logger.logger;
@@ -42,14 +35,37 @@ import static java.lang.String.format;
 
 public final class Fetch implements Function<Request, Optional<Response>> {
 
-	private final Function<Request, Request> limit=new Limit<>(0);
+	private Function<Request, Request> limit=new Limit<>(0);
 
 	private final Fetcher fetcher=service(fetcher());
 	private final Logger logger=service(logger());
 
 
+	/**
+	 * Configures the rate limit for this fetcher (default={@code no limit})
+	 *
+	 * @param limit the rate limit for this fetcher
+	 *
+	 * @return this fetcher
+	 *
+	 * @throws NullPointerException if {@code limit} is null
+	 */
+	public Fetch limit(final Function<Request, Request> limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		this.limit=limit;
+
+		return this;
+	}
+
+
 	@Override public Optional<Response> apply(final Request request) {
-		return Optional.ofNullable(request)
+		return Optional
+
+				.ofNullable(request)
 
 				.map(limit)
 				.map(fetcher)
