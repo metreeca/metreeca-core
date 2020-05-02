@@ -90,7 +90,7 @@ public interface Store {
 	/**
 	 * Storage blob store.
 	 *
-	 * <p>Stores data blobs in the {@code store} folder of the system file {@linkplain Context#storage storage}.</p>>
+	 * <p>Stores data blobs in the {@code store} folder of the system file {@linkplain Context#storage storage}.</p>
 	 */
 	public static class FileStore implements Store {
 

@@ -82,7 +82,7 @@ import static java.time.Instant.now;
 	/**
 	 * Storage blob cache.
 	 *
-	 * <p>Caches data blobs in the {@code cache} folder of the system file {@linkplain Context#storage storage}.</p>>
+	 * <p>Caches data blobs in the {@code cache} folder of the system file {@linkplain Context#storage storage}.</p>
 	 */
 	public static final class FileCache implements Cache {
 
@@ -93,7 +93,7 @@ import static java.time.Instant.now;
 
 
 		/**
-		 * Configures the time-to-live for this cache (default={@link Duration#ZERO}).
+		 * Configures the time-to-live for this cache (defaults to {@link Duration#ZERO}).
 		 *
 		 * @param ttl the time-to-live for items stored in this cache; if {@link Duration#isZero() zero}, items will be
 		 *            retained indefinitely

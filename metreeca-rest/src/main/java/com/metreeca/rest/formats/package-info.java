@@ -15,8 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.vocabularies;
+/**
+ * Basic message formats.
+ */
 
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-
-public class XSD extends XMLSchema {}
+package com.metreeca.rest.formats;
