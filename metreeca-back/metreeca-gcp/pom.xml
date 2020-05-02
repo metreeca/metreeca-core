@@ -41,10 +41,6 @@
 			<artifactId>metreeca-rest</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-json</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>com.google.cloud</groupId>

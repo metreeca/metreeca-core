@@ -12,6 +12,6 @@ defaults:
       path: ""
     values:
       project: "metreeca-link"
-      version: "0.52.0"
+      version: "0.0.0-SNAPSHOT"
       tagline: "Metreeca Linked Data Framework"
-      release: "https://github.com/metreeca/link/releases/tag/v0.52.0"
+      release: "https://github.com/metreeca/link/releases/tag/v0.0.0-SNAPSHOT"

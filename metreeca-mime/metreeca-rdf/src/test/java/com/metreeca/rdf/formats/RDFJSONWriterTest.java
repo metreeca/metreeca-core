@@ -40,7 +40,7 @@ import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.metreeca.json.JSONAssert.assertThat;
+import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.item;

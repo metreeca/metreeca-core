@@ -36,16 +36,15 @@
 
     <dependencies>
 
-        <dependency> <!-- !!! migrate to metreeca-json -->
-            <groupId>org.glassfish</groupId>
-            <artifactId>javax.json</artifactId>
-            <version>1.1.4</version>
-        </dependency>
-
-
         <dependency>
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-tree</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+            <version>1.1.4</version>
         </dependency>
 
     </dependencies>

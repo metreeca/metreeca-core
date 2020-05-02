@@ -37,11 +37,6 @@
 
     <dependencies>
 
-        <dependency>
-            <groupId>com.metreeca</groupId>
-            <artifactId>metreeca-json</artifactId>
-        </dependency>
-
         <dependency>  <!-- !!! required for ValueComparator / remove -->
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryalgebra-evaluation</artifactId>
@@ -83,14 +78,6 @@
         <dependency>
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-rest</artifactId>
-            <version>${project.version}</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.metreeca</groupId>
-            <artifactId>metreeca-json</artifactId>
             <version>${project.version}</version>
             <type>test-jar</type>
             <scope>test</scope>

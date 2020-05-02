@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.json.JSONAssert;
+import com.metreeca.rest.formats.JSONAssert;
 import com.metreeca.rdf.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import javax.json.JsonValue;
 import java.util.function.Consumer;
 
-import static com.metreeca.json.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;

@@ -49,7 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.metreeca.json.formats.JSONFormat.context;
+import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Result.Error;
@@ -233,8 +233,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	}
 
 	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
-		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey(); // !!! pass base as argument
-		// and factor decoder instance
+		// !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey();
 	}
 
 

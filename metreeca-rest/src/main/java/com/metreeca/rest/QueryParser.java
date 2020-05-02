@@ -107,8 +107,7 @@ final class QueryParser {
 		final int offset=offset(json);
 		final int limit=limit(json);
 
-		final Shape filtered=and(shape, Shape.filter().then(filter)) // mark as filtering only >> don't include in
-				// results
+		final Shape filtered=and(shape, Shape.filter().then(filter)) // filtering only >> don't include in results
 				.map(new Optimizer());
 
 		return terms != null ? Terms.terms(filtered, terms)

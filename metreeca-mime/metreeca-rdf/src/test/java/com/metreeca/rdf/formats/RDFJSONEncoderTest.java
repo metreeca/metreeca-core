@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.json.JSONAssert.assertThat;
+import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.rdf.formats.RDFJSONTest.*;

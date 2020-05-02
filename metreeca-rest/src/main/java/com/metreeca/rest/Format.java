@@ -133,7 +133,7 @@ public abstract class Format<V> {
 	 * @param message the message whose body representation managed by this body format is to be retrieved
 	 *
 	 * @return a value providing access to the body representation managed by this body format, if it was possible to
-	 * 		derive one from {@code message}; an error providing access to the processing failure, otherwise
+	 * derive one from {@code message}; an error providing access to the processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */

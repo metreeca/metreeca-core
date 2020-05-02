@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Copyright © 2013-2020 Metreeca srl. All rights reserved.
 
@@ -136,17 +135,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+
             <!-- Format Adapters -->
 
             <dependency>
                 <groupId>com.metreeca</groupId>
                 <artifactId>metreeca-xml</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.metreeca</groupId>
-                <artifactId>metreeca-json</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -169,33 +163,16 @@
 
             <dependency>
                 <groupId>com.metreeca</groupId>
-                <artifactId>metreeca-gcp</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.metreeca</groupId>
-                <artifactId>metreeca-sparql</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.metreeca</groupId>
                 <artifactId>metreeca-rdf4j</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.metreeca</groupId>
-                <artifactId>metreeca-stardog</artifactId>
+                <artifactId>metreeca-gcp</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.metreeca</groupId>
-                <artifactId>metreeca-virtuoso</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <!-- Exported BOMs -->
 
@@ -429,7 +406,7 @@
                             <reportOutputDirectory>${project.basedir}/docs/javadocs</reportOutputDirectory>
                             <destDir>javadocs</destDir>
 
-                            <groups>
+                            <groups> <!-- colon-separated patterns -->
                                 <group>
                                     <title>Modelling Framework</title>
                                     <packages>com.metreeca.tree*</packages>
@@ -443,13 +420,9 @@
                                     <packages>com.metreeca.gate*</packages>
                                 </group>
                                 <group>
-                                    <title>Data Integration Engine</title>
-                                    <packages>com.metreeca.feed*</packages>
-                                </group>
-                                <group>
                                     <title>Format Adapters</title>
                                     <packages>
-                                        com.metreeca.rdf*
+                                        com.metreeca.xml*:com.metreeca.rdf*
                                     </packages>
                                 </group>
                                 <group>
@@ -461,13 +434,12 @@
                                 <group>
                                     <title>Backend Adapters</title>
                                     <packages>
-                                        com.metreeca.rdf4j*
+                                        com.metreeca.rdf4j*:com.metreeca.gcp*
                                     </packages>
                                 </group>
                             </groups>
 
                             <excludePackageNames> <!-- colon-separated patterns -->
-                                com.metreeca.gcp;com.metreeca.gcp*
                             </excludePackageNames>
 
                         </configuration>

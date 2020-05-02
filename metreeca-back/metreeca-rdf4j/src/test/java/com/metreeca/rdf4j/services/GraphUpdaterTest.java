@@ -24,7 +24,7 @@ import com.metreeca.rest.Response;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;

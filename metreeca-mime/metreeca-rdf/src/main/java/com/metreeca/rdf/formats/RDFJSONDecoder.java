@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.json.formats.JSONFormat;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
 import org.eclipse.rdf4j.model.*;
@@ -34,7 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.formats.JSONFormat.resolver;
+import static com.metreeca.rest.formats.JSONFormat.resolver;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
 import static com.metreeca.tree.shapes.Datatype.datatype;

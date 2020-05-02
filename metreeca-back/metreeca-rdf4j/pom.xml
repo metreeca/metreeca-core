@@ -77,14 +77,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-json</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
 
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>

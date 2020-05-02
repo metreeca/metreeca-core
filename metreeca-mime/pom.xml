@@ -38,7 +38,6 @@
 	<modules>
 
 		<module>metreeca-xml</module>
-		<module>metreeca-json</module>
 		<module>metreeca-rdf</module>
 
 	</modules>

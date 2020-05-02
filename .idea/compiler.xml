@@ -8,7 +8,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="metreeca-rdf" />
         <module name="metreeca-gcp" />
-        <module name="metreeca-json" />
         <module name="metreeca-tree" />
         <module name="metreeca-servlet" />
         <module name="metreeca-rest" />

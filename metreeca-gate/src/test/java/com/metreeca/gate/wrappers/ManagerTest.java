@@ -35,7 +35,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static com.metreeca.gate.Roster.roster;
-import static com.metreeca.json.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.services.Clock.clock;

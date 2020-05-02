@@ -15,11 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.json.formats;
+package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.ReaderFormat;
-import com.metreeca.rest.formats.WriterFormat;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
@@ -132,7 +130,6 @@ public final class JSONFormat extends Format<JsonObject> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 	/**
 	 * The JSON-LD {@value} keyword.
