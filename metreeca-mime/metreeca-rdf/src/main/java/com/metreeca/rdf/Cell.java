@@ -18,7 +18,6 @@
 
 package com.metreeca.rdf;
 
-import com.metreeca.rdf.vocabularies.Schema;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
@@ -37,8 +36,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Path.direct;
 import static com.metreeca.rdf.Path.union;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.Values.*;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableCollection;
 
@@ -47,8 +45,11 @@ public final class Cell implements Resource {
 
 	private static final long serialVersionUID=3100418201450076593L;
 
-	private static final Path label=union(RDFS.LABEL, DC.TITLE, Schema.NAME);
-	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, Schema.DESCRIPTION);
+	private static final IRI SchemaName=iri("http://schema.org/", "name");
+	private static final IRI SchemaDescription=iri("http://schema.org/", "description");
+
+	private static final Path label=union(RDFS.LABEL, DC.TITLE, SchemaName);
+	private static final Path notes=union(RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription);
 
 
 	public static Builder cell(final Resource focus) {
