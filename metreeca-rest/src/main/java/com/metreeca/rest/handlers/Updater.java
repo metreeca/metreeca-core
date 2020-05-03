@@ -45,18 +45,18 @@ import static com.metreeca.rest.Wrapper.wrapper;
  */
 public final class Updater extends Actor {
 
-	public Updater() {
-		delegate(updater()
+    public Updater() {
+        delegate(updater()
 
-				.with(connector())
-				.with(wrapper(Request::collection,
-						throttler(Shape.Update, Shape.Holder),
-						throttler(Shape.Update, Shape.Detail)
-				))
-				.with(validator())
+                .with(connector())
+                .with(wrapper(Request::collection,
+                        throttler(Shape.Update, Shape.Holder),
+                        throttler(Shape.Update, Shape.Detail)
+                ))
+                .with(validator())
 
-		);
+        );
 
-	}
+    }
 
 }

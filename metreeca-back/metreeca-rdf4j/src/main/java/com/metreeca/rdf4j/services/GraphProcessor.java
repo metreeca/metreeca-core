@@ -102,14 +102,11 @@ abstract class GraphProcessor {
 
 
     private Shape anchor(final IRI resource, final Shape shape) {
-        return pass(shape) ?
+        return resource.stringValue().endsWith("/")
 
-                resource.stringValue().endsWith("/")
+                ? pass(shape) ? field(inverse(LDP.CONTAINS), focus()) : shape // holders default to ldp:BasicContainer
+                : pass(shape) ? all(focus()) : and(all(focus()), shape); // members default to self
 
-                        ? field(inverse(LDP.CONTAINS), focus()) // holders default to ldp:BasicContainer
-                        : all(focus()) // members default to self
-
-                : shape;
     }
 
 
@@ -553,7 +550,7 @@ abstract class GraphProcessor {
 
         private Snippet roots(final Shape shape) { // root universal constraints
             return all(shape)
-                    .map(values1 -> values(values1))
+                    .map(this::values)
                     .map(values -> values(shape, values))
                     .orElse(null);
         }

@@ -20,13 +20,9 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -75,17 +71,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class GraphProcessorTest {
 
-	private static final IRI Root=iri(Internal, "root");
+    private static final IRI Root=iri("app:/");
 
-	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
-
-
-	private void exec(final Runnable task) {
-		GraphTest.exec(model(small()), task);
-	}
+    private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
 
 
-	private Collection<Statement> query(final IRI resource, final Query query) {
+    private void exec(final Runnable task) {
+        GraphTest.exec(model(small()), task);
+    }
+
+
+    private Collection<Statement> query(final IRI resource, final Query query) {
 		return service(Graph.graph()).exec(connection -> {
 			return new GraphProcessor() {}.fetch(connection, resource, query)
 
@@ -148,19 +144,19 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t\n"
-							+"\t?employee ?d ?r.\n"
-							+"\t?r ?i ?employee.\n"
-							+"\n"
-							+"\t?r rdf:type ?t.\n"
-							+"\t?r rdfs:label ?l.\n"
-							+"\t?r rdfs:comment ?c.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t\n"
+                            +"\t?employee ?d ?r.\n"
+                            +"\t?r ?i ?employee.\n"
+                            +"\n"
+                            +"\t?r rdf:type ?t.\n"
+                            +"\t?r rdfs:label ?l.\n"
+                            +"\t?r rdfs:comment ?c.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
 							+"\tvalues ?employee {\n"
 							+"\t\t<employees/1002>\n"
 							+"\t\t<employees/1056>\n"
@@ -184,10 +180,10 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { app:root ldp:contains ?employee. ?employee a :Employee }"
-							+" where { ?employee a :Employee }"
+                    "construct { <app:/> ldp:contains ?employee. ?employee a :Employee }"
+                            +" where { ?employee a :Employee }"
 
-			)));
+            )));
 		}
 
 		@Test void testSorting() {
@@ -246,9 +242,9 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(decode(
 
-					"@prefix app: <app:/terms#> . app:root app:count 0 ."
+                    "@prefix app: <app:/terms#> . <app:/> app:count 0 ."
 
-			)));
+            )));
 		}
 
 		@Test void testEmptyProjection() {
@@ -258,19 +254,19 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root app:count ?count; app:min ?min; app:max ?max;\n"
-							+"\n"
-							+"\t\t\tapp:stats app:iri.\n"
-							+"\t\t\t\n"
-							+"\tapp:iri app:count ?count; app:min ?min; app:max ?max.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\tselect (count(?p) as ?count) (min(?p) as ?min) (max(?p) as ?max) {\n"
-							+"\n"
-							+"\t\t?p a :Employee\n"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> app:count ?count; app:min ?min; app:max ?max;\n"
+                            +"\n"
+                            +"\t\t\tapp:stats app:iri.\n"
+                            +"\t\t\t\n"
+                            +"\tapp:iri app:count ?count; app:min ?min; app:max ?max.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\tselect (count(?p) as ?count) (min(?p) as ?min) (max(?p) as ?max) {\n"
+                            +"\n"
+                            +"\t\t?p a :Employee\n"
 							+"\n"
 							+"\t}\n"
 							+"\n"
@@ -286,19 +282,19 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root \n"
-							+"\t\tapp:count ?count; app:min ?min; app:max ?max.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\tselect (count(?account) as ?count) (min(?account) as ?min) (max(?account) as ?max) {\n"
-							+"\n"
-							+"\t\t<employees/1370> :account ?account\n"
-							+"\n"
-							+"\t}\n"
-							+"\n"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> \n"
+                            +"\t\tapp:count ?count; app:min ?min; app:max ?max.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\tselect (count(?account) as ?count) (min(?account) as ?min) (max(?account) as ?max) {\n"
+                            +"\n"
+                            +"\t\t<employees/1370> :account ?account\n"
+                            +"\n"
+                            +"\t}\n"
+                            +"\n"
 							+"}"
 
 			)));
@@ -323,19 +319,19 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root app:terms [\n"
-							+"\t\tapp:value ?employee;\n"
-							+"\t\tapp:count 1\n"
-							+"\t].\n"
-							+"\n"
-							+"\t?employee rdfs:label ?label.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?employee a :Employee; \n"
-							+"\t\trdfs:label ?label.\n"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> app:terms [\n"
+                            +"\t\tapp:value ?employee;\n"
+                            +"\t\tapp:count 1\n"
+                            +"\t].\n"
+                            +"\n"
+                            +"\t?employee rdfs:label ?label.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?employee a :Employee; \n"
+                            +"\t\trdfs:label ?label.\n"
 							+"\n"
 							+"}"
 
@@ -349,19 +345,19 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root app:items [\n"
-							+"\t\tapp:value ?account;\n"
-							+"\t\tapp:count 1\n"
-							+"\t].\n"
-							+"\n"
-							+"\t?account rdfs:label ?label.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t<employees/1370> :account ?account.\n"
-							+"\n"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> app:items [\n"
+                            +"\t\tapp:value ?account;\n"
+                            +"\t\tapp:count 1\n"
+                            +"\t].\n"
+                            +"\n"
+                            +"\t?account rdfs:label ?label.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t<employees/1370> :account ?account.\n"
+                            +"\n"
 							+"\t?account rdfs:label ?label.\n"
 							+"\n"
 							+"}"
@@ -402,7 +398,8 @@ final class GraphProcessorTest {
 	}
 
 
-	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shapes
+    // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Nested final class Annotations {
 
@@ -442,16 +439,16 @@ final class GraphProcessorTest {
 
 				)).isIsomorphicTo(graph(
 
-						"construct {\n"
-								+"\n"
-								+"\tapp:root ldp:contains ?item.\n"
-								+"\t?item :code ?code.\n"
-								+"\n"
-								+"} where {\n"
-								+"\n"
-								+"\t?item :code ?code filter ( datatype(?code) = xsd:string )\n"
-								+"\n"
-								+"}"
+                        "construct {\n"
+                                +"\n"
+                                +"\t<app:/> ldp:contains ?item.\n"
+                                +"\t?item :code ?code.\n"
+                                +"\n"
+                                +"} where {\n"
+                                +"\n"
+                                +"\t?item :code ?code filter ( datatype(?code) = xsd:string )\n"
+                                +"\n"
+                                +"}"
 
 				));
 
@@ -465,18 +462,18 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee a ?type\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\tvalues ?type { :Employee }\n"
-							+"\n"
-							+"\t?employee a ?type\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee a ?type\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\tvalues ?type { :Employee }\n"
+                            +"\n"
+                            +"\t?employee a ?type\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -489,16 +486,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee :seniority ?seniority.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?employee :seniority ?seniority filter (?seniority > 3)\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee :seniority ?seniority.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?employee :seniority ?seniority filter (?seniority > 3)\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -510,16 +507,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee :seniority ?seniority.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?employee :seniority ?seniority filter (?seniority < 3)\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee :seniority ?seniority.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?employee :seniority ?seniority filter (?seniority < 3)\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -531,16 +528,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee :seniority ?seniority.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?employee :seniority ?seniority filter (?seniority >= 3)\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee :seniority ?seniority.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?employee :seniority ?seniority filter (?seniority >= 3)\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -552,16 +549,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee :seniority ?seniority.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?employee :seniority ?seniority filter (?seniority <= 3)\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee :seniority ?seniority.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?employee :seniority ?seniority filter (?seniority <= 3)\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -574,16 +571,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee :forename ?forename.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?employee :forename ?forename filter (strlen(str(?forename)) >= 5)\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee :forename ?forename.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?employee :forename ?forename filter (strlen(str(?forename)) >= 5)\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -595,16 +592,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee :forename ?forename.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?employee :forename ?forename filter (strlen(str(?forename)) <= 5)\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee :forename ?forename.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?employee :forename ?forename filter (strlen(str(?forename)) <= 5)\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -616,16 +613,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?item.\n"
-							+"\t?item rdfs:label ?label.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?item rdfs:label ?label filter regex(?label, '\\\\bgerard\\\\b', 'i')\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?item.\n"
+                            +"\t?item rdfs:label ?label.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?item rdfs:label ?label filter regex(?label, '\\\\bgerard\\\\b', 'i')\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -637,16 +634,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?item.\n"
-							+"\t?item rdfs:label ?label.\n"
-							+"\t \n"
-							+"} where { \n"
-							+"\n"
-							+"\t?item rdfs:label ?label, 'Gerard Bondur'^^xsd:string\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?item.\n"
+                            +"\t?item rdfs:label ?label.\n"
+                            +"\t \n"
+                            +"} where { \n"
+                            +"\n"
+                            +"\t?item rdfs:label ?label, 'Gerard Bondur'^^xsd:string\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -690,16 +687,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct { \n"
-							+"\n"
-							+"\tapp:root ldp:contains ?item.\n"
-							+"\t?item :employee ?employee.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?item :employee ?employee, <employees/1002>, <employees/1056>.\n"
-							+"\n"
-							+"}"
+                    "construct { \n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?item.\n"
+                            +"\t?item :employee ?employee.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?item :employee ?employee, <employees/1002>, <employees/1056>.\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -713,16 +710,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?office.\n"
-							+"\t?employee :office ?office.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?office ^:office ?employee, <employees/1002>, <employees/1056>.\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?office.\n"
+                            +"\t?employee :office ?office.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?office ^:office ?employee, <employees/1002>, <employees/1056>.\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -737,18 +734,18 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee a ?type\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\tvalues ?employee { <employees/1002> <employees/1056> }\n"
-							+"\n"
-							+"\t?employee a ?type\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee a ?type\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\tvalues ?employee { <employees/1002> <employees/1056> }\n"
+                            +"\n"
+                            +"\t?employee a ?type\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -760,16 +757,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?office.\n"
-							+"\t?office :employee ?employee.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?office :employee ?employee, <employees/1002>\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?office.\n"
+                            +"\t?office :employee ?employee.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?office :employee ?employee, <employees/1002>\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -784,17 +781,17 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?office.\n"
-							+"\t?office :employee ?employee.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?office :employee ?employee, ?value filter (?value in (<employees/1002>, "
-							+"<employees/1056>))\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?office.\n"
+                            +"\t?office :employee ?employee.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?office :employee ?employee, ?value filter (?value in (<employees/1002>, "
+                            +"<employees/1056>))\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -808,16 +805,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?office.\n"
-							+"\t?office :employee ?employee.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?office :employee ?employee, <employees/1002>\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?office.\n"
+                            +"\t?office :employee ?employee.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?office :employee ?employee, <employees/1002>\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -832,19 +829,19 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?employee.\n"
-							+"\t?employee rdfs:label ?label.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\tvalues ?employee {\n"
-							+"\t\t<employees/1002>\n"
-							+"\t\t<employees/1056>\n"
-							+"\t}\n"
-							+"\n"
-							+"\t?employee rdfs:label ?label\n"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?employee.\n"
+                            +"\t?employee rdfs:label ?label.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\tvalues ?employee {\n"
+                            +"\t\t<employees/1002>\n"
+                            +"\t\t<employees/1056>\n"
+                            +"\t}\n"
+                            +"\n"
+                            +"\t?employee rdfs:label ?label\n"
 							+"\n"
 							+"}"
 
@@ -862,16 +859,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?item.\n"
-							+"\t?item :country ?country.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?item :country ?country.\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?item.\n"
+                            +"\t?item :country ?country.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?item :country ?country.\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -890,16 +887,16 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?item.\n"
-							+"\t?item :country ?country; :city ?city.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?item :country ?country; :city ?city.\n"
-							+"\n"
-							+"}"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?item.\n"
+                            +"\t?item :country ?country; :city ?city.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\t?item :country ?country; :city ?city.\n"
+                            +"\n"
+                            +"}"
 
 			)));
 		}
@@ -917,19 +914,19 @@ final class GraphProcessorTest {
 
 			)).isIsomorphicTo(graph(
 
-					"construct {\n"
-							+"\n"
-							+"\tapp:root ldp:contains ?item.\n"
-							+"\t?item a ?type.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\tvalues ?type {\n"
-							+"\t\t:Office\n"
-							+"\t\t:Employee\n"
-							+"\t}\n"
-							+"\n"
-							+"\t?item a ?type.\n"
+                    "construct {\n"
+                            +"\n"
+                            +"\t<app:/> ldp:contains ?item.\n"
+                            +"\t?item a ?type.\n"
+                            +"\n"
+                            +"} where {\n"
+                            +"\n"
+                            +"\tvalues ?type {\n"
+                            +"\t\t:Office\n"
+                            +"\t\t:Employee\n"
+                            +"\t}\n"
+                            +"\n"
+                            +"\t?item a ?type.\n"
 							+"\n"
 							+"}"
 
@@ -959,18 +956,18 @@ final class GraphProcessorTest {
 
 		)).isIsomorphicTo(graph(
 
-				""
-						+"\n"
-						+"construct {\n"
-						+"\n"
-						+"\tapp:root ldp:contains ?office.\n"
-						+"\t?office :employee ?employee\n"
-						+"\n"
-						+"} where {\n"
-						+"\n"
-						+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
-						+"\n"
-						+"}"
+                ""
+                        +"\n"
+                        +"construct {\n"
+                        +"\n"
+                        +"\t<app:/> ldp:contains ?office.\n"
+                        +"\t?office :employee ?employee\n"
+                        +"\n"
+                        +"} where {\n"
+                        +"\n"
+                        +"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
+                        +"\n"
+                        +"}"
 
 		)));
 	}
