@@ -395,12 +395,12 @@ Note that  server-managed properties like `demo:code` and `demo:stock` are omitt
 {
    	"type": "/terms#Product",
     "label": "1903 Ford Model A",
-    "comment": "Features opening trunk,  working steering system",
+    "comment": "Features opening trunk, working steering system",
     "line": "/product-lines/vintage-cars",
     "scale": "1:18",
     "vendor": "Unimax Art Galleries",
-    "buy": 68.3,
-    "price": 136.59
+    "buy": 50.00,
+    "price": 120.00
 }
 EOF
 

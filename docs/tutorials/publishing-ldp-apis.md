@@ -14,6 +14,8 @@ We will walk through the REST API development process focusing on the task of pu
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
 
+A Maven project with the code for the complete demo app is available on [GitHub](https://github.com/metreeca/demo): clone or [download](https://github.com/metreeca/demo/archive/master.zip) it to your workspace, open in your favorite IDE and launch a local instance of the server. If you are working with IntelliJ IDEA you may want to use the `Demo` pre-configured run configuration to deploy and update the local server instance.
+
 # Getting Started
 
 To get started, set up a Maven Java 1.8 project, importing the BOM module for Metreeca/Link:
