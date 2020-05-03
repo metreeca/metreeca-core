@@ -17,16 +17,11 @@
 
 package com.metreeca.rdf4j.services;
 
-import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
-import com.metreeca.tree.queries.Items;
-import com.metreeca.tree.queries.Stats;
-import com.metreeca.tree.queries.Terms;
+import com.metreeca.tree.queries.*;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -57,8 +52,6 @@ final class GraphRelator extends GraphProcessor {
 
 	private final Graph graph=service(graph());
 
-	private final RDFFormat rdf=rdf();
-
 
 	Future<Response> handle(final Request request) {
 		return request.reply(response -> {
@@ -77,7 +70,7 @@ final class GraphRelator extends GraphProcessor {
 						.status(Response.NotImplemented)
 						.cause("resource filtered retrieval not supported")
 
-				) : request.query(rdf, and(all(item), shape)).fold(
+				) : request.query(rdf(), and(all(item), shape)).fold(
 
 						query -> graph.exec(connection -> {
 
@@ -112,7 +105,7 @@ final class GraphRelator extends GraphProcessor {
 
 									}))
 
-									.body(rdf, model);
+									.body(rdf(), model);
 
 						}),
 
@@ -129,7 +122,7 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return request.query(rdf, digest).fold(
+				return request.query(rdf(), digest).fold(
 
 						query -> graph.exec(connection -> {
 
@@ -155,7 +148,7 @@ final class GraphRelator extends GraphProcessor {
 											}
 
 										}))
-										.body(rdf, matches);
+										.body(rdf(), matches);
 
 							} else { // include container description
 
@@ -166,7 +159,7 @@ final class GraphRelator extends GraphProcessor {
 								return response
 										.status(OK)
 										.shape(and(holder, field(LDP.CONTAINS, digest)))
-										.body(rdf, matches);
+										.body(rdf(), matches);
 
 							}
 

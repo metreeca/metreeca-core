@@ -20,13 +20,9 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
-import com.metreeca.tree.shapes.And;
-import com.metreeca.tree.shapes.Clazz;
-import com.metreeca.tree.shapes.Field;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import com.metreeca.tree.shapes.*;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.Collection;
@@ -73,7 +69,7 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return sources.stream()
-				.filter(source -> source instanceof Resource)
+				.filter(Resource.class::isInstance)
 				.map(source -> statement((Resource)source, RDF.TYPE, RDFFormat.iri(clazz.getName())));
 	}
 

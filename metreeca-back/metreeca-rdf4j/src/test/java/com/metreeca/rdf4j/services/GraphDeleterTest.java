@@ -21,18 +21,19 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
+
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValuesTest.small;
 import static com.metreeca.rdf.ValuesTest.term;
 import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.tree.Shape.convey;
 import static com.metreeca.tree.Shape.filter;
 import static com.metreeca.tree.shapes.And.and;
@@ -71,6 +72,7 @@ final class GraphDeleterTest {
 											field(RDF.TYPE, term("Employee"))
 									),
 									convey().then(
+											field(RDF.TYPE),
 											field(RDFS.LABEL),
 											field(term("forename")),
 											field(term("surname")),
@@ -79,7 +81,8 @@ final class GraphDeleterTest {
 											field(term("code")),
 											field(term("office")),
 											field(term("seniority")),
-											field(term("supervisor"))
+											field(term("supervisor")),
+											field(term("subordinate"))
 									)
 							))
 					)
@@ -92,6 +95,9 @@ final class GraphDeleterTest {
 
 						assertThat(model("construct where { <employees/1370> ?p ?o }"))
 								.isEmpty();
+
+						assertThat(model("construct where { ?s a :Employee; ?p ?o. }"))
+								.isNotEmpty();
 
 					}));
 		}

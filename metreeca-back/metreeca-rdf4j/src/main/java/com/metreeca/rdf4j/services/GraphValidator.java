@@ -19,15 +19,12 @@ package com.metreeca.rdf4j.services;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.Trace;
 import com.metreeca.tree.shapes.*;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
@@ -60,13 +57,11 @@ final class GraphValidator extends GraphProcessor {
 
 	private final Graph graph=service(graph());
 
-	private final RDFFormat rdf=rdf();
-
 
 	<M extends Message<M>> Result<M, Failure> validate(final M message) {
 		return message
 
-				.body(rdf)
+				.body(rdf())
 
 				.process(rdf -> Optional.of(validate(iri(message.item()), convey(message.shape()), rdf))
 						.filter(trace -> !trace.isEmpty())

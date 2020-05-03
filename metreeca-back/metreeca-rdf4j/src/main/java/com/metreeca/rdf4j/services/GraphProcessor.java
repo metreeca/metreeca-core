@@ -20,31 +20,24 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.services.Logger;
-import com.metreeca.tree.Order;
 import com.metreeca.tree.Query;
-import com.metreeca.tree.Shape;
+import com.metreeca.tree.*;
 import com.metreeca.tree.probes.Redactor;
 import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.queries.Items;
-import com.metreeca.tree.queries.Stats;
-import com.metreeca.tree.queries.Terms;
+import com.metreeca.tree.queries.*;
 import com.metreeca.tree.shapes.*;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
-import org.eclipse.rdf4j.query.BindingSet;
-import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.BNodeType;
@@ -65,6 +58,7 @@ import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf4j.services.Snippets.*;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.logger;
+import static com.metreeca.rest.services.Logger.time;
 import static com.metreeca.tree.Shape.focus;
 import static com.metreeca.tree.Shape.pass;
 import static com.metreeca.tree.shapes.All.all;
@@ -72,7 +66,6 @@ import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
 import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Or.or;
-import static java.lang.Math.max;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
@@ -81,809 +74,802 @@ import static java.util.stream.Collectors.toSet;
 
 abstract class GraphProcessor {
 
-	Shape holder(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Area, Shape.Holder));
-	}
+    Shape holder(final Shape shape) { // !!! caching
+        return shape.map(new Redactor(Shape.Area, Shape.Holder));
+    }
 
-	Shape digest(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Area, Shape.Digest));
-	}
+    Shape digest(final Shape shape) { // !!! caching
+        return shape.map(new Redactor(Shape.Area, Shape.Digest));
+    }
 
-	Shape detail(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Area, Shape.Detail));
-	}
+    Shape detail(final Shape shape) { // !!! caching
+        return shape.map(new Redactor(Shape.Area, Shape.Detail));
+    }
 
 
-	Shape convey(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Mode, Shape.Convey));
-	}
+    Shape convey(final Shape shape) { // !!! caching
+        return shape.map(new Redactor(Shape.Mode, Shape.Convey));
+    }
 
-	Shape filter(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Mode, Shape.Filter));
-	}
+    Shape filter(final Shape shape) { // !!! caching
+        return shape.map(new Redactor(Shape.Mode, Shape.Filter));
+    }
 
 
-	Iterable<Statement> outline(final IRI resource, final Shape shape) {
-		return anchor(resource, shape).map(new Outliner(resource)).collect(toList());
-	}
+    Iterable<Statement> outline(final IRI resource, final Shape shape) {
+        return anchor(resource, shape).map(new Outliner(resource)).collect(toList());
+    }
 
 
-	private Shape anchor(final IRI resource, final Shape shape) {
-		return pass(shape) ? resource.stringValue().endsWith("/")
+    private Shape anchor(final IRI resource, final Shape shape) {
+        return pass(shape) ?
 
-				? field(inverse(LDP.CONTAINS), focus()) // holders default to ldp:BasicContainer
-				: all(focus()) // members default to self
+                resource.stringValue().endsWith("/")
 
-				: shape;
-	}
+                        ? field(inverse(LDP.CONTAINS), focus()) // holders default to ldp:BasicContainer
+                        : all(focus()) // members default to self
 
+                : shape;
+    }
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Logger logger=service(logger());
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private final Logger logger=service(logger());
 
-	//// Tracing ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String compile(final Supplier<String> generator) {
+    //// Tracing ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		final long start=System.currentTimeMillis();
+    private String compile(final Supplier<String> generator) {
+        return time(generator).apply((t, v) -> {
 
-		final String query=generator.get();
+            logger.debug(this, () -> format("executing %s", v.endsWith("\n") ? v : v+"\n"));
+            logger.debug(this, () -> format("generated in <,%d> ms", t));
 
-		final long stop=System.currentTimeMillis();
+        });
+    }
 
-		logger.debug(this, () -> format("executing %s", query.endsWith("\n") ? query : query+"\n"));
-		logger.debug(this, () -> format("generated in %d ms", max(1, stop-start)));
+    private void evaluate(final Runnable task) {
+        time(task).apply((t) ->
 
-		return query;
-	}
+                logger.debug(this, () -> format("evaluated in <%,d> ms", t))
 
-	private void evaluate(final Runnable task) {
+        );
+    }
 
-		final long start=System.currentTimeMillis();
 
-		task.run();
+    //// Fetching //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		final long stop=System.currentTimeMillis();
+    Collection<Statement> fetch(final RepositoryConnection connection, final IRI item, final Query query) {
+        return query.map(new FetcherProbe(connection, item));
+    }
 
-		logger.debug(this, () -> format("evaluated in %d ms", max(1, stop-start)));
 
-	}
+    private final class FetcherProbe implements Query.Probe<Collection<Statement>> { // !!! refactor
 
+        private final RepositoryConnection connection;
 
-	//// Fetching //////////////////////////////////////////////////////////////////////////////////////////////////////
+        private final IRI resource;
 
-	Collection<Statement> fetch(final RepositoryConnection connection, final IRI item, final Query query) {
-		return query.map(new FetcherProbe(connection, item));
-	}
 
+        private FetcherProbe(final RepositoryConnection connection, final IRI resource) {
+            this.connection=connection;
+            this.resource=resource;
+        }
 
-	private final class FetcherProbe implements Query.Probe<Collection<Statement>> { // !!! refactor
 
-		private final RepositoryConnection connection;
+        private Value value(final Object value) {
+            return value instanceof Shape.Focus
+                    ? iri(((Shape.Focus)value).resolve(resource.stringValue()))
+                    : RDFFormat.value(value);
+        }
 
-		private final IRI resource;
+        private Set<Value> values(final Collection<Object> values) {
+            return values.stream()
+                    .map(this::value)
+                    .collect(toSet());
+        }
 
 
-		private FetcherProbe(final RepositoryConnection connection, final IRI resource) {
-			this.connection=connection;
-			this.resource=resource;
-		}
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        @Override public Collection<Statement> probe(final Items items) {
 
-		private Value value(final Object value) {
-			return value instanceof Shape.Focus
-					? iri(((Shape.Focus)value).resolve(resource.stringValue()))
-					: RDFFormat.value(value);
-		}
+            final Shape shape=items.getShape();
+            final List<Order> orders=items.getOrders();
+            final int offset=items.getOffset();
+            final int limit=items.getLimit();
 
-		private Set<Value> values(final Collection<Object> values) {
-			return values.stream()
-					.map(this::value)
-					.collect(toSet());
-		}
+            final Object root=new Object(); // root object
 
+            final Collection<Statement> model=new LinkedHashSet<>();
+            final Collection<Statement> template=new ArrayList<>();
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            // construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve
+            // ordering
 
-		@Override public Collection<Statement> probe(final Items items) {
+            final Shape pattern=convey(shape);
+            final Shape selector=anchor(resource, filter(shape));
 
-			final Shape shape=items.getShape();
-			final List<Order> orders=items.getOrders();
-			final int offset=items.getOffset();
-			final int limit=items.getLimit();
+            evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
 
-			final Object root=new Object(); // root object
+                    nothing(id(root, pattern, selector)), // link root to pattern and selector shapes
 
-			final Collection<Statement> model=new LinkedHashSet<>();
-			final Collection<Statement> template=new ArrayList<>();
+                    snippet(
 
-			// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve 
-			// ordering
+                            "# items query\n"
+                                    +"\n"
+                                    +"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+                                    +"\n"
+                                    +"select {variables} where {\n"
+                                    +"\n"
+                                    +"\t{filter}\n"
+                                    +"\n"
+                                    +"\t{pattern}\n"
+                                    +"\n"
+                                    +"\t{sorters}\n"
+                                    +"\n"
+                                    +"} order by {criteria}",
 
-			final Shape pattern=convey(shape);
-			final Shape selector=anchor(resource, filter(shape));
+                            (Snippet)(source, identifiers) -> Stream
+                                    .concat(
+                                            Stream.of(identifiers.apply(root, root)), /// always project root
+                                            pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s),
+                                                    template::add))
+                                    )
+                                    .distinct()
+                                    .sorted()
+                                    .forEachOrdered(id -> source.accept(" ?"+id)),
 
-			evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
+                            selector(selector, orders, offset, limit),
+                            pattern(pattern),
 
-					nothing(id(root, pattern, selector)), // link root to pattern and selector shapes
+                            sorters(root, orders), // !!! (€) don't extract if already present in pattern
+                            criteria(root, orders)
 
-					snippet(
+                    )
 
-							"# items query\n"
-									+"\n"
-									+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-									+"\n"
-									+"select {variables} where {\n"
-									+"\n"
-									+"\t{filter}\n"
-									+"\n"
-									+"\t{pattern}\n"
-									+"\n"
-									+"\t{sorters}\n"
-									+"\n"
-									+"} order by {criteria}",
+            ))).evaluate(new AbstractTupleQueryResultHandler() {
 
-							(Snippet)(source, identifiers) -> Stream
-									.concat(
-											Stream.of(identifiers.apply(root, root)), /// always project root
-											pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s),
-													template::add))
-									)
-									.distinct()
-									.sorted()
-									.forEachOrdered(id -> source.accept(" ?"+id)),
+                @Override public void handleSolution(final BindingSet bindings) {
 
-							selector(selector, orders, offset, limit),
-							pattern(pattern),
+                    final Value match=bindings.getValue("0"); // root id
 
-							sorters(root, orders), // !!! (€) don't extract if already present in pattern
-							criteria(root, orders)
+                    if ( match != null ) {
 
-					)
+                        if ( !match.equals(resource) ) {
+                            model.add(statement(resource, LDP.CONTAINS, match));
+                        }
 
-			))).evaluate(new AbstractTupleQueryResultHandler() {
+                        if ( template.isEmpty() ) { // wildcard shape => symmetric+labelled concise bounded description
 
-				@Override public void handleSolution(final BindingSet bindings) {
+                            description((Resource)match);
 
-					final Value match=bindings.getValue("0"); // root id
+                        } else {
 
-					if ( match != null ) {
+                            template(bindings);
 
-						if ( !match.equals(resource) ) {
-							model.add(statement(resource, LDP.CONTAINS, match));
-						}
+                        }
 
-						if ( template.isEmpty() ) { // wildcard shape => symmetric+labelled concise bounded description
+                    }
 
-							description((Resource)match);
+                }
 
-						} else {
+                private void template(final BindingSet bindings) {
+                    template.forEach(statement -> {
 
-							template(bindings);
+                        final Resource subject=statement.getSubject();
+                        final Value object=statement.getObject();
 
-						}
+                        final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) :
+                                subject;
+                        final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) :
+                                object;
 
-					}
+                        if ( source instanceof Resource && target != null ) {
+                            model.add(statement((Resource)source, statement.getPredicate(), target));
+                        }
 
-				}
+                    });
+                }
 
-				private void template(final BindingSet bindings) {
-					template.forEach(statement -> {
+                private void description(final Resource resource) {
 
-						final Resource subject=statement.getSubject();
-						final Value object=statement.getObject();
+                    final Collection<Resource> visited=new HashSet<>();
+                    final Collection<Resource> pending=new HashSet<>(singleton(resource));
 
-						final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) :
-								subject;
-						final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) :
-								object;
+                    while ( !pending.isEmpty() ) {
 
-						if ( source instanceof Resource && target != null ) {
-							model.add(statement((Resource)source, statement.getPredicate(), target));
-						}
+                        final GraphQuery query=connection.prepareGraphQuery(source(
 
-					});
-				}
+                                "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+                                        +"\n"
+                                        +"construct {\n"
+                                        +"\n"
+                                        +"\t?r ?p ?o. ?o a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
+                                        +"\t?s ?p ?r. ?s a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
+                                        +"\t\n"
+                                        +"} where {\n"
+                                        +"\n"
+                                        +"\tvalues ?r {\n"
+                                        +"\t\t{resources}\n"
+                                        +"\t}\n"
+                                        +"\n"
+                                        +"\t{\n"
+                                        +"\t\n"
+                                        +"\t\t?r ?p ?o\n"
+                                        +"\n"
+                                        +"\t\toptional { ?o a ?t }\n"
+                                        +"\t\toptional { ?o rdfs:label ?l }\n"
+                                        +"\t\toptional { ?o rdfs:comment ?c }\n"
+                                        +"\n"
+                                        +"\t} union {\n"
+                                        +"\n"
+                                        +"\t\t?s ?p ?r\n"
+                                        +"\n"
+                                        +"\t\toptional { ?s a ?t }\n"
+                                        +"\t\toptional { ?s rdfs:label ?l }\n"
+                                        +"\t\toptional { ?s rdfs:comment ?c }\n"
+                                        +"\n"
+                                        +"\t}\n"
+                                        +"\n"
+                                        +"}",
 
-				private void description(final Resource resource) {
+                                list(pending.stream().map(Values::format), "\n")
 
-					final Collection<Resource> visited=new HashSet<>();
-					final Collection<Resource> pending=new HashSet<>(singleton(resource));
+                        ));
 
-					while ( !pending.isEmpty() ) {
+                        pending.clear();
 
-						final GraphQuery query=connection.prepareGraphQuery(source(
+                        query.evaluate(new AbstractRDFHandler() {
+                            @Override public void handleStatement(final Statement statement) {
 
-								"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-										+"\n"
-										+"construct {\n"
-										+"\n"
-										+"\t?r ?p ?o. ?o a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
-										+"\t?s ?p ?r. ?s a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
-										+"\t\n"
-										+"} where {\n"
-										+"\n"
-										+"\tvalues ?r {\n"
-										+"\t\t{resources}\n"
-										+"\t}\n"
-										+"\n"
-										+"\t{\n"
-										+"\t\n"
-										+"\t\t?r ?p ?o\n"
-										+"\n"
-										+"\t\toptional { ?o a ?t }\n"
-										+"\t\toptional { ?o rdfs:label ?l }\n"
-										+"\t\toptional { ?o rdfs:comment ?c }\n"
-										+"\n"
-										+"\t} union {\n"
-										+"\n"
-										+"\t\t?s ?p ?r\n"
-										+"\n"
-										+"\t\toptional { ?s a ?t }\n"
-										+"\t\toptional { ?s rdfs:label ?l }\n"
-										+"\t\toptional { ?s rdfs:comment ?c }\n"
-										+"\n"
-										+"\t}\n"
-										+"\n"
-										+"}",
+                                model.add(statement);
 
-								list(pending.stream().map(Values::format), "\n")
+                                final Resource subject=statement.getSubject();
+                                final Value object=statement.getObject();
 
-						));
+                                if ( subject instanceof BNode && visited.add(subject) ) {
+                                    pending.add(subject);
+                                }
 
-						pending.clear();
+                                if ( object instanceof BNode && visited.add((Resource)object) ) {
+                                    pending.add((Resource)object);
+                                }
 
-						query.evaluate(new AbstractRDFHandler() {
-							@Override public void handleStatement(final Statement statement) {
+                            }
+                        });
 
-								model.add(statement);
+                    }
+                }
 
-								final Resource subject=statement.getSubject();
-								final Value object=statement.getObject();
+            }));
 
-								if ( subject instanceof BNode && visited.add(subject) ) {
-									pending.add(subject);
-								}
+            return model;
+        }
 
-								if ( object instanceof BNode && visited.add((Resource)object) ) {
-									pending.add((Resource)object);
-								}
+        @Override public Collection<Statement> probe(final Stats stats) {
 
-							}
-						});
+            final Shape shape=stats.getShape();
+            final List<IRI> path=stats.getPath().stream().map(RDFFormat::iri).collect(toList());
 
-					}
-				}
+            final Model model=new LinkedHashModel();
 
-			}));
+            final Collection<BigInteger> counts=new ArrayList<>();
+            final Collection<Value> mins=new ArrayList<>();
+            final Collection<Value> maxs=new ArrayList<>();
 
-			return model;
-		}
+            final Shape selector=anchor(resource, filter(shape));
 
-		@Override public Collection<Statement> probe(final Stats stats) {
+            final Object source=var(selector);
+            final Object target=path.isEmpty() ? source : var();
 
-			final Shape shape=stats.getShape();
-			final List<IRI> path=stats.getPath().stream().map(RDFFormat::iri).collect(toList());
+            evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
 
-			final Model model=new LinkedHashModel();
+                    "# stats query\n"
+                            +"\n"
+                            +"prefix : <{base}>\n"
+                            +"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+                            +"\n"
+                            +"select ?type\t\n"
+                            +"\n"
+                            +"\t(count(distinct {target}) as ?count)\n"
+                            +"\t(min({target}) as ?min)\n"
+                            +"\t(max({target}) as ?max) \n"
+                            +"\n"
+                            +"\bwhere {\n"
+                            +"\n"
+                            +"\t{roots}\n"
+                            +"\n"
+                            +"\t{filters}\n"
+                            +"\n"
+                            +"\t{path}\n"
+                            +"\n"
+                            +"\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as "
+                            +"?type)\n"
+                            +"\n"
+                            +"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
 
-			final Collection<BigInteger> counts=new ArrayList<>();
-			final Collection<Value> mins=new ArrayList<>();
-			final Collection<Value> maxs=new ArrayList<>();
 
-			final Shape selector=anchor(resource, filter(shape));
+                    GraphEngine.Base,
+                    target,
 
-			final Object source=var(selector);
-			final Object target=path.isEmpty() ? source : var();
+                    roots(selector),
+                    filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-			evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
+                    path(source, path, target)
 
-					"# stats query\n"
-							+"\n"
-							+"prefix : <{base}>\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select ?type\t\n"
-							+"\n"
-							+"\t(count(distinct {target}) as ?count)\n"
-							+"\t(min({target}) as ?min)\n"
-							+"\t(max({target}) as ?max) \n"
-							+"\n"
-							+"\bwhere {\n"
-							+"\n"
-							+"\t{roots}\n"
-							+"\n"
-							+"\t{filters}\n"
-							+"\n"
-							+"\t{path}\n"
-							+"\n"
-							+"\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as "
-							+"?type)\n"
-							+"\n"
-							+"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
+                    // !!! support ordering/slicing?
 
+            )))).evaluate(new AbstractTupleQueryResultHandler() {
 
-					GraphEngine.Base,
-					target,
+                @Override public void handleSolution(final BindingSet bindings) {
 
-					roots(selector),
-					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+                    final Resource type=(Resource)bindings.getValue("type");
 
-					path(source, path, target)
+                    final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
+                    final Value min=bindings.getValue("min");
+                    final Value max=bindings.getValue("max");
 
-					// !!! support ordering/slicing?
+                    // ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-			)))).evaluate(new AbstractTupleQueryResultHandler() {
+                    if ( type != null ) { model.add(resource, GraphEngine.stats, type); }
+                    if ( type != null && count != null ) { model.add(type, GraphEngine.count, literal(count)); }
+                    if ( type != null && min != null ) { model.add(type, GraphEngine.min, min); }
+                    if ( type != null && max != null ) { model.add(type, GraphEngine.max, max); }
 
-				@Override public void handleSolution(final BindingSet bindings) {
+                    counts.add(count);
+                    mins.add(min);
+                    maxs.add(max);
 
-					final Resource type=(Resource)bindings.getValue("type");
+                }
 
-					final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
-					final Value min=bindings.getValue("min");
-					final Value max=bindings.getValue("max");
+            }));
 
-					// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+            model.add(resource, GraphEngine.count, literal(counts.stream()
+                    .filter(Objects::nonNull)
+                    .reduce(BigInteger.ZERO, BigInteger::add)
+            ));
 
-					if ( type != null ) { model.add(resource, GraphEngine.stats, type); }
-					if ( type != null && count != null ) { model.add(type, GraphEngine.count, literal(count)); }
-					if ( type != null && min != null ) { model.add(type, GraphEngine.min, min); }
-					if ( type != null && max != null ) { model.add(type, GraphEngine.max, max); }
+            mins.stream()
+                    .filter(Objects::nonNull)
+                    .reduce((x, y) -> compare(x, y) < 0 ? x : y)
+                    .ifPresent(min -> model.add(resource, GraphEngine.min, min));
 
-					counts.add(count);
-					mins.add(min);
-					maxs.add(max);
+            maxs.stream()
+                    .filter(Objects::nonNull)
+                    .reduce((x, y) -> compare(x, y) > 0 ? x : y)
+                    .ifPresent(max -> model.add(resource, GraphEngine.max, max));
 
-				}
+            return model;
+        }
 
-			}));
+        @Override public Collection<Statement> probe(final Terms terms) {
 
-			model.add(resource, GraphEngine.count, literal(counts.stream()
-					.filter(Objects::nonNull)
-					.reduce(BigInteger.ZERO, BigInteger::add)
-			));
+            final Shape shape=terms.getShape();
+            final List<IRI> path=terms.getPath().stream().map(RDFFormat::iri).collect(toList());
 
-			mins.stream()
-					.filter(Objects::nonNull)
-					.reduce((x, y) -> compare(x, y) < 0 ? x : y)
-					.ifPresent(min -> model.add(resource, GraphEngine.min, min));
+            final Model model=new LinkedHashModel();
 
-			maxs.stream()
-					.filter(Objects::nonNull)
-					.reduce((x, y) -> compare(x, y) > 0 ? x : y)
-					.ifPresent(max -> model.add(resource, GraphEngine.max, max));
+            final Shape selector=anchor(resource, filter(shape));
 
-			return model;
-		}
+            final Object source=var(selector);
+            final Object target=path.isEmpty() ? source : var();
 
-		@Override public Collection<Statement> probe(final Terms terms) {
+            evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
 
-			final Shape shape=terms.getShape();
-			final List<IRI> path=terms.getPath().stream().map(RDFFormat::iri).collect(toList());
+                    "# terms query\n"
+                            +"\n"
+                            +"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+                            +"\n"
+                            +"select ({target} as ?value)\t\n"
+                            +"\n"
+                            +"\t(sample(?l) as ?label)\n"
+                            +"\t(sample(?n) as ?notes)\n"
+                            +"\t(count(distinct {source}) as ?count)\n"
+                            +"\n"
+                            +"\bwhere {\n"
+                            +"\n"
+                            +"\t{roots}\n"
+                            +"\t\n"
+                            +"\t{filters}\n"
+                            +"\t\n"
+                            +"\t{path}\n"
+                            +"\t\n"
+                            +"\toptional { {target} rdfs:label ?l }\n"
+                            +"\toptional { {target} rdfs:comment ?n }\n"
+                            +"\t\t\n"
+                            +"} group by {target} having ( count({source}) > 0 ) order by desc(?count) ?value",
 
-			final Model model=new LinkedHashModel();
+                    target, source,
 
-			final Shape selector=anchor(resource, filter(shape));
+                    roots(selector),
+                    filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-			final Object source=var(selector);
-			final Object target=path.isEmpty() ? source : var();
+                    path(source, path, target)
 
-			evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
+                    // !!! handle label/comment language
+                    // !!! support ordering/slicing?
 
-					"# terms query\n"
-							+"\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select ({target} as ?value)\t\n"
-							+"\n"
-							+"\t(sample(?l) as ?label)\n"
-							+"\t(sample(?n) as ?notes)\n"
-							+"\t(count(distinct {source}) as ?count)\n"
-							+"\n"
-							+"\bwhere {\n"
-							+"\n"
-							+"\t{roots}\n"
-							+"\t\n"
-							+"\t{filters}\n"
-							+"\t\n"
-							+"\t{path}\n"
-							+"\t\n"
-							+"\toptional { {target} rdfs:label ?l }\n"
-							+"\toptional { {target} rdfs:comment ?n }\n"
-							+"\t\t\n"
-							+"} group by {target} having ( count({source}) > 0 ) order by desc(?count) ?value",
+            )))).evaluate(new AbstractTupleQueryResultHandler() {
+                @Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
 
-					target, source,
+                    final Value value=bindings.getValue("value");
+                    final Value count=bindings.getValue("count");
+                    final Value label=bindings.getValue("label");
+                    final Value notes=bindings.getValue("notes");
 
-					roots(selector),
-					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+                    // ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-					path(source, path, target)
+                    final BNode term=bnode();
 
-					// !!! handle label/comment language
-					// !!! support ordering/slicing?
+                    if ( term != null ) { model.add(resource, GraphEngine.terms, term); }
+                    if ( term != null && value != null ) { model.add(term, GraphEngine.value, value); }
+                    if ( term != null && count != null ) {
+                        model.add(term, GraphEngine.count, literal(integer(count).orElse(BigInteger.ZERO)));
+                    }
 
-			)))).evaluate(new AbstractTupleQueryResultHandler() {
-				@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
+                    // !!! manage multiple languages
 
-					final Value value=bindings.getValue("value");
-					final Value count=bindings.getValue("count");
-					final Value label=bindings.getValue("label");
-					final Value notes=bindings.getValue("notes");
+                    if ( label != null ) { model.add((Resource)value, RDFS.LABEL, label); }
+                    if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
 
-					// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+                }
+            }));
 
-					final BNode term=bnode();
+            return model;
+        }
 
-					if ( term != null ) { model.add(resource, GraphEngine.terms, term); }
-					if ( term != null && value != null ) { model.add(term, GraphEngine.value, value); }
-					if ( term != null && count != null ) {
-						model.add(term, GraphEngine.count, literal(integer(count).orElse(BigInteger.ZERO)));
-					}
 
-					// !!! manage multiple languages
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-					if ( label != null ) { model.add((Resource)value, RDFS.LABEL, label); }
-					if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
+        private Snippet selector(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
+            return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : snippet(
 
-				}
-			}));
+                    "{ select {root} {\n"
+                            +"\n"
+                            +"\t{roots}\n"
+                            +"\n"
+                            +"\t{filters}\n"
+                            +"\n"
+                            +"\t{sorters}\n"
+                            +"\n"
+                            +"} {orders} {offset} {limit} }",
 
-			return model;
-		}
+                    var(shape),
 
+                    roots(shape),
+                    filters(shape),
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+                    offset > 0 || limit > 0 ? sorters(shape, orders) : null,
+                    offset > 0 || limit > 0 ? snippet(" order by ", criteria(shape, orders)) : null,
 
-		private Snippet selector(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
-			return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : snippet(
+                    offset > 0 ? snippet(" offset ", offset) : null,
+                    limit > 0 ? snippet(" limit ", limit) : null
 
-					"{ select {root} {\n"
-							+"\n"
-							+"\t{roots}\n"
-							+"\n"
-							+"\t{filters}\n"
-							+"\n"
-							+"\t{sorters}\n"
-							+"\n"
-							+"} {orders} {offset} {limit} }",
+            );
 
-					var(shape),
+        }
 
-					roots(shape),
-					filters(shape),
+        private Snippet roots(final Shape shape) { // root universal constraints
+            return all(shape)
+                    .map(values1 -> values(values1))
+                    .map(values -> values(shape, values))
+                    .orElse(null);
+        }
 
-					offset > 0 || limit > 0 ? sorters(shape, orders) : null,
-					offset > 0 || limit > 0 ? snippet(" order by ", criteria(shape, orders)) : null,
+        private Snippet filters(final Shape shape) {
+            return shape.map(new FilterProbe(shape));
+        }
 
-					offset > 0 ? snippet(" offset ", offset) : null,
-					limit > 0 ? snippet(" limit ", limit) : null
+        private Snippet pattern(final Shape shape) {
+            return shape.map(new PatternProbe(shape));
+        }
 
-			);
+        private Snippet sorters(final Object root, final Collection<Order> orders) {
+            return snippet(orders.stream()
+                    .filter(order -> !order.getPath().isEmpty()) // root already retrieved
+                    .map(order -> snippet(
+                            "optional { {root} {path} {order} }\n", var(root),
+                            path(order.getPath().stream().map(RDFFormat::iri).collect(toList())), var(order))
+                    )
+            );
+        }
 
-		}
+        private Snippet criteria(final Object root, final Collection<Order> orders) {
+            return list(Stream.concat(
 
-		private Snippet roots(final Shape shape) { // root universal constraints
-			return all(shape)
-					.map(values1 -> values(values1))
-					.map(values -> values(shape, values))
-					.orElse(null);
-		}
+                    orders.stream().map(order -> snippet(
+                            order.isInverse() ? "desc({criterion})" : "asc({criterion})",
+                            var(order.getPath().isEmpty() ? root : order)
+                    )),
 
-		private Snippet filters(final Shape shape) {
-			return shape.map(new FilterProbe(shape));
-		}
+                    orders.stream()
+                            .map(Order::getPath)
+                            .filter(List::isEmpty)
+                            .findFirst()
+                            .map(empty -> Stream.empty())
+                            .orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
 
-		private Snippet pattern(final Shape shape) {
-			return shape.map(new PatternProbe(shape));
-		}
+            ), " ");
+        }
 
-		private Snippet sorters(final Object root, final Collection<Order> orders) {
-			return snippet(orders.stream()
-					.filter(order -> !order.getPath().isEmpty()) // root already retrieved
-					.map(order -> snippet(
-							"optional { {root} {path} {order} }\n", var(root),
-							path(order.getPath().stream().map(RDFFormat::iri).collect(toList())), var(order))
-					)
-			);
-		}
+        private Snippet values(final Shape source, final Collection<Value> values) {
+            return snippet("\n\nvalues {source} {\n{values}\n}\n\n",
 
-		private Snippet criteria(final Object root, final Collection<Order> orders) {
-			return list(Stream.concat(
+                    var(source), list(values.stream().map(Values::format), "\n")
 
-					orders.stream().map(order -> snippet(
-							order.isInverse() ? "desc({criterion})" : "asc({criterion})",
-							var(order.getPath().isEmpty() ? root : order)
-					)),
+            );
+        }
 
-					orders.stream()
-							.map(Order::getPath)
-							.filter(List::isEmpty)
-							.findFirst()
-							.map(empty -> Stream.empty())
-							.orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
 
-			), " ");
-		}
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		private Snippet values(final Shape source, final Collection<Value> values) {
-			return snippet("\n\nvalues {source} {\n{values}\n}\n\n",
+        private final class TemplateProbe extends Traverser<Stream<Integer>> {
 
-					var(source), list(values.stream().map(Values::format), "\n")
+            private final Shape focus;
 
-			);
-		}
+            private final Function<Shape, Integer> identifier;
+            private final Consumer<Statement> template;
 
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            private TemplateProbe(
+                    final Shape focus, final Function<Shape, Integer> identifier, final Consumer<Statement> template
+            ) {
 
-		private final class TemplateProbe extends Traverser<Stream<Integer>> {
+                this.focus=focus;
 
-			private final Shape focus;
+                this.identifier=identifier;
+                this.template=template;
+            }
 
-			private final Function<Shape, Integer> identifier;
-			private final Consumer<Statement> template;
 
+            @Override public Stream<Integer> probe(final Shape shape) { return Stream.empty(); }
 
-			private TemplateProbe(
-					final Shape focus, final Function<Shape, Integer> identifier, final Consumer<Statement> template
-			) {
 
-				this.focus=focus;
+            @Override public Stream<Integer> probe(final Field field) {
 
-				this.identifier=identifier;
-				this.template=template;
-			}
+                final IRI iri=iri(field.getName());
+                final Shape shape=field.getShape();
 
+                final Integer source=identifier.apply(focus);
+                final Integer target=identifier.apply(shape);
 
-			@Override public Stream<Integer> probe(final Shape shape) { return Stream.empty(); }
+                final Resource snode=bnode(source.toString());
+                final Resource tnode=bnode(target.toString());
 
+                template.accept(direct(iri) ? statement(snode, iri, tnode) : statement(tnode, inverse(iri), snode));
 
-			@Override public Stream<Integer> probe(final Field field) {
+                return Stream.concat(
+                        Stream.of(source, target),
+                        shape.map(new TemplateProbe(shape, identifier, template))
+                );
 
-				final IRI iri=iri(field.getName());
-				final Shape shape=field.getShape();
+            }
 
-				final Integer source=identifier.apply(focus);
-				final Integer target=identifier.apply(shape);
 
-				final Resource snode=bnode(source.toString());
-				final Resource tnode=bnode(target.toString());
+            @Override public Stream<Integer> probe(final And and) {
+                return and.getShapes().stream().flatMap(shape -> shape.map(this));
+            }
 
-				template.accept(direct(iri) ? statement(snode, iri, tnode) : statement(tnode, inverse(iri), snode));
+            @Override public Stream<Integer> probe(final Or or) {
+                return or.getShapes().stream().flatMap(shape -> shape.map(this));
+            }
 
-				return Stream.concat(
-						Stream.of(source, target),
-						shape.map(new TemplateProbe(shape, identifier, template))
-				);
+            @Override public Stream<Integer> probe(final When when) {
+                return Stream.concat(
+                        when.getPass().map(this),
+                        when.getFail().map(this)
+                );
+            }
 
-			}
+        }
 
+        private final class FilterProbe implements Shape.Probe<Snippet> {
 
-			@Override public Stream<Integer> probe(final And and) {
-				return and.getShapes().stream().flatMap(shape -> shape.map(this));
-			}
+            private final Shape source;
 
-			@Override public Stream<Integer> probe(final Or or) {
-				return or.getShapes().stream().flatMap(shape -> shape.map(this));
-			}
 
-			@Override public Stream<Integer> probe(final When when) {
-				return Stream.concat(
-						when.getPass().map(this),
-						when.getFail().map(this)
-				);
-			}
+            private FilterProbe(final Shape source) {
+                this.source=source;
+            }
 
-		}
 
-		private final class FilterProbe implements Shape.Probe<Snippet> {
+            @Override public Snippet probe(final Meta meta) {
+                return nothing();
+            }
 
-			private final Shape source;
+            @Override public Snippet probe(final Guard guard) {
+                throw new UnsupportedOperationException("partially redacted shape");
+            }
 
 
-			private FilterProbe(final Shape source) {
-				this.source=source;
-			}
+            @Override public Snippet probe(final Datatype datatype) {
 
+                final IRI iri=iri(datatype.getName());
 
-			@Override public Snippet probe(final Meta meta) {
-				return nothing();
-			}
+                return iri.equals(ValueType) ? nothing() : snippet(
 
-			@Override public Snippet probe(final Guard guard) {
-				throw new UnsupportedOperationException("partially redacted shape");
-			}
+                        iri.equals(ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )"
+                                : iri.equals(BNodeType) ? "filter isBlank({value})"
+                                : iri.equals(IRIType) ? "filter isIRI({value})"
+                                : iri.equals(LiteralType) ? "filter isLiteral({value})"
+                                : "filter ( datatype({value}) = <{datatype}> )",
 
+                        var(source),
+                        iri
 
-			@Override public Snippet probe(final Datatype datatype) {
+                );
 
-				final IRI iri=iri(datatype.getName());
+            }
 
-				return iri.equals(ValueType) ? nothing() : snippet(
+            @Override public Snippet probe(final Clazz clazz) {
+                return snippet(var(source), " a/rdfs:subClassOf* ", format(iri(clazz.getName())), " .");
+            }
 
-						iri.equals(ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )"
-								: iri.equals(BNodeType) ? "filter isBlank({value})"
-								: iri.equals(IRIType) ? "filter isIRI({value})"
-								: iri.equals(LiteralType) ? "filter isLiteral({value})"
-								: "filter ( datatype({value}) = <{datatype}> )",
+            @Override public Snippet probe(final MinExclusive minExclusive) {
+                return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.getValue())));
+            }
 
-						var(source),
-						iri
+            @Override public Snippet probe(final MaxExclusive maxExclusive) {
+                return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.getValue())));
+            }
 
-				);
+            @Override public Snippet probe(final MinInclusive minInclusive) {
+                return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.getValue())));
+            }
 
-			}
+            @Override public Snippet probe(final MaxInclusive maxInclusive) {
+                return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.getValue())));
+            }
 
-			@Override public Snippet probe(final Clazz clazz) {
-				return snippet(var(source), " a/rdfs:subClassOf* ", format(iri(clazz.getName())), " .");
-			}
+            @Override public Snippet probe(final Pattern pattern) {
+                return snippet("filter regex({source}, '{pattern}', '{flags}')",
+                        var(source), pattern.getText().replace("\\", "\\\\"), pattern.getFlags()
+                );
+            }
 
-			@Override public Snippet probe(final MinExclusive minExclusive) {
-				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.getValue())));
-			}
+            @Override public Snippet probe(final Like like) {
+                return snippet("filter regex({source}, '{pattern}')",
+                        var(source), like.toExpression().replace("\\", "\\\\")
+                );
+            }
 
-			@Override public Snippet probe(final MaxExclusive maxExclusive) {
-				return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.getValue())));
-			}
+            @Override public Snippet probe(final MinLength minLength) {
+                return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.getLimit());
+            }
 
-			@Override public Snippet probe(final MinInclusive minInclusive) {
-				return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.getValue())));
-			}
+            @Override public Snippet probe(final MaxLength maxLength) {
+                return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.getLimit());
+            }
 
-			@Override public Snippet probe(final MaxInclusive maxInclusive) {
-				return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.getValue())));
-			}
 
-			@Override public Snippet probe(final Pattern pattern) {
-				return snippet("filter regex({source}, '{pattern}', '{flags}')",
-						var(source), pattern.getText().replace("\\", "\\\\"), pattern.getFlags()
-				);
-			}
+            @Override public Snippet probe(final MinCount minCount) {
+                throw new UnsupportedOperationException("minimum focus size constraint");
+            }
 
-			@Override public Snippet probe(final Like like) {
-				return snippet("filter regex({source}, '{pattern}')",
-						var(source), like.toExpression().replace("\\", "\\\\")
-				);
-			}
+            @Override public Snippet probe(final MaxCount maxCount) {
+                throw new UnsupportedOperationException("maximum focus size constraint");
+            }
 
-			@Override public Snippet probe(final MinLength minLength) {
-				return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.getLimit());
-			}
 
-			@Override public Snippet probe(final MaxLength maxLength) {
-				return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.getLimit());
-			}
+            @Override public Snippet probe(final In in) {
+                throw new UnsupportedOperationException("focus range constraint");
+            }
 
+            @Override public Snippet probe(final All all) {
+                return nothing(); // universal constraints handled by field probe
+            }
 
-			@Override public Snippet probe(final MinCount minCount) {
-				throw new UnsupportedOperationException("minimum focus size constraint");
-			}
+            @Override public Snippet probe(final Any any) { // singleton universal constraints handled by field probe
 
-			@Override public Snippet probe(final MaxCount maxCount) {
-				throw new UnsupportedOperationException("maximum focus size constraint");
-			}
+                // values-based filtering (as opposed to in-based filtering) works also or root terms // !!!
+                // performance?
 
+                return any.getValues().size() > 1 ? values(source, values(any.getValues())) : nothing();
 
-			@Override public Snippet probe(final In in) {
-				throw new UnsupportedOperationException("focus range constraint");
-			}
+            }
 
-			@Override public Snippet probe(final All all) {
-				return nothing(); // universal constraints handled by field probe
-			}
 
-			@Override public Snippet probe(final Any any) { // singleton universal constraints handled by field probe
+            @Override public Snippet probe(final Field field) {
 
-				// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! 
-				// performance?
+                final IRI iri=iri(field.getName());
+                final Shape shape=field.getShape();
 
-				return any.getValues().size() > 1 ? values(source, values(any.getValues())) : nothing();
+                final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
+                final Optional<Set<Value>> any=any(shape).map(values1 -> values(values1));
 
-			}
+                final Optional<Value> singleton=any
+                        .filter(values -> values.size() == 1)
+                        .map(values -> values.iterator().next());
 
+                return snippet(
 
-			@Override public Snippet probe(final Field field) {
+                        (shape instanceof All || singleton.isPresent()) // filtering hook
+                                ? null // ($) only if actually referenced by filters
+                                : edge(var(source), iri, var(shape)),
 
-				final IRI iri=iri(field.getName());
-				final Shape shape=field.getShape();
+                        all // target universal constraints
+                                .map(values -> values.stream().map(value -> edge(var(source), iri, format(value))))
+                                .orElse(null),
 
-				final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
-				final Optional<Set<Value>> any=any(shape).map(values1 -> values(values1));
+                        singleton // target singleton existential constraints
+                                .map(value -> edge(var(source), iri, format(value)))
+                                .orElse(null),
 
-				final Optional<Value> singleton=any
-						.filter(values -> values.size() == 1)
-						.map(values -> values.iterator().next());
+                        "\n\n",
 
-				return snippet(
+                        filters(shape)
+                );
+            }
 
-						(shape instanceof All || singleton.isPresent()) // filtering hook
-								? null // ($) only if actually referenced by filters
-								: edge(var(source), iri, var(shape)),
 
-						all // target universal constraints
-								.map(values -> values.stream().map(value -> edge(var(source), iri, format(value))))
-								.orElse(null),
+            @Override public Snippet probe(final And and) {
+                return snippet(and.getShapes().stream().map(shape -> shape.map(this)));
+            }
 
-						singleton // target singleton existential constraints
-								.map(value -> edge(var(source), iri, format(value)))
-								.orElse(null),
+            @Override public Snippet probe(final Or or) {
+                return list(
+                        or.getShapes().stream().map(s -> snippet("{\f{branch}\f}", s.map(this))),
+                        " union "
+                );
+            }
 
-						"\n\n",
+            @Override public Snippet probe(final When when) {
+                throw new UnsupportedOperationException("conditional pattern"); // !!! tbi
+            }
 
-						filters(shape)
-				);
-			}
+        }
 
+        private final class PatternProbe extends Traverser<Snippet> {
 
-			@Override public Snippet probe(final And and) {
-				return snippet(and.getShapes().stream().map(shape -> shape.map(this)));
-			}
+            // !!! (€) remove optionals if term is required or if exists a filter on the same path
 
-			@Override public Snippet probe(final Or or) {
-				return list(
-						or.getShapes().stream().map(s -> snippet("{\f{branch}\f}", s.map(this))),
-						" union "
-				);
-			}
+            private final Shape shape;
 
-			@Override public Snippet probe(final When when) {
-				throw new UnsupportedOperationException("conditional pattern"); // !!! tbi
-			}
 
-		}
+            private PatternProbe(final Shape shape) {
+                this.shape=shape;
+            }
 
-		private final class PatternProbe extends Traverser<Snippet> {
 
-			// !!! (€) remove optionals if term is required or if exists a filter on the same path
+            @Override public Snippet probe(final Guard guard) {
+                throw new UnsupportedOperationException("partially redacted shape");
+            }
 
-			private final Shape shape;
 
+            @Override public Snippet probe(final Field field) {
 
-			private PatternProbe(final Shape shape) {
-				this.shape=shape;
-			}
+                final IRI iri=iri(field.getName());
+                final Shape shape=field.getShape();
 
+                return snippet( // (€) optional unless universal constraints are present
 
-			@Override public Snippet probe(final Guard guard) {
-				throw new UnsupportedOperationException("partially redacted shape");
-			}
+                        all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
 
+                        snippet(
+                                edge(var(this.shape), iri, var(shape)), "\n",
+                                pattern(shape)
+                        )
 
-			@Override public Snippet probe(final Field field) {
+                );
+            }
 
-				final IRI iri=iri(field.getName());
-				final Shape shape=field.getShape();
 
-				return snippet( // (€) optional unless universal constraints are present
+            @Override public Snippet probe(final And and) {
+                return snippet(and.getShapes().stream().map(s -> s.map(this)));
+            }
 
-						all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
+            @Override public Snippet probe(final Or or) {
+                return snippet(or.getShapes().stream().map(s -> s.map(this)));
+            }
 
-						snippet(
-								edge(var(this.shape), iri, var(shape)), "\n",
-								pattern(shape)
-						)
+            @Override public Snippet probe(final When when) {
+                throw new UnsupportedOperationException("conditional shape");
+            }
 
-				);
-			}
+        }
 
-
-			@Override public Snippet probe(final And and) {
-				return snippet(and.getShapes().stream().map(s -> s.map(this)));
-			}
-
-			@Override public Snippet probe(final Or or) {
-				return snippet(or.getShapes().stream().map(s -> s.map(this)));
-			}
-
-			@Override public Snippet probe(final When when) {
-				throw new UnsupportedOperationException("conditional shape");
-			}
-
-		}
-
-	}
+    }
 
 }

@@ -17,23 +17,14 @@
 
 package com.metreeca.rdf4j.services;
 
-import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.shapes.And;
-import com.metreeca.tree.shapes.Field;
-import com.metreeca.tree.shapes.Or;
-import com.metreeca.tree.shapes.When;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import com.metreeca.tree.shapes.*;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import org.eclipse.rdf4j.model.*;
+
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.direct;
@@ -48,11 +39,8 @@ import static java.util.stream.Collectors.toSet;
 
 final class GraphTrimmer extends GraphProcessor {
 
-	private final RDFFormat rdf=rdf();
-
-
 	<M extends Message<M>> Result<M, Failure> trim(final M message) {
-		return message.body(rdf).value(rdf -> message.body(this.rdf,
+		return message.body(rdf()).value(rdf -> message.body(rdf(),
 				trim(iri(message.item()), convey(message.shape()), rdf)
 		));
 	}
