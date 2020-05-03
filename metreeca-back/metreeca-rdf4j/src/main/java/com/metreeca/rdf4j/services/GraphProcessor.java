@@ -121,18 +121,18 @@ abstract class GraphProcessor {
     //// Tracing ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private String compile(final Supplier<String> generator) {
-        return time(generator).apply((t, v) -> {
+        return time(generator).apply((t, v) -> logger
 
-            logger.debug(this, () -> format("executing %s", v.endsWith("\n") ? v : v+"\n"));
-            logger.debug(this, () -> format("generated in <,%d> ms", t));
+                .debug(this, () -> format("executing %s", v.endsWith("\n") ? v : v+"\n"))
+                .debug(this, () -> format("generated in <,%d> ms", t))
 
-        });
+        );
     }
 
     private void evaluate(final Runnable task) {
-        time(task).apply((t) ->
+        time(task).apply((t) -> logger
 
-                logger.debug(this, () -> format("evaluated in <%,d> ms", t))
+                .debug(this, () -> format("evaluated in <%,d> ms", t))
 
         );
     }
