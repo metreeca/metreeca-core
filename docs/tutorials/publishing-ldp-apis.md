@@ -392,25 +392,25 @@ Standard resource action handlers can be defined using high-level declarative mo
 <p class="warning">Only LDP Basic and Direct Containers are currently supported.</p>
 
 ```diff
-\@Override protected Handler load(final Context context) {
-    return context
+    @Override protected Handler load(final Context context) {
+        return context
 
-            .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
-+           .set(engine(), GraphEngine::new)
+                .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
++               .set(engine(), GraphEngine::new)
 
-            .exec(new BIRT())
+                .exec(new BIRT())
 
-            .get(() -> new Server()
+                .get(() -> new Server()
 
-                    .wrap(new Rewriter(BIRT.BASE))
+                        .wrap(new Rewriter(BIRT.BASE))
 
-                    .wrap(new Router()
+                        .wrap(new Router()
 
-                            .path("/products/*", new Products())
+                                .path("/products/*", new Products())
 
-                    )
-            );
-}
+                        )
+                );
+    }
 ```
 
 Actors delegate transaction management, data validation and trimming and CRUD operations to a customizable LDP engine.
