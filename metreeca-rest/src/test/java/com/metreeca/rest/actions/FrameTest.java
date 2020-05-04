@@ -20,6 +20,7 @@ package com.metreeca.rest.actions;
 
 import com.metreeca.rest.Context;
 import com.metreeca.rest.Xtream;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
@@ -28,16 +29,21 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class StampTest {
+final class FrameTest {
 
-	private void exec(final Runnable task) {
-		new Context().exec(task).clear();
-	}
+    private void exec(final Runnable task) {
+        new Context().exec(task).clear();
+    }
 
 
-	private Stream<String> fill(final String template, final String name, final String value) {
-		return new Stamp<String>(template).value(name, value).apply(value);
-	}
+    private Stream<String> fill(final String template, final String name, final String value) {
+        return new Frame<>()
+
+                .model(template)
+                .value(name, value)
+
+                .apply(value);
+    }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -81,26 +87,30 @@ final class StampTest {
 
 
 	@Test void testGenerateCartesianProduct() {
-		exec(() -> assertThat
+        exec(() -> {
+                    assertThat
 
-				(Xtream
-						.of("test")
+                            (Xtream
+                                    .of("test")
 
-						.flatMap(new Stamp<String>("{base}:{x}{y}")
-								.values("base", Stream::of)
-								.values("x", string -> Stream.of("1", "2"))
-								.values("y", string -> Stream.of("2", "3"))
-						)
+                                    .flatMap(new Frame<String>()
 
-						.collect(toList())
-				)
+                                            .model("{base}:{x}{y}")
+                                            .values("base", Stream::of)
+                                            .values("x", string -> Stream.of("1", "2"))
+                                            .values("y", string -> Stream.of("2", "3"))
+                                    )
 
-				.containsExactlyInAnyOrder(
-						"test:12",
-						"test:13",
-						"test:22",
-						"test:23"
-				)
+                                    .collect(toList())
+                            )
+
+                            .containsExactlyInAnyOrder(
+                                    "test:12",
+                                    "test:13",
+                                    "test:22",
+                                    "test:23"
+                            );
+                }
 
 		);
 	}

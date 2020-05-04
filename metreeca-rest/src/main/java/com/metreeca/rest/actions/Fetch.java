@@ -28,7 +28,6 @@ import java.util.function.Function;
 
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.rest.services.Fetcher.fetcher;
 import static com.metreeca.rest.services.Logger.logger;
 import static java.lang.String.format;
 
@@ -53,7 +52,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
      *
      * @param limit the request processing rate limit
      *
-     * @return this fetcher
+     * @return this action
      *
      * @throws NullPointerException if {@code limit} is null
      */
@@ -73,7 +72,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
      *
      * @param fetcher the resource fetcher
      *
-     * @return this fetcher
+     * @return this action
      *
      * @throws NullPointerException if {@code fetcher} is null
      */
