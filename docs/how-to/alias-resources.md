@@ -37,7 +37,7 @@ new Router()
 ))
 ```
 
-```http
+```shell
 GET http://localhost:8080/products/byname/Pont+Yacht
 
 303 See Other
@@ -59,7 +59,7 @@ new Router()
         )
 ```
 
-```http
+```shell
 GET http://localhost:8080/products/Pont+Yacht
 
 303 See Other
@@ -80,7 +80,7 @@ new Router()
 )
 ```
 
-```http
+```shell
 GET http://localhost:8080/products/?name=Model+A
 
 303 See Other
