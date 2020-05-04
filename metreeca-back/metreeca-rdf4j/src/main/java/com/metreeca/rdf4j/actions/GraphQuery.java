@@ -17,26 +17,51 @@
 
 package com.metreeca.rdf4j.actions;
 
+import com.metreeca.rdf4j.services.Graph;
+import com.metreeca.rest.services.Logger;
+
 import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.query.Operation;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Logger.time;
 import static org.eclipse.rdf4j.common.iteration.Iterations.asList;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 
-public final class GraphQuery extends Operation<GraphQuery> implements Function<String, Stream<Statement>> {
+/**
+ * SPARQL graph query action.
+ *
+ * <p>Executes SPARQL graph queries against the {@linkplain #graph(Graph) target graph}.</p>
+ */
+public final class GraphQuery extends Action<GraphQuery> implements Function<String, Stream<Statement>> {
 
-	@Override public Stream<Statement> apply(final String query) {
-		return graph().exec(connection -> {
-			return time(() -> // statements must be retrieved inside txn
+    private final Logger logger=service(Logger.logger());
 
-					asList(configure(connection.prepareGraphQuery(SPARQL, query, base())).evaluate()).parallelStream()
 
-			).apply((t, v) -> logger().info(this, String.format("executed in <%,d> ms", t)));
-		});
-	}
+    /**
+     * Executes a SPARQL graph query.
+     *
+     * @param query the graph query to be executed
+     *
+     * @return a stream of statements produced by executing {@code query} against the {@linkplain #graph(Graph)
+     * target graph} after {@linkplain #configure(Operation) configuring} it; null or empty queries are silently ignored
+     */
+    @Override public Stream<Statement> apply(final String query) {
+        return query == null || query.isEmpty() ? Stream.empty() : graph().exec(connection -> {
+            return time(() -> // statements must be retrieved inside txn
+
+                    asList(configure(connection.prepareGraphQuery(SPARQL, query, base())).evaluate()).parallelStream()
+
+            ).apply((t, v) ->
+
+                    logger.info(this, String.format("executed in <%,d> ms", t))
+
+            );
+        });
+    }
 
 }
