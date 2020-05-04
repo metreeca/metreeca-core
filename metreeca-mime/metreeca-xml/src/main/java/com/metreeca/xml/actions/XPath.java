@@ -21,9 +21,7 @@ import org.w3c.dom.*;
 
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.namespace.QName;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+import javax.xml.xpath.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -37,334 +35,429 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static javax.xml.XMLConstants.XMLNS_ATTRIBUTE;
 
 
+/**
+ * XPath expression matching.
+ *
+ * <p>Applies XPath expression to XML nodes.</p>
+ */
 public final class XPath {
 
-	public static final String DefaultPrefix="_";
+    /**
+     * The prefix mapped to the default namespace of the target document ({@value}).
+     */
+    public static final String DefaultPrefix="_";
 
 
-	private static final String HTMLPrefix="html";
-	private static final String HTMLUri="http://www.w3.org/1999/xhtml";
+    private static final String HTMLPrefix="html";
+    private static final String HTMLUri="http://www.w3.org/1999/xhtml";
 
-	private static final Pattern EntityPattern=Pattern.compile("&#(?<hex>x?)(?<code>\\d+);", CASE_INSENSITIVE);
+    private static final Pattern EntityPattern=Pattern.compile("&#(?<hex>x?)(?<code>\\d+);", CASE_INSENSITIVE);
 
+    private static final XPathFactory factory=XPathFactory.newInstance();
 
-	private static final XPathFactory factory=XPathFactory.newInstance();
 
+    /**
+     * Creates an xpath-based function.
+     *
+     * @param query a function taking as argument an xpath matching action and returning a value
+     * @param <R>   the type of the value returned by {@code query}
+     *
+     * @return a function taking an XML node as argument and returning the value produced by applying {@code query}
+     * to an xpath matching action targeting the argument
+     *
+     * @throws NullPointerException if {@code query} is null
+     */
+    public static <R> Function<Node, R> XPath(final Function<XPath, R> query) {
 
-	public static Function<Node, Optional<String>> String(final String path) {
+        if ( query == null ) {
+            throw new NullPointerException("null query");
+        }
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+        return node -> query.apply(new XPath(node));
+    }
 
-		return node -> new XPath(node).string(path);
-	}
 
-	public static Function<Node, Stream<String>> Strings(final String path) {
+    /**
+     * Decodes XML numeric entities.
+     *
+     * @param text the text to be decoded
+     *
+     * @return a version of {@code text} where XML numeric entities (for instance {@code &#x2019;} or {@code &#8220;})
+     * are replaced with the corresponding Unicode characters
+     *
+     * @throws NullPointerException if {@code text} is null
+     */
+    public static String decode(final CharSequence text) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+        if ( text == null ) {
+            throw new NullPointerException("null text");
+        }
 
-		return node -> new XPath(node).strings(path);
-	}
+        final StringBuffer buffer=new StringBuffer(text.length());
+        final Matcher matcher=EntityPattern.matcher(text);
 
+        while ( matcher.find() ) {
 
-	public static Function<Node, Stream<String>> Links(final String path) {
+            matcher.appendReplacement(buffer, "");
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+            buffer.append(Character.toChars(
+                    Integer.parseInt(matcher.group("code"), matcher.group("hex").isEmpty() ? 10 : 16)
+            ));
+        }
 
-		return node -> new XPath(node).links(path);
-	}
+        matcher.appendTail(buffer);
 
+        return buffer.toString();
+    }
 
-	public static Function<Node, Optional<Element>> Element(final String path) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		return node -> new XPath(node).element(path);
-	}
+    private final Node node;
+    private final URI base;
 
-	public static Function<Node, Stream<Element>> Elements(final String path) {
+    private final javax.xml.xpath.XPath xpath;
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+    /**
+     * Creates an xpath matching action.
+     *
+     * @param node the target XML node for the action
+     *
+     * @throws NullPointerException if {@code node} is null
+     */
+    public XPath(final Node node) {
 
-		return node -> new XPath(node).elements(path);
-	}
+        if ( node == null ) {
+            throw new NullPointerException("null node");
+        }
 
+        this.node=node;
+        this.base=Optional.ofNullable(node.getBaseURI()).map(s -> {
 
-	public static Function<Node, Optional<Node>> Node(final String path) {
+            try {
+                return new URI(s);
+            } catch ( final URISyntaxException e ) {
+                return null;
+            }
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+        }).orElse(null);
 
-		return node -> new XPath(node).node(path);
-	}
+        this.xpath=factory.newXPath();
 
-	public static Function<Node, Stream<Node>> Nodes(final String path) {
+        final Node root=node instanceof Document ? ((Document)node).getDocumentElement() : node;
+        final NamedNodeMap attributes=root.getAttributes();
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+        final Map<String, String> namespaces=new HashMap<>();
 
-		return node -> new XPath(node).nodes(path);
-	}
+        for (int i=0, n=attributes.getLength(); i < n; ++i) {
 
+            final Node attribute=attributes.item(i);
 
-	public static <R> Function<Node, R> Query(final Function<XPath, R> query) {
+            if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName()) ) { // default namespace
 
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
+                namespaces.put(DefaultPrefix, attribute.getNodeValue());
 
-		return node -> query.apply(new XPath(node));
-	}
+            } else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) { // prefixed namespace
 
+                namespaces.put(attribute.getLocalName(), attribute.getNodeValue());
 
-	/**
-	 * Decodes XML numeric entities.
-	 *
-	 * @param text the text to be decoded
-	 *
-	 * @return a version of {@code text} where XML numeric entities (for instance {@code &#x2019;} or {@code &#8220;})
-	 * 		are replaced with the corresponding Unicode characters
-	 *
-	 * @throws NullPointerException if {@code text} is null
-	 */
-	public static String decode(final CharSequence text) {
+            }
 
-		if ( text == null ) {
-			throw new NullPointerException("null text");
-		}
+        }
 
-		final StringBuffer buffer=new StringBuffer(text.length());
-		final Matcher matcher=EntityPattern.matcher(text);
+        final String namespace=root.getNamespaceURI();
 
-		while ( matcher.find() ) {
+        namespaces.computeIfAbsent(DefaultPrefix, prefix -> namespace);
+        namespaces.computeIfAbsent(HTMLPrefix, prefix -> HTMLUri.equals(namespace) ? namespace : null);
 
-			matcher.appendReplacement(buffer, "");
+        xpath.setNamespaceContext(new NamespaceContext() {
 
-			buffer.append(Character.toChars(
-					Integer.parseInt(matcher.group("code"), matcher.group("hex").isEmpty() ? 10 : 16)
-			));
-		}
+            @Override public String getNamespaceURI(final String prefix) {
+                return namespaces.get(prefix);
+            }
 
-		matcher.appendTail(buffer);
+            @Override public String getPrefix(final String namespaceURI) {
+                throw new UnsupportedOperationException("prefix lookup");
+            }
 
-		return buffer.toString();
-	}
+            @Override public Iterator<String> getPrefixes(final String namespaceURI) {
+                throw new UnsupportedOperationException("prefixes lookup");
+            }
 
+        });
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    }
 
-	private final Node node;
-	private final URI base;
 
-	private final javax.xml.xpath.XPath xpath;
+    /**
+     * Retrieves the target node.
+     *
+     * @return the target node of this xpath matching action.
+     */
+    public Node node() {
+        return node;
+    }
+
+    /**
+     * Retrieves the target document.
+     *
+     * @return the target document of this xpath matching action.
+     */
+    public Document document() {
+        return node instanceof Document ? (Document)node : node.getOwnerDocument();
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Retrieves a boolean value from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return an optional boolean containing the value produced by evaluating {@code xpath} against the target node
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Optional<Boolean> bool(final String xpath) {
 
-	public XPath(final Node node) {
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return Optional.of((Boolean)evaluate(xpath, XPathConstants.BOOLEAN));
+    }
+
+    /**
+     * Retrieves a numeric value from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return an optional number containing the value produced by evaluating {@code xpath} against the target node,
+     * if one was available; an empty optional, otherwise
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Optional<Double> number(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
 
-		if ( node == null ) {
-			throw new NullPointerException("null node");
-		}
+        return Optional.of((Double)evaluate(xpath, XPathConstants.NUMBER)).filter(x -> !Double.isNaN(x));
+    }
 
-		this.node=node;
-		this.base=Optional.ofNullable(node.getBaseURI()).map(s -> {
 
-			try {
-				return new URI(s);
-			} catch ( final URISyntaxException e ) {
-				return null;
-			}
-
-		}).orElse(null);
-
-		this.xpath=factory.newXPath();
-
-		final Node root=node instanceof Document ? ((Document)node).getDocumentElement() : node;
-		final NamedNodeMap attributes=root.getAttributes();
-
-		final Map<String, String> namespaces=new HashMap<>();
-
-		for (int i=0, n=attributes.getLength(); i < n; ++i) {
-
-			final Node attribute=attributes.item(i);
-
-			if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName()) ) { // default namespace
-
-				namespaces.put(DefaultPrefix, attribute.getNodeValue());
-
-			} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) { // prefixed namespace
-
-				namespaces.put(attribute.getLocalName(), attribute.getNodeValue());
-
-			}
-
-		}
-
-		final String namespace=root.getNamespaceURI();
-
-		namespaces.computeIfAbsent(DefaultPrefix, prefix -> namespace);
-		namespaces.computeIfAbsent(HTMLPrefix, prefix -> HTMLUri.equals(namespace) ? namespace : null);
-
-		xpath.setNamespaceContext(new NamespaceContext() {
-
-			@Override public String getNamespaceURI(final String prefix) {
-				return namespaces.get(prefix);
-			}
-
-			@Override public String getPrefix(final String namespaceURI) {
-				throw new UnsupportedOperationException("prefix lookup");
-			}
-
-			@Override public Iterator<String> getPrefixes(final String namespaceURI) {
-				throw new UnsupportedOperationException("prefixes lookup");
-			}
-
-		});
-
-	}
-
-
-	public Node node() {
-		return node;
-	}
-
-	public Document document() {
-		return node instanceof Document ? (Document)node : node.getOwnerDocument();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public Optional<Boolean> bool(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return Optional.of((Boolean)evaluate(path, XPathConstants.BOOLEAN));
-	}
-
-	public Optional<Double> number(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return Optional.of((Double)evaluate(path, XPathConstants.NUMBER)).filter(x -> !Double.isNaN(x));
-	}
-
-
-	public Optional<String> string(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return Optional.of((String)evaluate(path, XPathConstants.STRING)).filter(s -> !s.isEmpty());
-	}
-
-	public Stream<String> strings(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return nodes(path).map(Node::getTextContent);
-	}
-
-
-	public Stream<String> links(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return nodes(path).map(Node::getTextContent).map(s -> base == null ? s : base.resolve(s).toString());
-	}
-
-
-	public Optional<Element> element(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return node(path)
-				.filter(node -> node instanceof Element)
-				.map(node -> (Element)node);
-	}
-
-	public Stream<Element> elements(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return nodes(path)
-				.filter(node -> node instanceof Element)
-				.map(node -> (Element)node);
-	}
-
-
-	public Optional<Node> node(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return Optional.ofNullable((Node)evaluate(path, XPathConstants.NODE));
-	}
-
-	public Stream<Node> nodes(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Node>() {
-
-			private final NodeList nodes=(NodeList)evaluate(path, XPathConstants.NODESET);
-
-			private int next=0;
-
-			@Override public boolean hasNext() {
-				return next < nodes.getLength();
-			}
-
-			@Override public Node next() throws NoSuchElementException {
-
-				if ( !hasNext() ) {
-					throw new NoSuchElementException("no more iterator elements");
-				}
-
-				return nodes.item(next++);
-
-			}
-
-		}, Spliterator.ORDERED), false);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Object evaluate(final String query, final QName type) {
-		try {
-
-			return xpath.compile(query).evaluate(node, type);
-
-		} catch ( final XPathExpressionException e ) {
-			throw new RuntimeException(String.format("unable to evaluate xpath expression {%s}", query), e);
-		}
-	}
+    /**
+     * Retrieves a textual value from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return an optional non-empty string containing the value produced by evaluating {@code xpath} against the
+     * target node, if one was available and not empty; an empty optional, otherwise
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Optional<String> string(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return Optional.of((String)evaluate(xpath, XPathConstants.STRING)).filter(s -> !s.isEmpty());
+    }
+
+    /**
+     * Retrieves textual values from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return a stream of non-empty strings containing the values produced by evaluating {@code xpath} against the
+     * target node
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Stream<String> strings(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return nodes(xpath).map(Node::getTextContent).filter(s -> !s.isEmpty());
+    }
+
+
+    /**
+     * Retrieves a URI value from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return an optional string URIs containing the values produced by evaluating {@code xpath} against the target
+     * node, if one was available, and resolving it against the {@linkplain Node#getBaseURI() base URI} of the target
+     * node, if available; syntactically malformed URIs are returned verbatim
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Optional<String> link(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return node(xpath).map(Node::getTextContent).map(s -> {
+            try {
+
+                return base == null ? s : base.resolve(s).toString();
+
+            } catch ( final IllegalArgumentException e ) {
+
+                return s;
+
+            }
+        });
+    }
+
+    /**
+     * Retrieves URI values from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return a stream of URIs containing the values produced by evaluating {@code xpath} against the target node
+     * and resolving them against the {@linkplain Node#getBaseURI() base URI} of the target node, if available;
+     * syntactically malformed URIs are returned verbatim
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Stream<String> links(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return nodes(xpath).map(Node::getTextContent).map(s -> {
+            try {
+
+                return base == null ? s : base.resolve(s).toString();
+
+            } catch ( final IllegalArgumentException e ) {
+
+                return s;
+
+            }
+        });
+    }
+
+
+    /**
+     * Retrieves an element value from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return an optional element containing the value produced by evaluating {@code xpath} against the target node,
+     * if one was available; an empty optional, otherwise
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Optional<Element> element(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return node(xpath)
+                .filter(Element.class::isInstance)
+                .map(Element.class::cast);
+    }
+
+    /**
+     * Retrieves element values from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return a stream of elements containing the values produced by evaluating {@code xpath} against the target node
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Stream<Element> elements(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return nodes(xpath)
+                .filter(Element.class::isInstance)
+                .map(Element.class::cast);
+    }
+
+
+    /**
+     * Retrieves a node value from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return an optional node containing the value produced by evaluating {@code xpath} against the target node,
+     * if one was available; an empty optional, otherwise
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Optional<Node> node(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return Optional.ofNullable((Node)evaluate(xpath, XPathConstants.NODE));
+    }
+
+    /**
+     * Retrieves node values from the target node.
+     *
+     * @param xpath the xpath expression to be evaluated against the target node
+     *
+     * @return a stream of nodes containing the values produced by evaluating {@code xpath} against the target node
+     *
+     * @throws NullPointerException if {@code xpath} is null
+     */
+    public Stream<Node> nodes(final String xpath) {
+
+        if ( xpath == null ) {
+            throw new NullPointerException("null xpath");
+        }
+
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Node>() {
+
+            private final NodeList nodes=(NodeList)evaluate(xpath, XPathConstants.NODESET);
+
+            private int next;
+
+            @Override public boolean hasNext() {
+                return next < nodes.getLength();
+            }
+
+            @Override public Node next() throws NoSuchElementException {
+
+                if ( !hasNext() ) {
+                    throw new NoSuchElementException("no more iterator elements");
+                }
+
+                return nodes.item(next++);
+
+            }
+
+        }, Spliterator.ORDERED), false);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private Object evaluate(final String query, final QName type) {
+        try {
+
+            return xpath.compile(query).evaluate(node, type);
+
+        } catch ( final XPathExpressionException e ) {
+            throw new RuntimeException(String.format("unable to evaluate xpath expression {%s}", query), e);
+        }
+    }
 
 }

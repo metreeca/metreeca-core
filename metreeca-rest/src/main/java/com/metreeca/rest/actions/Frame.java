@@ -257,7 +257,6 @@ public final class Frame<V> implements Function<V, Stream<String>> {
      * @return a stream of strings from the configured {@linkplain #model(String) model} and
      * {@linkplain #values(String, Function) expressions}
      */
-
     @Override public Stream<String> apply(final V value) {
 
         return stream(value).map(this::fill);
