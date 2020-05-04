@@ -21,6 +21,7 @@ A Maven project with the code for the complete demo app is available on [GitHub]
 The demo linked data server is pre-configured with a small collection of read/write REST APIs able to drive a typical web-based interface like a user-facing [product catalog](https://demo.metreeca.com/apps/shop/).
 
 <p class="warning">The product catalog demo is hosted on a cloud service: it is not expected to provide production-level performance and may experience some delays during workspace initialization.</p>
+
 | REST API                                 | Contents                     |
 | :--------------------------------------- | :--------------------------- |
 | [/product-lines/](https://demo.metreeca.com/product-lines/) | Product line faceted catalog |
