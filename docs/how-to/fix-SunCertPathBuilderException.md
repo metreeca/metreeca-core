@@ -61,4 +61,3 @@ JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home/ sudo
     -import -alias "Thawte RSA CA 2018" -file public.crt \
     -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit
 ```
-
