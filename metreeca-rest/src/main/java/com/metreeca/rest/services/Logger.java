@@ -59,9 +59,9 @@ public abstract class Logger {
 
 
     /**
-     * Retrieves the default trace factory.
+     * Retrieves the default logger factory.
      *
-     * @return the default trace factory, which logs trace records through the the standard {@linkplain LogManager Java
+     * @return the default logger factory, which logs events through the the standard {@linkplain LogManager Java
      * logging} facilities
      */
     public static Supplier<Logger> logger() {
@@ -183,10 +183,10 @@ public abstract class Logger {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Adds an error trace entry.
+     * Adds an error log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message for the log entry
      *
      * @return this logger
      */
@@ -195,10 +195,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds an error trace entry.
+     * Adds an error log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message supplier for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message supplier for the log entry
      *
      * @return this logger
      */
@@ -207,10 +207,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds an exceptional error trace entry.
+     * Adds an exceptional error log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message for the log entry
      * @param cause   the throwable that caused the traced exceptional condition
      *
      * @return this logger
@@ -220,10 +220,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds an exceptional error trace entry.
+     * Adds an exceptional error log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message supplier for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message supplier for the log entry
      * @param cause   the throwable that caused the traced exceptional condition
      *
      * @return this logger
@@ -234,10 +234,10 @@ public abstract class Logger {
 
 
     /**
-     * Adds a warning trace entry.
+     * Adds a warning log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message for the log entry
      *
      * @return this logger
      */
@@ -246,10 +246,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds a warning trace entry.
+     * Adds a warning log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message supplier for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message supplier for the log entry
      *
      * @return this logger
      */
@@ -258,10 +258,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds an exceptional warning trace entry.
+     * Adds an exceptional warning log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message for the log entry
      * @param cause   the throwable that caused the traced exceptional condition
      *
      * @return this logger
@@ -271,10 +271,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds an exceptional warning trace entry.
+     * Adds an exceptional warning log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message supplier for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message supplier for the log entry
      * @param cause   the throwable that caused the traced exceptional condition
      *
      * @return this logger
@@ -285,10 +285,10 @@ public abstract class Logger {
 
 
     /**
-     * Adds an info trace entry.
+     * Adds an info log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message for the log entry
      *
      * @return this logger
      */
@@ -297,10 +297,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds an info trace entry.
+     * Adds an info log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message supplier for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message supplier for the log entry
      *
      * @return this logger
      */
@@ -310,10 +310,10 @@ public abstract class Logger {
 
 
     /**
-     * Adds a debug trace entry.
+     * Adds a debug log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message for the log entry
      *
      * @return this logger
      */
@@ -322,10 +322,10 @@ public abstract class Logger {
     }
 
     /**
-     * Adds a debug trace entry.
+     * Adds a debug log entry.
      *
-     * @param source  the source object for the trace entry or {@code null} for global trace entries
-     * @param message the message supplier for the trace entry
+     * @param source  the source object for the log entry or {@code null} for global log entries
+     * @param message the message supplier for the log entry
      *
      * @return this logger
      */
@@ -335,12 +335,12 @@ public abstract class Logger {
 
 
     /**
-     * Adds a trace entry.
+     * Adds a log entry.
      *
-     * @param level   the logging level for the trace entry
-     * @param source  the source object for the trace entry or {@code null} for global trace entries; may be a
+     * @param level   the logging level for the log entry
+     * @param source  the source object for the log entry or {@code null} for global log entries; may be a
      *                human-readable string label
-     * @param message the message supplier for the trace entry
+     * @param message the message supplier for the log entry
      * @param cause   the throwable that caused the traced exceptional condition or {@code null} if immaterial
      *
      * @return this logger

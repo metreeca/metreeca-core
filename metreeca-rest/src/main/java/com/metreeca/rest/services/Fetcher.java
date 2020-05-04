@@ -47,9 +47,9 @@ import static java.util.stream.Collectors.toMap;
 @FunctionalInterface public interface Fetcher extends Function<Request, Response> {
 
 	/**
-	 * Retrieves the default fetcher factory.
+	 * Retrieves the default resource fetcher factory.
 	 *
-	 * @return the default fetcher factory, which creates {@link URLFetcher} instances
+	 * @return the default resource fetcher factory, which creates {@link URLFetcher} instances
 	 */
 	public static Supplier<Fetcher> fetcher() {
 		return URLFetcher::new;
