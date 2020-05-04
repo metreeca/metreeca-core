@@ -18,11 +18,7 @@
 package com.metreeca.rest.actions;
 
 import java.time.Duration;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
+import java.util.concurrent.*;
 import java.util.function.UnaryOperator;
 
 import static java.lang.System.currentTimeMillis;
@@ -30,92 +26,120 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 
 /**
- * Rate limit.
+ * Event rate limiting.
+ *
+ * <p>Enforces a user-defined rate-limit to event processing.</p>
+ *
+ * @param <T> the type of the rate-limited events
  */
 public final class Limit<T> implements UnaryOperator<T> {
 
-	private final Duration period;
+    private final Duration period;
 
-	private final BlockingQueue<Token> tokens=new DelayQueue<>();
-
-
-	public Limit(final int txns) {
-		this(txns, Duration.ofSeconds(1));
-	}
-
-	public Limit(final int txns, final Duration period) {
-
-		if ( txns < 0 ) {
-			throw new IllegalArgumentException("illegal transaction limit {"+txns+"}");
-		}
-
-		if ( period == null ) {
-			throw new NullPointerException("null period");
-		}
-
-		if ( period.isNegative() ) {
-			throw new IllegalArgumentException("negative period {"+period+"}");
-		}
-
-		this.period=period;
-
-		for (int i=0; i < txns; ++i) { tokens.offer(new Token(0)); }
-
-	}
+    private final BlockingQueue<Token> tokens=new DelayQueue<>();
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Creates a new per second rate limit.
+     *
+     * @param events the number of accepted events in a second.
+     *
+     * @throws IllegalArgumentException if {@code events} is negative
+     */
+    public Limit(final int events) {
+        this(events, Duration.ofSeconds(1));
+    }
 
-	@Override public T apply(final T t) {
-		if ( tokens.isEmpty() || period.isZero() ) { return t; } else {
+    /**
+     * Creates a new rate limit.
+     *
+     * @param events the number of accepted events in the given {@code period}; no rate limit is enforced if equal to 0
+     * @param period the time window for counting events}; no rate limit is enforced if {@linkplain Duration#isZero()}
+     *               equal to 0}
+     *
+     * @throws NullPointerException     if {@code period} is null
+     * @throws IllegalArgumentException if either {@code events} or {@code period} is negative
+     */
+    public Limit(final int events, final Duration period) {
 
-			while ( true ) {
-				try {
+        if ( events < 0 ) {
+            throw new IllegalArgumentException("negative transaction limit");
+        }
 
-					tokens.take();
-					tokens.offer(new Token(period.toMillis()));
+        if ( period == null ) {
+            throw new NullPointerException("null period");
+        }
 
-					return t;
+        if ( period.isNegative() ) {
+            throw new IllegalArgumentException("negative period");
+        }
 
-				} catch ( final InterruptedException ignored ) {}
-			}
+        this.period=period;
 
-		}
-	}
+        for (int i=0; i < events; ++i) { tokens.offer(new Token(0)); }
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class Token implements Delayed {
-
-		private final long time;
-
-
-		private Token(final long delay) {
-			time=currentTimeMillis()+delay;
-		}
-
-
-		@Override public long getDelay(final TimeUnit unit) {
-			return unit.convert(time-currentTimeMillis(), MILLISECONDS);
-		}
-
-
-		@Override public int compareTo(final Delayed delayed) {
-			return delayed instanceof Token
-					? Long.compare(time, ((Token)delayed).time)
-					: Long.compare(getDelay(MILLISECONDS), delayed.getDelay(MILLISECONDS));
-		}
+    }
 
 
-		@Override public int hashCode() {
-			return Long.hashCode(time);
-		}
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		@Override public boolean equals(final Object object) {
-			return object instanceof Token && time == ((Token)object).time;
-		}
+    /**
+     * Returns an event as soon as it is compatible with the enforced rate limits.
+     *
+     * @param event an event to be accepted
+     *
+     * @return the input {@code event}
+     */
+    @Override public T apply(final T event) {
+        if ( tokens.isEmpty() || period.isZero() ) { return event; } else {
 
-	}
+            while ( true ) {
+                try {
+
+                    tokens.take();
+                    tokens.offer(new Token(period.toMillis()));
+
+                    return event;
+
+                } catch ( final InterruptedException ignored ) {}
+            }
+
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static final class Token implements Delayed {
+
+        private final long time;
+
+
+        private Token(final long delay) {
+            time=currentTimeMillis()+delay;
+        }
+
+
+        @Override public long getDelay(final TimeUnit unit) {
+            return unit.convert(time-currentTimeMillis(), MILLISECONDS);
+        }
+
+
+        @Override public int compareTo(final Delayed delayed) {
+            return delayed instanceof Token
+                    ? Long.compare(time, ((Token)delayed).time)
+                    : Long.compare(getDelay(MILLISECONDS), delayed.getDelay(MILLISECONDS));
+        }
+
+
+        @Override public int hashCode() {
+            return Long.hashCode(time);
+        }
+
+        @Override public boolean equals(final Object object) {
+            return object instanceof Token && time == ((Token)object).time;
+        }
+
+    }
 
 }

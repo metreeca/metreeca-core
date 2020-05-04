@@ -35,61 +35,93 @@ import static java.lang.String.format;
 
 /**
  * Resource fetching.
+ *
+ * <p>Maps resource requests to optional responses.</p>
  */
 public final class Fetch implements Function<Request, Optional<Response>> {
 
-	private Function<Request, Request> limit=new Limit<>(0);
+    private Function<Request, Request> limit=new Limit<>(0);
 
-	private final Fetcher fetcher=service(fetcher());
-	private final Logger logger=service(logger());
-
-
-	/**
-	 * Configures the rate limit for this fetcher (default to no limit)
-	 *
-	 * @param limit the rate limit for this fetcher
-	 *
-	 * @return this fetcher
-	 *
-	 * @throws NullPointerException if {@code limit} is null
-	 */
-	public Fetch limit(final Function<Request, Request> limit) {
-
-		if ( limit == null ) {
-			throw new NullPointerException("null limit");
-		}
-
-		this.limit=limit;
-
-		return this;
-	}
+    private Fetcher fetcher=service(Fetcher.fetcher());
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private final Logger logger=service(logger());
 
-	@Override public Optional<Response> apply(final Request request) {
-		return Optional
 
-				.ofNullable(request)
+    /**
+     * Configures the rate limit (default to no limit)
+     *
+     * @param limit the request processing rate limit
+     *
+     * @return this fetcher
+     *
+     * @throws NullPointerException if {@code limit} is null
+     */
+    public Fetch limit(final Function<Request, Request> limit) {
 
-				.map(limit)
-				.map(fetcher)
+        if ( limit == null ) {
+            throw new NullPointerException("null limit");
+        }
 
-				.filter(response -> {
+        this.limit=limit;
 
-					final boolean success=response.success();
+        return this;
+    }
 
-					if ( !success ) {
+    /**
+     * Configures the resource fetcher (defaults to the {@linkplain Fetcher#fetcher() shared resource fetcher})
+     *
+     * @param fetcher the resource fetcher
+     *
+     * @return this fetcher
+     *
+     * @throws NullPointerException if {@code fetcher} is null
+     */
+    public Fetch fetcher(final Fetcher fetcher) {
 
-						logger.error(this, format("unable to retrieve data from <%s> : status %d (%s)",
-								response.item(), response.status(), response.body(text()).value().orElse("")
-						));
+        if ( fetcher == null ) {
+            throw new NullPointerException("null fetcher");
+        }
 
-					}
+        this.fetcher=fetcher;
 
-					return success;
+        return this;
+    }
 
-				});
-	}
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Fetches a resource.
+     *
+     * @param request the request to be used for fetching the request; ignored if null
+     *
+     * @return an optional response, if the {@code request} was not null and successfully processed; an empty optional,
+     * otherwise, logging an error to the {@linkplain Logger#logger() shared event logger}
+     */
+    @Override public Optional<Response> apply(final Request request) {
+        return Optional
+
+                .ofNullable(request)
+
+                .map(limit)
+                .map(fetcher)
+
+                .filter(response -> {
+
+                    final boolean success=response.success();
+
+                    if ( !success ) {
+
+                        logger.error(this, format("unable to retrieve data from <%s> : status %d (%s)",
+                                response.item(), response.status(), response.body(text()).value().orElse("")
+                        ));
+
+                    }
+
+                    return success;
+
+                });
+    }
 
 }

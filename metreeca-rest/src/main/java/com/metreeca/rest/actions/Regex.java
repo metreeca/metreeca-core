@@ -27,11 +27,13 @@ import java.util.stream.Stream;
 
 
 /**
- * {@link Pattern} {@link Character}
+ * Regular expression matching.
+ *
+ * <p>Maps strings to regular expression matchers.</p>
  */
 public final class Regex {
 
-	private static final Map<String, Pattern> patterns=new ConcurrentHashMap<>();
+	private static final Map<String, Pattern> patterns=new ConcurrentHashMap<>(); // pattern cache
 
 
 	public static Predicate<String> Matches(final String regex) {
