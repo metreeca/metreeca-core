@@ -19,12 +19,11 @@ package com.metreeca.rest.actions;
 
 
 import com.metreeca.rest.Context;
-import com.metreeca.rest.Feed;
+import com.metreeca.rest.Xtream;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -84,7 +83,7 @@ final class StampTest {
 	@Test void testGenerateCartesianProduct() {
 		exec(() -> assertThat
 
-				(Feed
+				(Xtream
 						.of("test")
 
 						.flatMap(new Stamp<String>("{base}:{x}{y}")
