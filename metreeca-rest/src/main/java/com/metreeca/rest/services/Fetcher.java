@@ -30,258 +30,253 @@ import static java.util.stream.Collectors.toMap;
  */
 @FunctionalInterface public interface Fetcher extends Function<Request, Response> {
 
-	/**
-	 * Retrieves the default resource fetcher factory.
-	 *
-	 * @return the default resource fetcher factory, which creates {@link URLFetcher} instances
-	 */
-	public static Supplier<Fetcher> fetcher() {
-		return URLFetcher::new;
-	}
+    /**
+     * Retrieves the default resource fetcher factory.
+     *
+     * @return the default resource fetcher factory, which creates {@link URLFetcher} instances
+     */
+    public static Supplier<Fetcher> fetcher() {
+        return URLFetcher::new;
+    }
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * URL resource fetcher.
-	 *
-	 * <p>Fetches external resources through the {@link URL#openConnection()} API.</p>
-	 */
-	public static class URLFetcher implements Fetcher {
+    /**
+     * URL resource fetcher.
+     *
+     * <p>Fetches external resources through the {@link URL#openConnection()} API.</p>
+     */
+    public static class URLFetcher implements Fetcher {
 
-		private final Logger logger=service(logger());
+        private final Logger logger=service(logger());
 
 
-		@Override public Response apply(final Request request) {
-			try {
+        @Override public Response apply(final Request request) {
+            try {
 
-				final String method=request.method();
-				final String item=request.item();
+                final String method=request.method();
+                final String item=request.item();
 
-				logger.info(this, format("fetching <%s>", item));
+                logger.info(this, format("fetching <%s>", item));
 
-				final HttpURLConnection connection=(HttpURLConnection)new URL(item).openConnection();
+                final HttpURLConnection connection=(HttpURLConnection)new URL(item).openConnection();
 
-				connection.setRequestMethod(method);
-				connection.setDoOutput(method.equals(Request.POST) || method.equals(Request.PUT));
+                connection.setRequestMethod(method);
+                connection.setDoOutput(method.equals(Request.POST) || method.equals(Request.PUT));
 
-				connection.setInstanceFollowRedirects(true);
+                connection.setInstanceFollowRedirects(true);
 
-				// !!! connection.setConnectTimeout();
-				// !!! connection.setReadTimeout();
-				// !!! connection.setIfModifiedSince();
+                // !!! connection.setConnectTimeout();
+                // !!! connection.setReadTimeout();
+                // !!! connection.setIfModifiedSince();
 
-				if ( !request.header("User-Agent").isPresent() ) {
-					connection.addRequestProperty("User-Agent", "Metreeca/Link (https://github.com/metreeca/link)");
-				}
+                if ( !request.header("User-Agent").isPresent() ) {
+                    connection.addRequestProperty("User-Agent", "Metreeca/Link (https://github.com/metreeca/link)");
+                }
 
-				if ( !request.header("Accept-Encoding").isPresent() ) {
-					connection.addRequestProperty("Accept-Encoding", "gzip");
-				}
+                if ( !request.header("Accept-Encoding").isPresent() ) {
+                    connection.addRequestProperty("Accept-Encoding", "gzip");
+                }
 
-				if ( !request.header("Accept").isPresent() ) {
-					connection.addRequestProperty("Accept", "text/html,"
-							+"application/xhtml+xml,"
-							+"application/xml;q=0.9;"
-							+"*/*;q=0.1"
-					);
-				}
+                if ( !request.header("Accept").isPresent() ) {
+                    connection.addRequestProperty("Accept", "text/html,"
+                            +"application/xhtml+xml,"
+                            +"application/xml;q=0.9;"
+                            +"*/*;q=0.1"
+                    );
+                }
 
-				request.headers().forEach((name, values) -> values.forEach(value ->
-						connection.addRequestProperty(name, value)
-				));
+                request.headers().forEach((name, values) -> values.forEach(value ->
+                        connection.addRequestProperty(name, value)
+                ));
 
-				connection.connect();
+                connection.connect();
 
-				if ( connection.getDoOutput() ) {
+                if ( connection.getDoOutput() ) {
 
-					request.body(input()).fold(
+                    request.body(input()).fold(
 
-							target -> {
+                            target -> {
 
-								try ( final InputStream input=target.get() ) {
+                                try ( final InputStream input=target.get() ) {
 
-									return Codecs.data(connection.getOutputStream(), input);
+                                    return Codecs.data(connection.getOutputStream(), input);
 
-								} catch ( final IOException e ) {
+                                } catch ( final IOException e ) {
 
-									throw new UncheckedIOException(e);
+                                    throw new UncheckedIOException(e);
 
-								}
+                                }
 
-							},
+                            },
 
-							error -> {
+                            error -> {
 
-								logger.error(this, format("unable to open input stream for <%s>", item));
+                                logger.error(this, format("unable to open input stream for <%s>", item));
 
-								throw new RuntimeException(error.toString()); // !!!
+                                throw new RuntimeException(error.toString()); // !!!
 
-							}
+                            }
 
-					);
+                    );
 
-				}
+                }
 
-				final int code=connection.getResponseCode(); // !!! handle http > https redirection
-				final String encoding=connection.getContentEncoding();
+                final int code=connection.getResponseCode(); // !!! handle http > https redirection
+                final String encoding=connection.getContentEncoding();
 
-				return new Response(request)
+                return new Response(request)
 
-						.status(code)
+                        .status(code)
 
-						.headers(connection.getHeaderFields().entrySet().stream()
-								.filter(entry -> entry.getKey() != null) // ;( may use null to hold status line
-								.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
-						)
+                        .headers(connection.getHeaderFields().entrySet().stream()
+                                .filter(entry -> entry.getKey() != null) // ;( may use null to hold status line
+                                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
+                        )
 
-						.body(input(), unchecked(() -> Optional
+                        .body(input(), unchecked(() -> Optional
 
-								.ofNullable(code/100 == 2
-										? connection.getInputStream()
-										: connection.getErrorStream()
-								)
+                                .ofNullable(code/100 == 2
+                                        ? connection.getInputStream()
+                                        : connection.getErrorStream()
+                                )
 
-								.map(unchecked(input -> "gzip".equals(encoding)
-										? new GZIPInputStream(input)
-										: input
-								))
+                                .map(unchecked(input -> "gzip".equals(encoding)
+                                        ? new GZIPInputStream(input)
+                                        : input
+                                ))
 
-								.orElseGet(Codecs::input)
+                                .orElseGet(Codecs::input)
 
-						));
+                        ));
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		}
+            } catch ( final IOException e ) {
+                throw new UncheckedIOException(e);
+            }
+        }
 
-	}
+    }
 
-	/**
-	 * Caching resource fetcher.
-	 *
-	 * <p>Caches resources fetched by a delegate fetcher.</p>
-	 */
-	public static final class CacheFetcher implements Fetcher { // !!! check caching headers
+    /**
+     * Caching resource fetcher.
+     *
+     * <p>Caches resources fetched by a delegate fetcher.</p>
+     */
+    public static final class CacheFetcher implements Fetcher { // !!! check caching headers
 
-		private Fetcher delegate=new URLFetcher();
-		private Cache cache=service(Cache.cache());
+        private Fetcher delegate=new URLFetcher();
+        private Cache cache=service(Cache.cache());
 
 
-		/**
-		 * Configures the delegate for this fetcher (defaults to {@link URLFetcher}).
-		 *
-		 * @param delegate the delegate for this fetcher
-		 *
-		 * @return this fetcher
-		 *
-		 * @throws NullPointerException if {@code delegate} is null
-		 */
-		public CacheFetcher delegate(final Fetcher delegate) {
+        /**
+         * Configures the delegate for this fetcher (defaults to {@link URLFetcher}).
+         *
+         * @param delegate the delegate for this fetcher
+         *
+         * @return this fetcher
+         *
+         * @throws NullPointerException if {@code delegate} is null
+         */
+        public CacheFetcher delegate(final Fetcher delegate) {
 
-			if ( delegate == null ) {
-				throw new NullPointerException("null delegate");
-			}
+            if ( delegate == null ) {
+                throw new NullPointerException("null delegate");
+            }
 
-			this.delegate=delegate;
+            this.delegate=delegate;
 
-			return this;
-		}
+            return this;
+        }
 
-		/**
-		 * Configures the cache for this fetcher (defaults to the {@link Cache#cache() shared cache}).
-		 *
-		 * @param cache the cache for this fetcher
-		 *
-		 * @return this fetcher
-		 *
-		 * @throws NullPointerException if {@code cache} is null
-		 */
-		public CacheFetcher cache(final Cache cache) {
+        /**
+         * Configures the cache for this fetcher (defaults to the {@link Cache#cache() shared cache}).
+         *
+         * @param cache the cache for this fetcher
+         *
+         * @return this fetcher
+         *
+         * @throws NullPointerException if {@code cache} is null
+         */
+        public CacheFetcher cache(final Cache cache) {
 
-			if ( cache == null ) {
-				throw new NullPointerException("null cache");
-			}
+            if ( cache == null ) {
+                throw new NullPointerException("null cache");
+            }
 
-			this.cache=cache;
+            this.cache=cache;
 
-			return this;
-		}
+            return this;
+        }
 
 
-		@Override public Response apply(final Request request) {
-			return request.method().equals(GET) ? cache.retrieve(request.item(),
+        @Override public Response apply(final Request request) {
+            return request.method().equals(GET) ? cache.retrieve(request.item(),
 
-					input -> decode(request, input),
-					output -> encode(delegate.apply(request), output)
+                    input -> decode(request, input),
+                    output -> encode(delegate.apply(request), output)
 
-			) : delegate.apply(request);
-		}
+            ) : delegate.apply(request);
+        }
 
 
-		private Response encode(final Response response, final OutputStream output) {
+        private Response encode(final Response response, final OutputStream output) {
+            return response.success() ? response.body(data()).fold(
 
-			if ( response.success() ) {
-				response.body(data()).fold(
+                    value -> {
 
-						value -> {
+                        try (
+                                final ObjectOutputStream serialized=new ObjectOutputStream(output);
+                        ) {
 
-							try (
-									final ObjectOutputStream serialized=new ObjectOutputStream(output);
-							) {
+                            serialized.writeInt(response.status());
+                            serialized.writeObject(response.headers());
+                            serialized.writeObject(value);
+                            serialized.flush();
 
-								serialized.writeInt(response.status());
-								serialized.writeObject(response.headers());
-								serialized.writeObject(value);
-								serialized.flush();
+                            return response.body(input(), () -> new ByteArrayInputStream(value));
 
-								return this;
+                        } catch ( final IOException e ) {
 
-							} catch ( final IOException e ) {
+                            throw new UncheckedIOException(e);
 
-								throw new UncheckedIOException(e);
+                        }
 
-							}
+                    },
 
-						},
+                    error -> {
 
-						error -> {
+                        throw new UncheckedIOException(new IOException(error.toString())); // !!! review
 
-							throw new UncheckedIOException(new IOException(error.toString())); // !!! review
+                    }
 
-						}
+            ) : response;
+        }
 
-				);
-			}
+        @SuppressWarnings("unchecked") private Response decode(final Request request, final InputStream input) {
+            try ( final ObjectInputStream serialized=new ObjectInputStream(input) ) {
 
-			return response;
-		}
+                final int status=serialized.readInt();
+                final Map<String, ? extends Collection<String>> headers=
+                        (Map<String, ? extends Collection<String>>)serialized.readObject();
+                final byte[] body=(byte[])serialized.readObject();
 
-		@SuppressWarnings("unchecked") private Response decode(final Request request, final InputStream input) {
-			try ( final ObjectInputStream serialized=new ObjectInputStream(input) ) {
+                return new Response(request)
+                        .status(status)
+                        .headers(headers)
+                        .body(input(), () -> new ByteArrayInputStream(body));
 
-				final int status=serialized.readInt();
-				final Map<String, ? extends Collection<String>> headers=
-						(Map<String, ? extends Collection<String>>)serialized.readObject();
-				final byte[] body=(byte[])serialized.readObject();
+            } catch ( final ClassNotFoundException unexpected ) {
 
-				return new Response(request)
-						.status(status)
-						.headers(headers)
-						.body(input(), () -> new ByteArrayInputStream(body));
+                throw new RuntimeException(unexpected);
 
-			} catch ( final ClassNotFoundException unexpected ) {
+            } catch ( final IOException e ) {
 
-				throw new RuntimeException(unexpected);
+                throw new UncheckedIOException(e);
 
-			} catch ( final IOException e ) {
+            }
+        }
 
-				throw new UncheckedIOException(e);
-
-			}
-		}
-
-	}
+    }
 
 }
