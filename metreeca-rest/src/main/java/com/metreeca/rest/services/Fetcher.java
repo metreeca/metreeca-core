@@ -1,37 +1,21 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rest.services;
 
-import com.metreeca.rest.Codecs;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Lambdas.unchecked;
 import static com.metreeca.rest.Request.GET;
 import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -140,6 +124,7 @@ import static java.util.stream.Collectors.toMap;
 				}
 
 				final int code=connection.getResponseCode(); // !!! handle http > https redirection
+				final String encoding=connection.getContentEncoding();
 
 				return new Response(request)
 
@@ -150,35 +135,21 @@ import static java.util.stream.Collectors.toMap;
 								.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
 						)
 
-						.body(input(), () -> {
-							try {
+						.body(input(), unchecked(() -> Optional
 
-								return Optional
+								.ofNullable(code/100 == 2
+										? connection.getInputStream()
+										: connection.getErrorStream()
+								)
 
-										.ofNullable(code/100 == 2
-												? connection.getInputStream()
-												: connection.getErrorStream()
-										)
+								.map(unchecked(input -> "gzip".equals(encoding)
+										? new GZIPInputStream(input)
+										: input
+								))
 
-										.map(input -> {
-											try {
-												return "gzip".equals(connection.getContentEncoding()) ?
-														new GZIPInputStream(input) : input;
-											} catch ( final IOException e ) {
-												throw new UncheckedIOException(e);
-											}
-										})
+								.orElseGet(Codecs::input)
 
-										.orElseGet(Codecs::input);
-
-							} catch ( final IOException e ) {
-
-								logger.error(this, format("unable to open input stream for <%s>", item), e);
-
-								throw new UncheckedIOException(e);
-
-							}
-						});
+						));
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -194,9 +165,29 @@ import static java.util.stream.Collectors.toMap;
 	 */
 	public static final class CacheFetcher implements Fetcher { // !!! check caching headers
 
+		private Fetcher delegate=new URLFetcher();
 		private Cache cache=service(Cache.cache());
-		private Fetcher delegate=service(fetcher());
 
+
+		/**
+		 * Configures the delegate for this fetcher (defaults to {@link URLFetcher}).
+		 *
+		 * @param delegate the delegate for this fetcher
+		 *
+		 * @return this fetcher
+		 *
+		 * @throws NullPointerException if {@code delegate} is null
+		 */
+		public CacheFetcher delegate(final Fetcher delegate) {
+
+			if ( delegate == null ) {
+				throw new NullPointerException("null delegate");
+			}
+
+			this.delegate=delegate;
+
+			return this;
+		}
 
 		/**
 		 * Configures the cache for this fetcher (defaults to the {@link Cache#cache() shared cache}).
@@ -214,26 +205,6 @@ import static java.util.stream.Collectors.toMap;
 			}
 
 			this.cache=cache;
-
-			return this;
-		}
-
-		/**
-		 * Configures the delegate for this fetcher (defaults to the {@link #fetcher() shared fetcher}).
-		 *
-		 * @param delegate the delegate for this fetcher
-		 *
-		 * @return this fetcher
-		 *
-		 * @throws NullPointerException if {@code delegate} is null
-		 */
-		public CacheFetcher delegate(final Fetcher delegate) {
-
-			if ( delegate == null ) {
-				throw new NullPointerException("null delegate");
-			}
-
-			this.delegate=delegate;
 
 			return this;
 		}
