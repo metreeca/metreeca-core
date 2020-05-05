@@ -1,18 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rest;
@@ -80,6 +67,39 @@ public final class Lambdas {
             try {
 
                 runnable.run();
+
+            } catch ( final IOException e ) {
+
+                throw new UncheckedIOException(e);
+
+            } catch ( final Exception e ) {
+
+                throw new RuntimeException(e);
+
+            }
+        };
+    }
+
+    /**
+     * Creates an unchecked consumer.
+     *
+     * @param consumer the checked consumer to be unchecked
+     * @param <T>      the type of the consumer input value
+     *
+     * @return a consumer wrapping checked exception thrown by {@code consumer} in a corresponding unchecked exception
+     *
+     * @throws NullPointerException if {@code consumer} is null
+     */
+    public static <T> Consumer<T> unchecked(final CheckedConsumer<T> consumer) {
+
+        if ( consumer == null ) {
+            throw new NullPointerException("null consumer");
+        }
+
+        return t -> {
+            try {
+
+                consumer.accept(t);
 
             } catch ( final IOException e ) {
 
@@ -210,6 +230,17 @@ public final class Lambdas {
     @FunctionalInterface public static interface CheckedRunnable {
 
         public void run() throws Exception;
+
+    }
+
+    /**
+     * Consumer throwing checked exceptions.
+     *
+     * @param <T> the type of value accepted by this consumer
+     */
+    @FunctionalInterface public static interface CheckedConsumer<T> {
+
+        public void accept(final T t) throws Exception;
 
     }
 

@@ -1,18 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rest;
@@ -297,7 +284,7 @@ public final class Xtream<T> implements Stream<T> {
      *
      * @throws NullPointerException if {@code mapper} is {@code null}
      */
-    public Xtream<T> loop(final Function<? super Xtream<T>, ? extends Stream<T>> mapper) {
+    public Xtream<T> loop(final Function<? super Xtream<T>, ? extends Stream<T>> mapper) { // !!! lazy
 
         if ( mapper == null ) {
             throw new NullPointerException("null mapper");
@@ -340,7 +327,7 @@ public final class Xtream<T> implements Stream<T> {
      * @throws IllegalArgumentException if {@code steps} is negative
      * @throws NullPointerException     if {@code mapper} is {@code null}
      */
-    public Xtream<T> iter(final int steps, final Function<? super Xtream<T>, ? extends Stream<T>> mapper) {
+    public Xtream<T> iter(final int steps, final Function<? super Xtream<T>, ? extends Stream<T>> mapper) { // !!! lazy
 
         if ( steps < 0 ) {
             throw new IllegalArgumentException("negative steps count");
