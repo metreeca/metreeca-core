@@ -1,18 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rest.actions;
@@ -75,13 +62,24 @@ public final class Parse<R> implements Function<Message<?>, Optional<R>> {
             // !!! get cause directly from failure
 
             final Response parse=new Response(message.request()).map(error);
+            final String media=format.getClass().getSimpleName();
 
-            // !!! review formatting >> avoid newlines in log
+            if ( parse.status() == Response.UnsupportedMediaType ) {
 
-            logger.error(this,
-                    String.format("unable to parse message body as <%s>", format.getClass().getName()),
-                    new RuntimeException(error.toString(), parse.cause().orElse(null))
-            );
+                logger.warning(this,
+                        String.format("no <%s> message body", media)
+                );
+
+            } else {
+
+                // !!! review formatting >> avoid newlines in log
+
+                logger.error(this,
+                        String.format("unable to parse message body as <%s>", media),
+                        new RuntimeException(error.toString(), parse.cause().orElse(null))
+                );
+
+            }
 
             return Optional.empty();
 
