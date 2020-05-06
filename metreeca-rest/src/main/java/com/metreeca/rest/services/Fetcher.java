@@ -165,12 +165,12 @@ import static java.util.stream.Collectors.toMap;
      */
     public static final class CacheFetcher implements Fetcher { // !!! check caching headers
 
-        private Fetcher delegate=new URLFetcher();
+        private Fetcher delegate=service(fetcher(), fetcher());
         private Cache cache=service(Cache.cache());
 
 
         /**
-         * Configures the delegate for this fetcher (defaults to {@link URLFetcher}).
+         * Configures the delegate for this fetcher (defaults to the {@linkplain #fetcher() shared fetcher service}).
          *
          * @param delegate the delegate for this fetcher
          *
