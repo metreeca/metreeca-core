@@ -122,6 +122,7 @@ import static java.util.stream.Collectors.toMap;
 
                 }
 
+                final boolean head=connection.getRequestMethod().equalsIgnoreCase("HEAD");
                 final int code=connection.getResponseCode(); // !!! handle http > https redirection
                 final String encoding=connection.getContentEncoding();
 
@@ -136,8 +137,8 @@ import static java.util.stream.Collectors.toMap;
 
                         .body(input(), unchecked(() -> Optional
 
-                                .ofNullable(code/100 == 2
-                                        ? connection.getInputStream()
+                                .ofNullable(head ? null
+                                        : code/100 == 2 ? connection.getInputStream()
                                         : connection.getErrorStream()
                                 )
 
