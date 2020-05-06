@@ -16,7 +16,6 @@ import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Lambdas.unchecked;
-import static com.metreeca.rest.Request.GET;
 import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.services.Logger.logger;
@@ -58,7 +57,7 @@ import static java.util.stream.Collectors.toMap;
                 final String method=request.method();
                 final String item=request.item();
 
-                logger.info(this, format("fetching <%s>", item));
+                logger.info(this, format("%s %s", method, item));
 
                 final HttpURLConnection connection=(HttpURLConnection)new URL(item).openConnection();
 
@@ -211,7 +210,9 @@ import static java.util.stream.Collectors.toMap;
 
 
         @Override public Response apply(final Request request) {
-            return request.method().equals(GET) ? cache.retrieve(request.item(),
+            return request.safe() ? cache.retrieve(
+
+                    String.format("%s %s", request.method(), request.item()),
 
                     input -> decode(request, input),
                     output -> encode(delegate.apply(request), output)
