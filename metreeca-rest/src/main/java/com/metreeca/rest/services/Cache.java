@@ -158,7 +158,7 @@ import static java.time.Instant.now;
 
 						} finally {
 
-							if ( Files.size(file) == 0 ) { Files.delete(file); }
+							if ( Files.exists(file) && Files.size(file) == 0 ) { Files.delete(file); }
 
 						}
 
