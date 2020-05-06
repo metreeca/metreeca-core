@@ -8,8 +8,12 @@ import com.metreeca.rest.Xtream;
 import com.metreeca.rest.actions.*;
 import com.metreeca.xml.formats.HTMLFormat;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -30,6 +34,7 @@ public final class Crawl implements Function<String, Stream<String>> {
     // !!! honour robots.txt
 
     private Fetch fetch=new Fetch();
+    private Function<Element, Optional<Element>> pruner=Optional::of;
 
 
     /**
@@ -52,6 +57,27 @@ public final class Crawl implements Function<String, Stream<String>> {
         return this;
     }
 
+    /**
+     * Configures the content pruner (default to the identity function).
+     *
+     * @param pruner a function taking as argument an element and returning an optional partial/restructured target
+     *               element, if one was identified, or an empty optional, otherwise
+     *
+     * @return this action
+     *
+     * @throws NullPointerException if {@code pruner} is null
+     */
+    public Crawl pruner(final Function<Element, Optional<Element>> pruner) {
+
+        if ( pruner == null ) {
+            throw new NullPointerException("null pruner");
+        }
+
+        this.pruner=pruner;
+
+        return this;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -60,7 +86,7 @@ public final class Crawl implements Function<String, Stream<String>> {
      *
      * @param url the root URL of the site to be crawled; ignored if null
      *
-     * @return a stram of links to nested HTML pages reachabble from the root {@code url}
+     * @return a stream of links to nested HTML pages reachable from the root {@code url}
      */
     @Override public Xtream<String> apply(final String url) {
         if ( url == null ) { return Xtream.empty(); } else {
@@ -85,6 +111,10 @@ public final class Crawl implements Function<String, Stream<String>> {
                         .optMap(new Query())
                         .optMap(fetch)
                         .optMap(new Parse<>(html())) // !!! support xhtml
+
+                        .map(Document::getDocumentElement)
+
+                        .optMap(pruner)
 
                         .flatMap(XPath(p -> p.links("//html:a/@href")))
                         .map(Regex(r -> r.replace("#.*$", ""))) // remove anchors
