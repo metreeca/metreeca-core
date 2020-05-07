@@ -9,7 +9,7 @@ import com.metreeca.rest.actions.*;
 import com.metreeca.xml.formats.HTMLFormat;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,7 +34,7 @@ public final class Crawl implements Function<String, Stream<String>> {
     // !!! honour robots.txt
 
     private Fetch fetch=new Fetch();
-    private Function<Element, Optional<Element>> pruner=Optional::of;
+    private Function<Node, Optional<Node>> focus=Optional::of;
 
 
     /**
@@ -58,22 +58,22 @@ public final class Crawl implements Function<String, Stream<String>> {
     }
 
     /**
-     * Configures the content pruner (default to the identity function).
+     * Configures the content focus (default to the identity function).
      *
-     * @param pruner a function taking as argument an element and returning an optional partial/restructured target
-     *               element, if one was identified, or an empty optional, otherwise
+     * @param focus a function taking as argument an element and returning an optional partial/restructured focus
+     *              element, if one was identified, or an empty optional, otherwise
      *
      * @return this action
      *
-     * @throws NullPointerException if {@code pruner} is null
+     * @throws NullPointerException if {@code focus} is null
      */
-    public Crawl pruner(final Function<Element, Optional<Element>> pruner) {
+    public Crawl focus(final Function<Node, Optional<Node>> focus) {
 
-        if ( pruner == null ) {
-            throw new NullPointerException("null pruner");
+        if ( focus == null ) {
+            throw new NullPointerException("null focus");
         }
 
-        this.pruner=pruner;
+        this.focus=focus;
 
         return this;
     }
@@ -92,7 +92,7 @@ public final class Crawl implements Function<String, Stream<String>> {
         if ( url == null ) { return Xtream.empty(); } else {
             try {
 
-                final URI root=new URI(url).normalize();
+                final URI origin=new URI(url).normalize();
 
                 return Xtream.of(url).loop(xtream -> xtream
 
@@ -114,22 +114,29 @@ public final class Crawl implements Function<String, Stream<String>> {
 
                         .map(Document::getDocumentElement)
 
-                        .optMap(pruner)
+                        .optMap(focus)
 
-                        .flatMap(XPath(p -> p.links("//html:a/@href")))
-                        .map(Regex(r -> r.replace("#.*$", ""))) // remove anchors
+                        .flatMap(node -> Xtream.of(node)
 
-                        .filter(link -> { // keep only nested resources
-                            try {
+                                .flatMap(XPath(p -> p.links("//html:a/@href")))
+                                .map(Regex(r -> r.replace("#.*$", ""))) // remove anchors
 
-                                return !root.relativize(new URI(link)).toString().equals(link);
+                                .filter(link -> { // keep only nested resources
+                                    try {
 
-                            } catch ( final URISyntaxException e ) {
+                                        final URI source=new URI(node.getBaseURI()).normalize(); // !!! nulls
+                                        final URI target=new URI(link).normalize();
 
-                                return false;
+                                        return /* !!! origin.equals(source) ||*/
+                                                !origin.relativize(target).equals(target);
 
-                            }
-                        })
+                                    } catch ( final URISyntaxException e ) {
+
+                                        return false;
+
+                                    }
+                                })
+                        )
 
                 );
 
