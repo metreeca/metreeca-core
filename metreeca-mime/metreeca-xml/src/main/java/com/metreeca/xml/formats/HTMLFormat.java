@@ -152,6 +152,11 @@ public final class HTMLFormat extends Format<Document> {
     private static final TransformerFactory transformers=TransformerFactory.newInstance();
 
 
+    static {
+        transformers.setAttribute("indent-number", 4);
+    }
+
+
     private static DocumentBuilder builder() {
         try {
 
@@ -169,6 +174,9 @@ public final class HTMLFormat extends Format<Document> {
 
             final Transformer transformer=transformers.newTransformer();
 
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
             return transformer;
