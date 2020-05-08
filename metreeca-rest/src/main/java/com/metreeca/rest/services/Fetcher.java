@@ -19,6 +19,8 @@ import static com.metreeca.rest.Lambdas.unchecked;
 import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.services.Logger.logger;
+import static java.lang.Integer.max;
+import static java.lang.Integer.min;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 
@@ -122,13 +124,13 @@ import static java.util.stream.Collectors.toMap;
 
                 }
 
-                final boolean head=connection.getRequestMethod().equalsIgnoreCase("HEAD");
+                final boolean head=connection.getRequestMethod().equalsIgnoreCase(Request.HEAD);
                 final int code=connection.getResponseCode(); // !!! handle http > https redirection
                 final String encoding=connection.getContentEncoding();
 
                 return new Response(request)
 
-                        .status(code)
+                        .status(min(max(100, code), 599)) // harden against illegal codes
 
                         .headers(connection.getHeaderFields().entrySet().stream()
                                 .filter(entry -> entry.getKey() != null) // ;( may use null to hold status line
@@ -213,7 +215,7 @@ import static java.util.stream.Collectors.toMap;
         @Override public Response apply(final Request request) {
             return request.safe() ? cache.retrieve(
 
-                    String.format("%s %s", request.method(), request.item()),
+                    format("%s %s", request.method(), request.item()),
 
                     input -> decode(request, input),
                     output -> encode(delegate.apply(request), output)

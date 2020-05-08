@@ -93,7 +93,7 @@ public final class Crawl implements Function<String, Stream<String>> {
      */
     @Override public Xtream<String> apply(final String url) {
         return url == null || url.isEmpty() ? Xtream.empty()
-                : Xtream.of(url).loop(cross).filter(link -> prune.test(url, link));
+                : Xtream.of(url).loop(page -> Xtream.of(page).flatMap(cross).filter(link -> prune.test(url, link)));
     }
 
 }
