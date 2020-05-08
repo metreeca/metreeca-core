@@ -1,18 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.xml.formats;
@@ -21,13 +8,12 @@ import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.ReaderFormat;
 import com.metreeca.rest.formats.WriterFormat;
+
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
@@ -91,7 +77,7 @@ public final class XMLFormat extends Format<Document> {
 	 * @param input the input stream the XML document is to be parsed from
 	 *
 	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error
-	 * 		result containing the parse exception, otherwise
+	 * result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if {@code input} is null
 	 */
@@ -111,7 +97,7 @@ public final class XMLFormat extends Format<Document> {
 	 * @param base  the base URL for the XML document to be parsed
 	 *
 	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error
-	 * 		result containing the parse exception, otherwise
+	 * result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if {@code input} is null
 	 */
@@ -135,7 +121,7 @@ public final class XMLFormat extends Format<Document> {
 	 * @param source the source the XML document is to be parsed from
 	 *
 	 * @return a value result containing the parsed XML document, if {@code source} was successfully parsed; an error
-	 * 		result containing the parse exception, otherwise
+	 * result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if {@code source} is null
 	 */
@@ -165,14 +151,10 @@ public final class XMLFormat extends Format<Document> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final DocumentBuilderFactory builders=DocumentBuilderFactory.newInstance();
-	private static final TransformerFactory transformers=TransformerFactory.newInstance();
-
-
 	private static DocumentBuilder builder() {
 		try {
 
-			return builders.newDocumentBuilder();
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
 		} catch ( final ParserConfigurationException e ) {
 
@@ -184,7 +166,7 @@ public final class XMLFormat extends Format<Document> {
 	private static Transformer transformer() {
 		try {
 
-			return transformers.newTransformer();
+			return TransformerFactory.newInstance().newTransformer();
 
 		} catch ( final TransformerConfigurationException e ) {
 
@@ -208,9 +190,9 @@ public final class XMLFormat extends Format<Document> {
 
 	/**
 	 * @return the optional XML body representation of {@code message}, as retrieved from the reader supplied by its
-	 *        {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
-	 * 		matched by {@link #MIMEPattern}; a failure reporting the {@link Response#UnsupportedMediaType} status,
-	 * 		otherwise
+	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
+	 * matched by {@link #MIMEPattern}; a failure reporting the {@link Response#UnsupportedMediaType} status,
+	 * otherwise
 	 */
 	@Override public Result<Document, Failure> get(final Message<?> message) {
 
@@ -252,7 +234,7 @@ public final class XMLFormat extends Format<Document> {
 
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the XML {@code value} to the 
+	 * Configures the {@link WriterFormat} representation of {@code message} to write the XML {@code value} to the
 	 * writer
 	 * supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
 	 * defined.
