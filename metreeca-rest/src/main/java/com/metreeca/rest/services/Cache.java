@@ -142,6 +142,11 @@ import static java.time.Instant.now;
 
                             return decoder.apply(input);
 
+                        } catch ( final Exception e ) { // possibly corrupted/stale cache entry
+
+                            Files.delete(file); // trash
+
+                            return retrieve(key, decoder, encoder); // reload
                         }
 
                     } else {
