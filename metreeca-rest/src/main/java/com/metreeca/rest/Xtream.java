@@ -275,8 +275,7 @@ public final class Xtream<T> implements Stream<T> {
     /**
      * Recursively expands this extended stream.
      *
-     * @param mapper a function mapping from/to extended streams of elements of the same type of the elements of this
-     *               extended stream
+     * @param mapper a function mapping elements to streams of elements of the same type
      *
      * @return an extended stream produced by recursively applying {@code mapper} to this extended stream and
      * expanding it with the elements of the returned streams until no new elements are generated; null returned
@@ -284,7 +283,7 @@ public final class Xtream<T> implements Stream<T> {
      *
      * @throws NullPointerException if {@code mapper} is {@code null}
      */
-    public Xtream<T> loop(final Function<? super Xtream<T>, ? extends Stream<T>> mapper) { // !!! lazy
+    public Xtream<T> loop(final Function<? super T, ? extends Stream<T>> mapper) { // !!! lazy
 
         if ( mapper == null ) {
             throw new NullPointerException("null mapper");
@@ -300,7 +299,7 @@ public final class Xtream<T> implements Stream<T> {
                 !pending.isEmpty();
 
                 pending=from(pending.stream())
-                        .pipe(mapper)
+                        .flatMap(mapper)
                         .filter(value -> !loop.contains(value))
                         .collect(toCollection(LinkedHashSet::new))
 
@@ -317,17 +316,16 @@ public final class Xtream<T> implements Stream<T> {
      * Iteratively expands this extended stream.
      *
      * @param steps  the number of expansion steps to be performed
-     * @param mapper a function mapping from/to extended streams of elements of the same type of the
-     *               elements of this extended stream
+     * @param mapper a function mapping elements to streams of elements of the same type
      *
      * @return an extended stream produced by iteratively applying {@code mapper} this this extended stream and
-     * replacing it with with the elements of the returned streams until {@code steps} cycles are performed null
+     * replacing it with with the elements of the returned streams until {@code steps} cycles are performed; null
      * returned streams are considered to be empty
      *
      * @throws IllegalArgumentException if {@code steps} is negative
      * @throws NullPointerException     if {@code mapper} is {@code null}
      */
-    public Xtream<T> iter(final int steps, final Function<? super Xtream<T>, ? extends Stream<T>> mapper) { // !!! lazy
+    public Xtream<T> iter(final int steps, final Function<? super T, ? extends Stream<T>> mapper) { // !!! lazy
 
         if ( steps < 0 ) {
             throw new IllegalArgumentException("negative steps count");
@@ -340,7 +338,7 @@ public final class Xtream<T> implements Stream<T> {
         Xtream<T> iter=this;
 
         for (int n=0; n < steps; ++n) {
-            iter=Optional.of(iter).map(mapper).map(Xtream::from).orElseGet(Xtream::empty);
+            iter=iter.flatMap(mapper);
         }
 
         return iter;
@@ -381,6 +379,18 @@ public final class Xtream<T> implements Stream<T> {
         }
 
         consumer.accept(this);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @SafeVarargs public final <R> Xtream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>>... mappers) {
+
+        if ( mappers == null || Arrays.stream(mappers).anyMatch(Objects::isNull)) {
+            throw new NullPointerException("null mappers");
+        }
+
+        return flatMap(t -> Arrays.stream(mappers).flatMap(mapper -> mapper.apply(t)));
     }
 
 
