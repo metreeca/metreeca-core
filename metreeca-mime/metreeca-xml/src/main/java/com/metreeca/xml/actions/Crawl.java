@@ -5,75 +5,77 @@
 package com.metreeca.xml.actions;
 
 import com.metreeca.rest.Xtream;
-import com.metreeca.rest.actions.*;
-import com.metreeca.xml.formats.HTMLFormat;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Request.HEAD;
-import static com.metreeca.rest.actions.Regex.Regex;
-import static com.metreeca.rest.services.Logger.logger;
-import static com.metreeca.xml.actions.XPath.XPath;
-import static com.metreeca.xml.formats.HTMLFormat.html;
 
 /**
  * Site crawling.
  *
- * <p>Maps site root URLs to streams of HTML site pages.</p>
+ * <p>Maps site root URLs to streams of URLs for HTML site pages.</p>
  */
 public final class Crawl implements Function<String, Stream<String>> {
 
     // !!! honour robots.txt
 
-    private Fetch fetch=new Fetch();
-    private Function<Node, Optional<Node>> focus=Optional::of;
+    private Function<String, Stream<String>> cross=new Cross();
+
+    private BiPredicate<String, String> prune=(root, link) -> { // keep only nested resources
+        try {
+
+            final URI origin=new URI(root).normalize();
+            final URI target=new URI(link).normalize();
+
+            return !origin.relativize(target).equals(target);
+
+        } catch ( final URISyntaxException e ) {
+
+            return false;
+
+        }
+    };
 
 
     /**
-     * Configures the fetch action.
+     * Configures the cross action (default to {@link Cross}).
      *
-     * @param fetch the action used to fetch site pages
+     * @param cross a function mapping page URLs to streams of URLs for linked HTML pages
      *
      * @return this action
      *
-     * @throws NullPointerException if {@code fetch} is null
+     * @throws NullPointerException if {@code cross} is null
      */
-    public Crawl fetch(final Fetch fetch) {
+    public Crawl cross(final Function<String, Stream<String>> cross) {
 
-        if ( fetch == null ) {
-            throw new NullPointerException("null fetch");
+        if ( cross == null ) {
+            throw new NullPointerException("null cross");
         }
 
-        this.fetch=fetch;
+        this.cross=cross;
 
         return this;
     }
 
     /**
-     * Configures the content focus (default to the identity function).
+     * Configures the prune action (default to accepting URLs nested under the site root URL).
      *
-     * @param focus a function taking as argument an element and returning an optional partial/restructured focus
-     *              element, if one was identified, or an empty optional, otherwise
+     * @param prune a bi-predicate taking as arguments the site root URL and a link URL and returning {@code true} if
+     *              the link targets a site page or {@code false} otherwise
      *
      * @return this action
      *
-     * @throws NullPointerException if {@code focus} is null
+     * @throws NullPointerException if {@code prune} is null
      */
-    public Crawl focus(final Function<Node, Optional<Node>> focus) {
+    public Crawl prune(final BiPredicate<String, String> prune) {
 
-        if ( focus == null ) {
-            throw new NullPointerException("null focus");
+        if ( prune == null ) {
+            throw new NullPointerException("null prune");
         }
 
-        this.focus=focus;
+        this.prune=prune;
 
         return this;
     }
@@ -84,70 +86,14 @@ public final class Crawl implements Function<String, Stream<String>> {
     /**
      * Crawls a site.
      *
-     * @param url the root URL of the site to be crawled; ignored if null
+     * @param url the root URL of the site to be crawled
      *
-     * @return a stream of links to nested HTML pages reachable from the root {@code url}
+     * @return a stream of links to HTML pages reachable from the root {@code url}; empty if {@code url} is null or
+     * empty
      */
     @Override public Xtream<String> apply(final String url) {
-        if ( url == null ) { return Xtream.empty(); } else {
-            try {
-
-                final URI origin=new URI(url).normalize();
-
-                return Xtream.of(url).loop(xtream -> xtream
-
-                        .filter(link -> Xtream.of(link)
-
-                                .optMap(new Query(request -> request.method(HEAD)))
-                                .optMap(fetch)
-
-                                .allMatch(response -> response.header("Content-Type")
-                                        .filter(HTMLFormat.MIMEPattern.asPredicate())
-                                        .isPresent()
-                                )
-
-                        )
-
-                        .optMap(new Query())
-                        .optMap(fetch)
-                        .optMap(new Parse<>(html())) // !!! support xhtml
-
-                        .map(Document::getDocumentElement)
-
-                        .optMap(focus)
-
-                        .flatMap(node -> Xtream.of(node)
-
-                                .flatMap(XPath(p -> p.links("//html:a/@href")))
-                                .map(Regex(r -> r.replace("#.*$", ""))) // remove anchors
-
-                                .filter(link -> { // keep only nested resources
-                                    try {
-
-                                        final URI source=new URI(node.getBaseURI()).normalize(); // !!! nulls
-                                        final URI target=new URI(link).normalize();
-
-                                        return /* !!! origin.equals(source) ||*/
-                                                !origin.relativize(target).equals(target);
-
-                                    } catch ( final URISyntaxException e ) {
-
-                                        return false;
-
-                                    }
-                                })
-                        )
-
-                );
-
-            } catch ( final URISyntaxException e ) {
-
-                service(logger()).warning(this, String.format("malformed URL <%s>>", url));
-
-                return Xtream.empty();
-
-            }
-        }
+        return url == null || url.isEmpty() ? Xtream.empty()
+                : Xtream.of(url).loop(cross).filter(link -> prune.test(url, link));
     }
 
 }
