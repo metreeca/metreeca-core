@@ -5,12 +5,22 @@
 package com.metreeca.xml.actions;
 
 import com.metreeca.rest.Xtream;
+import com.metreeca.rest.actions.*;
+import com.metreeca.xml.formats.HTMLFormat;
+
+import org.w3c.dom.Node;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static com.metreeca.rest.Request.HEAD;
+import static com.metreeca.rest.actions.Regex.Regex;
+import static com.metreeca.xml.actions.XPath.XPath;
+import static com.metreeca.xml.formats.HTMLFormat.html;
 
 /**
  * Site crawling.
@@ -21,7 +31,9 @@ public final class Crawl implements Function<String, Stream<String>> {
 
     // !!! honour robots.txt
 
-    private Function<String, Stream<String>> cross=new Cross();
+    private Fetch fetch=new Fetch();
+
+    private Function<? super Node, Optional<Node>> focus=Optional::of;
 
     private BiPredicate<String, String> prune=(root, link) -> { // keep only nested resources
         try {
@@ -40,21 +52,42 @@ public final class Crawl implements Function<String, Stream<String>> {
 
 
     /**
-     * Configures the cross action (default to {@link Cross}).
+     * Configures the fetch action (default to {@link Fetch}.
      *
-     * @param cross a function mapping page URLs to streams of URLs for linked HTML pages
+     * @param fetch the action used to fetch pages
      *
      * @return this action
      *
-     * @throws NullPointerException if {@code cross} is null
+     * @throws NullPointerException if {@code fetch} is null
      */
-    public Crawl cross(final Function<String, Stream<String>> cross) {
+    public Crawl fetch(final Fetch fetch) {
 
-        if ( cross == null ) {
-            throw new NullPointerException("null cross");
+        if ( fetch == null ) {
+            throw new NullPointerException("null fetch");
         }
 
-        this.cross=cross;
+        this.fetch=fetch;
+
+        return this;
+    }
+
+    /**
+     * Configures the content focus (default to the identity function).
+     *
+     * @param focus a function taking as argument an element and returning an optional partial/restructured focus
+     *              element, if one was identified, or an empty optional, otherwise
+     *
+     * @return this action
+     *
+     * @throws NullPointerException if {@code focus} is null
+     */
+    public Crawl focus(final Function<? super Node, Optional<Node>> focus) {
+
+        if ( focus == null ) {
+            throw new NullPointerException("null focus");
+        }
+
+        this.focus=focus;
 
         return this;
     }
@@ -92,8 +125,35 @@ public final class Crawl implements Function<String, Stream<String>> {
      * empty
      */
     @Override public Xtream<String> apply(final String url) {
-        return url == null || url.isEmpty() ? Xtream.empty()
-                : Xtream.of(url).loop(page -> Xtream.of(page).flatMap(cross).filter(link -> prune.test(url, link)));
+        return url == null || url.isEmpty() ? Xtream.empty() : Xtream.of(url).loop(page -> Xtream
+
+                .of(page)
+
+                .filter(link -> Xtream.of(link)
+
+                        .optMap(new Query(request -> request.method(HEAD)))
+                        .optMap(fetch)
+
+                        .allMatch(response -> response
+                                .header("Content-Type")
+                                .filter(HTMLFormat.MIMEPattern.asPredicate())
+                                .isPresent()
+                        )
+
+                )
+
+                .optMap(new Query())
+                .optMap(fetch)
+
+                .optMap(new Parse<>(html())) // !!! support xhtml
+                .optMap(focus)
+
+                .flatMap(XPath(p -> p.links("//html:a/@href")))
+                .map(Regex(r -> r.replace("#.*$", "")))
+
+                .filter(link -> prune.test(url, link))
+
+        );
     }
 
 }
