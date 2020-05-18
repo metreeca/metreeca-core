@@ -30,25 +30,12 @@ import static com.metreeca.xml.formats.HTMLFormat.html;
 public final class Crawl implements Function<String, Stream<String>> {
 
     // !!! honour robots.txt
+    // !!! session state
 
     private Fetch fetch=new Fetch();
 
     private Function<? super Node, Optional<Node>> focus=Optional::of;
-
-    private BiPredicate<String, String> prune=(root, link) -> { // keep only nested resources
-        try {
-
-            final URI origin=new URI(root).normalize();
-            final URI target=new URI(link).normalize();
-
-            return !origin.relativize(target).equals(target);
-
-        } catch ( final URISyntaxException e ) {
-
-            return false;
-
-        }
-    };
+    private BiPredicate<String, String> prune=(root, link) -> true;
 
 
     /**
@@ -93,7 +80,7 @@ public final class Crawl implements Function<String, Stream<String>> {
     }
 
     /**
-     * Configures the prune action (default to accepting URLs nested under the site root URL).
+     * Configures the prune action (default to always pass).
      *
      * @param prune a bi-predicate taking as arguments the site root URL and a link URL and returning {@code true} if
      *              the link targets a site page or {@code false} otherwise
@@ -121,8 +108,8 @@ public final class Crawl implements Function<String, Stream<String>> {
      *
      * @param url the root URL of the site to be crawled
      *
-     * @return a stream of links to HTML pages reachable from the root {@code url}; empty if {@code url} is null or
-     * empty
+     * @return a stream of links to nested HTML pages reachable from the root {@code url}; empty if {@code url} is
+     * null or empty
      */
     @Override public Xtream<String> apply(final String url) {
         return url == null || url.isEmpty() ? Xtream.empty() : Xtream.of(url).loop(page -> Xtream
@@ -149,7 +136,22 @@ public final class Crawl implements Function<String, Stream<String>> {
                 .optMap(focus)
 
                 .flatMap(XPath(p -> p.links("//html:a/@href")))
-                .map(Regex(r -> r.replace("#.*$", "")))
+                .map(Regex(r -> r.replace("#.*$", ""))) // remove anchors
+
+                .filter(link -> { // keep only nested resources
+                    try {
+
+                        final URI origin=new URI(url).normalize();
+                        final URI target=new URI(link).normalize();
+
+                        return !origin.relativize(target).equals(target);
+
+                    } catch ( final URISyntaxException e ) {
+
+                        return false;
+
+                    }
+                })
 
                 .filter(link -> prune.test(url, link))
 
