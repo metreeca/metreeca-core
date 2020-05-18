@@ -1,5 +1,18 @@
 /*
- * Copyright © 2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rest;
@@ -13,271 +26,269 @@ import java.util.function.*;
  */
 public final class Lambdas {
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Creates a guarded function.
+	 *
+	 * @param function the function to be guarded
+	 * @param <V>      the type of the {@code function} input value
+	 * @param <R>      the type of the {@code function} return value
+	 *
+	 * @return a function that returns the value produced by applying {@code function} to its input value, if it is
+	 * not null and no exception is thrown in the process, or {@code null}, otherwise
+	 *
+	 * @throws NullPointerException if {@code function} is null
+	 */
+	public static <V, R> Function<V, R> guarded(final CheckedFunction<? super V, ? extends R> function) {
+
+		if ( function == null ) {
+			throw new NullPointerException("null function");
+		}
 
-    /**
-     * Creates a guarded function.
-     *
-     * @param function the function to be guarded
-     * @param <V>      the type of the {@code function} input value
-     * @param <R>      the type of the {@code function} return value
-     *
-     * @return a function that returns the value produced by applying {@code function} to its input value, if it is
-     * not null and no exception is thrown in the process, or {@code null}, otherwise
-     *
-     * @throws NullPointerException if {@code function} is null
-     */
-    public static <V, R> Function<V, R> guarded(final Function<V, R> function) {
+		return v -> {
+			try {
 
-        if ( function == null ) {
-            throw new NullPointerException("null function");
-        }
+				return v == null ? null : function.apply(v);
 
-        return v -> {
-            try {
+			} catch ( final Exception e ) {
 
-                return v == null ? null : function.apply(v);
+				return null;
 
-            } catch ( final RuntimeException e ) {
+			}
+		};
 
-                return null;
+	}
 
-            }
-        };
 
-    }
+	/**
+	 * Creates an unchecked runnable.
+	 *
+	 * @param runnable the checked runnable to be unchecked
+	 *
+	 * @return a runnable wrapping checked exception thrown by {@code runnable} in a corresponding unchecked exception
+	 *
+	 * @throws NullPointerException if {@code runnable} is null
+	 */
+	public static Runnable unchecked(final CheckedRunnable runnable) {
 
+		if ( runnable == null ) {
+			throw new NullPointerException("null runnable");
+		}
 
-    /**
-     * Creates an unchecked runnable.
-     *
-     * @param runnable the checked runnable to be unchecked
-     *
-     * @return a runnable wrapping checked exception thrown by {@code runnable} in a corresponding unchecked exception
-     *
-     * @throws NullPointerException if {@code runnable} is null
-     */
-    public static Runnable unchecked(final CheckedRunnable runnable) {
+		return () -> {
+			try {
 
-        if ( runnable == null ) {
-            throw new NullPointerException("null runnable");
-        }
+				runnable.run();
 
-        return () -> {
-            try {
+			} catch ( final IOException e ) {
 
-                runnable.run();
+				throw new UncheckedIOException(e);
 
-            } catch ( final IOException e ) {
+			} catch ( final Exception e ) {
 
-                throw new UncheckedIOException(e);
+				throw new RuntimeException(e);
 
-            } catch ( final Exception e ) {
+			}
+		};
+	}
 
-                throw new RuntimeException(e);
+	/**
+	 * Creates an unchecked consumer.
+	 *
+	 * @param consumer the checked consumer to be unchecked
+	 * @param <T>      the type of the consumer input value
+	 *
+	 * @return a consumer wrapping checked exception thrown by {@code consumer} in a corresponding unchecked exception
+	 *
+	 * @throws NullPointerException if {@code consumer} is null
+	 */
+	public static <T> Consumer<T> unchecked(final CheckedConsumer<? super T> consumer) {
 
-            }
-        };
-    }
+		if ( consumer == null ) {
+			throw new NullPointerException("null consumer");
+		}
 
-    /**
-     * Creates an unchecked consumer.
-     *
-     * @param consumer the checked consumer to be unchecked
-     * @param <T>      the type of the consumer input value
-     *
-     * @return a consumer wrapping checked exception thrown by {@code consumer} in a corresponding unchecked exception
-     *
-     * @throws NullPointerException if {@code consumer} is null
-     */
-    public static <T> Consumer<T> unchecked(final CheckedConsumer<T> consumer) {
+		return t -> {
+			try {
 
-        if ( consumer == null ) {
-            throw new NullPointerException("null consumer");
-        }
+				consumer.accept(t);
 
-        return t -> {
-            try {
+			} catch ( final IOException e ) {
 
-                consumer.accept(t);
+				throw new UncheckedIOException(e);
 
-            } catch ( final IOException e ) {
+			} catch ( final Exception e ) {
 
-                throw new UncheckedIOException(e);
+				throw new RuntimeException(e);
 
-            } catch ( final Exception e ) {
+			}
+		};
+	}
 
-                throw new RuntimeException(e);
+	/**
+	 * Creates an unchecked supplier.
+	 *
+	 * @param supplier the checked supplier to be unchecked
+	 * @param <T>      the type of the supplier return value
+	 *
+	 * @return a supplier wrapping checked exception thrown by {@code supplier} in a corresponding unchecked exception
+	 *
+	 * @throws NullPointerException if {@code supplier} is null
+	 */
+	public static <T> Supplier<T> unchecked(final CheckedSupplier<? extends T> supplier) {
 
-            }
-        };
-    }
+		if ( supplier == null ) {
+			throw new NullPointerException("null supplier");
+		}
 
-    /**
-     * Creates an unchecked supplier.
-     *
-     * @param supplier the checked supplier to be unchecked
-     * @param <T>      the type of the supplier return value
-     *
-     * @return a supplier wrapping checked exception thrown by {@code supplier} in a corresponding unchecked exception
-     *
-     * @throws NullPointerException if {@code supplier} is null
-     */
-    public static <T> Supplier<T> unchecked(final CheckedSupplier<T> supplier) {
+		return () -> {
+			try {
 
-        if ( supplier == null ) {
-            throw new NullPointerException("null supplier");
-        }
+				return supplier.get();
 
-        return () -> {
-            try {
+			} catch ( final IOException e ) {
 
-                return supplier.get();
+				throw new UncheckedIOException(e);
 
-            } catch ( final IOException e ) {
+			} catch ( final Exception e ) {
 
-                throw new UncheckedIOException(e);
+				throw new RuntimeException(e);
 
-            } catch ( final Exception e ) {
+			}
+		};
+	}
 
-                throw new RuntimeException(e);
+	/**
+	 * Creates an unchecked function.
+	 *
+	 * @param function the checked function to be unchecked
+	 * @param <T>      the type of the function input value
+	 * @param <R>      the type of the function return value
+	 *
+	 * @return a function wrapping checked exception thrown by {@code function} in a corresponding unchecked exception
+	 *
+	 * @throws NullPointerException if {@code function} is null
+	 */
+	public static <T, R> Function<T, R> unchecked(final CheckedFunction<? super T, ? extends R> function) {
 
-            }
-        };
-    }
+		if ( function == null ) {
+			throw new NullPointerException("null function");
+		}
 
-    /**
-     * Creates an unchecked function.
-     *
-     * @param function the checked function to be unchecked
-     * @param <T>      the type of the function input value
-     * @param <R>      the type of the function return value
-     *
-     * @return a function wrapping checked exception thrown by {@code function} in a corresponding unchecked exception
-     *
-     * @throws NullPointerException if {@code function} is null
-     */
-    public static <T, R> Function<T, R> unchecked(final CheckedFunction<T, R> function) {
+		return t -> {
+			try {
 
-        if ( function == null ) {
-            throw new NullPointerException("null function");
-        }
+				return function.apply(t);
 
-        return t -> {
-            try {
+			} catch ( final IOException e ) {
 
-                return function.apply(t);
+				throw new UncheckedIOException(e);
 
-            } catch ( final IOException e ) {
+			} catch ( final Exception e ) {
 
-                throw new UncheckedIOException(e);
+				throw new RuntimeException(e);
 
-            } catch ( final Exception e ) {
+			}
+		};
+	}
 
-                throw new RuntimeException(e);
+	/**
+	 * Creates an unchecked bifunction.
+	 *
+	 * @param bifunction the checked bifunction to be unchecked
+	 * @param <T>        the type of the bifunction first input value
+	 * @param <U>        the type of the bifunction second input value
+	 * @param <R>        the type of the bifunction return value
+	 *
+	 * @return a bifunction wrapping checked exception thrown by {@code bifunction} in a corresponding unchecked
+	 * exception
+	 *
+	 * @throws NullPointerException if {@code bifunction} is null
+	 */
+	public static <T, U, R> BiFunction<T, U, R> unchecked(final CheckedBiFunction<? super T, ? super U, ? extends R> bifunction) {
 
-            }
-        };
-    }
+		if ( bifunction == null ) {
+			throw new NullPointerException("null bifunction");
+		}
 
-    /**
-     * Creates an unchecked bifunction.
-     *
-     * @param bifunction the checked bifunction to be unchecked
-     * @param <T>        the type of the bifunction first input value
-     * @param <U>        the type of the bifunction second input value
-     * @param <R>        the type of the bifunction return value
-     *
-     * @return a bifunction wrapping checked exception thrown by {@code bifunction} in a corresponding unchecked
-     * exception
-     *
-     * @throws NullPointerException if {@code bifunction} is null
-     */
-    public static <T, U, R> BiFunction<T, U, R> unchecked(final CheckedBiFunction<T, U, R> bifunction) {
+		return (t, u) -> {
+			try {
 
-        if ( bifunction == null ) {
-            throw new NullPointerException("null bifunction");
-        }
+				return bifunction.apply(t, u);
 
-        return (t, u) -> {
-            try {
+			} catch ( final IOException e ) {
 
-                return bifunction.apply(t, u);
+				throw new UncheckedIOException(e);
 
-            } catch ( final IOException e ) {
+			} catch ( final Exception e ) {
 
-                throw new UncheckedIOException(e);
+				throw new RuntimeException(e);
 
-            } catch ( final Exception e ) {
+			}
+		};
+	}
 
-                throw new RuntimeException(e);
 
-            }
-        };
-    }
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private Lambdas() {} // utility
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private Lambdas() {} // utility
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Runnable throwing checked exceptions.
+	 */
+	@FunctionalInterface public static interface CheckedRunnable {
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		public void run() throws Exception;
 
-    /**
-     * Runnable throwing checked exceptions.
-     */
-    @FunctionalInterface public static interface CheckedRunnable {
+	}
 
-        public void run() throws Exception;
+	/**
+	 * Consumer throwing checked exceptions.
+	 *
+	 * @param <T> the type of value accepted by this consumer
+	 */
+	@FunctionalInterface public static interface CheckedConsumer<T> {
 
-    }
+		public void accept(final T t) throws Exception;
 
-    /**
-     * Consumer throwing checked exceptions.
-     *
-     * @param <T> the type of value accepted by this consumer
-     */
-    @FunctionalInterface public static interface CheckedConsumer<T> {
+	}
 
-        public void accept(final T t) throws Exception;
+	/**
+	 * Supplier throwing checked exceptions.
+	 *
+	 * @param <T> the type of results supplied by this supplier
+	 */
+	@FunctionalInterface public static interface CheckedSupplier<T> {
 
-    }
+		public T get() throws Exception;
 
-    /**
-     * Supplier throwing checked exceptions.
-     *
-     * @param <T> the type of results supplied by this supplier
-     */
-    @FunctionalInterface public static interface CheckedSupplier<T> {
+	}
 
-        public T get() throws Exception;
+	/**
+	 * Function throwing checked exceptions.
+	 *
+	 * @param <T> the type of the input to the function
+	 * @param <R> the type of the result of the function
+	 */
+	@FunctionalInterface public static interface CheckedFunction<T, R> {
 
-    }
+		public R apply(final T t) throws Exception;
 
-    /**
-     * Function throwing checked exceptions.
-     *
-     * @param <T> the type of the input to the function
-     * @param <R> the type of the result of the function
-     */
-    @FunctionalInterface public static interface CheckedFunction<T, R> {
+	}
 
-        public R apply(final T t) throws Exception;
+	/**
+	 * Function throwing checked exceptions.
+	 *
+	 * @param <T> the type of the first argument to the function
+	 * @param <U> the type of the second argument to the function
+	 * @param <R> the type of the result of the function
+	 */
+	@FunctionalInterface public static interface CheckedBiFunction<T, U, R> {
 
-    }
+		public R apply(final T t, final U u) throws Exception;
 
-    /**
-     * Function throwing checked exceptions.
-     *
-     * @param <T> the type of the first argument to the function
-     * @param <U> the type of the second argument to the function
-     * @param <R> the type of the result of the function
-     */
-    @FunctionalInterface public static interface CheckedBiFunction<T, U, R> {
-
-        public R apply(final T t, final U u) throws Exception;
-
-    }
+	}
 
 }
