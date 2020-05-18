@@ -289,7 +289,7 @@ public final class Xtream<T> implements Stream<T> {
             throw new NullPointerException("null mapper");
         }
 
-        final Collection<T> loop=new LinkedHashSet<>(); // preserve order
+        final Collection<T> visited=new LinkedHashSet<>(); // preserve order
 
         for (
 
@@ -298,18 +298,19 @@ public final class Xtream<T> implements Stream<T> {
 
                 !pending.isEmpty();
 
-                pending=from(pending.stream())
+                pending=pending
+                        .stream()
                         .flatMap(mapper)
-                        .filter(value -> !loop.contains(value))
+                        .filter(value -> !visited.contains(value))
                         .collect(toCollection(LinkedHashSet::new))
 
         ) {
 
-            loop.addAll(pending);
+            visited.addAll(pending);
 
         }
 
-        return from(loop.stream());
+        return from(visited.stream());
     }
 
     /**
