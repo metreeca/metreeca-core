@@ -1,18 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rdf.formats;
@@ -24,37 +11,27 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.formats.OutputFormat;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.rio.*;
-import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
-import org.eclipse.rdf4j.rio.helpers.RioSettingImpl;
+import org.eclipse.rdf4j.rio.helpers.*;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import javax.json.*;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
-import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
@@ -78,8 +55,10 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	/**
 	 * The plain <a href="http://www.json.org/">JSON</a> file format.
 	 *
-	 * The file extension {@code .json} is recommend for JSON documents. The media type is {@code application/json}. The
-	 * character encoding is {@code UTF-8}.
+	 * The file extension {@code .json} is recommend for JSON documents.
+	 *
+	 * The media type is {@code application/json}.
+	 * <br>The character encoding is {@code UTF-8}.
 	 */
 	public static final org.eclipse.rdf4j.rio.RDFFormat RDFJSONFormat=new org.eclipse.rdf4j.rio.RDFFormat("JSON",
 			asList("application/json", "text/json"),
@@ -87,7 +66,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 			singletonList("json"),
 			Values.iri("http://www.json.org/"),
 			org.eclipse.rdf4j.rio.RDFFormat.NO_NAMESPACES,
-			org.eclipse.rdf4j.rio.RDFFormat.NO_CONTEXTS
+			org.eclipse.rdf4j.rio.RDFFormat.NO_CONTEXTS,
+			false
 	);
 
 	/**
@@ -165,7 +145,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	}
 
 
-	///// Casts ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///// Casts //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Converts an object to an IRI.
@@ -240,8 +220,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	/**
 	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
-	 * 		representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
-	 * 		status, otherwise
+	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
+	 * status, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
 		return message.body(input).fold(
@@ -273,8 +253,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 							parser.set(setting, value);
 
-							//  ;(dbpedia) ignore malformed rdf:langString literals (https://github
-							//  .com/eclipse/rdf4j/issues/2004)
+							//  ;(dbpedia) ignore malformed rdf:langString literals
+							//  (https://github.com/eclipse/rdf4j/issues/2004)
 
 							if ( BasicParserSettings.VERIFY_DATATYPE_VALUES.equals(setting) && FALSE.equals(value) ) {
 								parser.setValueFactory(new SimpleValueFactory() {
@@ -321,7 +301,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 					} catch ( final RDFParseException e ) {
 
-						if ( errorCollector.getFatalErrors().isEmpty() ) { // exception possibly not reported by parser…
+						if ( errorCollector.getFatalErrors().isEmpty() ) { // exception not always reported by parser…
 							errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
 						}
 
@@ -430,8 +410,8 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Iterable<Statement> rewrite(final String source, final String target,
-			final Iterable<Statement> statements) {
+	private Iterable<Statement> rewrite(
+			final String source, final String target, final Iterable<Statement> statements) {
 		return () -> new Iterator<Statement>() {
 
 			private final Iterator<Statement> iterator=statements.iterator();
