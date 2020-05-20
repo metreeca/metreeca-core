@@ -1,18 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rest;
@@ -29,7 +16,7 @@ public final class Lambdas {
 	/**
 	 * Creates a guarded function.
 	 *
-	 * @param function the function to be guarded
+	 * @param function the function to be wrapped
 	 * @param <V>      the type of the {@code function} input value
 	 * @param <R>      the type of the {@code function} return value
 	 *
@@ -38,7 +25,7 @@ public final class Lambdas {
 	 *
 	 * @throws NullPointerException if {@code function} is null
 	 */
-	public static <V, R> Function<V, R> guarded(final CheckedFunction<? super V, ? extends R> function) {
+	public static <V, R> Function<V, R> guarded(final Function<? super V, ? extends R> function) {
 
 		if ( function == null ) {
 			throw new NullPointerException("null function");
@@ -49,7 +36,7 @@ public final class Lambdas {
 
 				return v == null ? null : function.apply(v);
 
-			} catch ( final Exception e ) {
+			} catch ( final RuntimeException e ) {
 
 				return null;
 
@@ -58,6 +45,45 @@ public final class Lambdas {
 
 	}
 
+	/**
+	 * Creates an autoclosing function.
+	 *
+	 * @param function the function to be wrapped
+	 * @param <V>      the type of the {@code function} input value
+	 * @param <R>      the type of the {@code function} return value
+	 *
+	 * @return a function that returns the value produced by applying {@code function} to its input value and closes
+	 * it after processing
+	 *
+	 * @throws NullPointerException if {@code function} is null
+	 */
+	public static <V extends AutoCloseable, R> Function<V, R> closing(final Function<? super V, ? extends R> function) {
+
+		if ( function == null ) {
+			throw new NullPointerException("null function");
+		}
+
+		return v -> {
+
+			try ( final V c=v ) {
+
+				return function.apply(c);
+
+			} catch ( final IOException e ) {
+
+				throw new UncheckedIOException(e);
+
+			} catch ( final Exception e ) {
+
+				throw new RuntimeException(e);
+
+			}
+
+		};
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Creates an unchecked runnable.
