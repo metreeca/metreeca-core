@@ -238,7 +238,9 @@ public final class Crawl implements Function<String, Stream<String>> {
 							.optMap(focus)
 
 							.flatMap(XPath(p -> p.links("//html:a/@href")))
-							.map(Regex(r -> r.replace("#.*$", ""))) // remove anchors
+
+							.map(Regex(r -> r.replace("#.*$", ""))) // remove anchor
+							.map(Regex(r -> r.replace("\\?.*$", ""))) // remove query // !!! review
 
 							.filter(link -> { // keep only nested resources
 								try {
