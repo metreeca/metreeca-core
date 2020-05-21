@@ -1,18 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rest;
@@ -23,6 +10,8 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -36,8 +25,29 @@ public final class Codecs {
 	private static final byte[] EmptyData={};
 	private static final String EmptyText="";
 
+	private static final Pattern SpacePattern=Pattern.compile("[\\s\\p{Space}\\p{Z}]+");
 
-	//// URLs //////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//// Text /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String normalize(final String string) {
+		if ( string == null || string.isEmpty() ) { return string; } else {
+
+			final int length=string.length();
+
+			final Matcher matcher=SpacePattern.matcher(string);
+			final StringBuffer buffer=new StringBuffer(length);
+
+			while ( matcher.find() ) {
+				matcher.appendReplacement(buffer, matcher.start() == 0 || matcher.end() == length ? "" : " ");
+			}
+
+			return matcher.appendTail(buffer).toString();
+		}
+	}
+
+
+	//// URLs /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Converts a string into a URL.
@@ -134,7 +144,7 @@ public final class Codecs {
 	}
 
 
-	//// Resources /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Resources ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static URL resource(final Object master, final String resource) {
 
@@ -252,7 +262,8 @@ public final class Codecs {
 	}
 
 
-	//// Input Utilities ///////////////////////////////////////////////////////////////////////////////////////////////
+	//// Input Utilities
+	// /////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Creates an empty input stream.
@@ -371,7 +382,7 @@ public final class Codecs {
 	}
 
 
-	//// Output Utilities //////////////////////////////////////////////////////////////////////////////////////////////
+	//// Output Utilities /////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static OutputStream output(final Writer writer) {
 		return output(writer, UTF_8);
@@ -521,12 +532,12 @@ public final class Codecs {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Codecs() {} // utility
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final class ReaderInputStream extends InputStream {
 
