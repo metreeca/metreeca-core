@@ -13,7 +13,8 @@ import org.w3c.dom.Node;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -183,18 +184,22 @@ public final class Crawl implements Function<String, Stream<String>> {
 		if ( root == null || root.isEmpty() ) { return Stream.empty(); } else {
 			try {
 
-				final Set<String> visited=Collections.newSetFromMap(new ConcurrentHashMap<>());
+				final Map<String, Boolean> visited=new ConcurrentHashMap<>();
 
 				// !!! custom thread factory for linking context
 
-				final ExecutorService pool=new ForkJoinPool(threads > 0 ? threads :
-						getRuntime().availableProcessors());
+				final ExecutorService pool=new ForkJoinPool(
+						threads > 0 ? threads : getRuntime().availableProcessors()
+				);
 
-				pool.execute(() -> action(root, root, visited).fork());
+				pool.execute(() -> crawl(root, root, visited).fork());
 				pool.shutdown();
 				pool.awaitTermination(timeout > 0 ? timeout : Long.MAX_VALUE, unit);
 
-				return visited.stream();
+				return visited
+						.entrySet().stream()
+						.filter(Map.Entry::getValue)
+						.map(Map.Entry::getKey);
 
 			} catch ( final InterruptedException e ) {
 
@@ -209,10 +214,10 @@ public final class Crawl implements Function<String, Stream<String>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RecursiveAction action(final String root, final String page, final Set<String> visited) {
+	private RecursiveAction crawl(final String root, final String page, final Map<String, Boolean> visited) {
 		return new RecursiveAction() {
 			@Override protected void compute() {
-				if ( visited.add(page) ) {
+				if ( visited.putIfAbsent(page, false) == null ) { // mark as pending
 
 					Xtream
 
@@ -223,7 +228,7 @@ public final class Crawl implements Function<String, Stream<String>> {
 									.optMap(head)
 									.optMap(fetch)
 
-									.allMatch(response -> response
+									.anyMatch(response -> response
 											.header("Content-Type")
 											.filter(HTMLFormat.MIMEPattern.asPredicate())
 											.isPresent()
@@ -236,6 +241,8 @@ public final class Crawl implements Function<String, Stream<String>> {
 
 							.optMap(parse)
 							.optMap(focus)
+
+							.peek(node -> visited.put(page, true)) // successfully processed
 
 							.flatMap(XPath(p -> p.links("//html:a/@href")))
 
@@ -259,7 +266,7 @@ public final class Crawl implements Function<String, Stream<String>> {
 
 							.filter(link -> prune.test(root, link))
 
-							.forEach(link -> action(root, link, visited).fork());
+							.forEach(link -> crawl(root, link, visited).fork());
 
 				}
 			}
