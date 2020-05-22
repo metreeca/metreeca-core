@@ -47,16 +47,34 @@ public final class Crawl implements Function<String, Stream<String>> {
 	// !!! session state
 
 
+	private int threads;
+
 	private Fetch fetch=new Fetch();
 
 	private Function<? super Node, Optional<Node>> focus=Optional::of;
 	private BiPredicate<String, String> prune=(root, link) -> true;
 
-	private int threads=0;
-	private int timeout=0;
 
-	private TimeUnit unit=TimeUnit.SECONDS;
+	/**
+	 * Configures the number of concurrent requests (defaults to the number of processors)
+	 *
+	 * @param threads the maximum number of concurrent resource fetches; equivalent to the number of system
+	 *                processors if equal to zero
+	 *
+	 * @return this action
+	 *
+	 * @throws IllegalArgumentException if {@code threads} is negative
+	 */
+	public Crawl threads(final int threads) {
 
+		if ( threads < 0 ) {
+			throw new IllegalArgumentException("negative thread count");
+		}
+
+		this.threads=threads;
+
+		return this;
+	}
 
 	/**
 	 * Configures the fetch action (defaults to {@link Fetch}.
@@ -121,55 +139,6 @@ public final class Crawl implements Function<String, Stream<String>> {
 	}
 
 
-	/**
-	 * Configures the number of concurrent requests (defaults to the number of processors)
-	 *
-	 * @param threads the maximum number of concurrent resource fetches; limited to the number of system processors if
-	 *                equal to zero
-	 *
-	 * @return this action
-	 *
-	 * @throws IllegalArgumentException if {@code threads} is negative
-	 */
-	public Crawl threads(final int threads) {
-
-		if ( threads < 0 ) {
-			throw new IllegalArgumentException("negative thread count");
-		}
-
-		this.threads=threads;
-
-		return this;
-	}
-
-	/**
-	 * Configures the request timeout (defaults to no limit)
-	 *
-	 * @param timeout the request timeout in {@code unit}; no timeout is enforced if equal to 0
-	 * @param unit    the time unit for {@code timeout}
-	 *
-	 * @return this action
-	 *
-	 * @throws IllegalArgumentException if {@code timeout} is negative
-	 * @throws NullPointerException     if {@code unit]} is null
-	 */
-	public Crawl timeout(final int timeout, final TimeUnit unit) {
-
-		if ( timeout < 0 ) {
-			throw new IllegalArgumentException("negative timeout");
-		}
-
-		if ( unit == null ) {
-			throw new NullPointerException("null unit");
-		}
-
-		this.timeout=timeout;
-		this.unit=unit;
-
-		return this;
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -181,96 +150,119 @@ public final class Crawl implements Function<String, Stream<String>> {
 	 * null or empty
 	 */
 	@Override public Stream<String> apply(final String root) {
-		if ( root == null || root.isEmpty() ) { return Stream.empty(); } else {
-			try {
-
-				final Map<String, Boolean> visited=new ConcurrentHashMap<>();
-
-				// !!! custom thread factory for linking context
-
-				final ExecutorService pool=new ForkJoinPool(
-						threads > 0 ? threads : getRuntime().availableProcessors()
-				);
-
-				pool.execute(() -> crawl(root, root, visited).fork());
-				pool.shutdown();
-				pool.awaitTermination(timeout > 0 ? timeout : Long.MAX_VALUE, unit);
-
-				return visited
-						.entrySet().stream()
-						.filter(Map.Entry::getValue)
-						.map(Map.Entry::getKey);
-
-			} catch ( final InterruptedException e ) {
-
-				throw new RuntimeException(e);
-
-				//return Stream.empty(); // !!! review
-
-			}
-		}
+		return root == null || root.isEmpty() ? Stream.empty() : new Crawler(root).crawl();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RecursiveAction crawl(final String root, final String page, final Map<String, Boolean> visited) {
-		return new RecursiveAction() {
-			@Override protected void compute() {
-				if ( visited.putIfAbsent(page, false) == null ) { // mark as pending
+	private final class Crawler {
 
-					Xtream
+		private final String root;
+		private final Map<String, Boolean> pages=new ConcurrentHashMap<>();
 
-							.of(page)
+		private final Phaser phaser=new Phaser(); // !!! handle 65k limit with tiered phasers
+		private final ExecutorService executor=Executors.newFixedThreadPool(
+				threads > 0 ? threads : getRuntime().availableProcessors()
+				// !!! custom thread factory for linking context
+		);
 
-							.filter(link -> Xtream.of(link)
 
-									.optMap(head)
-									.optMap(fetch)
+		private Crawler(final String root) {
+			this.root=root;
+		}
 
-									.anyMatch(response -> response
-											.header("Content-Type")
-											.filter(HTMLFormat.MIMEPattern.asPredicate())
-											.isPresent()
-									)
 
-							)
+		private Stream<String> crawl() {
+			try {
 
-							.optMap(get)
-							.optMap(fetch)
+				phaser.register();
 
-							.optMap(parse)
-							.optMap(focus)
+				crawl(root);
 
-							.peek(node -> visited.put(page, true)) // successfully processed
+				phaser.arriveAndAwaitAdvance();
 
-							.flatMap(XPath(p -> p.links("//html:a/@href")))
+				return pages
+						.entrySet().stream()
+						.filter(Map.Entry::getValue)
+						.map(Map.Entry::getKey);
 
-							.map(Regex(r -> r.replace("#.*$", ""))) // remove anchor
-							.map(Regex(r -> r.replace("\\?.*$", ""))) // remove query // !!! review
 
-							.filter(link -> { // keep only nested resources
-								try {
+			} finally {
 
-									final URI origin=new URI(root).normalize();
-									final URI target=new URI(link).normalize();
+				executor.shutdown();
 
-									return !origin.relativize(target).equals(target);
-
-								} catch ( final URISyntaxException e ) {
-
-									return false;
-
-								}
-							})
-
-							.filter(link -> prune.test(root, link))
-
-							.forEach(link -> crawl(root, link, visited).fork());
-
-				}
 			}
-		};
+		}
+
+
+		private void crawl(final String page) {
+			if ( pages.putIfAbsent(page, false) == null ) { // mark as pending
+
+				phaser.register();
+
+				executor.execute(() -> {
+					try {
+
+						Xtream
+
+								.of(page)
+
+								.filter(link -> Xtream.of(link)
+
+										.optMap(head)
+										.optMap(fetch)
+
+										.anyMatch(response -> response
+												.header("Content-Type")
+												.filter(HTMLFormat.MIMEPattern.asPredicate())
+												.isPresent()
+										)
+
+								)
+
+								.optMap(get)
+								.optMap(fetch)
+
+								.optMap(parse)
+								.optMap(focus)
+
+								.peek(node -> pages.put(page, true)) // successfully processed
+
+								.flatMap(XPath(p -> p.links("//html:a/@href")))
+
+								.map(Regex(r -> r.replace("#.*$", ""))) // remove anchor
+								.map(Regex(r -> r.replace("\\?.*$", ""))) // remove query // !!! ?
+
+								.filter(link -> { // keep only nested resources
+									try {
+
+										final URI origin=new URI(root).normalize();
+										final URI target=new URI(link).normalize();
+
+										return !origin.relativize(target).equals(target);
+
+									} catch ( final URISyntaxException e ) {
+
+										return false;
+
+									}
+								})
+
+								.filter(link -> prune.test(root, link))
+
+								.forEach(this::crawl);
+
+					} finally {
+
+						phaser.arrive();
+
+					}
+				});
+
+			}
+		}
+
 	}
 
 }
