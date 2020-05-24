@@ -1,50 +1,27 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 package com.metreeca.rdf;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.SimpleIRI;
-import org.eclipse.rdf4j.model.impl.SimpleNamespace;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.impl.*;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.net.*;
+import java.security.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
-import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQueries;
+import java.time.temporal.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -64,7 +41,7 @@ public final class Values {
 	/**
 	 * A pattern matching absolute IRIs.
 	 */
-	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[^:/?#]+:.+$");
+	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[a-zA-Z][-+.a-zA-Z0-9]*:.+$");
 
 	/**
 	 * A pattern matching IRI components.
