@@ -98,9 +98,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
                     if ( !success ) {
 
-                        logger.warning(this, format(
-                                "unable to retrieve data from <%s> : status %d", response.item(), response.status()
-                        ));
+                        logger.warning(this, format("%d %s", response.status(), response.item()));
 
                     }
 
