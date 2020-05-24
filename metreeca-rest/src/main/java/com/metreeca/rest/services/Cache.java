@@ -17,7 +17,6 @@ import java.util.function.Supplier;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Context.storage;
 import static com.metreeca.rest.services.Logger.logger;
-import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.Instant.now;
 
@@ -29,155 +28,158 @@ import static java.time.Instant.now;
  */
 @FunctionalInterface public interface Cache {
 
-    /**
-     * Retrieves the default cache factory.
-     *
-     * @return the default cache factory, which creates {@link FileCache} instances
-     */
-    public static Supplier<Cache> cache() { return FileCache::new; }
+	/**
+	 * Retrieves the default cache factory.
+	 *
+	 * @return the default cache factory, which creates {@link FileCache} instances
+	 */
+	public static Supplier<Cache> cache() { return FileCache::new; }
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Retrieves an item from this cache.
-     *
-     * @param key     the key of the item to be retrieved
-     * @param decoder a function decoding a cached item from its binary representation; takes as argument an input
-     *                stream for reading the binary representation of the item to be retrieved and is expected to
-     *                return a non null object of type {@code T}
-     * @param encoder a function encoding an item to be cached to its binary representation; takes as argument an
-     *                output stream for writing the binary representation of the item to be cached and is expected
-     *                to return a non null object of type {@code T}
-     * @param <T>     the type of the cached items
-     *
-     * @return an object of type {@code T}, returned either from the {@code decoder}, if a binary blob matching {@code
-     * key} was found in the cache, or by the {@code encoder}, otherwise
-     *
-     * @throws NullPointerException if any argument is null
-     */
-    public <T> T retrieve(final String key,
-            final Function<InputStream, T> decoder, final Function<OutputStream, T> encoder
-    );
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Storage blob cache.
-     *
-     * <p>Caches data blobs in the {@code cache} folder of the system file {@linkplain Context#storage storage}.</p>
-     */
-    public static final class FileCache implements Cache {
-
-        private Duration ttl=Duration.ZERO; // no expiry
-
-        private final Path path=service(storage()).resolve("cache");
-        private final Logger logger=service(logger());
+	/**
+	 * Retrieves an item from this cache.
+	 *
+	 * @param key     the key of the item to be retrieved
+	 * @param decoder a function decoding a cached item from its binary representation; takes as argument an input
+	 *                stream for reading the binary representation of the item to be retrieved and is expected to
+	 *                return a non null object of type {@code T}
+	 * @param encoder a function encoding an item to be cached to its binary representation; takes as argument an
+	 *                output stream for writing the binary representation of the item to be cached and is expected
+	 *                to return a non null object of type {@code T}
+	 * @param <T>     the type of the cached items
+	 *
+	 * @return an object of type {@code T}, returned either from the {@code decoder}, if a binary blob matching {@code
+	 * key} was found in the cache, or by the {@code encoder}, otherwise
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public <T> T retrieve(final String key,
+			final Function<InputStream, T> decoder, final Function<OutputStream, T> encoder
+	);
 
 
-        /**
-         * Configures the time-to-live for this cache (defaults to {@link Duration#ZERO}).
-         *
-         * @param ttl the time-to-live for items stored in this cache; if {@link Duration#isZero() zero}, items will be
-         *            retained indefinitely
-         *
-         * @return this cache
-         *
-         * @throws NullPointerException     if {@code ttl} is null
-         * @throws IllegalArgumentException if {@code ttl} is negative
-         */
-        public FileCache ttl(final Duration ttl) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            if ( ttl == null ) {
-                throw new NullPointerException("null ttl");
-            }
+	/**
+	 * Storage blob cache.
+	 *
+	 * <p>Caches data blobs in the {@code cache} folder of the system file {@linkplain Context#storage storage}.</p>
+	 */
+	public static final class FileCache implements Cache {
 
-            if ( ttl.isNegative() ) {
-                throw new IllegalArgumentException("negative ttl");
-            }
+		private Duration ttl=Duration.ZERO; // no expiry
 
-            synchronized ( path ) {
-                this.ttl=ttl;
-            }
-
-            return this;
-        }
+		private final Path path=service(storage()).resolve("cache");
+		private final Logger logger=service(logger());
 
 
-        @Override public <T> T retrieve(
-                final String key, final Function<InputStream, T> decoder, final Function<OutputStream, T> encoder
-        ) {
+		/**
+		 * Configures the time-to-live for this cache (defaults to {@link Duration#ZERO}).
+		 *
+		 * @param ttl the time-to-live for items stored in this cache; if {@link Duration#isZero() zero}, items will be
+		 *            retained indefinitely
+		 *
+		 * @return this cache
+		 *
+		 * @throws NullPointerException     if {@code ttl} is null
+		 * @throws IllegalArgumentException if {@code ttl} is negative
+		 */
+		public FileCache ttl(final Duration ttl) {
 
-            if ( key == null ) {
-                throw new NullPointerException("null key");
-            }
+			if ( ttl == null ) {
+				throw new NullPointerException("null ttl");
+			}
 
-            if ( decoder == null ) {
-                throw new NullPointerException("null decoder");
-            }
+			if ( ttl.isNegative() ) {
+				throw new IllegalArgumentException("negative ttl");
+			}
 
-            if ( encoder == null ) {
-                throw new NullPointerException("null encoder");
-            }
+			synchronized ( path ) {
+				this.ttl=ttl;
+			}
 
-            // !!! inter-process locking using FileLock (https://stackoverflow.com/q/128038/739773)
+			return this;
+		}
 
-            synchronized ( path ) {
-                try {
 
-                    final Path file=Files
-                            .createDirectories(path)
-                            .resolve(UUID.nameUUIDFromBytes(key.getBytes(UTF_8)).toString());
+		@Override public <T> T retrieve(final String key,
+				final Function<InputStream, T> decoder, final Function<OutputStream, T> encoder
+		) {
 
-                    final boolean alive=Files.exists(file) && (
-                            ttl.isZero() || Files.getLastModifiedTime(file).toInstant().plus(ttl).isAfter(now())
-                    );
+			if ( key == null ) {
+				throw new NullPointerException("null key");
+			}
 
-                    if ( alive ) {
+			if ( decoder == null ) {
+				throw new NullPointerException("null decoder");
+			}
 
-                        logger.info(Cache.class, format("retrieving <%s>", key));
+			if ( encoder == null ) {
+				throw new NullPointerException("null encoder");
+			}
 
-                        try ( final InputStream input=Files.newInputStream(file) ) {
+			try {
 
-                            return decoder.apply(input);
+				final Path file=Files
+						.createDirectories(path)
+						.resolve(UUID.nameUUIDFromBytes(key.getBytes(UTF_8)).toString())
+						.toAbsolutePath();
 
-                        } catch ( final Exception e ) { // possibly corrupted/stale cache entry
+				synchronized ( file.toString().intern() ) { // see https://stackoverflow.com/a/13957003/739773
 
-                            Files.delete(file); // trash
+					// !!! inter-process locking using FileLock? (https://stackoverflow.com/q/128038/739773)
 
-                            return retrieve(key, decoder, encoder); // reload
-                        }
+					final boolean alive=Files.exists(file) && (
+							ttl.isZero() || Files.getLastModifiedTime(file).toInstant().plus(ttl).isAfter(now())
+					);
 
-                    } else {
+					if ( alive ) {
 
-                        try ( final OutputStream output=Files.newOutputStream(file) ) {
+						logger.info(Cache.class, key);
 
-                            return encoder.apply(output);
+						try ( final InputStream input=Files.newInputStream(file) ) {
 
-                        } catch ( final Exception e ) {
+							return decoder.apply(input);
 
-                            Files.delete(file);
+						} catch ( final Exception e ) { // possibly corrupted/stale cache entry
 
-                            throw e;
+							Files.delete(file); // trash
 
-                        } finally {
+							return retrieve(key, decoder, encoder); // reload
+						}
 
-                            if ( Files.exists(file) && Files.size(file) == 0 ) { Files.delete(file); }
+					} else {
 
-                        }
+						try ( final OutputStream output=Files.newOutputStream(file) ) {
 
-                    }
+							return encoder.apply(output);
 
-                } catch ( final IOException e ) {
+						} catch ( final Exception e ) {
 
-                    throw new UncheckedIOException(e);
+							Files.delete(file);
 
-                }
-            }
+							throw e;
 
-        }
+						} finally {
 
-    }
+							if ( Files.exists(file) && Files.size(file) == 0 ) { Files.delete(file); }
+
+						}
+
+					}
+
+				}
+
+			} catch ( final IOException e ) {
+
+				throw new UncheckedIOException(e);
+
+			}
+
+		}
+
+	}
 
 }
