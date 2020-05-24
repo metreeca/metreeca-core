@@ -527,8 +527,9 @@ public final class Xtream<T> implements Stream<T> {
 		}
 
 		@Override public Spliterator<Collection<T>> trySplit() {
-			return base.estimateSize() <= size ? null : Optional.ofNullable(base.trySplit())
-					.map(spliterator -> new BatchSpliterator<>(size, base.trySplit()))
+			return base.estimateSize() <= size ? null : Optional
+					.ofNullable(base.trySplit())
+					.map(spliterator -> new BatchSpliterator<>(size, spliterator))
 					.orElse(null);
 		}
 
