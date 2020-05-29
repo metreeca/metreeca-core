@@ -273,6 +273,26 @@ public final class Xtream<T> implements Stream<T> {
 
 
 	/**
+	 * Batches elements.
+	 *
+	 * @param collector a stream collector
+	 *
+	 * @return an extended stream containg a single element produced by collecting the elements of this extended
+	 * stream using {@code collector}
+	 *
+	 * @throws NullPointerException if {@code collector} is null
+	 */
+	public <C> Xtream<C> batch(final Collector<T, ?, C> collector) {
+
+		if ( collector == null ) {
+			throw new NullPointerException("null collector");
+		}
+
+		return of(collect(collector));
+	}
+
+
+	/**
 	 * Recursively expands this extended stream.
 	 *
 	 * @param mapper a function mapping elements to streams of elements of the same type
