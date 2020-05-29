@@ -17,15 +17,9 @@
 
 package com.metreeca.rdf;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -41,7 +35,7 @@ import static java.util.Arrays.asList;
 
 		return (subject, model) -> model.stream()
 
-				.peek(statement -> { if ( statement == null ) { throw new NullPointerException("null statement"); } })
+				.peek(Objects::requireNonNull)
 
 				.filter(s -> s.getSubject().equals(subject))
 				.filter(s -> s.getPredicate().equals(predicate))
@@ -57,7 +51,7 @@ import static java.util.Arrays.asList;
 
 		return (subject, model) -> model.stream()
 
-				.peek(statement -> { if ( statement == null ) { throw new NullPointerException("null statement"); } })
+				.peek(Objects::requireNonNull)
 
 				.filter(s -> s.getObject().equals(subject))
 				.filter(s -> s.getPredicate().equals(predicate))
@@ -72,7 +66,16 @@ import static java.util.Arrays.asList;
 			throw new NullPointerException("null paths");
 		}
 
-		return union(Arrays.stream(predicates).map(Path::direct).collect(Collectors.toList()));
+		final Collection<IRI> paths=new HashSet<>(asList(predicates));
+
+		return (subject, model) -> model.stream()
+
+				.peek(Objects::requireNonNull)
+
+				.filter(s -> s.getSubject().equals(subject))
+				.filter(s -> paths.contains(s.getPredicate()))
+
+				.map(Statement::getObject);
 	}
 
 	public static Path union(final Path... paths) {
@@ -86,15 +89,11 @@ import static java.util.Arrays.asList;
 
 	public static Path union(final Collection<Path> paths) {
 
-		if ( paths == null ) {
+		if ( paths == null || paths.stream().anyMatch(Objects::isNull)) {
 			throw new NullPointerException("null paths");
 		}
 
-		return (subject, model) -> paths.stream()
-
-				.peek(path -> { if ( path == null ) { throw new NullPointerException("null path"); } })
-
-				.flatMap(path -> path.follow(subject, model));
+		return (subject, model) -> paths.stream().flatMap(path -> path.follow(subject, model));
 	}
 
 
