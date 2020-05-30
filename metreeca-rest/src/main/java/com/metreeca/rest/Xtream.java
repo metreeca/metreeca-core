@@ -203,6 +203,37 @@ public final class Xtream<T> implements Stream<T> {
 
 
 	/**
+	 * Removes incompatible elements.
+	 *
+	 * @param clash a binary predicate returning {@code true} if its arguments are mutually incompatible or {@code
+	 *              false} otherwise
+	 *
+	 * @return an extended stream produced by removing from this extended stream all elements not compatible with
+	 * previously processed elements according to {@code clash}
+	 *
+	 * @throws NullPointerException if {@code clash} is null
+	 */
+	public Xtream<T> prune(final BiPredicate<T, T> clash) {
+
+		if ( clash == null ) {
+			throw new NullPointerException("null clash");
+		}
+
+		return filter(new Predicate<T>() {
+
+			private final Collection<T> matches=new ArrayList<>();
+
+			@Override public boolean test(final T x) {
+				synchronized ( matches ) {
+					return matches.stream().noneMatch(y -> clash.test(x, y)) && matches.add(x);
+				}
+			}
+
+		});
+	}
+
+
+	/**
 	 * Groups elements.
 	 *
 	 * @param classifier a function mapping elements to a grouping key
@@ -270,7 +301,6 @@ public final class Xtream<T> implements Stream<T> {
 		return size == 0 ? of(stream.collect(toList()))
 				: from(StreamSupport.stream(new BatchSpliterator<>(size, stream.spliterator()), stream.isParallel()));
 	}
-
 
 	/**
 	 * Batches elements.
