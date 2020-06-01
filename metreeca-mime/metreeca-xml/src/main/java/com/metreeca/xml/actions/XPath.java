@@ -166,8 +166,22 @@ public final class XPath {
 		this.node=node;
 		this.base=Optional
 
-				.ofNullable(Optional
-						.of((String)evaluate("/html:html/html:head/html:base/@href", XPathConstants.STRING))
+				.ofNullable(Optional.of(root)
+
+						.filter(r -> HTMLUri.equals(r.getNamespaceURI()))
+
+						.map(r -> {
+							try {
+
+								return (String)xpath
+										.compile("/html:html/html:head/html:base/@href")
+										.evaluate(r, XPathConstants.STRING);
+
+							} catch ( final XPathExpressionException e ) {
+								return null;
+							}
+						})
+
 						.filter(href -> !href.isEmpty())
 						.orElse(node.getBaseURI())
 				)
