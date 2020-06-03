@@ -12,6 +12,7 @@ import java.nio.charset.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -183,7 +184,9 @@ public final class Codecs {
 
 		try {
 
-			return resource(master, resource).openStream();
+			final InputStream input=resource(master, resource).openStream();
+
+			return resource.endsWith(".gz") ? new GZIPInputStream(input) : input;
 
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
