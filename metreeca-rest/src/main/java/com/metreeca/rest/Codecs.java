@@ -10,8 +10,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.*;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 import static java.lang.String.format;
@@ -25,27 +23,6 @@ public final class Codecs {
 
 	private static final byte[] EmptyData={};
 	private static final String EmptyText="";
-
-	private static final Pattern SpacePattern=Pattern.compile("[\\s\\p{Space}\\p{Z}]+");
-
-
-	//// Text /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static String normalize(final String string) {
-		if ( string == null || string.isEmpty() ) { return string; } else {
-
-			final int length=string.length();
-
-			final Matcher matcher=SpacePattern.matcher(string);
-			final StringBuffer buffer=new StringBuffer(length);
-
-			while ( matcher.find() ) {
-				matcher.appendReplacement(buffer, matcher.start() == 0 || matcher.end() == length ? "" : " ");
-			}
-
-			return matcher.appendTail(buffer).toString();
-		}
-	}
 
 
 	//// URLs /////////////////////////////////////////////////////////////////////////////////////////////////////////
