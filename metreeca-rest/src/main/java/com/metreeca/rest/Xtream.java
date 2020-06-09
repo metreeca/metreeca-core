@@ -202,6 +202,32 @@ public final class Xtream<T> implements Stream<T> {
 	}
 
 
+	@SafeVarargs public final <R> Xtream<R> bagMap(final Function<? super T, ? extends Collection<R>>... mappers) {
+
+		if ( mappers == null || Arrays.stream(mappers).anyMatch(Objects::isNull)) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return flatMap(t -> Arrays.stream(mappers)
+				.map(mapper -> mapper.apply(t))
+				.filter(Objects::nonNull)
+				.flatMap(Collection::stream)
+		);
+
+	}
+
+	@SafeVarargs public final <R> Xtream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>>... mappers) {
+
+		if ( mappers == null || Arrays.stream(mappers).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null mappers");
+		}
+
+		return flatMap(t -> Arrays.stream(mappers)
+				.flatMap(mapper -> mapper.apply(t))
+		);
+	}
+
+
 	/**
 	 * Removes incompatible elements.
 	 *
@@ -434,18 +460,6 @@ public final class Xtream<T> implements Stream<T> {
 		}
 
 		consumer.accept(this);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@SafeVarargs public final <R> Xtream<R> flatMap(final Function<? super T, ? extends Stream<? extends R>>... mappers) {
-
-		if ( mappers == null || Arrays.stream(mappers).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null mappers");
-		}
-
-		return flatMap(t -> Arrays.stream(mappers).flatMap(mapper -> mapper.apply(t)));
 	}
 
 
