@@ -2,6 +2,7 @@ package com.metreeca.rest.actions;
 
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
+import java.util.Locale;
 import java.util.function.UnaryOperator;
 
 /**
@@ -24,6 +25,26 @@ public final class Clean implements UnaryOperator<String> {
 	 */
 	public static String normalize(final String text) {
 		return Instance.apply(text);
+	}
+
+	/**
+	 * Normalize to lower case.
+	 *
+	 * @param text the text to be normalized; may be null
+	 * @return a copy of {@code text} converted to lower case according to the {@link Locale#ROOT root locale}.
+	 */
+	public static String lower(final String text) {
+		return text == null || text.isEmpty()? text : text.toLowerCase(Locale.ROOT);
+	}
+
+	/**
+	 * Normalize to upper case.
+	 *
+	 * @param text the text to be normalized; may be null
+	 * @return a copy of {@code text} converted to upper case according to the {@link Locale#ROOT root locale}.
+	 */
+	public static String upper(final String text) {
+		return text == null || text.isEmpty()? text : text.toUpperCase(Locale.ROOT);
 	}
 
 
