@@ -292,7 +292,11 @@ public final class Cell implements Resource {
 
 		public Builder insert(final IRI predicate, final Value... objects) {
 
-			if ( predicate != null && objects != null ) {
+			if ( predicate == null ) {
+				throw new NullPointerException("null predicate");
+			}
+
+			if ( objects != null ) {
 				for (final Value object : objects) {
 					insert(predicate, object);
 				}
@@ -303,7 +307,11 @@ public final class Cell implements Resource {
 
 		public Builder insert(final IRI predicate, final Iterable<? extends Value> objects) {
 
-			if ( predicate != null && objects != null ) {
+			if ( predicate == null ) {
+				throw new NullPointerException("null predicate");
+			}
+
+			if ( objects != null ) {
 				for (final Value object : objects) {
 					insert(predicate, object);
 				}
@@ -314,7 +322,11 @@ public final class Cell implements Resource {
 
 		public Builder insert(final IRI predicate, final Optional<? extends Value> object) {
 
-			if ( predicate != null && object != null ) {
+			if ( predicate == null ) {
+				throw new NullPointerException("null predicate");
+			}
+
+			if ( object != null ) {
 				object.ifPresent(value -> insert(predicate, value));
 			}
 
@@ -323,7 +335,11 @@ public final class Cell implements Resource {
 
 		public Builder insert(final IRI predicate, final Stream<? extends Value> objects) {
 
-			if ( predicate != null && objects != null ) {
+			if ( predicate == null ) {
+				throw new NullPointerException("null predicate");
+			}
+
+			if ( objects != null ) {
 				objects.forEach(value -> insert(predicate, value));
 			}
 
