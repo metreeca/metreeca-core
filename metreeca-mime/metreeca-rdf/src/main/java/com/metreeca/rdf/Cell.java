@@ -1,36 +1,17 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
- *
- * This file is part of Metreeca/Link.
- *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
- *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Copyright © 2020 Metreeca srl. All rights reserved.
  */
 
 
 package com.metreeca.rdf;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -39,6 +20,7 @@ import static com.metreeca.rdf.Path.union;
 import static com.metreeca.rdf.Values.*;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableCollection;
+import static java.util.Objects.requireNonNull;
 
 
 public final class Cell implements Resource {
@@ -244,13 +226,21 @@ public final class Cell implements Resource {
 			}
 
 			for (final Statement statement : model) {
-
-				if ( statement == null ) {
-					throw new NullPointerException("null model statement");
-				}
-
-				this.model.add(statement);
+				this.model.add(requireNonNull(statement, "null model statement"));
 			}
+
+			return this;
+		}
+
+		public Builder insert(final Stream<Statement> model) {
+
+			if ( model == null ) {
+				throw new NullPointerException("null model");
+			}
+
+			model
+					.map(statement -> requireNonNull(statement, "null model statement"))
+					.forEachOrdered(this.model::add);
 
 			return this;
 		}
