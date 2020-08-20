@@ -1,9 +1,3 @@
-com.metreeca.gate
-com.metreeca.gate.digests
-com.metreeca.gate.policies
-com.metreeca.gate.wrappers
-com.metreeca.gcp
-com.metreeca.gcp.services
 com.metreeca.rdf
 com.metreeca.rdf.formats
 com.metreeca.rdf.wrappers
