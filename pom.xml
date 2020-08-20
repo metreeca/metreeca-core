@@ -403,7 +403,7 @@
                             <reportOutputDirectory>${project.basedir}/docs/javadocs</reportOutputDirectory>
                             <destDir>javadocs</destDir>
 
-                            <groups> <!-- colon-separated patterns -->
+                            <groups> <!-- colon-separated patterns / single line -->
                                 <group>
                                     <title>Modelling Framework</title>
                                     <packages>com.metreeca.tree*</packages>
@@ -412,10 +412,10 @@
                                     <title>REST API Framework</title>
                                     <packages>com.metreeca.rest*</packages>
                                 </group>
-                                <group>
+                                <!--<group>
                                     <title>REST IAM Framework</title>
                                     <packages>com.metreeca.gate*</packages>
-                                </group>
+                                </group>-->
                                 <group>
                                     <title>Format Adapters</title>
                                     <packages>
@@ -431,12 +431,14 @@
                                 <group>
                                     <title>Backend Adapters</title>
                                     <packages>
-                                        com.metreeca.rdf4j*:com.metreeca.gcp*
+                                        com.metreeca.rdf4j*<!--:com.metreeca.gcp*-->
                                     </packages>
                                 </group>
                             </groups>
 
-                            <excludePackageNames> <!-- colon-separated patterns -->
+                            <excludePackageNames> <!-- colon-separated patterns / multi line -->
+								com.metreeca.gate:com.metreeca.gate.*
+								:com.metreeca.gcp:com.metreeca.gcp.*
                             </excludePackageNames>
 
                         </configuration>
