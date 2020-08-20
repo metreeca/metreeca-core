@@ -134,10 +134,10 @@ public abstract class Message<T extends Message<T>> {
 	 * @param message the source message to be merged into this message
 	 *
 	 * @return this message modified as follows:
-	 * 		<ul>
-	 * 		<li>source message headers are copied to this message overriding existing values;</li>
-	 * 		<li>source message body representations are copied to this message replacing all existing values.</li>
-	 * 		</ul>
+	 * <ul>
+	 * <li>source message headers are copied to this message overriding existing values;</li>
+	 * <li>source message body representations are copied to this message replacing all existing values.</li>
+	 * </ul>
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
@@ -162,7 +162,7 @@ public abstract class Message<T extends Message<T>> {
 	 *             message; will be resolved against the message {@linkplain #item() item} IRI
 	 *
 	 * @return a new linked message with a focus item identified by {@code item} and the same {@linkplain #request()
-	 * 		originating request} as this message
+	 * originating request} as this message
 	 *
 	 * @throws NullPointerException     if {@code item} is null
 	 * @throws IllegalArgumentException if {@code item} is not a legal (possibly relative) IRI
@@ -183,7 +183,7 @@ public abstract class Message<T extends Message<T>> {
 	 * Tests if this message is interactive.
 	 *
 	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
-	 * 		usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
+	 * usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
 	 */
 	public boolean interactive() {
 		return Stream.of(headers("accept"), headers("content-type"))
@@ -195,7 +195,7 @@ public abstract class Message<T extends Message<T>> {
 	 * Retrieves the character encoding of this message.
 	 *
 	 * @return the character encoding set in the {@code Content-Type} header of this message; empty if this message
-	 * 		doesn't include a  {@code Content-Type} header or if no character encoding is explicitly set
+	 * doesn't include a  {@code Content-Type} header or if no character encoding is explicitly set
 	 */
 	public Optional<String> charset() {
 		return header("Content-Type")
@@ -205,12 +205,13 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	//// Shape /////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shape ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the linked data shape.
 	 *
-	 * @return the linked data shape associated to this message; defaults to an {@linkplain And#and() empty conjunction}
+	 * @return the linked data shape associated to this message; defaults to an {@linkplain And#and() empty
+	 * conjunction}
 	 */
 	public Shape shape() {
 		return shape;
@@ -237,7 +238,7 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Headers //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves message headers.
@@ -291,7 +292,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @param name the name of the header whose value is to be retrieved
 	 *
 	 * @return an optional value containing the first value among those returned by {@link #headers(String)}, if one is
-	 * 		present; an empty optional otherwise
+	 * present; an empty optional otherwise
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */
@@ -308,8 +309,8 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures message header value.
 	 *
 	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
-	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
-	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header
+	 * {@code values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name  the name of the header whose value is to be configured
 	 * @param value the new value for {@code name}; empty values are ignored
@@ -318,7 +319,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code value} is null
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">
-	 * 		RFC 7230 Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing - § 3.2.2. Field Order</a>
+	 * RFC 7230 Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T header(final String name, final String value) {
 
@@ -370,8 +371,9 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
 	 *                              {@code null} value
-	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * 		Message Syntax and Routing - § 3.2.2. Field Order</a>
+	 * @see
+	 * <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final String... values) {
 		return headers(name, asList(values));
@@ -381,8 +383,8 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures message header values.
 	 *
 	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
-	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
-	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header
+	 * {@code values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
@@ -391,8 +393,9 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
 	 *                              {@code null} value
-	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * 		Message Syntax and Routing - § 3.2.2. Field Order</a>
+	 * @see
+	 * <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final Collection<String> values) {
 
@@ -435,7 +438,7 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	//// Bodies ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Bodies ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves a body representation.
@@ -444,7 +447,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @param <V>    the type of the body representation managed by {@code body}
 	 *
 	 * @return a result providing access to the body representation managed by {@code body}, if one was successfully
-	 * 		retrieved from this message; a result providing access to the body processing failure, otherwise
+	 * retrieved from this message; a result providing access to the body processing failure, otherwise
 	 *
 	 * @throws NullPointerException if {@code body} is null
 	 */

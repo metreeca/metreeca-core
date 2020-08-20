@@ -1,3 +1,20 @@
+/*
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.metreeca.rest.actions;
 
 import java.text.Normalizer;
@@ -20,7 +37,7 @@ public final class Clean implements UnaryOperator<String> {
 	 *
 	 * @param text the text to be normalized; may be null
 	 *
-	 * @returna a copy of {@code text} where leading and trailing sequences of control and separator characters are
+	 * @return a copy of {@code text} where leading and trailing sequences of control and separator characters are
 	 * removed and other sequences replaced with a single space character
 	 */
 	public static String normalize(final String text) {
