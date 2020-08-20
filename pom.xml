@@ -525,12 +525,6 @@
 								<fileset>
 									<directory>docs/_site</directory>
 								</fileset>
-								<fileset>
-									<directory>docs/javadocs</directory>
-								</fileset>
-								<fileset>
-									<directory>docs/reports</directory>
-								</fileset>
 							</filesets>
 						</configuration>
 
