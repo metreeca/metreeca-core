@@ -34,7 +34,7 @@ new Router()
   .path("/products/byname/{name}", new Aliaser(request -> request
         .parameter("name")
         .flatMap(connect(this::byname))
-))
+   ).wrap(response -> response.status(NotFound)))
 ```
 
 ```shell
