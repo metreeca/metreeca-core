@@ -31,12 +31,12 @@ import static java.lang.String.format;
 
 
 /**
- * Linked data server.
+ * API root.
  *
  * <p>Provides default resource pre/postprocessing and error handling; mainly intended as the outermost wrapper
- * returned by gateway loaders.</p>
+ * returned by loaders.</p>
  */
-public final class Server implements Wrapper {
+public final class API implements Wrapper {
 
 	private static final Pattern TextualPattern=Pattern.compile("text/[-\\w]+|application/json");
 	private static final Pattern URLEncodedPattern=Pattern.compile("application/x-www-form-urlencoded\\b");
@@ -85,7 +85,7 @@ public final class Server implements Wrapper {
 	}
 
 
-	//// Pre-Processing ////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Pre-Processing ///////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Request query(final Request request) { // parse parameters from query string, if not already set
 		return request.parameters().isEmpty() && request.method().equals(GET)
@@ -93,7 +93,7 @@ public final class Server implements Wrapper {
 				: request;
 	}
 
-	private Request form(final Request request) { // parse parameters from encoded form body, ignoring charset parameter
+	private Request form(final Request request) { // parse parameters from encoded form body, ignoring charset
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
@@ -102,7 +102,7 @@ public final class Server implements Wrapper {
 	}
 
 
-	//// Post-Processing ///////////////////////////////////////////////////////////////////////////////////////////////
+	//// Post-Processing //////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Response logging(final Response response) { // log request outcome
 
@@ -113,13 +113,16 @@ public final class Server implements Wrapper {
 		final int status=response.status();
 		final Throwable cause=response.cause().orElse(null);
 
-		logger.entry(status < 400 ? Logger.Level.Info : status < 500 ? Logger.Level.Warning : Logger.Level.Error,
-				this, () -> format("%s %s > %d", method, item, status), cause);
+		final Logger.Level level=(status < 400) ? Logger.Level.Info
+				: (status < 500) ? Logger.Level.Warning
+				: Logger.Level.Error;
+
+		logger.entry(level, this, () -> format("%s %s > %d", method, item, status), cause);
 
 		return response;
 	}
 
-	private Response charset(final Response response) { // ;( prevent the container from adding its own default charset…
+	private Response charset(final Response response) { // ;( prevent the container from adding its default charset…
 
 		response.header("Content-Type")
 				.filter(type -> TextualPattern.matcher(type).matches()) // textual content with no charset

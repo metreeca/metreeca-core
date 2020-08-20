@@ -17,17 +17,12 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Context;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.ResponseAssert;
+import com.metreeca.rest.*;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.Response.OK;
@@ -38,7 +33,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class ServerTest {
+final class APITest {
 
 	@Nested final class QueryParsing {
 
@@ -49,7 +44,7 @@ final class ServerTest {
 
 
 		@Test void testPreprocessQueryParameters() {
-			new Context().get(Server::new)
+			new Context().get(API::new)
 
 					.wrap((Handler)request -> {
 
@@ -70,7 +65,7 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessBodyParameters() {
-			new Context().get(Server::new)
+			new Context().get(API::new)
 
 					.wrap((Handler)request -> {
 
@@ -92,7 +87,7 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessDontOverwriteExistingParameters() {
-			new Context().get(Server::new)
+			new Context().get(API::new)
 
 					.wrap((Handler)request -> {
 
@@ -113,7 +108,7 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessQueryOnlyOnGET() {
-			new Context().get(Server::new)
+			new Context().get(API::new)
 
 					.wrap((Handler)request -> {
 
@@ -131,7 +126,7 @@ final class ServerTest {
 		}
 
 		@Test void testPreprocessBodyOnlyOnPOST() {
-			new Context().get(Server::new)
+			new Context().get(API::new)
 
 					.wrap((Handler)request -> {
 
@@ -154,7 +149,7 @@ final class ServerTest {
 	@Nested final class ErrorHandling {
 
 		@Test void testTrapStrayExceptions() {
-			new Context().exec(() -> new Server()
+			new Context().exec(() -> new API()
 
 					.wrap((Request request) -> { throw new UnsupportedOperationException("stray"); })
 

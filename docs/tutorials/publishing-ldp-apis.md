@@ -125,9 +125,9 @@ import static com.metreeca.rdf4j.services.Graph.graph;
 
                 .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
                 
-                .get(() -> new Server()
+                .get(() -> new API()
 
-                        .wrap((Request request) -> request.reply(response ->
+                        .wrap(request -> request.reply(response ->
                                 response.status(Response.OK))
                         )
 
@@ -167,9 +167,9 @@ The [context](../javadocs/?com/metreeca/rest/Context.html) argument handled to t
                 }
             }))
 
-            .get(() -> new Server()
+            .get(() -> new API()
 
-                    .wrap((Request request) -> request.reply(response ->
+                    .wrap(request -> request.reply(response ->
                             response.status(Response.OK))
                     )
 
@@ -222,11 +222,11 @@ public final class BIRT implements Runnable {
 
             .exec(new BIRT())
 
-            .get(() -> new Server()
+            .get(() -> new API()
 
-                    .wrap(new Rewriter(BIRT.BASE))
+                    .with(new Rewriter(BIRT.BASE))
 
-                    .wrap((Request request) -> request.reply(response ->
+                    .wrap(request -> request.reply(response ->
                             response.status(Response.OK))
                     )
 
@@ -244,9 +244,9 @@ The [rewriter](../javadocs/?com/metreeca/rest/wrappers/Rewriter.html) wrapper re
 Requests are dispatched to their final handlers through a hierarchy of wrappers and delegating handlers.
 
 ```java
-() -> new Server()
+() -> new API()
 
-    .wrap(new Rewriter(BIRT.BASE))
+    .with(new Rewriter(BIRT.BASE))
 
     .wrap(new Router()
 
@@ -328,9 +328,9 @@ If the router doesn't contain a matching handler, no action is performed giving 
 Again, complex handlers can be easily factored to dedicated classes:
 
 ```java
-() -> new Server()
+() -> new API()
 
-        .wrap(new Rewriter(BIRT.BASE))
+        .with(new Rewriter(BIRT.BASE))
 
         .wrap(new Router()
 
@@ -400,9 +400,9 @@ Standard resource action handlers can be defined using high-level declarative mo
 
             .exec(new BIRT())
 
-            .get(() -> new Server()
+            .get(() -> new API()
 
-                    .wrap(new Rewriter(BIRT.BASE))
+                    .with(new Rewriter(BIRT.BASE))
 
                     .wrap(new Router()
 
@@ -687,13 +687,13 @@ private static boolean authorized(final Request request) {
 ```
 
 ```java
-() -> new Server()
+() -> new API()
 
-    .wrap(new Rewriter(BIRT.BASE))
+    .with(new Rewriter(BIRT.BASE))
   
   	// set request roles if user is authorized
 
-    .wrap((Wrapper)handler -> request ->
+    .with(handler -> request ->
           authorized(request) ? handler.handle(request.roles(BIRT.staff))
               : request.safe() ? handler.handle(request)
               : request.reply(response -> response.status(Response.Unauthorized))

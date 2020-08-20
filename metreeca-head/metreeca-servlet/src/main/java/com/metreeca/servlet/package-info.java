@@ -74,9 +74,9 @@
  *
  *          .exec(() -> { service(Service.factory()).exec(…); }) // initialize the app using shared services
  *
- *          .get(() -> new Server()
+ *          .get(() -> new API()
  *
- *               .wrap(new Wrapper() { … }) // configure system-wide wrappers
+ *               .with(new Wrapper() { … }) // configure system-wide wrappers
  *
  *               .wrap(new Handler() { … }) // configure the app main handler
  *
