@@ -12,8 +12,6 @@ import static com.metreeca.rest.Lambdas.guarded;
 
 /**
  * HTTP response.
- *
- * <p>Handles state/behaviour for HTTP responses.</p>
  */
 public final class Response extends Message<Response> {
 

@@ -50,8 +50,8 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
 
-	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
