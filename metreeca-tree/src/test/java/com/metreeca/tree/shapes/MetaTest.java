@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -24,7 +24,6 @@ import static com.metreeca.tree.shapes.Field.field;
 import static com.metreeca.tree.shapes.Meta.*;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 

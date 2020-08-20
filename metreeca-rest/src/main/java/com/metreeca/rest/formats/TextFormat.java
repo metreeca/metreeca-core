@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,12 +18,14 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.Codecs;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
+import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -43,6 +45,7 @@ public final class TextFormat extends Format<String> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private final InputFormat input=input();
 	private final ReaderFormat reader=reader();
 	private final WriterFormat writer=writer();
 
@@ -54,12 +57,12 @@ public final class TextFormat extends Format<String> {
 
 	/**
 	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
-	 * supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
-	 * otherwise
+	 * 		supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
+	 * 		otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
 		return message.body(reader).value(source -> {
-			try (final Reader reader=source.get()) {
+			try ( final Reader reader=source.get() ) {
 
 				return Codecs.text(reader);
 
@@ -70,19 +73,48 @@ public final class TextFormat extends Format<String> {
 	}
 
 	/**
-	 * Configures the {@link WriterFormat} body of {@code message} to write the textual {@code value} to the output
-	 * stream supplied by the accepted output stream supplier.
+	 * Configures a message to hold a textual body representation.
+	 *
+	 * <ul>
+	 *
+	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the
+	 * textual {@code value} using the character encoding specified in the {@code Content-Type} header of
+	 * {@code message} or the {@linkplain StandardCharsets#UTF_8 default charset} if none is specified;</li>
+	 *
+	 * <li>the {@link ReaderFormat} body of {@code message} is configured to generate a reader reading the
+	 * textual {@code value};</li>
+	 *
+	 * <li>the {@link WriterFormat} body of {@code message} is configured to write the textual {@code value} to the
+	 * writer supplied by the accepted writer supplier.</li>
+	 *
+	 * </ul>
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final String value) {
-		return message.body(writer, target -> {
-			try (final Writer output=target.get()) {
+		return message
 
-				output.write(value);
+				.body(input, () -> {
+					try {
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+						return new ByteArrayInputStream(value.getBytes(message.charset().orElseGet(UTF_8::name)));
+
+					} catch ( final UnsupportedEncodingException e ) {
+
+						throw new UncheckedIOException(e);
+
+					}
+				})
+
+				.body(reader, () -> new StringReader(value))
+
+				.body(writer, target -> {
+					try ( final Writer output=target.get() ) {
+
+						output.write(value);
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 }

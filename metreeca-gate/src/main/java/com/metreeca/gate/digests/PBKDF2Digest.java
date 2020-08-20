@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -21,6 +21,8 @@ import com.metreeca.gate.Crypto;
 import com.metreeca.gate.Digest;
 import com.metreeca.rest.Context;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -28,12 +30,8 @@ import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
 import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.rest.Context.service;
-
 import static java.lang.System.currentTimeMillis;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -42,7 +40,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * PBKDF2 secret digest.
  *
  * @see <a href="https://tools.ietf.org/html/rfc8018#section-5.2">RFCF 8018 PKCS #5: Password-Based Cryptography
- * Specification Version 2.1 - § 5.2 PBKDF2</a>
+ * 		Specification Version 2.1 - § 5.2 PBKDF2</a>
  */
 public final class PBKDF2Digest implements Digest {
 

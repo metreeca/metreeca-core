@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2019 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl. All rights reserved.
 
   This file is part of Metreeca/Link.
 
@@ -18,38 +18,28 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.metreeca</groupId>
-		<artifactId>metreeca-link</artifactId>
-		<version>0.52.0</version>
-	</parent>
+    <parent>
+        <groupId>com.metreeca</groupId>
+        <artifactId>metreeca-link</artifactId>
+        <version>0.53.0</version>
+    </parent>
 
-	<artifactId>metreeca-back</artifactId>
-	<version>0.52.0</version>
-	<packaging>pom</packaging>
+    <artifactId>metreeca-back</artifactId>
+    <version>0.53.0</version>
+    <packaging>pom</packaging>
 
-	<name>Metreeca Backend Adapters</name>
-	<description>Backend adapter kits.</description>
+    <name>Metreeca Backend Adapters</name>
+    <description>Backend adapter kits.</description>
 
-	<properties>
+    <modules>
 
-		<rdf4j.version>3.0.0</rdf4j.version> <!-- shared among rdf-based modules ;(BOM clashes with GCP)-->
+        <module>metreeca-rdf4j</module>
+        <module>metreeca-gcp</module>
 
-	</properties>
-
-	<modules>
-
-		<module>metreeca-gcp</module>
-
-		<module>metreeca-rdf</module>
-		<module>metreeca-rdf4j</module>
-		<module>metreeca-virtuoso</module>
-		<module>metreeca-stardog</module>
-
-	</modules>
+    </modules>
 
 </project>

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,16 +17,14 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.MessageMock;
 import com.metreeca.rest.Codecs;
-
+import com.metreeca.rest.MessageMock;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
 
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 

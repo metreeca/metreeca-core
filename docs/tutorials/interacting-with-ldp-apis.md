@@ -21,6 +21,7 @@ A Maven project with the code for the complete demo app is available on [GitHub]
 The demo linked data server is pre-configured with a small collection of read/write REST APIs able to drive a typical web-based interface like a user-facing [product catalog](https://demo.metreeca.com/apps/shop/).
 
 <p class="warning">The product catalog demo is hosted on a cloud service: it is not expected to provide production-level performance and may experience some delays during workspace initialization.</p>
+
 | REST API                                 | Contents                     |
 | :--------------------------------------- | :--------------------------- |
 | [/product-lines/](https://demo.metreeca.com/product-lines/) | Product line faceted catalog |
@@ -395,12 +396,12 @@ Note that  server-managed properties like `demo:code` and `demo:stock` are omitt
 {
    	"type": "/terms#Product",
     "label": "1903 Ford Model A",
-    "comment": "Features opening trunk,  working steering system",
+    "comment": "Features opening trunk, working steering system",
     "line": "/product-lines/vintage-cars",
     "scale": "1:18",
     "vendor": "Unimax Art Galleries",
-    "buy": 68.3,
-    "price": 136.59
+    "buy": 50.00,
+    "price": 120.00
 }
 EOF
 

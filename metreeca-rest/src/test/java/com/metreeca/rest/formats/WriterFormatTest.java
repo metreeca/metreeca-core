@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,14 +18,15 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.MessageMock;
-
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -42,7 +43,7 @@ final class WriterFormatTest {
 				.header("Content-Type", "text/plain; charset="+charset)
 
 				.body(writer(), supplier -> {
-					try (final Writer writer=supplier.get()) {
+					try ( final Writer writer=supplier.get() ) {
 						writer.write(text);
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -54,7 +55,7 @@ final class WriterFormatTest {
 				.fold(
 
 						value -> {
-							try (final ByteArrayOutputStream buffer=new ByteArrayOutputStream()) {
+							try ( final ByteArrayOutputStream buffer=new ByteArrayOutputStream() ) {
 
 								value.accept(() -> buffer);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,7 +18,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.Codecs;
 
 import java.io.*;
 
@@ -54,14 +53,15 @@ public final class DataFormat extends Format<byte[]> {
 
 	/**
 	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing error,
-	 * otherwise
+	 * 		stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing
+	 * 		error,
+	 * 		otherwise
 	 */
 	@Override public Result<byte[], Failure> get(final Message<?> message) {
 		return message.body(input).value(
 
 				source -> {
-					try (final InputStream input=source.get()) {
+					try ( final InputStream input=source.get() ) {
 
 						return Codecs.data(input);
 
@@ -74,19 +74,34 @@ public final class DataFormat extends Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} body of {@code message} to write the binary {@code value} to the output
-	 * stream supplied by the accepted output stream supplier.
+	 * Configures a message to hold a binary body representation.
+	 *
+	 * <ul>
+	 *
+	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the binary
+	 * {@code value};</li>
+	 *
+	 * <li>the {@link OutputFormat} body of {@code message} is configured to write the binary {@code value} to the
+	 * output stream supplied by the accepted output stream supplier.</li>
+	 *
+	 * </ul>
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final byte[] value) {
-		return message.body(output, target -> {
-			try (final OutputStream output=target.get()) {
+	@Override public <M extends Message<M>> M set(final M message, final byte... value) {
+		return message
 
-				output.write(value);
+				.body(input, () ->
+						new ByteArrayInputStream(value)
+				)
 
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
+				.body(output, target -> {
+					try ( final OutputStream output=target.get() ) {
+
+						output.write(value);
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 }

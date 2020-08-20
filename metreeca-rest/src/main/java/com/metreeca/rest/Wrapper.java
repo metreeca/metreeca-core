@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -23,7 +23,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.metreeca.rest.Handler.handler;
-
 import static java.util.Objects.requireNonNull;
 
 
@@ -54,7 +53,8 @@ import static java.util.Objects.requireNonNull;
 	 *             true} on the request
 	 *
 	 * @return a conditional wrapper that routes requests and responses through the {@code pass} handler if the {@code
-	 * test} predicate evaluates to {@code true} on the request or to a {@linkplain #wrapper() dummy wrapper} otherwise
+	 * 		test} predicate evaluates to {@code true} on the request or to a {@linkplain #wrapper() dummy wrapper}
+	 * 		otherwise
 	 *
 	 * @throws NullPointerException if either {@code test} or {@code pass} is null
 	 */
@@ -81,7 +81,7 @@ import static java.util.Objects.requireNonNull;
 	 *             false} on the request
 	 *
 	 * @return a conditional wrapper that routes requests and responses either through the {@code pass} or the {@code
-	 * fail} wrapper according to the results of the {@code test} predicate
+	 * 		fail} wrapper according to the results of the {@code test} predicate
 	 *
 	 * @throws NullPointerException if any of the arguments is null
 	 */
@@ -186,7 +186,7 @@ import static java.util.Objects.requireNonNull;
 	 *               for {@code format} and must return a non-null updated value
 	 *
 	 * @return a conditional wrapper that post-process the {@code format} body representation of successful responses
-	 * using {@code mapper}
+	 * 		using {@code mapper}
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
@@ -196,15 +196,16 @@ import static java.util.Objects.requireNonNull;
 			throw new NullPointerException("null mapper");
 		}
 
-		return handler -> request -> handler.handle(request).map(response -> response.success() ? response.body(format).fold(
+		return handler -> request -> handler.handle(request).map(response -> response.success() ?
+				response.body(format).fold(
 
-				value -> response.body(format,
-						requireNonNull(mapper.apply(response, value), "null mapper return value")
-				),
+						value -> response.body(format,
+								requireNonNull(mapper.apply(response, value), "null mapper return value")
+						),
 
-				error -> new Response(request).map(error)
+						error -> new Response(request).map(error)
 
-		) : response);
+				) : response);
 	}
 
 

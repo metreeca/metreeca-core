@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -23,7 +23,7 @@ public final class MessageMock extends Message<MessageMock> {
 
 
 	@Override public String item() {
-			return "app:/";
+		return "app:/";
 	}
 
 	@Override public Request request() { return request; }

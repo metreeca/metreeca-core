@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,7 +18,6 @@
 package com.metreeca.gate.wrappers;
 
 import com.metreeca.rest.*;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +34,7 @@ final class BearerTest {
 
 
 	private Bearer bearer() {
-		return new Bearer((now, token) -> token.equals("token")? Optional.of(handler -> handler) : Optional.empty());
+		return new Bearer((token, request) -> token.equals("token") ? Optional.of(request) : Optional.empty());
 	}
 
 	private Handler handler(final int status) {
@@ -208,7 +207,7 @@ final class BearerTest {
 		}
 
 		@Test void testUnauthorized() {
-				exec(() -> bearer()
+			exec(() -> bearer()
 
 					.wrap(handler(Response.Unauthorized))
 

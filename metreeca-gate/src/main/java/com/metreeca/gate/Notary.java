@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -20,9 +20,14 @@ package com.metreeca.gate;
 
 import com.metreeca.rest.services.Clock;
 import com.metreeca.rest.services.Vault;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.CompressionCodecs;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
-import io.jsonwebtoken.*;
-
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -31,14 +36,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
+import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.services.Clock.clock;
 import static com.metreeca.rest.services.Vault.vault;
-import static com.metreeca.rest.Context.service;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 
@@ -67,8 +67,9 @@ public final class Notary {
 	 * Retrieves the default JWT notary factory.
 	 *
 	 * @return the default JWT notary factory, configured with the {@link SignatureAlgorithm#HS256} signing algorithm
-	 * and the signing key {@linkplain #KeyVaultId retrieved} from the shared {@linkplain Vault vault}, if one is
-	 * available, or a random key, otherwise
+	 * and
+	 * 		the signing key {@linkplain #KeyVaultId retrieved} from the shared {@linkplain Vault vault}, if one is
+	 * 		available, or a random key, otherwise
 	 */
 	public static Supplier<Notary> notary() {
 

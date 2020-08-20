@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,14 +18,12 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.Codecs;
 
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.InputFormat.input;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 
@@ -56,9 +54,11 @@ public final class ReaderFormat extends Format<Supplier<Reader>> {
 
 	/**
 	 * @return a value providing access to a reader supplier converting from the {@linkplain InputFormat raw binary
-	 * input body} of {@code message} using the character encoding specified in its {@code Content-Type} header or the
-	 * {@linkplain StandardCharsets#UTF_8 default charset} if none is specified; an error  providing access to the
-	 * processing failure, otherwise
+	 * input
+	 * 		body} of {@code message} using the character encoding specified in its {@code Content-Type} header or the
+	 *        {@linkplain StandardCharsets#UTF_8 default charset} if none is specified; an error  providing access to
+	 *        the
+	 * 		processing failure, otherwise
 	 */
 	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
 		return message.body(input).value(input -> () ->

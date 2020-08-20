@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,17 +18,15 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ControllerTest {
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.exec(tasks)
 				.clear();

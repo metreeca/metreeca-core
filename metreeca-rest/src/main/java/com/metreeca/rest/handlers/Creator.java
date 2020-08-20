@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,7 +18,10 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
 
@@ -35,8 +38,10 @@ import static java.util.UUID.randomUUID;
  * <p>Performs:</p>
  *
  * <ul>
- * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based {@linkplain Actor#throttler(Object, Object...)
- * authorization}, considering shapes enabled by the {@linkplain Shape#Create} task and the {@linkplain Shape#Detail} area;</li>
+ * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based
+ * {@linkplain Actor#throttler(Object, Object...)
+ * authorization}, considering shapes enabled by the {@linkplain Shape#Create} task and the {@linkplain Shape#Detail}
+ * area;</li>
  * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
  * <li>resource {@linkplain #Creator(Function) slug} generation;</li>
  * <li>engine assisted resource {@linkplain Engine#create(Request) creation}.</li>
@@ -82,7 +87,8 @@ public final class Creator extends Actor {
 	 * @param <T>    the type of the message body to be inspected during slug generation
 	 * @param format the format of the message body to be inspected during slug generation
 	 * @param slug   a function mapping from the creation request and its payload to the identifier to be assigned to
-	 *               the newly created resource; must return a non-null non-clashing value
+	 *                 the
+	 *               newly created resource; must return a non-null non-clashing value
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code slug} is null
 	 */

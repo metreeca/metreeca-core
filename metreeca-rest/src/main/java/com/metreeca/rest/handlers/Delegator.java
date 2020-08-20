@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -54,12 +54,17 @@ public abstract class Delegator implements Handler {
 	 *
 	 * @return this delegator
 	 *
-	 * @throws NullPointerException if {@code delegate} is null
+	 * @throws NullPointerException     if {@code delegate} is null
+	 * @throws IllegalArgumentException if {@code delegate} is equal to this handler
 	 */
 	protected Delegator delegate(final Handler delegate) {
 
 		if ( delegate == null ) {
 			throw new NullPointerException("null delegate");
+		}
+
+		if ( delegate.equals(this) ) {
+			throw new IllegalArgumentException("self delegate");
 		}
 
 		this.delegate=delegate;

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -31,9 +31,12 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * <p>Performs:</p>
  *
  * <ul>
- * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based {@linkplain Actor#throttler(Object, Object...)
- * authorization}, considering shapes enabled by the {@linkplain Shape#Update} task and the {@linkplain Shape#Holder} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
+ * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based
+ * {@linkplain Actor#throttler(Object, Object...)
+ * authorization}, considering shapes enabled by the {@linkplain Shape#Update} task and the {@linkplain Shape#Holder}
+ * area, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
+ * resources;</li>
  * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
  * </ul>
@@ -42,18 +45,18 @@ import static com.metreeca.rest.Wrapper.wrapper;
  */
 public final class Updater extends Actor {
 
-	public Updater() {
-		delegate(updater()
+    public Updater() {
+        delegate(updater()
 
-				.with(connector())
-				.with(wrapper(Request::collection,
-						throttler(Shape.Update, Shape.Holder),
-						throttler(Shape.Update, Shape.Detail)
-				))
-				.with(validator())
+                .with(connector())
+                .with(wrapper(Request::collection,
+                        throttler(Shape.Update, Shape.Holder),
+                        throttler(Shape.Update, Shape.Detail)
+                ))
+                .with(validator())
 
-		);
+        );
 
-	}
+    }
 
 }

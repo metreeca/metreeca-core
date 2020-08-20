@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -27,7 +27,6 @@ import java.util.function.Predicate;
 
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Or.or;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.disjoint;
 

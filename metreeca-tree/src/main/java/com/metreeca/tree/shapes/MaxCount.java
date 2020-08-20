@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -95,8 +95,10 @@ public final class MaxCount implements Shape {
 
 		// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
 
-		private static final BinaryOperator<Integer> min=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) <= 0 ? x : y;
-		private static final BinaryOperator<Integer> max=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
+		private static final BinaryOperator<Integer> min=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) <= 0
+				? x : y;
+		private static final BinaryOperator<Integer> max=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) >= 0
+				? x : y;
 
 
 		@Override public Integer probe(final MaxCount maxCount) {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -19,6 +19,7 @@ package com.metreeca.tree;
 
 import com.metreeca.tree.shapes.*;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.function.Function;
 
@@ -29,7 +30,6 @@ import static com.metreeca.tree.shapes.In.in;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.When.when;
-
 import static java.util.Arrays.asList;
 
 
@@ -37,14 +37,6 @@ import static java.util.Arrays.asList;
  * Linked data shape constraint.
  */
 public interface Shape {
-
-	/**
-	 * Standard value for referring to the target of a shape-based operation.
-	 */
-	public static Object Target=new Object() {
-		@Override public String toString() { return "{target}"; }
-	};
-
 
 	//// Shape Metadata ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -144,52 +136,88 @@ public interface Shape {
 
 	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Guard role(final Object... roles) { return guard(Role, roles); }
+	public static Shape role(final Object... roles) { return guard(Role, roles); }
 
-	public static Guard task(final Object... tasks) { return guard(Task, tasks); }
+	public static Shape task(final Object... tasks) { return guard(Task, tasks); }
 
-	public static Guard area(final Object... areas) { return guard(Area, areas); }
+	public static Shape area(final Object... areas) { return guard(Area, areas); }
 
-	public static Guard mode(final Object... modes) { return guard(Mode, modes); }
+	public static Shape mode(final Object... modes) { return guard(Mode, modes); }
 
 
-	public static Guard create() { return task(Create); }
+	public static Shape create() { return task(Create); }
 
-	public static Guard relate() { return task(Relate); }
+	public static Shape relate() { return task(Relate); }
 
-	public static Guard update() { return task(Update); }
+	public static Shape update() { return task(Update); }
 
-	public static Guard delete() { return task(Delete); }
+	public static Shape delete() { return task(Delete); }
 
 
 	/*
 	 * Marks shapes as server-defined internal.
 	 */
-	public static Guard hidden() { return task(Delete); }
+	public static Shape hidden() { return task(Delete); }
 
 	/*
 	 * Marks shapes as server-defined read-only.
 	 */
-	public static Guard server() { return task(Relate, Delete); }
+	public static Shape server() { return task(Relate, Delete); }
 
 	/*
 	 * Marks shapes as client-defined write-once.
 	 */
-	public static Guard client() { return task(Create, Relate, Delete); }
+	public static Shape client() { return task(Create, Relate, Delete); }
 
 
-	public static Guard holder() { return area(Holder); }
+	public static Shape holder() { return area(Holder); }
 
-	public static Guard member() { return area(Digest, Detail); }
+	public static Shape member() { return area(Digest, Detail); }
 
-	public static Guard digest() { return area(Digest); }
+	public static Shape digest() { return area(Digest); }
 
-	public static Guard detail() { return area(Detail); }
+	public static Shape detail() { return area(Detail); }
 
 
-	public static Guard convey() { return mode(Convey); }
+	public static Shape convey() { return mode(Convey); }
 
-	public static Guard filter() { return mode(Filter); }
+	public static Shape filter() { return mode(Filter); }
+
+
+	//// Relative IRIs /////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a target focus value.
+	 *
+	 * @return a focus value resolving to the target IRI of a shape-driven operation
+	 */
+	public static Focus focus() {
+		return iri -> iri;
+	}
+
+	/**
+	 * Creates a relative focus value.
+	 *
+	 * @param iri the relative IRI of the focus value
+	 *
+	 * @return a focus value resolving {@code iri} against the target IRI of a shape-driven operation; trailing slashes
+	 * 		in the resolved IRI are removed unless {@code iri} includes one
+	 *
+	 * @throws NullPointerException if {@code iri} is null
+	 */
+	public static Focus focus(final String iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		final Focus resolve=path -> URI.create(path).resolve(iri).toString();
+		final Focus convert=path -> path.endsWith("/") ? path.substring(0, path.length()-1) : path;
+
+		return iri.isEmpty() ? path -> path
+				: iri.endsWith("/") ? resolve
+				: resolve.then(convert);
+	}
 
 
 	//// Evaluation ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,7 +228,7 @@ public interface Shape {
 	 * @param shape the shape to be tested
 	 *
 	 * @return {@code true} if {@code shape} is equal to an {@linkplain And#and() empty conjunction}, ignoring
-	 * {@linkplain Meta annotations}; {@code false} otherwise
+	 *        {@linkplain Meta annotations}; {@code false} otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -219,7 +247,7 @@ public interface Shape {
 	 * @param shape the shape to be tested
 	 *
 	 * @return {@code true} if {@code shape} is equal to an {@linkplain Or#or() empty disjunction}, ignoring {@linkplain
-	 * Meta annotations}; {@code false} otherwise
+	 *        Meta annotations}; {@code false} otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -238,7 +266,7 @@ public interface Shape {
 	 * @param shape the shape to be tested
 	 *
 	 * @return {@code true} if {@code shape} is equal either to an {@linkplain And#and() empty conjunction} or to an
-	 * {@linkplain Or#or() empty disjunction}, ignoring {@linkplain Meta annotations}; {@code false} otherwise
+	 *        {@linkplain Or#or() empty disjunction}, ignoring {@linkplain Meta annotations}; {@code false} otherwise
 	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
@@ -274,7 +302,7 @@ public interface Shape {
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
 	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
-	 * shapes}
+	 * 		shapes}
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
@@ -288,7 +316,7 @@ public interface Shape {
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
 	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
-	 * shapes}
+	 * 		shapes}
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
@@ -307,6 +335,49 @@ public interface Shape {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	/**
+	 * Shape focus.
+	 *
+	 * <p>Provides a placeholder for a shape value dynamically derived from a target IRI while performing a
+	 * shape-driven operation, for instance serving a linked data resource.</p>
+	 */
+	@FunctionalInterface public static interface Focus {
+
+		/**
+		 * Resolves this focus value.
+		 *
+		 * @param iri the target IRI for a shape-driven operation
+		 *
+		 * @return the IRI obtained by resolving this focus value against {@code iri}
+		 *
+		 * @throws NullPointerException     if {@code iri} is {@code null}
+		 * @throws IllegalArgumentException if {@code iri} is malformed
+		 */
+		public String resolve(final String iri);
+
+
+		/**
+		 * Chains a focus value.
+		 *
+		 * @param focus the focus value to be chained to this focus value
+		 *
+		 * @return a combined focus value sequentially resolving target IRIs against {@code focus} and this focus value,
+		 * 		in order
+		 *
+		 * @throws NullPointerException if {@code focus} is null
+		 */
+		public default Focus then(final Focus focus) {
+
+			if ( focus == null ) {
+				throw new NullPointerException("null focus");
+			}
+
+			return iri -> focus.resolve(resolve(iri));
+		}
+
+	}
 
 	/**
 	 * Shape probe.

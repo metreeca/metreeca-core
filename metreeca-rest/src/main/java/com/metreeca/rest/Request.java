@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -20,16 +20,14 @@ package com.metreeca.rest;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
+import javax.json.JsonException;
+import javax.json.JsonValue;
 import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
 
-import javax.json.JsonException;
-import javax.json.JsonValue;
-
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 
@@ -74,7 +72,7 @@ public final class Request extends Message<Request> {
 	 * Retrieves the focus item IRI of this request.
 	 *
 	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
-	 * this request
+	 * 		this request
 	 */
 	@Override public String item() {
 		return base+path.substring(1);
@@ -134,8 +132,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Checks if this request is safe.
 	 *
-	 * @return {@code true} if this request is <a href="https://tools.ietf.org/html/rfc7231#section-4.2.1">safe</a>,
-	 * that is if it's not expected to cause any state change on the origin server ; {@code false} otherwise
+	 * @return {@code true} if this request is <a href="https://tools.ietf.org/html/rfc7231#section-4.2.1">safe</a> ,
+	 * 		that is if it's not expected to cause any state change on the origin server ; {@code false} otherwise
 	 */
 	public boolean safe() {
 		return Safe.contains(method);
@@ -147,7 +145,7 @@ public final class Request extends Message<Request> {
 	 * @return {@code true} if the {@link #path()} of this request includes a trailing slash; {@code false} otherwise
 	 *
 	 * @see <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
-	 * Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
+	 * 		Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
 	 */
 	public boolean collection() {
 		return path.endsWith("/");
@@ -160,7 +158,7 @@ public final class Request extends Message<Request> {
 	 * @param roles the target set if roles to be checked
 	 *
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
-	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
+	 * 		roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
 	public boolean role(final Object... roles) {
 		return role(asList(roles));
@@ -172,7 +170,7 @@ public final class Request extends Message<Request> {
 	 * @param roles the target set if roles to be checked
 	 *
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
-	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
+	 * 		roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
 	public boolean role(final Collection<Object> roles) {
 
@@ -190,7 +188,7 @@ public final class Request extends Message<Request> {
 	 * Retrieves the identifier of the request user.
 	 *
 	 * @return an optional identifier for the user performing this request or the empty optional if no user is
-	 * authenticated
+	 * 		authenticated
 	 */
 	public Optional<Object> user() { return user; }
 
@@ -219,8 +217,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of values uniquely identifying the roles attributed to the request {@linkplain #user()
-	 *              user}
+	 * @param roles a collection of values uniquely identifying the roles {@linkplain #roles(Object...) assigned} to the
+	 *              request {@linkplain #user() user}
 	 *
 	 * @return this request
 	 *
@@ -233,8 +231,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of IRIs uniquely identifying the roles attributed to the request {@linkplain #user()
-	 *              user}
+	 * @param roles a collection of IRIs uniquely identifying the roles {@linkplain #roles(Collection) assigned} to the
+	 *              request {@linkplain #user() user}
 	 *
 	 * @return this request
 	 *
@@ -288,7 +286,7 @@ public final class Request extends Message<Request> {
 	 * Retrieves the base IRI of this request.
 	 *
 	 * @return the base IRI of this request, that is the base IRI if the linked data server handling the request;
-	 * includes a trailing slash
+	 * 		includes a trailing slash
 	 */
 	public String base() {
 		return base;
@@ -302,8 +300,7 @@ public final class Request extends Message<Request> {
 	 * @return this request
 	 *
 	 * @throws NullPointerException     if {@code base} is null
-	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing
-	 *                                  slash
+	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing slash
 	 */
 	public Request base(final String base) {
 
@@ -329,7 +326,7 @@ public final class Request extends Message<Request> {
 	 * Retrieves the resource path of this request.
 	 *
 	 * @return the resource path of this request, that is the absolute server path of the linked data resources this
-	 * request refers to; includes a leading slash
+	 * 		request refers to; includes a leading slash
 	 */
 	public String path() {
 		return path;
@@ -379,8 +376,8 @@ public final class Request extends Message<Request> {
 	 * @param shape  the base shape for the query
 	 *
 	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	 * {@linkplain #query() query} string, if successfully parsed using {@code format} parsing methods; an error
-	 * providing access to the parsing failure, otherwise
+	 *        {@linkplain #query() query} string, if successfully parsed using {@code format} parsing methods; an error
+	 * 		providing access to the parsing failure, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
@@ -494,7 +491,7 @@ public final class Request extends Message<Request> {
 	 * @param name the name of the query parameter whose value is to be retrieved
 	 *
 	 * @return an optional value containing the first value among those returned by {@link #parameters(String)}, if one
-	 * is present; an empty optional otherwise
+	 * 		is present; an empty optional otherwise
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */

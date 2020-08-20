@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -21,8 +21,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -37,7 +39,6 @@ final class MultipartParser {
 	private enum Type {
 		Empty, Data, Open, Close, EOF
 	}
-
 
 
 	@FunctionalInterface private static interface State {
@@ -295,7 +296,7 @@ final class MultipartParser {
 	 * @param boundary the boundary marker to be looke for in the buffer at position {@code head}
 	 *
 	 * @return {@code true}, if the buffer contains the {@code boundary} marker at position {@code head}, ignoring
-	 * trailing whitespace; {@code false}, otherwise
+	 * 		trailing whitespace; {@code false}, otherwise
 	 */
 	private boolean boundary(final int head, final byte... boundary) {
 
@@ -337,7 +338,7 @@ final class MultipartParser {
 	 * @return {@code true}, if {@code c} is a token character; {@code false}, otherwise
 	 *
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.6">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * Message Syntax and Routing - § 3.2.6.  Field Value Components</a>
+	 * 		Message Syntax and Routing - § 3.2.6.  Field Value Components</a>
 	 */
 	private boolean token(final byte c) {
 		return c >= 'a' && c <= 'z'

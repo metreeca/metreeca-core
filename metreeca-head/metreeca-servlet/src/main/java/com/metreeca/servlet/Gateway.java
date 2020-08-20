@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,23 +17,24 @@
 
 package com.metreeca.servlet;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.services.Loader;
-import com.metreeca.rest.services.Storage;
-
-import java.io.*;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
 import static java.util.Objects.requireNonNull;
@@ -53,7 +54,8 @@ import static java.util.Objects.requireNonNull;
  * <li>intercepts HTTP requests and handles them using a linked data {@linkplain Handler handler} loaded from the
  * shared tool tray;</li>
  *
- * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data server.</li>
+ * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data server
+ * .</li>
  *
  * </ul>
  */
@@ -84,14 +86,14 @@ public abstract class Gateway implements Filter {
 
 			this.context
 
-					.set(Storage.storage(), () -> storage(context))
+					.set(Context.storage(), () -> storage(context))
 					.set(Loader.loader(), () -> loader(context))
 
 					.get(handler); // force handler loading during filter initialization
 
 		} catch ( final Throwable t ) {
 
-			try (final StringWriter message=new StringWriter()) {
+			try ( final StringWriter message=new StringWriter() ) {
 
 				t.printStackTrace(new PrintWriter(message));
 
@@ -121,15 +123,8 @@ public abstract class Gateway implements Filter {
 	}
 
 
-	private Storage storage(final ServletContext context) {
-		return name -> {
-
-			if ( name == null ) {
-				throw new NullPointerException("null name");
-			}
-
-			return new File((File)context.getAttribute(ServletContext.TEMPDIR), name);
-		};
+	private Path storage(final ServletContext context) {
+		return ((File)context.getAttribute(ServletContext.TEMPDIR)).toPath();
 	}
 
 	private Loader loader(final ServletContext context) {

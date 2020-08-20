@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -89,7 +89,7 @@ public final class Response extends Message<Response> {
 	 * Retrieves the focus item IRI of this response.
 	 *
 	 * @return the absolute IRI included in the {@code Location} header of this response, if defined; the {@linkplain
-	 * Request#item() focus item} IRI of the originating request otherwise
+	 *        Request#item() focus item} IRI of the originating request otherwise
 	 */
 	@Override public String item() {
 
@@ -116,7 +116,7 @@ public final class Response extends Message<Response> {
 	 * Checks if this response is successful.
 	 *
 	 * @return {@code true} if the {@linkplain #status() status} code is in the {@code 2XX} range; {@code false}
-	 * otherwise
+	 * 		otherwise
 	 */
 	public boolean success() {
 		return status/100 == 2;
@@ -126,7 +126,7 @@ public final class Response extends Message<Response> {
 	 * Checks if this response is an error.
 	 *
 	 * @return {@code true} if the {@linkplain #status() status} code is in beyond the {@code 3XX} range; {@code false}
-	 * otherwise
+	 * 		otherwise
 	 */
 	public boolean error() {
 		return status/100 > 3;

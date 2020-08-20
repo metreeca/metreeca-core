@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,34 +17,37 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.gate.*;
-import com.metreeca.rest.*;
+import com.metreeca.gate.Crypto;
+import com.metreeca.gate.Notary;
+import com.metreeca.gate.Permit;
+import com.metreeca.gate.Roster;
 import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.rest.services.Clock;
 import com.metreeca.rest.services.Logger;
-
 import io.jsonwebtoken.Claims;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.json.*;
-
 import static com.metreeca.gate.Crypto.crypto;
 import static com.metreeca.gate.Notary.notary;
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.services.Clock.clock;
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -200,7 +203,7 @@ import static java.util.regex.Pattern.compile;
  * <hr>
  *
  * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.3">RFC 7234 Hypertext Transfer Protocol (HTTP/1.1):
- * Caching - 5.2.3.  Cache Control Extensions</a>
+ * 		Caching - 5.2.3.  Cache Control Extensions</a>
  */
 public final class Manager implements Wrapper {
 
@@ -211,7 +214,8 @@ public final class Manager implements Wrapper {
 
 	private static final int TokenIdLength=32; // [bytes]
 
-	private static final Pattern SessionCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)", SessionCookie));
+	private static final Pattern SessionCookiePattern=compile(format("\\b%s\\s*=\\s*(?<value>[^\\s;]+)",
+			SessionCookie));
 	private static final Collection<String> TicketFields=new HashSet<>(asList("handle", "secret", "update"));
 
 

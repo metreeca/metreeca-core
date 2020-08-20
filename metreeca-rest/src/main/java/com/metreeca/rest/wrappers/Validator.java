@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -24,7 +24,6 @@ import java.util.LinkedHashSet;
 import java.util.function.Function;
 
 import static com.metreeca.tree.Trace.trace;
-
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 

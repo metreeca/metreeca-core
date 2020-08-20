@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,22 +17,21 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
-
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
+import static com.metreeca.rest.formats.WriterFormat.writer;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
 
 final class ValidatorTest {
 
-	private void exec(final Runnable ...tasks) {
+	private void exec(final Runnable... tasks) {
 		new Context()
 				.exec(tasks)
 				.clear();
@@ -43,33 +42,30 @@ final class ValidatorTest {
 	}
 
 
-
 	@Test void testAcceptValidRequests() {
 		exec(() -> new Validator(request -> emptyList())
 
-						.wrap(handler())
+				.wrap(handler())
 
-						.handle(new Request())
+				.handle(new Request())
 
-						.accept(response -> assertThat(response)
-								.hasStatus(Response.OK)
-						)
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.OK)
+				)
 		);
 	}
 
 	@Test void testRejectInvalidRequests() {
 		exec(() -> new Validator(request -> asList("issue", "issue"))
 
-						.wrap(handler())
+				.wrap(handler())
 
-						.handle(new Request())
+				.handle(new Request())
 
-						.accept(response -> assertThat(response)
-								.hasStatus(Response.UnprocessableEntity)
-								.hasBody(json(), json -> assertThat(json)
-										.containsKey("error")
-								)
-						)
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.UnprocessableEntity)
+						.hasBody(writer())
+				)
 		);
 	}
 

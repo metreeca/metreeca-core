@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -22,10 +22,11 @@ import com.metreeca.gate.RosterAssert;
 import com.metreeca.gate.RosterMock;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.ClockMock;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+import javax.json.JsonValue;
 import java.time.Duration;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Optional;
@@ -33,20 +34,14 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.json.Json;
-import javax.json.JsonValue;
-
 import static com.metreeca.gate.Roster.roster;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.services.Clock.clock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.lang.Math.max;
-
 import static javax.json.Json.createValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ManagerTest {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -53,7 +53,7 @@ public final class Stats implements Query {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( path == null || path.stream().anyMatch(Objects::isNull)) {
+		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null path or path step");
 		}
 

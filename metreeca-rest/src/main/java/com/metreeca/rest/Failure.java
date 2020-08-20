@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,9 +17,13 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Trace;
 
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -27,16 +31,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import javax.json.*;
-
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.WriterFormat.writer;
+import static java.util.Collections.singletonMap;
 
 
 /**
  * HTTP processing failure.
  *
  * <p>Reports an error condition in an HTTP request processing operation; can be {@linkplain #apply(Response)
- * transferred} to the {@linkplain JSONFormat JSON} body of an HTTP response like:</p>
+ * transferred} to an HTTP response like:</p>
  *
  * <pre>{@code
  * <status>
@@ -121,7 +124,7 @@ public final class Failure implements Function<Response, Response> {
 	 * @param cause the internal server error
 	 *
 	 * @return a new failure reporting {@code cause} with a {@value Response#InternalServerError} status code; no detail
-	 * about {@code cause} is disclosed to the client
+	 * 		about {@code cause} is disclosed to the client
 	 *
 	 * @throws NullPointerException if {@code cause} is null
 	 */
@@ -221,7 +224,7 @@ public final class Failure implements Function<Response, Response> {
 	 *
 	 * @return this failure
 	 */
-	public Failure trace(final JsonValue trace) {
+	public Failure trace(final JsonValue trace) { // !!! revoew/remove
 
 		this.trace=trace == null
 				|| trace.equals(JsonValue.NULL)
@@ -239,7 +242,8 @@ public final class Failure implements Function<Response, Response> {
 	 * Configures the error cause.
 	 *
 	 * @param cause a human readable description of cause of the error condition defined by this failure; ignored if
-	 *              null or empty
+	 *                 null
+	 *              or empty
 	 *
 	 * @return this failure
 	 */
@@ -282,7 +286,22 @@ public final class Failure implements Function<Response, Response> {
 		return response
 				.status(status)
 				.cause(cause)
-				.body(json(), ticket());
+
+				// !!! revoew/remove
+
+				.headers("Content-Type", "application/json")
+				.body(writer(), supplier -> {
+					try ( final Writer writer=supplier.get() ) {
+
+						Json
+								.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true))
+								.createWriter(writer)
+								.write(ticket());
+
+					} catch ( final IOException e ) {
+						throw new UncheckedIOException(e);
+					}
+				});
 	}
 
 
@@ -330,7 +349,6 @@ public final class Failure implements Function<Response, Response> {
 
 		return builder.build();
 	}
-
 
 	private JsonObject format(final Trace trace) {
 

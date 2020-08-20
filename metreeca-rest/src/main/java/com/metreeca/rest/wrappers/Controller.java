@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,9 +17,15 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.Wrapper;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 
@@ -59,7 +65,7 @@ public final class Controller implements Wrapper {
 	 */
 	public Controller(final Collection<Object> roles) {
 
-		if ( roles == null || roles.stream().anyMatch(Objects::isNull)) {
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");
 		}
 

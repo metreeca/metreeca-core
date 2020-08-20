@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -24,16 +24,16 @@ import com.metreeca.tree.queries.Items;
 import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.queries.Terms;
 import com.metreeca.tree.shapes.Field;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import javax.json.JsonNumber;
+import javax.json.JsonString;
+import javax.json.JsonValue;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-
-import javax.json.*;
 
 import static com.metreeca.tree.Order.decreasing;
 import static com.metreeca.tree.Order.increasing;
@@ -54,11 +54,9 @@ import static com.metreeca.tree.shapes.MinExclusive.minExclusive;
 import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.MinLength.minLength;
 import static com.metreeca.tree.shapes.Pattern.pattern;
-
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
-import static java.util.Arrays.asList;
 
 
 final class QueryParserTest {
@@ -275,7 +273,7 @@ final class QueryParserTest {
 
 		items("{ '~': 'words' }", shape, items -> assertThat(items.getShape())
 				.as("like")
-				.isEqualTo(filter(shape, like("words")))
+				.isEqualTo(filter(shape, like("words", true)))
 		);
 
 
@@ -507,7 +505,7 @@ final class QueryParserTest {
 
 		items("~head=keyword", shape, items -> {
 
-			assertThat(items.getShape()).isEqualTo(filter(shape, field("head", like("keyword"))));
+			assertThat(items.getShape()).isEqualTo(filter(shape, field("head", like("keyword", true))));
 
 		});
 
@@ -549,8 +547,10 @@ final class QueryParserTest {
 					: value.equals(JsonValue.FALSE) ? false
 					: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
 					: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
-					: value instanceof JsonString ? ((JsonString)value).getString()+datatype(shape).map(t -> "^"+t).orElse("")
-					: null;			}
+					: value instanceof JsonString ?
+					((JsonString)value).getString()+datatype(shape).map(t -> "^"+t).orElse("")
+					: null;
+		}
 	}
 
 

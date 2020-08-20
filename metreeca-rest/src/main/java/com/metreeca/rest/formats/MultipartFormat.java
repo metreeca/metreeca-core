@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -32,27 +32,31 @@ import static com.metreeca.rest.Response.PayloadTooLarge;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 
 /**
  * Multipart body format.
  *
  * @see <a href="https://tools.ietf.org/html/rfc2046#section-5.1">RFC 2046 - Multipurpose Internet Mail Extensions
- * (MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
+ * 		(MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
  */
 public final class MultipartFormat extends Format<Map<String, Message<?>>> {
+
+	/**
+	 * The default MIME type for multipart message bodies ({@value}).
+	 */
+	public static final String MIME="multipart/mixed";
+
 
 	private static final byte[] Dashes="--".getBytes(UTF_8);
 	private static final byte[] CRLF="\r\n".getBytes(UTF_8);
 	private static final byte[] Colon=": ".getBytes(UTF_8);
 
-	private static final byte[] BoundaryChars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(UTF_8);
+	private static final byte[] BoundaryChars=
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes(UTF_8);
 
 	private static final Pattern BoundaryPattern=Pattern.compile(parameter("boundary"));
 	private static final Pattern NamePattern=Pattern.compile(parameter("name"));
@@ -75,7 +79,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	 * Retrieves a write-only multipart body format.
 	 *
 	 * @return a write-only multipart body format with part/body size limit set to 0, intended for configuring multipart
-	 * response bodies
+	 * 		response bodies
 	 */
 	public static MultipartFormat multipart() {
 		return new MultipartFormat(0, 0);
@@ -84,12 +88,13 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	/**
 	 * Retrieves a multipart body format.
 	 *
-	 * @param part the size limit for individual message parts; includes boundary and headers and applies also to
-	 *             message preamble and epilogue
+	 * @param part the size limit for individual message parts; includes boundary and headers and applies also to 
+	 *                message
+	 *             preamble and epilogue
 	 * @param body the size limit for the complete message body
 	 *
 	 * @return a write-only multipart body format with part/body size limit set to 0, intended for configuring multipart
-	 * response bodies
+	 * 		response bodies
 	 *
 	 * @throws IllegalArgumentException if either {@code part} or {@code body} is less than 0 or if {@code part} is
 	 *                                  greater than {@code body}
@@ -210,7 +215,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 		final String type=message
 				.header("Content-Type") // custom value
-				.orElse("multipart/mixed"); // fallback value
+				.orElse(MIME); // fallback value
 
 		final byte[] boundary; // compute boundary
 
@@ -233,7 +238,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 		}
 
 		return message.body(output, target -> {
-			try (final OutputStream out=target.get()) {
+			try ( final OutputStream out=target.get() ) {
 
 				for (final Message<?> part : value.values()) {
 

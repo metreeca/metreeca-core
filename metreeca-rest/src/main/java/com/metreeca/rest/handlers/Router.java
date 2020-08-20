@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,7 +18,10 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Future;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
@@ -143,7 +146,8 @@ public final class Router implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Function<Request, Optional<Future<Response>>> route(final String prefix, final String suffix, final Handler handler) {
+	private Function<Request, Optional<Future<Response>>> route(final String prefix, final String suffix,
+			final Handler handler) {
 
 		final Collection<String> keys=new LinkedHashSet<>();
 

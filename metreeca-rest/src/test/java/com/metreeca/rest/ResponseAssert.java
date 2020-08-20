@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -36,7 +36,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 				final byte[] data;
 
-				try (final ByteArrayOutputStream out=new ByteArrayOutputStream(1000)) {
+				try ( final ByteArrayOutputStream out=new ByteArrayOutputStream(1000) ) {
 
 					output.accept(() -> out);
 
@@ -48,7 +48,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 				response.body(output(), supplier -> { // cache output
 
-					try (final OutputStream out=supplier.get()) {
+					try ( final OutputStream out=supplier.get() ) {
 
 						Codecs.data(out, data);
 

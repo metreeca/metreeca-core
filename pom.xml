@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2019 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl. All rights reserved.
 
   This file is part of Metreeca/Link.
 
@@ -18,530 +17,622 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<groupId>com.metreeca</groupId>
-	<artifactId>metreeca-link</artifactId>
-	<version>0.52.0</version>
-	<packaging>pom</packaging>
-
-	<name>Metreeca Linked Data Framework</name>
-	<description>A declarative model-driven framework for rapid linked data service development.</description>
-	<url>https://github.com/metreeca/link</url>
-	<inceptionYear>2013</inceptionYear>
-
-	<organization>
-		<name>Metreeca</name>
-		<url>https://www.metreeca.com/</url>
-	</organization>
-
-	<licenses>
-		<license>
-			<name>GNU Affero General Public License, Version 3</name>
-			<url>https://www.gnu.org/licenses/agpl.html</url>
-			<distribution>repo</distribution>
-		</license>
-		<license>
-			<name>Custom Commercial License</name>
-		</license>
-	</licenses>
-
-	<developers>
-		<developer>
-			<name>Metreeca</name>
-			<email>info@metreeca.com</email>
-			<organization>Metreeca</organization>
-			<organizationUrl>https://www.metreeca.com/</organizationUrl>
-		</developer>
-	</developers>
+    <modelVersion>4.0.0</modelVersion>
 
-	<scm>
-		<connection>scm:git:git@github.com:metreeca/link.git</connection>
-		<developerConnection>scm:git:git@github.com:metreeca/link.git</developerConnection>
-		<url>https://github.com/metreeca/link</url>
-	</scm>
+    <groupId>com.metreeca</groupId>
+    <artifactId>metreeca-link</artifactId>
+    <version>0.53.0</version>
+    <packaging>pom</packaging>
 
-	<issueManagement>
-		<system>GitHub</system>
-		<url>https://github.com/metreeca/link/issues</url>
-	</issueManagement>
+    <name>Metreeca Linked Data Framework</name>
+    <description>A declarative model-driven framework for rapid linked data service development.</description>
+    <url>https://github.com/metreeca/link</url>
+    <inceptionYear>2013</inceptionYear>
+
+    <organization>
+        <name>Metreeca</name>
+        <url>https://www.metreeca.com/</url>
+    </organization>
 
-	<distributionManagement>
+    <licenses>
+        <license>
+            <name>GNU Affero General Public License, Version 3</name>
+            <url>https://www.gnu.org/licenses/agpl.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/releases</url>
-		</repository>
+    <developers>
+        <developer>
+            <name>Metreeca</name>
+            <email>info@metreeca.com</email>
+            <organization>Metreeca</organization>
+            <organizationUrl>https://www.metreeca.com/</organizationUrl>
+        </developer>
+    </developers>
 
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
+    <scm>
+        <connection>scm:git:git@github.com:metreeca/link.git</connection>
+        <developerConnection>scm:git:git@github.com:metreeca/link.git</developerConnection>
+        <url>https://github.com/metreeca/link</url>
+    </scm>
 
-		<site>
-			<id>github-pages</id>
-			<url>https://metreeca.github.io/link/reports</url>
-		</site>
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/metreeca/link/issues</url>
+    </issueManagement>
 
-	</distributionManagement>
+    <distributionManagement>
 
-	<modules>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/releases</url>
+        </repository>
 
-		<module>metreeca-tree</module>
-		<module>metreeca-rest</module>
-		<module>metreeca-gate</module>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
 
-		<module>metreeca-head</module>
-		<module>metreeca-back</module>
+        <site>
+            <id>github-pages</id>
+            <url>https://metreeca.github.io/link/reports</url>
+        </site>
 
-	</modules>
+    </distributionManagement>
 
-	<properties>
+    <properties>
 
-		<java.version>1.8</java.version>
-		<maven.version>3.3</maven.version>
+        <java.version>1.8</java.version>
+        <maven.version>3.3</maven.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.deploy.skip>true</maven.deploy.skip> <!-- ossrh public artifact deployment -->
+        <maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
 
-		<maven.deploy.skip>true</maven.deploy.skip> <!-- ossrh public artifact deployment -->
-		<maven.build.timestamp.format>yyyyMMdd</maven.build.timestamp.format>
+        <timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
+
+    </properties>
+
+    <modules>
+
+        <module>metreeca-tree</module>
+        <module>metreeca-rest</module>
+        <module>metreeca-gate</module>
 
-		<timestamp>${maven.build.timestamp}</timestamp> <!-- ;( not directly available to filtered resources -->
+        <module>metreeca-mime</module>
+        <module>metreeca-head</module>
+        <module>metreeca-back</module>
+
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- Core Modules -->
+
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-tree</artifactId>
+                <version>0.53.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-rest</artifactId>
+                <version>0.53.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-gate</artifactId>
+                <version>0.53.0</version>
+            </dependency>
+
+
+            <!-- Format Adapters -->
+
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-xml</artifactId>
+                <version>0.53.0</version>
+            </dependency>
 
-	</properties>
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-rdf</artifactId>
+                <version>0.53.0</version>
+            </dependency>
+
 
-	<dependencies> <!-- shared testing dependencies -->
+            <!-- Server Adapters -->
 
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.5.2</version>
-			<scope>test</scope>
-		</dependency>
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-servlet</artifactId>
+                <version>0.53.0</version>
+            </dependency>
 
-		<dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<version>3.13.2</version>
-			<scope>test</scope>
-		</dependency>
+            <!-- Backend Adapters -->
 
-		<dependency> <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.26</version>
-			<scope>test</scope>
-		</dependency>
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-rdf4j</artifactId>
+                <version>0.53.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-gcp</artifactId>
+                <version>0.53.0</version>
+            </dependency>
 
-	</dependencies>
 
-	<build>
+            <!-- Exported BOMs -->
 
-		<resources>
+            <dependency> <!-- https://search.maven.org/artifact/org.eclipse.rdf4j/rdf4j-bom -->
+                <groupId>org.eclipse.rdf4j</groupId>
+                <artifactId>rdf4j-bom</artifactId>
+                <version>3.1.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-			<resource>
-				<directory>${basedir}/src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
+            <dependency> <!-- https://search.maven.org/artifact/com.google.cloud/libraries-bom -->
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>4.1.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-		</resources>
+            <!-- Conflict Resolution -->
 
-		<plugins>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>20.0</version>
+            </dependency>
 
-			<plugin> <!-- https://maven.apache.org/enforcer/maven-enforcer-plugin/ -->
+        </dependencies>
+    </dependencyManagement>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.0.0-M2</version>
+    <dependencies> <!-- shared testing dependencies -->
 
-				<executions>
-					<execution>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
+        </dependency>
 
-						<id>enforce-maven</id>
+        <dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.13.2</version>
+            <scope>test</scope>
+        </dependency>
 
-						<goals>
-							<goal>enforce</goal>
-						</goals>
+        <dependency> <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.26</version>
+            <scope>test</scope>
+        </dependency>
 
-						<configuration>
-							<rules>
-								<requireMavenVersion>
-									<version>${maven.version}</version>
-								</requireMavenVersion>
-							</rules>
-						</configuration>
+    </dependencies>
 
-					</execution>
-				</executions>
+    <build>
 
-			</plugin>
+        <resources>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-compiler-plugin -->
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
+        </resources>
 
-				<configuration>
+        <plugins>
 
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+            <plugin> <!-- https://maven.apache.org/enforcer/maven-enforcer-plugin/ -->
 
-				</configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M2</version>
 
-			</plugin>
+                <executions>
+                    <execution>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-jar-plugin/ -->
+                        <id>enforce-maven</id>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.1</version>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
 
-				<configuration>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>${maven.version}</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
 
-					<archive>
+                    </execution>
+                </executions>
 
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-						</manifest>
+            </plugin>
 
-						<manifestEntries>
-							<Built-By>${project.organization.name}</Built-By>
-							<Built-On>${maven.build.timestamp}</Built-On>
-							<Implementation-Version>${project.version}</Implementation-Version>
-						</manifestEntries>
+            <plugin> <!-- https://maven.apache.org/plugins/maven-compiler-plugin -->
 
-					</archive>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
 
-				</configuration>
+                <configuration>
 
-				<executions>
-					<execution>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
 
-						<id>package-test-jar</id>
-						<phase>package</phase>
+                </configuration>
 
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
+            </plugin>
 
-					</execution>
-				</executions>
+            <plugin> <!-- https://maven.apache.org/plugins/maven-jar-plugin/ -->
 
-			</plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
 
-			<plugin> <!-- https://maven.apache.org/surefire/maven-surefire-plugin/ -->
+                <configuration>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.22.0</version>
+                    <archive>
 
-			</plugin>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
+                        <manifestEntries>
+                            <Built-By>${project.organization.name}</Built-By>
+                            <Built-On>${maven.build.timestamp}</Built-On>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                        </manifestEntries>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.1.0</version>
+                    </archive>
 
-				<executions>
-					<execution>
+                </configuration>
 
-						<id>copy-jekyll-configuration</id>
-						<inherited>false</inherited>
-						<phase>site</phase>
+                <executions>
+                    <execution>
 
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
+                        <id>package-test-jar</id>
+                        <phase>package</phase>
 
-						<configuration>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
 
-							<outputDirectory>${basedir}/docs</outputDirectory>
-							<overwrite>true</overwrite>
+                    </execution>
+                </executions>
 
-							<resources>
-								<resource>
-									<directory>${basedir}/docs/_resources</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
+            </plugin>
 
-						</configuration>
+            <plugin> <!-- https://maven.apache.org/surefire/maven-surefire-plugin/ -->
 
-					</execution>
-				</executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
 
-			</plugin>
+            </plugin>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
+            <plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.1.0</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
 
-				<configuration>
+                <executions>
+                    <execution>
 
-					<notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
+                        <id>copy-jekyll-configuration</id>
+                        <inherited>false</inherited>
+                        <phase>site</phase>
 
-					<!-- !!! replace with shared assets (https://stackoverflow.com/questions/30507476/maven-javadoc-how-to-include-centralized-resources/30668813#30668813) -->
-					<!--<stylesheetfile>${maven.multiModuleProjectDirectory}/docs/assets/javadocs.css</stylesheetfile>-->
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
 
-					<links>
+                        <configuration>
 
-						<link>http://docs.rdf4j.org/javadoc/latest/</link>
+                            <outputDirectory>${basedir}/docs</outputDirectory>
+                            <overwrite>true</overwrite>
 
-					</links>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/docs/_resources</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
 
-				</configuration>
+                        </configuration>
 
-				<executions>
+                    </execution>
+                </executions>
 
-					<execution>
+            </plugin>
 
-						<id>generate-aggregate-javadocs</id>
-						<inherited>false</inherited>
-						<phase>site</phase>
+            <plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
 
-						<goals>
-							<goal>aggregate</goal>
-						</goals>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.1</version>
 
-						<configuration>
+                <configuration>
 
-							<reportOutputDirectory>${project.basedir}/docs/javadocs</reportOutputDirectory>
-							<destDir>javadocs</destDir>
+                    <notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
 
-							<groups>
-								<group>
-									<title>Modelling Framework</title>
-									<packages>com.metreeca.tree*</packages>
-								</group>
-								<group>
-									<title>REST API Framework</title>
-									<packages>com.metreeca.rest*</packages>
-								</group>
-								<group>
-									<title>REST IAM Framework</title>
-									<packages>com.metreeca.gate*</packages>
-								</group>
-								<group>
-									<title>Server Adapters</title>
-									<packages>com.metreeca.servlet*</packages>
-								</group>
-								<group>
-									<title>RDF/SPARQL Adapters</title>
-									<packages>
-										com.metreeca.rdf*:com.metreeca.rdf4j*:com.metreeca.virtuoso*:com.metreeca.stardog*
-									</packages>
-								</group>
-								<!--<group>
-									<title>Google Cloud Platform Adapters</title>
-									<packages>
-										com.metreeca.gcp*
-									</packages>
-								</group>-->
-							</groups>
+                    <!-- !!! replace with shared assets (https://stackoverflow.com/questions/30507476/maven-javadoc-how-to-include-centralized-resources/30668813#30668813) -->
+                    <!--<stylesheetfile>${maven.multiModuleProjectDirectory}/docs/assets/javadocs.css</stylesheetfile>-->
 
-							<excludePackageNames>
-								com.metreeca.gcp;com.metreeca.gcp* <!-- colon-separated patterns -->
-							</excludePackageNames>
+                    <links>
 
-						</configuration>
+                        <link>http://docs.rdf4j.org/javadoc/latest/</link>
 
-					</execution>
+                    </links>
 
-				</executions>
+                </configuration>
 
-			</plugin>
+                <executions>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
+                    <execution>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
+                        <id>generate-aggregate-javadocs</id>
+                        <inherited>false</inherited>
+                        <phase>site</phase>
 
-				<executions>
-					<execution>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
 
-						<id>clean-docs-folder</id>
-						<phase>clean</phase>
-						<inherited>false</inherited>
+                        <configuration>
 
-						<goals>
-							<goal>clean</goal>
-						</goals>
+                            <reportOutputDirectory>${project.basedir}/docs/javadocs</reportOutputDirectory>
+                            <destDir>javadocs</destDir>
 
-						<configuration>
-							<filesets>
-								<fileset>
-									<directory>docs/_site</directory>
-								</fileset>
-								<fileset>
-									<directory>docs/javadocs</directory>
-								</fileset>
-								<fileset>
-									<directory>docs/reports</directory>
-								</fileset>
-							</filesets>
-						</configuration>
+                            <groups> <!-- colon-separated patterns / single line -->
+                                <group>
+                                    <title>Modelling Framework</title>
+                                    <packages>com.metreeca.tree*</packages>
+                                </group>
+                                <group>
+                                    <title>REST API Framework</title>
+                                    <packages>com.metreeca.rest*</packages>
+                                </group>
+                                <!--<group>
+                                    <title>REST IAM Framework</title>
+                                    <packages>com.metreeca.gate*</packages>
+                                </group>-->
+                                <group>
+                                    <title>Format Adapters</title>
+                                    <packages>
+                                        com.metreeca.xml*:com.metreeca.rdf*
+                                    </packages>
+                                </group>
+                                <group>
+                                    <title>Server Adapters</title>
+                                    <packages>
+                                        com.metreeca.servlet*
+                                    </packages>
+                                </group>
+                                <group>
+                                    <title>Backend Adapters</title>
+                                    <packages>
+                                        com.metreeca.rdf4j*<!--:com.metreeca.gcp*-->
+                                    </packages>
+                                </group>
+                            </groups>
 
-					</execution>
-				</executions>
+                            <excludePackageNames> <!-- colon-separated patterns / multi line -->
+								com.metreeca.gate:com.metreeca.gate.*
+								:com.metreeca.gcp:com.metreeca.gcp.*
+                            </excludePackageNames>
 
-			</plugin>
+                        </configuration>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
+                    </execution>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.7.1</version>
+                </executions>
 
-				<configuration>
+            </plugin>
 
-					<skipDeploy>true</skipDeploy> <!-- github deployment -->
+            <plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
 
-					<stagingDirectory>${maven.multiModuleProjectDirectory}/docs/reports</stagingDirectory>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version>
 
-				</configuration>
+                <executions>
+                    <execution>
 
-			</plugin>
+                        <id>clean-docs-folder</id>
+                        <phase>clean</phase>
+                        <inherited>false</inherited>
 
-		</plugins>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
 
-	</build>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>docs/_site</directory>
+                                </fileset>
+                                <fileset>
+                                    <directory>docs/javadocs</directory>
+                                </fileset>
+                                <fileset>
+                                    <directory>docs/reports</directory>
+                                </fileset>
+                            </filesets>
+                        </configuration>
 
-	<reporting>
-		<plugins>
+                    </execution>
+                </executions>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-project-info-reports-plugin/ -->
+            </plugin>
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
+            <plugin> <!-- https://maven.apache.org/plugins/maven-site-plugin -->
 
-				<reportSets>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
 
-					<reportSet>
+                <configuration>
 
-						<reports>
-							<report>index</report>
-							<report>dependencies</report>
-						</reports>
+                    <skipDeploy>true</skipDeploy> <!-- github deployment -->
 
-						<configuration>
-							<dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-						</configuration>
+                    <stagingDirectory>${maven.multiModuleProjectDirectory}/docs/reports</stagingDirectory>
 
-					</reportSet>
+                </configuration>
 
-				</reportSets>
+            </plugin>
 
-			</plugin>
+        </plugins>
 
-		</plugins>
-	</reporting>
+    </build>
 
-	<profiles>
-		<profile>
+    <reporting>
+        <plugins>
 
-			<id>release</id>
+            <plugin> <!-- https://maven.apache.org/plugins/maven-project-info-reports-plugin/ -->
 
-			<build>
-				<plugins>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.0.0</version>
 
-					<plugin> <!-- https://maven.apache.org/plugins/maven-source-plugin -->
+                <reportSets>
 
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<version>3.0.1</version>
+                    <reportSet>
 
-						<executions>
-							<execution>
+                        <reports>
+                            <report>index</report>
+                            <report>dependencies</report>
+                        </reports>
 
-								<id>attach-sources</id>
-								<phase>package</phase>
+                        <configuration>
+                            <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                        </configuration>
 
-								<goals>
-									<goal>jar-no-fork</goal>
-								</goals>
+                    </reportSet>
 
-							</execution>
-						</executions>
+                </reportSets>
 
-					</plugin>
+            </plugin>
 
-					<plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
+        </plugins>
+    </reporting>
 
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
+    <profiles>
+        <profile>
 
-						<executions>
+            <id>release</id>
 
-							<execution>
+            <build>
+                <plugins>
 
-								<id>attach-javadocs</id>
-								<phase>package</phase>
+                    <plugin> <!-- https://maven.apache.org/plugins/maven-source-plugin -->
 
-								<goals>
-									<goal>jar</goal>
-								</goals>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.2.1</version>
 
-							</execution>
+                        <executions>
+                            <execution>
 
-						</executions>
+                                <id>attach-sources</id>
+                                <phase>package</phase>
 
-					</plugin>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
 
-					<plugin> <!-- http://maven.apache.org/plugins/maven-gpg-plugin/ -->
+                            </execution>
+                        </executions>
 
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
+                    </plugin>
 
-						<configuration>
-							<executable>gpg</executable>
-							<passphraseServerId>gpg.metreeca</passphraseServerId>
-						</configuration>
+                    <plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
 
-						<executions>
-							<execution>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
 
-								<id>sign-artifacts</id>
-								<phase>verify</phase>
+                        <executions>
 
-								<goals>
-									<goal>sign</goal>
-								</goals>
+                            <execution>
 
-							</execution>
-						</executions>
+                                <id>attach-javadocs</id>
+                                <phase>package</phase>
 
-					</plugin>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
 
-					<plugin> <!-- https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin -->
+                            </execution>
 
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.8</version>
+                        </executions>
 
-						<extensions>true</extensions>
+                    </plugin>
 
-						<configuration>
-							<serverId>ossrh</serverId>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-							<autoReleaseAfterClose>true</autoReleaseAfterClose>
-						</configuration>
+                    <plugin> <!-- http://maven.apache.org/plugins/maven-gpg-plugin/ -->
 
-					</plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
 
-				</plugins>
-			</build>
+                        <configuration>
+                            <executable>gpg</executable>
+                            <passphraseServerId>gpg.metreeca</passphraseServerId>
+                        </configuration>
 
-		</profile>
-	</profiles>
+                        <executions>
+                            <execution>
+
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+
+                            </execution>
+                        </executions>
+
+                    </plugin>
+
+                    <plugin> <!-- https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin -->
+
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.8</version>
+
+                        <extensions>true</extensions>
+
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+
+                    </plugin>
+
+                </plugins>
+            </build>
+
+        </profile>
+    </profiles>
 
 </project>

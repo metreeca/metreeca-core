@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,10 +18,16 @@
 package com.metreeca.rest;
 
 import java.io.*;
-import java.net.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
-import java.nio.charset.*;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.util.*;
 
 import static java.lang.String.format;
@@ -46,7 +52,7 @@ public final class Codecs {
 	 *
 	 * @return the URL converted from {@code url}
 	 *
-	 * @throws NullPointerException if {@code url} is null
+	 * @throws NullPointerException     if {@code url} is null
 	 * @throws IllegalArgumentException if {@code url} is not a well-formed URL
 	 */
 	public static URL url(final String url) {
@@ -152,7 +158,10 @@ public final class Codecs {
 
 		if ( url == null ) {
 			throw new MissingResourceException(
-					format("unknown resource [%s:%s]", clazz.getName(), resource), clazz.getName(), resource);
+					format("unknown resource [%s:%s]", clazz.getName(), resource),
+					clazz.getName(),
+					resource
+			);
 		}
 
 		return url;
@@ -169,14 +178,58 @@ public final class Codecs {
 		}
 
 		try {
+
 			return resource(master, resource).openStream();
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	public static Reader reader(final Object master, final String resource) {
+
+		if ( master == null ) {
+			throw new NullPointerException("null master");
+		}
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		return reader(input(master, resource));
+	}
+
+	/**
+	 * Retrieves the binary content of a class resource.
+	 *
+	 * @param master   the target class or an instance of the target class for the resource to be read
+	 * @param resource the path of the resource to be read, relative to the target class
+	 *
+	 * @return the binary content of the given {@code resource}
+	 *
+	 * @throws MissingResourceException if {@code resource} is not available
+	 */
+	public static byte[] data(final Object master, final String resource) {
+
+		if ( master == null ) {
+			throw new NullPointerException("null master");
+		}
+
+		if ( resource == null ) {
+			throw new NullPointerException("null resource");
+		}
+
+		try ( final InputStream input=input(master, resource) ) {
+
+			return data(input);
+
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
 	/**
-	 * Retrieves the text of a class resource.
+	 * Retrieves the textual content of a class resource.
 	 *
 	 * @param master   the target class or an instance of the target class for the resource to be read
 	 * @param resource the path of the resource to be read, relative to the target class
@@ -195,16 +248,22 @@ public final class Codecs {
 			throw new NullPointerException("null resource");
 		}
 
-		return text(reader(input(master, resource)));
+		try ( final Reader reader=reader(master, resource) ) {
+
+			return text(reader);
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
 	}
 
 
 	//// Input Utilities ///////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates an empty reader.
+	 * Creates an empty input stream.
 	 *
-	 * @return an emtpy input stream
+	 * @return an empty input stream
 	 */
 	public static InputStream input() {
 		return new ByteArrayInputStream(EmptyData);
@@ -291,26 +350,26 @@ public final class Codecs {
 	}
 
 
-	public static byte[] data(final InputStream input) throws UncheckedIOException {
+	public static byte[] data(final InputStream input) {
 
 		if ( input == null ) {
 			throw new NullPointerException("null input");
 		}
 
-		try (final ByteArrayOutputStream output=new ByteArrayOutputStream()) {
+		try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
 			return data(output, input).toByteArray();
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
-	public static String text(final Reader reader) throws UncheckedIOException {
+	public static String text(final Reader reader) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
 		}
 
-		try (final StringWriter writer=new StringWriter()) {
+		try ( final StringWriter writer=new StringWriter() ) {
 			return text(writer, reader).toString();
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
@@ -334,7 +393,8 @@ public final class Codecs {
 			throw new NullPointerException("null charset");
 		}
 
-		return output(writer, Charset.forName(charset));}
+		return output(writer, Charset.forName(charset));
+	}
 
 	public static OutputStream output(final Writer writer, final Charset charset) {
 
@@ -364,7 +424,8 @@ public final class Codecs {
 			throw new NullPointerException("null charset");
 		}
 
-		return writer(output, Charset.forName(charset));}
+		return writer(output, Charset.forName(charset));
+	}
 
 	public static Writer writer(final OutputStream output, final Charset charset) {
 
@@ -380,7 +441,7 @@ public final class Codecs {
 	}
 
 
-	public static <T extends OutputStream> T data(final T output, final byte... data) throws UncheckedIOException {
+	public static <T extends OutputStream> T data(final T output, final byte... data) {
 
 		if ( output == null ) {
 			throw new NullPointerException("null output");
@@ -390,14 +451,14 @@ public final class Codecs {
 			throw new NullPointerException("null data");
 		}
 
-		try (final InputStream input=new ByteArrayInputStream(data)) {
+		try ( final InputStream input=new ByteArrayInputStream(data) ) {
 			return data(output, input);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
-	public static <T extends Writer> T text(final T writer, final String text) throws UncheckedIOException {
+	public static <T extends Writer> T text(final T writer, final String text) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
@@ -407,7 +468,7 @@ public final class Codecs {
 			throw new NullPointerException("null text");
 		}
 
-		try (final Reader reader=new StringReader(text)) {
+		try ( final Reader reader=new StringReader(text) ) {
 			return text(writer, reader);
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
@@ -415,7 +476,7 @@ public final class Codecs {
 	}
 
 
-	public static <T extends OutputStream> T data(final T output, final InputStream input) throws UncheckedIOException {
+	public static <T extends OutputStream> T data(final T output, final InputStream input) {
 
 		if ( output == null ) {
 			throw new NullPointerException("null output");
@@ -440,7 +501,7 @@ public final class Codecs {
 		}
 	}
 
-	public static <T extends Writer> T text(final T writer, final Reader reader) throws UncheckedIOException {
+	public static <T extends Writer> T text(final T writer, final Reader reader) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -30,7 +30,6 @@ import static com.metreeca.rest.Response.Unauthorized;
 import static com.metreeca.rest.Wrapper.success;
 import static com.metreeca.rest.services.Engine.engine;
 import static com.metreeca.tree.Shape.empty;
-
 import static java.util.function.Function.identity;
 
 
@@ -47,7 +46,7 @@ public abstract class Actor extends Delegator {
 	/**
 	 * Creates a connector wrapper.
 	 *
-	 * @return returns a wrapper processing request inside a single {@linkplain Engine#exec(Runnable) engine
+	 * @return returns a wrapper processing request inside a single {@linkplain Engine#exec(Runnable) engine 
 	 * transaction}
 	 */
 	protected Wrapper connector() {
@@ -117,7 +116,7 @@ public abstract class Actor extends Delegator {
 	 * Creates a validator wrapper.
 	 *
 	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#validate(Message) validation} of request
-	 * payloads
+	 * 		payloads
 	 */
 	protected Wrapper validator() {
 		return handler -> request -> engine.validate(request).fold(handler::handle, request::reply);
@@ -127,7 +126,7 @@ public abstract class Actor extends Delegator {
 	 * Creates a trimmer wrapper.
 	 *
 	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#trim(Message) validation} of {@linkplain
-	 * Response#success() successful} response payloads
+	 *        Response#success() successful} response payloads
 	 */
 	protected Wrapper trimmer() {
 		return success(response -> engine.trim(response).fold(identity(), response::map));

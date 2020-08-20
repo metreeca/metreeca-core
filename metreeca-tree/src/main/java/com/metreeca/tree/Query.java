@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,7 +17,9 @@
 
 package com.metreeca.tree;
 
-import com.metreeca.tree.queries.*;
+import com.metreeca.tree.queries.Items;
+import com.metreeca.tree.queries.Stats;
+import com.metreeca.tree.queries.Terms;
 
 import java.util.function.Function;
 

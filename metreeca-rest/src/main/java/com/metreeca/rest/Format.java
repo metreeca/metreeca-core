@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -19,15 +19,13 @@ package com.metreeca.rest;
 
 import com.metreeca.tree.Shape;
 
+import javax.json.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.json.*;
-
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.tree.shapes.Field.fields;
-
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -105,11 +103,13 @@ public abstract class Format<V> {
 				: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
 				: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
 				: value instanceof JsonString ? ((JsonString)value).getString()
-				: value instanceof JsonArray ? ((JsonArray)value).stream().map(v -> value(base, shape, v)).collect(toList())
-				: value instanceof JsonObject ? ((JsonObject)value).entrySet().stream().collect(toMap(Map.Entry::getKey, e -> Optional
-				.ofNullable(fields(shape).get(e.getKey()))
-				.map(nested -> value(base, nested, e.getValue()))
-				.orElseThrow(() -> new JsonException("unknown field {"+e.getKey()+"}"))
+				: value instanceof JsonArray ?
+				((JsonArray)value).stream().map(v -> value(base, shape, v)).collect(toList())
+				: value instanceof JsonObject ? ((JsonObject)value).entrySet().stream().collect(toMap(Map.Entry::getKey
+				, e -> Optional
+						.ofNullable(fields(shape).get(e.getKey()))
+						.map(nested -> value(base, nested, e.getValue()))
+						.orElseThrow(() -> new JsonException("unknown field {"+e.getKey()+"}"))
 		))
 				: null;
 	}
@@ -176,7 +176,6 @@ public abstract class Format<V> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 *
 	 * {@inheritDoc}
 	 *
 	 * <p>By all formats in the same class are equal to each other.</p>

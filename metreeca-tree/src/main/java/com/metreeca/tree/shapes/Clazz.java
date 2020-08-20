@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -20,7 +20,10 @@ package com.metreeca.tree.shapes;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
 

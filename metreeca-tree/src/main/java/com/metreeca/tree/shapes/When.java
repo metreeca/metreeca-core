@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -66,7 +66,7 @@ public final class When implements Shape {
 			throw new NullPointerException("null fail shape");
 		}
 
-		if ( test.map(new FilteringProbe())) {
+		if ( test.map(new FilteringProbe()) ) {
 			throw new UnsupportedOperationException("test shape are limited to non-filtering constraints");
 		}
 

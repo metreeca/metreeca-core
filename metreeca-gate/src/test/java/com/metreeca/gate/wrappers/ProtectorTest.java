@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,9 +17,11 @@
 
 package com.metreeca.gate.wrappers;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 import com.metreeca.rest.services.ClockMock;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -30,10 +32,8 @@ import java.util.function.Supplier;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.services.Clock.clock;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.lang.String.format;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ProtectorTest {

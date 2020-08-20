@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -62,7 +62,7 @@ public interface Roster {
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 *
 	 * @return a value result with the current permit for the user identified by {@code handle}, if successful
-	 * identified; an error result with a roster-specific error tag, otherwise
+	 * 		identified; an error result with a roster-specific error tag, otherwise
 	 *
 	 * @throws NullPointerException if {@code handle} is null
 	 */
@@ -75,7 +75,7 @@ public interface Roster {
 	 * @param secret the current secret for the user identified by {@code handle}
 	 *
 	 * @return a value result with the current permit for the user identified by {@code handle}, if successful logged in
-	 * using {@code secret}; an error result with a roster-specific error tag, otherwise
+	 * 		using {@code secret}; an error result with a roster-specific error tag, otherwise
 	 *
 	 * @throws NullPointerException if either {@code handle} or {@code secret} is null
 	 */
@@ -89,8 +89,8 @@ public interface Roster {
 	 * @param update the updated secret for the user identified by {@code handle}
 	 *
 	 * @return a value result with the current permit for the user identified by {@code handle}, if successful logged in
-	 * using the current {@code secret} and associated with the {@code updated} one; an error result with a
-	 * roster-specific error tag, otherwise
+	 * 		using the current {@code secret} and associated with the {@code updated} one; an error result with a
+	 * 		roster-specific error tag, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
@@ -102,7 +102,7 @@ public interface Roster {
 	 * @param handle a handle uniquely identifying a user (e.g. username, email, current session id, …)
 	 *
 	 * @return a value result with the current permit for the user identified by {@code handle}, if successful logged
-	 * out; an error result with a roster-specific error tag, otherwise
+	 * 		out; an error result with a roster-specific error tag, otherwise
 	 *
 	 * @throws NullPointerException if {@code handle} is null
 	 */

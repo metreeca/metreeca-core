@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,7 +18,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.Codecs;
 import com.metreeca.rest.services.Logger;
 
 import java.util.regex.Pattern;
@@ -28,7 +27,6 @@ import static com.metreeca.rest.Request.GET;
 import static com.metreeca.rest.Request.POST;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.lang.String.format;
 
 

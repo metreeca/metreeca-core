@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2019 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl. All rights reserved.
 
   This file is part of Metreeca/Link.
 
@@ -18,20 +18,20 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-	<parent>
-		<groupId>com.metreeca</groupId>
-		<artifactId>metreeca-link</artifactId>
-		<version>0.52.0</version>
-	</parent>
+    <parent>
+        <groupId>com.metreeca</groupId>
+        <artifactId>metreeca-link</artifactId>
+        <version>0.53.0</version>
+    </parent>
 
-	<artifactId>metreeca-tree</artifactId>
-	<version>0.52.0</version>
+    <artifactId>metreeca-tree</artifactId>
+    <version>0.53.0</version>
 
-	<name>Metreeca Modelling Framework</name>
-	<description>A shape-based framework for defining linked data models.</description>
+    <name>Metreeca Data Modelling Framework</name>
+    <description>A shape-based linked data modelling framework.</description>
 
 </project>

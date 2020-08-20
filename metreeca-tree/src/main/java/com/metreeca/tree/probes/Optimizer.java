@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -23,7 +23,10 @@ import com.metreeca.tree.shapes.*;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Set;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 import static com.metreeca.tree.shapes.And.and;
@@ -32,7 +35,6 @@ import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
 import static java.util.stream.Collectors.*;
 
 
@@ -66,7 +68,7 @@ public class Optimizer extends Traverser<Shape> {
 			: and(shapes);
 
 	private static final Function<Collection<Shape>, Shape> OrPacker=shapes
-			->  shapes.contains(and()) ? and() // always pass
+			-> shapes.contains(and()) ? and() // always pass
 			: shapes.size() == 1 ? shapes.iterator().next()
 			: or(shapes);
 

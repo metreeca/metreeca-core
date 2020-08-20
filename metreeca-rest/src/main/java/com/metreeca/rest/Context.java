@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -19,13 +19,14 @@ package com.metreeca.rest;
 
 import com.metreeca.rest.services.Logger;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.services.Logger.logger;
-
 import static java.lang.String.format;
 
 
@@ -38,6 +39,16 @@ import static java.lang.String.format;
 public final class Context {
 
 	private static final ThreadLocal<Context> context=new ThreadLocal<>();
+
+	/**
+	 * Retrieves the default storage factory.
+	 *
+	 * @return the default storage factory, which returns the current working directory of the process in the host
+	 * filesystem
+	 */
+	public static Supplier<Path> storage() {
+		return () -> Paths.get("").toAbsolutePath();
+	}
 
 
 	/**
@@ -224,8 +235,9 @@ public final class Context {
 	 * Executes a set of task using shared ervices managed by this context.
 	 *
 	 * <p>During task execution, shared services may be retrieved from this context through the static {@linkplain
-	 * #service(Supplier) service locator} method of the Context class. The context used by the service locator method
-	 * is managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
+	 * #service(Supplier) service locator} method of the Context class. The context used by the service locator
+	 * method is
+	 * managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
 	 * thread.</p>
 	 *
 	 * @param tasks the tasks to be executed

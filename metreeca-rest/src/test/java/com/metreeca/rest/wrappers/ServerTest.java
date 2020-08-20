@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,29 +17,33 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
-
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.ResponseAssert;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.TextFormat.text;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
+import static com.metreeca.rest.formats.WriterFormat.writer;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ServerTest {
 
 	@Nested final class QueryParsing {
 
-		private Map.Entry<String, ? extends Collection<String>> parameter(final String name, final List<String> values) {
+		private Map.Entry<String, ? extends Collection<String>> parameter(final String name,
+				final List<String> values) {
 			return new AbstractMap.SimpleImmutableEntry<>(name, values);
 		}
 
@@ -158,7 +162,7 @@ final class ServerTest {
 
 					.accept(response -> ResponseAssert.assertThat(response)
 							.hasStatus(InternalServerError)
-							.hasBody(json())
+							.hasBody(writer())
 					)
 
 			);

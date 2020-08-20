@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,8 +17,8 @@
 
 package com.metreeca.tree.probes;
 
-import com.metreeca.tree.shapes.*;
 import com.metreeca.tree.Shape;
+import com.metreeca.tree.shapes.*;
 
 
 /**

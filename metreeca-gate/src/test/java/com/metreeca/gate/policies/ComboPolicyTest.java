@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -24,10 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.util.regex.Pattern;
 
 import static com.metreeca.gate.policies.ComboPolicy.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static java.lang.Character.UnicodeBlock.BASIC_LATIN;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ComboPolicyTest {

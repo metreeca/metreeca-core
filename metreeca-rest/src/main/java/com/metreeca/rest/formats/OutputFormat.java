@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,7 +17,10 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Failure;
+import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
+import com.metreeca.rest.Result;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
@@ -32,7 +35,7 @@ import static com.metreeca.rest.Result.Value;
 public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>> {
 
 	/**
-	 * The default MIME type for binary outbound raw message bodies.
+	 * The default MIME type for binary raw message bodies ({@value}).
 	 */
 	public static final String MIME="application/octet-stream";
 
@@ -62,7 +65,7 @@ public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>>
 	}
 
 	/**
-	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined
+	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Consumer<Supplier<OutputStream>> value) {
 		return message.header("~Content-Type", MIME);

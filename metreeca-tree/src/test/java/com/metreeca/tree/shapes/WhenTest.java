@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -20,9 +20,7 @@ package com.metreeca.tree.shapes;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Clazz.clazz;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 

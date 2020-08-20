@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,21 +18,19 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.Request;
-
 import org.junit.jupiter.api.Test;
-
-import java.io.*;
 
 import javax.json.Json;
 import javax.json.JsonObject;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UncheckedIOException;
 
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 final class JSONFormatTest {
@@ -51,7 +49,9 @@ final class JSONFormatTest {
 				.header("content-type", JSONFormat.MIME)
 				.body(reader(), () -> new StringReader(TestJSON.toString()));
 
-		assertEquals(TestJSON, request.body(json()).value().orElseGet(() -> fail("no json representation")));
+		assertThat(request.body(json()).value())
+				.isPresent()
+				.contains(TestJSON);
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
@@ -59,41 +59,49 @@ final class JSONFormatTest {
 		final Request request=new Request()
 				.body(reader(), () -> new StringReader(TestJSON.toString()));
 
-		assertThat(request.body(json()).value().isPresent()).isFalse();
+		assertThat(request.body(json()).value())
+				.isNotPresent();
 	}
 
 	@Test void testConfigureJSON() {
 
 		final Request request=new Request().body(json(), TestJSON);
 
-		assertEquals(TestJSON, request.body(writer())
+		assertThat
 
-				.value(client -> {
-					try (final StringWriter writer=new StringWriter()) {
+				(request
 
-						client.accept(() -> writer);
+						.body(writer())
 
-						return writer.toString();
+						.value(client -> {
+							try ( final StringWriter writer=new StringWriter() ) {
 
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				})
+								client.accept(() -> writer);
 
-				.value(test -> Json.createReader(new StringReader(test)).readObject())
+								return writer.toString();
 
-				.value()
+							} catch ( final IOException e ) {
+								throw new UncheckedIOException(e);
+							}
+						})
 
-				.orElseGet(() -> fail("missing outbound representation"))
+						.value(test -> Json.createReader(new StringReader(test)).readObject())
 
-		);
+						.value()
+				)
+
+				.isPresent()
+				.contains(TestJSON);
+
 	}
 
 	@Test void testConfigureJSONSetsContentType() {
 
 		final Request request=new Request().body(json(), TestJSON);
 
-		assertEquals(JSONFormat.MIME, request.header("content-type").orElseGet(() -> fail("no content-type header")));
+		assertThat(request.header("content-type"))
+				.isPresent()
+				.contains(JSONFormat.MIME);
 
 	}
 

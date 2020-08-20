@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -16,7 +16,7 @@
  */
 
 /**
- * RDF4J storage tools.
+ * RDF4J SPARQL tools.
  *
  * <p>Requires the following Maven dependency in your project:</p>
  *

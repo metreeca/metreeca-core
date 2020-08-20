@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,7 +18,6 @@
 package com.metreeca.tree.probes;
 
 import com.metreeca.tree.Shape;
-
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.tree.shapes.All.all;
@@ -33,7 +32,6 @@ import static com.metreeca.tree.shapes.Meta.label;
 import static com.metreeca.tree.shapes.MinCount.minCount;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -84,7 +82,6 @@ final class OptimizerTest {
 		assertThat(optimize(any())).as("empty").isEqualTo(or());
 
 	}
-
 
 
 	@Test void testOptimizeFields() {
