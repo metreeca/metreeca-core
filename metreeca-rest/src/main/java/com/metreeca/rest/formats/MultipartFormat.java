@@ -19,9 +19,7 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -246,7 +244,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 					out.write(boundary);
 					out.write(CRLF);
 
-					for (final Map.Entry<String, Collection<String>> header : part.headers().entrySet()) {
+					for (final Map.Entry<String, List<String>> header : part.headers().entrySet()) {
 
 						final String name=header.getKey();
 

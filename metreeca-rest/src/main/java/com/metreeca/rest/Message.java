@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tree.shapes.And.and;
 import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -58,7 +58,7 @@ public abstract class Message<T extends Message<T>> {
 
 	private Shape shape=and();
 
-	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
+	private final Map<String, List<String>> headers=new LinkedHashMap<>();
 	private final Map<Format<?>, Object> bodies=new HashMap<>();
 
 
@@ -245,7 +245,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return an immutable and possibly empty map from header names to collections of headers values
 	 */
-	public Map<String, Collection<String>> headers() {
+	public Map<String, List<String>> headers() {
 		return unmodifiableMap(headers);
 	}
 
@@ -342,7 +342,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return an immutable and possibly empty collection of values
 	 */
-	public Collection<String> headers(final String name) {
+	public List<String> headers(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -350,11 +350,11 @@ public abstract class Message<T extends Message<T>> {
 
 		final String _name=normalize(name);
 
-		return unmodifiableCollection(headers.entrySet().stream()
+		return unmodifiableList(headers.entrySet().stream()
 				.filter(entry -> entry.getKey().equalsIgnoreCase(_name))
 				.map(Map.Entry::getValue)
 				.findFirst()
-				.orElseGet(Collections::emptySet)
+				.orElseGet(Collections::emptyList)
 		);
 	}
 
@@ -412,7 +412,7 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		final String _name=normalize(name);
-		final Collection<String> _values=normalize(values);
+		final List<String> _values=normalize(values);
 
 		if ( name.startsWith("~") ) {
 
@@ -430,7 +430,7 @@ public abstract class Message<T extends Message<T>> {
 
 		} else {
 
-			headers.put(_name, unmodifiableCollection(_values));
+			headers.put(_name, unmodifiableList(_values));
 
 		}
 
@@ -506,7 +506,7 @@ public abstract class Message<T extends Message<T>> {
 		return (name.startsWith("~") || name.startsWith("+") ? name.substring(1) : name).toLowerCase(Locale.ROOT);
 	}
 
-	private Collection<String> normalize(final Collection<String> values) {
+	private List<String> normalize(final Collection<String> values) {
 		return values
 				.stream()
 				.filter(value -> !value.isEmpty())
