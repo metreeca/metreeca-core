@@ -37,7 +37,7 @@ final class APITest {
 
 	@Nested final class QueryParsing {
 
-		private Map.Entry<String, ? extends Collection<String>> parameter(final String name,
+		private Map.Entry<String, ? extends List<String>> parameter(final String name,
 				final List<String> values) {
 			return new AbstractMap.SimpleImmutableEntry<>(name, values);
 		}

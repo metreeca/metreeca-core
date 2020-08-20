@@ -22,10 +22,10 @@ import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.*;
+
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -234,11 +234,11 @@ public final class Rewriter implements Wrapper {
 		}
 
 
-		private <T> Collection<T> rewrite(final Collection<T> collection, final Function<T, T> rewriter) {
+		private <T> List<T> rewrite(final Collection<T> collection, final Function<T, T> rewriter) {
 			return collection.stream().map(rewriter).collect(toList());
 		}
 
-		private Map<String, Collection<String>> rewrite(final Map<String, Collection<String>> map) {
+		private Map<String, List<String>> rewrite(final Map<String, List<String>> map) {
 			return map.entrySet().stream().collect(toMap(
 					Map.Entry::getKey, entry -> rewrite(entry.getValue(), this::rewrite)
 			));
