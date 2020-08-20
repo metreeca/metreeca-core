@@ -51,7 +51,7 @@ final class BearerTest {
 
 		exec(() -> bearer()
 
-				.wrap(authenticator)
+				.with(authenticator)
 				.wrap(handler(Response.Unauthorized))
 
 				.handle(new Request()

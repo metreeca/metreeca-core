@@ -7,8 +7,14 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="metreeca-rdf" />
+        <module name="metreeca-gate" />
+        <module name="metreeca-rdf4j" />
+        <module name="metreeca-rest" />
+        <module name="metreeca-xml" />
+        <module name="metreeca-tree" />
         <module name="metreeca-gcp" />
         <module name="metreeca-tree" />
+        <module name="metreeca-rdf" />
         <module name="metreeca-servlet" />
         <module name="metreeca-rest" />
         <module name="metreeca-rdf4j" />
@@ -30,6 +36,7 @@
       <module name="metreeca-rest" target="1.8" />
       <module name="metreeca-servlet" target="1.8" />
       <module name="metreeca-tree" target="1.8" />
+      <module name="metreeca-xml" target="1.8" />
       <module name="metreeca-xml" target="1.8" />
     </bytecodeTargetLevel>
   </component>

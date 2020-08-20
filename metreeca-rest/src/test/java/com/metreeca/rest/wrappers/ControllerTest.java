@@ -56,7 +56,7 @@ final class ControllerTest {
 	@Test void testAcceptedControlled() {
 		exec(() -> new Controller("x", "y")
 
-				.wrap((Wrapper)handler -> request -> {
+				.with((Wrapper)handler -> request -> {
 
 					assertThat(request.roles()).containsOnly("x");
 

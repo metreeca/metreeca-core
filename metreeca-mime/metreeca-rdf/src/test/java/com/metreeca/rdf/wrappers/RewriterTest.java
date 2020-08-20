@@ -328,7 +328,7 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal)
 
-						.wrap((Wrapper)handler -> request -> request.body(multipart(150, 300)).fold(
+						.with((Wrapper)handler -> request -> request.body(multipart(150, 300)).fold(
 
 								parts -> Optional.ofNullable(parts.get("main"))
 
