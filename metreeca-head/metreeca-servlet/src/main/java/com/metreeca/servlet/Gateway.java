@@ -17,10 +17,7 @@
 
 package com.metreeca.servlet;
 
-import com.metreeca.rest.Context;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.services.Loader;
 
 import javax.servlet.*;
@@ -48,14 +45,14 @@ import static java.util.Objects.requireNonNull;
  *
  * <ul>
  *
- * <li>initializes and destroys the shared tool {@linkplain Context tray} managing platform services required by
+ * <li>initializes and destroys the shared {@linkplain Context context} managing platform services required by
  * resource handlers;</li>
  *
  * <li>intercepts HTTP requests and handles them using a linked data {@linkplain Handler handler} loaded from the
- * shared tool tray;</li>
+ * shared context;</li>
  *
- * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data server
- * .</li>
+ * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data
+ * handler.</li>
  *
  * </ul>
  */
