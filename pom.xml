@@ -493,6 +493,7 @@
 							<excludePackageNames> <!-- colon-separated patterns / multi line -->
 								com.metreeca.gate:com.metreeca.gate.*
 								:com.metreeca.gcp:com.metreeca.gcp.*
+								:com.metreeca.http
 							</excludePackageNames>
 
 						</configuration>
