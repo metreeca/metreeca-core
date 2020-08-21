@@ -52,13 +52,13 @@ public final class Request extends Message<Request> {
 			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
-
 	private static final Pattern SchemePattern=Pattern.compile("[a-zA-Z][-+.a-zA-Z0-9]*:");
+	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<Object> user=Optional.empty();
+	private Object user=null;
 	private Set<Object> roles=emptySet();
 
 	private String method="";
@@ -148,10 +148,24 @@ public final class Request extends Message<Request> {
 	 * @return {@code true} if the {@link #path()} of this request includes a trailing slash; {@code false} otherwise
 	 *
 	 * @see
-	 * <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
+	 * <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
+	 * Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
 	 */
 	public boolean collection() {
 		return path.endsWith("/");
+	}
+
+	/**
+	 * Checks if request is interactive.
+	 *
+	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #GET} and the {@code Accept}
+	 * header includes a MIME type usually associated with an interactive browser-managed HTTP request
+	 * (e.g. {@code text /html}
+	 */
+	public boolean interactive() {
+		return method.equals(GET) && headers("content-type")
+				.stream()
+				.anyMatch(value -> HTMLPattern.matcher(value).find());
 	}
 
 
@@ -193,7 +207,7 @@ public final class Request extends Message<Request> {
 	 * @return an optional identifier for the user performing this request or the empty optional if no user is
 	 * authenticated
 	 */
-	public Optional<Object> user() { return user; }
+	public Optional<Object> user() { return Optional.ofNullable(user); }
 
 	/**
 	 * Configures the identifier of the request user.
@@ -204,7 +218,7 @@ public final class Request extends Message<Request> {
 	 */
 	public Request user(final Object user) {
 
-		this.user=Optional.ofNullable(user);
+		this.user=user;
 
 		return this;
 	}
@@ -220,8 +234,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of values uniquely identifying the roles {@linkplain #roles(Object...) assigned} to
-	 *              the request {@linkplain #user() user}
+	 * @param roles a collection of values uniquely identifying the roles assigned to the request {@linkplain #user()
+	 *              user}
 	 *
 	 * @return this request
 	 *
@@ -234,8 +248,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of IRIs uniquely identifying the roles {@linkplain #roles(Collection) assigned} to the
-	 *              request {@linkplain #user() user}
+	 * @param roles a collection of IRIs uniquely identifying the roles assigned to the request {@linkplain #user()
+	 *              user}
 	 *
 	 * @return this request
 	 *
