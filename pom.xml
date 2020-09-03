@@ -487,6 +487,7 @@
 
 							<excludePackageNames> <!-- colon-separated patterns / multi line -->
 								:com.metreeca.gcp:com.metreeca.gcp.*
+								:com.metreeca.http
 							</excludePackageNames>
 
 						</configuration>

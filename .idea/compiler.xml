@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="metreeca-rdf4j" />
         <module name="metreeca-rest" />
+        <module name="metreeca-http" />
         <module name="metreeca-xml" />
         <module name="metreeca-rdf" />
         <module name="metreeca-tree" />

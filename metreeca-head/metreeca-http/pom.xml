@@ -20,26 +20,27 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.metreeca</groupId>
-        <artifactId>metreeca-link</artifactId>
-        <version>0.0.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>metreeca-head</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>metreeca-head</artifactId>
-    <version>0.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+	<artifactId>metreeca-http</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
 
-    <name>Metreeca Server Adapters</name>
-    <description>Server adapter kits.</description>
+	<name>Metreeca JDK Server Adapter</name>
+	<description>Adapter for deploying Metreeca/Link apps to the JDK internal HTTP server.</description>
 
-    <modules>
+	<dependencies>
 
-        <module>metreeca-servlet</module>
-        <module>metreeca-http</module>
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rest</artifactId>
+		</dependency>
 
-    </modules>
+	</dependencies>
 
 </project>
