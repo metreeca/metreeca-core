@@ -15,15 +15,14 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gate.wrappers;
+package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-
-import static com.metreeca.rest.ResponseAssert.assertThat;
 
 
 final class BearerTest {
@@ -59,7 +58,7 @@ final class BearerTest {
 						.header("Authorization", "Custom secret")
 				)
 
-				.accept(response -> assertThat(response)
+				.accept(response -> ResponseAssert.assertThat(response)
 
 						.as("access denied")
 						.hasStatus(Response.Unauthorized)
@@ -83,7 +82,7 @@ final class BearerTest {
 							.method(Request.GET)
 					)
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 
 							.as("access granted")
 							.hasStatus(Response.OK)
@@ -102,7 +101,7 @@ final class BearerTest {
 							.method(Request.GET)
 					)
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 
 							.as("access denied")
 							.hasStatus(Response.Forbidden)
@@ -121,7 +120,7 @@ final class BearerTest {
 							.method(Request.GET)
 					)
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 
 							.as("access denied")
 							.hasStatus(Response.Unauthorized)
@@ -150,7 +149,7 @@ final class BearerTest {
 							.header("Authorization", "Bearer token")
 					)
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 
 							.as("access granted")
 							.hasStatus(Response.OK)
@@ -171,7 +170,7 @@ final class BearerTest {
 							.header("Authorization", "Bearer qwertyuiop")
 					)
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 
 							.as("access denied")
 							.hasStatus(Response.Unauthorized)
@@ -195,7 +194,7 @@ final class BearerTest {
 							.header("Authorization", "Bearer token")
 					)
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 
 							.as("access denied")
 							.hasStatus(Response.Forbidden)
@@ -216,7 +215,7 @@ final class BearerTest {
 							.header("Authorization", "Bearer token")
 					)
 
-					.accept(response -> assertThat(response)
+					.accept(response -> ResponseAssert.assertThat(response)
 
 							.as("access denied")
 							.hasStatus(Response.Unauthorized)

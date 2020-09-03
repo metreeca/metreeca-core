@@ -101,7 +101,6 @@
 
 		<module>metreeca-tree</module>
 		<module>metreeca-rest</module>
-		<module>metreeca-gate</module>
 
 		<module>metreeca-mime</module>
 		<module>metreeca-head</module>
@@ -466,10 +465,6 @@
 									<title>REST API Framework</title>
 									<packages>com.metreeca.rest*</packages>
 								</group>
-								<!--<group>
-									<title>REST IAM Framework</title>
-									<packages>com.metreeca.gate*</packages>
-								</group>-->
 								<group>
 									<title>Format Adapters</title>
 									<packages>
@@ -491,7 +486,6 @@
 							</groups>
 
 							<excludePackageNames> <!-- colon-separated patterns / multi line -->
-								com.metreeca.gate:com.metreeca.gate.*
 								:com.metreeca.gcp:com.metreeca.gcp.*
 								:com.metreeca.http
 							</excludePackageNames>

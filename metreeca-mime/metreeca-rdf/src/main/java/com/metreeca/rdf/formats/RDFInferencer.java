@@ -21,9 +21,10 @@ import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Inspector;
 import com.metreeca.tree.shapes.*;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.Set;
 
@@ -57,7 +58,7 @@ final class RDFInferencer extends Inspector<Shape> {
 
 
 	@Override public Shape probe(final Datatype datatype) {
-		return datatype.getName().equals(XMLSchema.BOOLEAN) ? and(datatype,
+		return datatype.getName().equals(XSD.BOOLEAN) ? and(datatype,
 				in(literal(false), literal(true)), maxCount(1)
 		) : datatype;
 	}

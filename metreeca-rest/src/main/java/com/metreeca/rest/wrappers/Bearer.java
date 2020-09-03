@@ -15,12 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gate.wrappers;
+package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 
 import java.util.Objects;
 import java.util.Optional;

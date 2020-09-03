@@ -19,20 +19,19 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import javax.json.JsonValue;
 
-import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.rdf.formats.RDFJSONTest.*;
+import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Datatype.datatype;
@@ -138,10 +137,10 @@ final class RDFJSONEncoderTest {
 	@Nested final class Literals {
 
 		@Test void testTypedString() {
-			assertThat(actual(literal("2019-04-03", XMLSchema.DATE)))
+			assertThat(actual(literal("2019-04-03", XSD.DATE)))
 					.isEqualTo(expected(map(
 							entry("value", "2019-04-03"),
-							entry("type", XMLSchema.DATE.stringValue())
+							entry("type", XSD.DATE.stringValue())
 					)));
 		}
 
@@ -172,7 +171,7 @@ final class RDFJSONEncoderTest {
 			assertThat(actual(literal(123.0)))
 					.isEqualTo(expected(map(
 							entry("value", "123.0"),
-							entry("type", XMLSchema.DOUBLE.stringValue())
+							entry("type", XSD.DOUBLE.stringValue())
 					)));
 		}
 
@@ -187,7 +186,7 @@ final class RDFJSONEncoderTest {
 		}
 
 		@Test void testLiteralWithKnownDatatype() {
-			assertThat(actual(literal("2019-04-03", XMLSchema.DATE), datatype(XMLSchema.DATE)))
+			assertThat(actual(literal("2019-04-03", XSD.DATE), datatype(XSD.DATE)))
 					.isEqualTo(expected("2019-04-03"));
 		}
 

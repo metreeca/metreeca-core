@@ -34,15 +34,6 @@ import static com.metreeca.rest.Handler.handler;
 @FunctionalInterface public interface Wrapper {
 
 	/**
-	 * Creates a dummy wrapper.
-	 *
-	 * @return a dummy wrapper that performs no action on requests and responses
-	 */
-	public static Wrapper wrapper() {
-		return handler -> handler;
-	}
-
-	/**
 	 * Creates a conditional wrapper.
 	 *
 	 * @param test the request predicate used to decide if requests and responses are to be routed through the wrapper
@@ -50,7 +41,7 @@ import static com.metreeca.rest.Handler.handler;
 	 *             true} on the request
 	 *
 	 * @return a conditional wrapper that routes requests and responses through the {@code pass} handler if the {@code
-	 * test} predicate evaluates to {@code true} on the request or to a {@linkplain #wrapper() dummy wrapper}
+	 * test} predicate evaluates to {@code true} on the request or to a dummy wrapper
 	 * otherwise
 	 *
 	 * @throws NullPointerException if either {@code test} or {@code pass} is null
@@ -65,7 +56,7 @@ import static com.metreeca.rest.Handler.handler;
 			throw new NullPointerException("null pass wrapper");
 		}
 
-		return wrapper(test, pass, wrapper());
+		return wrapper(test, pass, handler -> handler);
 	}
 
 	/**

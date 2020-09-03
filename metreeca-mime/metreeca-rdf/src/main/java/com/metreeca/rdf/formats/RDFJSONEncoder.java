@@ -17,12 +17,13 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.rdf.Values;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import javax.json.*;
 import java.math.BigDecimal;
@@ -32,10 +33,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
-import static com.metreeca.rest.formats.JSONFormat.aliaser;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
+import static com.metreeca.rest.formats.JSONFormat.aliaser;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 import static com.metreeca.tree.shapes.MaxCount.maxCount;
@@ -181,10 +182,10 @@ abstract class RDFJSONEncoder {
 
 		try {
 
-			return datatype.equals(XMLSchema.BOOLEAN) ? json(literal.booleanValue())
-					: datatype.equals(XMLSchema.STRING) ? json(literal.stringValue())
-					: datatype.equals(XMLSchema.INTEGER) ? json(literal.integerValue())
-					: datatype.equals(XMLSchema.DECIMAL) ? json(literal.decimalValue())
+			return datatype.equals(XSD.BOOLEAN) ? json(literal.booleanValue())
+					: datatype.equals(XSD.STRING) ? json(literal.stringValue())
+					: datatype.equals(XSD.INTEGER) ? json(literal.integerValue())
+					: datatype.equals(XSD.DECIMAL) ? json(literal.decimalValue())
 					: datatype.equals(RDF.LANGSTRING) ? json(literal, literal.getLanguage().orElse(""))
 					: datatype(shape).isPresent() ? Json.createValue(literal.stringValue()) // only lexical value if
 					// type is known

@@ -6,7 +6,6 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="metreeca-gate" />
         <module name="metreeca-rdf4j" />
         <module name="metreeca-rest" />
         <module name="metreeca-http" />

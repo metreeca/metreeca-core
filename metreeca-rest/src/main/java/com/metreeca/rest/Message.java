@@ -50,7 +50,6 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
 
-	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b");
 
 
@@ -178,18 +177,6 @@ public abstract class Message<T extends Message<T>> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Tests if this message is interactive.
-	 *
-	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
-	 * usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
-	 */
-	public boolean interactive() {
-		return Stream.of(headers("accept"), headers("content-type"))
-				.flatMap(Collection::stream)
-				.anyMatch(value -> HTMLPattern.matcher(value).find());
-	}
 
 	/**
 	 * Retrieves the character encoding of this message.

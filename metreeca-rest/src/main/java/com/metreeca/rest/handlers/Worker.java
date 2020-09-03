@@ -18,14 +18,9 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.WriterFormat.writer;
@@ -53,9 +48,36 @@ public final class Worker implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Configures the handler for the OPTIONS HTTP method.
+	 *
+	 * @param handler the handler to be delegated for OPTIONS HTTP method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is null
+	 */
+	public Worker options(final Handler handler) {
+		return method(Request.OPTIONS, handler);
+	}
+
+
+	/**
+	 * Configures the handler for the HEAD HTTP method.
+	 *
+	 * @param handler the handler to be delegated for HEAD HTTP method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is null
+	 */
+	public Worker head(final Handler handler) {
+		return method(Request.HEAD, handler);
+	}
+
+	/**
 	 * Configures the handler for the GET HTTP method.
 	 *
-	 * @param handler the handler to be delegated for HTTP GET method
+	 * @param handler the handler to be delegated for GET HTTP method
 	 *
 	 * @return this dispatcher
 	 *
@@ -69,7 +91,7 @@ public final class Worker implements Handler {
 	/**
 	 * Configures the handler for the POST HTTP method.
 	 *
-	 * @param handler the handler to be delegated for HTTP POST method
+	 * @param handler the handler to be delegated for POST HTTP method
 	 *
 	 * @return this dispatcher
 	 *
@@ -93,9 +115,22 @@ public final class Worker implements Handler {
 	}
 
 	/**
+	 * Configures the handler for the PATCH HTTP method.
+	 *
+	 * @param handler the handler to be delegated for PATCH HTTP method
+	 *
+	 * @return this dispatcher
+	 *
+	 * @throws NullPointerException if {@code handler} is null
+	 */
+	public Worker patch(final Handler handler) {
+		return method(Request.PATCH, handler);
+	}
+
+	/**
 	 * Configures the handler for the DELETE HTTP method.
 	 *
-	 * @param handler the handler to be delegated for HTTP DELETE method
+	 * @param handler the handler to be delegated for DELETE HTTP method
 	 *
 	 * @return this dispatcher
 	 *

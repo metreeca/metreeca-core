@@ -22,9 +22,10 @@ import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Engine;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.function.Supplier;
 
@@ -59,24 +60,24 @@ public final class GraphEngine implements Engine {
 
 
 	private static final Shape TermShape=and(
-			field(RDFS.LABEL, and(optional(), datatype(XMLSchema.STRING)))
+			field(RDFS.LABEL, and(optional(), datatype(XSD.STRING)))
 	);
 
 	static final Shape TermsShape=and(
 			field(terms, and(multiple(),
 					field(value, and(required(), TermShape)),
-					field(count, and(required(), datatype(XMLSchema.INTEGER)))
+					field(count, and(required(), datatype(XSD.INTEGER)))
 			))
 	);
 
 	static final Shape StatsShape=and(
 
-			field(count, and(required(), datatype(XMLSchema.INTEGER))),
+			field(count, and(required(), datatype(XSD.INTEGER))),
 			field(min, and(optional(), TermShape)),
 			field(max, and(optional(), TermShape)),
 
 			field(stats, and(multiple(),
-					field(count, and(required(), datatype(XMLSchema.INTEGER))),
+					field(count, and(required(), datatype(XSD.INTEGER))),
 					field(min, and(required(), TermShape)),
 					field(max, and(required(), TermShape))
 			))
