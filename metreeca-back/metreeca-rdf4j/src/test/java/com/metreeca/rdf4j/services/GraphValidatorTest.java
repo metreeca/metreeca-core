@@ -18,14 +18,13 @@
 package com.metreeca.rdf4j.services;
 
 import com.metreeca.rdf.Values;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -206,14 +205,14 @@ final class GraphValidatorTest {
 			assertThat(validate(datatype(Values.LiteralType), "1")).hasValue();
 			assertThat(validate(datatype(Values.LiteralType), "_:x")).hasError();
 
-			assertThat(validate(datatype(XMLSchema.STRING), "'text'")).hasValue();
-			assertThat(validate(datatype(XMLSchema.STRING), "_:x")).hasError();
+			assertThat(validate(datatype(XSD.STRING), "'text'")).hasValue();
+			assertThat(validate(datatype(XSD.STRING), "_:x")).hasError();
 
 			assertThat(validate(datatype(RDF.LANGSTRING), "'text'@en")).hasValue();
 			assertThat(validate(datatype(RDF.LANGSTRING), "_:x")).hasError();
 
-			assertThat(validate(datatype(XMLSchema.BOOLEAN), "true")).hasValue();
-			assertThat(validate(datatype(XMLSchema.BOOLEAN), "_:x")).hasError();
+			assertThat(validate(datatype(XSD.BOOLEAN), "true")).hasValue();
+			assertThat(validate(datatype(XSD.BOOLEAN), "_:x")).hasError();
 
 			assertThat(validate(datatype(Values.IRIType))).as("empty focus").hasValue();
 

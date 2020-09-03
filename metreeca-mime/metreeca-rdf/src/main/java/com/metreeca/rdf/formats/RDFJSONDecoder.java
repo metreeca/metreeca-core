@@ -17,12 +17,13 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.rdf.Values;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import javax.json.*;
 import java.net.URI;
@@ -34,9 +35,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.formats.JSONFormat.resolver;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
+import static com.metreeca.rest.formats.JSONFormat.resolver;
 import static com.metreeca.tree.shapes.Datatype.datatype;
 import static com.metreeca.tree.shapes.Field.fields;
 import static java.util.stream.Collectors.toMap;
@@ -228,7 +229,7 @@ abstract class RDFJSONDecoder {
 
 				: (value != null) ? (type != null) ? literal(value, iri(type))
 				: (language != null) ? literal(value, language)
-				: literal(value, datatype(shape).map(RDFFormat::iri).orElse(XMLSchema.STRING))
+				: literal(value, datatype(shape).map(RDFFormat::iri).orElse(XSD.STRING))
 
 				: focus != null ? focus : bnode();
 
@@ -241,7 +242,7 @@ abstract class RDFJSONDecoder {
 	private Map.Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
-		final IRI type=datatype(shape).filter(o -> o instanceof IRI).map(o -> (IRI)o).orElse(XMLSchema.STRING);
+		final IRI type=datatype(shape).filter(o -> o instanceof IRI).map(o -> (IRI)o).orElse(XSD.STRING);
 
 		final Value value=ResourceType.equals(type) ? resource(text)
 				: BNodeType.equals(type) ? bnode(text)
@@ -257,16 +258,16 @@ abstract class RDFJSONDecoder {
 
 		final Literal value
 
-				=XMLSchema.DECIMAL.equals(datatype) ? Values.literal(number.bigDecimalValue())
-				: XMLSchema.INTEGER.equals(datatype) ? Values.literal(number.bigIntegerValue())
+				=XSD.DECIMAL.equals(datatype) ? Values.literal(number.bigDecimalValue())
+				: XSD.INTEGER.equals(datatype) ? Values.literal(number.bigIntegerValue())
 
-				: XMLSchema.DOUBLE.equals(datatype) ? Values.literal(number.numberValue().doubleValue())
-				: XMLSchema.FLOAT.equals(datatype) ? Values.literal(number.numberValue().floatValue())
+				: XSD.DOUBLE.equals(datatype) ? Values.literal(number.numberValue().doubleValue())
+				: XSD.FLOAT.equals(datatype) ? Values.literal(number.numberValue().floatValue())
 
-				: XMLSchema.LONG.equals(datatype) ? Values.literal(number.numberValue().longValue())
-				: XMLSchema.INTEGER.equals(datatype) ? Values.literal(number.numberValue().intValue())
-				: XMLSchema.SHORT.equals(datatype) ? Values.literal(number.numberValue().shortValue())
-				: XMLSchema.BYTE.equals(datatype) ? Values.literal(number.numberValue().byteValue())
+				: XSD.LONG.equals(datatype) ? Values.literal(number.numberValue().longValue())
+				: XSD.INTEGER.equals(datatype) ? Values.literal(number.numberValue().intValue())
+				: XSD.SHORT.equals(datatype) ? Values.literal(number.numberValue().shortValue())
+				: XSD.BYTE.equals(datatype) ? Values.literal(number.numberValue().byteValue())
 
 				: number.isIntegral() ? Values.literal(number.bigIntegerValue())
 				: Values.literal(number.bigDecimalValue());

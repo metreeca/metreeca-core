@@ -20,31 +20,25 @@ package com.metreeca.rdf.formats;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.Or;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.junit.jupiter.api.Test;
 
 import javax.json.*;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.item;
 import static com.metreeca.rdf.formats.RDFJSONTest.*;
+import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static com.metreeca.tree.Shape.multiple;
 import static com.metreeca.tree.Shape.required;
 import static com.metreeca.tree.shapes.And.and;
@@ -97,7 +91,7 @@ final class RDFJSONWriterTest {
 		assertEquivalent("decimal", values.apply(new BigDecimal("1.0")), write(decode("[] rdf:value 1.0 .")));
 
 		assertEquivalent("numeric",
-				values.apply(map(entry("value", "1"), entry("type", XMLSchema.INT.stringValue()))),
+				values.apply(map(entry("value", "1"), entry("type", XSD.INT.stringValue()))),
 				write(decode("[] rdf:value '1'^^xsd:int .")));
 
 		assertEquivalent("custom",
@@ -109,7 +103,7 @@ final class RDFJSONWriterTest {
 				write(decode("[] rdf:value 'text'@en .")));
 
 		assertEquivalent("malformed",
-				values.apply(map(entry("value", "malformed"), entry("type", XMLSchema.BOOLEAN.stringValue()))),
+				values.apply(map(entry("value", "malformed"), entry("type", XSD.BOOLEAN.stringValue()))),
 				write(decode("[] rdf:value 'malformed'^^xsd:boolean .")));
 
 	}
@@ -390,7 +384,7 @@ final class RDFJSONWriterTest {
 				write(
 						decode("_:focus rdf:value '2016-08-11'^^xsd:date."),
 						bnode("focus"),
-						field(RDF.VALUE, and(datatype(XMLSchema.DATE), maxCount(1)))
+						field(RDF.VALUE, and(datatype(XSD.DATE), maxCount(1)))
 				));
 	}
 
