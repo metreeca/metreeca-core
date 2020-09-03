@@ -20,14 +20,15 @@ package com.metreeca.rest;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
-import javax.json.JsonException;
-import javax.json.JsonValue;
+import javax.json.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.TextFormat.text;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 
@@ -98,7 +99,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @param status the status code for the response
 	 *
-	 * @return a new lazy response {@linkplain Response#request() associated} to this request
+	 * @return a new lazy response for this request
 	 *
 	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
 	 */
@@ -114,9 +115,90 @@ public final class Request extends Message<Request> {
 	/**
 	 * Creates a response for this request.
 	 *
+	 * @param status the response status code
+	 * @param body   the human readable response body
+	 *
+	 * @return a new lazy response for this request
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 * @throws NullPointerException     if {@code body} is null
+	 */
+	public Future<Response> reply(final int status, final String body) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
+
+		return reply(status).map(response -> status < 500
+				? response.body(text(), body)
+				: response.cause(new Exception(body))
+		);
+	}
+
+	/**
+	 * Creates a response for this request.
+	 *
+	 * @param status the response status code
+	 * @param body   the machine readable response body
+	 *
+	 * @return a new lazy response for this request
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 * @throws NullPointerException     if {@code body} is null
+	 */
+	public Future<Response> reply(final int status, final JsonObject body) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		if ( body == null ) {
+			throw new NullPointerException("null body");
+		}
+
+		return reply(status).map(response -> status < 500
+				? response.body(json(), body)
+				: response.cause(new Exception(body.toString()))
+		);
+	}
+
+	/**
+	 * Creates a response for this request.
+	 *
+	 * @param status the response status code
+	 * @param cause  the exceptional response cause
+	 *
+	 * @return a new lazy response for this request
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 * @throws NullPointerException     if {@code cause} is null
+	 */
+	public Future<Response> reply(final int status, final Throwable cause) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
+		return reply(status).map(response -> status < 500
+				? response.body(text(), Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString))
+				: response.cause(cause)
+		);
+	}
+
+	/**
+	 * Creates a response for this request.
+	 *
 	 * @param mapper the mapping function  used to initialize the new response; must return a non-null value
 	 *
-	 * @return a new lazy response {@linkplain Response#request() associated} to this request
+	 * @return a new lazy response for this request
 	 *
 	 * @throws NullPointerException if {@code mapper} is null or return a null value
 	 */
