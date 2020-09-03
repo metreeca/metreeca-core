@@ -31,7 +31,7 @@
 	<artifactId>metreeca-tree</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca Data Modelling Framework</name>
+	<name>Metreeca Modelling Framework</name>
 	<description>A shape-based linked data modelling framework.</description>
 
 </project>
