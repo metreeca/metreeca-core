@@ -89,7 +89,7 @@ final class GraphProcessorTest {
 
 					// ;(virtuoso) counts reported as xsd:int // !!! review dependency
 
-					.map(statement -> type(statement.getObject()).equals(XMLSchema.INT) ? statement(
+					.map(statement -> type(statement.getObject()).equals(XSD.INT) ? statement(
 							statement.getSubject(),
 							statement.getPredicate(),
 							literal(integer(statement.getObject()).orElse(BigInteger.ZERO)),
@@ -429,13 +429,13 @@ final class GraphProcessorTest {
 
 				assertThat(query(
 
-						Root, items(field(term("code"), datatype(XMLSchema.INTEGER)))
+						Root, items(field(term("code"), datatype(XSD.INTEGER)))
 
 				)).isEmpty();
 
 				assertThat(query(
 
-						Root, items(field(term("code"), datatype(XMLSchema.STRING)))
+						Root, items(field(term("code"), datatype(XSD.STRING)))
 
 				)).isIsomorphicTo(graph(
 

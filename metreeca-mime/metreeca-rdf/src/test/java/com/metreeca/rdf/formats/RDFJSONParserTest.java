@@ -19,13 +19,12 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
+
 import org.assertj.core.api.Assertions;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.rio.RDFParseException;
 import org.eclipse.rdf4j.rio.RDFParser;
 import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
@@ -34,9 +33,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
 import javax.json.JsonValue;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -168,7 +165,7 @@ final class RDFJSONParserTest {
 				.isEqualTo(decode("[] rdf:first 1 ."));
 
 		assertThat(rdf(map(entry("id", ""), entry(first, map(entry("value", "1"), entry("type",
-				XMLSchema.INT.stringValue()))))))
+				XSD.INT.stringValue()))))))
 				.as("numeric")
 				.isEqualTo(decode("[] rdf:first '1'^^xsd:int ."));
 
@@ -406,7 +403,7 @@ final class RDFJSONParserTest {
 		assertThat(rdf(
 				map(entry("id", ""), entry("first", "2016-08-11")),
 				null,
-				field(RDF.FIRST, datatype(XMLSchema.DATE))
+				field(RDF.FIRST, datatype(XSD.DATE))
 		))
 				.as("simplified literal with known datatype")
 				.isEqualTo(decode("[] rdf:first '2016-08-11'^^xsd:date."));
@@ -467,7 +464,7 @@ final class RDFJSONParserTest {
 		assertThat(rdf(
 				map(entry("id", ""), entry(first, list(1.0, integer(1), decimal(1)))),
 				null,
-				field(RDF.FIRST, datatype(XMLSchema.DECIMAL))
+				field(RDF.FIRST, datatype(XSD.DECIMAL))
 		))
 				.as("proved decimal")
 				.isEqualTo(decode("[] rdf:first 1.0, '1'^^xsd:decimal ."));
@@ -479,7 +476,7 @@ final class RDFJSONParserTest {
 		assertThat(rdf(
 				map(entry("id", ""), entry(first, list(1.0, integer(1), decimal(1)))),
 				null,
-				field(RDF.FIRST, datatype(XMLSchema.DOUBLE))
+				field(RDF.FIRST, datatype(XSD.DOUBLE))
 		))
 				.as("proved decimal")
 				.isEqualTo(decode("[] rdf:first '1.0'^^xsd:double ."));
@@ -491,7 +488,7 @@ final class RDFJSONParserTest {
 		assertThatThrownBy(() -> rdf(map(entry("id", ""), entry(first, map(
 
 				entry("value", "22/5/2018"),
-				entry("type", XMLSchema.DATETIME.stringValue())
+				entry("type", XSD.DATETIME.stringValue())
 
 		))))).isInstanceOf(RDFParseException.class);
 

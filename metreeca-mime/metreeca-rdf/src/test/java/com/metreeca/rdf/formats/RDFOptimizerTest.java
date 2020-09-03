@@ -19,8 +19,9 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.tree.shapes.All.all;
@@ -66,13 +67,13 @@ final class RDFOptimizerTest {
 				.as("conjunction / superclass")
 				.isEqualTo(datatype(Values.IRIType));
 
-		assertThat(optimize(and(datatype(Values.LiteralType), datatype(XMLSchema.STRING))))
+		assertThat(optimize(and(datatype(Values.LiteralType), datatype(XSD.STRING))))
 				.as("conjunction / literal")
-				.isEqualTo(datatype(XMLSchema.STRING));
+				.isEqualTo(datatype(XSD.STRING));
 
-		assertThat(optimize(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING))))
+		assertThat(optimize(and(datatype(Values.ResourceType), datatype(XSD.STRING))))
 				.as("conjunction / unrelated")
-				.isEqualTo(and(datatype(Values.ResourceType), datatype(XMLSchema.STRING)));
+				.isEqualTo(and(datatype(Values.ResourceType), datatype(XSD.STRING)));
 
 		assertThat(optimize(or(datatype(Values.IRIType), datatype(Values.ResourceType))))
 				.as("disjunction / superclass")

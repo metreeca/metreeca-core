@@ -1,12 +1,25 @@
 /*
- * Copyright © 2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rdf;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.*;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
@@ -393,21 +406,21 @@ public final class Values {
 	}
 
 	public static Literal literal(final LocalDate value) {
-		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value.atStartOfDay()), XMLSchema.DATETIME);
+		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value.atStartOfDay()), XSD.DATETIME);
 	}
 
 	public static Literal literal(final LocalDateTime value) {
-		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value), XMLSchema.DATETIME);
+		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value), XSD.DATETIME);
 	}
 
 	public static Literal literal(final OffsetDateTime value) {
-		return value == null ? null : literal(ISO_OFFSET_DATE_TIME.format(value), XMLSchema.DATETIME);
+		return value == null ? null : literal(ISO_OFFSET_DATE_TIME.format(value), XSD.DATETIME);
 	}
 
 
 	public static Literal literal(final byte[] value) {
 		return value == null ? null : factory.createLiteral("data:application/octet-stream;base64,"
-				+Base64.getEncoder().encodeToString(value), XMLSchema.ANYURI);
+				+Base64.getEncoder().encodeToString(value), XSD.ANYURI);
 	}
 
 	public static Literal literal(final String value, final String lang) {
@@ -493,7 +506,7 @@ public final class Values {
 	public static Literal time(final Instant instant, final boolean millis) {
 		return instant == null ? null : literal(
 				ISO_DATE_TIME.format(instant.truncatedTo(millis ? ChronoUnit.MILLIS : ChronoUnit.SECONDS).atZone(UTC)),
-				XMLSchema.DATETIME
+				XSD.DATETIME
 		);
 	}
 
@@ -537,7 +550,7 @@ public final class Values {
 
 			return Optional.empty();
 
-		} else if ( literal.getDatatype().equals(XMLSchema.DATETIME) ) {
+		} else if ( literal.getDatatype().equals(XSD.DATETIME) ) {
 
 			final TemporalAccessor accessor=ISO_DATE_TIME.parse(literal.stringValue());
 
@@ -556,7 +569,7 @@ public final class Values {
 	}
 
 	public static Optional<LocalDate> localDate(final Literal value) { // !!! review/complete
-		return Optional.ofNullable(value != null && value.getDatatype().equals(XMLSchema.DATETIME)
+		return Optional.ofNullable(value != null && value.getDatatype().equals(XSD.DATETIME)
 				? ISO_LOCAL_DATE_TIME.parse(value.stringValue()).query(TemporalQueries.localDate())
 				: null // !!! review
 		);
@@ -666,11 +679,11 @@ public final class Values {
 
 			try {
 
-				return type.equals(XMLSchema.BOOLEAN) ? String.valueOf(literal.booleanValue())
-						: type.equals(XMLSchema.INTEGER) ? String.valueOf(literal.integerValue())
-						: type.equals(XMLSchema.DECIMAL) ? literal.decimalValue().toPlainString()
-						: type.equals(XMLSchema.DOUBLE) ? exponential().format(literal.doubleValue())
-						: type.equals(XMLSchema.STRING) ? quote(literal.getLabel())
+				return type.equals(XSD.BOOLEAN) ? String.valueOf(literal.booleanValue())
+						: type.equals(XSD.INTEGER) ? String.valueOf(literal.integerValue())
+						: type.equals(XSD.DECIMAL) ? literal.decimalValue().toPlainString()
+						: type.equals(XSD.DOUBLE) ? exponential().format(literal.doubleValue())
+						: type.equals(XSD.STRING) ? quote(literal.getLabel())
 						: literal.getLanguage()
 						.map(lang -> format(literal, lang))
 						.orElseGet(() -> format(literal, type, namespaces));

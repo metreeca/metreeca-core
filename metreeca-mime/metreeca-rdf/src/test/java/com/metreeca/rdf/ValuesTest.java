@@ -18,16 +18,12 @@
 package com.metreeca.rdf;
 
 import com.metreeca.tree.Shape;
+
 import org.assertj.core.data.MapEntry;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.*;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.RDFParserRegistry;
-import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.jupiter.api.Test;
 
@@ -35,10 +31,7 @@ import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import java.util.logging.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.*;
@@ -92,7 +85,7 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Textual=and(required(), datatype(XMLSchema.STRING));
+	public static final Shape Textual=and(required(), datatype(XSD.STRING));
 
 	public static final Shape Employee=role(Manager, Salesman).then(
 
@@ -101,20 +94,20 @@ public final class ValuesTest {
 					server().then(
 							field(RDF.TYPE, and(required(), datatype(IRIType))),
 							field(RDFS.LABEL, Textual),
-							field(term("code"), and(required(), datatype(XMLSchema.STRING), pattern("\\d+")))
+							field(term("code"), and(required(), datatype(XSD.STRING), pattern("\\d+")))
 					),
 
 					and(
 
-							field(term("forename"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-							field(term("surname"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-							field(term("email"), and(required(), datatype(XMLSchema.STRING), maxLength(80))),
-							field(term("title"), and(required(), datatype(XMLSchema.STRING), maxLength(80)))
+							field(term("forename"), and(required(), datatype(XSD.STRING), maxLength(80))),
+							field(term("surname"), and(required(), datatype(XSD.STRING), maxLength(80))),
+							field(term("email"), and(required(), datatype(XSD.STRING), maxLength(80))),
+							field(term("title"), and(required(), datatype(XSD.STRING), maxLength(80)))
 					),
 
 					role(Manager).then(
 
-							field(term("seniority"), and(required(), datatype(XMLSchema.INTEGER),
+							field(term("seniority"), and(required(), datatype(XSD.INTEGER),
 									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
 
 							field(term("supervisor"), and(
@@ -155,7 +148,7 @@ public final class ValuesTest {
 			entry("birt", Namespace),
 			entry("rdf", RDF.NAMESPACE),
 			entry("rdfs", RDFS.NAMESPACE),
-			entry("xsd", XMLSchema.NAMESPACE),
+			entry("xsd", XSD.NAMESPACE),
 			entry("ldp", LDP.NAMESPACE),
 			entry("skos", SKOS.NAMESPACE)
 	).collect(toMap(MapEntry::getKey, MapEntry::getValue)));

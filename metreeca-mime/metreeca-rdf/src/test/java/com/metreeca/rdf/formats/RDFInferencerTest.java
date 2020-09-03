@@ -19,8 +19,9 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.rdf.Values;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.BiFunction;
@@ -66,10 +67,10 @@ final class RDFInferencerTest {
 	@Test void testType() { // !!! improve testing of multiple implications
 
 		assertImplies("xsd:boolean has closed range",
-				datatype(XMLSchema.BOOLEAN), and(maxCount(1), in(literal(false), literal(true))));
+				datatype(XSD.BOOLEAN), and(maxCount(1), in(literal(false), literal(true))));
 
 		assertImplies("xsd:boolean has exclusive values",
-				datatype(XMLSchema.BOOLEAN), and(maxCount(1), in(literal(false), literal(true))));
+				datatype(XSD.BOOLEAN), and(maxCount(1), in(literal(false), literal(true))));
 
 	}
 
@@ -84,7 +85,7 @@ final class RDFInferencerTest {
 				in(literal(1), literal(2.0)), maxCount(2));
 
 		assertImplies("if unique, focus values share the datatype of the allowed value set",
-				in(literal(1), literal(2)), and(maxCount(2), datatype(XMLSchema.INT)));
+				in(literal(1), literal(2)), and(maxCount(2), datatype(XSD.INT)));
 
 	}
 

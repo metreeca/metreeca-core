@@ -20,12 +20,10 @@ package com.metreeca.rdf.formats;
 import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.tree.Shape;
-import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -155,10 +153,10 @@ final class RDFJSONDecoderTest {
 		@Test void testTypedLiteral() {
 			assertThat(value(createObjectBuilder()
 					.add("value", "2019-04-02")
-					.add("type", XMLSchema.DATE.stringValue())
+					.add("type", XSD.DATE.stringValue())
 					.build()
 			))
-					.isEqualTo(value(literal("2019-04-02", XMLSchema.DATE)));
+					.isEqualTo(value(literal("2019-04-02", XSD.DATE)));
 		}
 
 		@Test void testTaggedLiteral() {
@@ -245,8 +243,8 @@ final class RDFJSONDecoderTest {
 					.isEqualTo(value(iri(ValuesTest.Base, "id")));
 
 
-			assertThat(value(createValue("2019-04-02"), datatype(XMLSchema.DATE)))
-					.isEqualTo(value(literal("2019-04-02", XMLSchema.DATE)));
+			assertThat(value(createValue("2019-04-02"), datatype(XSD.DATE)))
+					.isEqualTo(value(literal("2019-04-02", XSD.DATE)));
 
 		}
 
@@ -280,41 +278,41 @@ final class RDFJSONDecoderTest {
 
 		@Test void testTypedNumber() {
 
-			assertThat(value(createValue(new BigDecimal("1.1")), datatype(XMLSchema.DECIMAL)))
+			assertThat(value(createValue(new BigDecimal("1.1")), datatype(XSD.DECIMAL)))
 					.as("decimal as decimal")
 					.isEqualTo(value(literal(new BigDecimal("1.1"))));
 
-			assertThat(value(createValue(new BigDecimal("1.1")), datatype(XMLSchema.INTEGER)))
+			assertThat(value(createValue(new BigDecimal("1.1")), datatype(XSD.INTEGER)))
 					.as("decimal as integer")
 					.isEqualTo(value(literal(new BigInteger("1"))));
 
-			assertThat(value(createValue(new BigDecimal("1.1")), datatype(XMLSchema.DOUBLE)))
+			assertThat(value(createValue(new BigDecimal("1.1")), datatype(XSD.DOUBLE)))
 					.as("decimal as double")
 					.isEqualTo(value(literal(1.1d)));
 
 
-			assertThat(value(createValue(new BigInteger("1")), datatype(XMLSchema.DECIMAL)))
+			assertThat(value(createValue(new BigInteger("1")), datatype(XSD.DECIMAL)))
 					.as("integer as decimal")
 					.isEqualTo(value(literal(new BigDecimal("1"))));
 
-			assertThat(value(createValue(new BigInteger("1")), datatype(XMLSchema.INTEGER)))
+			assertThat(value(createValue(new BigInteger("1")), datatype(XSD.INTEGER)))
 					.as("integer as integer")
 					.isEqualTo(value(literal(new BigInteger("1"))));
 
-			assertThat(value(createValue(new BigInteger("1")), datatype(XMLSchema.DOUBLE)))
+			assertThat(value(createValue(new BigInteger("1")), datatype(XSD.DOUBLE)))
 					.as("integer as double")
 					.isEqualTo(value(literal(1d)));
 
 
-			assertThat(value(createValue(1.1d), datatype(XMLSchema.DECIMAL)))
+			assertThat(value(createValue(1.1d), datatype(XSD.DECIMAL)))
 					.as("double as decimal")
 					.isEqualTo(value(literal(new BigDecimal("1.1"))));
 
-			assertThat(value(createValue(1.1d), datatype(XMLSchema.INTEGER)))
+			assertThat(value(createValue(1.1d), datatype(XSD.INTEGER)))
 					.as("double as integer")
 					.isEqualTo(value(literal(new BigInteger("1"))));
 
-			assertThat(value(createValue(1.1d), datatype(XMLSchema.DOUBLE)))
+			assertThat(value(createValue(1.1d), datatype(XSD.DOUBLE)))
 					.as("double as double")
 					.isEqualTo(value(literal(1.1d)));
 
