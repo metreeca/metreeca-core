@@ -22,6 +22,7 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.And;
 
 import java.net.URI;
+import java.nio.charset.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -30,6 +31,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tree.shapes.And.and;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
@@ -179,16 +181,21 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the character encoding of this message.
+	 * Retrieves the charset of this message.
 	 *
-	 * @return the character encoding set in the {@code Content-Type} header of this message; empty if this message
-	 * doesn't include a  {@code Content-Type} header or if no character encoding is explicitly set
+	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to
+	 * {@linkplain StandardCharsets#UTF_8 UTF-8} if this message doesn't include a {@code Content-Type} header or if
+	 * no charset is explicitly defined
+	 *
+	 * @throws UnsupportedCharsetException if the charset of this message is not supported
 	 */
-	public Optional<String> charset() {
+	public Charset charset() throws UnsupportedCharsetException {
 		return header("Content-Type")
 				.map(CharsetPattern::matcher)
 				.filter(Matcher::find)
-				.map(matcher -> matcher.group("charset"));
+				.map(matcher -> matcher.group("charset"))
+				.map(Charset::forName)
+				.orElse(UTF_8);
 	}
 
 

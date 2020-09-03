@@ -25,7 +25,6 @@ import java.nio.charset.StandardCharsets;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.WriterFormat.writer;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -92,17 +91,7 @@ public final class TextFormat extends Format<String> {
 	@Override public <M extends Message<M>> M set(final M message, final String value) {
 		return message
 
-				.body(input, () -> {
-					try {
-
-						return new ByteArrayInputStream(value.getBytes(message.charset().orElseGet(UTF_8::name)));
-
-					} catch ( final UnsupportedEncodingException e ) {
-
-						throw new UncheckedIOException(e);
-
-					}
-				})
+				.body(input, () -> new ByteArrayInputStream(value.getBytes(message.charset())))
 
 				.body(reader, () -> new StringReader(value))
 

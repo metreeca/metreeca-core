@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.InputFormat.input;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -62,7 +61,7 @@ public final class ReaderFormat extends Format<Supplier<Reader>> {
 	 */
 	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
 		return message.body(input).value(input -> () ->
-				Codecs.reader(input.get(), message.charset().orElse(UTF_8.name()))
+				Codecs.reader(input.get(), message.charset())
 		);
 	}
 

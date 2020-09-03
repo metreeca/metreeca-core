@@ -17,20 +17,14 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Codecs;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
+import com.metreeca.rest.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
@@ -81,7 +75,7 @@ public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 
 					try ( final OutputStream output=source.get() ) {
 
-						value.accept(() -> Codecs.writer(output, message.charset().orElse(UTF_8.name())));
+						value.accept(() -> Codecs.writer(output, message.charset()));
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
