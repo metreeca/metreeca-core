@@ -33,6 +33,12 @@ import static com.metreeca.rest.formats.WriterFormat.writer;
 public final class TextFormat extends Format<String> {
 
 	/**
+	 * The default MIME type for textual messages ({@value}).
+	 */
+	public static final String MIME="text/plain";
+
+
+	/**
 	 * Creates a textual format.
 	 *
 	 * @return the new textual format

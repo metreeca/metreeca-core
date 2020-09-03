@@ -31,6 +31,12 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 public final class DataFormat extends Format<byte[]> {
 
 	/**
+	 * The default MIME type for binary messages ({@value}).
+	 */
+	public static final String MIME="application/octet-stream";
+
+
+	/**
 	 * Creates a binary body format.
 	 *
 	 * @return a new binary body format

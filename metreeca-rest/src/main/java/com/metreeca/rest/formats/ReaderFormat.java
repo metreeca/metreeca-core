@@ -43,9 +43,6 @@ public final class ReaderFormat extends Format<Supplier<Reader>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final InputFormat input=input();
-
-
 	private ReaderFormat() {}
 
 
@@ -60,7 +57,7 @@ public final class ReaderFormat extends Format<Supplier<Reader>> {
 	 * 		processing failure, otherwise
 	 */
 	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
-		return message.body(input).value(input -> () ->
+		return message.body(input()).value(input -> () ->
 				Codecs.reader(input.get(), message.charset())
 		);
 	}
