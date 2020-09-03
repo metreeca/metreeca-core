@@ -19,7 +19,6 @@ package com.metreeca.http;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.services.Logger;
-import com.metreeca.rest.wrappers.API;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -33,10 +32,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static com.metreeca.rest.Response.NotFound;
-import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.rest.services.Logger.logger;
 
 /**
@@ -56,37 +53,15 @@ import static com.metreeca.rest.services.Logger.logger;
  */
 public final class HTTPServer {
 
-	public static void main(final String... args) {
-		new HTTPServer()
-
-				.handler(context -> context
-
-						.get(() -> new API()
-
-								.wrap(request -> request.reply(response -> response
-										.status(OK)
-										.body(text(), "ciao!")
-								))
-
-						)
-
-				)
-
-				.start();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private final String root="/"; // must end with slash
 
 	private final int backlog=128;
 	private final int delay=0;
 
-	private Function<Context, Handler> factory=context -> request -> request.reply(response ->
-			response.status(NotFound)
-	);
+	private Function<Context, Handler> factory=context -> request -> request.reply(NotFound);
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public HTTPServer handler(final Function<Context, Handler> factory) {
 
