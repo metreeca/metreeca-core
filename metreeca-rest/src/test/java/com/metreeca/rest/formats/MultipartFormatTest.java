@@ -18,17 +18,14 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
+
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.MessageAssert.assertThat;
@@ -235,7 +232,7 @@ final class MultipartFormatTest {
 
 								final StringWriter writer=new StringWriter();
 
-								target.accept(() -> Codecs.output(writer));
+								target.accept(Codecs.output(writer));
 
 								assertThat(writer.toString())
 										.contains("--1234567890--");

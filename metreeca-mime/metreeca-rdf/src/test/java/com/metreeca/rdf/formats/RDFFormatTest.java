@@ -21,6 +21,7 @@ import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
+
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -28,10 +29,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import javax.json.JsonException;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
@@ -204,10 +202,11 @@ final class RDFFormatTest {
 
 						try ( final ByteArrayOutputStream stream=new ByteArrayOutputStream() ) {
 
-							consumer.accept(() -> stream);
+							consumer.accept(stream);
 
 							assertThat(decode(new String(stream.toByteArray(), UTF_8)))
-									.isIsomorphicTo(decode("<http://example.com/container> ldp:contains <http://example"
+									.isIsomorphicTo(decode("<http://example.com/container> ldp:contains "
+											+ "<http://example"
 											+".com/resource> ."));
 
 							return consumer;

@@ -20,30 +20,20 @@ package com.metreeca.rdf4j.handlers;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tree.Shape;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.*;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
@@ -154,13 +144,7 @@ public final class Graphs extends Endpoint<Graphs> {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(output(), _target -> {
-								try ( final OutputStream output=_target.get() ) {
-									connection.export(factory.getWriter(output), context);
-								} catch ( final IOException e ) {
-									throw new UncheckedIOException(e);
-								}
-							})
+							.body(output(), output -> connection.export(factory.getWriter(output), context))
 
 					).accept(consumer);
 				});

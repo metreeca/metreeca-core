@@ -44,11 +44,6 @@ public final class TextFormat extends Format<String> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final InputFormat input=input();
-	private final ReaderFormat reader=reader();
-	private final WriterFormat writer=writer();
-
-
 	private TextFormat() {}
 
 
@@ -60,7 +55,7 @@ public final class TextFormat extends Format<String> {
 	 * 		otherwise
 	 */
 	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(reader).value(source -> {
+		return message.body(reader()).value(source -> {
 			try ( final Reader reader=source.get() ) {
 
 				return Codecs.text(reader);
@@ -91,14 +86,14 @@ public final class TextFormat extends Format<String> {
 	@Override public <M extends Message<M>> M set(final M message, final String value) {
 		return message
 
-				.body(input, () -> new ByteArrayInputStream(value.getBytes(message.charset())))
+				.body(input(), () -> new ByteArrayInputStream(value.getBytes(message.charset())))
 
-				.body(reader, () -> new StringReader(value))
+				.body(reader(), () -> new StringReader(value))
 
-				.body(writer, target -> {
-					try ( final Writer output=target.get() ) {
+				.body(writer(), writer -> {
+					try {
 
-						output.write(value);
+						writer.write(value);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);

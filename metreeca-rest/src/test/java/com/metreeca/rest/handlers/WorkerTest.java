@@ -19,11 +19,10 @@ package com.metreeca.rest.handlers;
 
 
 import com.metreeca.rest.*;
+
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.WriterFormat.writer;
@@ -37,16 +36,16 @@ final class WorkerTest {
 
 				.status(Response.OK)
 
-				.body(writer(), target -> {
-					try ( final Writer writer=target.get() ) {
+				.body(writer(), writer -> {
+					try {
 						writer.write("body");
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
 				})
 
-				.body(output(), target -> {
-					try ( final OutputStream output=target.get() ) {
+				.body(output(), output -> {
+					try {
 						output.write("body".getBytes());
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -100,12 +99,12 @@ final class WorkerTest {
 
 					assertThat(response.status()).isEqualTo(Response.OK);
 
-					assertThat(((Result<Consumer<Supplier<OutputStream>>, Failure>)response.body(output())).<byte[]>fold(
+					assertThat(response.body(output()).<byte[]>fold(
 							v -> {
 
 								final ByteArrayOutputStream output=new ByteArrayOutputStream();
 
-								v.accept(() -> output);
+								v.accept(output);
 
 								return output.toByteArray();
 
@@ -113,12 +112,12 @@ final class WorkerTest {
 							e -> new byte[0]
 					)).isEmpty();
 
-					assertThat(((Result<Consumer<Supplier<Writer>>, Failure>)response.body(writer())).<String>fold(
+					assertThat(response.body(writer()).<String>fold(
 							v -> {
 
 								final StringWriter output=new StringWriter();
 
-								v.accept(() -> output);
+								v.accept(output);
 
 								return output.toString();
 

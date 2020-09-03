@@ -18,14 +18,12 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.Request;
+
 import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
 import javax.json.JsonObject;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UncheckedIOException;
+import java.io.*;
 
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -76,7 +74,7 @@ final class JSONFormatTest {
 						.value(client -> {
 							try ( final StringWriter writer=new StringWriter() ) {
 
-								client.accept(() -> writer);
+								client.accept(writer);
 
 								return writer.toString();
 

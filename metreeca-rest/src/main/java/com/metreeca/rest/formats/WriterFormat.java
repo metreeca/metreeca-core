@@ -17,12 +17,12 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Format;
+import com.metreeca.rest.Message;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -30,7 +30,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 /**
  * Textual output body format.
  */
-public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
+public final class WriterFormat extends Format<Consumer<Writer>> {
 
 	/**
 	 * The default MIME type for textual message bodies ({@value}).
@@ -50,8 +50,6 @@ public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final OutputFormat output=output();
-
 	private WriterFormat() {}
 
 
@@ -66,21 +64,17 @@ public final class WriterFormat extends Format<Consumer<Supplier<Writer>>> {
 	 *
 	 * <p>Sets the {@code Content-Type} header of {@code message} to {@link #MIME}, unless already defined.</p>
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final Consumer<Supplier<Writer>> value) {
+	@Override public <M extends Message<M>> M set(final M message, final Consumer<Writer> value) {
 		return message
 
 				.header("~Content-Type", MIME)
 
-				.body(output, source -> {
-
-					try ( final OutputStream output=source.get() ) {
-
-						value.accept(() -> Codecs.writer(output, message.charset()));
-
+				.body(output(), output -> {
+					try ( final OutputStreamWriter writer=new OutputStreamWriter(output, message.charset()) ) {
+						value.accept(writer);
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-
 				});
 	}
 

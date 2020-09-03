@@ -17,14 +17,10 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Format;
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Result;
+import com.metreeca.rest.*;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static com.metreeca.rest.Result.Value;
 
@@ -32,7 +28,7 @@ import static com.metreeca.rest.Result.Value;
 /**
  * Raw binary output body format.
  */
-public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>> {
+public final class OutputFormat extends Format<Consumer<OutputStream>> {
 
 	/**
 	 * The default MIME type for binary raw message bodies ({@value}).
@@ -58,16 +54,16 @@ public final class OutputFormat extends Format<Consumer<Supplier<OutputStream>>>
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return a result providing access to a consumer taking no action on the supplied output stream provider
+	 * @return a result providing access to a consumer taking no action on the supplied output stream
 	 */
-	@Override public Result<Consumer<Supplier<OutputStream>>, Failure> get(final Message<?> message) {
+	@Override public Result<Consumer<OutputStream>, Failure> get(final Message<?> message) {
 		return Value(target -> {});
 	}
 
 	/**
 	 * Configures the {@code Content-Type} header of {@code message} to {@value #MIME}, unless already defined.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final Consumer<Supplier<OutputStream>> value) {
+	@Override public <M extends Message<M>> M set(final M message, final Consumer<OutputStream> value) {
 		return message.header("~Content-Type", MIME);
 	}
 

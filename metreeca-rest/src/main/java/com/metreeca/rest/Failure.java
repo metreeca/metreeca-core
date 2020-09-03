@@ -21,14 +21,9 @@ import com.metreeca.tree.Trace;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import static com.metreeca.rest.formats.WriterFormat.writer;
@@ -290,18 +285,11 @@ public final class Failure implements Function<Response, Response> {
 				// !!! revoew/remove
 
 				.headers("Content-Type", "application/json")
-				.body(writer(), supplier -> {
-					try ( final Writer writer=supplier.get() ) {
-
-						Json
-								.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true))
-								.createWriter(writer)
-								.write(ticket());
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				});
+				.body(writer(), writer -> Json
+						.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true))
+						.createWriter(writer)
+						.write(ticket())
+				);
 	}
 
 

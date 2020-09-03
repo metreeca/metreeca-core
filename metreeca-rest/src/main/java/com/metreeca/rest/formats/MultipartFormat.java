@@ -19,7 +19,8 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -120,9 +121,6 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	private final int part;
 	private final int body;
 
-	private final InputFormat input=input();
-	private final OutputFormat output=output();
-
 
 	private MultipartFormat(final int part, final int body) {
 		this.part=part;
@@ -137,7 +135,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 				.filter(type -> type.startsWith("multipart/"))
 
-				.map(type -> message.body(input).process(source -> {
+				.map(type -> message.body(input()).process(source -> {
 
 					final String boundary=message
 							.header("Content-Type")
@@ -182,7 +180,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 											mapping(Map.Entry::getValue, toList())
 									)))
 
-									.body(input, () -> content)
+									.body(input(), () -> content)
 
 							);
 
@@ -235,38 +233,38 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 		}
 
-		return message.body(output, target -> {
-			try ( final OutputStream out=target.get() ) {
+		return message.body(output(), output -> {
+			try {
 
 				for (final Message<?> part : value.values()) {
 
-					out.write(Dashes);
-					out.write(boundary);
-					out.write(CRLF);
+					output.write(Dashes);
+					output.write(boundary);
+					output.write(CRLF);
 
 					for (final Map.Entry<String, List<String>> header : part.headers().entrySet()) {
 
 						final String name=header.getKey();
 
 						for (final String _value : header.getValue()) {
-							out.write(name.getBytes(UTF_8));
-							out.write(Colon);
-							out.write(_value.getBytes(UTF_8));
-							out.write(CRLF);
+							output.write(name.getBytes(UTF_8));
+							output.write(Colon);
+							output.write(_value.getBytes(UTF_8));
+							output.write(CRLF);
 						}
 					}
 
-					out.write(CRLF);
+					output.write(CRLF);
 
-					part.body(output).value().ifPresent(output -> output.accept(() -> out)); // !!! handle errors
+					part.body(output()).value().ifPresent(target -> target.accept(output)); // !!! handle errors
 
-					out.write(CRLF);
+					output.write(CRLF);
 				}
 
-				out.write(Dashes);
-				out.write(boundary);
-				out.write(Dashes);
-				out.write(CRLF);
+				output.write(Dashes);
+				output.write(boundary);
+				output.write(Dashes);
+				output.write(CRLF);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

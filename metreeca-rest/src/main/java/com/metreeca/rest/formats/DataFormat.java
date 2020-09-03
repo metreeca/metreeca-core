@@ -42,10 +42,6 @@ public final class DataFormat extends Format<byte[]> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final InputFormat input=input();
-	private final OutputFormat output=output();
-
-
 	private DataFormat() {}
 
 
@@ -58,7 +54,7 @@ public final class DataFormat extends Format<byte[]> {
 	 * 		otherwise
 	 */
 	@Override public Result<byte[], Failure> get(final Message<?> message) {
-		return message.body(input).value(
+		return message.body(input()).value(
 
 				source -> {
 					try ( final InputStream input=source.get() ) {
@@ -89,12 +85,12 @@ public final class DataFormat extends Format<byte[]> {
 	@Override public <M extends Message<M>> M set(final M message, final byte... value) {
 		return message
 
-				.body(input, () ->
+				.body(input(), () ->
 						new ByteArrayInputStream(value)
 				)
 
-				.body(output, target -> {
-					try ( final OutputStream output=target.get() ) {
+				.body(output(), output -> {
+					try {
 
 						output.write(value);
 

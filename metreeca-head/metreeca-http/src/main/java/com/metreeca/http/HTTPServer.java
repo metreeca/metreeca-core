@@ -23,8 +23,7 @@ import com.metreeca.rest.services.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Objects;
@@ -170,7 +169,13 @@ public final class HTTPServer {
 					.orElse(0L)
 			);
 
-			response.body(output()).value().ifPresent(consumer -> consumer.accept(exchange::getResponseBody));
+			response.body(output()).value().ifPresent(consumer -> {
+				try ( final OutputStream output=exchange.getResponseBody() ) {
+					consumer.accept(output);
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			});
 
 			exchange.close();
 

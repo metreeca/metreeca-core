@@ -197,13 +197,13 @@ public abstract class Gateway implements Filter {
 
 			// ignore missing response bodies // !!! handle other body retrieval errors
 
-			response.body(output()).value().ifPresent(consumer -> consumer.accept(() -> {
+			response.body(output()).value().ifPresent(target -> {
 				try {
-					return http.getOutputStream();
+					target.accept(http.getOutputStream());
 				} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
 				}
-			}));
+			});
 
 			if ( !http.isCommitted() ) { // flush if not already committed by bodies
 				try {

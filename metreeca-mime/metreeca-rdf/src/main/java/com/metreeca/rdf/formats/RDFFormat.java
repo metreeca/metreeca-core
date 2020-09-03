@@ -1,5 +1,18 @@
 /*
- * Copyright © 2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.rdf.formats;
@@ -194,9 +207,6 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	private final Consumer<Codec> customizer;
 
-	private final InputFormat input=input();
-	private final OutputFormat output=output();
-
 	private final JsonObject context=service(context());
 
 
@@ -224,7 +234,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * status, otherwise
 	 */
 	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
-		return message.body(input).fold(
+		return message.body(input()).fold(
 
 				supplier -> {
 
@@ -367,7 +377,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 						.orElseGet(() -> factory.getRDFFormat().getDefaultMIMEType())
 				)
 
-				.body(output, target -> {
+				.body(output(), output -> {
 
 					final IRI focus=Values.iri(message.item());
 					final Shape shape=message.shape();
@@ -377,7 +387,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 					final String internal=message.request().base();
 					final String external=message.header(ExternalBase).orElse(internal); // made available by Rewriter
 
-					try ( final OutputStream output=target.get() ) {
+					try {
 
 						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response
 						// focus
@@ -400,8 +410,6 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 					} catch ( final URISyntaxException e ) {
 						throw new UnsupportedOperationException("unsupported base IRI {"+base+"}", e);
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
 					}
 
 				});

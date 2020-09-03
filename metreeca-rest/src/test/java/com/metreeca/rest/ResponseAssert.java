@@ -32,13 +32,13 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 		if ( response != null ) {
 
-			response.body(output()).value().ifPresent(output -> {
+			response.body(output()).value().ifPresent(target -> {
 
 				final byte[] data;
 
 				try ( final ByteArrayOutputStream out=new ByteArrayOutputStream(1000) ) {
 
-					output.accept(() -> out);
+					target.accept(out);
 
 					data=out.toByteArray();
 
@@ -46,15 +46,9 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 					throw new UncheckedIOException(e);
 				}
 
-				response.body(output(), supplier -> { // cache output
+				response.body(output(), output -> { // cache output
 
-					try ( final OutputStream out=supplier.get() ) {
-
-						Codecs.data(out, data);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
+					Codecs.data(output, data);
 
 				});
 

@@ -22,10 +22,7 @@ import com.metreeca.rest.*;
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParsingException;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -212,10 +209,6 @@ public final class JSONFormat extends Format<JsonObject> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final ReaderFormat reader=reader();
-	private final WriterFormat writer=writer();
-
-
 	private JSONFormat() {}
 
 
@@ -234,7 +227,7 @@ public final class JSONFormat extends Format<JsonObject> {
 				.anyMatch(type -> MIMEPattern.matcher(type).matches())
 
 				? message
-				.body(reader)
+				.body(reader())
 				.process(source -> {
 
 					try ( final Reader reader=source.get() ) {
@@ -262,17 +255,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
 		return message
 				.header("~Content-Type", MIME)
-				.body(writer, target -> {
-
-					try ( final Writer writer=target.get() ) {
-
-						json(writer, value);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-
-				});
+				.body(writer(), writer -> json(writer, value));
 	}
 
 }

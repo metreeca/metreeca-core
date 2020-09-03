@@ -19,28 +19,19 @@ package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.OutputFormat;
+import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
+
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFWriter;
-import org.eclipse.rdf4j.rio.RDFWriterFactory;
-import org.eclipse.rdf4j.rio.RDFWriterRegistry;
+import org.eclipse.rdf4j.rio.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
+import static com.metreeca.rest.formats.OutputFormat.output;
 
 
 /**
@@ -100,7 +91,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 				} else if ( operation instanceof Update ) {
 
-					process(request, (Update)operation, connection).accept(consumer);
+					process(request, (Update)operation).accept(consumer);
 
 				} else {
 
@@ -225,15 +216,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
-
-						factory.getWriter(output).handleBoolean(result);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				})
+				.body(output(), output -> factory.getWriter(output).handleBoolean(result))
 		);
 	}
 
@@ -248,8 +231,8 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
+				.body(output(), output -> {
+					try {
 
 						final TupleQueryResultWriter writer=factory.getWriter(output);
 
@@ -260,8 +243,6 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 						writer.endQueryResult();
 
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
 					} finally {
 						result.close();
 					}
@@ -279,33 +260,28 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
+				.body(output(), output -> {
 
-						final RDFWriter writer=factory.getWriter(output);
+					final RDFWriter writer=factory.getWriter(output);
 
-						writer.startRDF();
+					writer.startRDF();
 
-						for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
-							writer.handleNamespace(entry.getKey(), entry.getValue());
-						}
-
-						try {
-							while ( result.hasNext() ) { writer.handleStatement(result.next());}
-						} finally {
-							result.close();
-						}
-
-						writer.endRDF();
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
+					for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
+						writer.handleNamespace(entry.getKey(), entry.getValue());
 					}
+
+					try {
+						while ( result.hasNext() ) { writer.handleStatement(result.next());}
+					} finally {
+						result.close();
+					}
+
+					writer.endRDF();
+
 				}));
 	}
 
-	private Future<Response> process(final Request request, final Update update,
-			final RepositoryConnection connection) {
+	private Future<Response> process(final Request request, final Update update) {
 
 		update.execute();
 
@@ -316,13 +292,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
-						factory.getWriter(output).handleBoolean(true);
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				})
+				.body(output(), output -> factory.getWriter(output).handleBoolean(true))
 		);
 	}
 

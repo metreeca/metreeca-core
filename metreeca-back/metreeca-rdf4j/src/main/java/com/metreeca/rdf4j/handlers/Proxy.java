@@ -21,13 +21,8 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.rest.services.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.io.*;
+import java.net.*;
 
 import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -163,11 +158,8 @@ public final class Proxy implements Handler {
 
 		}
 
-		return response.body(output(), target -> {
-			try (
-					final OutputStream output=target.get();
-					final InputStream input=connect(connection)
-			) {
+		return response.body(output(), output -> {
+			try ( final InputStream input=connect(connection) ) {
 
 				final byte[] buffer=new byte[1024];
 

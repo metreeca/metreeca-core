@@ -18,12 +18,10 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.MessageMock;
+
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.io.Writer;
+import java.io.*;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.WriterFormat.writer;
@@ -42,8 +40,8 @@ final class WriterFormatTest {
 
 				.header("Content-Type", "text/plain; charset="+charset)
 
-				.body(writer(), supplier -> {
-					try ( final Writer writer=supplier.get() ) {
+				.body(writer(), writer -> {
+					try {
 						writer.write(text);
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -57,7 +55,7 @@ final class WriterFormatTest {
 						value -> {
 							try ( final ByteArrayOutputStream buffer=new ByteArrayOutputStream() ) {
 
-								value.accept(() -> buffer);
+								value.accept(buffer);
 
 								return assertThat(buffer.toByteArray())
 										.as("written using provided charset")

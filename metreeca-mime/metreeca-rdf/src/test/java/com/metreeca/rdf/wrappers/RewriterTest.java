@@ -21,6 +21,7 @@ import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.junit.jupiter.api.Test;
@@ -231,7 +232,7 @@ final class RewriterTest {
 
 							try ( final ByteArrayOutputStream stream=new ByteArrayOutputStream() ) {
 
-								consumer.accept(() -> stream);
+								consumer.accept(stream);
 
 								assertThat(decode(new String(stream.toByteArray(), UTF_8)))
 										.as("response rdf rewritten")
@@ -295,7 +296,7 @@ final class RewriterTest {
 
 							try ( final ByteArrayOutputStream buffer=new ByteArrayOutputStream() ) {
 
-								value.accept(() -> buffer);
+								value.accept(buffer);
 
 								assertThat(Json.createReader(new ByteArrayInputStream(buffer.toByteArray())).readObject())
 										.as("rewritten response json")
