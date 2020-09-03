@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.metreeca.rest.Lambdas.guarded;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -186,7 +185,13 @@ public final class HTTPServer {
 
 			exchange.sendResponseHeaders(response.status(), response
 					.header("Content-Length")
-					.map(guarded(Long::parseUnsignedLong))
+					.map(s -> {
+						try {
+							return Long.parseUnsignedLong(s);
+						} catch ( final NumberFormatException e ) {
+							return null;
+						}
+					})
 					.orElse(0L)
 			);
 
