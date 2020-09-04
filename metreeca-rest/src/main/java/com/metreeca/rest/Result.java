@@ -34,13 +34,15 @@ import static java.util.Objects.requireNonNull;
 public abstract class Result<V, E> {
 
 	/**
-	 * Creates an operation result with a returned value.
+	 * Creates an operation result returning a value.
 	 *
 	 * @param value the value returned by the operation
 	 * @param <V>   the type of the value returned by the operation
 	 * @param <E>   the type of the error possibly reported by the operation
 	 *
 	 * @return a result providing access to the value returned by the operation
+	 *
+	 * @throws NullPointerException if {@code value} is null
 	 */
 	public static <V, E> Result<V, E> Value(final V value) {
 
@@ -71,13 +73,15 @@ public abstract class Result<V, E> {
 	}
 
 	/**
-	 * Creates an operation result with a reported error.
+	 * Creates an operation result reporting an error.
 	 *
 	 * @param error the error reported by the operation
 	 * @param <V>   the type of the value possibly returned by the operation
 	 * @param <E>   the type of the error reported by the operation
 	 *
 	 * @return a result providing access to the error reported by the operation
+	 *
+	 * @throws NullPointerException if {@code error} is null
 	 */
 	public static <V, E> Result<V, E> Error(final E error) {
 
