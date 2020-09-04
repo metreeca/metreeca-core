@@ -18,6 +18,7 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
+import com.metreeca.tree.Trace;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -81,7 +82,7 @@ public final class Validator implements Wrapper {
 					.status(Response.UnprocessableEntity)
 					.error(Failure.DataInvalid)
 					.trace(trace(issues.stream()
-							.map(issue -> trace(issue))
+							.map(Trace::trace)
 							.collect(toList())
 					))
 

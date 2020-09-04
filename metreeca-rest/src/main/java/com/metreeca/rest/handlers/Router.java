@@ -18,10 +18,7 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
@@ -183,22 +180,21 @@ public final class Router implements Handler {
 
 					.filter(Matcher::matches)
 
-					.map(matcher -> consumer -> {
+					.map(matcher -> {
 
-								keys.forEach(key -> {
-									try {
-										request.parameter(key, URLDecoder.decode(matcher.group(key), "UTF-8"));
-									} catch ( final UnsupportedEncodingException unexpected ) {
-										throw new UncheckedIOException(unexpected);
-									}
-								});
-
-								handler
-										.handle(request.header(RoutingPrefix, head+matcher.group(1)))
-										.accept(consumer);
-
+						keys.forEach(key -> {
+							try {
+								request.parameter(key, URLDecoder.decode(matcher.group(key), "UTF-8"));
+							} catch ( final UnsupportedEncodingException unexpected ) {
+								throw new UncheckedIOException(unexpected);
 							}
-					);
+						});
+
+						return request.header(RoutingPrefix, head+matcher.group(1));
+
+					})
+
+					.map(handler::handle);
 
 		};
 	}
