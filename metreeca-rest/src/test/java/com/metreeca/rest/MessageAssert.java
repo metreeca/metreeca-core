@@ -18,6 +18,7 @@
 package com.metreeca.rest;
 
 import com.metreeca.tree.Shape;
+
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 
@@ -25,9 +26,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static com.metreeca.rest.assets.Logger.clip;
 import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.rest.services.Logger.clip;
 import static com.metreeca.tree.shapes.And.and;
 import static org.assertj.core.api.Assertions.fail;
 

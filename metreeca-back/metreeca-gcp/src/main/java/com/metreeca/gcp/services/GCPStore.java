@@ -17,12 +17,11 @@
 
 package com.metreeca.gcp.services;
 
-import com.google.cloud.storage.*;
-import com.metreeca.rest.services.Store;
+import com.metreeca.rest.assets.Store;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.google.cloud.storage.*;
+
+import java.io.*;
 import java.nio.channels.Channels;
 import java.nio.file.NoSuchFileException;
 import java.util.regex.Matcher;

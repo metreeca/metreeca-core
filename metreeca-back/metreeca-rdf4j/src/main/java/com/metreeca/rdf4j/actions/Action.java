@@ -17,7 +17,8 @@
 
 package com.metreeca.rdf4j.actions;
 
-import com.metreeca.rdf4j.services.Graph;
+import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -26,8 +27,6 @@ import org.eclipse.rdf4j.query.Operation;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
 
 import java.util.*;
-
-import static com.metreeca.rest.Context.service;
 
 
 /**
@@ -39,7 +38,7 @@ import static com.metreeca.rest.Context.service;
  */
 public abstract class Action<T extends Action<T>> {
 
-    private Graph graph=service(Graph.graph());
+    private Graph graph=Context.asset(Graph.graph());
 
     private String base;
     private Boolean inferred;

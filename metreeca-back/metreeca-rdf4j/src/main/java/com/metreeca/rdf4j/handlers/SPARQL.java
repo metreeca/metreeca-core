@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.rdf.Formats;
-import com.metreeca.rdf4j.services.Graph;
+import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Worker;
 

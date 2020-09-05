@@ -17,8 +17,9 @@
 
 package com.metreeca.rdf4j.actions;
 
-import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.services.Logger;
+import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rest.Context;
+import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -27,9 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Logger.logger;
-import static com.metreeca.rest.services.Logger.time;
+import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
@@ -46,14 +46,14 @@ public final class Upload implements Consumer<Collection<Statement>> {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private Graph graph=service(Graph.graph());
+    private Graph graph=Context.asset(Graph.graph());
 
     private Resource[] contexts=DefaultContexts;
 
     private final AtomicBoolean clear=new AtomicBoolean();
     private final AtomicLong count=new AtomicLong();
 
-    private final Logger logger=service(logger());
+    private final Logger logger=Context.asset(logger());
 
 
     /**

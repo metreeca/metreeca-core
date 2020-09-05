@@ -18,14 +18,13 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.services.Logger;
+import com.metreeca.rest.assets.Logger;
 
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Request.*;
+import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.rest.services.Logger.logger;
 import static java.lang.String.format;
 
 
@@ -43,7 +42,7 @@ public final class API implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Logger logger=service(logger());
+	private final Logger logger=Context.asset(logger());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

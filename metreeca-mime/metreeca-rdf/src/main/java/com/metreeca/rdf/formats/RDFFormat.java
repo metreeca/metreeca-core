@@ -41,7 +41,6 @@ import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
@@ -209,7 +208,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	private final Consumer<Codec> customizer;
 
-	private final JsonObject context=service(context());
+	private final JsonObject context=Context.asset(context());
 
 
 	private RDFFormat(final Consumer<Codec> customizer) {

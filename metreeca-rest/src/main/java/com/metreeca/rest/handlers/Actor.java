@@ -18,16 +18,15 @@
 package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.services.Engine;
+import com.metreeca.rest.assets.Engine;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
 
 import java.util.function.Function;
 
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
-import static com.metreeca.rest.services.Engine.engine;
+import static com.metreeca.rest.assets.Engine.engine;
 import static com.metreeca.tree.Shape.empty;
 import static java.util.function.Function.identity;
 
@@ -39,7 +38,7 @@ import static java.util.function.Function.identity;
  */
 public abstract class Actor extends Delegator {
 
-	private final Engine engine=service(engine());
+	private final Engine engine=Context.asset(engine());
 
 
 	/**

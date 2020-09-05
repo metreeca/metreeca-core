@@ -18,14 +18,12 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rdf4j.services.GraphTest;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rdf4j.assets.GraphTest;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
@@ -38,9 +36,8 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.encode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rdf4j.services.GraphTest.exec;
-import static com.metreeca.rdf4j.services.GraphTest.export;
-import static com.metreeca.rest.Context.service;
+import static com.metreeca.rdf4j.assets.GraphTest.exec;
+import static com.metreeca.rdf4j.assets.GraphTest.export;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
@@ -63,7 +60,7 @@ final class GraphsTest {
 	}
 
 	private Model dflt() {
-		return service(Graph.graph()).exec(connection -> {
+		return Context.asset(Graph.graph()).exec(connection -> {
 
 			return export(connection, (Resource)null);
 
@@ -71,7 +68,7 @@ final class GraphsTest {
 	}
 
 	private Model named() {
-		return service(Graph.graph()).exec(connection -> {
+		return Context.asset(Graph.graph()).exec(connection -> {
 
 			return export(connection, RDF.NIL).stream()
 					.map(s -> statement(s.getSubject(), s.getPredicate(), s.getObject())) // strip context info

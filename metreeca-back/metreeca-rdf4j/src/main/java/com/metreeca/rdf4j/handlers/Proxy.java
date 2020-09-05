@@ -18,16 +18,15 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.rest.*;
+import com.metreeca.rest.assets.Logger;
 import com.metreeca.rest.handlers.Worker;
-import com.metreeca.rest.services.Logger;
 
 import java.io.*;
 import java.net.*;
 
-import static com.metreeca.rest.Context.service;
 import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.services.Logger.logger;
 import static java.util.Arrays.asList;
 
 
@@ -45,7 +44,7 @@ public final class Proxy implements Handler {
 	private static final int timeoutRead=60; // [s]
 
 
-	private final Logger logger=service(logger());
+	private final Logger logger=Context.asset(logger());
 
 	private final Handler delegate=new Worker()
 			.get(this::process)

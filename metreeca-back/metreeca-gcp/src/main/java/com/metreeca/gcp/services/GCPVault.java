@@ -17,11 +17,10 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.rest.assets.Vault;
+
 import com.google.api.gax.rpc.NotFoundException;
-import com.google.cloud.secretmanager.v1beta1.AccessSecretVersionRequest;
-import com.google.cloud.secretmanager.v1beta1.SecretManagerServiceClient;
-import com.google.cloud.secretmanager.v1beta1.SecretVersionName;
-import com.metreeca.rest.services.Vault;
+import com.google.cloud.secretmanager.v1beta1.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
