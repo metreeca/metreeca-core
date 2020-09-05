@@ -19,6 +19,8 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.*;
 
+import static java.util.function.Function.identity;
+
 
 /**
  * Delegating handler.
@@ -28,24 +30,8 @@ import com.metreeca.rest.*;
  */
 public abstract class Delegator implements Handler {
 
-	private Handler delegate;
+	private Handler delegate=request -> request.reply(identity());
 
-
-	/**
-	 * Retrieves the delegate handler.
-	 *
-	 * @return the handler request processing is delegated to
-	 *
-	 * @throws IllegalStateException if the delegate handler wasn't {@linkplain #delegate(Handler) configured}
-	 */
-	protected Handler delegate() {
-
-		if ( delegate == null ) {
-			throw new IllegalStateException("undefined delegate");
-		}
-
-		return delegate;
-	}
 
 	/**
 	 * Configures the delegate handler.
@@ -55,16 +41,11 @@ public abstract class Delegator implements Handler {
 	 * @return this delegator
 	 *
 	 * @throws NullPointerException     if {@code delegate} is null
-	 * @throws IllegalArgumentException if {@code delegate} is equal to this handler
 	 */
 	protected Delegator delegate(final Handler delegate) {
 
 		if ( delegate == null ) {
 			throw new NullPointerException("null delegate");
-		}
-
-		if ( delegate.equals(this) ) {
-			throw new IllegalArgumentException("self delegate");
 		}
 
 		this.delegate=delegate;
@@ -75,12 +56,8 @@ public abstract class Delegator implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Handler with(final Wrapper wrapper) {
-		return delegate().with(wrapper);
-	}
-
 	@Override public Future<Response> handle(final Request request) {
-		return delegate().handle(request);
+		return delegate.handle(request);
 	}
 
 }

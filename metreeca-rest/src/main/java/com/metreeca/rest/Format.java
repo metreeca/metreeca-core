@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Message body format {thread-safe}.
  *
- * <p>Manages the conversion between message body representations.</p>
+ * <p>Converts message body representations.</p>
  *
  * <p><strong>Warning</strong> / Implementations must be thread-safe.</p>
  *
@@ -182,7 +182,7 @@ public abstract class Format<V> {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * <p>By all formats in the same class are equal to each other.</p>
+	 * <p>All formats in the same class are equal to each other.</p>
 	 */
 	@Override public boolean equals(final Object object) {
 		return this == object || object != null && getClass().equals(object.getClass());

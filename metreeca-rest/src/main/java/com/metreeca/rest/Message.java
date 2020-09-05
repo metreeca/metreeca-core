@@ -474,7 +474,6 @@ public abstract class Message<T extends Message<T>> {
 	 * @return this message
 	 *
 	 * @throws NullPointerException  if either {@code body} or {@code value} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
 	 */
 	public <V> T body(final Format<? super V> format, final V value) {
 
