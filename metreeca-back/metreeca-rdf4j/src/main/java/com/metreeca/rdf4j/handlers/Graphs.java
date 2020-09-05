@@ -21,7 +21,6 @@ import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf4j.services.Graph;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.handlers.Worker;
 import com.metreeca.tree.Shape;
 
@@ -65,9 +64,6 @@ public final class Graphs extends Endpoint<Graphs> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final InputFormat input=input();
-
 
 	public Graphs() {
 		delegate(new Worker()
@@ -185,9 +181,10 @@ public final class Graphs extends Endpoint<Graphs> {
 				);
 
 				graph().exec(connection -> {
-					try ( final InputStream input=request.body(this.input).value() // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-							.get() ) {
+							.get()
+					) {
 
 						final boolean exists=exists(connection, context);
 
@@ -325,7 +322,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
 				graph().exec(connection -> {
-					try ( final InputStream input=request.body(this.input).value() // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).value() // binary format >> no rewriting
 							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
 							.get() ) {
 
