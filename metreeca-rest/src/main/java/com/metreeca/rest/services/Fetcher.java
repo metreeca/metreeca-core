@@ -17,7 +17,8 @@
 
 package com.metreeca.rest.services;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -114,7 +115,23 @@ import static java.util.stream.Collectors.toMap;
 
 								try ( final InputStream input=target.get() ) {
 
-									return Codecs.data(connection.getOutputStream(), input);
+									final OutputStream output=connection.getOutputStream();
+
+									if ( output == null ) {
+										throw new NullPointerException("null output");
+									}
+
+									if ( input == null ) {
+										throw new NullPointerException("null input");
+									}
+
+									final byte[] buffer=new byte[1024];
+
+									for (int n; (n=input.read(buffer)) >= 0; output.write(buffer, 0, n)) {}
+
+									output.flush();
+
+									return output;
 
 								} catch ( final IOException e ) {
 
@@ -171,7 +188,7 @@ import static java.util.stream.Collectors.toMap;
 											}
 										})
 
-										.orElseGet(Codecs::input);
+										.orElseGet(() -> new ByteArrayInputStream(new byte[0]));
 
 							} catch ( final IOException e ) {
 								throw new UncheckedIOException(e);

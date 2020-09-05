@@ -17,6 +17,8 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.rest.formats.DataFormat;
+
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,7 +50,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 				response.body(output(), output -> { // cache output
 
-					Codecs.data(output, data);
+					DataFormat.data(output, data);
 
 				});
 

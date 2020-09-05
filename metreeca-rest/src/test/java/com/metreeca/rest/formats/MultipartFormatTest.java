@@ -229,11 +229,11 @@ final class MultipartFormatTest {
 
 							.hasBody(output(), target -> {
 
-								final StringWriter writer=new StringWriter();
+								final ByteArrayOutputStream output=new ByteArrayOutputStream();
 
-								target.accept(Codecs.output(writer));
+								target.accept(output);
 
-								assertThat(writer.toString())
+								assertThat(new String(output.toByteArray(), UTF_8))
 										.contains("--1234567890--");
 
 							})

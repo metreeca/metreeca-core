@@ -17,26 +17,25 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.tree.Order;
-import com.metreeca.tree.Query;
-import com.metreeca.tree.Shape;
+import com.metreeca.tree.*;
 import com.metreeca.tree.probes.Optimizer;
 import com.metreeca.tree.queries.Stats;
 import com.metreeca.tree.queries.Terms;
 import com.metreeca.tree.shapes.*;
 
 import javax.json.*;
-import java.io.StringReader;
+import java.io.*;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Codecs.decode;
 import static com.metreeca.tree.Order.decreasing;
 import static com.metreeca.tree.Order.increasing;
 import static com.metreeca.tree.queries.Items.items;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Field.fields;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -77,10 +76,16 @@ final class QueryParser {
 			throw new NullPointerException("null query");
 		}
 
-		return query.isEmpty() ? items(shape)
-				: query.startsWith("%7B") ? json(decode(query))
-				: query.startsWith("{") ? json(query)
-				: form(query);
+		try {
+
+			return query.isEmpty() ? items(shape)
+					: query.startsWith("%7B") ? json(URLDecoder.decode(query, UTF_8.name()))
+					: query.startsWith("{") ? json(query)
+					: form(query);
+
+		} catch ( final UnsupportedEncodingException unexpected ) {
+			throw new UncheckedIOException(unexpected);
+		}
 
 	}
 
@@ -89,7 +94,7 @@ final class QueryParser {
 		return json(Optional
 				.of(query)
 				.map(v -> Json.createReader(new StringReader(v)).readValue())
-				.filter(v -> v instanceof JsonObject)
+				.filter(JsonObject.class::isInstance)
 				.map(JsonValue::asJsonObject)
 				.orElseGet(() -> error("filter is not an object"))
 		);
@@ -117,7 +122,7 @@ final class QueryParser {
 
 
 	private Query form(final String query) {
-		return json(Json.createObjectBuilder(Codecs.parameters(query).entrySet().stream()
+		return json(Json.createObjectBuilder(Request.search(query).entrySet().stream()
 
 				.collect(toMap(Map.Entry::getKey, this::value))
 

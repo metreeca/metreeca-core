@@ -25,6 +25,10 @@ import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -46,6 +50,7 @@ import static com.metreeca.tree.shapes.MinExclusive.minExclusive;
 import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
 import static com.metreeca.tree.shapes.Or.or;
 import static com.metreeca.tree.shapes.When.when;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -163,15 +168,20 @@ public final class Rewriter implements Wrapper {
 		final Matcher matcher=QueryWordPattern.matcher(query);
 
 		while ( matcher.find() ) {
+			try {
 
-			final String encoded=matcher.group();
-			final String decoded=Codecs.decode(encoded);
+				final String encoded=matcher.group();
+				final String decoded=URLDecoder.decode(encoded, UTF_8.name());
 
-			final String rewritten=engine.rewrite(decoded);
+				final String rewritten=engine.rewrite(decoded);
 
-			matcher.appendReplacement(buffer,
-					encoded.equals(decoded) ? rewritten : Codecs.encode(rewritten) // re-encode only if actually encoded
-			);
+				matcher.appendReplacement(buffer, encoded.equals(decoded) ?
+						rewritten : URLEncoder.encode(rewritten, UTF_8.name()) // re-encode only if actually encoded
+				);
+
+			} catch ( final UnsupportedEncodingException unexpected ) {
+				throw new UncheckedIOException(unexpected);
+			}
 		}
 
 		matcher.appendTail(buffer);

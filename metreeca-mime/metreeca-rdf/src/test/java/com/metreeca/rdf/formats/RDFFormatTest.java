@@ -136,7 +136,7 @@ final class RDFFormatTest {
 		@Test void testHandleEmptyInput() {
 			exec(() -> new Request()
 
-					.body(input(), Codecs::input)
+					.body(input(), () -> new ByteArrayInputStream(new byte[0]))
 
 					.body(rdf())
 
@@ -151,9 +151,9 @@ final class RDFFormatTest {
 					.base(internal)
 					.path("/")
 					.header(RDFFormat.ExternalBase, external)
-					.body(input(), () -> Codecs.input(new StringReader(
-							"<http://example.com/container> ldp:contains <http://example.com/resource> ."
-					)))
+					.body(input(), () -> new ByteArrayInputStream(
+							"<http://example.com/container> ldp:contains <http://example.com/resource> .".getBytes(UTF_8)
+					))
 
 					.body(rdf())
 
@@ -206,7 +206,7 @@ final class RDFFormatTest {
 
 							assertThat(decode(new String(stream.toByteArray(), UTF_8)))
 									.isIsomorphicTo(decode("<http://example.com/container> ldp:contains "
-											+ "<http://example"
+											+"<http://example"
 											+".com/resource> ."));
 
 							return consumer;

@@ -18,6 +18,8 @@
 package com.metreeca.rest;
 
 
+import com.metreeca.rest.formats.DataFormat;
+
 import org.assertj.core.api.Assertions;
 
 import java.io.ByteArrayInputStream;
@@ -42,7 +44,7 @@ public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 
 				try ( final InputStream stream=supplier.get() ) {
 
-					final byte[] data=Codecs.data(stream);
+					final byte[] data=DataFormat.data(stream);
 
 					request.body(input(), () -> new ByteArrayInputStream(data));
 

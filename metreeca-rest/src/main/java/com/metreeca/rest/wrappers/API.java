@@ -88,7 +88,7 @@ public final class API implements Wrapper {
 
 	private Request query(final Request request) { // parse parameters from query string, if not already set
 		return request.parameters().isEmpty() && request.method().equals(GET)
-				? request.parameters(Codecs.parameters(request.query()))
+				? request.parameters(search(request.query()))
 				: request;
 	}
 
@@ -96,7 +96,7 @@ public final class API implements Wrapper {
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
-				? request.parameters(Codecs.parameters(request.body(text()).value().orElse("")))
+				? request.parameters(search(request.body(text()).value().orElse("")))
 				: request;
 	}
 

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.Optional;
 
 import static com.metreeca.rdf.ModelAssert.assertThat;
@@ -77,7 +78,15 @@ final class RewriterTest {
 
 
 	private String encode(final IRI iri) {
-		return Codecs.encode(iri.toString());
+		try {
+
+			return URLEncoder.encode(iri.toString(), UTF_8.name());
+
+		} catch ( final UnsupportedEncodingException unexpected ) {
+
+			throw new UncheckedIOException(unexpected);
+
+		}
 	}
 
 
@@ -223,9 +232,9 @@ final class RewriterTest {
 						.base(External)
 						.path("/s")
 
-						.body(input(), () -> Codecs.input(new StringReader(ValuesTest.encode(singleton(
+						.body(input(), () -> new ByteArrayInputStream(ValuesTest.encode(singleton(
 								external("s", "p", "o")
-						))))))
+						)).getBytes(UTF_8))))
 
 				.accept(response -> response.body(output()).fold(
 

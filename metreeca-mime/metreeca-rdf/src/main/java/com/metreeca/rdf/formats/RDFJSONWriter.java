@@ -19,27 +19,21 @@ package com.metreeca.rdf.formats;
 
 
 import com.metreeca.tree.Shape;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFWriter;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import javax.json.JsonWriterFactory;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
+import javax.json.*;
+import java.io.*;
 import java.util.Collection;
 
 import static com.metreeca.rdf.formats.RDFFormat.*;
 import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
-import static com.metreeca.rest.Codecs.writer;
 import static com.metreeca.tree.Shape.pass;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonMap;
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
@@ -65,7 +59,7 @@ public final class RDFJSONWriter extends AbstractRDFWriter {
 	}
 
 	RDFJSONWriter(final OutputStream stream, final String base) {
-		this(writer(stream), base);
+		this(new OutputStreamWriter(stream, UTF_8), base);
 	}
 
 
