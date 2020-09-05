@@ -48,6 +48,11 @@ import static java.util.UUID.randomUUID;
  */
 public final class Creator extends Actor {
 
+	private static final Object monitor=new Object();
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Creates a resource creator with a UUID-based slug generator.
 	 */
@@ -84,19 +89,21 @@ public final class Creator extends Actor {
 	 * @param <T>    the type of the message body to be inspected during slug generation
 	 * @param format the format of the message body to be inspected during slug generation
 	 * @param slug   a function mapping from the creation request and its payload to the identifier to be assigned to
-	 *                 the
+	 *               the
 	 *               newly created resource; must return a non-null non-clashing value
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code slug} is null
 	 */
-	public <T> Creator(final Format<T> format, final BiFunction<Request, T, String> slug) {
+	public <T> Creator(final Format<T> format, final BiFunction<? super Request, T, String> slug) {
 		this(request -> request.body(format).fold(value -> slug.apply(request, value), failure -> ""));
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private Wrapper wrapper(final Function<Request, String> slug) {
 		return handler -> request -> consumer -> {
-			synchronized ( delegate() ) { // attempt to serialize slug operations from multiple snapshot txns
+			synchronized ( monitor ) { // attempt to serialize slug operations from multiple snapshot txns
 				handler.handle(request.header("Slug",
 
 						Objects.requireNonNull(slug.apply(request), "null resource name")
