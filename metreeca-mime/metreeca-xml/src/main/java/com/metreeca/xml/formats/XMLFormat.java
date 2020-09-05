@@ -211,7 +211,7 @@ public final class XMLFormat extends Format<Document> {
 
 		return message
 				.headers("Content-Type").stream()
-				.anyMatch(mime -> MIMEPattern.matcher(mime).matches())
+				.anyMatch(MIMEPattern.asPredicate())
 
 				? message
 				.body(reader())
