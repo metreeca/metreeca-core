@@ -35,9 +35,11 @@ import static java.util.stream.Collectors.toMap;
 
 
 /**
- * Message body format.
+ * Message body format {thread-safe}.
  *
  * <p>Manages the conversion between message body representations.</p>
+ *
+ * <p><strong>Warning</strong> / Implementations must be thread-safe.</p>
  *
  * @param <V> the type of the message body representation managed by the body format
  */
