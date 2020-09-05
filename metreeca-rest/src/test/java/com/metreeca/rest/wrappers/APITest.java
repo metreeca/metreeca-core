@@ -26,8 +26,8 @@ import java.util.*;
 
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.rest.formats.WriterFormat.writer;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -155,9 +155,9 @@ final class APITest {
 
 					.handle(new Request())
 
-					.accept(response -> ResponseAssert.assertThat(response)
+					.accept(response -> assertThat(response)
 							.hasStatus(InternalServerError)
-							.hasBody(writer())
+							.hasCause(UnsupportedOperationException.class)
 					)
 
 			);

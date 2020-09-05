@@ -31,6 +31,8 @@ import org.eclipse.rdf4j.rio.*;
 
 import java.util.*;
 
+import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 
@@ -65,11 +67,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 				if ( operation == null ) { // !!! return void description for GET
 
-					request.reply(new Failure()
-							.status(Response.BadRequest)
-							.error("parameter-missing")
-							.notes("missing query/update parameter")
-					).accept(consumer);
+					request.reply(status(BadRequest, "missing query/update parameter")).accept(consumer);
 
 				} else if ( operation instanceof Query && !queryable(request.roles())
 						|| operation instanceof Update && !updatable(request.roles())
@@ -95,78 +93,23 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 				} else {
 
-					request.reply(new Failure()
-							.status(Response.NotImplemented)
-							.error("operation-unsupported")
-							.notes(operation.getClass().getName())
-					).accept(consumer);
+					request.reply(status(NotImplemented, operation.getClass().getName())).accept(consumer);
 
 				}
 
-			} catch ( final MalformedQueryException e ) {
+			} catch ( final MalformedQueryException|IllegalArgumentException e ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("query-malformed")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final IllegalArgumentException e ) {
-
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("request-malformed")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
+				request.reply(status(BadRequest, e)).accept(consumer);
 
 			} catch ( final UnsupportedOperationException e ) {
 
-				request.reply(new Failure()
-						.status(Response.NotImplemented)
-						.error("operation-unsupported")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final QueryEvaluationException e ) {
-
-				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
-
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("query-evaluation")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final UpdateExecutionException e ) {
-
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("update-evaluation")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final TupleQueryResultHandlerException e ) {
-
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("response-error")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
+				request.reply(status(NotImplemented, e)).accept(consumer);
 
 			} catch ( final RuntimeException e ) {
 
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("repository-error")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
+				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
+
+				request.reply(status(InternalServerError, e)).accept(consumer);
 
 			}
 		});

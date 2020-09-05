@@ -53,7 +53,7 @@ final class AliaserTest {
 	@Test void testRedirectAliasedItem() {
 		exec(() -> aliaser("/canonical")
 
-				.wrap((Request request) -> request.reply(OK))
+				.wrap((Request request) -> request.reply(Request.status(OK)))
 
 				.handle(request("/alias"))
 
@@ -67,7 +67,7 @@ final class AliaserTest {
 	@Test void testForwardIdempotentItems() {
 		exec(() -> aliaser("/alias")
 
-				.wrap((Request request) -> request.reply(OK))
+				.wrap((Request request) -> request.reply(Request.status(OK)))
 
 				.handle(request("/alias"))
 
@@ -80,7 +80,7 @@ final class AliaserTest {
 	@Test void testForwardOtherItems() {
 		exec(() -> aliaser("/canonical")
 
-				.wrap((Request request) -> request.reply(OK))
+				.wrap((Request request) -> request.reply(Request.status(OK)))
 
 				.handle(request("/other"))
 

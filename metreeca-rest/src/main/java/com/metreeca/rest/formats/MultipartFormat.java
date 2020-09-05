@@ -23,9 +23,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.ParseException;
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.PayloadTooLarge;
 import static com.metreeca.rest.Result.Error;
@@ -130,7 +132,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Result<Map<String, Message<?>>, Failure> get(final Message<?> message) {
+	@Override public Result<Map<String, Message<?>>, UnaryOperator<Response>> get(final Message<?> message) {
 		return message.header("Content-Type")
 
 				.filter(type -> type.startsWith("multipart/"))
@@ -188,10 +190,8 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 					} catch ( final ParseException e ) {
 
-						return Error(new Failure()
-								.status(e.getMessage().contains("size limit") ? PayloadTooLarge : BadRequest)
-								.cause(e)
-						);
+						final int status=e.getMessage().contains("size limit") ? PayloadTooLarge : BadRequest;
+						return Error(status(status, e));
 
 					} catch ( final IOException e ) {
 
@@ -203,8 +203,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 				}))
 
-				.orElseGet(() -> Error(new Failure()
-						.status(Response.UnsupportedMediaType)));
+				.orElseGet(() -> Error(status(Response.UnsupportedMediaType)));
 	}
 
 	@Override public <M extends Message<M>> M set(final M message, final Map<String, Message<?>> value) {

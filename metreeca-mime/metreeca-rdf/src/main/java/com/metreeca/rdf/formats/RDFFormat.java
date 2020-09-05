@@ -38,9 +38,11 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -233,7 +235,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
 	 * status, otherwise
 	 */
-	@Override public Result<Collection<Statement>, Failure> get(final Message<?> message) {
+	@Override public Result<Collection<Statement>, UnaryOperator<Response>> get(final Message<?> message) {
 		return message.body(input()).fold(
 
 				supplier -> {
@@ -339,10 +341,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 						if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
 						if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
 
-						return Error(new Failure()
-								.status(Response.BadRequest)
-								.error(Failure.BodyMalformed)
-								.trace(trace.build()));
+						return Error(status(Response.BadRequest, trace.build()));
 
 					}
 

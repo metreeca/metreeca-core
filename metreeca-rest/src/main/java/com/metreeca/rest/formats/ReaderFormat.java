@@ -22,6 +22,7 @@ import com.metreeca.rest.*;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import static com.metreeca.rest.formats.InputFormat.input;
 
@@ -51,12 +52,12 @@ public final class ReaderFormat extends Format<Supplier<Reader>> {
 	/**
 	 * @return a value providing access to a reader supplier converting from the {@linkplain InputFormat raw binary
 	 * input
-	 * 		body} of {@code message} using the character encoding specified in its {@code Content-Type} header or the
-	 *        {@linkplain StandardCharsets#UTF_8 default charset} if none is specified; an error  providing access to
-	 *        the
-	 * 		processing failure, otherwise
+	 * body} of {@code message} using the character encoding specified in its {@code Content-Type} header or the
+	 * {@linkplain StandardCharsets#UTF_8 default charset} if none is specified; an error  providing access to
+	 * the
+	 * processing failure, otherwise
 	 */
-	@Override public Result<Supplier<Reader>, Failure> get(final Message<?> message) {
+	@Override public Result<Supplier<Reader>, UnaryOperator<Response>> get(final Message<?> message) {
 		return message.body(input()).value(input -> () ->
 				Codecs.reader(input.get(), message.charset())
 		);

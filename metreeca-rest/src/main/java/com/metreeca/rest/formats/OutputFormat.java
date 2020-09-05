@@ -21,6 +21,7 @@ import com.metreeca.rest.*;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 import static com.metreeca.rest.Result.Value;
 
@@ -50,7 +51,7 @@ public final class OutputFormat extends Format<Consumer<OutputStream>> {
 	/**
 	 * @return a result providing access to a consumer taking no action on the supplied output stream
 	 */
-	@Override public Result<Consumer<OutputStream>, Failure> get(final Message<?> message) {
+	@Override public Result<Consumer<OutputStream>, UnaryOperator<Response>> get(final Message<?> message) {
 		return Value(target -> {});
 	}
 

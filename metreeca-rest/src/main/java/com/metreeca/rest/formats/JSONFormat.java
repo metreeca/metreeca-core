@@ -25,10 +25,10 @@ import javax.json.stream.JsonParsingException;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -216,11 +216,11 @@ public final class JSONFormat extends Format<JsonObject> {
 
 	/**
 	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 *        {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header
-	 *        is equal
-	 * 		to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header
+	 * is equal
+	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
-	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
+	@Override public Result<JsonObject, UnaryOperator<Response>> get(final Message<?> message) {
 
 		return message
 				.headers("Content-Type").stream()
@@ -232,7 +232,7 @@ public final class JSONFormat extends Format<JsonObject> {
 
 					try ( final Reader reader=source.get() ) {
 
-						return json(reader).error(Failure::malformed);
+						return json(reader).error(cause -> status(Response.BadRequest, cause));
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -240,9 +240,7 @@ public final class JSONFormat extends Format<JsonObject> {
 
 				})
 
-				: Error(new Failure()
-				.status(Response.UnsupportedMediaType)
-				.notes("missing JSON body")
+				: Error(status(Response.UnsupportedMediaType, "missing JSON body")
 		);
 
 	}

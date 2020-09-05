@@ -17,6 +17,9 @@
 
 package com.metreeca.tree;
 
+import javax.json.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -107,6 +110,71 @@ public final class Trace {
 		return unmodifiableMap(fields);
 	}
 
+
+	public JsonObject toJSON() {
+
+		final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+		if ( !issues.isEmpty() ) {
+
+			final JsonObjectBuilder errors=Json.createObjectBuilder();
+
+			issues.forEach((detail, values) -> {
+
+				final JsonArrayBuilder objects=Json.createArrayBuilder();
+
+				values.forEach(value -> {
+					if ( value == null ) {
+
+						objects.add(JsonValue.NULL);
+
+					} else if ( value instanceof Boolean ) {
+
+						objects.add((Boolean)value);
+
+					} else if ( value instanceof BigDecimal ) {
+
+						objects.add((BigDecimal)value);
+
+					} else if ( value instanceof BigInteger ) {
+
+						objects.add((BigInteger)value);
+
+					} else if ( value instanceof Double || value instanceof Float ) {
+
+						objects.add(((Number)value).doubleValue());
+
+					} else if ( value instanceof Number ) {
+
+						objects.add(((Number)value).longValue());
+
+					} else {
+
+						objects.add(value.toString());
+
+					}
+				});
+
+				errors.add(detail, objects.build());
+
+			});
+
+			builder.add("", errors);
+		}
+
+		getFields().forEach((name, nested) -> {
+
+			if ( !nested.isEmpty() ) {
+				builder.add(name.toString(), nested.toJSON());
+			}
+
+		});
+
+		return builder.build();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public String toString() {
 		return String.format("{\n\tissue: %s\n\tfields: %s\n}", issues, fields);

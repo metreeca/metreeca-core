@@ -23,8 +23,7 @@ import com.metreeca.rest.services.Logger;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Request.GET;
-import static com.metreeca.rest.Request.POST;
+import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static com.metreeca.rest.services.Logger.logger;
 import static java.lang.String.format;
@@ -74,7 +73,7 @@ public final class API implements Wrapper {
 
 				request
 
-						.reply(Failure.internal(e))
+						.reply(status(Response.InternalServerError, e))
 
 						.map(this::logging)
 

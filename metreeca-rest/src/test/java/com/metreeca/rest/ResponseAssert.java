@@ -120,4 +120,15 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 		return this;
 	}
 
+	public ResponseAssert hasCause(final Class<? extends Throwable> expected) {
+
+		isNotNull();
+
+		if ( expected.isInstance(actual.cause()) ) {
+			failWithMessage("expected response to have cause of class <%s>", expected);
+		}
+
+		return this;
+	}
+
 }

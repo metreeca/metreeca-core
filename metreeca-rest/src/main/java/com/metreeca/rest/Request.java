@@ -23,8 +23,11 @@ import com.metreeca.tree.Shape;
 import javax.json.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnprocessableEntity;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.JSONFormat.json;
@@ -55,6 +58,105 @@ public final class Request extends Message<Request> {
 
 	private static final Pattern SchemePattern=Pattern.compile("[a-zA-Z][-+.a-zA-Z0-9]*:");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+
+
+	/**
+	 * Creates a shorthand response generator.
+	 *
+	 * @param status the status code for the response
+	 *
+	 * @return a shorthand response generator for {@code status}
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 */
+	public static UnaryOperator<Response> status(final int status) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		return response -> response.status(status);
+	}
+
+	/**
+	 * Creates a shorthand response generator.
+	 *
+	 * @param status  the response status code
+	 * @param details the human readable response details
+	 *
+	 * @return a shorthand response generator for {@code status} and {@code details}
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 * @throws NullPointerException     if {@code details} is null
+	 */
+	public static UnaryOperator<Response> status(final int status, final String details) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		if ( details == null ) {
+			throw new NullPointerException("null details");
+		}
+
+		return response -> status < 500
+				? response.status(status).body(text(), details)
+				: response.status(status).cause(new Exception(details));
+	}
+
+	/**
+	 * Creates a shorthand response generator.
+	 *
+	 * @param status  the response status code
+	 * @param details the machine readable response details
+	 *
+	 * @return a shorthand response generator for {@code status} and {@code details}
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 * @throws NullPointerException     if {@code details} is null
+	 */
+	public static UnaryOperator<Response> status(final int status, final JsonObject details) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		if ( details == null ) {
+			throw new NullPointerException("null details");
+		}
+
+		return response -> status < 500
+				? response.status(status).body(json(), details)
+				: response.status(status).cause(new Exception(details.toString()));
+	}
+
+	/**
+	 * Creates a shorthand response generator.
+	 *
+	 * @param status the response status code
+	 * @param cause  the exceptional response cause
+	 *
+	 * @return a shorthand response generator for {@code status} and {@code cause}
+	 *
+	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
+	 * @throws NullPointerException     if {@code cause} is null
+	 */
+	public static UnaryOperator<Response> status(final int status, final Throwable cause) {
+
+		if ( status < 100 || status > 599 ) { // 0 used internally
+			throw new IllegalArgumentException("illegal status code ["+status+"]");
+		}
+
+		if ( cause == null ) {
+			throw new NullPointerException("null cause");
+		}
+
+		final String message=Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString);
+
+		return response -> status < 500
+				? response.status(status).cause(cause).body(text(), message)
+				: response.status(status).cause(cause);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,105 +195,6 @@ public final class Request extends Message<Request> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a response for this request.
-	 *
-	 * @param status the status code for the response
-	 *
-	 * @return a new lazy response for this request
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 */
-	public Future<Response> reply(final int status) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		return reply(response -> response.status(status));
-	}
-
-	/**
-	 * Creates a response for this request.
-	 *
-	 * @param status the response status code
-	 * @param body   the human readable response body
-	 *
-	 * @return a new lazy response for this request
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 * @throws NullPointerException     if {@code body} is null
-	 */
-	public Future<Response> reply(final int status, final String body) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( body == null ) {
-			throw new NullPointerException("null body");
-		}
-
-		return reply(status).map(response -> status < 500
-				? response.body(text(), body)
-				: response.cause(new Exception(body))
-		);
-	}
-
-	/**
-	 * Creates a response for this request.
-	 *
-	 * @param status the response status code
-	 * @param body   the machine readable response body
-	 *
-	 * @return a new lazy response for this request
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 * @throws NullPointerException     if {@code body} is null
-	 */
-	public Future<Response> reply(final int status, final JsonObject body) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( body == null ) {
-			throw new NullPointerException("null body");
-		}
-
-		return reply(status).map(response -> status < 500
-				? response.body(json(), body)
-				: response.cause(new Exception(body.toString()))
-		);
-	}
-
-	/**
-	 * Creates a response for this request.
-	 *
-	 * @param status the response status code
-	 * @param cause  the exceptional response cause
-	 *
-	 * @return a new lazy response for this request
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 * @throws NullPointerException     if {@code cause} is null
-	 */
-	public Future<Response> reply(final int status, final Throwable cause) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
-
-		return reply(status).map(response -> status < 500
-				? response.body(text(), Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString))
-				: response.cause(cause)
-		);
-	}
 
 	/**
 	 * Creates a response for this request.
@@ -481,7 +484,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public Result<Query, Failure> query(final Format<?> format, final Shape shape) {
+	public Result<Query, UnaryOperator<Response>> query(final Format<?> format, final Shape shape) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
@@ -497,21 +500,11 @@ public final class Request extends Message<Request> {
 
 		} catch ( final JsonException e ) {
 
-			return Error(new Failure()
-					.status(Response.BadRequest)
-					.error("query-malformed")
-					.notes(e.getMessage())
-					.cause(e)
-			);
+			return Error(status(BadRequest, e));
 
 		} catch ( final NoSuchElementException e ) {
 
-			return Error(new Failure()
-					.status(Response.UnprocessableEntity)
-					.error("query-illegal")
-					.notes(e.getMessage())
-					.cause(e)
-			);
+			return Error(status(UnprocessableEntity, e));
 
 		}
 	}

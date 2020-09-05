@@ -21,13 +21,11 @@ import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
+
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
@@ -185,7 +183,6 @@ final class GraphRelatorTest {
 							.hasStatus(Response.NotImplemented)
 
 							.doesNotHaveShape()
-							.hasBody(json())
 
 					)
 			);

@@ -25,6 +25,7 @@ import java.io.*;
 import java.net.*;
 
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.services.Logger.logger;
 import static java.util.Arrays.asList;
@@ -72,10 +73,7 @@ public final class Proxy implements Handler {
 						: e instanceof IOException ? Response.BadGateway
 						: Response.InternalServerError;
 
-				return response.map(new Failure()
-						.status(i)
-						.error("request-failed")
-						.cause(e));
+				return response.map(status(i, e));
 
 			}
 		}).accept(consumer);

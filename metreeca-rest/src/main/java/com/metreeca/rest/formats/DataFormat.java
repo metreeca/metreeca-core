@@ -20,6 +20,7 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
+import java.util.function.UnaryOperator;
 
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -55,11 +56,11 @@ public final class DataFormat extends Format<byte[]> {
 
 	/**
 	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * 		stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing
-	 * 		error,
-	 * 		otherwise
+	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing
+	 * error,
+	 * otherwise
 	 */
-	@Override public Result<byte[], Failure> get(final Message<?> message) {
+	@Override public Result<byte[], UnaryOperator<Response>> get(final Message<?> message) {
 		return message.body(input()).value(
 
 				source -> {

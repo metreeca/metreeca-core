@@ -17,26 +17,25 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.rest.formats.JSONAssert;
 import com.metreeca.rdf.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Statement;
+import com.metreeca.rest.formats.JSONAssert;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import javax.json.JsonValue;
 import java.util.function.Consumer;
 
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -555,7 +554,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 
@@ -566,7 +564,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 
@@ -581,7 +578,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 
@@ -595,7 +591,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 
@@ -607,7 +602,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 
@@ -618,7 +612,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 
@@ -629,7 +622,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 
@@ -640,7 +632,6 @@ final class SPARQLTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.BadRequest)
-						.hasBody(json()).isNotNull()
 				));
 	}
 

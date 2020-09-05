@@ -30,7 +30,7 @@ import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Failure.internal;
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static java.util.stream.Collectors.toList;
@@ -66,7 +66,8 @@ final class GraphCreator extends GraphProcessor {
 
 					if ( clashing ) { // report clashing slug
 
-						return Error(internal(new IllegalStateException("clashing entity slug {"+member+"}")));
+						return Error(status(Response.InternalServerError, new IllegalStateException("clashing "
+								+"entity slug {"+member+"}")));
 
 					} else { // store model
 
@@ -86,7 +87,8 @@ final class GraphCreator extends GraphProcessor {
 	}
 
 	private Future<Response> member(final Request request) {
-		return request.reply(internal(new UnsupportedOperationException("member POST method")));
+		return request.reply(status(Response.InternalServerError, new UnsupportedOperationException("member POST "
+				+"method")));
 	}
 
 

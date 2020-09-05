@@ -34,8 +34,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.ReaderFormat.reader;
@@ -214,7 +216,7 @@ public final class HTMLFormat extends Format<Document> {
 	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
 	 * {@link #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
 	 */
-	@Override public Result<Document, Failure> get(final Message<?> message) {
+	@Override public Result<Document, UnaryOperator<Response>> get(final Message<?> message) {
 
 		return message
 				.headers("Content-Type").stream()
@@ -226,7 +228,7 @@ public final class HTMLFormat extends Format<Document> {
 
 					try ( final Reader reader=source.get() ) {
 
-						return html(reader, message.item()).error(Failure::malformed);
+						return html(reader, message.item()).error(cause -> status(Response.BadRequest, cause));
 
 					} catch ( final IOException e ) {
 
@@ -236,9 +238,7 @@ public final class HTMLFormat extends Format<Document> {
 
 				})
 
-				: Error(new Failure()
-				.status(Response.UnsupportedMediaType)
-				.notes("missing HTML body")
+				: Error(status(Response.UnsupportedMediaType, "missing HTML body")
 
 		);
 

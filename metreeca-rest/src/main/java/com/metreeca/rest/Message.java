@@ -25,6 +25,7 @@ import java.net.URI;
 import java.nio.charset.*;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -445,7 +446,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if {@code body} is null
 	 */
-	public <V> Result<V, Failure> body(final Format<V> format) {
+	public <V> Result<V, UnaryOperator<Response>> body(final Format<V> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null body");

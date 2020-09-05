@@ -18,10 +18,9 @@
 package com.metreeca.rdf4j.services;
 
 
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
@@ -29,7 +28,7 @@ import java.util.Optional;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Failure.internal;
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.tree.queries.Items.items;
 
 
@@ -46,7 +45,8 @@ final class GraphDeleter extends GraphProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> holder(final Request request) {
-		return request.reply(internal(new UnsupportedOperationException("holder DELETE method")));
+		return request.reply(status(Response.InternalServerError, new UnsupportedOperationException("holder "
+				+"DELETE method")));
 	}
 
 	private Future<Response> member(final Request request) {

@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -57,7 +58,7 @@ public final class HTTPServer {
 	private final int backlog=128;
 	private final int delay=0;
 
-	private Function<Context, Handler> factory=context -> request -> request.reply(NotFound);
+	private Function<Context, Handler> factory=context -> request -> request.reply(status(NotFound));
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

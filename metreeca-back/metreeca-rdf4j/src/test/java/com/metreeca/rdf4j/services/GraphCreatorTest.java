@@ -24,6 +24,7 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.tree.Shape;
 import com.metreeca.tree.probes.Redactor;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -31,7 +32,6 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValueAssert.assertThat;
 import static com.metreeca.rdf.Values.literal;
@@ -149,8 +149,7 @@ final class GraphCreatorTest {
 					.accept(response -> {
 
 						assertThat(response)
-								.hasStatus(Response.InternalServerError)
-								.hasBody(json());
+								.hasStatus(Response.InternalServerError);
 
 						assertThat(service(graph()).exec(RepositoryConnection::isEmpty))
 								.as("storage unchanged")

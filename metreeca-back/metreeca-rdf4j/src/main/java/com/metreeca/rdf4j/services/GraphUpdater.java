@@ -29,7 +29,7 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Failure.internal;
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.tree.queries.Items.items;
 
 
@@ -46,7 +46,8 @@ final class GraphUpdater extends GraphProcessor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> holder(final Request request) {
-		return request.reply(internal(new UnsupportedOperationException("holder PUT method")));
+		return request.reply(status(Response.InternalServerError, new UnsupportedOperationException("holder "
+				+"PUT method")));
 	}
 
 	private Future<Response> member(final Request request) {

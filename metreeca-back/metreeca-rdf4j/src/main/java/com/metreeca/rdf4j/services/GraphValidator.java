@@ -31,6 +31,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.compare;
@@ -46,7 +47,8 @@ import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rdf4j.services.Snippets.source;
 import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.Failure.invalid;
+import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.Response.UnprocessableEntity;
 import static com.metreeca.tree.Trace.trace;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
@@ -58,14 +60,15 @@ final class GraphValidator extends GraphProcessor {
 	private final Graph graph=service(graph());
 
 
-	<M extends Message<M>> Result<M, Failure> validate(final M message) {
+	<M extends Message<M>> Result<M, UnaryOperator<Response>> validate(final M message) {
 		return message
 
 				.body(rdf())
 
 				.process(rdf -> Optional.of(validate(iri(message.item()), convey(message.shape()), rdf))
 						.filter(trace -> !trace.isEmpty())
-						.map(trace -> Result.<M, Failure>Error(invalid(trace)))
+						.map(trace -> Result.<M, UnaryOperator<Response>>Error(status(UnprocessableEntity,
+								trace.toJSON())))
 						.orElseGet(() -> Result.Value(message))
 				);
 	}

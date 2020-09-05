@@ -20,10 +20,10 @@ package com.metreeca.rest;
 import com.metreeca.tree.Shape;
 
 import javax.json.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.UnaryOperator;
 
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.tree.shapes.Field.fields;
 import static java.util.Arrays.asList;
@@ -137,13 +137,13 @@ public abstract class Format<V> {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public Result<V, Failure> get(final Message<?> message) {
+	public Result<V, UnaryOperator<Response>> get(final Message<?> message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
 		}
 
-		return Error(new Failure().status(Response.UnsupportedMediaType));
+		return Error(status(Response.UnsupportedMediaType));
 	}
 
 	/**

@@ -34,6 +34,7 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Context.service;
+import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.tree.queries.Items.items;
@@ -65,10 +66,8 @@ final class GraphRelator extends GraphProcessor {
 				final IRI item=iri(request.item());
 				final Shape shape=resource ? detail(request.shape()) : holder(request.shape());
 
-				return filtered ? response.map(new Failure()
-
-						.status(Response.NotImplemented)
-						.cause("resource filtered retrieval not supported")
+				return filtered ? response.map(status(Response.NotImplemented, "resource filtered retrieval not "
+						+"supported")
 
 				) : request.query(rdf(), and(all(item), shape)).fold(
 

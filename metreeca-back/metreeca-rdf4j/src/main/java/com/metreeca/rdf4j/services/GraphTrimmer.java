@@ -25,6 +25,7 @@ import com.metreeca.tree.shapes.*;
 import org.eclipse.rdf4j.model.*;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.rdf.Values.direct;
@@ -39,7 +40,7 @@ import static java.util.stream.Collectors.toSet;
 
 final class GraphTrimmer extends GraphProcessor {
 
-	<M extends Message<M>> Result<M, Failure> trim(final M message) {
+	<M extends Message<M>> Result<M, UnaryOperator<Response>> trim(final M message) {
 		return message.body(rdf()).value(rdf -> message.body(rdf(),
 				trim(iri(message.item()), convey(message.shape()), rdf)
 		));

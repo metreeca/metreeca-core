@@ -17,15 +17,9 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -87,7 +81,8 @@ public final class Controller implements Wrapper {
 
 				roles.retainAll(request.roles());
 
-				return roles.isEmpty() ? request.reply(Response.Unauthorized) // !!! 404 under strict security
+				return roles.isEmpty() ? request.reply(Request.status(Response.Unauthorized)) // !!! 404 under strict
+						// security
 						: handler.handle(request.roles(roles));
 
 			}

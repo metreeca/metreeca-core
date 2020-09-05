@@ -37,6 +37,9 @@ import java.util.*;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.tree.Shape.only;
@@ -90,11 +93,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			if ( target == null && !catalog ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !queryable(request.roles()) ) {
 
@@ -158,11 +157,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
 
@@ -199,34 +194,19 @@ public final class Graphs extends Endpoint<Graphs> {
 
 						logger().warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("payload-unreadable")
-								.notes("I/O while reading RDF payload: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					} catch ( final RDFParseException e ) {
 
 						logger().warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.BadRequest)
-								.error("payload-malformed")
-								.notes("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(BadRequest, e)).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						logger().warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("update-aborted")
-								.notes("unable to update graph: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
 				});
@@ -245,11 +225,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
 
@@ -274,11 +250,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 						logger().warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("update-aborted")
-								.notes("unable to delete graph: see server logs for details")
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
 				});
@@ -300,11 +272,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
 
@@ -338,34 +306,19 @@ public final class Graphs extends Endpoint<Graphs> {
 
 						logger().warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("payload-unreadable")
-								.notes("I/O while reading RDF payload: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					} catch ( final RDFParseException e ) {
 
 						logger().warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.BadRequest)
-								.error("payload-malformed")
-								.notes("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(BadRequest, e)).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						logger().warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("update-aborted")
-								.notes("unable to update graph: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
 				});

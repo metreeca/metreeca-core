@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 
+import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.Response.UnprocessableEntity;
 import static com.metreeca.tree.Trace.trace;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -73,20 +75,15 @@ public final class Validator implements Wrapper {
 	@Override public Handler wrap(final Handler handler) {
 		return request -> {
 
-			final Collection<String> issues=rules.stream()
+			final Trace trace=trace(rules.stream()
 					.flatMap(rule -> rule.apply(request).stream())
-					.collect(toList());
-
-			return issues.isEmpty() ? handler.handle(request) : request.reply(new Failure()
-
-					.status(Response.UnprocessableEntity)
-					.error(Failure.DataInvalid)
-					.trace(trace(issues.stream()
-							.map(Trace::trace)
-							.collect(toList())
-					))
-
+					.map(Trace::trace)
+					.collect(toList())
 			);
+
+			return trace.isEmpty()
+					? handler.handle(request)
+					: request.reply(status(UnprocessableEntity, trace.toJSON()));
 
 		};
 	}
