@@ -19,8 +19,8 @@ package com.metreeca.xml.formats;
 
 import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.ReaderFormat;
-import com.metreeca.rest.formats.WriterFormat;
+import com.metreeca.rest.formats.InputFormat;
+import com.metreeca.rest.formats.OutputFormat;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.w3c.dom.Document;
@@ -38,10 +38,11 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.regex.Pattern.compile;
 
 
@@ -125,12 +126,12 @@ public final class HTMLFormat extends Format<Document> {
 	 * @param base   the base URL for the HTML node to be written
 	 * @param node   the HTML node to be written
 	 *
-	 * @return a value result containing the target {@code writer}, if {@code node} was successfully written; an
-	 * error result containing the write exception, otherwise
+	 * @return the target {@code writer}
 	 *
 	 * @throws NullPointerException if any argument is null
+	 * @throws TransformerException if en encoding error occurs
 	 */
-	public static <W extends Writer> Result<W, Exception> html(final W writer, final String base, final Node node) {
+	public static <W extends Writer> W html(final W writer, final String base, final Node node) throws TransformerException {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
@@ -144,20 +145,12 @@ public final class HTMLFormat extends Format<Document> {
 			throw new NullPointerException("null node");
 		}
 
-		try {
+		transformer().transform( // !!! format as HTML
+				new DOMSource(node, base),
+				new StreamResult(writer)
+		);
 
-			transformer().transform( // !!! format as HTML
-					new DOMSource(node, base),
-					new StreamResult(writer)
-			);
-
-			return Value(writer);
-
-		} catch ( final TransformerException e ) {
-
-			return Error(e);
-
-		}
+		return writer;
 	}
 
 
@@ -212,23 +205,32 @@ public final class HTMLFormat extends Format<Document> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional HTML body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
-	 * {@link #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * @return the optional HTML body representation of {@code message}, as retrieved from the input supplied by its
+	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header is
+	 * matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
 	 */
 	@Override public Result<Document, UnaryOperator<Response>> get(final Message<?> message) {
 
 		return message
-				.headers("Content-Type").stream()
-				.anyMatch(MIMEPattern.asPredicate())
+
+				.header("Content-Type")
+				.filter(MIMEPattern.asPredicate())
+				.isPresent()
 
 				? message
-				.body(reader())
+				.body(input())
 				.process(source -> {
 
-					try ( final Reader reader=source.get() ) {
+					try (
+							final InputStream input=source.get();
+							final Reader reader=new InputStreamReader(input, message.charset())
+					) {
 
 						return html(reader, message.item()).error(cause -> status(Response.BadRequest, cause));
+
+					} catch ( final UnsupportedEncodingException e ) {
+
+						return Error(status(BadRequest, e));
 
 					} catch ( final IOException e ) {
 
@@ -246,19 +248,31 @@ public final class HTMLFormat extends Format<Document> {
 
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the HML {@code value} to the
-	 * writer
-	 * supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
-	 * defined.
+	 * Configures the {@link OutputFormat} representation of {@code message} to write the HTML {@code value} to the
+	 * accepted outputstream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final Document value) {
 		return message
+
 				.header("~Content-Type", MIME)
-				.body(writer(), writer -> html(writer, message.item(), value).error().ifPresent(e -> {
 
-					throw new RuntimeException("unable to format HTML body", e);
+				.body(output(), output -> {
 
-				}));
+					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
+
+						html(writer, message.item(), value);
+
+					} catch ( final TransformerException e ) {
+
+						throw new RuntimeException("unable to format HTML body", e);
+
+					} catch ( final IOException e ) {
+
+						throw new UncheckedIOException(e);
+
+					}
+
+				});
 	}
 
 }

@@ -23,7 +23,6 @@ import com.metreeca.rest.*;
 import java.util.*;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.WriterFormat.writer;
 
 
 /**
@@ -183,10 +182,8 @@ public final class Worker implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Future<Response> head(final Request request) {
-		return handle(request.method(Request.GET)).map(response -> response
-				.body(output(), target -> {})
-				.body(writer(), target -> {})
-		);
+		return handle(request.method(Request.GET))
+				.map(response -> response.body(output(), target -> {}));
 	}
 
 	private Future<Response> options(final Request request) {

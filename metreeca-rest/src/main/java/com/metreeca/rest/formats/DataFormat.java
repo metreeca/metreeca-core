@@ -47,6 +47,53 @@ public final class DataFormat extends Format<byte[]> {
 	}
 
 
+	public static byte[] data(final InputStream input) {
+
+		if ( input == null ) {
+			throw new NullPointerException("null input");
+		}
+
+		try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
+
+			final byte[] buffer=new byte[1024];
+
+			for (int n; (n=input.read(buffer)) >= 0; output.write(buffer, 0, n)) {}
+
+			output.flush();
+
+			return output.toByteArray();
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		}
+	}
+
+	public static <O extends OutputStream> O data(final O output, final byte[] value) {
+
+		if ( output == null ) {
+			throw new NullPointerException("null output");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		try {
+			output.write(value);
+			output.flush();
+
+			return output;
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		}
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private DataFormat() {}
@@ -56,8 +103,7 @@ public final class DataFormat extends Format<byte[]> {
 
 	/**
 	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing
-	 * error,
+	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the decoding error,
 	 * otherwise
 	 */
 	@Override public Result<byte[], UnaryOperator<Response>> get(final Message<?> message) {
@@ -66,7 +112,7 @@ public final class DataFormat extends Format<byte[]> {
 				source -> {
 					try ( final InputStream input=source.get() ) {
 
-						return Codecs.data(input);
+						return data(input);
 
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
@@ -77,34 +123,15 @@ public final class DataFormat extends Format<byte[]> {
 	}
 
 	/**
-	 * Configures a message to hold a binary body representation.
-	 *
-	 * <ul>
-	 *
-	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the binary
-	 * {@code value};</li>
-	 *
-	 * <li>the {@link OutputFormat} body of {@code message} is configured to write the binary {@code value} to the
-	 * output stream supplied by the accepted output stream supplier.</li>
-	 *
-	 * </ul>
+	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value} to the
+	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final byte... value) {
 		return message
 
-				.body(input(), () ->
-						new ByteArrayInputStream(value)
-				)
+				.header("~Content-Type", MIME)
 
-				.body(output(), output -> {
-					try {
-
-						output.write(value);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				});
+				.body(output(), output -> data(output, value));
 	}
 
 }

@@ -33,7 +33,6 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toMap;
@@ -100,7 +99,7 @@ final class MultipartFormatTest {
 										.as("part available by name")
 										.hasItem("file:example.txt")
 										.hasHeader("Content-Disposition")
-										.hasBody(reader(), source -> assertThat(Codecs.text(source.get()))
+										.hasBody(text(), text -> assertThat(text)
 												.isEqualTo("text")
 										);
 

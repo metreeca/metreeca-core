@@ -17,14 +17,12 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Context;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
+
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
@@ -64,7 +62,7 @@ final class ValidatorTest {
 
 				.accept(response -> assertThat(response)
 						.hasStatus(Response.UnprocessableEntity)
-						.hasBody(writer())
+						.hasBody(output())
 				)
 		);
 	}

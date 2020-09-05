@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.WriterFormat.writer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -35,14 +34,6 @@ final class WorkerTest {
 		return request.reply(response -> response
 
 				.status(Response.OK)
-
-				.body(writer(), writer -> {
-					try {
-						writer.write("body");
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				})
 
 				.body(output(), output -> {
 					try {
@@ -112,18 +103,6 @@ final class WorkerTest {
 							e -> new byte[0]
 					)).isEmpty();
 
-					assertThat(response.body(writer()).<String>fold(
-							v -> {
-
-								final StringWriter output=new StringWriter();
-
-								v.accept(output);
-
-								return output.toString();
-
-							},
-							e -> ""
-					)).isEmpty();
 
 				});
 	}

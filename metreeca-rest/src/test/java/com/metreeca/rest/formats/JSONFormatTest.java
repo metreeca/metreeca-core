@@ -25,9 +25,10 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.*;
 
+import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -45,7 +46,7 @@ final class JSONFormatTest {
 
 		final Request request=new Request()
 				.header("content-type", JSONFormat.MIME)
-				.body(reader(), () -> new StringReader(TestJSON.toString()));
+				.body(input(), () -> new ByteArrayInputStream(TestJSON.toString().getBytes(UTF_8)));
 
 		assertThat(request.body(json()).value())
 				.isPresent()
@@ -55,7 +56,7 @@ final class JSONFormatTest {
 	@Test void testRetrieveJSONChecksContentType() {
 
 		final Request request=new Request()
-				.body(reader(), () -> new StringReader(TestJSON.toString()));
+				.body(input(), () -> new ByteArrayInputStream(TestJSON.toString().getBytes(UTF_8)));
 
 		assertThat(request.body(json()).value())
 				.isNotPresent();
@@ -69,21 +70,21 @@ final class JSONFormatTest {
 
 				(request
 
-						.body(writer())
+						.body(output())
 
-						.value(client -> {
-							try ( final StringWriter writer=new StringWriter() ) {
+						.value(target -> {
+							try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
 
-								client.accept(writer);
+								target.accept(output);
 
-								return writer.toString();
+								return new ByteArrayInputStream(output.toByteArray());
 
 							} catch ( final IOException e ) {
 								throw new UncheckedIOException(e);
 							}
 						})
 
-						.value(test -> Json.createReader(new StringReader(test)).readObject())
+						.value(input -> Json.createReader(input).readObject())
 
 						.value()
 				)

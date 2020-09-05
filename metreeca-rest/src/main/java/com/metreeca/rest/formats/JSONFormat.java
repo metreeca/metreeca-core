@@ -29,10 +29,12 @@ import java.util.function.*;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.Collections.singletonMap;
 
 
@@ -74,7 +76,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * @param reader the reader the JSON object is to be parsed from
 	 *
 	 * @return a value result containing the parsed JSON object, if {@code reader} was successfully parsed; an error
-	 * 		result containing the parse exception, otherwise
+	 * result containing the parse exception, otherwise
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
@@ -165,7 +167,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * @param context the JSON-LD context property names are to be aliased against
 	 *
 	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
-	 * 		property name if no alias is found
+	 * property name if no alias is found
 	 *
 	 * @throws NullPointerException if {@code context} is null
 	 */
@@ -193,7 +195,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 *
 	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m
 	 * defaulting to
-	 * 		the alias if no property name is found
+	 * the alias if no property name is found
 	 *
 	 * @throws NullPointerException if {@code context} is null
 	 */
@@ -215,45 +217,66 @@ public final class JSONFormat extends Format<JsonObject> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 * {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header
-	 * is equal
-	 * to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * @return the optional JSON body representation of {@code message}, as retrieved from the input supplied by its
+	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header
+	 * is matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
 	 */
 	@Override public Result<JsonObject, UnaryOperator<Response>> get(final Message<?> message) {
 
 		return message
-				.headers("Content-Type").stream()
-				.anyMatch(type -> MIMEPattern.matcher(type).matches())
+
+				.header("Content-Type")
+				.filter(MIMEPattern.asPredicate())
+				.isPresent()
 
 				? message
-				.body(reader())
+				.body(input())
 				.process(source -> {
 
-					try ( final Reader reader=source.get() ) {
+					try (
+							final InputStream input=source.get();
+							final Reader reader=new InputStreamReader(input, message.charset())
+					) {
 
-						return json(reader).error(cause -> status(Response.BadRequest, cause));
+						return json(reader).error(cause -> status(BadRequest, cause));
+
+					} catch ( final UnsupportedEncodingException e ) {
+
+						return Error(status(BadRequest, e));
 
 					} catch ( final IOException e ) {
+
 						throw new UncheckedIOException(e);
+
 					}
 
 				})
 
-				: Error(status(Response.UnsupportedMediaType, "missing JSON body")
+				: Error(status(UnsupportedMediaType, "missing JSON body")
 		);
 
 	}
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
-	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
-	 * defined.
+	 * Configures the {@link OutputFormat} representation of {@code message} to write the JSON {@code value} to the
+	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
 	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
 		return message
+
 				.header("~Content-Type", MIME)
-				.body(writer(), writer -> json(writer, value));
+
+				.body(output(), output -> {
+					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
+
+						json(writer, value);
+
+					} catch ( final IOException e ) {
+
+						throw new UncheckedIOException(e);
+
+					}
+				});
 	}
 
 }

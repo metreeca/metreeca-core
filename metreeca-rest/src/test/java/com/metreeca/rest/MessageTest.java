@@ -19,12 +19,13 @@ package com.metreeca.rest;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
+import java.io.ByteArrayInputStream;
 import java.util.function.Function;
 
 import static com.metreeca.rest.MessageAssert.assertThat;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
+import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.TextFormat.text;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -33,7 +34,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public final class MessageTest {
 
-	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Headers
+	// /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testHeadersNormalizeHeaderNames() {
 		assertThat(new MessageMock()
@@ -103,11 +105,13 @@ public final class MessageTest {
 	//}
 
 
-	//// Body //////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Body
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testBodyCaching() {
 
-		final MessageMock message=new MessageMock().body(reader(), () -> new StringReader("test"));
+		final MessageMock message=new MessageMock()
+				.body(input(), () -> new ByteArrayInputStream("test".getBytes(UTF_8)));
 
 		final Function<Message<?>, String> accessor=m -> m
 				.body(text()).fold(value -> value, error -> fail("missing test body"));

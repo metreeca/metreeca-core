@@ -22,7 +22,7 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.And;
 
 import java.net.URI;
-import java.nio.charset.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -187,16 +187,13 @@ public abstract class Message<T extends Message<T>> {
 	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to
 	 * {@linkplain StandardCharsets#UTF_8 UTF-8} if this message doesn't include a {@code Content-Type} header or if
 	 * no charset is explicitly defined
-	 *
-	 * @throws UnsupportedCharsetException if the charset of this message is not supported
 	 */
-	public Charset charset() throws UnsupportedCharsetException {
+	public String charset() {
 		return header("Content-Type")
 				.map(CharsetPattern::matcher)
 				.filter(Matcher::find)
 				.map(matcher -> matcher.group("charset"))
-				.map(Charset::forName)
-				.orElse(UTF_8);
+				.orElse(UTF_8.name());
 	}
 
 
@@ -479,7 +476,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @throws NullPointerException  if either {@code body} or {@code value} is null
 	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
 	 */
-	public <V> T body(final Format<V> format, final V value) {
+	public <V> T body(final Format<? super V> format, final V value) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null body");
