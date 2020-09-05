@@ -7,13 +7,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="metreeca-rdf4j" />
+        <module name="metreeca-j2ee" />
         <module name="metreeca-rest" />
         <module name="metreeca-http" />
         <module name="metreeca-xml" />
         <module name="metreeca-rdf" />
         <module name="metreeca-tree" />
         <module name="metreeca-gcp" />
-        <module name="metreeca-servlet" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -23,13 +23,13 @@
       <module name="metreeca-gcp" target="1.8" />
       <module name="metreeca-head" target="1.8" />
       <module name="metreeca-http" target="1.8" />
+      <module name="metreeca-j2ee" target="1.8" />
       <module name="metreeca-json" target="1.8" />
       <module name="metreeca-link" target="1.8" />
       <module name="metreeca-mime" target="1.8" />
       <module name="metreeca-rdf" target="1.8" />
       <module name="metreeca-rdf4j" target="1.8" />
       <module name="metreeca-rest" target="1.8" />
-      <module name="metreeca-servlet" target="1.8" />
       <module name="metreeca-tree" target="1.8" />
       <module name="metreeca-xml" target="1.8" />
     </bytecodeTargetLevel>

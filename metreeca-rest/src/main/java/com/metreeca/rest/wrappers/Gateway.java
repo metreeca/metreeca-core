@@ -22,6 +22,7 @@ import com.metreeca.rest.assets.Logger;
 
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.TextFormat.text;
@@ -29,12 +30,12 @@ import static java.lang.String.format;
 
 
 /**
- * API root.
+ * API gateway.
  *
  * <p>Provides default resource pre/postprocessing and error handling; mainly intended as the outermost wrapper
  * returned by loaders.</p>
  */
-public final class API implements Wrapper {
+public final class Gateway implements Wrapper {
 
 	private static final Pattern TextualPattern=Pattern.compile("text/[-\\w]+|application/json");
 	private static final Pattern URLEncodedPattern=Pattern.compile("application/x-www-form-urlencoded\\b");
@@ -42,7 +43,7 @@ public final class API implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Logger logger=Context.asset(logger());
+	private final Logger logger=asset(logger());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

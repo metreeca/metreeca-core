@@ -33,7 +33,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class APITest {
+final class GatewayTest {
 
 	@Nested final class QueryParsing {
 
@@ -44,7 +44,7 @@ final class APITest {
 
 
 		@Test void testPreprocessQueryParameters() {
-			new Context().get(API::new)
+			new Context().get(Gateway::new)
 
 					.wrap((Handler)request -> {
 
@@ -65,7 +65,7 @@ final class APITest {
 		}
 
 		@Test void testPreprocessBodyParameters() {
-			new Context().get(API::new)
+			new Context().get(Gateway::new)
 
 					.wrap((Handler)request -> {
 
@@ -87,7 +87,7 @@ final class APITest {
 		}
 
 		@Test void testPreprocessDontOverwriteExistingParameters() {
-			new Context().get(API::new)
+			new Context().get(Gateway::new)
 
 					.wrap((Handler)request -> {
 
@@ -108,7 +108,7 @@ final class APITest {
 		}
 
 		@Test void testPreprocessQueryOnlyOnGET() {
-			new Context().get(API::new)
+			new Context().get(Gateway::new)
 
 					.wrap((Handler)request -> {
 
@@ -126,7 +126,7 @@ final class APITest {
 		}
 
 		@Test void testPreprocessBodyOnlyOnPOST() {
-			new Context().get(API::new)
+			new Context().get(Gateway::new)
 
 					.wrap((Handler)request -> {
 
@@ -149,7 +149,7 @@ final class APITest {
 	@Nested final class ErrorHandling {
 
 		@Test void testTrapStrayExceptions() {
-			new Context().exec(() -> new API()
+			new Context().exec(() -> new Gateway()
 
 					.wrap((Request request) -> { throw new UnsupportedOperationException("stray"); })
 

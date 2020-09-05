@@ -173,7 +173,7 @@
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-servlet</artifactId>
+				<artifactId>metreeca-j2ee</artifactId>
 				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 
@@ -484,7 +484,7 @@
 								<group>
 									<title>Server Adapters</title>
 									<packages>
-										com.metreeca.servlet*
+										com.metreeca.j2ee*
 									</packages>
 								</group>
 								<group>

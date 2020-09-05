@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.servlet;
+package com.metreeca.j2ee;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Loader;
@@ -38,25 +38,23 @@ import static java.util.Objects.requireNonNull;
 
 
 /**
- * Servlet gateway.
+ * Servlet adapter.
  *
- * <p>Provides a gateway between a web application managed by Servlet 3.1 container and resource handlers based on the
- * Metreeca/Link linked data framework:</p>
+ * <p>Adapts web applications managed by Servlet 3.1 container and resource handlers based on the Metreeca/Link REST
+ * framework:</p>
  *
  * <ul>
  *
- * <li>initializes and destroys the shared {@linkplain Context context} managing platform services required by
- * resource handlers;</li>
+ * <li>initializes and cleans the {@linkplain Context context} managing shared assets required by resource handlers;
+ * </li>
  *
- * <li>intercepts HTTP requests and handles them using a linked data {@linkplain Handler handler} loaded from the
- * shared context;</li>
+ * <li>intercepts HTTP requests and handles them using a  {@linkplain Handler handler} loaded from the context;</li>
  *
- * <li>forwards HTTP requests to the enclosing web application if no response is committed by the linked data
- * handler.</li>
+ * <li>forwards HTTP requests to the enclosing web application if no response is committed by REST handlers.</li>
  *
  * </ul>
  */
-public abstract class Gateway implements Filter {
+public abstract class J2EEFilter implements Filter {
 
 	private final Context context=new Context();
 
@@ -64,9 +62,9 @@ public abstract class Gateway implements Filter {
 
 
 	/*
-	 * Creates the main gateway handler.
+	 * Creates the main handler.
 	 *
-	 * @param context the shared service context; may be configured with additional application-specific services
+	 * @param context the shared asset context; may be configured with additional application-specific assets
 	 *
 	 * @return a non-null resource handler to be used as main entry point for serving requests
 	 */

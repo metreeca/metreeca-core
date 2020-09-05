@@ -37,7 +37,7 @@
 
     <modules>
 
-        <module>metreeca-servlet</module>
+        <module>metreeca-j2ee</module>
         <module>metreeca-http</module>
 
     </modules>

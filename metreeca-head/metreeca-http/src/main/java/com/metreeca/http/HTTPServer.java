@@ -18,7 +18,7 @@
 package com.metreeca.http;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.services.Logger;
+import com.metreeca.rest.assets.Logger;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -32,22 +32,22 @@ import java.util.function.Function;
 
 import static com.metreeca.rest.Request.status;
 import static com.metreeca.rest.Response.NotFound;
+import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.services.Logger.logger;
 
 /**
- * JDK HTTP server gateway.
+ * JDK HTTP server adapter.
  *
- * <p>Provides a gateway between a web application managed by a native {@linkplain HttpServer JDK HTTP server} and
- * resource handlers based on the Metreeca/Link linked data framework:</p>
+ * <p>Adapts web applications managed by a native {@linkplain HttpServer JDK HTTP server} and
+ * resource handlers based on the Metreeca/Link REST framework:</p>
  *
  * <ul>
  *
- * <li>initializes and destroys the shared {@linkplain Context context} managing platform services required by
- * resource handlers;</li>
+ * <li>initializes and cleans the {@linkplain Context context} managing shared assets required by resource handlers;
+ * </li>
  *
- * <li>handles HTTP requests using a linked data {@linkplain Handler handler} loaded from the shared context.</li>
+ * <li>handles HTTP requests using a {@linkplain Handler handler} loaded from the context.</li>
  *
  * </ul>
  */
@@ -63,6 +63,14 @@ public final class HTTPServer {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	/*
+	 * Configures the main handler.
+	 *
+	 * @param context the shared asset context; may be configured with additional application-specific assets
+	 *
+	 * @return a non-null resource handler to be used as main entry point for serving requests
+	 */
 	public HTTPServer handler(final Function<Context, Handler> factory) {
 
 		if ( factory == null ) {
