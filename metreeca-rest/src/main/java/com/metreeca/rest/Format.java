@@ -20,10 +20,7 @@ package com.metreeca.rest;
 import com.metreeca.tree.Shape;
 
 import javax.json.*;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import static com.metreeca.rest.Request.status;
@@ -119,78 +116,6 @@ public abstract class Format<V> {
 						.orElseThrow(() -> new JsonException("unknown field {"+e.getKey()+"}"))
 		))
 				: null;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a guarded function.
-	 *
-	 * @param function the function to be wrapped
-	 * @param <V>      the type of the {@code function} input value
-	 * @param <R>      the type of the {@code function} return value
-	 *
-	 * @return a function that returns the value produced by applying {@code function} to its input value, if it is
-	 * not null and no exception is thrown in the process, or {@code null}, otherwise
-	 *
-	 * @throws NullPointerException if {@code function} is null
-	 */
-	public static <V, R> Function<V, R> guarded(final Function<? super V, ? extends R> function) {
-
-		if ( function == null ) {
-			throw new NullPointerException("null function");
-		}
-
-		return v -> {
-			try {
-
-				return v == null ? null : function.apply(v);
-
-			} catch ( final RuntimeException e ) {
-
-				return null;
-
-			}
-		};
-
-	}
-
-	/**
-	 * Creates an autoclosing function.
-	 *
-	 * @param function the function to be wrapped
-	 * @param <V>      the type of the {@code function} input value
-	 * @param <R>      the type of the {@code function} return value
-	 *
-	 * @return a function that returns the value produced by applying {@code function} to its input value, closing
-	 * it after processing
-	 *
-	 * @throws NullPointerException if {@code function} is null
-	 */
-	public static <V extends AutoCloseable, R> Function<V, R> closing(final Function<? super V, ? extends R> function) {
-
-		if ( function == null ) {
-			throw new NullPointerException("null function");
-		}
-
-		return v -> {
-
-			try ( final V c=v ) {
-
-				return function.apply(c);
-
-			} catch ( final IOException e ) {
-
-				throw new UncheckedIOException(e);
-
-			} catch ( final Exception e ) {
-
-				throw new RuntimeException(e);
-
-			}
-
-		};
 	}
 
 
