@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.j2ee;
+package com.metreeca.jee;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Loader;
@@ -38,9 +38,9 @@ import static java.util.Objects.requireNonNull;
 
 
 /**
- * Servlet adapter.
+ * Java EE Servlet adapter.
  *
- * <p>Adapts web applications managed by Servlet 3.1 container and resource handlers based on the Metreeca/Link REST
+ * <p>Adapts web applications managed by Servlet 3.1 container and resource handlers based on the Metreeca/Link
  * framework:</p>
  *
  * <ul>
@@ -54,7 +54,7 @@ import static java.util.Objects.requireNonNull;
  *
  * </ul>
  */
-public abstract class J2EEFilter implements Filter {
+public abstract class JEEFilter implements Filter {
 
 	private final Context context=new Context();
 

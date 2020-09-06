@@ -16,10 +16,10 @@
  */
 
 /**
- * JDK HTTP server adapter.
+ * Java SE HTTP server adapter.
  *
- * <p>Provides an adapter for deploying apps based on Metreeca/link as web applications managed by the internal JDK
+ * <p>Provides an adapter for deploying apps based on Metreeca/link as web applications managed by the internal Java SE
  * HTTP server.</p>
  */
 
-package com.metreeca.http;
+package com.metreeca.jse;

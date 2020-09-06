@@ -28,24 +28,17 @@
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>metreeca-j2ee</artifactId>
+	<artifactId>metreeca-jse</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca J2EE Adapter</name>
-	<description>Adapter for deploying Metreeca linked data apps to Servlet 3.1 containers.</description>
+	<name>Metreeca Java SE Adapter</name>
+	<description>Adapter for deploying Metreeca/Link apps to the Jave SE internal HTTP server.</description>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-rest</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<version>3.1.0</version>
-			<scope>provided</scope>
 		</dependency>
 
 	</dependencies>

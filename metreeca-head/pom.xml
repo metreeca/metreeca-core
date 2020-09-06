@@ -37,8 +37,8 @@
 
     <modules>
 
-        <module>metreeca-j2ee</module>
-        <module>metreeca-http</module>
+        <module>metreeca-jee</module>
+        <module>metreeca-jse</module>
 
     </modules>
 

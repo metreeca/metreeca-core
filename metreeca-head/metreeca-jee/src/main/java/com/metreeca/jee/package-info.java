@@ -16,7 +16,7 @@
  */
 
 /**
- * J2EE adapter.
+ * Java EE adapter.
  *
  * <p>Provides an adapter for deploying apps based on Metreeca/Link as web applications managed by a Servlet 3.1
  * container.</p>
@@ -25,7 +25,7 @@
  *
  * <ul>
  *
- * <li>a runtime dependency from the servlet module and other required framework components;</li>
+ * <li>a runtime dependency from the Java EE module and other required framework components;</li>
  *
  * <li>a provided dependency from the Servlet 3.1 API, unless you want to manually define the app as a web context
  * listener in {@code WEB-INF/web.xml}.</li>
@@ -38,7 +38,7 @@
  *
  *     <dependency>
  *         <groupId>com.metreeca</groupId>
- *         <artifactId>metreeca-j2ee</artifactId>
+ *         <artifactId>metreeca-jee</artifactId>
  *         <version>${project.version}</version>
  *     </dependency>
  *
@@ -59,13 +59,13 @@
  * import com.metreeca.rest.Handler;
  * import com.metreeca.rest.Wrapper;
  * import com.metreeca.rest.wrappers.Gateway;
- * import com.metreeca.j2ee.Gateway;
+ * import com.metreeca.jee.JEEFilter;
  *
  * import javax.servlet.annotation.WebFilter;
  *
  * import static com.metreeca.rest.Context.asset;
  *
- * ＠WebFilter("/*") public final class Demo extends J2EEFilter { // define the path pattern managed by the app
+ * ＠WebFilter("/*") public final class Demo extends JEEFilter { // define the path pattern managed by the app
  *
  * ＠Override protected Handler load(final Context context) {
  *      return context
@@ -89,4 +89,4 @@
  * com.metreeca.rest.handlers} packages.</p>
  */
 
-package com.metreeca.j2ee;
+package com.metreeca.jee;

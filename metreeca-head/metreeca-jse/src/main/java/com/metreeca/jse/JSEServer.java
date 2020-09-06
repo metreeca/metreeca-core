@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.http;
+package com.metreeca.jse;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Logger;
@@ -37,10 +37,10 @@ import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 /**
- * JDK HTTP server adapter.
+ * Java SE HTTP server adapter.
  *
- * <p>Adapts web applications managed by a native {@linkplain HttpServer JDK HTTP server} and
- * resource handlers based on the Metreeca/Link REST framework:</p>
+ * <p>Adapts web applications managed by a native Java SE {@linkplain HttpServer HTTP server} and
+ * resource handlers based on the Metreeca/Link framework:</p>
  *
  * <ul>
  *
@@ -51,7 +51,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
  *
  * </ul>
  */
-public final class HTTPServer {
+public final class JSEServer {
 
 	private final String root="/"; // must end with slash
 
@@ -73,7 +73,7 @@ public final class HTTPServer {
 	 *
 	 * @return a non-null resource handler to be used as main entry point for serving requests
 	 */
-	public HTTPServer handler(final Function<Context, Handler> factory) {
+	public JSEServer handler(final Function<Context, Handler> factory) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null handler factory");

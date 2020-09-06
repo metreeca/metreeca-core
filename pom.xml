@@ -17,7 +17,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -99,8 +99,8 @@
 
 	<modules>
 
-		<module>metreeca-tree</module>
 		<module>metreeca-rest</module>
+		<module>metreeca-tree</module>
 
 		<module>metreeca-mime</module>
 		<module>metreeca-head</module>
@@ -173,13 +173,13 @@
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-j2ee</artifactId>
+				<artifactId>metreeca-jee</artifactId>
 				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-http</artifactId>
+				<artifactId>metreeca-jse</artifactId>
 				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 
@@ -484,7 +484,7 @@
 								<group>
 									<title>Server Adapters</title>
 									<packages>
-										com.metreeca.j2ee*
+										com.metreeca.jee*:com.metreeca.jse
 									</packages>
 								</group>
 								<group>
@@ -497,7 +497,6 @@
 
 							<excludePackageNames> <!-- colon-separated patterns / multi line -->
 								:com.metreeca.gcp:com.metreeca.gcp.*
-								:com.metreeca.http
 							</excludePackageNames>
 
 						</configuration>
