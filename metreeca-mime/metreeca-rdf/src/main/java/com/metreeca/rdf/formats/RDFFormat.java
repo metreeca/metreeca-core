@@ -38,7 +38,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.MessageException.status;
@@ -206,7 +205,6 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	private final Consumer<Codec> customizer;
 
 	private final JsonObject context=Context.asset(context());
@@ -235,7 +233,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
 	 * status, otherwise
 	 */
-	@Override public Result<Collection<Statement>, UnaryOperator<Response>> get(final Message<?> message) {
+	@Override public Result<Collection<Statement>, MessageException> decode(final Message<?> message) {
 		return message.body(input()).fold(
 
 				supplier -> {
@@ -359,7 +357,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * one
 	 * is present, or to {@code "text/turtle"}, otherwise.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final Collection<Statement> value) {
+	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 
 		final List<String> types=Formats.types(message.request().headers("Accept"));
 

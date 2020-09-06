@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.text.ParseException;
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +48,11 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	 * The default MIME type for multipart message bodies ({@value}).
 	 */
 	public static final String MIME="multipart/mixed";
+
+	/**
+	 * A pattern matching multipart MIME types, for instance {@code multipart/form-data}.
+	 */
+	public static final Pattern MIMEPattern=Pattern.compile("(?i)^multipart/.+$");
 
 
 	private static final byte[] Dashes="--".getBytes(UTF_8);
@@ -131,10 +135,8 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Result<Map<String, Message<?>>, UnaryOperator<Response>> get(final Message<?> message) {
-		return message.header("Content-Type")
-
-				.filter(type -> type.startsWith("multipart/"))
+	@Override public Result<Map<String, Message<?>>, MessageException> decode(final Message<?> message) {
+		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
 				.map(type -> message.body(input()).process(source -> {
 
@@ -187,10 +189,9 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 						}).parse();
 
-					} catch ( final ParseException e ) {
+					} catch ( final ParseException e ) { // !!!
 
-						final int status=e.getMessage().contains("size limit") ? PayloadTooLarge : BadRequest;
-						return Error(status(status, e));
+						return Error(status(e.getMessage().contains("size limit") ? PayloadTooLarge : BadRequest, e));
 
 					} catch ( final IOException e ) {
 
@@ -205,7 +206,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 				.orElseGet(() -> Error(status(UnsupportedMediaType)));
 	}
 
-	@Override public <M extends Message<M>> M set(final M message, final Map<String, Message<?>> value) {
+	@Override public <M extends Message<M>> M encode(final M message, final Map<String, Message<?>> value) {
 
 		final String type=message
 				.header("Content-Type") // custom value

@@ -21,10 +21,8 @@ import com.metreeca.tree.Shape;
 
 import javax.json.*;
 import java.util.*;
-import java.util.function.UnaryOperator;
 
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.tree.shapes.Field.fields;
 import static java.util.Arrays.asList;
@@ -33,15 +31,84 @@ import static java.util.stream.Collectors.toMap;
 
 
 /**
- * Message body format {thread-safe}.
+ * Message format {thread-safe}.
  *
- * <p>Converts message body representations.</p>
+ * <p>Decodes and encodes message bodies.</p>
  *
- * <p><strong>Warning</strong> / Implementations must be thread-safe.</p>
+ * <p><strong>Warning</strong> / Concrete subclasses must be thread-safe.</p>
  *
- * @param <V> the type of the message body representation managed by the body format
+ * @param <V> the type of the message body managed by the body format
  */
 public abstract class Format<V> {
+
+	/**
+	 * Decodes a message body.
+	 *
+	 * <p>The default implementation returns a {@linkplain MessageException#status() no-op message exception}.</p>
+	 *
+	 * @param message the message whose body is to be decoded
+	 *
+	 * @return either a message exception reporting a decoding issue or the decoded {@code message} body; decoding
+	 * issues should be reported using the following HTTP status codes:
+	 *
+	 * <ul>
+	 * <li>{@link Response#UnsupportedMediaType} for missing bodies;</li>
+	 * <li>{@link Response#BadRequest} for malformed bodies, unless a more specific status code is available.</li>
+	 * </ul>
+	 *
+	 * @throws NullPointerException if {@code message} is null
+	 */
+	public Result<V, MessageException> decode(final Message<?> message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		return Error(status());
+	}
+
+	/**
+	 * Encodes a message body.
+	 *
+	 * <p>The default implementation has no effects.</p>
+	 *
+	 * @param message the message whose body is to be encoded
+	 * @param value   the body being encoded into {@code message}
+	 * @param <M>     the type of {@code message}
+	 *
+	 * @return the target {@code message} with the encoded {@code value} as body
+	 *
+	 * @throws NullPointerException if either {@code message} or {@code value} is null
+	 */
+	public <M extends Message<M>> M encode(final M message, final V value) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		return message;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>All formats in the same class are equal to each other.</p>
+	 */
+	@Override public boolean equals(final Object object) {
+		return this == object || object != null && getClass().equals(object.getClass());
+	}
+
+	@Override public int hashCode() {
+		return getClass().hashCode();
+	}
+
 
 	//// !!! //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -117,80 +184,6 @@ public abstract class Format<V> {
 						.orElseThrow(() -> new JsonException("unknown field {"+e.getKey()+"}"))
 		))
 				: null;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves a body representation from a message.
-	 *
-	 * <p>Processing failure should be reported using the following HTTP status codes:</p>
-	 *
-	 * <ul>
-	 * <li>{@link Response#UnsupportedMediaType} for missing bodies;</li>
-	 * <li>{@link Response#BadRequest} for malformed bodies, unless a more specific status code is available.</li>
-	 * </ul>
-	 *
-	 * <p>The default implementation returns a failure reporting the {@link Response#UnsupportedMediaType} status,
-	 * unless explicitly {@linkplain Message#body(Format, Object) overridden}.</p>
-	 *
-	 * @param message the message whose body representation managed by this body format is to be retrieved
-	 *
-	 * @return a value providing access to the body representation managed by this body format, if it was possible to
-	 * derive one from {@code message}; an error providing access to the processing failure, otherwise
-	 *
-	 * @throws NullPointerException if {@code message} is null
-	 */
-	public Result<V, UnaryOperator<Response>> get(final Message<?> message) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		return Error(status(UnsupportedMediaType));
-	}
-
-	/**
-	 * Configures a message to hold a body representation.
-	 *
-	 * <p>The default implementation has no effects.</p>
-	 *
-	 * @param message the message to be configured to hold a body representation managed by this body format
-	 * @param value   the body representation being configured for {@code message} by this body format
-	 * @param <M>     the type of {@code message}
-	 *
-	 * @return the configured {@code message}
-	 *
-	 * @throws NullPointerException if either {@code message} or {@code value} is null
-	 */
-	public <M extends Message<M>> M set(final M message, final V value) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		return message;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>All formats in the same class are equal to each other.</p>
-	 */
-	@Override public boolean equals(final Object object) {
-		return this == object || object != null && getClass().equals(object.getClass());
-	}
-
-	@Override public int hashCode() {
-		return getClass().hashCode();
 	}
 
 }

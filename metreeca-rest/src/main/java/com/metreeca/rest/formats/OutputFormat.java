@@ -17,22 +17,19 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.*;
+import com.metreeca.rest.Format;
 
 import java.io.OutputStream;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
-
-import static com.metreeca.rest.Result.Value;
 
 
 /**
- * Raw binary output body format.
+ * Output body format.
  */
 public final class OutputFormat extends Format<Consumer<OutputStream>> {
 
 	/**
-	 * Creates a raw binary output body format.
+	 * Creates an output body format.
 	 *
 	 * @return the new raw binary output body format
 	 */
@@ -44,23 +41,5 @@ public final class OutputFormat extends Format<Consumer<OutputStream>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private OutputFormat() {}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * @return a result providing access to a consumer taking no action on the supplied output stream
-	 */
-	@Override public Result<Consumer<OutputStream>, UnaryOperator<Response>> get(final Message<?> message) {
-		return Value(target -> {});
-	}
-
-	/**
-	 * Configures the {@code Content-Type} header of {@code message} to {@value DataFormat#MIME}, unless already
-	 * defined.
-	 */
-	@Override public <M extends Message<M>> M set(final M message, final Consumer<OutputStream> value) {
-		return message.header("~Content-Type", DataFormat.MIME);
-	}
 
 }

@@ -34,7 +34,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.MessageException.status;
@@ -70,6 +69,8 @@ public final class HTMLFormat extends Format<Document> {
 	 */
 	public static HTMLFormat html() { return new HTMLFormat(); }
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Parses an HTML document.
@@ -157,19 +158,10 @@ public final class HTMLFormat extends Format<Document> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final DocumentBuilderFactory builders=DocumentBuilderFactory.newInstance();
-	private static final TransformerFactory transformers=TransformerFactory.newInstance();
-
-
-	static {
-		transformers.setAttribute("indent-number", 4);
-	}
-
-
 	private static DocumentBuilder builder() {
 		try {
 
-			return builders.newDocumentBuilder();
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
 		} catch ( final ParserConfigurationException e ) {
 
@@ -181,7 +173,11 @@ public final class HTMLFormat extends Format<Document> {
 	private static Transformer transformer() {
 		try {
 
-			final Transformer transformer=transformers.newTransformer();
+			final TransformerFactory factory=TransformerFactory.newInstance();
+
+			factory.setAttribute("indent-number", 4);
+
+			final Transformer transformer=factory.newTransformer();
 
 			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
@@ -210,7 +206,7 @@ public final class HTMLFormat extends Format<Document> {
 	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header is
 	 * matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
 	 */
-	@Override public Result<Document, UnaryOperator<Response>> get(final Message<?> message) {
+	@Override public Result<Document, MessageException> decode(final Message<?> message) {
 
 		return message
 
@@ -247,12 +243,11 @@ public final class HTMLFormat extends Format<Document> {
 
 	}
 
-
 	/**
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the HTML {@code value} to the
-	 * accepted outputstream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
+	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final Document value) {
+	@Override public <M extends Message<M>> M encode(final M message, final Document value) {
 		return message
 
 				.header("~Content-Type", MIME)

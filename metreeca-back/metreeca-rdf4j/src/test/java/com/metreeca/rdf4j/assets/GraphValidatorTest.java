@@ -28,7 +28,6 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.function.UnaryOperator;
 
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.literal;
@@ -73,11 +72,11 @@ final class GraphValidatorTest {
 	}
 
 
-	private Result<Request, UnaryOperator<Response>> validate(final Shape shape, final String... model) {
+	private Result<Request, MessageException> validate(final Shape shape, final String... model) {
 		return validate(shape, model(model));
 	}
 
-	private Result<Request, UnaryOperator<Response>> validate(final Shape shape, final Collection<Statement> model) {
+	private Result<Request, MessageException> validate(final Shape shape, final Collection<Statement> model) {
 		return new GraphValidator().validate(new Request()
 				.body(rdf(), model)
 				.shape(field(RDF.VALUE, shape))

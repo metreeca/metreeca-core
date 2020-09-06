@@ -33,7 +33,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.MessageException.status;
@@ -87,6 +86,8 @@ public final class XMLFormat extends Format<Document> {
 		return new XMLFormat(parser);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Parses a XML document.
@@ -210,7 +211,7 @@ public final class XMLFormat extends Format<Document> {
 	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header is
 	 * matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
 	 */
-	@Override public Result<Document, UnaryOperator<Response>> get(final Message<?> message) {
+	@Override public Result<Document, MessageException> decode(final Message<?> message) {
 
 		return message
 
@@ -263,7 +264,7 @@ public final class XMLFormat extends Format<Document> {
 	 * the accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already
 	 * defined.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final Document value) {
+	@Override public <M extends Message<M>> M encode(final M message, final Document value) {
 		return message
 
 				.header("~Content-Type", MIME)
@@ -272,17 +273,17 @@ public final class XMLFormat extends Format<Document> {
 
 					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
-						final javax.xml.transform.Result result=new StreamResult(writer);
 						final Source source=new DOMSource(value);
+						final javax.xml.transform.Result result=new StreamResult(writer);
 
 						source.setSystemId(message.item());
 						result.setSystemId(message.item());
 
 						transformer().transform(source, result);
 
-					} catch ( final TransformerException e ) {
+					} catch ( final TransformerException unexpected ) {
 
-						throw new RuntimeException("unable to format XML body", e);
+						throw new RuntimeException("unable to format XML body", unexpected);
 
 					} catch ( final IOException e ) {
 

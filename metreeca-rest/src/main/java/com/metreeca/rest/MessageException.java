@@ -35,6 +35,15 @@ public final class MessageException extends RuntimeException implements UnaryOpe
 
 
 	/**
+	 * Creates a no-op response generator.
+	 *
+	 * @return a no-op response generator
+	 */
+	public static MessageException status() {
+		return new MessageException();
+	}
+
+	/**
 	 * Creates a shorthand response generator.
 	 *
 	 * @param status the status code for the response
@@ -131,6 +140,14 @@ public final class MessageException extends RuntimeException implements UnaryOpe
 
 	private final UnaryOperator<Response> report;
 
+
+	private MessageException() {
+
+		super(String.format("%3d", 0));
+
+		this.status=0;
+		this.report=response -> response;
+	}
 
 	private MessageException(final int status) {
 

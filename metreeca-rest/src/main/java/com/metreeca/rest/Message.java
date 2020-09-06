@@ -25,7 +25,6 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -44,9 +43,6 @@ import static java.util.stream.Collectors.toList;
  * HTTP message.
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
- *
- * <p>Messages are associated with possibly multiple {@linkplain #body(Format) body} representations managed by message
- * body {@linkplain Format formats}.</p>
  *
  * @param <T> the self-bounded message type supporting fluent setters
  */
@@ -433,17 +429,17 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves a body representation.
+	 * Decodes message body.
 	 *
-	 * @param format the body format managing the body representation to be retrieved
-	 * @param <V>    the type of the body representation managed by {@code body}
+	 * @param format the expected body format
+	 * @param <V>    the type of the body to be decoded
 	 *
-	 * @return a result providing access to the body representation managed by {@code body}, if one was successfully
-	 * retrieved from this message; a result providing access to the body processing failure, otherwise
+	 * @return either a message exception reporting a decoding issue or the message body
+	 * {@linkplain Format#decode(Message) decoded} by {@code format}
 	 *
-	 * @throws NullPointerException if {@code body} is null
+	 * @throws NullPointerException if {@code format} is null
 	 */
-	public <V> Result<V, UnaryOperator<Response>> body(final Format<V> format) {
+	public <V> Result<V, MessageException> body(final Format<V> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null body");
@@ -451,7 +447,7 @@ public abstract class Message<T extends Message<T>> {
 
 		final V cached=(V)bodies.get(format);
 
-		return cached != null ? Value(cached) : format.get(self()).value(value -> {
+		return cached != null ? Value(cached) : format.decode(self()).value(value -> {
 
 			bodies.put(format, value);
 
@@ -462,18 +458,18 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 	/**
-	 * Configures a body representation.
+	 * Encodes message body.
 	 *
-	 * <p>Future calls to {@link #body(Format)} with the same body format will return the specified value, rather than
-	 * the value {@linkplain Format#get(Message) retrieved} from this message by the body format.</p>
+	 * <p>Future calls to {@link #body(Format)} with the same body format will return the specified value.</p>
 	 *
-	 * @param format the body format managing the body representation to be configured
-	 * @param value  the body representation to be associated with {@code body}
-	 * @param <V>    the type of the body representation managed by {@code body}
+	 * @param format the body format
+	 * @param value  the body to be encoded
+	 * @param <V>    the type of the body to be encoded
 	 *
-	 * @return this message
+	 * @return this message with the {@code value} {@linkplain Format#encode(Message, Object) encoded} by {@code
+	 * format} as body
 	 *
-	 * @throws NullPointerException  if either {@code body} or {@code value} is null
+	 * @throws NullPointerException if either {@code format} or {@code value} is null
 	 */
 	public <V> T body(final Format<? super V> format, final V value) {
 
@@ -487,7 +483,7 @@ public abstract class Message<T extends Message<T>> {
 
 		bodies.put(format, value);
 
-		return format.set(self(), value);
+		return format.encode(self(), value);
 	}
 
 

@@ -24,14 +24,14 @@ import java.util.function.Supplier;
 
 
 /**
- * Raw binary input body format.
+ * Input body format.
  */
 public final class InputFormat extends Format<Supplier<InputStream>> {
 
 	/**
-	 * Creates a raw binary input body format.
+	 * Creates an input body format.
 	 *
-	 * @return a new raw binary input body format
+	 * @return a new input body format
 	 */
 	public static InputFormat input() {
 		return new InputFormat();

@@ -28,7 +28,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
@@ -112,7 +111,7 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <M extends Message<M>> Result<M, UnaryOperator<Response>> trim(final M message) {
+	@Override public <M extends Message<M>> Result<M, MessageException> trim(final M message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
@@ -121,7 +120,7 @@ public final class GraphEngine implements Engine {
 		return trimmer.trim(message);
 	}
 
-	@Override public <M extends Message<M>> Result<M, UnaryOperator<Response>> validate(final M message) {
+	@Override public <M extends Message<M>> Result<M, MessageException> validate(final M message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");

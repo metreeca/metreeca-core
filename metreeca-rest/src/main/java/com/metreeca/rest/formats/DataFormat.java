@@ -20,7 +20,7 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
-import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -36,6 +36,11 @@ public final class DataFormat extends Format<byte[]> {
 	 */
 	public static final String MIME="application/octet-stream";
 
+	/**
+	 * A pattern matching binary MIME types, for instance {@code application/zip}.
+	 */
+	public static final Pattern MIMEPattern=Pattern.compile("(?i)^application/.+$");
+
 
 	/**
 	 * Creates a binary body format.
@@ -46,6 +51,8 @@ public final class DataFormat extends Format<byte[]> {
 		return new DataFormat();
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static byte[] data(final InputStream input) {
 
@@ -106,27 +113,23 @@ public final class DataFormat extends Format<byte[]> {
 	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the decoding error,
 	 * otherwise
 	 */
-	@Override public Result<byte[], UnaryOperator<Response>> get(final Message<?> message) {
-		return message.body(input()).value(
+	@Override public Result<byte[], MessageException> decode(final Message<?> message) {
+		return message.body(input()).value(source -> {
+			try ( final InputStream input=source.get() ) {
 
-				source -> {
-					try ( final InputStream input=source.get() ) {
+				return data(input);
 
-						return data(input);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}
-
-		);
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		});
 	}
 
 	/**
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value} to the
 	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final byte... value) {
+	@Override public <M extends Message<M>> M encode(final M message, final byte... value) {
 		return message
 
 				.header("~Content-Type", MIME)

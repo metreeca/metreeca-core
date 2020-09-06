@@ -20,7 +20,6 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
-import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.MessageException.status;
@@ -42,7 +41,7 @@ public final class TextFormat extends Format<String> {
 	public static final String MIME="text/plain";
 
 	/**
-	 * A pattern matching JSON-based MIME types, for instance {@code text/csv}.
+	 * A pattern matching textual MIME types, for instance {@code text/csv}.
 	 */
 	public static final Pattern MIMEPattern=Pattern.compile("(?i)^text/.+$");
 
@@ -56,6 +55,8 @@ public final class TextFormat extends Format<String> {
 		return new TextFormat();
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String text(final Reader reader) {
 
@@ -117,7 +118,7 @@ public final class TextFormat extends Format<String> {
 	 * stream supplied by its {@link InputFormat} body, if one is present; a failure describing the decoding error,
 	 * otherwise
 	 */
-	@Override public Result<String, UnaryOperator<Response>> get(final Message<?> message) {
+	@Override public Result<String, MessageException> decode(final Message<?> message) {
 		return message.body(input()).process(source -> {
 			try (
 					final InputStream input=source.get();
@@ -142,7 +143,7 @@ public final class TextFormat extends Format<String> {
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the textual {@code value} to the
 	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final String value) {
+	@Override public <M extends Message<M>> M encode(final M message, final String value) {
 		return message
 
 				.header("~Content-Type", MIME)

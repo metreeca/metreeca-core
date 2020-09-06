@@ -20,7 +20,6 @@ package com.metreeca.rest.assets;
 import com.metreeca.rest.*;
 
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 
 /**
@@ -100,8 +99,8 @@ public interface Engine {
 	 * <p>Rewrites the engine-specific message {@linkplain Message#body(Format) payload} retaining only the subset
 	 * compatible with the envelope of the message {@linkplain Message#shape() shape}.</p>
 	 *
-	 * @param message the message whose engine-specific payload is to be trimmed
 	 * @param <M>     the type of {@code message}
+	 * @param message the message whose engine-specific payload is to be trimmed
 	 *
 	 * @return a value providing access to the given {@code message} with an updated payload, if its engine-specific
 	 * {@linkplain Message#body(Format) payload} is well-formed and compatible with its {@linkplain Message#shape()
@@ -109,7 +108,7 @@ public interface Engine {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public <M extends Message<M>> Result<M, UnaryOperator<Response>> trim(final M message);
+	public <M extends Message<M>> Result<M, MessageException> trim(final M message);
 
 	/**
 	 * Validates message payloads.
@@ -126,7 +125,7 @@ public interface Engine {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public <M extends Message<M>> Result<M, UnaryOperator<Response>> validate(final M message);
+	public <M extends Message<M>> Result<M, MessageException> validate(final M message);
 
 
 	//// CRUD Actions

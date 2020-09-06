@@ -25,7 +25,8 @@ import javax.json.stream.JsonParsingException;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.MessageException.status;
@@ -69,6 +70,8 @@ public final class JSONFormat extends Format<JsonObject> {
 		return new JSONFormat();
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Parses a JSON object.
@@ -120,7 +123,7 @@ public final class JSONFormat extends Format<JsonObject> {
 
 		try ( final JsonWriter jsonWriter=JsonWriters.createWriter(writer) ) {
 
-			jsonWriter.write(object);
+			jsonWriter.writeObject(object);
 
 			return writer;
 
@@ -221,7 +224,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header
 	 * is matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
 	 */
-	@Override public Result<JsonObject, UnaryOperator<Response>> get(final Message<?> message) {
+	@Override public Result<JsonObject, MessageException> decode(final Message<?> message) {
 
 		return message
 
@@ -261,7 +264,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * Configures the {@link OutputFormat} representation of {@code message} to write the JSON {@code value} to the
 	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
+	@Override public <M extends Message<M>> M encode(final M message, final JsonObject value) {
 		return message
 
 				.header("~Content-Type", MIME)
