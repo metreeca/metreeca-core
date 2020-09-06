@@ -17,9 +17,9 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.tree.Shape;
+
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.RequestAssert.assertThat;
@@ -63,7 +63,7 @@ final class DriverTest {
 	@Test void testConfigureExchangeShape() {
 		new Driver(TestShape)
 
-				.wrap((Handler)request -> {
+				.wrap(request -> {
 
 					assertThat(request)
 							.hasShape(TestShape);
@@ -86,7 +86,7 @@ final class DriverTest {
 	@Test void testHandleSpecsQuery() {
 		new Driver(TestShape)
 
-				.wrap((Handler)request -> request.reply(response -> response))
+				.wrap(request -> request.reply(response -> response))
 
 				.handle(request()
 						.roles(None)

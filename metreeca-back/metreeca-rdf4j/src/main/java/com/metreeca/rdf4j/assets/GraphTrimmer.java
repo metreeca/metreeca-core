@@ -39,8 +39,8 @@ import static java.util.stream.Collectors.toSet;
 
 final class GraphTrimmer extends GraphProcessor {
 
-	<M extends Message<M>> Result<M, MessageException> trim(final M message) {
-		return message.body(rdf()).value(rdf -> message.body(rdf(),
+	<M extends Message<M>> Either<MessageException, M> trim(final M message) {
+		return message.body(rdf()).map(rdf -> message.body(rdf(),
 				trim(iri(message.item()), convey(message.shape()), rdf)
 		));
 	}

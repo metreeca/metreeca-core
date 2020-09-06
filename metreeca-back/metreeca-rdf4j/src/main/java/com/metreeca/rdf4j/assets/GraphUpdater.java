@@ -52,7 +52,7 @@ final class GraphUpdater extends GraphProcessor {
 	private Future<Response> member(final Request request) {
 		return request.body(rdf()).fold(
 
-				model -> request.reply(response -> graph.exec(connection -> {
+				request::reply, model -> request.reply(response -> graph.exec(connection -> {
 
 					final IRI item=iri(request.item());
 					final Shape shape=request.shape();
@@ -78,9 +78,7 @@ final class GraphUpdater extends GraphProcessor {
 
 							);
 
-				})),
-
-				request::reply
+				}))
 
 		);
 	}

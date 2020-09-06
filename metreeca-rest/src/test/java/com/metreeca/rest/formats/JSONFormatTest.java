@@ -25,6 +25,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.io.*;
 
+import static com.metreeca.rest.EitherAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -48,9 +49,8 @@ final class JSONFormatTest {
 				.header("content-type", JSONFormat.MIME)
 				.body(input(), () -> new ByteArrayInputStream(TestJSON.toString().getBytes(UTF_8)));
 
-		assertThat(request.body(json()).value())
-				.isPresent()
-				.contains(TestJSON);
+		assertThat(request.body(json()))
+				.hasRight(TestJSON);
 	}
 
 	@Test void testRetrieveJSONChecksContentType() {
@@ -58,8 +58,8 @@ final class JSONFormatTest {
 		final Request request=new Request()
 				.body(input(), () -> new ByteArrayInputStream(TestJSON.toString().getBytes(UTF_8)));
 
-		assertThat(request.body(json()).value())
-				.isNotPresent();
+		assertThat(request.body(json()))
+				.hasLeft();
 	}
 
 	@Test void testConfigureJSON() {
@@ -72,7 +72,7 @@ final class JSONFormatTest {
 
 						.body(output())
 
-						.value(target -> {
+						.map(target -> {
 							try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
 
 								target.accept(output);
@@ -84,13 +84,11 @@ final class JSONFormatTest {
 							}
 						})
 
-						.value(input -> Json.createReader(input).readObject())
+						.map(input -> Json.createReader(input).readObject())
 
-						.value()
 				)
 
-				.isPresent()
-				.contains(TestJSON);
+				.hasRight(TestJSON);
 
 	}
 

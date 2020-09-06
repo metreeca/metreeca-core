@@ -69,33 +69,33 @@ public final class Parse<R> implements Function<Message<?>, Optional<R>> {
      * {@linkplain Logger#logger() shared event logger}
      */
     @Override public Optional<R> apply(final Message<?> message) {
-        return message == null ? Optional.empty() : message.body(format).fold(Optional::of, error -> {
+        return message == null ? Optional.empty() : message.body(format).fold(error -> {
 
-            // !!! get cause directly from failure
+	        // !!! get cause directly from failure
 
-            final Response parse=new Response(message.request()).map(error);
-            final String media=format.getClass().getSimpleName();
+	        final Response parse=new Response(message.request()).map(error);
+	        final String media=format.getClass().getSimpleName();
 
-            if ( parse.status() == Response.UnsupportedMediaType ) {
+	        if ( parse.status() == Response.UnsupportedMediaType ) {
 
-                logger.warning(this,
-                        String.format("no <%s> message body", media)
+		        logger.warning(this,
+				        String.format("no <%s> message body", media)
                 );
 
             } else {
 
                 // !!! review formatting >> avoid newlines in log
 
-                logger.error(this,
-                        String.format("unable to parse message body as <%s>", media),
-                        new RuntimeException(error.toString(), parse.cause().orElse(null))
-                );
+		        logger.error(this,
+				        String.format("unable to parse message body as <%s>", media),
+				        new RuntimeException(error.toString(), parse.cause().orElse(null))
+		        );
 
-            }
+	        }
 
-            return Optional.empty();
+	        return Optional.empty();
 
-        });
+        }, Optional::of);
     }
 
 }

@@ -91,7 +91,7 @@ final class WorkerTest {
 					assertThat(response.status()).isEqualTo(Response.OK);
 
 					assertThat(response.body(output()).<byte[]>fold(
-							v -> {
+							e -> new byte[0], v -> {
 
 								final ByteArrayOutputStream output=new ByteArrayOutputStream();
 
@@ -99,8 +99,7 @@ final class WorkerTest {
 
 								return output.toByteArray();
 
-							},
-							e -> new byte[0]
+							}
 					)).isEmpty();
 
 

@@ -22,8 +22,8 @@ import com.metreeca.tree.Shape;
 import javax.json.*;
 import java.util.*;
 
+import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Result.Error;
 import static com.metreeca.tree.shapes.Field.fields;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -59,13 +59,13 @@ public abstract class Format<V> {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public Result<V, MessageException> decode(final Message<?> message) {
+	public Either<MessageException, V> decode(final Message<?> message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
 		}
 
-		return Error(status());
+		return Left(status());
 	}
 
 	/**

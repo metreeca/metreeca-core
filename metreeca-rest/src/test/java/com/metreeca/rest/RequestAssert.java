@@ -22,16 +22,14 @@ import com.metreeca.rest.formats.DataFormat;
 
 import org.assertj.core.api.Assertions;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.TextFormat.text;
+import static java.util.function.Function.identity;
 
 
 public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
@@ -40,19 +38,19 @@ public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 
 		if ( request != null ) {
 
-			request.body(input()).value().ifPresent(supplier -> { // cache input
+			request.body(input(), (request.body(input()).fold(e -> Xtream::input, source -> { // cache input
 
-				try ( final InputStream stream=supplier.get() ) {
+				try ( final InputStream stream=source.get() ) {
 
 					final byte[] data=DataFormat.data(stream);
 
-					request.body(input(), () -> new ByteArrayInputStream(data));
+					return () -> new ByteArrayInputStream(data);
 
 				} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
 				}
 
-			});
+			})));
 
 			final StringBuilder builder=new StringBuilder(2500);
 
@@ -64,16 +62,17 @@ public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 
 			builder.append('\n');
 
-			request.body(text()).value().ifPresent(text -> {
-				if ( !text.isEmpty() ) {
 
-					final int limit=builder.capacity();
+			final String text=request.body(text()).fold(e -> "", identity());
 
-					builder
-							.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮")
-							.append("\n\n");
-				}
-			});
+			if ( !text.isEmpty() ) {
+
+				final int limit=builder.capacity();
+
+				builder
+						.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮")
+						.append("\n\n");
+			}
 
 			Logger.getLogger(request.getClass().getName()).log(
 					Level.INFO,

@@ -28,6 +28,7 @@ import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static java.lang.String.format;
+import static java.util.function.Function.identity;
 
 
 /**
@@ -97,7 +98,7 @@ public final class Gateway implements Wrapper {
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
-				? request.parameters(search(request.body(text()).value().orElse("")))
+				? request.parameters(search(request.body(text()).fold(e -> "", identity()))) // !!! error handling?
 				: request;
 	}
 

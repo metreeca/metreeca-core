@@ -29,11 +29,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.Collections.singletonMap;
@@ -82,7 +82,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 *
 	 * @throws NullPointerException if {@code reader} is null
 	 */
-	public static Result<JsonObject, JsonParsingException> json(final Reader reader) {
+	public static Either<JsonParsingException, JsonObject> json(final Reader reader) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -90,11 +90,11 @@ public final class JSONFormat extends Format<JsonObject> {
 
 		try ( final JsonReader jsonReader=Json.createReader(reader) ) {
 
-			return Value(jsonReader.readObject());
+			return Right(jsonReader.readObject());
 
 		} catch ( final JsonParsingException e ) {
 
-			return Error(e);
+			return Left(e);
 
 		}
 	}
@@ -223,21 +223,21 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * body, if one is available and the {@code message} {@code Content-Type} header is matched by
 	 * {@link #MIMEPattern}, taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
-	@Override public Result<JsonObject, MessageException> decode(final Message<?> message) {
+	@Override public Either<MessageException, JsonObject> decode(final Message<?> message) {
 		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
-				.map(type -> message.body(input()).process(source -> {
+				.map(type -> message.body(input()).flatMap(source -> {
 
 					try (
 							final InputStream input=source.get();
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
-						return json(reader).fold(Result::Value, e -> Error(status(BadRequest, e)));
+						return json(reader).fold(e -> Left(status(BadRequest, e)), Either::Right);
 
 					} catch ( final UnsupportedEncodingException e ) {
 
-						return Error(status(BadRequest, e));
+						return Left(status(BadRequest, e));
 
 					} catch ( final IOException e ) {
 
@@ -247,7 +247,7 @@ public final class JSONFormat extends Format<JsonObject> {
 
 				}))
 
-				.orElseGet(() -> Error(status(UnsupportedMediaType, "no JSON body")));
+				.orElseGet(() -> Left(status(UnsupportedMediaType, "no JSON body")));
 	}
 
 	/**

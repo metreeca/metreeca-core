@@ -178,9 +178,11 @@ public final class HTTPServer {
 					.orElse(0L)
 			);
 
-			response.body(output()).value().ifPresent(consumer -> {
+			response.body(output()).accept(e -> {}, target -> {
 				try ( final OutputStream output=exchange.getResponseBody() ) {
-					consumer.accept(output);
+
+					target.accept(output);
+
 				} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
 				}

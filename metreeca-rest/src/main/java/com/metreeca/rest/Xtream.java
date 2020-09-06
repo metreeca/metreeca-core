@@ -17,8 +17,7 @@
 
 package com.metreeca.rest;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.*;
@@ -231,6 +230,99 @@ public final class Xtream<T> implements Stream<T> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Creates an empty input stream.
+	 *
+	 * @return a new empty input stream
+	 */
+	public static InputStream input() {
+		return new ByteArrayInputStream(new byte[0]);
+	}
+
+	/**
+	 * Creates an empty reader.
+	 *
+	 * @return a new empty reader
+	 */
+	public static Reader reader() {
+		return new StringReader("");
+	}
+
+	/**
+	 * Copies an input stream to an output stream.
+	 *
+	 * @param <O>    the type of the output stream
+	 * @param output the output stream
+	 * @param input  the input stream
+	 *
+	 * @return the {@code output} stream
+	 *
+	 * @throws NullPointerException if either {@code output} ir {@code input} is null
+	 */
+	public static <O extends OutputStream> O copy(final O output, final InputStream input) {
+
+		if ( output == null ) {
+			throw new NullPointerException("null output");
+		}
+
+		if ( input == null ) {
+			throw new NullPointerException("null input");
+		}
+
+		try {
+
+			final byte[] buffer=new byte[1024];
+
+			for (int n; (n=input.read(buffer)) >= 0; output.write(buffer, 0, n)) {}
+
+			output.flush();
+
+			return output;
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	/**
+	 * Copies a reader to writer.
+	 *
+	 * @param <W>    the type of the writer
+	 * @param writer the writer
+	 * @param reader the reader
+	 *
+	 * @return the {@code writer}
+	 *
+	 * @throws NullPointerException if either {@code writer} ir {@code reader} is null
+	 */
+	public static <W extends Writer> W copy(final W writer, final Reader reader) {
+
+		if ( writer == null ) {
+			throw new NullPointerException("null writer");
+		}
+
+		if ( reader == null ) {
+			throw new NullPointerException("null reader");
+		}
+
+		try {
+
+			final char[] buffer=new char[1024];
+
+			for (int n; (n=reader.read(buffer)) >= 0; writer.write(buffer, 0, n)) {}
+
+			writer.flush();
+
+			return writer;
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private final Stream<T> stream; // the delegate plain stream
 
 
@@ -291,7 +383,7 @@ public final class Xtream<T> implements Stream<T> {
 
 	@SafeVarargs public final <R> Xtream<R> bagMap(final Function<? super T, ? extends Collection<R>>... mappers) {
 
-		if ( mappers == null || Arrays.stream(mappers).anyMatch(Objects::isNull)) {
+		if ( mappers == null || Arrays.stream(mappers).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null mapper");
 		}
 

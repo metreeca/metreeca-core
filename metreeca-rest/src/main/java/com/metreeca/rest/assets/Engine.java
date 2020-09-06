@@ -108,7 +108,7 @@ public interface Engine {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public <M extends Message<M>> Result<M, MessageException> trim(final M message);
+	public <M extends Message<M>> Either<MessageException, M> trim(final M message);
 
 	/**
 	 * Validates message payloads.
@@ -125,7 +125,7 @@ public interface Engine {
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
-	public <M extends Message<M>> Result<M, MessageException> validate(final M message);
+	public <M extends Message<M>> Either<MessageException, M> validate(final M message);
 
 
 	//// CRUD Actions

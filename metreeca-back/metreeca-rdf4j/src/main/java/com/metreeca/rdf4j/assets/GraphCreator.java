@@ -32,10 +32,10 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.InternalServerError;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 
@@ -57,7 +57,7 @@ final class GraphCreator extends GraphProcessor {
 
 				.body(rdf())
 
-				.process(rdf -> graph.exec(connection -> {
+				.flatMap(rdf -> graph.exec(connection -> {
 
 					final IRI holder=iri(request.item());
 					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
@@ -78,7 +78,7 @@ final class GraphCreator extends GraphProcessor {
 
 					if ( clashing ) { // report clashing slug
 
-						return Error(status(InternalServerError,
+						return Left(status(InternalServerError,
 								new IllegalStateException("clashing entity slug {"+member+"}")));
 
 					} else { // store model
@@ -86,7 +86,7 @@ final class GraphCreator extends GraphProcessor {
 						connection.add(outline(member, filter(request.shape())));
 						connection.add(rewrite(member, holder, rdf));
 
-						return Value(request.reply(response -> response
+						return Right(request.reply(response -> response
 								.status(Response.Created)
 								.header("Location", member.stringValue()))
 						);
@@ -95,7 +95,7 @@ final class GraphCreator extends GraphProcessor {
 
 				}))
 
-				.fold(future -> future, request::reply);
+				.fold(request::reply, future -> future);
 	}
 
 	private Future<Response> member(final Request request) {

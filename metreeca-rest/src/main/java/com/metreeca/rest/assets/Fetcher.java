@@ -110,41 +110,26 @@ import static java.util.stream.Collectors.toMap;
 
 					request.body(input()).fold(
 
-							target -> {
+							error -> {
 
-								try ( final InputStream input=target.get() ) {
+								logger.error(this, format("unable to open input stream for <%s>", item));
 
-									final OutputStream output=connection.getOutputStream();
+								throw new RuntimeException(error.toString()); // !!!
 
-									if ( output == null ) {
-										throw new NullPointerException("null output");
-									}
+							}, target -> {
 
-									if ( input == null ) {
-										throw new NullPointerException("null input");
-									}
+								try (
+										final InputStream input=target.get();
+										final OutputStream output=connection.getOutputStream()
+								) {
 
-									final byte[] buffer=new byte[1024];
-
-									for (int n; (n=input.read(buffer)) >= 0; output.write(buffer, 0, n)) {}
-
-									output.flush();
-
-									return output;
+									return Xtream.copy(output, input);
 
 								} catch ( final IOException e ) {
 
 									throw new UncheckedIOException(e);
 
 								}
-
-							},
-
-							error -> {
-
-								logger.error(this, format("unable to open input stream for <%s>", item));
-
-								throw new RuntimeException(error.toString()); // !!!
 
 							}
 
@@ -187,7 +172,7 @@ import static java.util.stream.Collectors.toMap;
 											}
 										})
 
-										.orElseGet(() -> new ByteArrayInputStream(new byte[0]));
+										.orElseGet(Xtream::input);
 
 							} catch ( final IOException e ) {
 								throw new UncheckedIOException(e);
@@ -268,7 +253,11 @@ import static java.util.stream.Collectors.toMap;
 		private Response encode(final Response response, final OutputStream output) {
 			return response.success() ? response.body(data()).fold(
 
-					value -> {
+					error -> {
+
+						throw new UncheckedIOException(new IOException(error.toString())); // !!! review
+
+					}, value -> {
 
 						try (
 								final ObjectOutputStream serialized=new ObjectOutputStream(output);
@@ -286,12 +275,6 @@ import static java.util.stream.Collectors.toMap;
 							throw new UncheckedIOException(e);
 
 						}
-
-					},
-
-					error -> {
-
-						throw new UncheckedIOException(new IOException(error.toString())); // !!! review
 
 					}
 

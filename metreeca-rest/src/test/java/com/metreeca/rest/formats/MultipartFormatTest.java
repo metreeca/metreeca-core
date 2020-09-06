@@ -35,6 +35,7 @@ import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -87,7 +88,7 @@ final class MultipartFormatTest {
 
 					.fold(
 
-							parts -> {
+							error -> fail("unexpected failure {"+error+"}"), parts -> {
 
 								assertThat(parts.size())
 										.isEqualTo(2);
@@ -105,9 +106,7 @@ final class MultipartFormatTest {
 
 								return this;
 
-							},
-
-							error -> fail("unexpected failure {"+error+"}")
+							}
 
 					);
 		}
@@ -120,13 +119,11 @@ final class MultipartFormatTest {
 
 			final Map<String, Message<?>> one=request
 					.body(multipart(250, 1000))
-					.value()
-					.orElseGet(() -> fail("missing multipart body"));
+					.fold(e -> fail("missing multipart body"), identity());
 
 			final Map<String, Message<?>> two=request
 					.body(multipart())
-					.value()
-					.orElseGet(() -> fail("missing multipart body"));
+					.fold(e -> fail("missing multipart body"), identity());
 
 			assertThat(one)
 					.as("idempotent")
@@ -143,8 +140,7 @@ final class MultipartFormatTest {
 					.body(multipart())
 
 					.fold(
-							parts -> fail("unexpected multipart body"),
-							Assertions::assertThat
+							Assertions::assertThat, parts -> fail("unexpected multipart body")
 					);
 		}
 
@@ -158,14 +154,6 @@ final class MultipartFormatTest {
 
 					.fold(
 
-							parts -> {
-								fail("unexpected multipart body");
-
-
-								return this;
-
-							},
-
 							error -> {
 
 								new Request().reply(error).accept(response -> assertThat(response)
@@ -175,7 +163,14 @@ final class MultipartFormatTest {
 
 
 								return this;
+							}, parts -> {
+								fail("unexpected multipart body");
+
+
+								return this;
+
 							}
+
 					);
 		}
 

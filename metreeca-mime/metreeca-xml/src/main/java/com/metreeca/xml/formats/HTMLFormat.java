@@ -17,7 +17,6 @@
 
 package com.metreeca.xml.formats;
 
-import com.metreeca.rest.Result;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.InputFormat;
 import com.metreeca.rest.formats.OutputFormat;
@@ -36,11 +35,11 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.regex.Pattern.compile;
@@ -82,7 +81,7 @@ public final class HTMLFormat extends Format<Document> {
 	 *
 	 * @throws NullPointerException if {@code reader} is null
 	 */
-	public static Result<Document, TransformerException> html(final Reader reader, final String base) {
+	public static Either<TransformerException, Document> html(final Reader reader, final String base) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -110,11 +109,11 @@ public final class HTMLFormat extends Format<Document> {
 
 			);
 
-			return Value(document);
+			return Right(document);
 
 		} catch ( final TransformerException e ) {
 
-			return Error(e);
+			return Left(e);
 
 		}
 	}
@@ -206,21 +205,21 @@ public final class HTMLFormat extends Format<Document> {
 	 * body, if one is available and the {@code message} {@code Content-Type} header is matched by
 	 * {@link #MIMEPattern}, taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
-	@Override public Result<Document, MessageException> decode(final Message<?> message) {
+	@Override public Either<MessageException, Document> decode(final Message<?> message) {
 		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
-				.map(type -> message.body(input()).process(source -> {
+				.map(type -> message.body(input()).flatMap(source -> {
 
 					try (
 							final InputStream input=source.get();
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
-						return html(reader, message.item()).fold(Result::Value, e -> Error(status(BadRequest, e)));
+						return html(reader, message.item()).fold(e -> Left(status(BadRequest, e)), Either::Right);
 
 					} catch ( final UnsupportedEncodingException e ) {
 
-						return Error(status(BadRequest, e));
+						return Left(status(BadRequest, e));
 
 					} catch ( final IOException e ) {
 
@@ -230,7 +229,7 @@ public final class HTMLFormat extends Format<Document> {
 
 				}))
 
-				.orElseGet(() -> Error(status(UnsupportedMediaType, "no HTML body")));
+				.orElseGet(() -> Left(status(UnsupportedMediaType, "no HTML body")));
 	}
 
 	/**

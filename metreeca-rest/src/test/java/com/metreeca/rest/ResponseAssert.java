@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.TextFormat.text;
+import static java.util.function.Function.identity;
 
 
 public final class ResponseAssert extends MessageAssert<ResponseAssert, Response> {
@@ -34,7 +35,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 		if ( response != null ) {
 
-			response.body(output()).value().ifPresent(target -> {
+			response.body(output()).accept(e -> {}, target -> {
 
 				final byte[] data;
 
@@ -48,12 +49,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 					throw new UncheckedIOException(e);
 				}
 
-				response.body(output(), output -> { // cache output
-
-					DataFormat.data(output, data);
-
-				});
-
+				response.body(output(), output -> DataFormat.data(output, data)); // cache output
 				response.body(input(), () -> new ByteArrayInputStream(data)); // make output readable for testing
 
 			});
@@ -68,16 +64,16 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 			builder.append('\n');
 
-			response.body(text()).value().ifPresent(text -> {
-				if ( !text.isEmpty() ) {
+			final String text=response.body(text()).fold(e -> "", identity());
 
-					final int limit=builder.capacity();
+			if ( !text.isEmpty() ) {
 
-					builder
-							.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮")
-							.append("\n\n");
-				}
-			});
+				final int limit=builder.capacity();
+
+				builder
+						.append(text.length() <= limit ? text : text.substring(0, limit)+"\n⋮")
+						.append("\n\n");
+			}
 
 			Logger.getLogger(response.getClass().getName()).log(
 					response.status() < 400 ? Level.INFO : response.status() < 500 ? Level.WARNING : Level.SEVERE,

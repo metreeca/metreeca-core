@@ -44,8 +44,8 @@ final class GraphTrimmerTest {
 						.shape(shape)
 						.body(rdf(), model)
 				)
-				.process(response -> response.body(rdf()))
-				.fold(statements -> statements, failure -> emptySet());
+				.flatMap(response -> response.body(rdf()))
+				.fold(failure -> emptySet(), statements -> statements);
 	}
 
 

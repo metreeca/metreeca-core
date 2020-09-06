@@ -33,6 +33,7 @@ import org.eclipse.rdf4j.rio.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
@@ -175,11 +176,8 @@ public final class Graphs extends Endpoint<Graphs> {
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
 				);
 
-				graph().exec(connection -> {
-					try ( final InputStream input=request.body(input()).value() // binary format >> no rewriting
-							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-							.get()
-					) {
+				graph().exec(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> Xtream.input(), Supplier::get) ) {
 
 						final boolean exists=exists(connection, context);
 
@@ -289,10 +287,8 @@ public final class Graphs extends Endpoint<Graphs> {
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
 						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
 
-				graph().exec(connection -> {
-					try ( final InputStream input=request.body(input()).value() // binary format >> no rewriting
-							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-							.get() ) {
+				graph().exec(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> Xtream.input(), Supplier::get) ) {
 
 						final boolean exists=exists(connection, context);
 

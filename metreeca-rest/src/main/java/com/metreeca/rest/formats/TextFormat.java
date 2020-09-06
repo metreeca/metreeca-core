@@ -22,10 +22,10 @@ import com.metreeca.rest.*;
 import java.io.*;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -66,11 +66,7 @@ public final class TextFormat extends Format<String> {
 
 		try ( final StringWriter writer=new StringWriter() ) {
 
-			final char[] buffer=new char[1024];
-
-			for (int n; (n=reader.read(buffer)) >= 0; writer.write(buffer, 0, n)) {}
-
-			writer.flush();
+			Xtream.copy(writer, reader);
 
 			return writer.toString();
 
@@ -118,18 +114,18 @@ public final class TextFormat extends Format<String> {
 	 * {@link InputFormat} body, if one is available, taking into account the {@code message}
 	 * {@linkplain Message#charset() charset}
 	 */
-	@Override public Result<String, MessageException> decode(final Message<?> message) {
-		return message.body(input()).process(source -> {
+	@Override public Either<MessageException, String> decode(final Message<?> message) {
+		return message.body(input()).flatMap(source -> {
 			try (
 					final InputStream input=source.get();
 					final Reader reader=new InputStreamReader(input, message.charset())
 			) {
 
-				return Value(text(reader));
+				return Right(text(reader));
 
 			} catch ( final UnsupportedEncodingException e ) {
 
-				return Error(status(BadRequest, e));
+				return Left(status(BadRequest, e));
 
 			} catch ( final IOException e ) {
 

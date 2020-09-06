@@ -22,6 +22,7 @@ import com.metreeca.rest.*;
 import java.io.*;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -62,13 +63,7 @@ public final class DataFormat extends Format<byte[]> {
 
 		try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
 
-			final byte[] buffer=new byte[1024];
-
-			for (int n; (n=input.read(buffer)) >= 0; output.write(buffer, 0, n)) {}
-
-			output.flush();
-
-			return output.toByteArray();
+			return copy(output, input).toByteArray();
 
 		} catch ( final IOException e ) {
 
@@ -113,8 +108,8 @@ public final class DataFormat extends Format<byte[]> {
 	 * Decodes the binary {@code message} body from the input stream supplied by the {@code message}
 	 * {@link InputFormat} body, if one is available
 	 */
-	@Override public Result<byte[], MessageException> decode(final Message<?> message) {
-		return message.body(input()).value(source -> {
+	@Override public Either<MessageException, byte[]> decode(final Message<?> message) {
+		return message.body(input()).map(source -> {
 			try ( final InputStream input=source.get() ) {
 
 				return data(input);

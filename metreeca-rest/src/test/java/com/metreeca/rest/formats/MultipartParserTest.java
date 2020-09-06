@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -67,7 +68,7 @@ final class MultipartParserTest {
 
 		private List<String> parts(final String content) throws IOException {
 			return MultipartParserTest.this.parts(content).stream()
-					.map(message -> message.body(text()).value().orElse(""))
+					.map(message -> message.body(text()).fold(e -> "", identity()))
 					.collect(toList());
 		}
 

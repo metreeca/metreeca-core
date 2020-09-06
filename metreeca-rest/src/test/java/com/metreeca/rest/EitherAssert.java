@@ -23,35 +23,35 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 
-public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>, Result<V, E>> {
+public final class EitherAssert<L, R> extends AbstractAssert<EitherAssert<L, R>, Either<R, L>> {
 
-	public static <V, E> ResultAssert<V, E> assertThat(final Result<V, E> result) {
-		return new ResultAssert<>(result);
+	public static <L, R> EitherAssert<L, R> assertThat(final Either<R, L> either) {
+		return new EitherAssert<>(either);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private ResultAssert(final Result<V, E> actual) {
-		super(actual, ResultAssert.class);
+	private EitherAssert(final Either<R, L> actual) {
+		super(actual, EitherAssert.class);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public ResultAssert<V, E> hasValue() {
-		return hasValue(value -> {});
+	public EitherAssert<L, R> hasLeft() {
+		return hasLeft(value -> {});
 	}
 
-	public ResultAssert<V, E> hasValue(final V expected) {
-		return hasValue(value -> {
-			if ( !Objects.equals(value, expected) ) {
-				failWithMessage("expected result <%s> to have value <%s>", actual, expected);
+	public EitherAssert<L, R> hasLeft(final R expected) {
+		return hasLeft(error -> {
+			if ( !Objects.equals(error, expected) ) {
+				failWithMessage("expected result <%s> to have error <%s>", actual, expected);
 			}
 		});
 	}
 
-	public ResultAssert<V, E> hasValue(final Consumer<V> assertions) {
+	public EitherAssert<L, R> hasLeft(final Consumer<R> assertions) {
 
 		if ( assertions == null ) {
 			throw new NullPointerException("null assertions");
@@ -61,18 +61,17 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 
 		actual.fold(
 
-				value -> {
-
-					assertions.accept(value);
-
-					return this;
-				},
-
 				error -> {
 
-					failWithMessage("expected result <%s> to have value", actual);
+					assertions.accept(error);
 
 					return this;
+
+				}, value -> {
+					failWithMessage("expected result <%s> to have error", actual);
+
+					return this;
+
 				}
 
 		);
@@ -81,19 +80,19 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 	}
 
 
-	public ResultAssert<V, E> hasError() {
-		return hasError(value -> {});
+	public EitherAssert<L, R> hasRight() {
+		return hasRight(value -> {});
 	}
 
-	public ResultAssert<V, E> hasError(final E expected) {
-		return hasError(error -> {
-			if ( !Objects.equals(error, expected) ) {
-				failWithMessage("expected result <%s> to have error <%s>", actual, expected);
+	public EitherAssert<L, R> hasRight(final L expected) {
+		return hasRight(value -> {
+			if ( !Objects.equals(value, expected) ) {
+				failWithMessage("expected result <%s> to have value <%s>", actual, expected);
 			}
 		});
 	}
 
-	public ResultAssert<V, E> hasError(final Consumer<E> assertions) {
+	public EitherAssert<L, R> hasRight(final Consumer<L> assertions) {
 
 		if ( assertions == null ) {
 			throw new NullPointerException("null assertions");
@@ -103,19 +102,16 @@ public final class ResultAssert<V, E> extends AbstractAssert<ResultAssert<V, E>,
 
 		actual.fold(
 
-				value -> {
-					failWithMessage("expected result <%s> to have error", actual);
-
-					return this;
-
-				},
-
 				error -> {
 
-					assertions.accept(error);
+					failWithMessage("expected result <%s> to have value", actual);
 
 					return this;
+				}, value -> {
 
+					assertions.accept(value);
+
+					return this;
 				}
 
 		);

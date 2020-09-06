@@ -30,11 +30,11 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnprocessableEntity;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 
@@ -430,7 +430,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @throws NullPointerException if any argument is null
 	 */
-	public Result<Query, UnaryOperator<Response>> query(final Format<?> format, final Shape shape) {
+	public Either<UnaryOperator<Response>, Query> query(final Format<?> format, final Shape shape) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null format");
@@ -442,15 +442,15 @@ public final class Request extends Message<Request> {
 
 		try {
 
-			return Value(new QueryParser(base, shape, format).parse(query()));
+			return Right(new QueryParser(base, shape, format).parse(query()));
 
 		} catch ( final JsonException e ) {
 
-			return Error(status(BadRequest, e));
+			return Left(status(BadRequest, e));
 
 		} catch ( final NoSuchElementException e ) {
 
-			return Error(status(UnprocessableEntity, e));
+			return Left(status(UnprocessableEntity, e));
 
 		}
 	}

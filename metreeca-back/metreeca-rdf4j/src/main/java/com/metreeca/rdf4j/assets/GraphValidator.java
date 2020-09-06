@@ -45,10 +45,10 @@ import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Snippets.source;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnprocessableEntity;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.tree.Trace.trace;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
@@ -60,21 +60,20 @@ final class GraphValidator extends GraphProcessor {
 	private final Graph graph=Context.asset(graph());
 
 
-	<M extends Message<M>> Result<M, MessageException> validate(final M message) {
+	<M extends Message<M>> Either<MessageException, M> validate(final M message) {
 		return message
 
 				.body(rdf())
 
-				.process(rdf -> validate(iri(message.item()), convey(message.shape()), rdf).fold(
-						model -> Value(message),
-						trace -> Error(status(UnprocessableEntity, trace.toJSON()))
+				.flatMap(rdf -> validate(iri(message.item()), convey(message.shape()), rdf).fold(
+						trace -> Left(status(UnprocessableEntity, trace.toJSON())), model -> Right(message)
 				));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Result<Collection<Statement>, Trace> validate(
+	private Either<Trace, Collection<Statement>> validate(
 			final IRI resource, final Shape shape, final Collection<Statement> model) {
 		return graph.exec(connection -> {
 
@@ -103,7 +102,9 @@ final class GraphValidator extends GraphProcessor {
 					));
 
 
-			return trace.isEmpty() ? Value(model) : Error(trace(trace(issues), trace));
+			final Trace merged=trace(trace(issues), trace);
+
+			return merged.isEmpty() ? Right(model) : Left(merged);
 
 		});
 	}

@@ -35,6 +35,7 @@ import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.TextFormat.text;
@@ -120,28 +121,17 @@ final class RDFFormatTest {
 	@Nested final class Getter {
 
 		@Test void testHandleMissingInput() {
-			exec(() -> new Request()
-
-					.body(rdf())
-
-					.value(value -> fail("unexpected RDF body {"+value+"}"))
-
-					.error(error -> assertThat(error.getStatus())
-							.isEqualTo(Response.UnsupportedMediaType)
-					)
-			);
+			exec(() -> new Request().body(rdf()).fold(
+					error -> assertThat(error.getStatus()).isEqualTo(UnsupportedMediaType),
+					value -> fail("unexpected RDF body {"+value+"}")
+			));
 		}
 
 		@Test void testHandleEmptyInput() {
-			exec(() -> new Request()
-
-					.body(input(), () -> new ByteArrayInputStream(new byte[0]))
-
-					.body(rdf())
-
-					.value(value -> assertThat(value).isEmpty())
-					.error(error -> fail("unexpected error {"+error+"}"))
-			);
+			exec(() -> new Request().body(input(), Xtream::input).body(rdf()).fold(
+					error -> fail("unexpected error {"+error+"}"),
+					value -> assertThat(value).isEmpty()
+			));
 		}
 
 		@Test void testRewriteRequestBody() {
@@ -156,11 +146,13 @@ final class RDFFormatTest {
 
 					.body(rdf())
 
-					.value(statements -> assertThat(statements)
-							.isIsomorphicTo(decode("<app://local/container> ldp:contains <app://local/resource> ."))
+					.fold(
+							error -> fail("unexpected error {"+error+"}"),
+							statements -> assertThat(statements).isIsomorphicTo(decode(
+									"<app://local/container> ldp:contains <app://local/resource> ."
+							))
 					)
 
-					.error(error -> fail("unexpected error {"+error+"}"))
 			);
 		}
 
@@ -197,18 +189,18 @@ final class RDFFormatTest {
 
 					.body(output())
 
-					.value(consumer -> {
+					.fold(error -> fail("unexpected error {"+error+"}"), target -> {
 
 						try ( final ByteArrayOutputStream stream=new ByteArrayOutputStream() ) {
 
-							consumer.accept(stream);
+							target.accept(stream);
 
 							assertThat(decode(new String(stream.toByteArray(), UTF_8)))
 									.isIsomorphicTo(decode("<http://example.com/container> ldp:contains "
 											+"<http://example"
 											+".com/resource> ."));
 
-							return consumer;
+							return target;
 
 						} catch ( final IOException e ) {
 							throw new UncheckedIOException(e);
@@ -216,7 +208,6 @@ final class RDFFormatTest {
 
 					})
 
-					.error(error -> fail("unexpected error {"+error+"}"))
 			);
 		}
 

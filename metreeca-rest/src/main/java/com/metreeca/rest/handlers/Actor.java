@@ -117,7 +117,7 @@ public abstract class Actor extends Delegator {
 	 * 		payloads
 	 */
 	protected Wrapper validator() {
-		return handler -> request -> engine.validate(request).fold(handler::handle, request::reply);
+		return handler -> request -> engine.validate(request).fold(request::reply, handler::handle);
 	}
 
 	/**
@@ -128,7 +128,7 @@ public abstract class Actor extends Delegator {
 	 */
 	protected Wrapper trimmer() {
 		return handler -> request -> handler.handle(request).map(response -> response.success() ?
-				engine.trim(response).fold(identity(), response::map) : response
+				engine.trim(response).fold(response::map, identity()) : response
 		);
 	}
 

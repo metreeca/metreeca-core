@@ -95,7 +95,7 @@ public final class Creator extends Actor {
 	 * @throws NullPointerException if either {@code format} or {@code slug} is null
 	 */
 	public <T> Creator(final Format<T> format, final BiFunction<? super Request, T, String> slug) {
-		this(request -> request.body(format).fold(value -> slug.apply(request, value), failure -> ""));
+		this(request -> request.body(format).fold(failure -> "", value -> slug.apply(request, value)));
 	}
 
 

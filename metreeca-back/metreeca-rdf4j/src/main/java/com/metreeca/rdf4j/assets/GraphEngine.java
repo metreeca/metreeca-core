@@ -111,7 +111,7 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <M extends Message<M>> Result<M, MessageException> trim(final M message) {
+	@Override public <M extends Message<M>> Either<MessageException, M> trim(final M message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");
@@ -120,7 +120,7 @@ public final class GraphEngine implements Engine {
 		return trimmer.trim(message);
 	}
 
-	@Override public <M extends Message<M>> Result<M, MessageException> validate(final M message) {
+	@Override public <M extends Message<M>> Either<MessageException, M> validate(final M message) {
 
 		if ( message == null ) {
 			throw new NullPointerException("null message");

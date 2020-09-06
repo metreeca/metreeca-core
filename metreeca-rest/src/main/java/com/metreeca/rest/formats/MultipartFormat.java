@@ -26,10 +26,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.lang.String.format;
@@ -139,10 +139,10 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is matched by
 	 * {@link #MIMEPattern}
 	 */
-	@Override public Result<Map<String, Message<?>>, MessageException> decode(final Message<?> message) {
+	@Override public Either<MessageException, Map<String, Message<?>>> decode(final Message<?> message) {
 		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
-				.map(type -> message.body(input()).process(source -> {
+				.map(type -> message.body(input()).flatMap(source -> {
 
 					final String boundary=message
 							.header("Content-Type")
@@ -195,7 +195,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 					} catch ( final MessageException e ) {
 
-						return Error(e);
+						return Left(e);
 
 					} catch ( final IOException e ) {
 
@@ -203,11 +203,11 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 					}
 
-					return Value(parts);
+					return Right(parts);
 
 				}))
 
-				.orElseGet(() -> Error(status(UnsupportedMediaType, "no multipart body")));
+				.orElseGet(() -> Left(status(UnsupportedMediaType, "no multipart body")));
 	}
 
 	/**
@@ -264,7 +264,13 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 					output.write(CRLF);
 
-					part.body(output()).value().ifPresent(target -> target.accept(output)); // !!! handle errors
+					part.body(output()).fold(unexpected -> { throw unexpected; }, target -> {
+
+						target.accept(output);
+
+						return null;
+
+					});
 
 					output.write(CRLF);
 				}

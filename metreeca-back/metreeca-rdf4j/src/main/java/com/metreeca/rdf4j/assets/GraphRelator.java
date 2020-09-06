@@ -68,7 +68,7 @@ final class GraphRelator extends GraphProcessor {
 
 				) : request.query(rdf(), and(all(item), shape)).fold(
 
-						query -> graph.exec(connection -> {
+						response::map, query -> graph.exec(connection -> {
 
 							final Collection<Statement> model=fetch(connection, item, query);
 
@@ -103,9 +103,7 @@ final class GraphRelator extends GraphProcessor {
 
 									.body(rdf(), model);
 
-						}),
-
-						response::map
+						})
 
 				);
 
@@ -120,7 +118,7 @@ final class GraphRelator extends GraphProcessor {
 
 				return request.query(rdf(), digest).fold(
 
-						query -> graph.exec(connection -> {
+						response::map, query -> graph.exec(connection -> {
 
 							final Collection<Statement> matches=fetch(connection, item, query);
 
@@ -159,9 +157,7 @@ final class GraphRelator extends GraphProcessor {
 
 							}
 
-						}),
-
-						response::map
+						})
 
 				);
 

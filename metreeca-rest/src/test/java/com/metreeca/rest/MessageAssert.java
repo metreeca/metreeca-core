@@ -242,18 +242,17 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		return actual.body(body).fold(
 
-				value -> {
+				error -> fail(
+						"expected message to have a <%s> body but was unable to retrieve one (%s)",
+						body.getClass().getSimpleName(), error
+				), value -> {
 
 					assertions.accept(value);
 
 					return myself;
 
-				},
+				}
 
-				error -> fail(
-						"expected message to have a <%s> body but was unable to retrieve one (%s)",
-						body.getClass().getSimpleName(), error
-				)
 		);
 	}
 
@@ -262,19 +261,23 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		actual.body(data()).value().ifPresent(data -> {
+		actual.body(data()).accept(e -> {}, data -> {
+
 			if ( data.length > 0 ) {
 				failWithMessage("expected empty body but had binary body of length <%d>", data.length);
 			}
+
 		});
 
-		actual.body(text()).value().ifPresent(text -> {
+		actual.body(text()).accept(e -> {}, text -> {
+
 			if ( !text.isEmpty() ) {
 				failWithMessage(
 						"expected empty body but had textual body of length <%d> (%s)",
 						text.length(), clip(text)
 				);
 			}
+
 		});
 
 		return myself;
@@ -289,8 +292,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		isNotNull();
 
 		return actual.body(body).fold(
-				value -> fail("expected message to have no <%s> body but has one"),
-				error -> myself
+				error -> myself, value -> fail("expected message to have no <%s> body but has one")
 		);
 	}
 

@@ -40,11 +40,11 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.context;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -179,10 +179,10 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * body, if one is available, taking into account the RDF serialization format defined by the {@code message}
 	 * {@code Content-Type} header and defaulting to {@code text/turtle}
 	 */
-	@Override public Result<Collection<Statement>, MessageException> decode(final Message<?> message) {
+	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
 		return message.body(input()).fold(
 
-				source -> {
+				error -> Left(status(UnsupportedMediaType, "no RDF body")), source -> {
 
 					final IRI focus=Values.iri(message.item());
 					final Shape shape=message.shape();
@@ -273,7 +273,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 					if ( fatals.isEmpty() ) { // return model
 
-						return Value(model);
+						return Right(model);
 
 					} else { // report errors // !!! log warnings/error/fatals?
 
@@ -285,13 +285,11 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 						if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
 						if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
 
-						return Error(status(BadRequest, trace.build()));
+						return Left(status(BadRequest, trace.build()));
 
 					}
 
-				},
-
-				error -> Error(status(UnsupportedMediaType, "no RDF body"))
+				}
 
 		);
 	}

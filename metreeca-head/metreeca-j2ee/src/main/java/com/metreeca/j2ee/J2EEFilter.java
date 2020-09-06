@@ -193,11 +193,13 @@ public abstract class J2EEFilter implements Filter {
 					values.forEach(value -> http.addHeader(name, value))
 			);
 
-			// ignore missing response bodies // !!! handle other body retrieval errors
+			// ignore missing response bodies
 
-			response.body(output()).value().ifPresent(target -> {
+			response.body(output()).accept(e -> {}, target -> {
 				try {
+
 					target.accept(http.getOutputStream());
+
 				} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
 				}

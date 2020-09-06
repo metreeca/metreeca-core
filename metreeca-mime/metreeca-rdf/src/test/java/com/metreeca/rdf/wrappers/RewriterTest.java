@@ -215,11 +215,9 @@ final class RewriterTest {
 
 					request.body(rdf()).fold(
 
-							model -> assertThat(model)
+							error -> fail("missing RDF payload"), model -> assertThat(model)
 									.as("request rdf rewritten")
-									.isIsomorphicTo(internal("s", "p", "o")),
-
-							error -> fail("missing RDF payload")
+									.isIsomorphicTo(internal("s", "p", "o"))
 
 					);
 
@@ -238,7 +236,7 @@ final class RewriterTest {
 
 				.accept(response -> response.body(output()).fold(
 
-						consumer -> {
+						error -> fail("missing RDF payload"), consumer -> {
 
 							try ( final ByteArrayOutputStream stream=new ByteArrayOutputStream() ) {
 
@@ -254,9 +252,7 @@ final class RewriterTest {
 
 							return this;
 
-						},
-
-						error -> fail("missing RDF payload")
+						}
 
 				))
 		);
@@ -302,7 +298,7 @@ final class RewriterTest {
 
 				.accept(response -> response.body(output()).fold(
 
-						value -> {
+						error -> fail("missing output body"), value -> {
 
 							try ( final ByteArrayOutputStream buffer=new ByteArrayOutputStream() ) {
 
@@ -322,9 +318,7 @@ final class RewriterTest {
 
 							return this;
 
-						},
-
-						error -> fail("missing output body")
+						}
 
 				))
 		);
@@ -341,7 +335,7 @@ final class RewriterTest {
 
 						.with((Wrapper)handler -> request -> request.body(multipart(150, 300)).fold(
 
-								parts -> Optional.ofNullable(parts.get("main"))
+								request::reply, parts -> Optional.ofNullable(parts.get("main"))
 
 										.map(main -> {
 
@@ -353,9 +347,7 @@ final class RewriterTest {
 										})
 
 										.orElseGet(() -> request.reply(status(BadRequest, "missing main body part")
-										)),
-
-								request::reply
+										))
 
 						))
 

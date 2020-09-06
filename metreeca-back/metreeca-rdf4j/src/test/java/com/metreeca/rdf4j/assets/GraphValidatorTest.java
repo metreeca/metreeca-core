@@ -34,7 +34,7 @@ import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
-import static com.metreeca.rest.ResultAssert.assertThat;
+import static com.metreeca.rest.EitherAssert.assertThat;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
 import static com.metreeca.tree.shapes.Any.any;
@@ -72,11 +72,11 @@ final class GraphValidatorTest {
 	}
 
 
-	private Result<Request, MessageException> validate(final Shape shape, final String... model) {
+	private Either<MessageException, Request> validate(final Shape shape, final String... model) {
 		return validate(shape, model(model));
 	}
 
-	private Result<Request, MessageException> validate(final Shape shape, final Collection<Statement> model) {
+	private Either<MessageException, Request> validate(final Shape shape, final Collection<Statement> model) {
 		return new GraphValidator().validate(new Request()
 				.body(rdf(), model)
 				.shape(field(RDF.VALUE, shape))
@@ -92,8 +92,8 @@ final class GraphValidatorTest {
 
 			final Shape shape=all(x);
 
-			assertThat(validate(shape, "<x>")).hasValue();
-			assertThat(validate(shape, "<x>; rdf:rest rdf:nil")).hasError();
+			assertThat(validate(shape, "<x>")).hasRight();
+			assertThat(validate(shape, "<x>; rdf:rest rdf:nil")).hasLeft();
 
 		});
 	}
@@ -103,8 +103,8 @@ final class GraphValidatorTest {
 
 			final Shape shape=field(RDF.VALUE, all(y));
 
-			assertThat(validate(shape, "<x>", "<x> rdf:value <y>")).hasValue();
-			assertThat(validate(shape, "<x>")).hasError();
+			assertThat(validate(shape, "<x>", "<x> rdf:value <y>")).hasRight();
+			assertThat(validate(shape, "<x>")).hasLeft();
 
 		});
 	}
@@ -114,8 +114,8 @@ final class GraphValidatorTest {
 
 			final Shape shape=field(inverse(RDF.VALUE), all(y));
 
-			assertThat(validate(shape, "<x>", "<y> rdf:value <x>")).hasValue();
-			assertThat(validate(shape, "<x>")).hasError();
+			assertThat(validate(shape, "<x>", "<y> rdf:value <x>")).hasRight();
+			assertThat(validate(shape, "<x>")).hasLeft();
 
 		});
 	}
@@ -128,8 +128,8 @@ final class GraphValidatorTest {
 
 			final Shape shape=minCount(2);
 
-			assertThat(validate(shape, "1, 2, 3")).hasValue();
-			assertThat(validate(shape, "1")).hasError();
+			assertThat(validate(shape, "1, 2, 3")).hasRight();
+			assertThat(validate(shape, "1")).hasLeft();
 
 		});
 	}
@@ -139,8 +139,8 @@ final class GraphValidatorTest {
 
 			final Shape shape=maxCount(2);
 
-			assertThat(validate(shape, "1, 2")).hasValue();
-			assertThat(validate(shape, "1, 2, 3")).hasError();
+			assertThat(validate(shape, "1, 2")).hasRight();
+			assertThat(validate(shape, "1, 2, 3")).hasLeft();
 
 		});
 	}
@@ -150,10 +150,10 @@ final class GraphValidatorTest {
 
 			final Shape shape=in(x, y);
 
-			assertThat(validate(shape, "<x>, <y>")).hasValue();
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasError();
+			assertThat(validate(shape, "<x>, <y>")).hasRight();
+			assertThat(validate(shape, "<x>, <y>, <z>")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -163,10 +163,10 @@ final class GraphValidatorTest {
 
 			final Shape shape=all(x, y);
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasValue();
-			assertThat(validate(shape, "<x>")).hasError();
+			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
+			assertThat(validate(shape, "<x>")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasError();
+			assertThat(validate(shape)).as("empty focus").hasLeft();
 
 		});
 	}
@@ -176,10 +176,10 @@ final class GraphValidatorTest {
 
 			final Shape shape=any(x, y);
 
-			assertThat(validate(shape, "<x>")).hasValue();
-			assertThat(validate(shape, "<z>")).hasError();
+			assertThat(validate(shape, "<x>")).hasRight();
+			assertThat(validate(shape, "<z>")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasError();
+			assertThat(validate(shape)).as("empty focus").hasLeft();
 
 		});
 	}
@@ -188,34 +188,34 @@ final class GraphValidatorTest {
 	@Test void testValidateDatatype() {
 		exec(() -> {
 
-			assertThat(validate(datatype(Values.ValueType), "<x>")).hasValue();
-			assertThat(validate(datatype(Values.ValueType), "_:x")).hasValue();
-			assertThat(validate(datatype(Values.ValueType), "1")).hasValue();
+			assertThat(validate(datatype(Values.ValueType), "<x>")).hasRight();
+			assertThat(validate(datatype(Values.ValueType), "_:x")).hasRight();
+			assertThat(validate(datatype(Values.ValueType), "1")).hasRight();
 
-			assertThat(validate(datatype(Values.ResourceType), "<x>")).hasValue();
-			assertThat(validate(datatype(Values.ResourceType), "_:x")).hasValue();
-			assertThat(validate(datatype(Values.ResourceType), "1")).hasError();
+			assertThat(validate(datatype(Values.ResourceType), "<x>")).hasRight();
+			assertThat(validate(datatype(Values.ResourceType), "_:x")).hasRight();
+			assertThat(validate(datatype(Values.ResourceType), "1")).hasLeft();
 
-			assertThat(validate(datatype(Values.BNodeType), "_:x")).hasValue();
-			assertThat(validate(datatype(Values.BNodeType), "1")).hasError();
+			assertThat(validate(datatype(Values.BNodeType), "_:x")).hasRight();
+			assertThat(validate(datatype(Values.BNodeType), "1")).hasLeft();
 
-			assertThat(validate(datatype(Values.IRIType), "<x>")).hasValue();
-			assertThat(validate(datatype(Values.IRIType), "_:x")).hasError();
+			assertThat(validate(datatype(Values.IRIType), "<x>")).hasRight();
+			assertThat(validate(datatype(Values.IRIType), "_:x")).hasLeft();
 
-			assertThat(validate(datatype(Values.LiteralType), "'x'")).hasValue();
-			assertThat(validate(datatype(Values.LiteralType), "1")).hasValue();
-			assertThat(validate(datatype(Values.LiteralType), "_:x")).hasError();
+			assertThat(validate(datatype(Values.LiteralType), "'x'")).hasRight();
+			assertThat(validate(datatype(Values.LiteralType), "1")).hasRight();
+			assertThat(validate(datatype(Values.LiteralType), "_:x")).hasLeft();
 
-			assertThat(validate(datatype(XSD.STRING), "'text'")).hasValue();
-			assertThat(validate(datatype(XSD.STRING), "_:x")).hasError();
+			assertThat(validate(datatype(XSD.STRING), "'text'")).hasRight();
+			assertThat(validate(datatype(XSD.STRING), "_:x")).hasLeft();
 
-			assertThat(validate(datatype(RDF.LANGSTRING), "'text'@en")).hasValue();
-			assertThat(validate(datatype(RDF.LANGSTRING), "_:x")).hasError();
+			assertThat(validate(datatype(RDF.LANGSTRING), "'text'@en")).hasRight();
+			assertThat(validate(datatype(RDF.LANGSTRING), "_:x")).hasLeft();
 
-			assertThat(validate(datatype(XSD.BOOLEAN), "true")).hasValue();
-			assertThat(validate(datatype(XSD.BOOLEAN), "_:x")).hasError();
+			assertThat(validate(datatype(XSD.BOOLEAN), "true")).hasRight();
+			assertThat(validate(datatype(XSD.BOOLEAN), "_:x")).hasLeft();
 
-			assertThat(validate(datatype(Values.IRIType))).as("empty focus").hasValue();
+			assertThat(validate(datatype(Values.IRIType))).as("empty focus").hasRight();
 
 		});
 	}
@@ -227,13 +227,13 @@ final class GraphValidatorTest {
 
 			// validate using type info retrieved from model
 
-			assertThat(validate(shape, "<employees/9999>", "<employees/9999> a :Employee")).hasValue();
-			assertThat(validate(shape, "<offices/9999>")).hasError();
+			assertThat(validate(shape, "<employees/9999>", "<employees/9999> a :Employee")).hasRight();
+			assertThat(validate(shape, "<offices/9999>")).hasLeft();
 
 			// validate using type info retrieved from graph
 
-			assertThat(validate(shape, "<employees/1370>")).hasValue();
-			assertThat(validate(shape, "<offices/1>")).hasError();
+			assertThat(validate(shape, "<employees/1370>")).hasRight();
+			assertThat(validate(shape, "<offices/1>")).hasLeft();
 
 		});
 	}
@@ -244,11 +244,11 @@ final class GraphValidatorTest {
 
 			final Shape shape=minExclusive(literal(1));
 
-			assertThat(validate(shape, "2")).hasValue();
-			assertThat(validate(shape, "1")).hasError();
-			assertThat(validate(shape, "0")).hasError();
+			assertThat(validate(shape, "2")).hasRight();
+			assertThat(validate(shape, "1")).hasLeft();
+			assertThat(validate(shape, "0")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -258,11 +258,11 @@ final class GraphValidatorTest {
 
 			final Shape shape=maxExclusive(literal(10));
 
-			assertThat(validate(shape, "2")).hasValue();
-			assertThat(validate(shape, "10")).hasError();
-			assertThat(validate(shape, "100")).hasError();
+			assertThat(validate(shape, "2")).hasRight();
+			assertThat(validate(shape, "10")).hasLeft();
+			assertThat(validate(shape, "100")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -272,11 +272,11 @@ final class GraphValidatorTest {
 
 			final Shape shape=minInclusive(literal(1));
 
-			assertThat(validate(shape, "2")).hasValue();
-			assertThat(validate(shape, "1")).hasValue();
-			assertThat(validate(shape, "0")).hasError();
+			assertThat(validate(shape, "2")).hasRight();
+			assertThat(validate(shape, "1")).hasRight();
+			assertThat(validate(shape, "0")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -286,11 +286,11 @@ final class GraphValidatorTest {
 
 			final Shape shape=maxInclusive(literal(10));
 
-			assertThat(validate(shape, "2")).hasValue();
-			assertThat(validate(shape, "10")).hasValue();
-			assertThat(validate(shape, "100")).hasError();
+			assertThat(validate(shape, "2")).hasRight();
+			assertThat(validate(shape, "10")).hasRight();
+			assertThat(validate(shape, "100")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -301,13 +301,13 @@ final class GraphValidatorTest {
 
 			final Shape shape=pattern(".*\\.org");
 
-			assertThat(validate(shape, "<http://exampe.org>")).hasValue();
-			assertThat(validate(shape, "<http://exampe.com>")).hasError();
+			assertThat(validate(shape, "<http://exampe.org>")).hasRight();
+			assertThat(validate(shape, "<http://exampe.com>")).hasLeft();
 
-			assertThat(validate(shape, "'example.org'")).hasValue();
-			assertThat(validate(shape, "'example.com'")).hasError();
+			assertThat(validate(shape, "'example.org'")).hasRight();
+			assertThat(validate(shape, "'example.com'")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -317,13 +317,13 @@ final class GraphValidatorTest {
 
 			final Shape shape=like("ex.org", true);
 
-			assertThat(validate(shape, "<http://exampe.org/>")).hasValue();
-			assertThat(validate(shape, "<http://exampe.com/>")).hasError();
+			assertThat(validate(shape, "<http://exampe.org/>")).hasRight();
+			assertThat(validate(shape, "<http://exampe.com/>")).hasLeft();
 
-			assertThat(validate(shape, "'example.org'")).hasValue();
-			assertThat(validate(shape, "'example.com'")).hasError();
+			assertThat(validate(shape, "'example.org'")).hasRight();
+			assertThat(validate(shape, "'example.com'")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -333,13 +333,13 @@ final class GraphValidatorTest {
 
 			final Shape shape=minLength(3);
 
-			assertThat(validate(shape, "100")).hasValue();
-			assertThat(validate(shape, "99")).hasError();
+			assertThat(validate(shape, "100")).hasRight();
+			assertThat(validate(shape, "99")).hasLeft();
 
-			assertThat(validate(shape, "'100'")).hasValue();
-			assertThat(validate(shape, "'99'")).hasError();
+			assertThat(validate(shape, "'100'")).hasRight();
+			assertThat(validate(shape, "'99'")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -349,13 +349,13 @@ final class GraphValidatorTest {
 
 			final Shape shape=maxLength(2);
 
-			assertThat(validate(shape, "99")).hasValue();
-			assertThat(validate(shape, "100")).hasError();
+			assertThat(validate(shape, "99")).hasRight();
+			assertThat(validate(shape, "100")).hasLeft();
 
-			assertThat(validate(shape, "'99'")).hasValue();
-			assertThat(validate(shape, "'100'")).hasError();
+			assertThat(validate(shape, "'99'")).hasRight();
+			assertThat(validate(shape, "'100'")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasValue();
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		});
 	}
@@ -366,9 +366,9 @@ final class GraphValidatorTest {
 
 			final Shape shape=minCount(1);
 
-			assertThat(validate(shape, "<x>, <z>")).hasValue();
+			assertThat(validate(shape, "<x>, <z>")).hasRight();
 
-			assertThat(validate(shape)).as("empty focus").hasError();
+			assertThat(validate(shape)).as("empty focus").hasLeft();
 
 		});
 
@@ -380,10 +380,10 @@ final class GraphValidatorTest {
 
 			final Shape shape=and(any(x), any(y));
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasValue();
-			assertThat(validate(shape, "<x>, <z>")).hasError();
+			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
+			assertThat(validate(shape, "<x>, <z>")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasError();
+			assertThat(validate(shape)).as("empty focus").hasLeft();
 
 		});
 	}
@@ -393,8 +393,8 @@ final class GraphValidatorTest {
 
 			final Shape shape=or(all(x, y), all(x, z));
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasValue();
-			assertThat(validate(shape, "<y>, <z>")).hasError();
+			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
+			assertThat(validate(shape, "<y>, <z>")).hasLeft();
 
 		});
 	}

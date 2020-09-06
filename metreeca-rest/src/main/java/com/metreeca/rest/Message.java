@@ -28,7 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Result.Value;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.tree.shapes.And.and;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
@@ -179,18 +179,11 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the charset of this message.
 	 *
+	 * <p><strong>Warning</strong> / The {@code Accept-Charset} header or the originating request is
+	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset">ignored</a>.</p>
+	 *
 	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to {@code UTF-8} if
 	 * no charset is explicitly defined
-	 *
-	 * @implNote <ul>
-	 *
-	 * <li>the {@code Accept-Charset} header or the originating request is
-	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset">ignored</a>;</li>
-	 *
-	 * <li>the return type is limited to {@code String} in order to force client code to handle malformed/unsupported
-	 * charsets.</li>
-	 *
-	 * </ul>
 	 */
 	public String charset() {
 		return header("Content-Type")
@@ -449,7 +442,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if {@code format} is null
 	 */
-	public <V> Result<V, MessageException> body(final Format<V> format) {
+	public <V> Either<MessageException, V> body(final Format<V> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null body");
@@ -457,7 +450,7 @@ public abstract class Message<T extends Message<T>> {
 
 		final V cached=(V)bodies.get(format);
 
-		return cached != null ? Value(cached) : format.decode(self()).value(value -> {
+		return cached != null ? Right(cached) : format.decode(self()).map(value -> {
 
 			bodies.put(format, value);
 

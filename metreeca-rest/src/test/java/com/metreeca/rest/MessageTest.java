@@ -114,7 +114,7 @@ public final class MessageTest {
 				.body(input(), () -> new ByteArrayInputStream("test".getBytes(UTF_8)));
 
 		final Function<Message<?>, String> accessor=m -> m
-				.body(text()).fold(value -> value, error -> fail("missing test body"));
+				.body(text()).fold(error -> fail("missing test body"), value -> value);
 
 		assertSame(accessor.apply(message), accessor.apply(message));
 	}

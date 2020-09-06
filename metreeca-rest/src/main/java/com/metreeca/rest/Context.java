@@ -18,7 +18,6 @@
 package com.metreeca.rest;
 
 import com.metreeca.rest.assets.Logger;
-import com.metreeca.rest.formats.DataFormat;
 import com.metreeca.rest.formats.TextFormat;
 
 import java.io.*;
@@ -29,6 +28,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 
+import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.assets.Logger.logger;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -66,8 +66,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is null
-	 * @throws IllegalStateException    if called outside an active context or a circular asset dependency is 
-	 * detected
+	 * @throws IllegalStateException    if called outside an active context or a circular asset dependency is
+	 *                                  detected
 	 */
 	public static <T> T asset(final Supplier<T> factory) {
 
@@ -259,9 +259,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 			throw new NullPointerException("null resource");
 		}
 
-		try ( final InputStream input=input(master, resource) ) {
+		try (
+				final InputStream input=input(master, resource);
+				final ByteArrayOutputStream output=new ByteArrayOutputStream()
+		) {
 
-			return DataFormat.data(input);
+			return copy(output, input).toByteArray();
 
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
