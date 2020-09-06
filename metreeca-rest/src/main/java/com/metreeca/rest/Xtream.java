@@ -18,11 +18,14 @@
 package com.metreeca.rest;
 
 import java.io.*;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.*;
 import java.util.stream.*;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
@@ -229,6 +232,51 @@ public final class Xtream<T> implements Stream<T> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * URL-encode a string.
+	 *
+	 * @param string the string to be encoded
+	 *
+	 * @return the encoded version of {@code string}
+	 *
+	 * @throws NullPointerException if {@code string} is null
+	 */
+	public static String encode(final String string) {
+
+		if ( string == null ) {
+			throw new NullPointerException("null string");
+		}
+
+		try {
+			return URLEncoder.encode(string, UTF_8.name());
+		} catch ( final UnsupportedEncodingException unexpected ) {
+			throw new UncheckedIOException(unexpected);
+		}
+	}
+
+	/**
+	 * URL-decode a string.
+	 *
+	 * @param string the string to be decoded
+	 *
+	 * @return the decoded version of {@code string}
+	 *
+	 * @throws NullPointerException if {@code string} is null
+	 */
+	public static String decode(final String string) {
+
+		if ( string == null ) {
+			throw new NullPointerException("null string");
+		}
+
+		try {
+			return URLDecoder.decode(string, UTF_8.name());
+		} catch ( final UnsupportedEncodingException unexpected ) {
+			throw new UncheckedIOException(unexpected);
+		}
+	}
+
 
 	/**
 	 * Creates an empty input stream.

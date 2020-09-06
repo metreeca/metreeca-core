@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
 import java.io.*;
-import java.net.URLEncoder;
 import java.util.Optional;
 
 import static com.metreeca.rdf.ModelAssert.assertThat;
@@ -78,15 +77,7 @@ final class RewriterTest {
 
 
 	private String encode(final IRI iri) {
-		try {
-
-			return URLEncoder.encode(iri.toString(), UTF_8.name());
-
-		} catch ( final UnsupportedEncodingException unexpected ) {
-
-			throw new UncheckedIOException(unexpected);
-
-		}
+		return Xtream.encode(iri.toString());
 	}
 
 

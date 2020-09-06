@@ -22,9 +22,6 @@ import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -36,7 +33,6 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.InternalServerError;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 
 
@@ -61,15 +57,7 @@ final class GraphCreator extends GraphProcessor {
 
 					final IRI holder=iri(request.item());
 					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
-
-							.map(text -> { // encode slug as IRI path component
-								try {
-									return URLEncoder.encode(text, UTF_8.name());
-								} catch ( final UnsupportedEncodingException unexpected ) {
-									throw new UncheckedIOException(unexpected);
-								}
-							})
-
+							.map(Xtream::encode)  // encode slug as IRI path component
 							.orElseGet(() -> UUID.randomUUID().toString()) // !! sequential generator
 					);
 
