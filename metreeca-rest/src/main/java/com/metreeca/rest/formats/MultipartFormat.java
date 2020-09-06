@@ -27,9 +27,8 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Request.status;
-import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Response.PayloadTooLarge;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -203,7 +202,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 				}))
 
-				.orElseGet(() -> Error(status(Response.UnsupportedMediaType)));
+				.orElseGet(() -> Error(status(UnsupportedMediaType)));
 	}
 
 	@Override public <M extends Message<M>> M set(final M message, final Map<String, Message<?>> value) {

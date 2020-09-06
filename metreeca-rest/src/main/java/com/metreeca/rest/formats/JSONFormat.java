@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.function.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;

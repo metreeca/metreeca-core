@@ -20,7 +20,8 @@ package com.metreeca.rest;
 import com.metreeca.tree.Query;
 import com.metreeca.tree.Shape;
 
-import javax.json.*;
+import javax.json.JsonException;
+import javax.json.JsonValue;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -29,12 +30,11 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnprocessableEntity;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.TextFormat.text;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 
@@ -61,105 +61,6 @@ public final class Request extends Message<Request> {
 
 	private static final Pattern SchemePattern=Pattern.compile("[a-zA-Z][-+.a-zA-Z0-9]*:");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
-
-
-	/**
-	 * Creates a shorthand response generator.
-	 *
-	 * @param status the status code for the response
-	 *
-	 * @return a shorthand response generator for {@code status}
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 */
-	public static UnaryOperator<Response> status(final int status) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		return response -> response.status(status);
-	}
-
-	/**
-	 * Creates a shorthand response generator.
-	 *
-	 * @param status  the response status code
-	 * @param details the human readable response details
-	 *
-	 * @return a shorthand response generator for {@code status} and {@code details}
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 * @throws NullPointerException     if {@code details} is null
-	 */
-	public static UnaryOperator<Response> status(final int status, final String details) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( details == null ) {
-			throw new NullPointerException("null details");
-		}
-
-		return response -> status < 500
-				? response.status(status).body(text(), details)
-				: response.status(status).cause(new Exception(details));
-	}
-
-	/**
-	 * Creates a shorthand response generator.
-	 *
-	 * @param status  the response status code
-	 * @param details the machine readable response details
-	 *
-	 * @return a shorthand response generator for {@code status} and {@code details}
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 * @throws NullPointerException     if {@code details} is null
-	 */
-	public static UnaryOperator<Response> status(final int status, final JsonObject details) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( details == null ) {
-			throw new NullPointerException("null details");
-		}
-
-		return response -> status < 500
-				? response.status(status).body(json(), details)
-				: response.status(status).cause(new Exception(details.toString()));
-	}
-
-	/**
-	 * Creates a shorthand response generator.
-	 *
-	 * @param status the response status code
-	 * @param cause  the exceptional response cause
-	 *
-	 * @return a shorthand response generator for {@code status} and {@code cause}
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 * @throws NullPointerException     if {@code cause} is null
-	 */
-	public static UnaryOperator<Response> status(final int status, final Throwable cause) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		if ( cause == null ) {
-			throw new NullPointerException("null cause");
-		}
-
-		final String message=Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString);
-
-		return response -> status < 500
-				? response.status(status).cause(cause).body(text(), message)
-				: response.status(status).cause(cause);
-	}
 
 
 	public static Map<String, List<String>> search(final String query) {

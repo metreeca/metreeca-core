@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.function.Function;
 
-import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnprocessableEntity;
 import static com.metreeca.tree.Trace.trace;
 import static java.util.Arrays.asList;

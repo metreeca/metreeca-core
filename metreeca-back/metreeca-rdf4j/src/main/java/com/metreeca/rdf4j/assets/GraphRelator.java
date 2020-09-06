@@ -33,9 +33,8 @@ import java.util.regex.Pattern;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rest.Request.status;
-import static com.metreeca.rest.Response.NotFound;
-import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.tree.queries.Items.items;
 import static com.metreeca.tree.shapes.All.all;
 import static com.metreeca.tree.shapes.And.and;
@@ -65,8 +64,7 @@ final class GraphRelator extends GraphProcessor {
 				final IRI item=iri(request.item());
 				final Shape shape=resource ? detail(request.shape()) : holder(request.shape());
 
-				return filtered ? response.map(status(Response.NotImplemented, "resource filtered retrieval not "
-						+"supported")
+				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
 				) : request.query(rdf(), and(all(item), shape)).fold(
 

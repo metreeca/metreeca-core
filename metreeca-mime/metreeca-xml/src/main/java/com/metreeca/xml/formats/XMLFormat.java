@@ -36,8 +36,9 @@ import java.io.*;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -251,7 +252,7 @@ public final class XMLFormat extends Format<Document> {
 
 				})
 
-				: Error(status(Response.UnsupportedMediaType, "missing XML body")
+				: Error(status(UnsupportedMediaType, "missing XML body")
 
 		);
 	}

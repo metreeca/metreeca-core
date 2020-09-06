@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;

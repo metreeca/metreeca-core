@@ -21,6 +21,8 @@ import com.metreeca.rest.*;
 
 import java.util.*;
 
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.Unauthorized;
 import static java.util.Arrays.asList;
 
 
@@ -81,8 +83,7 @@ public final class Controller implements Wrapper {
 
 				roles.retainAll(request.roles());
 
-				return roles.isEmpty() ? request.reply(Request.status(Response.Unauthorized)) // !!! 404 under strict
-						// security
+				return roles.isEmpty() ? request.reply(status(Unauthorized)) // !!! 404 under strict security
 						: handler.handle(request.roles(roles));
 
 			}

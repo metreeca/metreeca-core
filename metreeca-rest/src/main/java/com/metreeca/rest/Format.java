@@ -23,7 +23,8 @@ import javax.json.*;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
-import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.tree.shapes.Field.fields;
 import static java.util.Arrays.asList;
@@ -147,7 +148,7 @@ public abstract class Format<V> {
 			throw new NullPointerException("null message");
 		}
 
-		return Error(status(Response.UnsupportedMediaType));
+		return Error(status(UnsupportedMediaType));
 	}
 
 	/**

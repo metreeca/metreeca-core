@@ -23,6 +23,7 @@ import com.metreeca.rest.assets.Logger;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.TextFormat.text;

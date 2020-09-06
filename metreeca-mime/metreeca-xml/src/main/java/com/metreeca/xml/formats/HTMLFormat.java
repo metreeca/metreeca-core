@@ -37,8 +37,9 @@ import java.io.*;
 import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Request.status;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -226,7 +227,7 @@ public final class HTMLFormat extends Format<Document> {
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
-						return html(reader, message.item()).error(cause -> status(Response.BadRequest, cause));
+						return html(reader, message.item()).error(cause -> status(BadRequest, cause));
 
 					} catch ( final UnsupportedEncodingException e ) {
 
@@ -240,7 +241,7 @@ public final class HTMLFormat extends Format<Document> {
 
 				})
 
-				: Error(status(Response.UnsupportedMediaType, "missing HTML body")
+				: Error(status(UnsupportedMediaType, "missing HTML body")
 
 		);
 
