@@ -24,14 +24,14 @@ import java.util.function.Consumer;
 
 
 /**
- * Output body format.
+ * Output message format.
  */
 public final class OutputFormat extends Format<Consumer<OutputStream>> {
 
 	/**
-	 * Creates an output body format.
+	 * Creates an output message format.
 	 *
-	 * @return a new output body format
+	 * @return a new output message format
 	 */
 	public static OutputFormat output() {
 		return new OutputFormat();

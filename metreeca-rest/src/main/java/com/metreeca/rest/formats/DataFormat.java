@@ -28,7 +28,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 
 
 /**
- * Binary body format.
+ * Binary message format.
  */
 public final class DataFormat extends Format<byte[]> {
 
@@ -44,9 +44,9 @@ public final class DataFormat extends Format<byte[]> {
 
 
 	/**
-	 * Creates a binary body format.
+	 * Creates a binary message format.
 	 *
-	 * @return a new binary body format
+	 * @return a new binary message format
 	 */
 	public static DataFormat data() {
 		return new DataFormat();

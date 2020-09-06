@@ -35,7 +35,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
- * Shared assets manager {thread-safe}.
+ * Assets manager {thread-safe}.
  *
  * <p>Manages the lifecycle of shared assets.</p>
  */

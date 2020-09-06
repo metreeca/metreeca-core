@@ -55,7 +55,7 @@ import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
 
 /**
- * RDF body format.
+ * RDF message format.
  */
 public final class RDFFormat extends Format<Collection<Statement>> {
 
@@ -116,20 +116,20 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates an RDF body format.
+	 * Creates an RDF message format.
 	 *
-	 * @return a new RDF body format
+	 * @return a new RDF message format
 	 */
 	public static RDFFormat rdf() {
 		return rdf(codec -> {});
 	}
 
 	/**
-	 * Creates a customized RDF body format.
+	 * Creates a customized RDF message format.
 	 *
 	 * @param customizer the RDF parsers/writers customizer; takes as argument a customizable RDF codec
 	 *
-	 * @return a new customized RDF body format
+	 * @return a new customized RDF message format
 	 */
 	public static RDFFormat rdf(final Consumer<Codec> customizer) {
 

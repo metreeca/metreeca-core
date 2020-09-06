@@ -45,7 +45,7 @@ import static java.util.regex.Pattern.compile;
 
 
 /**
- * XML body format.
+ * XML message format.
  */
 public final class XMLFormat extends Format<Document> {
 
@@ -86,18 +86,18 @@ public final class XMLFormat extends Format<Document> {
 
 
 	/**
-	 * Creates an XML body format.
+	 * Creates an XML message format.
 	 *
-	 * @return a new XML body format
+	 * @return a new XML message format
 	 */
 	public static XMLFormat xml() {return new XMLFormat(null);}
 
 	/**
-	 * Creates an XML body format using a custom SAX parser.
+	 * Creates an XML message format using a custom SAX parser.
 	 *
 	 * @param parser the custom SAX parser
 	 *
-	 * @return a new XML body format a custom SAX {@code parser}
+	 * @return a new XML message format a custom SAX {@code parser}
 	 *
 	 * @throws NullPointerException if {@code parser} is null
 	 */

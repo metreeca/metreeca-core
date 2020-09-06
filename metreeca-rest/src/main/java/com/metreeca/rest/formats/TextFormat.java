@@ -31,7 +31,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 
 
 /**
- * Textual body format.
+ * Textual message format.
  */
 public final class TextFormat extends Format<String> {
 
@@ -47,9 +47,9 @@ public final class TextFormat extends Format<String> {
 
 
 	/**
-	 * Creates a textual format.
+	 * Creates a textual message format.
 	 *
-	 * @return a new textual format
+	 * @return a new textual message format
 	 */
 	public static TextFormat text() {
 		return new TextFormat();

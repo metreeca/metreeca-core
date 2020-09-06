@@ -46,7 +46,7 @@ import static java.util.regex.Pattern.compile;
 
 
 /**
- * HTML body format.
+ * HTML message format.
  */
 public final class HTMLFormat extends Format<Document> {
 
@@ -62,9 +62,9 @@ public final class HTMLFormat extends Format<Document> {
 
 
 	/**
-	 * Creates an HTML body format.
+	 * Creates an HTML message format.
 	 *
-	 * @return a new HTML body format
+	 * @return a new HTML message format
 	 */
 	public static HTMLFormat html() { return new HTMLFormat(); }
 

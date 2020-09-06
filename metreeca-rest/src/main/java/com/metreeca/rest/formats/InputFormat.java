@@ -24,14 +24,14 @@ import java.util.function.Supplier;
 
 
 /**
- * Input body format.
+ * Input message format.
  */
 public final class InputFormat extends Format<Supplier<InputStream>> {
 
 	/**
-	 * Creates an input body format.
+	 * Creates an input message format.
 	 *
-	 * @return a new input body format
+	 * @return a new input message format
 	 */
 	public static InputFormat input() {
 		return new InputFormat();

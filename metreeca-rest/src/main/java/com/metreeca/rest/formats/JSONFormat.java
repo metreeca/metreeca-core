@@ -40,7 +40,7 @@ import static java.util.Collections.singletonMap;
 
 
 /**
- * JSON body format.
+ * JSON message format.
  *
  * @see <a href="https://javaee.github.io/jsonp/">JSR 374 - Java API for JSON Processing</a>
  */
@@ -62,9 +62,9 @@ public final class JSONFormat extends Format<JsonObject> {
 
 
 	/**
-	 * Creates a JSON body format.
+	 * Creates a JSON message format.
 	 *
-	 * @return a new JSON body format
+	 * @return a new JSON message format
 	 */
 	public static JSONFormat json() {
 		return new JSONFormat();

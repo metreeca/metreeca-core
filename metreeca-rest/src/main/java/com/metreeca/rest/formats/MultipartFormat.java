@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.*;
 
 
 /**
- * Multipart body format.
+ * Multipart message format.
  *
  * @see <a href="https://tools.ietf.org/html/rfc2046#section-5.1">RFC 2046 - Multipurpose Internet Mail Extensions
  * (MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
@@ -81,9 +81,9 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 
 	/**
-	 * Creates a write-only multipart body format.
+	 * Creates a write-only multipart message format.
 	 *
-	 * @return a new write-only multipart body format with part/body size limit set to 0, intended for configuring
+	 * @return a new write-only multipart message format with part/body size limit set to 0, intended for configuring
 	 * multipart response bodies
 	 */
 	public static MultipartFormat multipart() {
@@ -91,13 +91,13 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	}
 
 	/**
-	 * Creates a multipart body format.
+	 * Creates a multipart message format.
 	 *
 	 * @param part the size limit for individual message parts; includes boundary and headers and applies also to
 	 *             message preamble and epilogue
 	 * @param body the size limit for the complete message body
 	 *
-	 * @return a new read/write multipart body format with the given {@code part}/{@code body} size limits
+	 * @return a new read/write multipart message format with the given {@code part}/{@code body} size limits
 	 *
 	 * @throws IllegalArgumentException if either {@code part} or {@code body} is less than 0 or if {@code part} is
 	 *                                  greater than {@code body}

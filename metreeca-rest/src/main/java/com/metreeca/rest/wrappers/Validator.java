@@ -48,9 +48,9 @@ public final class Validator implements Wrapper {
 	/**
 	 * Creates a validating preprocessor.
 	 *
-	 * <p>Validation rules are handled a target request and must return a non-null but possibly
-	 * empty collection of validation issues; if the collection is not empty, the request fails with a {@link
-	 * Response#UnprocessableEntity} status code; otherwise, the request is routed to the wrapped handler.</p>
+	 * <p>Validation rules handle a target request and must return a non-null but possibly empty collection of
+	 * validation issues; if the collection is not empty, the request fails with a
+	 * {@link Response#UnprocessableEntity} status code; otherwise, the request is routed to the wrapped handler.</p>
 	 *
 	 * @param rules the custom validation rules to be applied to incoming requests
 	 *

@@ -24,7 +24,7 @@ import static java.util.Objects.requireNonNull;
 
 
 /**
- * Alternative value pair.
+ * Alternative values.
  *
  * <p>Wraps a pair of mutually exclusive values.</p>
  *
