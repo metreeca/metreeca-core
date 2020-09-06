@@ -85,8 +85,8 @@
  *
  * } }</pre>
  *
- * <p>Standard wrappers and handler building blocks are provided by the {@link com.metreeca.rest.wrappers} and {@link
- * com.metreeca.rest.handlers} packages.</p>
+ * <p>Standard wrappers and handler building blocks are provided by the {@link com.metreeca.core.wrappers} and {@link
+ * com.metreeca.core.handlers} packages.</p>
  */
 
 package com.metreeca.jee;
