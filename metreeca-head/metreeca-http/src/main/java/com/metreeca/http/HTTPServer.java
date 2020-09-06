@@ -60,6 +60,8 @@ public final class HTTPServer {
 
 	private Function<Context, Handler> factory=context -> request -> request.reply(status(NotFound));
 
+	private final Context context=new Context();
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -97,8 +99,6 @@ public final class HTTPServer {
 
 		try {
 
-			final Context context=new Context();
-
 			final Handler handler=Objects.requireNonNull(factory.apply(context), "null handler");
 			final Logger logger=context.get(logger());
 
@@ -107,7 +107,9 @@ public final class HTTPServer {
 			server.createContext(root, exchange -> {
 				try {
 
-					handler.handle(request(exchange)).accept(response -> response(exchange, response));
+					context.exec(() ->
+							handler.handle(request(exchange)).accept(response -> response(exchange, response))
+					);
 
 				} catch ( final RuntimeException e ) {
 					logger.error(this, "unhandled exception", e);
