@@ -18,12 +18,12 @@
 package com.metreeca.core.wrappers;
 
 import com.metreeca.core.*;
-import com.metreeca.json.Trace;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import javax.json.Json;
+import java.util.*;
 import java.util.function.Function;
 
+import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.UnprocessableEntity;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -71,19 +71,23 @@ public final class Validator implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> {
+		return request -> Optional
 
-			final Trace trace=Trace.trace(rules.stream()
-					.flatMap(rule -> rule.apply(request).stream())
-					.map(Trace::trace)
-					.collect(toList())
-			);
+				.of(rules.stream()
+						.flatMap(rule -> rule.apply(request).stream())
+						.collect(toList())
+				)
 
-			return trace.isEmpty()
-					? handler.handle(request)
-					: request.reply(MessageException.status(UnprocessableEntity, trace.toJSON()));
+				.filter(issues -> !issues.isEmpty())
 
-		};
+				.map(issues -> Json.createObjectBuilder()
+						.add("", Json.createArrayBuilder(issues)) // !!! align with JSON validator format
+						.build()
+				)
+
+				.map(details -> request.reply(status(UnprocessableEntity, details)))
+
+				.orElseGet(() -> handler.handle(request));
 	}
 
 }
