@@ -26,8 +26,10 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.core.Response.NotImplemented;
 import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
@@ -37,6 +39,8 @@ import static com.metreeca.rdf.ValuesTest.term;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
+import static com.metreeca.rest.assets.Engine.shape;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class GraphRelatorTest {
@@ -64,8 +68,7 @@ final class GraphRelatorTest {
 		private Request request() {
 			return new Request()
 					.base(ValuesTest.Base)
-					.path("/employees/")
-					.shape(EmployeeShape);
+					.path("/employees/").attribute(shape(), EmployeeShape);
 		}
 
 
@@ -76,9 +79,8 @@ final class GraphRelatorTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.OK)
-
-							.hasShape()
+							.hasStatus(Response.OK).hasAttribute(shape(),
+									shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.hasStatement(iri(response.item()), LDP.CONTAINS, null)
@@ -98,9 +100,8 @@ final class GraphRelatorTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.OK)
-
-							.hasShape()
+							.hasStatus(Response.OK).hasAttribute(shape(),
+									shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 
@@ -128,8 +129,7 @@ final class GraphRelatorTest {
 
 							.hasStatus(Response.OK)
 							.hasHeader("Preference-Applied", response.request().header("Prefer").orElse(""))
-
-							.hasShape()
+							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.doesNotHaveStatement(null, LDP.CONTAINS, null)
@@ -145,8 +145,7 @@ final class GraphRelatorTest {
 		private Request request() {
 			return new Request()
 					.base(ValuesTest.Base)
-					.path("/employees/1370")
-					.shape(EmployeeShape);
+					.path("/employees/1370").attribute(shape(), EmployeeShape);
 		}
 
 
@@ -157,9 +156,8 @@ final class GraphRelatorTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.OK)
-
-							.hasShape()
+							.hasStatus(Response.OK).hasAttribute(shape(),
+									shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(rdf(), rdf -> assertThat(rdf)
 									.as("items retrieved")
@@ -180,9 +178,9 @@ final class GraphRelatorTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.NotImplemented)
+							.hasStatus(NotImplemented)
 
-							.doesNotHaveShape()
+							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(and()))
 
 					)
 			);

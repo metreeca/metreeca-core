@@ -19,7 +19,6 @@ package com.metreeca.rdf.wrappers;
 
 import com.metreeca.core.*;
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -45,6 +44,7 @@ import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -166,7 +166,7 @@ final class RewriterTest {
 
 				.get(() -> new Rewriter(Internal).wrap((Handler)request -> {
 
-					assertThat(request.shape())
+					assertThat(request.attribute(shape()))
 							.isEqualTo(and(
 									field(internal("p")),
 									field(inverse(internal("p")))
@@ -174,22 +174,21 @@ final class RewriterTest {
 
 					return request.reply(response -> response
 							.status(OK)
-							.shape(request.shape()));
+							.attribute(shape(), request.attribute(shape()))
+					);
 
 				}))
 
 				.handle(new Request()
 
-						.base(External)
-
-						.shape(and(
+						.base(External).attribute(shape(), and(
 								field(external("p")),
 								field(inverse(external("p")))
 						))
 
 				)
 
-				.accept(response -> assertThat(response.shape())
+				.accept(response -> assertThat(response.attribute(shape()))
 						.isEqualTo(and(
 								field(external("p")),
 								field(inverse(external("p")))
@@ -251,7 +250,7 @@ final class RewriterTest {
 
 	@Test void testJSONRewriting() {
 
-		final Shape TestShape=field(internal("p"), and(required(), datatype(Values.IRIType)));
+		final Shape TestShape=field(internal("p"), and(required(), datatype(IRIType)));
 
 		final Context context=new Context();
 
@@ -263,9 +262,9 @@ final class RewriterTest {
 							.as("request json rewritten")
 							.isIsomorphicTo(singleton(internal("s", "p", "o"))));
 
-					return request.reply(response -> response.
-							status(OK)
-							.shape(TestShape)
+					return request.reply(response -> response
+							.status(OK)
+							.attribute(shape(), TestShape)
 							.body(rdf(), singleton(internal("s", "p", "o"))));
 				}))
 
@@ -275,9 +274,7 @@ final class RewriterTest {
 						.path("/s")
 
 						.header("content-type", "application/json")
-						.header("accept", "application/json")
-
-						.shape(TestShape)
+						.header("accept", "application/json").attribute(shape(), TestShape)
 
 						.body(input(), () -> new ByteArrayInputStream(Json.createObjectBuilder()
 								.add("p", "o")

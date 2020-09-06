@@ -20,8 +20,8 @@ package com.metreeca.rdf.wrappers;
 import com.metreeca.core.*;
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
+import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -50,6 +50,7 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -67,10 +68,10 @@ import static java.util.stream.Collectors.toMap;
  *
  * <li>request {@linkplain Request#user() user}, {@linkplain Request#roles() roles}, {@linkplain Request#base() base},
  * {@linkplain Request#query() query}, {@linkplain Request#parameters() parameters}, {@linkplain Request#headers()
- * headers}, {@linkplain Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
+ * headers}, {@linkplain Engine#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
  *
  * <li>response {@linkplain Request#item() focus item}, {@linkplain Request#headers() headers}, {@linkplain
- * Message#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
+ * Engine#shape() shape} and {@link RDFFormat} {@linkplain Request#body(Format) body};</li>
  *
  * </ul>
  *
@@ -103,7 +104,7 @@ public final class Rewriter implements Wrapper {
 			throw new NullPointerException("null base");
 		}
 
-		if ( !Values.AbsoluteIRIPattern.matcher(base).matches() ) {
+		if ( !AbsoluteIRIPattern.matcher(base).matches() ) {
 			throw new IllegalArgumentException("not an absolute base IRI");
 		}
 
@@ -131,17 +132,17 @@ public final class Rewriter implements Wrapper {
 			final boolean identity=external.isEmpty() || internal.isEmpty() || external.equals(internal);
 
 			return identity ? handler.handle(request) : request
-					.map(_request -> rewrite(_request, new Engine(external, internal)))
+					.map(_request -> rewrite(_request, new RewriterEngine(external, internal)))
 					.map(handler::handle)
-					.map(_response -> rewrite(request, _response, new Engine(internal, external)));
+					.map(_response -> rewrite(request, _response, new RewriterEngine(internal, external)));
 		};
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Request rewrite(final Request request, final Engine engine) {
-		return new Request().lift(request) // preserve the external request it for linking to the external response
+	private Request rewrite(final Request request, final RewriterEngine engine) {
+		return new Request().lift(request) // preserve the external request for linking to the external response
 
 				.user(request.user().map(RDFFormat::iri).map(engine::rewrite).orElse(null))
 				.roles(engine.rewrite(request.roles(), engine::rewrite))
@@ -155,14 +156,13 @@ public final class Rewriter implements Wrapper {
 
 				.headers(engine.rewrite(request.headers()))
 
-				.shape(engine.rewrite(request.shape()))
+				.attribute(shape(), engine.rewrite(request.attribute(shape())))
 
-				.header(RDFFormat.ExternalBase, request.base()); // make the external base available to rewriting in
-		// RDFBody
+				.header(RDFFormat.ExternalBase, request.base()); // make the external base available to RDFFormat
 
 	}
 
-	private String rewrite(final CharSequence query, final Engine engine) {
+	private String rewrite(final CharSequence query, final RewriterEngine engine) {
 
 		final StringBuffer buffer=new StringBuffer(query.length());
 		final Matcher matcher=QueryWordPattern.matcher(query);
@@ -190,14 +190,14 @@ public final class Rewriter implements Wrapper {
 	}
 
 
-	private Response rewrite(final Request request, final Response response, final Engine engine) {
+	private Response rewrite(final Request request, final Response response, final RewriterEngine engine) {
 
-		// rewrite the internal response to drive on-demand rewriting in RDFBody
+		// rewrite the internal response to drive on-demand rewriting in RDFFormat
 
 		response
 
 				.headers(engine.rewrite(response.headers()))
-				.shape(engine.rewrite(response.shape()));
+				.attribute(shape(), engine.rewrite(response.attribute(shape())));
 
 		// clone the internal response linking it to the original external request
 
@@ -205,8 +205,7 @@ public final class Rewriter implements Wrapper {
 
 				.status(response.status())
 				.cause(response.cause().orElse(null))
-
-				.shape(response.shape());
+				.attribute(shape(), response.attribute(shape()));
 
 		// make external base/location available to rewriting in RDFBody (after cloning to keep service headers hidden)
 
@@ -222,7 +221,7 @@ public final class Rewriter implements Wrapper {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class Engine {
+	private static final class RewriterEngine {
 
 		private final Pattern source;
 		private final String target;
@@ -230,7 +229,7 @@ public final class Rewriter implements Wrapper {
 		private final ShapeEngine shapes;
 
 
-		private Engine(final String source, final String target) {
+		private RewriterEngine(final String source, final String target) {
 
 			this.source=Pattern.compile("\\b"+Pattern.quote(source));
 			this.target=target;
@@ -279,7 +278,7 @@ public final class Rewriter implements Wrapper {
 			}
 
 			@Override public Guard probe(final Guard guard) {
-				return guard(rewrite(guard.getAxis()), rewrite(guard.getValues(), Engine.this::rewrite));
+				return guard(rewrite(guard.getAxis()), rewrite(guard.getValues(), RewriterEngine.this::rewrite));
 			}
 
 
@@ -321,15 +320,15 @@ public final class Rewriter implements Wrapper {
 			@Override public Shape probe(final MaxCount maxCount) { return maxCount; }
 
 			@Override public In probe(final In in) {
-				return in(rewrite(in.getValues(), Engine.this::rewrite));
+				return in(rewrite(in.getValues(), RewriterEngine.this::rewrite));
 			}
 
 			@Override public All probe(final All all) {
-				return all(rewrite(all.getValues(), Engine.this::rewrite));
+				return all(rewrite(all.getValues(), RewriterEngine.this::rewrite));
 			}
 
 			@Override public Any probe(final Any any) {
-				return any(rewrite(any.getValues(), Engine.this::rewrite));
+				return any(rewrite(any.getValues(), RewriterEngine.this::rewrite));
 			}
 
 

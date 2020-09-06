@@ -42,6 +42,7 @@ import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -168,7 +169,7 @@ final class RDFFormatTest {
 
 					.reply(response -> response
 							.status(Response.OK)
-							.shape(field(LDP.CONTAINS, datatype(Values.IRIType)))
+							.attribute(shape(), field(LDP.CONTAINS, datatype(Values.IRIType)))
 							.body(rdf(), decode("</context/container/> ldp:contains </context/container/x>."))
 					)
 

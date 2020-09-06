@@ -29,6 +29,7 @@ import static com.metreeca.core.Response.Forbidden;
 import static com.metreeca.core.Response.Unauthorized;
 import static com.metreeca.json.Shape.empty;
 import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.function.Function.identity;
 
 
@@ -45,7 +46,7 @@ public abstract class Actor extends Delegator {
 	/**
 	 * Creates a connector wrapper.
 	 *
-	 * @return returns a wrapper processing request inside a single {@linkplain Engine#exec(Runnable) engine 
+	 * @return returns a wrapper processing request inside a single {@linkplain Engine#exec(Runnable) engine
 	 * transaction}
 	 */
 	protected Wrapper connector() {
@@ -65,7 +66,7 @@ public abstract class Actor extends Delegator {
 	protected Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
 		return handler -> request -> {
 
-			final Shape shape=request.shape();
+			final Shape shape=request.attribute(shape());
 
 			final Shape baseline=shape // visible to anyone taking into account task/area
 
@@ -82,24 +83,20 @@ public abstract class Actor extends Delegator {
 					.map(new Redactor(Shape.Mode, Shape.Convey));
 
 
-			final Function<Request, Request> pre=message -> message.shape(message.shape() // request shape redactor
+			final Function<Request, Request> pre=message -> message.attribute(shape(), message.attribute(shape()) //
+					// request shape redactor
 
-							.map(new Redactor(Shape.Role, request.roles()))
-							.map(new Redactor(Shape.Task, task))
-							.map(new Redactor(Shape.Area, area))
+					.map(new Redactor(Shape.Role, request.roles()))
+					.map(new Redactor(Shape.Task, task))
+					.map(new Redactor(Shape.Area, area)));
 
-					// mode (convey/filter) redaction performed by action handlers
-
-			);
-
-			final Function<Response, Response> post=message -> message.shape(message.shape() // response shape redactor
+			final Function<Response, Response> post=message -> message.attribute(shape(), message.attribute(shape())
+					// response shape redactor
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
 					.map(new Redactor(Shape.Area, area))
-					.map(new Redactor(Shape.Mode, Shape.Convey))
-
-			);
+					.map(new Redactor(Shape.Mode, Shape.Convey)));
 
 			return empty(baseline) ? request.reply(response -> response.status(Forbidden))
 					: empty(authorized) ? request.reply(response -> response.status(Unauthorized))
@@ -115,7 +112,7 @@ public abstract class Actor extends Delegator {
 	 * Creates a validator wrapper.
 	 *
 	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#validate(Message) validation} of request
-	 * 		payloads
+	 * payloads
 	 */
 	protected Wrapper validator() {
 		return handler -> request -> engine.validate(request).fold(request::reply, handler::handle);
@@ -125,7 +122,7 @@ public abstract class Actor extends Delegator {
 	 * Creates a trimmer wrapper.
 	 *
 	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#trim(Message) validation} of {@linkplain
-	 *        Response#success() successful} response payloads
+	 * Response#success() successful} response payloads
 	 */
 	protected Wrapper trimmer() {
 		return handler -> request -> handler.handle(request).map(response -> response.success() ?

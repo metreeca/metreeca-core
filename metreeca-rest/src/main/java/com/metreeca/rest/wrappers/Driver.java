@@ -21,10 +21,12 @@ import com.metreeca.core.*;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.probes.Redactor;
+import com.metreeca.rest.assets.Engine;
 
 import java.util.Optional;
 
 import static com.metreeca.core.formats.TextFormat.text;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.lang.String.format;
 
 
@@ -36,7 +38,7 @@ import static java.lang.String.format;
  *
  * <ul>
  *
- * <li>{@linkplain Message#shape() associates} the driving shape model to incoming requests;</li>
+ * <li>{@linkplain Engine#shape() associates} the driving shape model to incoming requests;</li>
  *
  * <li>advertises the association between response focus {@linkplain Response#item() items} and the driving shape model
  * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
@@ -52,10 +54,10 @@ import static java.lang.String.format;
  *
  * <ul>
  *
- * <li>redacting the shape {@linkplain Message#shape() associated} to incoming request according to the task to be 
+ * <li>redacting the shape {@linkplain Engine#shape() associated} to incoming request according to the task to be 
  * performed;</li>
  *
- * <li>{@linkplain Message#shape() associating} a shape to outgoing responses in order to drive further processing
+ * <li>{@linkplain Engine#shape() associating} a shape to outgoing responses in order to drive further processing
  * (e.g. JSON body mapping).</li>
  *
  * </ul>
@@ -127,7 +129,7 @@ public final class Driver implements Wrapper {
 
 
 	private Request before(final Request request) {
-		return request.shape(shape);
+		return request.attribute(shape(), shape);
 	}
 
 	private Response after(final Response response) {

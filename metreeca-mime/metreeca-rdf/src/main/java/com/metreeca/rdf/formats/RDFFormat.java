@@ -48,6 +48,7 @@ import static com.metreeca.core.formats.InputFormat.input;
 import static com.metreeca.core.formats.JSONFormat.context;
 import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -185,7 +186,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 				error -> Left(status(UnsupportedMediaType, "no RDF body")), source -> {
 
 					final IRI focus=Values.iri(message.item());
-					final Shape shape=message.shape();
+					final Shape shape=message.attribute(shape());
 
 					final String base=focus.stringValue();
 					final String type=message.header("Content-Type").orElse("");
@@ -320,7 +321,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 				.body(output(), output -> {
 
 					final IRI focus=Values.iri(message.item());
-					final Shape shape=message.shape();
+					final Shape shape=message.attribute(shape());
 
 					final String base=focus.stringValue();
 

@@ -18,6 +18,8 @@
 package com.metreeca.rest.assets;
 
 import com.metreeca.core.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.And;
 
 import java.util.function.Supplier;
 
@@ -37,6 +39,15 @@ public interface Engine {
 	 */
 	public static Supplier<Engine> engine() {
 		return () -> { throw new IllegalStateException("undefined engine service"); };
+	}
+
+	/**
+	 * Retrieves the default shape factory.
+	 *
+	 * @return the default shape factory, which returns an {@linkplain And#and() empty conjunction}
+	 */
+	public static Supplier<Shape> shape() {
+		return And::and;
 	}
 
 
@@ -95,13 +106,13 @@ public interface Engine {
 	 * Trims message payloads.
 	 *
 	 * <p>Rewrites the engine-specific message {@linkplain Message#body(Format) payload} retaining only the subset
-	 * compatible with the envelope of the message {@linkplain Message#shape() shape}.</p>
+	 * compatible with the envelope of the message {@linkplain Engine#shape() shape}.</p>
 	 *
 	 * @param <M>     the type of {@code message}
 	 * @param message the message whose engine-specific payload is to be trimmed
 	 *
 	 * @return a value providing access to the given {@code message} with an updated payload, if its engine-specific
-	 * {@linkplain Message#body(Format) payload} is well-formed and compatible with its {@linkplain Message#shape()
+	 * {@linkplain Message#body(Format) payload} is well-formed and compatible with its {@linkplain Engine#shape()
 	 * shape}; an error providing access to a failure response builder possibly reporting a validation trace, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
@@ -112,13 +123,13 @@ public interface Engine {
 	 * Validates message payloads.
 	 *
 	 * <p>Validates the engine-specific message {@linkplain Message#body(Format) payload} against the message
-	 * {@linkplain Message#shape() shape}.</p>
+	 * {@linkplain Engine#shape() shape}.</p>
 	 *
 	 * @param <M>     the type of {@code message}
 	 * @param message the message whose engine-specific payload is to be validated
 	 *
 	 * @return a value providing access to {@code message}, if its engine-specific {@linkplain Message#body(Format)
-	 * payload} is well-formed and compatible with its {@linkplain Message#shape() shape}; an error providing access
+	 * payload} is well-formed and compatible with its {@linkplain Engine#shape() shape}; an error providing access
 	 * to a failure response builder possibly reporting a validation trace, otherwise
 	 *
 	 * @throws NullPointerException if {@code message} is null
@@ -133,7 +144,7 @@ public interface Engine {
 	 *
 	 * <p>Handles creation requests on the linked data resource identified by the request {@linkplain Request#item()
 	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
-	 * {@linkplain Message#shape() shape}.</p>
+	 * {@linkplain Engine#shape() shape}.</p>
 	 *
 	 * @param request a creation request for the managed linked data resource
 	 *
@@ -148,7 +159,7 @@ public interface Engine {
 	 * Handles retrieval requests.
 	 *
 	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using the message {@linkplain Message#shape() shape}.</p>
+	 * item} possibly using the message {@linkplain Engine#shape() shape}.</p>
 	 *
 	 * @param request a retrieval request for the managed linked data resource
 	 *
@@ -164,7 +175,7 @@ public interface Engine {
 	 *
 	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
 	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
-	 * {@linkplain Message#shape() shape}.</p>
+	 * {@linkplain Engine#shape() shape}.</p>
 	 *
 	 * @param request an updating request for the managed linked data resource
 	 *
@@ -179,7 +190,7 @@ public interface Engine {
 	 * Handles deletion requests.
 	 *
 	 * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using  the message {@linkplain Message#shape() shape}.</p>
+	 * item} possibly using  the message {@linkplain Engine#shape() shape}.</p>
 	 *
 	 * @param request a deletion request for the managed linked data resource
 	 *

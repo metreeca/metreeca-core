@@ -34,6 +34,7 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.stream.Collectors.toList;
 
 
@@ -72,7 +73,7 @@ final class GraphCreator extends GraphProcessor {
 
 					} else { // store model
 
-						connection.add(outline(member, filter(request.shape())));
+						connection.add(outline(member, filter(request.attribute(shape()))));
 						connection.add(rewrite(member, holder, rdf));
 
 						return Right(request.reply(response -> response

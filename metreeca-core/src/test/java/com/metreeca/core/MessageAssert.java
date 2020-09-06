@@ -20,7 +20,6 @@ package com.metreeca.core;
 import com.metreeca.core.assets.Logger;
 import com.metreeca.core.formats.DataFormat;
 import com.metreeca.core.formats.TextFormat;
-import com.metreeca.json.Shape;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
@@ -28,8 +27,8 @@ import org.assertj.core.api.Assertions;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-import static com.metreeca.json.shapes.And.and;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -63,6 +62,26 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		if ( !Objects.equals(actual.item(), item) ) {
 			failWithMessage("expected message to have <%s> item but has <%s>", item, actual.item());
 		}
+
+		return myself;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public <V> A hasAttribute(final Supplier<V> factory, final Consumer<V> assertions) {
+
+		if ( factory == null ) {
+			throw new NullPointerException("null factory");
+		}
+
+		if ( assertions == null ) {
+			throw new NullPointerException("null assertions");
+		}
+
+		isNotNull();
+
+		assertions.accept(actual.attribute(factory));
 
 		return myself;
 	}
@@ -175,50 +194,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public A hasShape() {
-
-		isNotNull();
-
-		final Shape shape=actual.shape();
-
-		if ( and().equals(shape) ) {
-			failWithMessage("expected message to have a shape but has none", shape);
-		}
-
-		return myself;
-	}
-
-	public A hasShape(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		isNotNull();
-
-		if ( !actual.shape().equals(shape) ) {
-			failWithMessage("shape message to have shape <%s> but has <%s>", shape, actual.shape());
-		}
-
-		return myself;
-	}
-
-	public A doesNotHaveShape() {
-
-		isNotNull();
-
-		final Shape shape=actual.shape();
-
-		if ( !and().equals(shape) ) {
-			failWithMessage("expected message to have no shape but has <%s>", shape);
-		}
-
-		return myself;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public A hasBody(final Format<?> format) {
 
 		if ( format == null ) {
@@ -245,7 +220,9 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 				error -> fail(
 						"expected message to have a <%s> body but was unable to retrieve one (%s)",
 						body.getClass().getSimpleName(), error
-				), value -> {
+				),
+
+				value -> {
 
 					assertions.accept(value);
 

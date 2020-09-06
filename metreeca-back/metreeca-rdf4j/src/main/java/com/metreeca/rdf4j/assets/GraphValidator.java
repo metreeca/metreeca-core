@@ -51,6 +51,7 @@ import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Snippets.source;
+import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -66,7 +67,7 @@ final class GraphValidator extends GraphProcessor {
 
 				.body(rdf())
 
-				.flatMap(rdf -> validate(iri(message.item()), convey(message.shape()), rdf).fold(
+				.flatMap(rdf -> validate(iri(message.item()), convey(message.attribute(shape())), rdf).fold(
 						trace -> Left(status(UnprocessableEntity, trace.toJSON())), model -> Right(message)
 				));
 	}

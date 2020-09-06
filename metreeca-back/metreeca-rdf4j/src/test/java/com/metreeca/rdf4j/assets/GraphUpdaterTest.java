@@ -21,6 +21,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.core.Request;
 import com.metreeca.core.Response;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rest.assets.Engine;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -62,15 +63,14 @@ final class GraphUpdaterTest {
             exec(model(small()), () -> new GraphUpdater()
 
                     .handle(new Request()
-                            .base(ValuesTest.Base)
-                            .path("/employees/1370") // Gerard Hernandez
-                            .shape(convey().then(
-                                    field(term("forename"), required()),
-                                    field(term("surname"), required()),
-                                    field(term("email"), required()),
-                                    field(term("title"), required()),
-                                    field(term("seniority"), required())
-                            ))
+		                    .base(ValuesTest.Base)
+		                    .path("/employees/1370").attribute(Engine.shape(), convey().then(
+				                    field(term("forename"), required()),
+				                    field(term("surname"), required()),
+				                    field(term("email"), required()),
+				                    field(term("title"), required()),
+				                    field(term("seniority"), required())
+		                    ))
                             .body(rdf(), decode("</employees/1370>"
                                     +":forename 'Tino';"
                                     +":surname 'Faussone';"

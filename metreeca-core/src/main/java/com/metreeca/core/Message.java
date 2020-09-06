@@ -18,18 +18,16 @@
 package com.metreeca.core;
 
 import com.metreeca.core.formats.MultipartFormat;
-import com.metreeca.json.Shape;
-import com.metreeca.json.shapes.And;
 
 import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.metreeca.core.Either.Right;
-import static com.metreeca.json.shapes.And.and;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -53,8 +51,7 @@ public abstract class Message<T extends Message<T>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape=and();
-
+	private final Map<Supplier<?>, Object> attributes=new LinkedHashMap<>();
 	private final Map<String, List<String>> headers=new LinkedHashMap<>();
 	private final Map<Format<?>, Object> bodies=new HashMap<>();
 
@@ -199,31 +196,46 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the linked data shape.
+	 * Retrieves a message attribute.
 	 *
-	 * @return the linked data shape associated to this message; defaults to an {@linkplain And#and() empty
-	 * conjunction}
+	 * @param key the key for the attribute to be retrieved; must return a non-null default value for the attribute
+	 * @param <V> the type of the attribute to be retrieved
+	 *
+	 * @return the value of message attribute associated with {@code key}
+	 *
+	 * @throws NullPointerException if {@code key} is null
 	 */
-	public Shape shape() {
-		return shape;
+	public <V> V attribute(final Supplier<V> key) {
+
+		if ( key == null ) {
+			throw new NullPointerException("null key");
+		}
+
+		return (V)attributes.computeIfAbsent(key, _key -> requireNonNull(_key.get(), "null key value"));
 	}
 
 	/**
-	 * Configures the linked data shape.
+	 * Configures a message attribute.
 	 *
-	 * @param shape the linked data shape to be associated to this message
+	 * @param key   the key for the attribute to be retrieved; must return a non-null default value for the attribute
+	 * @param value the attribute value to be associated with {@code key}
+	 * @param <V>   the type of the attribute to be configured
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if {@code shape} is null
+	 * @throws NullPointerException if either {@code key} or {@code value} is null
 	 */
-	public T shape(final Shape shape) {
+	public <V> T attribute(final Supplier<V> key, final V value) {
 
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
+		if ( key == null ) {
+			throw new NullPointerException("null key");
 		}
 
-		this.shape=shape;
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		attributes.put(key, value);
 
 		return self();
 	}
@@ -463,7 +475,7 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Encodes message body.
 	 *
-	 * <p>Future calls to {@link #body(Format)} with the same body format will return the specified value.</p>
+	 * <p>Subsequent calls to {@link #body(Format)} with the same body format will return the specified value.</p>
 	 *
 	 * @param format the body format
 	 * @param value  the body to be encoded

@@ -30,6 +30,7 @@ import static com.metreeca.core.Response.InternalServerError;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.assets.Engine.shape;
 
 
 final class GraphDeleter extends GraphProcessor {
@@ -52,7 +53,7 @@ final class GraphDeleter extends GraphProcessor {
 		return request.reply(response -> graph.exec(connection -> {
 
 			final IRI item=iri(request.item());
-			final Shape shape=request.shape();
+			final Shape shape=request.attribute(shape());
 
 			return Optional
 

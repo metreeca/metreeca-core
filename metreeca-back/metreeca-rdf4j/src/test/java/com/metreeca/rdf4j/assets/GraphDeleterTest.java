@@ -21,6 +21,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.core.Request;
 import com.metreeca.core.Response;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -64,8 +65,7 @@ final class GraphDeleterTest {
 
 					.handle(new Request()
 							.base(ValuesTest.Base)
-							.path("/employees/1370")
-							.shape(and(
+							.path("/employees/1370").attribute(Engine.shape(), and(
 									filter().then(
 											field(RDF.TYPE, term("Employee"))
 									),

@@ -21,6 +21,7 @@ import com.metreeca.core.Request;
 import com.metreeca.core.Response;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -40,8 +41,7 @@ final class GraphTrimmerTest {
 
 	private Collection<Statement> trim(final Shape shape, final Collection<Statement> model) {
 		return new GraphTrimmer()
-				.trim(new Response(new Request().base(ValuesTest.Base))
-						.shape(shape)
+				.trim(new Response(new Request().base(ValuesTest.Base)).attribute(Engine.shape(), shape)
 						.body(rdf(), model)
 				)
 				.flatMap(response -> response.body(rdf()))

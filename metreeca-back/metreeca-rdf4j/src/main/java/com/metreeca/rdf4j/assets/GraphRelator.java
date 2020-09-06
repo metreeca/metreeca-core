@@ -39,6 +39,7 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.assets.Engine.shape;
 
 
 final class GraphRelator extends GraphProcessor {
@@ -62,7 +63,7 @@ final class GraphRelator extends GraphProcessor {
 			if ( resource || minimal ) {
 
 				final IRI item=iri(request.item());
-				final Shape shape=resource ? detail(request.shape()) : holder(request.shape());
+				final Shape shape=resource ? detail(request.attribute(shape())) : holder(request.attribute(shape()));
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
@@ -75,7 +76,7 @@ final class GraphRelator extends GraphProcessor {
 							// containers are currently virtual and respond always with 200 OK even if not described in
 							// the graph
 
-							return resource && model.isEmpty() ? response.status(NotFound) : response
+							final Message<Response> message=response
 
 									// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
@@ -83,9 +84,13 @@ final class GraphRelator extends GraphProcessor {
 
 									.header("+Preference-Applied",
 											minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
-									)
+									);
 
-									.shape(query.map(new Query.Probe<Shape>() {
+							// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+							// !!! add ldp:contains if items.path is not empty
+
+							return resource && model.isEmpty() ? response.status(NotFound) :
+									message.attribute(shape(), query.map(new Query.Probe<Shape>() {
 
 										@Override public Shape probe(final Items items) {
 											return items.getShape(); // !!! add ldp:contains if items.path is not empty
@@ -111,8 +116,8 @@ final class GraphRelator extends GraphProcessor {
 
 				final IRI item=iri(request.item());
 
-				final Shape holder=holder(request.shape());
-				final Shape digest=digest(request.shape());
+				final Shape holder=holder(request.attribute(shape()));
+				final Shape digest=digest(request.attribute(shape()));
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
@@ -125,8 +130,7 @@ final class GraphRelator extends GraphProcessor {
 							if ( filtered ) { // matches only
 
 								return response
-										.status(OK)
-										.shape(query.map(new Query.Probe<Shape>() {
+										.status(OK).attribute(shape(), query.map(new Query.Probe<Shape>() {
 
 											@Override public Shape probe(final Items items) {
 												return field(LDP.CONTAINS, items.getShape());
@@ -152,7 +156,7 @@ final class GraphRelator extends GraphProcessor {
 
 								return response
 										.status(OK)
-										.shape(and(holder, field(LDP.CONTAINS, digest)))
+										.attribute(shape(), and(holder, field(LDP.CONTAINS, digest)))
 										.body(rdf(), matches);
 
 							}

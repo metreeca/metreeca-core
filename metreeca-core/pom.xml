@@ -36,7 +36,7 @@
 
 	<dependencies>
 
-		<dependency>
+		<dependency> <!-- !!! remove -->
 			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-json</artifactId>
 		</dependency>

@@ -31,6 +31,7 @@ import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.assets.Engine.shape;
 
 
 final class GraphUpdater extends GraphProcessor {
@@ -55,7 +56,7 @@ final class GraphUpdater extends GraphProcessor {
 				request::reply, model -> request.reply(response -> graph.exec(connection -> {
 
 					final IRI item=iri(request.item());
-					final Shape shape=request.shape();
+					final Shape shape=request.attribute(shape());
 
 					return Optional
 
