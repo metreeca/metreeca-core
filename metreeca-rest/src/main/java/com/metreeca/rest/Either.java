@@ -17,6 +17,7 @@
 
 package com.metreeca.rest;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -159,6 +160,15 @@ import static java.util.Objects.requireNonNull;
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the right value.
+	 *
+	 * @return an optional containing the right value of this pair, if one is present, or an empty optional, otherwise
+	 */
+	public default Optional<R> get() {
+		return fold(l -> Optional.empty(), Optional::of);
+	}
 
 	/**
 	 * Maps the right value.
