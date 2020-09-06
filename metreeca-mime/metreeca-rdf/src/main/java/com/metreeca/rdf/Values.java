@@ -30,12 +30,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.*;
-import java.security.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.*;
 import java.time.temporal.*;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -81,17 +83,6 @@ public final class Values {
 		return new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 	}
 
-
-	/*
-	 * The random number generator used by this class to create random values.
-	 *
-	 * In a holder class to defer initialization.
-	 */
-	private static final class Random {
-
-		private static final SecureRandom generator=new SecureRandom();
-
-	}
 
 	private static final class Inverse extends SimpleIRI {
 
@@ -212,7 +203,7 @@ public final class Values {
 
 		final byte[] bytes=new byte[16];
 
-		Random.generator.nextBytes(bytes);
+		ThreadLocalRandom.current().nextBytes(bytes);
 
 		return DatatypeConverter
 				.printHexBinary(bytes)
@@ -237,13 +228,14 @@ public final class Values {
 	}
 
 
-	public static Statement statement(final Resource subject, final IRI predicate, final Value object) {
+	public static Statement statement(
+			final Resource subject, final IRI predicate, final Value object) {
 		return subject == null || predicate == null || object == null ? null
 				: factory.createStatement(subject, predicate, object);
 	}
 
-	public static Statement statement(final Resource subject, final IRI predicate, final Value object,
-			final Resource context) {
+	public static Statement statement(
+			final Resource subject, final IRI predicate, final Value object, final Resource context) {
 		return subject == null || predicate == null || object == null ? null
 				: factory.createStatement(subject, predicate, object, context);
 	}
@@ -400,10 +392,6 @@ public final class Values {
 		return value == null ? null : factory.createLiteral(value);
 	}
 
-
-	@Deprecated public static Literal literal(final Date value) {
-		return value == null ? null : factory.createLiteral(value);
-	}
 
 	public static Literal literal(final LocalDate value) {
 		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value.atStartOfDay()), XSD.DATETIME);
