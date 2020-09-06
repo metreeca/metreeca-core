@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.core.formats.JSONFormat;
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
-import com.metreeca.rest.formats.JSONFormat;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -33,13 +33,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
+import static com.metreeca.core.formats.JSONFormat.aliaser;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.fields;
+import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
-import static com.metreeca.rest.formats.JSONFormat.aliaser;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.fields;
-import static com.metreeca.tree.shapes.MaxCount.maxCount;
 import static java.util.stream.Collectors.toCollection;
 
 

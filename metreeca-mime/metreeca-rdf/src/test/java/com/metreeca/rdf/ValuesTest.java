@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf;
 
-import com.metreeca.tree.Shape;
+import com.metreeca.json.Shape;
 
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.*;
@@ -34,17 +34,17 @@ import java.util.Map;
 import java.util.logging.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Clazz.clazz;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.json.shapes.MaxLength.maxLength;
+import static com.metreeca.json.shapes.Meta.meta;
+import static com.metreeca.json.shapes.MinInclusive.minInclusive;
+import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.tree.Shape.*;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Clazz.clazz;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.tree.shapes.MaxLength.maxLength;
-import static com.metreeca.tree.shapes.Meta.meta;
-import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
-import static com.metreeca.tree.shapes.Pattern.pattern;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;

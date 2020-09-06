@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -31,17 +31,17 @@ import org.junit.jupiter.api.Test;
 import javax.json.JsonException;
 import java.io.*;
 
+import static com.metreeca.core.Response.UnsupportedMediaType;
+import static com.metreeca.core.formats.InputFormat.input;
+import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.core.formats.TextFormat.text;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rest.Response.UnsupportedMediaType;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

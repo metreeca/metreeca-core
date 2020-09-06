@@ -18,18 +18,18 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
 
+import static com.metreeca.core.MessageException.status;
+import static com.metreeca.core.Response.InternalServerError;
+import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.InternalServerError;
-import static com.metreeca.tree.queries.Items.items;
 
 
 final class GraphDeleter extends GraphProcessor {

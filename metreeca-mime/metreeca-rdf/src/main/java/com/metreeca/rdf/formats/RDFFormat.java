@@ -17,13 +17,13 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.core.*;
+import com.metreeca.core.formats.InputFormat;
+import com.metreeca.core.formats.OutputFormat;
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.wrappers.Rewriter;
-import com.metreeca.rest.*;
-import com.metreeca.rest.formats.InputFormat;
-import com.metreeca.rest.formats.OutputFormat;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -39,15 +39,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.metreeca.core.Either.Left;
+import static com.metreeca.core.Either.Right;
+import static com.metreeca.core.MessageException.status;
+import static com.metreeca.core.Response.BadRequest;
+import static com.metreeca.core.Response.UnsupportedMediaType;
+import static com.metreeca.core.formats.InputFormat.input;
+import static com.metreeca.core.formats.JSONFormat.context;
+import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rest.Either.Left;
-import static com.metreeca.rest.Either.Right;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Response.UnsupportedMediaType;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.JSONFormat.context;
-import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

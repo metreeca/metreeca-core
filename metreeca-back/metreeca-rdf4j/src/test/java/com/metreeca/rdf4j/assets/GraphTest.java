@@ -19,7 +19,7 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.core.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;

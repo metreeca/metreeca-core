@@ -38,9 +38,8 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rest</artifactId>
+			<artifactId>metreeca-core</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>com.google.cloud</groupId>

@@ -18,27 +18,28 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.core.*;
 
 import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
 import java.util.UUID;
 
+import static com.metreeca.core.Context.asset;
+import static com.metreeca.core.Either.Left;
+import static com.metreeca.core.Either.Right;
+import static com.metreeca.core.MessageException.status;
+import static com.metreeca.core.Response.InternalServerError;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rest.Either.Left;
-import static com.metreeca.rest.Either.Right;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.InternalServerError;
 import static java.util.stream.Collectors.toList;
 
 
 final class GraphCreator extends GraphProcessor {
 
-	private final Graph graph=Context.asset(graph());
+	private final Graph graph=asset(graph());
 
 
 	Future<Response> handle(final Request request) {

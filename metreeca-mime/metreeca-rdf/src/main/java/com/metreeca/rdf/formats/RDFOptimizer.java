@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.probes.Optimizer;
 import com.metreeca.rdf.Values;
-import com.metreeca.tree.probes.Optimizer;
 
 
 /**

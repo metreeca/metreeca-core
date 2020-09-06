@@ -17,25 +17,25 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.tree.shapes.All.all;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Any.any;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Guard.guard;
-import static com.metreeca.tree.shapes.MaxCount.maxCount;
-import static com.metreeca.tree.shapes.Meta.alias;
-import static com.metreeca.tree.shapes.Meta.label;
-import static com.metreeca.tree.shapes.MinCount.minCount;
-import static com.metreeca.tree.shapes.Or.or;
-import static com.metreeca.tree.shapes.When.when;
+import static com.metreeca.json.shapes.All.all;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Any.any;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.guard;
+import static com.metreeca.json.shapes.MaxCount.maxCount;
+import static com.metreeca.json.shapes.Meta.alias;
+import static com.metreeca.json.shapes.Meta.label;
+import static com.metreeca.json.shapes.MinCount.minCount;
+import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
 

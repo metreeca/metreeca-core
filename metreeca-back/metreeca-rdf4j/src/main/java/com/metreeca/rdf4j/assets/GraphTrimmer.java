@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.shapes.*;
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.*;
 

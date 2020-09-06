@@ -17,14 +17,14 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Optimizer;
-import com.metreeca.tree.probes.Redactor;
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.probes.Optimizer;
+import com.metreeca.json.probes.Redactor;
 
 import java.util.Optional;
 
-import static com.metreeca.rest.formats.TextFormat.text;
+import static com.metreeca.core.formats.TextFormat.text;
 import static java.lang.String.format;
 
 

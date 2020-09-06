@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.tree.Shape;
+import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -27,14 +27,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Shape.focus;
+import static com.metreeca.json.shapes.All.all;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Clazz.clazz;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.tree.Shape.focus;
-import static com.metreeca.tree.shapes.All.all;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Clazz.clazz;
-import static com.metreeca.tree.shapes.Field.field;
 import static java.util.stream.Collectors.toSet;
 
 

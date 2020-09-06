@@ -39,6 +39,11 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rest</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-rdf</artifactId>
 		</dependency>
 
@@ -55,7 +60,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-tree</artifactId>
+			<artifactId>metreeca-json</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -63,7 +68,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rest</artifactId>
+			<artifactId>metreeca-core</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>

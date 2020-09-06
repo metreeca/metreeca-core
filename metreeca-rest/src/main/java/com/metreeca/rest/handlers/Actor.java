@@ -17,17 +17,18 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.*;
+import com.metreeca.core.*;
+import com.metreeca.core.handlers.Delegator;
+import com.metreeca.json.Shape;
+import com.metreeca.json.probes.Redactor;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Redactor;
 
 import java.util.function.Function;
 
-import static com.metreeca.rest.Response.Forbidden;
-import static com.metreeca.rest.Response.Unauthorized;
+import static com.metreeca.core.Response.Forbidden;
+import static com.metreeca.core.Response.Unauthorized;
+import static com.metreeca.json.Shape.empty;
 import static com.metreeca.rest.assets.Engine.engine;
-import static com.metreeca.tree.Shape.empty;
 import static java.util.function.Function.identity;
 
 

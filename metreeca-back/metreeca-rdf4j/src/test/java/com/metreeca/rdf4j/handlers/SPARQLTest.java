@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf4j.handlers;
 
+import com.metreeca.core.Request;
+import com.metreeca.core.Response;
+import com.metreeca.core.formats.JSONAssert;
 import com.metreeca.rdf.Values;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.JSONAssert;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -29,13 +29,13 @@ import org.junit.jupiter.api.Test;
 import javax.json.JsonValue;
 import java.util.function.Consumer;
 
+import static com.metreeca.core.ResponseAssert.assertThat;
+import static com.metreeca.core.formats.JSONFormat.json;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
-import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONFormat.json;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;

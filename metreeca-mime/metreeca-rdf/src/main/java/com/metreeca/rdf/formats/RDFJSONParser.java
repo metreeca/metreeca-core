@@ -18,26 +18,22 @@
 package com.metreeca.rdf.formats;
 
 
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
-import com.metreeca.tree.Shape;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFParser;
 
-import javax.json.Json;
-import javax.json.JsonException;
-import javax.json.JsonObject;
-import javax.json.JsonReaderFactory;
+import javax.json.*;
 import javax.json.stream.JsonParsingException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.Collection;
 
+import static com.metreeca.json.Shape.pass;
 import static com.metreeca.rdf.formats.RDFFormat.*;
 import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
-import static com.metreeca.tree.Shape.pass;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 

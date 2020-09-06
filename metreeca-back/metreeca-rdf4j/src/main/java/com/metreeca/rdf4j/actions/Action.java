@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf4j.actions;
 
+import com.metreeca.core.Context;
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;

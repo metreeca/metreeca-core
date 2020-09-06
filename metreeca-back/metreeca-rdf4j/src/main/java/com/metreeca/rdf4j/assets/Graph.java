@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.core.*;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;

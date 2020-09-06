@@ -18,9 +18,9 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.rest.*;
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.tree.Shape;
 
 import java.util.Objects;
 import java.util.function.BiFunction;

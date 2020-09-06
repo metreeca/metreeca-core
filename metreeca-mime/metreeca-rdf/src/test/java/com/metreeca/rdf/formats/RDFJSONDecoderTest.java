@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.ModelAssert;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -36,10 +36,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;

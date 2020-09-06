@@ -18,7 +18,7 @@
 package com.metreeca.rdf.formats;
 
 
-import com.metreeca.rest.formats.JSONFormat;
+import com.metreeca.core.formats.JSONFormat;
 
 import javax.json.Json;
 import javax.json.JsonObject;

@@ -17,11 +17,11 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -29,12 +29,12 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.function.Supplier;
 
+import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.tree.Shape.*;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
 
 
 /**

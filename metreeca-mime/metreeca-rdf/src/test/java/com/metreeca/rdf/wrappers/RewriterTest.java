@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf.wrappers;
 
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -30,21 +30,21 @@ import javax.json.Json;
 import java.io.*;
 import java.util.Optional;
 
+import static com.metreeca.core.MessageException.status;
+import static com.metreeca.core.RequestAssert.assertThat;
+import static com.metreeca.core.Response.BadRequest;
+import static com.metreeca.core.Response.OK;
+import static com.metreeca.core.formats.InputFormat.input;
+import static com.metreeca.core.formats.MultipartFormat.multipart;
+import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.json.Shape.required;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.RequestAssert.assertThat;
-import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.MultipartFormat.multipart;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.tree.Shape.required;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singleton;
 import static org.assertj.core.api.Assertions.assertThat;

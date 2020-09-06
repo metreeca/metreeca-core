@@ -17,8 +17,8 @@
 
 package com.metreeca.jee;
 
-import com.metreeca.rest.*;
-import com.metreeca.rest.assets.Loader;
+import com.metreeca.core.*;
+import com.metreeca.core.assets.Loader;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.assets.Logger.logger;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.core.assets.Logger.logger;
+import static com.metreeca.core.formats.InputFormat.input;
+import static com.metreeca.core.formats.OutputFormat.output;
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
 import static java.util.Objects.requireNonNull;

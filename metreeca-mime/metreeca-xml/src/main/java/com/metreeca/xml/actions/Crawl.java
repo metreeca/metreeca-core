@@ -1,11 +1,24 @@
 /*
- * Copyright © 2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.metreeca.xml.actions;
 
-import com.metreeca.rest.*;
-import com.metreeca.rest.actions.*;
+import com.metreeca.core.*;
+import com.metreeca.core.actions.*;
 import com.metreeca.xml.formats.HTMLFormat;
 
 import org.w3c.dom.Document;
@@ -20,8 +33,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Request.HEAD;
-import static com.metreeca.rest.actions.Regex.Regex;
+import static com.metreeca.core.Request.HEAD;
+import static com.metreeca.core.actions.Regex.Regex;
 import static com.metreeca.xml.actions.XPath.XPath;
 import static com.metreeca.xml.formats.HTMLFormat.html;
 import static java.lang.Runtime.getRuntime;

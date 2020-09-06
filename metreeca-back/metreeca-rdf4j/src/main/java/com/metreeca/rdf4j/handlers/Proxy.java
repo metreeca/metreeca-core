@@ -17,16 +17,16 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.rest.*;
-import com.metreeca.rest.assets.Logger;
-import com.metreeca.rest.handlers.Worker;
+import com.metreeca.core.*;
+import com.metreeca.core.assets.Logger;
+import com.metreeca.core.handlers.Worker;
 
 import java.io.*;
 import java.net.*;
 
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.assets.Logger.logger;
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.core.MessageException.status;
+import static com.metreeca.core.assets.Logger.logger;
+import static com.metreeca.core.formats.OutputFormat.output;
 import static java.util.Arrays.asList;
 
 

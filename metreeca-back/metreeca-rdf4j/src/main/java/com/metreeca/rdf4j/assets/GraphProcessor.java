@@ -17,16 +17,16 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.core.Context;
+import com.metreeca.core.assets.Logger;
+import com.metreeca.json.Query;
+import com.metreeca.json.*;
+import com.metreeca.json.probes.Redactor;
+import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.queries.*;
+import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.Context;
-import com.metreeca.rest.assets.Logger;
-import com.metreeca.tree.Query;
-import com.metreeca.tree.*;
-import com.metreeca.tree.probes.Redactor;
-import com.metreeca.tree.probes.Traverser;
-import com.metreeca.tree.queries.*;
-import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -41,6 +41,15 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.core.assets.Logger.logger;
+import static com.metreeca.core.assets.Logger.time;
+import static com.metreeca.json.Shape.focus;
+import static com.metreeca.json.Shape.pass;
+import static com.metreeca.json.shapes.All.all;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Any.any;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rdf.Values.BNodeType;
 import static com.metreeca.rdf.Values.IRIType;
 import static com.metreeca.rdf.Values.LiteralType;
@@ -57,15 +66,6 @@ import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
 import static com.metreeca.rdf4j.assets.Snippets.*;
-import static com.metreeca.rest.assets.Logger.logger;
-import static com.metreeca.rest.assets.Logger.time;
-import static com.metreeca.tree.Shape.focus;
-import static com.metreeca.tree.Shape.pass;
-import static com.metreeca.tree.shapes.All.all;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Any.any;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Or.or;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;

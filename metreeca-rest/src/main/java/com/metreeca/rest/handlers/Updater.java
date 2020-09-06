@@ -17,12 +17,12 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Request;
+import com.metreeca.core.Message;
+import com.metreeca.core.Request;
+import com.metreeca.json.Shape;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.tree.Shape;
 
-import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.core.Wrapper.wrapper;
 
 
 /**

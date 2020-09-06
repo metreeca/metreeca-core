@@ -17,11 +17,11 @@
 
 package com.metreeca.rdf.wrappers;
 
+import com.metreeca.core.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
-import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -34,22 +34,22 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.json.shapes.All.all;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Any.any;
+import static com.metreeca.json.shapes.Clazz.clazz;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.guard;
+import static com.metreeca.json.shapes.In.in;
+import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
+import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
+import static com.metreeca.json.shapes.Meta.meta;
+import static com.metreeca.json.shapes.MinExclusive.minExclusive;
+import static com.metreeca.json.shapes.MinInclusive.minInclusive;
+import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.tree.shapes.All.all;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Any.any;
-import static com.metreeca.tree.shapes.Clazz.clazz;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Guard.guard;
-import static com.metreeca.tree.shapes.In.in;
-import static com.metreeca.tree.shapes.MaxExclusive.maxExclusive;
-import static com.metreeca.tree.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.tree.shapes.Meta.meta;
-import static com.metreeca.tree.shapes.MinExclusive.minExclusive;
-import static com.metreeca.tree.shapes.MinInclusive.minInclusive;
-import static com.metreeca.tree.shapes.Or.or;
-import static com.metreeca.tree.shapes.When.when;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -311,7 +311,7 @@ public final class Rewriter implements Wrapper {
 
 			@Override public Shape probe(final MaxLength maxLength) { return maxLength; }
 
-			@Override public Shape probe(final com.metreeca.tree.shapes.Pattern pattern) { return pattern; }
+			@Override public Shape probe(final com.metreeca.json.shapes.Pattern pattern) { return pattern; }
 
 			@Override public Shape probe(final Like like) { return like; }
 

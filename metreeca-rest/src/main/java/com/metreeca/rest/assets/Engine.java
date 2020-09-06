@@ -17,7 +17,7 @@
 
 package com.metreeca.rest.assets;
 
-import com.metreeca.rest.*;
+import com.metreeca.core.*;
 
 import java.util.function.Supplier;
 

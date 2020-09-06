@@ -17,12 +17,12 @@
 
 package com.metreeca.rdf4j.handlers;
 
+import com.metreeca.core.*;
+import com.metreeca.core.handlers.Worker;
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.*;
-import com.metreeca.rest.handlers.Worker;
-import com.metreeca.tree.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -35,17 +35,17 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static com.metreeca.core.MessageException.status;
+import static com.metreeca.core.Response.BadRequest;
+import static com.metreeca.core.Response.InternalServerError;
+import static com.metreeca.core.formats.InputFormat.input;
+import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.json.Shape.only;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Response.InternalServerError;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.tree.Shape.only;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Field.field;
 import static java.lang.String.format;
 
 

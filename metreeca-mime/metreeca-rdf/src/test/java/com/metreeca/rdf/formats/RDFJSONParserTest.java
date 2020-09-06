@@ -17,8 +17,8 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.Shape;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.tree.Shape;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.*;
@@ -41,16 +41,16 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Shape.required;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.term;
 import static com.metreeca.rdf.formats.RDFJSONTest.*;
-import static com.metreeca.tree.Shape.required;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.Meta.alias;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

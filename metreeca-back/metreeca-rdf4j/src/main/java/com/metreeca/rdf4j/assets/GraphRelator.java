@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.rest.*;
-import com.metreeca.tree.Query;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.queries.*;
+import com.metreeca.core.*;
+import com.metreeca.json.Query;
+import com.metreeca.json.Shape;
+import com.metreeca.json.queries.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -30,15 +30,15 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.core.MessageException.status;
+import static com.metreeca.core.Response.*;
+import static com.metreeca.json.queries.Items.items;
+import static com.metreeca.json.shapes.All.all;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.*;
-import static com.metreeca.tree.queries.Items.items;
-import static com.metreeca.tree.shapes.All.all;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Field.field;
 
 
 final class GraphRelator extends GraphProcessor {

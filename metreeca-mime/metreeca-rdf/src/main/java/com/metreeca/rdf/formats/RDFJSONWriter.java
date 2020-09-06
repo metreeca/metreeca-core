@@ -18,7 +18,7 @@
 package com.metreeca.rdf.formats;
 
 
-import com.metreeca.tree.Shape;
+import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -30,9 +30,9 @@ import javax.json.*;
 import java.io.*;
 import java.util.Collection;
 
+import static com.metreeca.json.Shape.pass;
 import static com.metreeca.rdf.formats.RDFFormat.*;
 import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
-import static com.metreeca.tree.Shape.pass;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonMap;
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;

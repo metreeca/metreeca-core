@@ -17,11 +17,11 @@
 
 package com.metreeca.rdf4j.handlers;
 
+import com.metreeca.core.*;
+import com.metreeca.core.formats.InputFormat;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rdf4j.assets.GraphTest;
-import com.metreeca.rest.*;
-import com.metreeca.rest.formats.InputFormat;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 
+import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
@@ -38,7 +39,6 @@ import static com.metreeca.rdf.ValuesTest.encode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.export;
-import static com.metreeca.rest.ResponseAssert.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toCollection;

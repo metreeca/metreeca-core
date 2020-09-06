@@ -10,14 +10,16 @@
         <module name="metreeca-jse" />
         <module name="metreeca-jee" />
         <module name="metreeca-rest" />
+        <module name="metreeca-json" />
         <module name="metreeca-xml" />
+        <module name="metreeca-core" />
         <module name="metreeca-rdf" />
-        <module name="metreeca-tree" />
         <module name="metreeca-gcp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="metreeca-back" target="1.8" />
+      <module name="metreeca-core" target="1.8" />
       <module name="metreeca-feed" target="1.8" />
       <module name="metreeca-gate" target="1.8" />
       <module name="metreeca-gcp" target="1.8" />
@@ -30,7 +32,6 @@
       <module name="metreeca-rdf" target="1.8" />
       <module name="metreeca-rdf4j" target="1.8" />
       <module name="metreeca-rest" target="1.8" />
-      <module name="metreeca-tree" target="1.8" />
       <module name="metreeca-xml" target="1.8" />
     </bytecodeTargetLevel>
   </component>

@@ -17,19 +17,19 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Request;
-import com.metreeca.tree.Shape;
+import com.metreeca.core.Request;
+import com.metreeca.json.Shape;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rest.RequestAssert.assertThat;
-import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.tree.Shape.*;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.MinCount.minCount;
-import static com.metreeca.tree.shapes.When.when;
+import static com.metreeca.core.RequestAssert.assertThat;
+import static com.metreeca.core.Response.OK;
+import static com.metreeca.core.ResponseAssert.assertThat;
+import static com.metreeca.core.formats.TextFormat.text;
+import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.MinCount.minCount;
+import static com.metreeca.json.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
 

@@ -42,13 +42,4 @@
 
 	</modules>
 
-	<dependencies>
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rest</artifactId>
-		</dependency>
-
-	</dependencies>
-
 </project>

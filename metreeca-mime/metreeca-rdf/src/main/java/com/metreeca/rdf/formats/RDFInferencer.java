@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.Shape;
+import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Inspector;
-import com.metreeca.tree.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -28,16 +28,16 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.Set;
 
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.In.in;
+import static com.metreeca.json.shapes.MaxCount.maxCount;
+import static com.metreeca.json.shapes.MinCount.minCount;
+import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Datatype.datatype;
-import static com.metreeca.tree.shapes.Field.field;
-import static com.metreeca.tree.shapes.In.in;
-import static com.metreeca.tree.shapes.MaxCount.maxCount;
-import static com.metreeca.tree.shapes.MinCount.minCount;
-import static com.metreeca.tree.shapes.Or.or;
-import static com.metreeca.tree.shapes.When.when;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
