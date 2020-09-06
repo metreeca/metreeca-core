@@ -17,24 +17,13 @@
 
 package com.metreeca.core;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
-
-import javax.json.JsonException;
-import javax.json.JsonValue;
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
-import static com.metreeca.core.Either.Left;
-import static com.metreeca.core.Either.Right;
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.BadRequest;
-import static com.metreeca.core.Response.UnprocessableEntity;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 
@@ -409,56 +398,18 @@ public final class Request extends Message<Request> {
 
 
 	/**
-	 * Retrieves the query component of this request.
+	 * Retrieves the query of this request.
 	 *
-	 * @return the query component this request
+	 * @return the query this request
 	 */
 	public String query() {
 		return query;
 	}
 
 	/**
-	 * Retrieves the shape-based query of this request.
+	 * Configures the query of this request.
 	 *
-	 * @param format the format supporting {@linkplain Format#path(String, Shape, String) path}/{@linkplain
-	 *               Format#value(String, Shape, JsonValue)  value} parsing
-	 * @param shape  the base shape for the query
-	 *
-	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	 * {@linkplain #query() query} string, if successfully parsed using {@code format} parsing methods; an error
-	 * providing access to the parsing failure, otherwise
-	 *
-	 * @throws NullPointerException if any argument is null
-	 */
-	public Either<UnaryOperator<Response>, Query> query(final Format<?> format, final Shape shape) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		try {
-
-			return Right(new QueryParser(base, shape, format).parse(query()));
-
-		} catch ( final JsonException e ) {
-
-			return Left(status(BadRequest, e));
-
-		} catch ( final NoSuchElementException e ) {
-
-			return Left(status(UnprocessableEntity, e));
-
-		}
-	}
-
-	/**
-	 * Configures the query component of this request.
-	 *
-	 * @param query the query component of this request
+	 * @param query the query of this request
 	 *
 	 * @return this request
 	 *

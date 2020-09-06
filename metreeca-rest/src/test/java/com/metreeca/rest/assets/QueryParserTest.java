@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.core;
+package com.metreeca.rest.assets;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
@@ -27,7 +27,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.json.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
 import static com.metreeca.json.Order.decreasing;
@@ -109,7 +110,20 @@ final class QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new QueryParser("app:/", shape, new TestFormat())
+		return new QueryParser("app:/", shape,
+
+				(base, _shape, path) -> path.isEmpty() ? Collections.emptyList() : asList((Object[])path.split("\\.")),
+
+				(base, _shape, value) -> value.equals(JsonValue.TRUE) ? true
+						: value.equals(JsonValue.FALSE) ? false
+						: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ?
+						((JsonNumber)value).longValue()
+						: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
+						: value instanceof JsonString ?
+						((JsonString)value).getString()+datatype(_shape).map(t -> "^"+t).orElse("")
+						: null
+
+		)
 				.parse(query.replace('\'', '"'));
 	}
 
@@ -530,24 +544,6 @@ final class QueryParserTest {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class TestFormat extends Format<Object> {
-
-		@Override public List<Object> path(final String base, final Shape shape, final String path) {
-			return path.isEmpty() ? Collections.emptyList() : asList((Object[])path.split("\\."));
-		}
-
-		@Override public Object value(final String base, final Shape shape, final JsonValue value) {
-			return value.equals(JsonValue.TRUE) ? true
-					: value.equals(JsonValue.FALSE) ? false
-					: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
-					: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
-					: value instanceof JsonString ?
-					((JsonString)value).getString()+datatype(shape).map(t -> "^"+t).orElse("")
-					: null;
-		}
-	}
-
 
 	private abstract static class TestQueryProbe implements Query.Probe<Boolean> {
 

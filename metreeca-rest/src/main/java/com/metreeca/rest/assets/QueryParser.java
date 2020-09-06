@@ -15,13 +15,15 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.core;
+package com.metreeca.rest.assets;
 
+import com.metreeca.core.Request;
 import com.metreeca.json.*;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rest.assets.Engine.Parser;
 
 import javax.json.*;
 import java.io.*;
@@ -46,13 +48,18 @@ final class QueryParser {
 
 	private final String base;
 	private final Shape shape;
-	private final Format<?> format;
+
+	private final Parser<String, List<?>> paths;
+	private final Parser<JsonValue, Object> values;
 
 
-	QueryParser(final String base, final Shape shape, final Format<?> format) {
+	QueryParser(final String base, final Shape shape,
+			final Parser<String, List<?>> paths, final Parser<JsonValue, Object> values
+	) {
 		this.base=base;
 		this.shape=shape;
-		this.format=format;
+		this.paths=paths;
+		this.values=values;
 	}
 
 
@@ -339,7 +346,7 @@ final class QueryParser {
 	private List<?> steps(final String path, final Shape shape) {
 		try {
 
-			return format.path(base, shape, path.trim());
+			return paths.parse(base, shape, path.trim());
 
 		} catch ( final JsonException e ) {
 
@@ -383,7 +390,7 @@ final class QueryParser {
 	}
 
 	private Object value(final JsonValue value, final Shape shape) {
-		return format.value(base, shape, value);
+		return values.parse(base, shape, value);
 	}
 
 

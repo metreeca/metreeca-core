@@ -21,6 +21,7 @@ import com.metreeca.core.*;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
+import com.metreeca.rdf.formats.RDFFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -39,6 +40,7 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.assets.Engine.query;
 import static com.metreeca.rest.assets.Engine.shape;
 
 
@@ -67,7 +69,7 @@ final class GraphRelator extends GraphProcessor {
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
-				) : request.query(rdf(), and(all(item), shape)).fold(
+				) : query(request, and(all(item), shape), RDFFormat::path, RDFFormat::value).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
@@ -121,7 +123,7 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return request.query(rdf(), digest).fold(
+				return query(request, digest, RDFFormat::path, RDFFormat::value).fold(
 
 						response::map, query -> graph.exec(connection -> {
 

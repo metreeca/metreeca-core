@@ -39,6 +39,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.metreeca.core.Context.asset;
 import static com.metreeca.core.Either.Left;
 import static com.metreeca.core.Either.Right;
 import static com.metreeca.core.MessageException.status;
@@ -165,7 +166,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	private final Consumer<Codec> customizer;
 
-	private final JsonObject context=Context.asset(context());
+	private final JsonObject context=asset(context());
 
 
 	private RDFFormat(final Consumer<Codec> customizer) {
@@ -405,14 +406,15 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	///// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
-		return new RDFJSONDecoder(base, context) {}.path(path, shape); // !!! pass base as argument and factor decoder
+	public static List<IRI> path(final String base, final Shape shape, final String path) {
+		return new RDFJSONDecoder(base, asset(context())) {}.path(path, shape); // !!! pass base as argument and
+		// factor decoder
 		// instance
 	}
 
-	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
+	public static Object value(final String base, final Shape shape, final JsonValue value) {
 		// !!! pass base as argument and factor decoder instance
-		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey();
+		return new RDFJSONDecoder(base, asset(context())) {}.value(value, shape, null).getKey();
 	}
 
 
