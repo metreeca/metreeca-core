@@ -17,20 +17,13 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Message;
-import com.metreeca.rest.MessageAssert;
-import com.metreeca.rest.MessageMock;
+import com.metreeca.rest.*;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.Map.Entry;
 
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -47,7 +40,7 @@ final class MultipartParserTest {
 		return new ByteArrayInputStream(content.replace("\n", "\r\n").getBytes(UTF_8));
 	}
 
-	private Collection<Message<?>> parts(final String content) throws IOException, ParseException {
+	private Collection<Message<?>> parts(final String content) throws IOException {
 
 		final Map<String, Message<?>> parts=new LinkedHashMap<>();
 
@@ -72,13 +65,13 @@ final class MultipartParserTest {
 
 	@Nested final class Splitting {
 
-		private List<String> parts(final String content) throws IOException, ParseException {
+		private List<String> parts(final String content) throws IOException {
 			return MultipartParserTest.this.parts(content).stream()
 					.map(message -> message.body(text()).value().orElse(""))
 					.collect(toList());
 		}
 
-		@Test void testIgnoreFrame() throws IOException, ParseException {
+		@Test void testIgnoreFrame() throws IOException {
 
 			assertThat(parts("")).isEmpty();
 
@@ -87,7 +80,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testSplitParts() throws IOException, ParseException {
+		@Test void testSplitParts() throws IOException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("canonical")
@@ -107,7 +100,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testIgnorePreamble() throws IOException, ParseException {
+		@Test void testIgnorePreamble() throws IOException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
@@ -119,7 +112,7 @@ final class MultipartParserTest {
 
 		}
 
-		@Test void testIgnoreEpilogue() throws IOException, ParseException {
+		@Test void testIgnoreEpilogue() throws IOException {
 
 			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
@@ -135,7 +128,7 @@ final class MultipartParserTest {
 
 	@Nested final class Headers {
 
-		@Test void testParseHeaders() throws IOException, ParseException {
+		@Test void testParseHeaders() throws IOException {
 			assertThat(parts("--boundary\nsingle: value\nmultiple: one\nmultiple: two\n\ncontent"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> MessageAssert.assertThat(message)
@@ -145,7 +138,7 @@ final class MultipartParserTest {
 					);
 		}
 
-		@Test void testHandleEmptyHeaders() throws IOException, ParseException {
+		@Test void testHandleEmptyHeaders() throws IOException {
 			assertThat(parts("--boundary\nempty:\n\ncontent"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> MessageAssert.assertThat(message)
@@ -154,7 +147,7 @@ final class MultipartParserTest {
 					);
 		}
 
-		@Test void testHandleEOFInHeaders() throws IOException, ParseException {
+		@Test void testHandleEOFInHeaders() throws IOException {
 			assertThat(parts("--boundary\nsingle: value"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> MessageAssert.assertThat(message)
@@ -164,15 +157,15 @@ final class MultipartParserTest {
 
 		@Test void testRejectMalformedHeaders() {
 
-			assertThatExceptionOfType(ParseException.class)
+			assertThatExceptionOfType(MessageException.class)
 					.as("spaces before colon")
 					.isThrownBy(() -> parts("--boundary\nheader : value\n\ncontent"));
 
-			assertThatExceptionOfType(ParseException.class)
+			assertThatExceptionOfType(MessageException.class)
 					.as("malformed name")
 					.isThrownBy(() -> parts("--boundary\nhea der: value\n\ncontent"));
 
-			assertThatExceptionOfType(ParseException.class)
+			assertThatExceptionOfType(MessageException.class)
 					.as("malformed value")
 					.isThrownBy(() -> parts("--boundary\nhea der: val\rue\n\ncontent"));
 
@@ -189,7 +182,7 @@ final class MultipartParserTest {
 
 		@Test void testEnforceBodySizeLimits() {
 
-			assertThatExceptionOfType(ParseException.class)
+			assertThatExceptionOfType(MessageException.class)
 					.as("body size exceeded")
 					.isThrownBy(() -> parser(5, 25,
 							"--boundary\n\none\n--boundary\n\ntwo\n--boundary--"
@@ -199,7 +192,7 @@ final class MultipartParserTest {
 
 		@Test void testEnforcePartSizeLimits() {
 
-			assertThatExceptionOfType(ParseException.class)
+			assertThatExceptionOfType(MessageException.class)
 					.as("parts size exceeded")
 					.isThrownBy(() -> parser(10, 1000,
 							"--boundary\n\nshort\n--boundary\n\nlong content\n--boundary--"

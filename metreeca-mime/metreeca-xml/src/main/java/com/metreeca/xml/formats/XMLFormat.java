@@ -61,114 +61,6 @@ public final class XMLFormat extends Format<Document> {
 	public static final Pattern MIMEPattern=compile("(?i)^.*/(?:.*\\+)?xml(?:\\s*;.*)?$");
 
 
-	/**
-	 * Creates an XML body format.
-	 *
-	 * @return the new XML body format
-	 */
-	public static XMLFormat xml() {return new XMLFormat(null);}
-
-	/**
-	 * Creates an XML body format using a custom SAX parser.
-	 *
-	 * @param parser the custom SAX parser
-	 *
-	 * @return the new XML body format
-	 *
-	 * @throws NullPointerException if {@code parser} is null
-	 */
-	public static XMLFormat xml(final XMLReader parser) {
-
-		if ( parser == null ) {
-			throw new NullPointerException("null parser");
-		}
-
-		return new XMLFormat(parser);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Parses a XML document.
-	 *
-	 * @param input the input stream the XML document is to be parsed from
-	 *
-	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error
-	 * result containing the parse exception, otherwise
-	 *
-	 * @throws NullPointerException if {@code input} is null
-	 */
-	public static Result<Document, Exception> xml(final InputStream input) {
-
-		if ( input == null ) {
-			throw new NullPointerException("null input");
-		}
-
-		return xml(input, null);
-	}
-
-	/**
-	 * Parses a XML document.
-	 *
-	 * @param input the input stream the XML document is to be parsed from
-	 * @param base  the base URL for the XML document to be parsed
-	 *
-	 * @return a value result containing the parsed XML document, if {@code input} was successfully parsed; an error
-	 * result containing the parse exception, otherwise
-	 *
-	 * @throws NullPointerException if {@code input} is null
-	 */
-	public static Result<Document, Exception> xml(final InputStream input, final String base) {
-
-		if ( input == null ) {
-			throw new NullPointerException("null input");
-		}
-
-		final InputSource source=new InputSource();
-
-		source.setSystemId(base);
-		source.setByteStream(input);
-
-		return xml(new SAXSource(source));
-	}
-
-	/**
-	 * Parses a XML document.
-	 *
-	 * @param source the source the XML document is to be parsed from
-	 *
-	 * @return a value result containing the parsed XML document, if {@code source} was successfully parsed; an error
-	 * result containing the parse exception, otherwise
-	 *
-	 * @throws NullPointerException if {@code source} is null
-	 */
-	public static Result<Document, Exception> xml(final Source source) {
-
-		if ( source == null ) {
-			throw new NullPointerException("null source");
-		}
-
-		try {
-
-			final Document document=builder().newDocument();
-
-			document.setDocumentURI(source.getSystemId());
-
-			transformer().transform(source, new DOMResult(document));
-
-			return Value(document);
-
-		} catch ( final TransformerException e ) {
-
-			return Error(e);
-
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private static DocumentBuilder builder() {
 		try {
 
@@ -194,6 +86,109 @@ public final class XMLFormat extends Format<Document> {
 	}
 
 
+	/**
+	 * Creates an XML body format.
+	 *
+	 * @return a new XML body format
+	 */
+	public static XMLFormat xml() {return new XMLFormat(null);}
+
+	/**
+	 * Creates an XML body format using a custom SAX parser.
+	 *
+	 * @param parser the custom SAX parser
+	 *
+	 * @return a new XML body format a custom SAX {@code parser}
+	 *
+	 * @throws NullPointerException if {@code parser} is null
+	 */
+	public static XMLFormat xml(final XMLReader parser) {
+
+		if ( parser == null ) {
+			throw new NullPointerException("null parser");
+		}
+
+		return new XMLFormat(parser);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Parses a XML document.
+	 *
+	 * @param input the input stream the XML document is to be parsed from
+	 *
+	 * @return either a parsing exception or the XML document parsed from {@code input}
+	 *
+	 * @throws NullPointerException if {@code input} is null
+	 */
+	public static Result<Document, TransformerException> xml(final InputStream input) {
+
+		if ( input == null ) {
+			throw new NullPointerException("null input");
+		}
+
+		return xml(input, null);
+	}
+
+	/**
+	 * Parses a XML document.
+	 *
+	 * @param input the input stream the XML document is to be parsed from
+	 * @param base  the possibly null base URL for the XML document to be parsed
+	 *
+	 * @return either a parsing exception or the XML document parsed from {@code input}
+	 *
+	 * @throws NullPointerException if {@code input} is null
+	 */
+	public static Result<Document, TransformerException> xml(final InputStream input, final String base) {
+
+		if ( input == null ) {
+			throw new NullPointerException("null input");
+		}
+
+		final InputSource source=new InputSource();
+
+		source.setSystemId(base);
+		source.setByteStream(input);
+
+		return xml(new SAXSource(source));
+	}
+
+	/**
+	 * Parses a XML document.
+	 *
+	 * @param source the source the XML document is to be parsed from
+	 *
+	 * @return either a parsing exception or the XML document parsed from {@code source}
+	 *
+	 * @throws NullPointerException if {@code source} is null
+	 */
+	public static Result<Document, TransformerException> xml(final Source source) {
+
+		if ( source == null ) {
+			throw new NullPointerException("null source");
+		}
+
+		try {
+
+			final Document document=builder().newDocument();
+
+			document.setDocumentURI(source.getSystemId());
+
+			transformer().transform(source, new DOMResult(document));
+
+			return Value(document);
+
+		} catch ( final TransformerException e ) {
+
+			return Error(e);
+
+		}
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final XMLReader parser;
@@ -207,31 +202,22 @@ public final class XMLFormat extends Format<Document> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional XML body representation of {@code message}, as retrieved from the input supplied by its
-	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header is
-	 * matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
+	 * Decodes the XML {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available and the {@code message} {@code Content-Type} header is matched by
+	 * {@link #MIMEPattern}, taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public Result<Document, MessageException> decode(final Message<?> message) {
+		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
-		return message
+				.map(type -> message.body(input()).process(source -> {
 
-				.header("Content-Type")
-				.filter(MIMEPattern.asPredicate())
-				.isPresent()
-
-				? message
-				.body(input())
-				.process(source -> {
-
-					try (
-							final InputStream input=source.get();
-							final Reader reader=new InputStreamReader(input, message.charset())
-					) {
+					try ( final InputStream input=source.get() ) {
 
 						final InputSource inputSource=new InputSource();
 
 						inputSource.setSystemId(message.item());
-						inputSource.setCharacterStream(reader);
+						inputSource.setByteStream(input);
+						inputSource.setEncoding(message.charset());
 
 						final SAXSource saxSource=(parser != null)
 								? new SAXSource(parser, inputSource)
@@ -239,7 +225,7 @@ public final class XMLFormat extends Format<Document> {
 
 						saxSource.setSystemId(message.item());
 
-						return xml(saxSource).error(cause -> status(BadRequest, cause));
+						return xml(saxSource).fold(Result::Value, e -> Error(status(BadRequest, e)));
 
 					} catch ( final UnsupportedEncodingException e ) {
 
@@ -251,18 +237,16 @@ public final class XMLFormat extends Format<Document> {
 
 					}
 
-				})
+				}))
 
-				: Error(status(UnsupportedMediaType, "missing XML body")
-
-		);
+				.orElseGet(() -> Error(status(UnsupportedMediaType, "no XML body")));
 	}
 
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the XML {@code value} to
-	 * the accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already
-	 * defined.
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the XML {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
+	 * taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Document value) {
 		return message
@@ -283,7 +267,7 @@ public final class XMLFormat extends Format<Document> {
 
 					} catch ( final TransformerException unexpected ) {
 
-						throw new RuntimeException("unable to format XML body", unexpected);
+						throw new RuntimeException(unexpected);
 
 					} catch ( final IOException e ) {
 

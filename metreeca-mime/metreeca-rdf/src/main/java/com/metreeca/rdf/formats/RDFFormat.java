@@ -42,6 +42,7 @@ import java.util.function.Consumer;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;
 import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -143,7 +144,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	/**
 	 * Customizable RDF codec.
 	 */
-	@FunctionalInterface public static interface Codec {
+	@FunctionalInterface public static interface Codec { // !!! review
 
 		/**
 		 * Configures a setting for this configurable codec
@@ -156,50 +157,6 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 		 */
 		public <T> Codec set(final RioSetting<T> setting, T value);
 
-	}
-
-
-	///// Casts //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Converts an object to an IRI.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
-	 */
-	public static IRI iri(final Object object) {
-		return as(object, IRI.class);
-	}
-
-	/**
-	 * Converts an object to a value.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
-	 */
-	public static Value value(final Object object) {
-		return as(object, Value.class);
-	}
-
-
-	private static <T> T as(final Object object, final Class<T> type) {
-		if ( object == null || type.isInstance(object) ) {
-
-			return type.cast(object);
-
-		} else {
-
-			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
-					object.getClass().getName(), type.getName()
-			));
-
-		}
 	}
 
 
@@ -217,26 +174,15 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
-		return new RDFJSONDecoder(base, context) {}.path(path, shape); // !!! pass base as argument and factor decoder
-		// instance
-	}
-
-	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
-		// !!! pass base as argument and factor decoder instance
-		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey();
-	}
-
-
 	/**
-	 * @return the optional RDF body representation of {@code message}, as retrieved from its {@link InputFormat}
-	 * representation, if present;  a failure reporting RDF processing errors with the {@link Response#BadRequest}
-	 * status, otherwise
+	 * Decodes the RDF {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available, taking into account the RDF serialization format defined by the {@code message}
+	 * {@code Content-Type} header and defaulting to {@code text/turtle}
 	 */
 	@Override public Result<Collection<Statement>, MessageException> decode(final Message<?> message) {
 		return message.body(input()).fold(
 
-				supplier -> {
+				source -> {
 
 					final IRI focus=Values.iri(message.item());
 					final Shape shape=message.shape();
@@ -305,7 +251,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 					});
 
-					try ( final InputStream input=supplier.get() ) {
+					try ( final InputStream input=source.get() ) {
 
 						parser.parse(input, base); // resolve relative IRIs wrt the request focus
 
@@ -345,17 +291,16 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 				},
 
-				Result::Error
+				error -> Error(status(UnsupportedMediaType, "no RDF body"))
 
 		);
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the RDF {@code value} to the
-	 * accepted output stream and, unless already defined, sets the {@code Content-Type} header to the MIME type of the
-	 * RDF serialization selected according to the {@code Accept} header of the request associated to the message, if
-	 * one
-	 * is present, or to {@code "text/turtle"}, otherwise.
+	 * Configures {@code message} {@code Content-Type} header, unless already defined, and encodes
+	 * the RDF {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
+	 * taking into account the RDF serialization selected according to the {@code Accept} header of the {@code message}
+	 * originating request, defaulting to {@code text/turtle}
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 
@@ -456,6 +401,61 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	private String rewrite(final String source, final String target, final String string) {
 		return string.startsWith(source) ? target+string.substring(source.length()) : string;
+	}
+
+
+	///// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public List<IRI> path(final String base, final Shape shape, final String path) {
+		return new RDFJSONDecoder(base, context) {}.path(path, shape); // !!! pass base as argument and factor decoder
+		// instance
+	}
+
+	@Override public Object value(final String base, final Shape shape, final JsonValue value) {
+		// !!! pass base as argument and factor decoder instance
+		return new RDFJSONDecoder(base, context) {}.value(value, shape, null).getKey();
+	}
+
+
+	/**
+	 * Converts an object to an IRI.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
+	 */
+	public static IRI iri(final Object object) {
+		return as(object, IRI.class);
+	}
+
+	/**
+	 * Converts an object to a value.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
+	 */
+	public static Value value(final Object object) {
+		return as(object, Value.class);
+	}
+
+
+	private static <T> T as(final Object object, final Class<T> type) {
+		if ( object == null || type.isInstance(object) ) {
+
+			return type.cast(object);
+
+		} else {
+
+			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
+					object.getClass().getName(), type.getName()
+			));
+
+		}
 	}
 
 }

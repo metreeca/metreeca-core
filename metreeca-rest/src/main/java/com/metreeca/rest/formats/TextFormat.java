@@ -49,7 +49,7 @@ public final class TextFormat extends Format<String> {
 	/**
 	 * Creates a textual format.
 	 *
-	 * @return the new textual format
+	 * @return a new textual format
 	 */
 	public static TextFormat text() {
 		return new TextFormat();
@@ -114,9 +114,9 @@ public final class TextFormat extends Format<String> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the input
-	 * stream supplied by its {@link InputFormat} body, if one is present; a failure describing the decoding error,
-	 * otherwise
+	 * Decodes the textual {@code message} body from the input stream supplied by the {@code message}
+	 * {@link InputFormat} body, if one is available, taking into account the {@code message}
+	 * {@linkplain Message#charset() charset}
 	 */
 	@Override public Result<String, MessageException> decode(final Message<?> message) {
 		return message.body(input()).process(source -> {
@@ -140,8 +140,9 @@ public final class TextFormat extends Format<String> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the textual {@code value} to the
-	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the textual {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
+	 * taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final String value) {
 		return message

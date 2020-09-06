@@ -21,14 +21,15 @@ import com.metreeca.rest.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.text.ParseException;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.Result.Error;
+import static com.metreeca.rest.Result.Value;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.lang.String.format;
@@ -40,7 +41,7 @@ import static java.util.stream.Collectors.*;
  * Multipart body format.
  *
  * @see <a href="https://tools.ietf.org/html/rfc2046#section-5.1">RFC 2046 - Multipurpose Internet Mail Extensions
- * 		(MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
+ * (MIME) Part Two: Media Types - § 5.1.  Multipart Media Type</a>
  */
 public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
@@ -80,25 +81,23 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 
 	/**
-	 * Retrieves a write-only multipart body format.
+	 * Creates a write-only multipart body format.
 	 *
-	 * @return a write-only multipart body format with part/body size limit set to 0, intended for configuring multipart
-	 * 		response bodies
+	 * @return a new write-only multipart body format with part/body size limit set to 0, intended for configuring
+	 * multipart response bodies
 	 */
 	public static MultipartFormat multipart() {
 		return new MultipartFormat(0, 0);
 	}
 
 	/**
-	 * Retrieves a multipart body format.
+	 * Creates a multipart body format.
 	 *
-	 * @param part the size limit for individual message parts; includes boundary and headers and applies also to 
-	 *                message
-	 *             preamble and epilogue
+	 * @param part the size limit for individual message parts; includes boundary and headers and applies also to
+	 *             message preamble and epilogue
 	 * @param body the size limit for the complete message body
 	 *
-	 * @return a write-only multipart body format with part/body size limit set to 0, intended for configuring multipart
-	 * 		response bodies
+	 * @return a new read/write multipart body format with the given {@code part}/{@code body} size limits
 	 *
 	 * @throws IllegalArgumentException if either {@code part} or {@code body} is less than 0 or if {@code part} is
 	 *                                  greater than {@code body}
@@ -135,6 +134,11 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	/**
+	 * Decodes the multipart {@code message} body from the input stream supplied by the {@code message}
+	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is matched by
+	 * {@link #MIMEPattern}
+	 */
 	@Override public Result<Map<String, Message<?>>, MessageException> decode(final Message<?> message) {
 		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
@@ -189,9 +193,9 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 						}).parse();
 
-					} catch ( final ParseException e ) { // !!!
+					} catch ( final MessageException e ) {
 
-						return Error(status(e.getMessage().contains("size limit") ? PayloadTooLarge : BadRequest, e));
+						return Error(e);
 
 					} catch ( final IOException e ) {
 
@@ -199,13 +203,18 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 					}
 
-					return Result.Value(parts);
+					return Value(parts);
 
 				}))
 
-				.orElseGet(() -> Error(status(UnsupportedMediaType)));
+				.orElseGet(() -> Error(status(UnsupportedMediaType, "no multipart body")));
 	}
 
+	/**
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, defines the
+	 * multipart message boundary, unless already defined and encodes the multipart {@code value} into the output
+	 * stream accepted by the {@code message} {@link OutputFormat} body
+	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Map<String, Message<?>> value) {
 
 		final String type=message
@@ -222,7 +231,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 		} else { // generate random boundary and update content-type definition
 
-			new Random().nextBytes(boundary=new byte[70]);
+			ThreadLocalRandom.current().nextBytes(boundary=new byte[70]);
 
 			for (int i=0; i < boundary.length; i++) {
 				boundary[i]=BoundaryChars[(boundary[i]&0xFF)%BoundaryChars.length];

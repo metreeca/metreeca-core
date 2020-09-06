@@ -37,9 +37,9 @@ public final class DataFormat extends Format<byte[]> {
 	public static final String MIME="application/octet-stream";
 
 	/**
-	 * A pattern matching binary MIME types, for instance {@code application/zip}.
+	 * A pattern matching binary MIME types, for instance {@code application/zip or image/png}.
 	 */
-	public static final Pattern MIMEPattern=Pattern.compile("(?i)^application/.+$");
+	public static final Pattern MIMEPattern=Pattern.compile("(?i)^(application|image)/.+$");
 
 
 	/**
@@ -88,6 +88,7 @@ public final class DataFormat extends Format<byte[]> {
 		}
 
 		try {
+
 			output.write(value);
 			output.flush();
 
@@ -109,9 +110,8 @@ public final class DataFormat extends Format<byte[]> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * stream supplied by its {@link InputFormat} body, if one is available; a failure describing the decoding error,
-	 * otherwise
+	 * Decodes the binary {@code message} body from the input stream supplied by the {@code message}
+	 * {@link InputFormat} body, if one is available
 	 */
 	@Override public Result<byte[], MessageException> decode(final Message<?> message) {
 		return message.body(input()).value(source -> {
@@ -126,8 +126,8 @@ public final class DataFormat extends Format<byte[]> {
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the binary {@code value} to the
-	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the binary {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final byte... value) {
 		return message

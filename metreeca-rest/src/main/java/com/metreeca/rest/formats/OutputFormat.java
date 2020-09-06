@@ -31,7 +31,7 @@ public final class OutputFormat extends Format<Consumer<OutputStream>> {
 	/**
 	 * Creates an output body format.
 	 *
-	 * @return the new raw binary output body format
+	 * @return a new output body format
 	 */
 	public static OutputFormat output() {
 		return new OutputFormat();

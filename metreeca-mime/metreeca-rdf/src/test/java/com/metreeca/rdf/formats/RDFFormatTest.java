@@ -35,7 +35,6 @@ import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.TextFormat.text;
@@ -127,8 +126,8 @@ final class RDFFormatTest {
 
 					.value(value -> fail("unexpected RDF body {"+value+"}"))
 
-					.error(error -> assertThat(new Response(new Request()).map(error))
-							.hasStatus(Response.UnsupportedMediaType)
+					.error(error -> assertThat(error.getStatus())
+							.isEqualTo(Response.UnsupportedMediaType)
 					)
 			);
 		}

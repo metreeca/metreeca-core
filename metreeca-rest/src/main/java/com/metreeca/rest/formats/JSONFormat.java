@@ -42,7 +42,7 @@ import static java.util.Collections.singletonMap;
 /**
  * JSON body format.
  *
- * @see "https://javaee.github.io/jsonp/"
+ * @see <a href="https://javaee.github.io/jsonp/">JSR 374 - Java API for JSON Processing</a>
  */
 public final class JSONFormat extends Format<JsonObject> {
 
@@ -64,7 +64,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	/**
 	 * Creates a JSON body format.
 	 *
-	 * @return the new JSON body format
+	 * @return a new JSON body format
 	 */
 	public static JSONFormat json() {
 		return new JSONFormat();
@@ -78,12 +78,11 @@ public final class JSONFormat extends Format<JsonObject> {
 	 *
 	 * @param reader the reader the JSON object is to be parsed from
 	 *
-	 * @return a value result containing the parsed JSON object, if {@code reader} was successfully parsed; an error
-	 * result containing the parse exception, otherwise
+	 * @return either a parsing exception or the JSON object parsed from {@code input}
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if {@code reader} is null
 	 */
-	public static Result<JsonObject, Exception> json(final Reader reader) {
+	public static Result<JsonObject, JsonParsingException> json(final Reader reader) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -109,7 +108,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 *
 	 * @return the target {@code writer}
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if either {@code writer} or {@code object} is null
 	 */
 	public static <W extends Writer> W json(final W writer, final JsonObject object) {
 
@@ -220,28 +219,21 @@ public final class JSONFormat extends Format<JsonObject> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional JSON body representation of {@code message}, as retrieved from the input supplied by its
-	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header
-	 * is matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
+	 * Decodes the JSON {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available and the {@code message} {@code Content-Type} header is matched by
+	 * {@link #MIMEPattern}, taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public Result<JsonObject, MessageException> decode(final Message<?> message) {
+		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
-		return message
-
-				.header("Content-Type")
-				.filter(MIMEPattern.asPredicate())
-				.isPresent()
-
-				? message
-				.body(input())
-				.process(source -> {
+				.map(type -> message.body(input()).process(source -> {
 
 					try (
 							final InputStream input=source.get();
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
-						return json(reader).error(cause -> status(BadRequest, cause));
+						return json(reader).fold(Result::Value, e -> Error(status(BadRequest, e)));
 
 					} catch ( final UnsupportedEncodingException e ) {
 
@@ -253,16 +245,15 @@ public final class JSONFormat extends Format<JsonObject> {
 
 					}
 
-				})
+				}))
 
-				: Error(status(UnsupportedMediaType, "missing JSON body")
-		);
-
+				.orElseGet(() -> Error(status(UnsupportedMediaType, "no JSON body")));
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the JSON {@code value} to the
-	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the JSON {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
+	 * taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final JsonObject value) {
 		return message

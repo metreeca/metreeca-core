@@ -22,7 +22,6 @@ import com.metreeca.tree.Shape;
 import com.metreeca.tree.shapes.And;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -180,15 +179,26 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Retrieves the charset of this message.
 	 *
-	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to
-	 * {@linkplain StandardCharsets#UTF_8 UTF-8} if this message doesn't include a {@code Content-Type} header or if
+	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to {@code UTF-8} if
 	 * no charset is explicitly defined
+	 *
+	 * @implNote <ul>
+	 *
+	 * <li>the {@code Accept-Charset} header or the originating request is
+	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset">ignored</a>;</li>
+	 *
+	 * <li>the return type is limited to {@code String} in order to force client code to handle malformed/unsupported
+	 * charsets.</li>
+	 *
+	 * </ul>
 	 */
 	public String charset() {
 		return header("Content-Type")
+
 				.map(CharsetPattern::matcher)
 				.filter(Matcher::find)
 				.map(matcher -> matcher.group("charset"))
+
 				.orElse(UTF_8.name());
 	}
 

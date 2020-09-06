@@ -65,7 +65,7 @@ public final class HTMLFormat extends Format<Document> {
 	/**
 	 * Creates an HTML body format.
 	 *
-	 * @return the new HTML body format
+	 * @return a new HTML body format
 	 */
 	public static HTMLFormat html() { return new HTMLFormat(); }
 
@@ -76,14 +76,13 @@ public final class HTMLFormat extends Format<Document> {
 	 * Parses an HTML document.
 	 *
 	 * @param reader the reader the HTML document is to be parsed from
-	 * @param base   the base URL for the HTML document to be parsed
+	 * @param base   the possibly null base URL for the HTML document to be parsed
 	 *
-	 * @return a value result containing the parsed HTML document, if {@code reader} was successfully parsed; an error
-	 * result containg the parse exception, otherwise
+	 * @return either a parsing exception or the HTML document parsed from {@code reader}
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if {@code reader} is null
 	 */
-	public static Result<Document, Exception> html(final Reader reader, final String base) {
+	public static Result<Document, TransformerException> html(final Reader reader, final String base) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -125,34 +124,35 @@ public final class HTMLFormat extends Format<Document> {
 	 *
 	 * @param <W>    the type of the {@code writer} the HTML node is to be written to
 	 * @param writer the writer the HTML node is to be written to
-	 * @param base   the base URL for the HTML node to be written
+	 * @param base   the possibly null base URL for the HTML node to be written
 	 * @param node   the HTML node to be written
 	 *
 	 * @return the target {@code writer}
 	 *
-	 * @throws NullPointerException if any argument is null
-	 * @throws TransformerException if en encoding error occurs
+	 * @throws NullPointerException if either {@code writer} or {@code node} is null
 	 */
-	public static <W extends Writer> W html(final W writer, final String base, final Node node) throws TransformerException {
+	public static <W extends Writer> W html(final W writer, final String base, final Node node) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
-		}
-
-		if ( base == null ) {
-			throw new NullPointerException("null base");
 		}
 
 		if ( node == null ) {
 			throw new NullPointerException("null node");
 		}
 
-		transformer().transform( // !!! format as HTML
-				new DOMSource(node, base),
-				new StreamResult(writer)
-		);
+		try {
 
-		return writer;
+			transformer().transform(
+					new DOMSource(node, base),
+					new StreamResult(writer)
+			);
+
+			return writer;
+
+		} catch ( final TransformerException unexpected ) {
+			throw new RuntimeException(unexpected);
+		}
 	}
 
 
@@ -179,7 +179,7 @@ public final class HTMLFormat extends Format<Document> {
 
 			final Transformer transformer=factory.newTransformer();
 
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			transformer.setOutputProperty(OutputKeys.METHOD, "html");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -202,28 +202,21 @@ public final class HTMLFormat extends Format<Document> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional HTML body representation of {@code message}, as retrieved from the input supplied by its
-	 * {@link InputFormat} representation, if one is present and the value of the {@code Content-Type} header is
-	 * matched by {@link #MIMEPattern}; a failure reporting the decoding error, otherwise
+	 * Decodes the HTML {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available and the {@code message} {@code Content-Type} header is matched by
+	 * {@link #MIMEPattern}, taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public Result<Document, MessageException> decode(final Message<?> message) {
+		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
-		return message
-
-				.header("Content-Type")
-				.filter(MIMEPattern.asPredicate())
-				.isPresent()
-
-				? message
-				.body(input())
-				.process(source -> {
+				.map(type -> message.body(input()).process(source -> {
 
 					try (
 							final InputStream input=source.get();
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
-						return html(reader, message.item()).error(cause -> status(BadRequest, cause));
+						return html(reader, message.item()).fold(Result::Value, e -> Error(status(BadRequest, e)));
 
 					} catch ( final UnsupportedEncodingException e ) {
 
@@ -235,17 +228,15 @@ public final class HTMLFormat extends Format<Document> {
 
 					}
 
-				})
+				}))
 
-				: Error(status(UnsupportedMediaType, "missing HTML body")
-
-		);
-
+				.orElseGet(() -> Error(status(UnsupportedMediaType, "no HTML body")));
 	}
 
 	/**
-	 * Configures the {@link OutputFormat} representation of {@code message} to write the HTML {@code value} to the
-	 * accepted output stream and sets the {@code Content-Type} header to {@value #MIME}, unless already defined.
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the HTML {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
+	 * taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Document value) {
 		return message
@@ -257,10 +248,6 @@ public final class HTMLFormat extends Format<Document> {
 					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
 						html(writer, message.item(), value);
-
-					} catch ( final TransformerException e ) {
-
-						throw new RuntimeException("unable to format HTML body", e);
 
 					} catch ( final IOException e ) {
 

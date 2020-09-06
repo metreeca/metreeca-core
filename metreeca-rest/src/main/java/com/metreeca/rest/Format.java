@@ -46,15 +46,16 @@ public abstract class Format<V> {
 	 *
 	 * <p>The default implementation returns a {@linkplain MessageException#status() no-op message exception}.</p>
 	 *
-	 * @param message the message whose body is to be decoded
-	 *
-	 * @return either a message exception reporting a decoding issue or the decoded {@code message} body; decoding
-	 * issues should be reported using the following HTTP status codes:
+	 * <p>Concrete subclasses should report decoding issues using the following HTTP status codes:</p>
 	 *
 	 * <ul>
 	 * <li>{@link Response#UnsupportedMediaType} for missing bodies;</li>
 	 * <li>{@link Response#BadRequest} for malformed bodies, unless a more specific status code is available.</li>
 	 * </ul>
+	 *
+	 * @param message the message whose body is to be decoded
+	 *
+	 * @return either a message exception reporting a decoding issue or the decoded {@code message} body
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
