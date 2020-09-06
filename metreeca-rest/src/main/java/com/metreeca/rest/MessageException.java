@@ -29,7 +29,7 @@ import static com.metreeca.rest.formats.TextFormat.text;
  *
  * <p>Thrown to report message processing issues.</p>
  */
-public final class MessageException extends RuntimeException implements UnaryOperator<Response> {
+public final class MessageException extends RuntimeException implements Handler, UnaryOperator<Response> {
 
 	private static final long serialVersionUID=6385340424276867964L;
 
@@ -201,6 +201,10 @@ public final class MessageException extends RuntimeException implements UnaryOpe
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public Future<Response> handle(final Request request) {
+		return request.reply(report);
+	}
 
 	@Override public Response apply(final Response response) {
 		return report.apply(response);
