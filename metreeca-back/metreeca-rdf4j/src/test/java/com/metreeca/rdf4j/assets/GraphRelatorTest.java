@@ -39,7 +39,6 @@ import static com.metreeca.rdf.ValuesTest.term;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
-import static com.metreeca.rest.assets.Engine.shape;
 import static org.assertj.core.api.Assertions.assertThat;
 
 

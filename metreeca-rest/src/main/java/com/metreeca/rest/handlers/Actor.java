@@ -28,8 +28,8 @@ import java.util.function.Function;
 import static com.metreeca.core.Response.Forbidden;
 import static com.metreeca.core.Response.Unauthorized;
 import static com.metreeca.json.Shape.empty;
+import static com.metreeca.json.Shape.shape;
 import static com.metreeca.rest.assets.Engine.engine;
-import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.function.Function.identity;
 
 

@@ -30,11 +30,11 @@ import static com.metreeca.core.Either.Left;
 import static com.metreeca.core.Either.Right;
 import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.InternalServerError;
+import static com.metreeca.json.Shape.shape;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.stream.Collectors.toList;
 
 

@@ -23,7 +23,6 @@ import com.metreeca.core.formats.OutputFormat;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.wrappers.Rewriter;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -47,9 +46,9 @@ import static com.metreeca.core.Response.BadRequest;
 import static com.metreeca.core.Response.UnsupportedMediaType;
 import static com.metreeca.core.formats.InputFormat.input;
 import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.json.Shape.shape;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.JSONLDFormat.context;
-import static com.metreeca.rest.assets.Engine.shape;
 import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -63,8 +62,6 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	/**
 	 * Custom header providing the external base for on-demand RDF body rewriting.
-	 *
-	 * @see Rewriter
 	 */
 	public static final String ExternalBase="-External-Base"; // !!! review/remove/hide
 

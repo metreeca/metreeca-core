@@ -20,7 +20,7 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.core.Request;
 import com.metreeca.core.Response;
-import com.metreeca.rest.assets.Engine;
+import com.metreeca.json.Shape;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -64,7 +64,7 @@ final class GraphUpdaterTest {
 
 					.handle(new Request()
 							.base(Base)
-							.path("/employees/1370").attribute(Engine.shape(), convey().then(
+							.path("/employees/1370").attribute(Shape.shape(), convey().then(
 									field(term("forename"), required()),
 									field(term("surname"), required()),
 									field(term("email"), required()),

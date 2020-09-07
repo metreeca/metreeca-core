@@ -30,7 +30,6 @@ import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.When.when;
-import static com.metreeca.rest.assets.Engine.shape;
 import static org.assertj.core.api.Assertions.assertThat;
 
 

@@ -22,6 +22,7 @@ import com.metreeca.json.shapes.*;
 import java.net.URI;
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -38,7 +39,18 @@ import static java.util.Arrays.asList;
  */
 public interface Shape {
 
-	//// Shape Metadata ////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Retrieves the default shape asset factory.
+	 *
+	 * @return the default shape factory, which returns an {@linkplain And#and() empty conjunction}
+	 */
+	public static Supplier<Shape> shape() {
+		return And::and;
+	}
+
+
+	//// Shape Metadata
+	// //////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Alias annotation.

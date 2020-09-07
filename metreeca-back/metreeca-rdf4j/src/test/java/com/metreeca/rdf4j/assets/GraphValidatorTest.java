@@ -20,7 +20,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.core.*;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
-import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -79,7 +78,7 @@ final class GraphValidatorTest {
 
 	private Either<MessageException, Request> validate(final Shape shape, final Collection<Statement> model) {
 		return new GraphValidator().validate(new Request()
-				.body(jsonld(), model).attribute(Engine.shape(), field(RDF.VALUE, shape))
+				.body(jsonld(), model).attribute(Shape.shape(), field(RDF.VALUE, shape))
 		);
 	}
 

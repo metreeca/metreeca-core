@@ -21,12 +21,11 @@ import com.metreeca.core.*;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.probes.Redactor;
-import com.metreeca.rest.assets.Engine;
 
 import java.util.Optional;
 
 import static com.metreeca.core.formats.TextFormat.text;
-import static com.metreeca.rest.assets.Engine.shape;
+import static com.metreeca.json.Shape.shape;
 import static java.lang.String.format;
 
 
@@ -38,7 +37,7 @@ import static java.lang.String.format;
  *
  * <ul>
  *
- * <li>{@linkplain Engine#shape() associates} the driving shape model to incoming requests;</li>
+ * <li>{@linkplain Shape#shape() associates} the driving shape model to incoming requests;</li>
  *
  * <li>advertises the association between response focus {@linkplain Response#item() items} and the driving shape model
  * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
@@ -54,10 +53,10 @@ import static java.lang.String.format;
  *
  * <ul>
  *
- * <li>redacting the shape {@linkplain Engine#shape() associated} to incoming request according to the task to be 
+ * <li>redacting the shape {@linkplain Shape#shape() associated} to incoming request according to the task to be 
  * performed;</li>
  *
- * <li>{@linkplain Engine#shape() associating} a shape to outgoing responses in order to drive further processing
+ * <li>{@linkplain Shape#shape() associating} a shape to outgoing responses in order to drive further processing
  * (e.g. JSON body mapping).</li>
  *
  * </ul>

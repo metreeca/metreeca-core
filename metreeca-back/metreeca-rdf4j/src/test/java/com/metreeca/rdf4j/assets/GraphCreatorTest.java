@@ -23,7 +23,6 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Redactor;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
-import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -73,7 +72,7 @@ final class GraphCreatorTest {
 							+" :email 'tfaussone@classicmodelcars.com' ;"
 							+" :title 'Sales Rep' ;"
 							+" :seniority 1 ."
-					)).attribute(Engine.shape(), Employee);
+					)).attribute(Shape.shape(), Employee);
 		}
 
 
@@ -140,7 +139,7 @@ final class GraphCreatorTest {
 					.handle(new Request()
 							.roles(ValuesTest.Manager)
 							.base(ValuesTest.Base)
-							.path("/employees/9999").attribute(Engine.shape(), ValuesTest.Employee)
+							.path("/employees/9999").attribute(Shape.shape(), ValuesTest.Employee)
 					)
 
 					.accept(response -> {

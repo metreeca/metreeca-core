@@ -27,12 +27,12 @@ import org.eclipse.rdf4j.model.*;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Shape.shape;
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
-import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;

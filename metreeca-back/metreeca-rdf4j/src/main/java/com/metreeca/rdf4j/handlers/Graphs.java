@@ -23,7 +23,6 @@ import com.metreeca.json.Shape;
 import com.metreeca.rdf.Formats;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -120,7 +119,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				});
 
 				request.reply(response -> response.status(Response.OK)
-						.attribute(Engine.shape(), GraphsShape)
+						.attribute(Shape.shape(), GraphsShape)
 						.body(rdf(), model)
 				).accept(consumer);
 
