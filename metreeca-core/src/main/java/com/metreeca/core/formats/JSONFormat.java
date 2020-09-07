@@ -47,14 +47,14 @@ import static java.util.Collections.singletonMap;
 public final class JSONFormat extends Format<JsonObject> {
 
 	/**
-	 * The default MIME type for JSON message bodies ({@value}).
+	 * The default MIME type for JSON messages ({@value}).
 	 */
 	public static final String MIME="application/json";
 
 	/**
 	 * A pattern matching JSON-based MIME types, for instance {@code application/ld+json}.
 	 */
-	public static final Pattern MIMEPattern=Pattern.compile("(?i)^application/(.*\\+)?json(?:\\s*;.*)?$");
+	public static final Pattern MIMEPattern=Pattern.compile("(?i)^(text/json|application/(.*\\+)?json)(?:\\s*;.*)?$");
 
 
 	private static final JsonWriterFactory JsonWriters=Json

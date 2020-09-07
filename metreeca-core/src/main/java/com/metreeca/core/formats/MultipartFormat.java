@@ -46,7 +46,7 @@ import static java.util.stream.Collectors.*;
 public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 	/**
-	 * The default MIME type for multipart message bodies ({@value}).
+	 * The default MIME type for multipart messages ({@value}).
 	 */
 	public static final String MIME="multipart/mixed";
 
