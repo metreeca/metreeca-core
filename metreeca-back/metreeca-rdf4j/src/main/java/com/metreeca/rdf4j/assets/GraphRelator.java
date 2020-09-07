@@ -38,7 +38,7 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.assets.Engine.query;
 import static com.metreeca.rest.assets.Engine.shape;
@@ -108,7 +108,7 @@ final class GraphRelator extends GraphProcessor {
 
 									}))
 
-									.body(rdf(), model);
+											.body(jsonld(), model);
 
 						})
 
@@ -148,7 +148,7 @@ final class GraphRelator extends GraphProcessor {
 											}
 
 										}))
-										.body(rdf(), matches);
+										.body(jsonld(), matches);
 
 							} else { // include container description
 
@@ -159,7 +159,7 @@ final class GraphRelator extends GraphProcessor {
 								return response
 										.status(OK)
 										.attribute(shape(), and(holder, field(LDP.CONTAINS, digest)))
-										.body(rdf(), matches);
+										.body(jsonld(), matches);
 
 							}
 

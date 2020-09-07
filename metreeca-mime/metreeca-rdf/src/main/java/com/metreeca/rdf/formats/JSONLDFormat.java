@@ -39,7 +39,7 @@ import static com.metreeca.core.Response.UnsupportedMediaType;
 import static com.metreeca.core.formats.InputFormat.input;
 import static com.metreeca.core.formats.JSONFormat.json;
 import static com.metreeca.core.formats.OutputFormat.output;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rest.assets.Engine.shape;
 
 /**

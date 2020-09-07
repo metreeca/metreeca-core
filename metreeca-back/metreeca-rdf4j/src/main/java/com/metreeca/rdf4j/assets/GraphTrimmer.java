@@ -30,8 +30,8 @@ import java.util.stream.Stream;
 import static com.metreeca.rdf.Values.direct;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toSet;
 final class GraphTrimmer extends GraphProcessor {
 
 	<M extends Message<M>> Either<MessageException, M> trim(final M message) {
-		return message.body(rdf()).map(rdf -> message.body(rdf(),
+		return message.body(jsonld()).map(rdf -> message.body(jsonld(),
 				trim(iri(message.item()), convey(message.attribute(shape())), rdf)
 		));
 	}

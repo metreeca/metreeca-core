@@ -32,7 +32,7 @@ import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.InternalServerError;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.assets.Engine.shape;
 import static java.util.stream.Collectors.toList;
@@ -53,7 +53,7 @@ final class GraphCreator extends GraphProcessor {
 	private Future<Response> holder(final Request request) {
 		return request
 
-				.body(rdf())
+				.body(jsonld())
 
 				.flatMap(rdf -> graph.exec(connection -> {
 

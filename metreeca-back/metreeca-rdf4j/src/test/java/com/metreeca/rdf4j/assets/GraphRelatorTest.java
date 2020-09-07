@@ -36,7 +36,7 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.ValuesTest.small;
 import static com.metreeca.rdf.ValuesTest.term;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.assets.Engine.shape;
@@ -68,7 +68,8 @@ final class GraphRelatorTest {
 		private Request request() {
 			return new Request()
 					.base(ValuesTest.Base)
-					.path("/employees/").attribute(shape(), EmployeeShape);
+					.path("/employees/")
+					.attribute(shape(), EmployeeShape);
 		}
 
 
@@ -79,10 +80,10 @@ final class GraphRelatorTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.OK).hasAttribute(shape(),
-									shape -> assertThat(shape).isNotEqualTo(and()))
+							.hasStatus(Response.OK)
+							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(rdf(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 									.hasStatement(iri(response.item()), LDP.CONTAINS, null)
 									.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
 											+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
@@ -103,7 +104,7 @@ final class GraphRelatorTest {
 							.hasStatus(Response.OK).hasAttribute(shape(),
 									shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(rdf(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 
 									.hasSubset(model(""
 											+"construct { ?e :title ?t; :seniority ?seniority }\n"
@@ -131,7 +132,7 @@ final class GraphRelatorTest {
 							.hasHeader("Preference-Applied", response.request().header("Prefer").orElse(""))
 							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(rdf(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 									.doesNotHaveStatement(null, LDP.CONTAINS, null)
 							)
 					)
@@ -159,7 +160,7 @@ final class GraphRelatorTest {
 							.hasStatus(Response.OK).hasAttribute(shape(),
 									shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(rdf(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 									.as("items retrieved")
 									.isSubsetOf(model(
 											"construct where { <employees/1370> ?p ?o }"

@@ -47,8 +47,8 @@ import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.is;
 import static com.metreeca.rdf.Values.pattern;
 import static com.metreeca.rdf.Values.text;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf.formats.RDFFormat.iri;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Snippets.source;
 import static com.metreeca.rest.assets.Engine.shape;
@@ -65,7 +65,7 @@ final class GraphValidator extends GraphProcessor {
 	<M extends Message<M>> Either<MessageException, M> validate(final M message) {
 		return message
 
-				.body(rdf())
+				.body(jsonld())
 
 				.flatMap(rdf -> validate(iri(message.item()), convey(message.attribute(shape())), rdf).fold(
 						trace -> Left(status(UnprocessableEntity, trace.toJSON())), model -> Right(message)

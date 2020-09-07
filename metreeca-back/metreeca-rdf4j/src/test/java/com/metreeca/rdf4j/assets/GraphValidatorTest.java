@@ -52,7 +52,7 @@ import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.ValuesTest.*;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
@@ -79,7 +79,7 @@ final class GraphValidatorTest {
 
 	private Either<MessageException, Request> validate(final Shape shape, final Collection<Statement> model) {
 		return new GraphValidator().validate(new Request()
-				.body(rdf(), model).attribute(Engine.shape(), field(RDF.VALUE, shape))
+				.body(jsonld(), model).attribute(Engine.shape(), field(RDF.VALUE, shape))
 		);
 	}
 

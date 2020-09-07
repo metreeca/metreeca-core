@@ -32,7 +32,7 @@ import java.util.Collection;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static java.util.Collections.emptySet;
 
@@ -42,9 +42,9 @@ final class GraphTrimmerTest {
 	private Collection<Statement> trim(final Shape shape, final Collection<Statement> model) {
 		return new GraphTrimmer()
 				.trim(new Response(new Request().base(ValuesTest.Base)).attribute(Engine.shape(), shape)
-						.body(rdf(), model)
+						.body(jsonld(), model)
 				)
-				.flatMap(response -> response.body(rdf()))
+				.flatMap(response -> response.body(jsonld()))
 				.fold(failure -> emptySet(), statements -> statements);
 	}
 

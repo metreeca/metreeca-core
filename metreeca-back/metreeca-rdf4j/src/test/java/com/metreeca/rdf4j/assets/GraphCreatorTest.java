@@ -42,7 +42,7 @@ import static com.metreeca.rdf.ValueAssert.assertThat;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.ValuesTest.*;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
@@ -67,7 +67,7 @@ final class GraphCreatorTest {
 					.base(ValuesTest.Base)
 					.path("/employees/")
 					.header("Slug", "slug")
-					.body(rdf(), decode("</employees/>"
+					.body(jsonld(), decode("</employees/>"
 							+" :forename 'Tino' ;"
 							+" :surname 'Faussone' ;"
 							+" :email 'tfaussone@classicmodelcars.com' ;"

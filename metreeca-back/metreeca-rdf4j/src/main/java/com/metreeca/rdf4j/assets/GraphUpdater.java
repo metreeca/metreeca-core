@@ -29,7 +29,7 @@ import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.InternalServerError;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.assets.Engine.shape;
 
@@ -51,7 +51,7 @@ final class GraphUpdater extends GraphProcessor {
 	}
 
 	private Future<Response> member(final Request request) {
-		return request.body(rdf()).fold(
+		return request.body(jsonld()).fold(
 
 				request::reply, model -> request.reply(response -> graph.exec(connection -> {
 
