@@ -91,13 +91,13 @@ public abstract class Format<V> {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * <p>All formats in the same class are equal to each other.</p>
+	 * <p>All format objects in the same class are equal to each other.</p>
 	 */
-	@Override public boolean equals(final Object object) {
+	@Override public final boolean equals(final Object object) {
 		return this == object || object != null && getClass().equals(object.getClass());
 	}
 
-	@Override public int hashCode() {
+	@Override public final int hashCode() {
 		return getClass().hashCode();
 	}
 
