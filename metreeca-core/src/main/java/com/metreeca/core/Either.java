@@ -38,29 +38,29 @@ import static java.util.Objects.requireNonNull;
 	 * Creates a left alternative value.
 	 *
 	 * @param value the left value to be wrapped
-	 * @param <R>   the type of the left alternative value
 	 * @param <L>   the type of the right alternative value
+	 * @param <R>   the type of the left alternative value
 	 *
 	 * @return an alternative values pair wrapping the supplied left {@code value}
 	 *
 	 * @throws NullPointerException if {@code value} is null
 	 */
-	public static <L, R> Either<R, L> Left(final R value) {
+	public static <L, R> Either<L, R> Left(final L value) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
 		}
 
-		return new Either<R, L>() {
+		return new Either<L, R>() {
 
-			@Override public <V> V fold(final Function<R, V> left, final Function<L, V> right) {
-
-				if ( right == null ) {
-					throw new NullPointerException("null success mapper");
-				}
+			@Override public <V> V fold(final Function<L, V> left, final Function<R, V> right) {
 
 				if ( left == null ) {
 					throw new NullPointerException("null failure mapper");
+				}
+
+				if ( right == null ) {
+					throw new NullPointerException("null success mapper");
 				}
 
 				return requireNonNull(left.apply(value), "null left mapper return value");
@@ -77,22 +77,22 @@ import static java.util.Objects.requireNonNull;
 	 * Creates a right alternative value.
 	 *
 	 * @param value the right value to be wrapped
-	 * @param <R>   the type of the left alternative value
 	 * @param <L>   the type of the right alternative value
+	 * @param <R>   the type of the left alternative value
 	 *
 	 * @return an alternative values pair wrapping the supplied right {@code value}
 	 *
 	 * @throws NullPointerException if {@code value} is null
 	 */
-	public static <L, R> Either<R, L> Right(final L value) {
+	public static <L, R> Either<L, R> Right(final R value) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
 		}
 
-		return new Either<R, L>() {
+		return new Either<L, R>() {
 
-			@Override public <V> V fold(final Function<R, V> left, final Function<L, V> right) {
+			@Override public <V> V fold(final Function<L, V> left, final Function<R, V> right) {
 
 				if ( right == null ) {
 					throw new NullPointerException("null success mapper");
@@ -187,8 +187,8 @@ import static java.util.Objects.requireNonNull;
 			throw new NullPointerException("null mapper");
 		}
 
-		return fold(
-				Either::Left, value -> Right(requireNonNull(mapper.apply(value), "null mapper return value"))
+		return fold(Either::Left, value ->
+				Right(requireNonNull(mapper.apply(value), "null mapper return value"))
 		);
 	}
 
@@ -209,8 +209,8 @@ import static java.util.Objects.requireNonNull;
 			throw new NullPointerException("null mapper");
 		}
 
-		return fold(
-				Either::Left, value -> requireNonNull(mapper.apply(value), "null mapper return value")
+		return fold(Either::Left, value ->
+				requireNonNull(mapper.apply(value), "null mapper return value")
 		);
 	}
 
