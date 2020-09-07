@@ -150,7 +150,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * objects are ignored.</p>
 	 *
 	 * @param reader  the reader the JSON-LD object is to be parsed from
-	 * @param base
+	 * @param base    the base IRI for the JSON-LD model to be parsed
 	 * @param focus
 	 * @param shape
 	 * @param context
@@ -190,7 +190,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 *
 	 * @param <W>     the type of the {@code writer} the JSON-LD model is to be written to
 	 * @param writer  the writer the JSON-LD model is to be written to
-	 * @param base
+	 * @param base  the base IRI for the JSON-LD model to be written
 	 * @param focus
 	 * @param shape
 	 * @param context
