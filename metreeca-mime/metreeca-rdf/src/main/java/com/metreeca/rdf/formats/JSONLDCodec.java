@@ -38,7 +38,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 
-final class RDFJSONCodec {
+final class JSONLDCodec {
 
 	static Shape driver(final Shape shape) { // !!! caching
 		return shape
@@ -155,6 +155,6 @@ final class RDFJSONCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RDFJSONCodec() {}
+	private JSONLDCodec() {}
 
 }

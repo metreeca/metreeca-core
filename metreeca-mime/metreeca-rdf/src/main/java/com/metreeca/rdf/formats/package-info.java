@@ -16,7 +16,7 @@
  */
 
 /**
- * RDF message formats and codecs.
+ * RDF message formats.
  */
 
 package com.metreeca.rdf.formats;

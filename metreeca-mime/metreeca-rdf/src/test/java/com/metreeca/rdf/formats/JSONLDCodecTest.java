@@ -18,24 +18,22 @@
 package com.metreeca.rdf.formats;
 
 
-import com.metreeca.core.formats.JSONFormat;
-
 import javax.json.Json;
 import javax.json.JsonObject;
 
 
-final class RDFJSONCodecTest {
+final class JSONLDCodecTest {
 
 	static final JsonObject Context=Json.createObjectBuilder()
-			.add("id", JSONFormat.id)
-			.add("value", JSONFormat.value)
-			.add("type", JSONFormat.type)
-			.add("language", JSONFormat.language)
+			.add("id", JSONLDFormat.id)
+			.add("value", JSONLDFormat.value)
+			.add("type", JSONLDFormat.type)
+			.add("language", JSONLDFormat.language)
 			.build();
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private RDFJSONCodecTest() {}
+	private JSONLDCodecTest() {}
 
 }

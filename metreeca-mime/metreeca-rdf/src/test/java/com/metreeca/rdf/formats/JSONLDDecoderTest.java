@@ -49,14 +49,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 
-final class RDFJSONDecoderTest {
+final class JSONLDDecoderTest {
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value) {
 		return values(value, null);
 	}
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value, final Shape shape) {
-		return new RDFJSONDecoder(ValuesTest.Base, RDFJSONCodecTest.Context) {}
+		return new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context) {}
 				.values(value, shape, null)
 				.entrySet()
 				.stream()
@@ -72,7 +72,7 @@ final class RDFJSONDecoderTest {
 
 	private Map.Entry<Value, Collection<Statement>> value(final JsonValue value, final Shape shape) {
 
-		final Map.Entry<Value, Stream<Statement>> entry=new RDFJSONDecoder(ValuesTest.Base, RDFJSONCodecTest.Context) {}
+		final Map.Entry<Value, Stream<Statement>> entry=new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context) {}
 				.value(value, shape, null);
 
 		return entry(entry.getKey(), entry.getValue().collect(toList()));

@@ -40,13 +40,13 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 
-final class RDFJSONEncoderTest {
+final class JSONLDEncoderTest {
 
 	private final IRI focus=iri("app:/");
 
 
-	private RDFJSONEncoder encoder() {
-		return new RDFJSONEncoder(ValuesTest.Base, RDFJSONCodecTest.Context) {};
+	private JSONLDEncoder encoder() {
+		return new JSONLDEncoder(ValuesTest.Base, JSONLDCodecTest.Context) {};
 	}
 
 

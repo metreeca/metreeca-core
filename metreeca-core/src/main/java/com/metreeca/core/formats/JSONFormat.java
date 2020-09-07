@@ -23,10 +23,6 @@ import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParsingException;
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.metreeca.core.Either.Left;
@@ -78,7 +74,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	 *
 	 * @param reader the reader the JSON object is to be parsed from
 	 *
-	 * @return either a parsing exception or the JSON object parsed from {@code input}
+	 * @return either a parsing exception or the JSON object parsed from {@code reader}
 	 *
 	 * @throws NullPointerException if {@code reader} is null
 	 */
@@ -102,8 +98,8 @@ public final class JSONFormat extends Format<JsonObject> {
 	/**
 	 * Writes a JSON object.
 	 *
-	 * @param <W>    the type of the {@code writer} the JSON document is to be written to
-	 * @param writer the writer the JSON document is to be written to
+	 * @param <W>    the type of the {@code writer} the JSON object is to be written to
+	 * @param writer the writer the JSON object is to be written to
 	 * @param object the JSON object to be written
 	 *
 	 * @return the target {@code writer}
@@ -127,87 +123,6 @@ public final class JSONFormat extends Format<JsonObject> {
 			return writer;
 
 		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String id="@id";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String value="@value";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String type="@type";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String language="@language";
-
-
-	/**
-	 * Retrieves the default JSON-LD context factory.
-	 *
-	 * @return the default JSON-LD context factory, which returns an amepty context
-	 */
-	public static Supplier<JsonObject> context() {
-		return () -> JsonValue.EMPTY_JSON_OBJECT;
-	}
-
-
-	/**
-	 * Aliases JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be aliased against
-	 *
-	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
-	 * property name if no alias is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	public static Function<String, String> aliaser(final JsonObject context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		final Map<String, String> aliases=new HashMap<>();
-
-		context.forEach((alias, name) -> {
-			if ( !alias.startsWith("@") && name instanceof JsonString ) {
-				aliases.put(((JsonString)name).getString(), alias);
-			}
-		});
-
-		return name -> aliases.getOrDefault(name, name);
-	}
-
-	/**
-	 * Resolves JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be resolved against
-	 *
-	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m
-	 * defaulting to
-	 * the alias if no property name is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	public static Function<String, String> resolver(final JsonObject context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		return alias -> context.getString(alias, alias);
 	}
 
 
@@ -252,8 +167,7 @@ public final class JSONFormat extends Format<JsonObject> {
 
 	/**
 	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
-	 * the JSON {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
-	 * taking into account the {@code message} {@linkplain Message#charset() charset}
+	 * the JSON {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final JsonObject value) {
 		return message

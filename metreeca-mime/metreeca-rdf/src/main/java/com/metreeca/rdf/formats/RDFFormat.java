@@ -46,9 +46,9 @@ import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.BadRequest;
 import static com.metreeca.core.Response.UnsupportedMediaType;
 import static com.metreeca.core.formats.InputFormat.input;
-import static com.metreeca.core.formats.JSONFormat.context;
 import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.formats.JSONLDFormat.context;
 import static com.metreeca.rest.assets.Engine.shape;
 import static java.lang.Boolean.FALSE;
 import static java.util.Arrays.asList;
@@ -407,14 +407,14 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	///// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static List<IRI> path(final String base, final Shape shape, final String path) {
-		return new RDFJSONDecoder(base, asset(context())) {}.path(path, shape); // !!! pass base as argument and
+		return new JSONLDDecoder(base, asset(context())) {}.path(path, shape); // !!! pass base as argument and
 		// factor decoder
 		// instance
 	}
 
 	public static Object value(final String base, final Shape shape, final JsonValue value) {
 		// !!! pass base as argument and factor decoder instance
-		return new RDFJSONDecoder(base, asset(context())) {}.value(value, shape, null).getKey();
+		return new JSONLDDecoder(base, asset(context())) {}.value(value, shape, null).getKey();
 	}
 
 

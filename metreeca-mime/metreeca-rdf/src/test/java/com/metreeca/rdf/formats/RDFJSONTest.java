@@ -72,7 +72,7 @@ final class RDFJSONTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Map<IRI, String> aliases(final Shape shape) {
-		return RDFJSONCodec.aliases(shape);
+		return JSONLDCodec.aliases(shape);
 	}
 
 

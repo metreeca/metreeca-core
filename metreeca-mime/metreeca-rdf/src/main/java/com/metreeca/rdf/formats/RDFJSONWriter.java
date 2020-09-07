@@ -31,8 +31,8 @@ import java.io.*;
 import java.util.Collection;
 
 import static com.metreeca.json.Shape.pass;
+import static com.metreeca.rdf.formats.JSONLDCodec.driver;
 import static com.metreeca.rdf.formats.RDFFormat.*;
-import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.singletonMap;
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
@@ -108,7 +108,7 @@ public final class RDFJSONWriter extends AbstractRDFWriter {
 
 			final Shape driver=shape == null || pass(shape) ? null : driver(shape);
 
-			final JsonValue json=new RDFJSONEncoder(base, context) {}.json(model, driver, focus);
+			final JsonValue json=new JSONLDEncoder(base, context) {}.json(model, driver, focus);
 
 			try {
 

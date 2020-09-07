@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.core.formats.JSONFormat;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
 
@@ -35,15 +34,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.core.formats.JSONFormat.resolver;
+import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.formats.RDFJSONCodec.aliases;
+import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
+import static com.metreeca.rdf.formats.JSONLDCodec.driver;
+import static com.metreeca.rdf.formats.JSONLDFormat.resolver;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 
-abstract class RDFJSONDecoder {
+abstract class JSONLDDecoder {
 
 	private static final JsonString Default=Json.createValue("");
 
@@ -64,13 +66,29 @@ abstract class RDFJSONDecoder {
 	private final Function<String, String> resolver;
 
 
-	RDFJSONDecoder(final String base, final JsonObject context) {
+	JSONLDDecoder(final String base, final JsonObject context) {
 		this.base=(base == null) ? null : URI.create(base);
 		this.resolver=resolver(context);
 	}
 
 
-	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
+	Collection<Statement> decode(final Resource focus, final Shape shape, final JsonObject json) throws JsonException {
+
+		final Collection<Statement> model=new ArrayList<>();
+		final Shape driver=shape == null || pass(shape) ? null : driver(shape);
+
+		values(json, driver, focus)
+				.values()
+				.stream()
+				.flatMap(identity())
+				.forEachOrdered(model::add);
+
+		return model;
+	}
+
+
+	//// Factories
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	String resolve(final String iri) {
 		try {
@@ -211,13 +229,13 @@ abstract class RDFJSONDecoder {
 					? ((JsonString)entry.getValue()).getString()
 					: error("'"+entry.getKey()+"' field is not a string");
 
-			if ( label.equals(JSONFormat.id) ) {
+			if ( label.equals(JSONLDFormat.id) ) {
 				id=string.get();
-			} else if ( label.equals(JSONFormat.value) ) {
+			} else if ( label.equals(JSONLDFormat.value) ) {
 				value=string.get();
-			} else if ( label.equals(JSONFormat.type) ) {
+			} else if ( label.equals(JSONLDFormat.type) ) {
 				type=string.get();
-			} else if ( label.equals(JSONFormat.language) ) {
+			} else if ( label.equals(JSONLDFormat.language) ) {
 				language=string.get();
 			}
 
@@ -286,7 +304,7 @@ abstract class RDFJSONDecoder {
 			final String label=resolver.apply(field.getKey());
 			final JsonValue value=field.getValue();
 
-			if ( label.equals(JSONFormat.type) && value instanceof JsonString ) {
+			if ( label.equals(JSONLDFormat.type) && value instanceof JsonString ) {
 
 				return Stream.of(statement(source, RDF.TYPE, iri(((JsonString)value).getString())));
 

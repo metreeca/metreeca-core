@@ -518,7 +518,7 @@ final class RDFJSONParserTest {
 
 			parser.set(RDFFormat.RioFocus, focus);
 			parser.set(RDFFormat.RioShape, shape);
-			parser.set(RDFFormat.RioContext, RDFJSONCodecTest.Context);
+			parser.set(RDFFormat.RioContext, JSONLDCodecTest.Context);
 
 			parser.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
 

@@ -42,6 +42,11 @@
 			<artifactId>metreeca-core</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-json</artifactId>
+		</dependency>
+
 		<dependency> <!-- !!! remove -->
 			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-rest</artifactId>

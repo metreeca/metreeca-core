@@ -434,7 +434,7 @@ final class RDFJSONWriterTest {
 
 			writer.set(RDFFormat.RioFocus, focus);
 			writer.set(RDFFormat.RioShape, shape);
-			writer.set(RDFFormat.RioContext, RDFJSONCodecTest.Context);
+			writer.set(RDFFormat.RioContext, JSONLDCodecTest.Context);
 
 			Rio.write(model, writer);
 

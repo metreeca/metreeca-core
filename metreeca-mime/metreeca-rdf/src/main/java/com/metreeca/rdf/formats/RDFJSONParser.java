@@ -32,8 +32,8 @@ import java.io.*;
 import java.util.Collection;
 
 import static com.metreeca.json.Shape.pass;
+import static com.metreeca.rdf.formats.JSONLDCodec.driver;
 import static com.metreeca.rdf.formats.RDFFormat.*;
-import static com.metreeca.rdf.formats.RDFJSONCodec.driver;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 
@@ -130,7 +130,7 @@ public final class RDFJSONParser extends AbstractRDFParser {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class Decoder extends RDFJSONDecoder {
+	private final class Decoder extends JSONLDDecoder {
 
 		private Decoder(final String baseURI, final JsonObject context) {
 			super(baseURI, context);
