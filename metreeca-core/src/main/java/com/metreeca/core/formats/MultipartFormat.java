@@ -136,11 +136,11 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 	/**
 	 * Decodes the multipart {@code message} body from the input stream supplied by the {@code message}
-	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is matched by
-	 * {@link #MIMEPattern}
+	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is
+	 * either missing or matched by {@link #MIMEPattern}
 	 */
 	@Override public Either<MessageException, Map<String, Message<?>>> decode(final Message<?> message) {
-		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
+		return message.header("Content-Type").filter(MIMEPattern.asPredicate().or(String::isEmpty))
 
 				.map(type -> message.body(input()).flatMap(source -> {
 
