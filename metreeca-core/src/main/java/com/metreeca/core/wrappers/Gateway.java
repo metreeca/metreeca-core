@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import static com.metreeca.core.Context.asset;
 import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Request.*;
+import static com.metreeca.core.Response.InternalServerError;
 import static com.metreeca.core.assets.Logger.logger;
 import static com.metreeca.core.formats.TextFormat.text;
 import static java.lang.String.format;
@@ -75,7 +76,7 @@ public final class Gateway implements Wrapper {
 
 				request
 
-						.reply(status(Response.InternalServerError, e))
+						.reply(status(InternalServerError, e))
 
 						.map(this::logging)
 

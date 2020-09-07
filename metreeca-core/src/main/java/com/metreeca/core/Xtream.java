@@ -296,6 +296,7 @@ public final class Xtream<T> implements Stream<T> {
 		return new StringReader("");
 	}
 
+
 	/**
 	 * Copies an input stream to an output stream.
 	 *
@@ -785,6 +786,9 @@ public final class Xtream<T> implements Stream<T> {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	// !!! https://www.airpair.com/java/posts/parallel-processing-of-io-based-data-with-java-streams
+	// !!! https://stackoverflow.com/questions/28210775/28211518#28211518
 
 	private static final class BatchSpliterator<T> implements Spliterator<Collection<T>> {
 

@@ -28,7 +28,7 @@ import static com.metreeca.core.MessageException.status;
  *
  * <p><strong>Warning</strong> / Concrete subclasses must be thread-safe.</p>
  *
- * @param <V> the type of the message body managed by the body format
+ * @param <V> the type of the message body managed by the format
  */
 public abstract class Format<V> {
 
