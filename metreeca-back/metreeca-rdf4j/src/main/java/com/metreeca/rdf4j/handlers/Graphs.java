@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.core.*;
-import com.metreeca.core.handlers.Worker;
+import com.metreeca.core.handlers.Router;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf4j.assets.Graph;
@@ -70,7 +70,7 @@ public final class Graphs extends Endpoint<Graphs> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Graphs() {
-		delegate(new Worker()
+		delegate(new Router()
 				.get(this::get)
 				.put(this::put)
 				.delete(this::delete)

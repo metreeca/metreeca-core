@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.core.*;
-import com.metreeca.core.handlers.Worker;
+import com.metreeca.core.handlers.Router;
 import com.metreeca.rdf4j.assets.Graph;
 
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -50,7 +50,7 @@ import static com.metreeca.core.formats.OutputFormat.output;
 public final class SPARQL extends Endpoint<SPARQL> {
 
 	public SPARQL() {
-		delegate(new Worker()
+		delegate(new Router()
 				.get(this::process)
 				.post(this::process)
 		);
