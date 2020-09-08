@@ -21,8 +21,8 @@ import com.metreeca.core.*;
 import com.metreeca.core.formats.*;
 import com.metreeca.json.Shape;
 
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.rio.ParserConfig;
 
 import javax.json.*;
 import java.io.*;
@@ -46,6 +46,60 @@ import static com.metreeca.rdf.Values.iri;
  * Model-driven JSON-LD message format.
  */
 public final class JSONLDFormat extends Format<Collection<Statement>> {
+
+	///// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static List<IRI> path(final String base, final Shape shape, final String path) {
+		return new JSONLDDecoder(base, asset(context()), new ParserConfig()) {}.path(path, shape);
+	}
+
+	public static Object value(final String base, final Shape shape, final JsonValue value) {
+		// !!! pass base as argument and factor decoder instance
+		return new JSONLDDecoder(base, asset(context()), new ParserConfig()) {}.value(value, shape, null).getKey();
+	}
+
+	/**
+	 * Converts an object to an IRI.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
+	 */
+	public static IRI _iri(final Object object) {
+		return as(object, IRI.class);
+	}
+
+	/**
+	 * Converts an object to a value.
+	 *
+	 * @param object the object to be converted; may be null
+	 *
+	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
+	 */
+	public static Value _value(final Object object) {
+		return as(object, Value.class);
+	}
+
+	private static <T> T as(final Object object, final Class<T> type) {
+		if ( object == null || type.isInstance(object) ) {
+
+			return type.cast(object);
+
+		} else {
+
+			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
+					object.getClass().getName(), type.getName()
+			));
+
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * The default MIME type for JSON-LD messages ({@value}).
@@ -171,7 +225,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 		return json(reader).fold(Either::Left, json -> {
 			try {
 
-				return Right(new JSONLDDecoder(base, context) {}.decode(focus, shape, json));
+				return Right(new JSONLDDecoder(base, context, new ParserConfig()) {}.decode(focus, shape, json));
 
 			} catch ( final JsonException e ) {
 

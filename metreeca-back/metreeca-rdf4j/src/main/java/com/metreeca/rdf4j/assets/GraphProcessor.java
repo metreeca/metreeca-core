@@ -26,7 +26,7 @@ import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.formats.RDFFormat;
+import com.metreeca.rdf.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -64,7 +64,7 @@ import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.formats.RDFFormat._iri;
+import static com.metreeca.rdf.formats.JSONLDFormat._iri;
 import static com.metreeca.rdf4j.assets.Snippets.*;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -158,7 +158,7 @@ abstract class GraphProcessor {
         private Value value(final Object value) {
 	        return value instanceof Shape.Focus
 			        ? iri(((Shape.Focus)value).resolve(resource.stringValue()))
-			        : RDFFormat._value(value);
+			        : JSONLDFormat._value(value);
         }
 
         private Set<Value> values(final Collection<Object> values) {
@@ -348,17 +348,17 @@ abstract class GraphProcessor {
         @Override public Collection<Statement> probe(final Stats stats) {
 
 	        final Shape shape=stats.getShape();
-	        final List<IRI> path=stats.getPath().stream().map(RDFFormat::_iri).collect(toList());
+	        final List<IRI> path=stats.getPath().stream().map(JSONLDFormat::_iri).collect(toList());
 
-            final Model model=new LinkedHashModel();
+	        final Model model=new LinkedHashModel();
 
-            final Collection<BigInteger> counts=new ArrayList<>();
-            final Collection<Value> mins=new ArrayList<>();
-            final Collection<Value> maxs=new ArrayList<>();
+	        final Collection<BigInteger> counts=new ArrayList<>();
+	        final Collection<Value> mins=new ArrayList<>();
+	        final Collection<Value> maxs=new ArrayList<>();
 
-            final Shape selector=anchor(resource, filter(shape));
+	        final Shape selector=anchor(resource, filter(shape));
 
-            final Object source=var(selector);
+	        final Object source=var(selector);
             final Object target=path.isEmpty() ? source : var();
 
             evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
@@ -444,16 +444,16 @@ abstract class GraphProcessor {
         @Override public Collection<Statement> probe(final Terms terms) {
 
 	        final Shape shape=terms.getShape();
-	        final List<IRI> path=terms.getPath().stream().map(RDFFormat::_iri).collect(toList());
+	        final List<IRI> path=terms.getPath().stream().map(JSONLDFormat::_iri).collect(toList());
 
-            final Model model=new LinkedHashModel();
+	        final Model model=new LinkedHashModel();
 
-            final Shape selector=anchor(resource, filter(shape));
+	        final Shape selector=anchor(resource, filter(shape));
 
-            final Object source=var(selector);
-            final Object target=path.isEmpty() ? source : var();
+	        final Object source=var(selector);
+	        final Object target=path.isEmpty() ? source : var();
 
-            evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
+	        evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
 
                     "# terms query\n"
                             +"\n"
@@ -568,7 +568,7 @@ abstract class GraphProcessor {
                     .filter(order -> !order.getPath().isEmpty()) // root already retrieved
                     .map(order -> snippet(
 		                    "optional { {root} {path} {order} }\n", var(root),
-		                    path(order.getPath().stream().map(RDFFormat::_iri).collect(toList())), var(order))
+		                    path(order.getPath().stream().map(JSONLDFormat::_iri).collect(toList())), var(order))
                     )
             );
         }

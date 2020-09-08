@@ -19,7 +19,7 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.core.*;
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.formats.RDFFormat;
+import com.metreeca.rdf.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -318,7 +318,7 @@ public final class Graph implements AutoCloseable {
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
 		operation.setBinding("item", iri(request.item()));
-		operation.setBinding("user", request.user().map(RDFFormat::_iri).orElse(RDF.NIL));
+		operation.setBinding("user", request.user().map(JSONLDFormat::_iri).orElse(RDF.NIL));
 
 		if ( message instanceof Response ) {
 			operation.setBinding("code", literal(Values.integer(((Response)message).status())));

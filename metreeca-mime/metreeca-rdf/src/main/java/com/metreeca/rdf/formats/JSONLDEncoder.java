@@ -39,8 +39,8 @@ import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
 import static com.metreeca.rdf.formats.JSONLDCodec.driver;
+import static com.metreeca.rdf.formats.JSONLDFormat._iri;
 import static com.metreeca.rdf.formats.JSONLDFormat.aliaser;
-import static com.metreeca.rdf.formats.RDFFormat._iri;
 import static java.util.stream.Collectors.toCollection;
 
 

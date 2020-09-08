@@ -72,35 +72,35 @@ final class RDFFormatTest {
 		@Test void testParsePaths() {
 			exec(() -> {
 
-				assertThat(rdf().path("app:/", shape, ""))
+				assertThat(JSONLDFormat.path("app:/", shape, ""))
 						.as("empty")
 						.isEmpty();
 
-				assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">"))
+				assertThat(JSONLDFormat.path("app:/", shape, "<"+RDF.FIRST+">"))
 						.as("direct iri")
 						.containsExactly(RDF.FIRST);
 
-				assertThat(rdf().path("app:/", shape, "^<"+RDF.FIRST+">"))
+				assertThat(JSONLDFormat.path("app:/", shape, "^<"+RDF.FIRST+">"))
 						.as("inverse iri")
 						.containsExactly(inverse(RDF.FIRST));
 
-				assertThat(rdf().path("app:/", shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
+				assertThat(JSONLDFormat.path("app:/", shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
 						.as("iri slash path")
 						.containsExactly(RDF.FIRST, RDF.REST);
 
-				assertThat(rdf().path("app:/", shape, "first"))
+				assertThat(JSONLDFormat.path("app:/", shape, "first"))
 						.as("direct alias")
 						.containsExactly(RDF.FIRST);
 
-				assertThat(rdf().path("app:/", shape, "firstOf"))
+				assertThat(JSONLDFormat.path("app:/", shape, "firstOf"))
 						.as("inverse alias")
 						.containsExactly(inverse(RDF.FIRST));
 
-				assertThat(rdf().path("app:/", shape, "first/rest"))
+				assertThat(JSONLDFormat.path("app:/", shape, "first/rest"))
 						.as("alias slash path")
 						.containsExactly(RDF.FIRST, RDF.REST);
 
-				assertThat(rdf().path("app:/", shape, "firstOf.rest"))
+				assertThat(JSONLDFormat.path("app:/", shape, "firstOf.rest"))
 						.as("alias dot path")
 						.containsExactly(inverse(RDF.FIRST), RDF.REST);
 
@@ -110,12 +110,12 @@ final class RDFFormatTest {
 
 		@Test void testRejectUnknownPathSteps() {
 			exec(() -> assertThatExceptionOfType(JsonException.class)
-					.isThrownBy(() -> rdf().path("app:/", shape, "first/unknown")));
+					.isThrownBy(() -> JSONLDFormat.path("app:/", shape, "first/unknown")));
 		}
 
 		@Test void testRejectMalformedPaths() {
 			exec(() -> assertThatExceptionOfType(JsonException.class)
-					.isThrownBy(() -> rdf().path("app:/", shape, "---")));
+					.isThrownBy(() -> JSONLDFormat.path("app:/", shape, "---")));
 		}
 
 	}
@@ -126,9 +126,6 @@ final class RDFFormatTest {
 		private final TestService RDFXML=new TestService(org.eclipse.rdf4j.rio.RDFFormat.RDFXML);
 		private final TestService Binary=new TestService(org.eclipse.rdf4j.rio.RDFFormat.BINARY);
 
-
-		//// Service
-		// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		@Test void testServiceScanMimeTypes() {
 
@@ -170,9 +167,6 @@ final class RDFFormatTest {
 		}
 
 
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		// /
-
 		private TestService service(final org.eclipse.rdf4j.rio.RDFFormat fallback, final List<String> types) {
 
 			final TestRegistry registry=new TestRegistry();
@@ -185,8 +179,8 @@ final class RDFFormatTest {
 		}
 
 
-		private final class TestRegistry extends FileFormatServiceRegistry<org.eclipse.rdf4j.rio.RDFFormat,
-				TestService> {
+		private final class TestRegistry
+				extends FileFormatServiceRegistry<org.eclipse.rdf4j.rio.RDFFormat, TestService> {
 
 			private TestRegistry() {
 				super(TestService.class);

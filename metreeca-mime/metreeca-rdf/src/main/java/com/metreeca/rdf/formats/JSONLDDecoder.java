@@ -25,7 +25,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.rio.ParserConfig;
 import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.helpers.*;
+import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
+import org.eclipse.rdf4j.rio.helpers.RDFParserHelper;
 
 import javax.json.*;
 import java.net.URI;
@@ -60,24 +61,19 @@ abstract class JSONLDDecoder {
 		return new AbstractMap.SimpleImmutableEntry<>(key, value);
 	}
 
-	private static final ParserConfig config=new ParserConfig()
-
-			.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true)
-			.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true)
-			.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true)
-			.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final URI base;
 
 	private final Function<String, String> resolver;
+	private final ParserConfig config;
 
 
-	JSONLDDecoder(final String base, final JsonObject context) {
+	JSONLDDecoder(final String base, final JsonObject context, final ParserConfig config) {
 		this.base=(base == null) ? null : URI.create(base);
 		this.resolver=resolver(context);
+		this.config=config;
 	}
 
 
@@ -138,8 +134,8 @@ abstract class JSONLDDecoder {
 	}
 
 	protected Literal literal(final String text, final String lang, final IRI type) {
-
 		try {
+
 			final ParseErrorCollector listener=new ParseErrorCollector();
 
 			final Literal literal=RDFParserHelper.createLiteral(text, lang, type, config, listener, factory());
@@ -190,7 +186,7 @@ abstract class JSONLDDecoder {
 
 			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
 
-			fields.keySet().stream().map(RDFFormat::_iri).forEach(edge -> {
+			fields.keySet().stream().map(JSONLDFormat::_iri).forEach(edge -> {
 				index.put(format(edge), edge); // inside angle brackets
 				index.put(edge.toString(), edge); // naked IRI
 			});
@@ -283,7 +279,7 @@ abstract class JSONLDDecoder {
 
 				: (value != null) ? (type != null) ? literal(value, iri(type))
 				: (language != null) ? literal(value, language)
-				: literal(value, datatype(shape).map(RDFFormat::_iri).orElse(XSD.STRING))
+				: literal(value, datatype(shape).map(JSONLDFormat::_iri).orElse(XSD.STRING))
 
 				: focus != null ? focus : bnode();
 
@@ -310,7 +306,7 @@ abstract class JSONLDDecoder {
 	private Map.Entry<Value, Stream<Statement>> value(
 			final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).map(RDFFormat::_iri).orElse(null);
+		final IRI datatype=datatype(shape).map(JSONLDFormat::_iri).orElse(null);
 
 		final Literal value
 

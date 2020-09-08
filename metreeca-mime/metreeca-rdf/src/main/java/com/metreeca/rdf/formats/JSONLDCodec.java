@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.formats.RDFFormat._iri;
+import static com.metreeca.rdf.formats.JSONLDFormat._iri;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;

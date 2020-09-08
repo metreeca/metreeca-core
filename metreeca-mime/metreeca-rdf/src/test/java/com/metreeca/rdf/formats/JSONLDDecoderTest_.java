@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.rio.ParserConfig;
 import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
@@ -51,6 +52,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.eclipse.rdf4j.rio.helpers.BasicParserSettings.VERIFY_DATATYPE_VALUES;
 
 
 final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
@@ -81,7 +83,9 @@ final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
 	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
 		try ( final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString()) ) {
 
-			return new LinkedHashModel(new JSONLDDecoder(base, Context) {}
+			return new LinkedHashModel(new JSONLDDecoder(base, Context,
+					new ParserConfig().set(VERIFY_DATATYPE_VALUES, true)
+			) {}
 					.decode(focus, shape, Json.createReader(reader).read()));
 
 		}

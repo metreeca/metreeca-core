@@ -24,6 +24,7 @@ import com.metreeca.rdf.ValuesTest;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.rio.ParserConfig;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -47,6 +48,7 @@ import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.eclipse.rdf4j.rio.helpers.BasicParserSettings.VERIFY_DATATYPE_VALUES;
 
 
 final class JSONLDDecoderTest {
@@ -56,7 +58,7 @@ final class JSONLDDecoderTest {
 	}
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value, final Shape shape) {
-		return new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context) {}
+		return new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context, new ParserConfig()) {}
 				.values(value, shape, null)
 				.entrySet()
 				.stream()
@@ -72,7 +74,9 @@ final class JSONLDDecoderTest {
 
 	private Map.Entry<Value, Collection<Statement>> value(final JsonValue value, final Shape shape) {
 
-		final Map.Entry<Value, Stream<Statement>> entry=new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context) {}
+		final Map.Entry<Value, Stream<Statement>> entry=new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context,
+				new ParserConfig().set(VERIFY_DATATYPE_VALUES, true)
+		) {}
 				.value(value, shape, null);
 
 		return entry(entry.getKey(), entry.getValue().collect(toList()));
