@@ -58,7 +58,7 @@ final class JSONLDDecoderTest {
 	}
 
 	private Map<Value, Collection<Statement>> values(final JsonValue value, final Shape shape) {
-		return new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context, new ParserConfig()) {}
+		return new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context, new ParserConfig())
 				.values(value, shape, null)
 				.entrySet()
 				.stream()
@@ -76,7 +76,7 @@ final class JSONLDDecoderTest {
 
 		final Map.Entry<Value, Stream<Statement>> entry=new JSONLDDecoder(ValuesTest.Base, JSONLDCodecTest.Context,
 				new ParserConfig().set(VERIFY_DATATYPE_VALUES, true)
-		) {}
+		)
 				.value(value, shape, null);
 
 		return entry(entry.getKey(), entry.getValue().collect(toList()));
