@@ -21,8 +21,9 @@ import com.metreeca.core.*;
 import com.metreeca.core.formats.InputFormat;
 import com.metreeca.core.formats.OutputFormat;
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Formats;
 
+import org.eclipse.rdf4j.common.lang.FileFormat;
+import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -33,9 +34,9 @@ import org.eclipse.rdf4j.rio.helpers.*;
 import javax.json.*;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static com.metreeca.core.Context.asset;
 import static com.metreeca.core.Either.Left;
@@ -113,6 +114,81 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Locates a file format service in a registry.
+	 *
+	 * @param registry the registry the file format service is to be located from
+	 * @param fallback the fallback file format to be used as key if no service in the registry is matched by one of
+	 *                 the suggested MIME {@code types}
+	 * @param types    the suggested MIME types for the file format service to be located
+	 * @param <F>      the type of the file format services listed by the {@code registry}
+	 * @param <S>      the type of the file file format service to be located
+	 *
+	 * @return the located file format service
+	 *
+	 * @throws NullPointerException if any parameter is null
+	 */
+	public static <F extends FileFormat, S> S service(
+			final FileFormatServiceRegistry<F, S> registry, final F fallback, final Collection<String> types
+	) {
+
+		if ( registry == null ) {
+			throw new NullPointerException("null registry");
+		}
+
+		if ( fallback == null ) {
+			throw new NullPointerException("null fallback");
+		}
+
+		if ( types == null || types.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null types");
+		}
+
+		final Function<String, Optional<F>> matcher=prefix -> {
+
+			for (final F format : registry.getKeys()) { // first try to match with the default MIME type
+				if ( format.getDefaultMIMEType().toLowerCase(Locale.ROOT).startsWith(prefix) ) {
+					return Optional.of(format);
+				}
+			}
+
+			for (final F format : registry.getKeys()) { // try alternative MIME types too
+				for (final String type : format.getMIMETypes()) {
+					if ( type.toLowerCase(Locale.ROOT).startsWith(prefix) ) {
+						return Optional.of(format);
+					}
+				}
+			}
+
+			return Optional.empty();
+
+		};
+
+		return registry
+
+				.get(types.stream()
+
+						.map(type -> type.equals("*/*") ? Optional.of(fallback)
+								: type.endsWith("/*") ? matcher.apply(type.substring(0, type.indexOf('/')+1))
+								: registry.getFileFormatForMIMEType(type)
+						)
+
+						.filter(Optional::isPresent)
+						.map(Optional::get)
+						.findFirst()
+
+						.orElse(fallback)
+				)
+
+				.orElseThrow(() -> new IllegalArgumentException(String.format(
+						"unsupported fallback format <%s>", fallback.getDefaultMIMEType()
+				)));
+
+	}
+
+
 	/**
 	 * Customizable RDF codec.
 	 */
@@ -185,8 +261,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 			final String base=focus.stringValue();
 			final String type=message.header("Content-Type").orElse("");
 
-			final RDFParser parser=Formats
-					.service(RDFParserRegistry.getInstance(), TURTLE, types(type))
+			final RDFParser parser=service(RDFParserRegistry.getInstance(), TURTLE, types(type))
 					.getParser();
 
 			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
@@ -285,7 +360,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 		final List<String> types=types(message.request().header("Accept").orElse(""));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
-		final RDFWriterFactory factory=Formats.service(registry, TURTLE, types);
+		final RDFWriterFactory factory=service(registry, TURTLE, types);
 
 		return message
 

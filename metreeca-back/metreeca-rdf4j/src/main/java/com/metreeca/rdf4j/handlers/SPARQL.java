@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.core.*;
 import com.metreeca.core.handlers.Worker;
-import com.metreeca.rdf.Formats;
 import com.metreeca.rdf4j.assets.Graph;
 
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -155,7 +154,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		final String accept=request.header("Accept").orElse("");
 
-		final BooleanQueryResultWriterFactory factory=Formats.service(
+		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
 				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
@@ -170,7 +169,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		final String accept=request.header("Accept").orElse("");
 
-		final TupleQueryResultWriterFactory factory=Formats.service(
+		final TupleQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
 				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
@@ -199,7 +198,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		final String accept=request.header("Accept").orElse("");
 
-		final RDFWriterFactory factory=Formats.service(
+		final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
 				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
@@ -231,7 +230,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		final String accept=request.header("Accept").orElse("");
 
-		final BooleanQueryResultWriterFactory factory=Formats.service(
+		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
 				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
