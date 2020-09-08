@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.RequestAssert.assertThat;
 import static com.metreeca.core.Response.OK;
 import static com.metreeca.core.ResponseAssert.assertThat;
@@ -67,19 +68,15 @@ final class DriverTest {
 					assertThat(request)
 							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(TestShape));
 
-					return request.reply(response -> response
-							.status(OK)
-							.header("link", "processed")
-					);
+					return request.reply(status(OK));
 
 				})
 
 				.handle(request())
 
-				.accept(response -> assertThat(response).hasHeaders("Link",
-						"processed",
-						"<http://example.org/resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy"
-				));
+				.accept(response -> assertThat(response)
+						.hasStatus(OK)
+				);
 	}
 
 }
