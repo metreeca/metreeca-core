@@ -51,7 +51,7 @@ import static com.metreeca.core.formats.OutputFormat.output;
  *
  * </ul>
  */
-public final class JSEServer {
+public final class Server {
 
 	private final String root="/"; // must end with slash
 
@@ -65,15 +65,18 @@ public final class JSEServer {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	/*
+	/**
 	 * Configures the main handler.
 	 *
-	 * @param context the shared asset context; may be configured with additional application-specific assets
+	 * @param factory the handler factory; takes as argument a shared asset context (which may configured with
+	 *                additional application-specific assets as a side effect) and must return a non-null handler
+	 *                to be used as main entry point for serving requests
 	 *
-	 * @return a non-null resource handler to be used as main entry point for serving requests
+	 * @return this server
+	 *
+	 * @throws NullPointerException if {@code factory} is null or returns null values
 	 */
-	public JSEServer handler(final Function<Context, Handler> factory) {
+	public Server handler(final Function<Context, Handler> factory) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null handler factory");

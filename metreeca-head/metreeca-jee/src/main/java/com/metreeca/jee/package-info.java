@@ -59,27 +59,28 @@
  * import com.metreeca.rest.Handler;
  * import com.metreeca.rest.Wrapper;
  * import com.metreeca.rest.wrappers.Gateway;
- * import com.metreeca.jee.JEEFilter;
+ * import com.metreeca.jee.Server;
  *
  * import javax.servlet.annotation.WebFilter;
  *
  * import static com.metreeca.rest.Context.asset;
  *
- * ＠WebFilter("/*") public final class Demo extends JEEFilter { // define the path pattern managed by the app
+ * ＠WebFilter("/*") public final class Demo extends Server { // define the path pattern managed by the app
  *
- * ＠Override protected Handler load(final Context context) {
- *      return context
+ *      public Demo() {
+ *          handler(context -> context
  *
- *          .set(Asset.factory(), () -> { return new AssetReplacement(); } // customize shared assets
+ *              .set(Asset.factory(), () -> { return new AssetReplacement(); } // customize shared assets
  *
- *          .exec(() -> { asset(Asset.factory()).…; }) // initialize the app using shared assets
+ *              .exec(() -> { asset(Asset.factory()).…; }) // initialize the app using shared assets
  *
- *          .get(() -> new Gateway()
+ *              .get(() -> new Gateway()
  *
- *               .with(new Wrapper() { … }) // configure system-wide wrappers
+ *                   .with(new Wrapper() { … }) // configure system-wide wrappers
  *
- *               .wrap(new Handler() { … }) // configure the app main handler
+ *                   .wrap(new Handler() { … }) // configure the app main handler
  *
+ *              )
  *          );
  *     }
  *

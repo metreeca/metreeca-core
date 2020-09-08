@@ -27,6 +27,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.core.assets.Logger.logger;
@@ -35,6 +36,7 @@ import static com.metreeca.core.formats.OutputFormat.output;
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Function.identity;
 
 
 /**
@@ -54,21 +56,34 @@ import static java.util.Objects.requireNonNull;
  *
  * </ul>
  */
-public abstract class JEEFilter implements Filter {
+public abstract class Server implements Filter {
 
 	private final Context context=new Context();
 
-	private final Supplier<Handler> handler=() -> requireNonNull(load(context), "null resource handler");
+	private final Supplier<Handler> handler=() -> request -> request.reply(identity());
 
 
-	/*
-	 * Creates the main handler.
+	/**
+	 * Configures the main factory.
 	 *
-	 * @param context the shared asset context; may be configured with additional application-specific assets
+	 * @param factory the handler factory; takes as argument a shared asset context (which may configured with
+	 *                additional application-specific assets as a side effect) and must return a non-null handler
+	 *                to be used as main entry point for serving requests
 	 *
-	 * @return a non-null resource handler to be used as main entry point for serving requests
+	 * @return this server
+	 *
+	 * @throws NullPointerException if {@code factory} is null or returns null values
 	 */
-	protected abstract Handler load(final Context context);
+	protected Server handler(final Function<Context, Handler> factory) {
+
+		if ( factory == null ) {
+			throw new NullPointerException("null factory");
+		}
+
+		context.set(handler, () -> requireNonNull(factory.apply(context), "null handler"));
+
+		return this;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
