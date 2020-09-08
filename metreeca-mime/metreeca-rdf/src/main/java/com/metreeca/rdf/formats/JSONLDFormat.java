@@ -215,7 +215,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null model or model statement");
 		}
 
-		return json(writer, new JSONLDEncoder(base, context) {}.encode(focus, shape, model));
+		return json(writer, (JsonObject)new JSONLDEncoder(base, context) {}.encode(focus, shape, model));
 
 	}
 

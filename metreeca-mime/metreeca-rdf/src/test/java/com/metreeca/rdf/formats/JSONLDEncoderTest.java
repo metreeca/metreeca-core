@@ -35,7 +35,6 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.item;
-import static com.metreeca.rdf.formats.RDFJSONTest.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -51,9 +50,9 @@ final class JSONLDEncoderTest {
 
 
 	private JsonValue expected(final Object value) {
-		return object(map(
-				entry("id", ((Value)focus).toString()),
-				entry("value", asList(value))
+		return JSONLDCodecTest.object(JSONLDCodecTest.map(
+				JSONLDCodecTest.entry("id", ((Value)focus).toString()),
+				JSONLDCodecTest.entry("value", asList(value))
 		));
 	}
 
@@ -77,7 +76,7 @@ final class JSONLDEncoderTest {
 
 		@Test void testBNode() {
 			assertThat(actual(bnode()))
-					.isEqualTo(expected(map()));
+					.isEqualTo(expected(JSONLDCodecTest.map()));
 		}
 
 		@Test void testBNodeWithBackLink() {
@@ -90,11 +89,11 @@ final class JSONLDEncoderTest {
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, required()))),
 					x
 			))
-					.isEqualTo(object(map(
-							entry("id", "_:x"),
-							entry("value", map(
-									entry("value", map(
-											entry("id", "_:x")
+					.isEqualTo(JSONLDCodecTest.object(JSONLDCodecTest.map(
+							JSONLDCodecTest.entry("id", "_:x"),
+							JSONLDCodecTest.entry("value", JSONLDCodecTest.map(
+									JSONLDCodecTest.entry("value", JSONLDCodecTest.map(
+											JSONLDCodecTest.entry("id", "_:x")
 									))
 							))
 					)));
@@ -110,10 +109,10 @@ final class JSONLDEncoderTest {
 					field(RDF.VALUE, and(required(), field(RDF.VALUE, and(required(), datatype(ResourceType))))),
 					x
 			))
-					.isEqualTo(object(map(
-							entry("id", "_:x"),
-							entry("value", map(
-									entry("value", "_:x")
+					.isEqualTo(JSONLDCodecTest.object(JSONLDCodecTest.map(
+							JSONLDCodecTest.entry("id", "_:x"),
+							JSONLDCodecTest.entry("value", JSONLDCodecTest.map(
+									JSONLDCodecTest.entry("value", "_:x")
 							))
 					)));
 		}
@@ -121,7 +120,7 @@ final class JSONLDEncoderTest {
 
 		@Test void testIRI() {
 			assertThat(actual(item("id")))
-					.isEqualTo(expected(map(entry("id", "/id"))));
+					.isEqualTo(expected(JSONLDCodecTest.map(JSONLDCodecTest.entry("id", "/id"))));
 		}
 
 		@Test void testProvedIRI() {
@@ -138,17 +137,17 @@ final class JSONLDEncoderTest {
 
 		@Test void testTypedString() {
 			assertThat(actual(literal("2019-04-03", XSD.DATE)))
-					.isEqualTo(expected(map(
-							entry("value", "2019-04-03"),
-							entry("type", XSD.DATE.stringValue())
+					.isEqualTo(expected(JSONLDCodecTest.map(
+							JSONLDCodecTest.entry("value", "2019-04-03"),
+							JSONLDCodecTest.entry("type", XSD.DATE.stringValue())
 					)));
 		}
 
 		@Test void testTaggedString() {
 			assertThat(actual(literal("string", "en")))
-					.isEqualTo(expected(map(
-							entry("value", "string"),
-							entry("language", "en")
+					.isEqualTo(expected(JSONLDCodecTest.map(
+							JSONLDCodecTest.entry("value", "string"),
+							JSONLDCodecTest.entry("language", "en")
 					)));
 		}
 
@@ -169,9 +168,9 @@ final class JSONLDEncoderTest {
 
 		@Test void testDouble() {
 			assertThat(actual(literal(123.0)))
-					.isEqualTo(expected(map(
-							entry("value", "123.0"),
-							entry("type", XSD.DOUBLE.stringValue())
+					.isEqualTo(expected(JSONLDCodecTest.map(
+							JSONLDCodecTest.entry("value", "123.0"),
+							JSONLDCodecTest.entry("type", XSD.DOUBLE.stringValue())
 					)));
 		}
 

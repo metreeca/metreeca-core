@@ -22,7 +22,6 @@ import com.metreeca.core.formats.InputFormat;
 import com.metreeca.core.formats.OutputFormat;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.Formats;
-import com.metreeca.rdf.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -34,8 +33,8 @@ import org.eclipse.rdf4j.rio.helpers.*;
 import javax.json.*;
 import java.io.*;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static com.metreeca.core.Context.asset;
@@ -46,12 +45,9 @@ import static com.metreeca.core.Response.BadRequest;
 import static com.metreeca.core.Response.UnsupportedMediaType;
 import static com.metreeca.core.formats.InputFormat.input;
 import static com.metreeca.core.formats.OutputFormat.output;
-import static com.metreeca.json.Shape.shape;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.JSONLDFormat.context;
 import static java.lang.Boolean.FALSE;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
 
@@ -60,83 +56,59 @@ import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
  */
 public final class RDFFormat extends Format<Collection<Statement>> {
 
-	/**
-	 * Custom header providing the external base for on-demand RDF body rewriting.
-	 */
-	public static final String ExternalBase="-External-Base"; // !!! review/remove/hide
+	///// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static List<IRI> path(final String base, final Shape shape, final String path) {
+		return new JSONLDDecoder(base, asset(context())) {}.path(path, shape); // !!! pass base as argument and
+		// factor decoder
+		// instance
+	}
+
+	public static Object value(final String base, final Shape shape, final JsonValue value) {
+		// !!! pass base as argument and factor decoder instance
+		return new JSONLDDecoder(base, asset(context())) {}.value(value, shape, null).getKey();
+	}
 
 
 	/**
-	 * The plain <a href="http://www.json.org/">JSON</a> file format.
+	 * Converts an object to an IRI.
 	 *
-	 * The file extension {@code .json} is recommend for JSON documents.
+	 * @param object the object to be converted; may be null
 	 *
-	 * The media type is {@code application/json}.
-	 * <br>The character encoding is {@code UTF-8}.
+	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
 	 */
-	public static final org.eclipse.rdf4j.rio.RDFFormat RDFJSONFormat=new org.eclipse.rdf4j.rio.RDFFormat("JSON",
-			asList("application/json", "text/json"),
-			StandardCharsets.UTF_8,
-			singletonList("json"),
-			Values.iri("http://www.json.org/"),
-			org.eclipse.rdf4j.rio.RDFFormat.NO_NAMESPACES,
-			org.eclipse.rdf4j.rio.RDFFormat.NO_CONTEXTS,
-			false
-	);
-
-	/**
-	 * Sets the focus resource for codecs.
-	 *
-	 * <p>Defaults to {@code null}.</p>
-	 */
-	public static final RioSetting<Resource> RioFocus=new RioSettingImpl<>(
-			RDFFormat.class.getName()+"#Focus", "Resource focus", null
-	);
-
-	/**
-	 * Sets the expected shape for the resources handled by codecs.
-	 *
-	 * <p>Defaults to {@code null}.</p>
-	 */
-	public static final RioSetting<Shape> RioShape=new RioSettingImpl<>(
-			RDFFormat.class.getName()+"#Shape", "Resource shape", null
-	);
-
-	/**
-	 * Sets the expected JSON-LD context for codecs.
-	 *
-	 * <p>Defaults to an empty object.</p>
-	 */
-	public static final RioSetting<JsonObject> RioContext=new RioSettingImpl<>(
-			RDFFormat.class.getName()+"#Context", "JSON-LD context", JsonValue.EMPTY_JSON_OBJECT
-	);
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates an RDF message format.
-	 *
-	 * @return a new RDF message format
-	 */
-	public static RDFFormat rdf() {
-		return rdf(codec -> {});
+	public static IRI _iri(final Object object) {
+		return as(object, IRI.class);
 	}
 
 	/**
-	 * Creates a customized RDF message format.
+	 * Converts an object to a value.
 	 *
-	 * @param customizer the RDF parsers/writers customizer; takes as argument a customizable RDF codec
+	 * @param object the object to be converted; may be null
 	 *
-	 * @return a new customized RDF message format
+	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
+	 *
+	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
 	 */
-	public static RDFFormat rdf(final Consumer<Codec> customizer) {
+	public static Value _value(final Object object) {
+		return as(object, Value.class);
+	}
 
-		if ( customizer == null ) {
-			throw new NullPointerException("null customizer");
+
+	private static <T> T as(final Object object, final Class<T> type) {
+		if ( object == null || type.isInstance(object) ) {
+
+			return type.cast(object);
+
+		} else {
+
+			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
+					object.getClass().getName(), type.getName()
+			));
+
 		}
-
-		return new RDFFormat(customizer);
 	}
 
 
@@ -161,9 +133,35 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Consumer<Codec> customizer;
+	/**
+	 * Creates an RDF message format.
+	 *
+	 * @return a new RDF message format
+	 */
+	public static RDFFormat rdf() {
+		return rdf(codec -> {});
+	}
 
-	private final JsonObject context=asset(context());
+	/**
+	 * Creates a customized RDF message format.
+	 *
+	 * @param customizer the RDF parser/writer customizer; takes as argument a customizable RDF codec
+	 *
+	 * @return a new customized RDF message format
+	 */
+	public static RDFFormat rdf(final Consumer<Codec> customizer) {
+
+		if ( customizer == null ) {
+			throw new NullPointerException("null customizer");
+		}
+
+		return new RDFFormat(customizer);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Consumer<Codec> customizer;
 
 
 	private RDFFormat(final Consumer<Codec> customizer) {
@@ -179,118 +177,100 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * {@code Content-Type} header and defaulting to {@code text/turtle}
 	 */
 	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
-		return message.body(input()).fold(
+		return message.body(input()).fold(error -> Left(status(UnsupportedMediaType, "no RDF body")), source -> {
 
-				error -> Left(status(UnsupportedMediaType, "no RDF body")), source -> {
+			final IRI focus=iri(message.item());
 
-					final IRI focus=Values.iri(message.item());
-					final Shape shape=message.attribute(shape());
+			final String base=focus.stringValue();
+			final String type=message.header("Content-Type").orElse("");
 
-					final String base=focus.stringValue();
-					final String type=message.header("Content-Type").orElse("");
+			final RDFParser parser=Formats
+					.service(RDFParserRegistry.getInstance(), TURTLE, type)
+					.getParser();
 
-					final RDFParser parser=Formats
-							.service(RDFParserRegistry.getInstance(), TURTLE, type)
-							.getParser();
+			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
+			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
 
-					parser.set(RioShape, shape);
-					parser.set(RioFocus, focus);
-					parser.set(RioContext, context);
+			parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
+			parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
 
-					parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
-					parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
+			customizer.accept(new Codec() {
+				@Override public <T> Codec set(final RioSetting<T> setting, final T value) {
 
-					parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
-					parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
+					parser.set(setting, value);
 
-					customizer.accept(new Codec() {
-						@Override public <T> Codec set(final RioSetting<T> setting, final T value) {
+					//  ;(dbpedia) ignore malformed rdf:langString literals
+					//  (https://github.com/eclipse/rdf4j/issues/2004)
 
-							parser.set(setting, value);
+					if ( BasicParserSettings.VERIFY_DATATYPE_VALUES.equals(setting) && FALSE.equals(value) ) {
+						parser.setValueFactory(new SimpleValueFactory() {
 
-							//  ;(dbpedia) ignore malformed rdf:langString literals
-							//  (https://github.com/eclipse/rdf4j/issues/2004)
-
-							if ( BasicParserSettings.VERIFY_DATATYPE_VALUES.equals(setting) && FALSE.equals(value) ) {
-								parser.setValueFactory(new SimpleValueFactory() {
-
-									@Override public Literal createLiteral(final String value, final IRI datatype) {
-										return RDF.LANGSTRING.equals(datatype) ?
-												createLiteral(value) : super.createLiteral(value, datatype);
-									}
-
-								});
+							@Override public Literal createLiteral(final String value, final IRI datatype) {
+								return RDF.LANGSTRING.equals(datatype) ?
+										createLiteral(value) : super.createLiteral(value, datatype);
 							}
 
-							return this;
-
-						}
-					});
-
-					final ParseErrorCollector errorCollector=new ParseErrorCollector();
-
-					parser.setParseErrorListener(errorCollector);
-
-					final Collection<Statement> model=new LinkedHashModel(); // order-preserving and writable
-
-					final String internal=message.request().base();
-					final String external=message.header(ExternalBase).orElse(internal); // made available by Rewriter
-
-					parser.setRDFHandler(external.equals(internal) ? new AbstractRDFHandler() {
-
-						@Override public void handleStatement(final Statement statement) {
-							model.add(statement);
-						}
-
-					} : new AbstractRDFHandler() {
-
-						@Override public void handleStatement(final Statement statement) {
-							model.add(rewrite(external, internal, statement));
-						}
-
-					});
-
-					try ( final InputStream input=source.get() ) {
-
-						parser.parse(input, base); // resolve relative IRIs wrt the request focus
-
-					} catch ( final RDFParseException e ) {
-
-						if ( errorCollector.getFatalErrors().isEmpty() ) { // exception not always reported by parser…
-							errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
-						}
-
-					} catch ( final IOException e ) {
-
-						throw new UncheckedIOException(e);
-
+						});
 					}
 
-					final List<String> fatals=errorCollector.getFatalErrors();
-					final List<String> errors=errorCollector.getErrors();
-					final List<String> warnings=errorCollector.getWarnings();
-
-					if ( fatals.isEmpty() ) { // return model
-
-						return Right(model);
-
-					} else { // report errors // !!! log warnings/error/fatals?
-
-						final JsonObjectBuilder trace=Json.createObjectBuilder()
-
-								.add("format", parser.getRDFFormat().getDefaultMIMEType());
-
-						if ( !fatals.isEmpty() ) { trace.add("fatals", Json.createArrayBuilder(fatals)); }
-						if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
-						if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
-
-						return Left(status(BadRequest, trace.build()));
-
-					}
+					return this;
 
 				}
+			});
 
-		);
+			final ParseErrorCollector errorCollector=new ParseErrorCollector();
+
+			parser.setParseErrorListener(errorCollector);
+
+			final Collection<Statement> model=new LinkedHashModel(); // order-preserving and writable
+
+			parser.setRDFHandler(new AbstractRDFHandler() {
+
+				@Override public void handleStatement(final Statement statement) {
+					model.add(statement);
+				}
+
+			});
+
+			try ( final InputStream input=source.get() ) {
+
+				parser.parse(input, base); // resolve relative IRIs wrt the request focus
+
+			} catch ( final RDFParseException e ) {
+
+				if ( errorCollector.getFatalErrors().isEmpty() ) { // exception not always reported by parser…
+					errorCollector.fatalError(e.getMessage(), e.getLineNumber(), e.getColumnNumber());
+				}
+
+			} catch ( final IOException e ) {
+
+				throw new UncheckedIOException(e);
+
+			}
+
+			final List<String> fatals=errorCollector.getFatalErrors();
+			final List<String> errors=errorCollector.getErrors();
+			final List<String> warnings=errorCollector.getWarnings();
+
+			if ( fatals.isEmpty() ) { // return model
+
+				return Right(model);
+
+			} else { // report errors // !!! log warnings/error/fatals?
+
+				final JsonObjectBuilder trace=Json.createObjectBuilder()
+
+						.add("format", parser.getRDFFormat().getDefaultMIMEType());
+
+				if ( !fatals.isEmpty() ) { trace.add("fatals", Json.createArrayBuilder(fatals)); }
+				if ( !errors.isEmpty() ) { trace.add("errors", Json.createArrayBuilder(errors)); }
+				if ( !warnings.isEmpty() ) { trace.add("warnings", Json.createArrayBuilder(warnings)); }
+
+				return Left(status(BadRequest, trace.build()));
+
+			}
+
+		});
 	}
 
 	/**
@@ -318,22 +298,12 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 
 				.body(output(), output -> {
 
-					final IRI focus=Values.iri(message.item());
-					final Shape shape=message.attribute(shape());
-
-					final String base=focus.stringValue();
-
-					final String internal=message.request().base();
-					final String external=message.header(ExternalBase).orElse(internal); // made available by Rewriter
+					final IRI focus=iri(message.item());
+					final String base=focus.stringValue(); // relativize IRIs wrt the response focus
 
 					try {
 
-						final RDFWriter writer=factory.getWriter(output, base); // relativize IRIs wrt the response
-						// focus
-
-						writer.set(RioShape, shape);
-						writer.set(RioFocus, focus);
-						writer.set(RioContext, context);
+						final RDFWriter writer=factory.getWriter(output, base);
 
 						customizer.accept(new Codec() {
 							@Override public <T> Codec set(final RioSetting<T> setting, final T value) {
@@ -345,115 +315,13 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 							}
 						});
 
-						Rio.write(external.equals(internal) ? value : rewrite(internal, external, value), writer);
+						Rio.write(value, writer);
 
 					} catch ( final URISyntaxException e ) {
-						throw new UnsupportedOperationException("unsupported base IRI {"+base+"}", e);
+						throw new UnsupportedOperationException("malformed base IRI {"+base+"}", e);
 					}
 
 				});
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Iterable<Statement> rewrite(
-			final String source, final String target, final Iterable<Statement> statements) {
-		return () -> new Iterator<Statement>() {
-
-			private final Iterator<Statement> iterator=statements.iterator();
-
-			@Override public boolean hasNext() {
-				return iterator.hasNext();
-			}
-
-			@Override public Statement next() {
-				return rewrite(source, target, iterator.next());
-			}
-
-		};
-	}
-
-
-	private Statement rewrite(final String source, final String target, final Statement statement) {
-		return statement == null ? null : statement(
-				rewrite(source, target, statement.getSubject()),
-				rewrite(source, target, statement.getPredicate()),
-				rewrite(source, target, statement.getObject()),
-				rewrite(source, target, statement.getContext())
-		);
-	}
-
-	private Value rewrite(final String source, final String target, final Value value) {
-		return value instanceof IRI ? rewrite(source, target, (IRI)value) : value;
-	}
-
-	private Resource rewrite(final String source, final String target, final Resource resource) {
-		return resource instanceof IRI ? rewrite(source, target, (IRI)resource) : resource;
-	}
-
-	private IRI rewrite(final String source, final String target, final IRI iri) {
-		return iri == null ? null : Values.iri(rewrite(source, target, iri.stringValue()));
-	}
-
-	private String rewrite(final String source, final String target, final String string) {
-		return string.startsWith(source) ? target+string.substring(source.length()) : string;
-	}
-
-
-	///// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static List<IRI> path(final String base, final Shape shape, final String path) {
-		return new JSONLDDecoder(base, asset(context())) {}.path(path, shape); // !!! pass base as argument and
-		// factor decoder
-		// instance
-	}
-
-	public static Object value(final String base, final Shape shape, final JsonValue value) {
-		// !!! pass base as argument and factor decoder instance
-		return new JSONLDDecoder(base, asset(context())) {}.value(value, shape, null).getKey();
-	}
-
-
-	/**
-	 * Converts an object to an IRI.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
-	 */
-	public static IRI iri(final Object object) {
-		return as(object, IRI.class);
-	}
-
-	/**
-	 * Converts an object to a value.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
-	 */
-	public static Value value(final Object object) {
-		return as(object, Value.class);
-	}
-
-
-	private static <T> T as(final Object object, final Class<T> type) {
-		if ( object == null || type.isInstance(object) ) {
-
-			return type.cast(object);
-
-		} else {
-
-			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
-					object.getClass().getName(), type.getName()
-			));
-
-		}
 	}
 
 }

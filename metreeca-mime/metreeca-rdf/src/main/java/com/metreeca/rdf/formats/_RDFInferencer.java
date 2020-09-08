@@ -37,7 +37,7 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.formats.RDFFormat._iri;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -47,7 +47,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively expands shapes with additional implied constraints.</p>
  */
-final class RDFInferencer extends Inspector<Shape> {
+final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
@@ -79,7 +79,7 @@ final class RDFInferencer extends Inspector<Shape> {
 	@Override public Shape probe(final In in) {
 
 		final Set<Object> values=in.getValues();
-		final Set<Object> types=values.stream().map(RDFFormat::value).map(Values::type).collect(toSet());
+		final Set<Object> types=values.stream().map(RDFFormat::_value).map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
 		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();
@@ -90,7 +90,7 @@ final class RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final IRI iri=iri(field.getName());
+		final IRI iri=_iri(field.getName());
 		final Shape shape=field.getShape().map(this);
 
 		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(ResourceType))), datatype(ResourceType))

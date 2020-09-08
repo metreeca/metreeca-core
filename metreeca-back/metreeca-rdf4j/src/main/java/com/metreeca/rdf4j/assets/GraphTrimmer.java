@@ -28,11 +28,9 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.shape;
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.formats.RDFFormat._iri;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -75,7 +73,7 @@ final class GraphTrimmer extends GraphProcessor {
 
 		@Override public Stream<Statement> probe(final Field field) {
 
-			final IRI iri=iri(field.getName());
+			final IRI iri=_iri(field.getName());
 			final Shape shape=field.getShape();
 
 			final IRI inverse=inverse(iri);

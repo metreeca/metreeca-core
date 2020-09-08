@@ -64,7 +64,7 @@ import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.formats.RDFFormat._iri;
 import static com.metreeca.rdf4j.assets.Snippets.*;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -156,9 +156,9 @@ abstract class GraphProcessor {
 
 
         private Value value(final Object value) {
-            return value instanceof Shape.Focus
-                    ? iri(((Shape.Focus)value).resolve(resource.stringValue()))
-                    : RDFFormat.value(value);
+	        return value instanceof Shape.Focus
+			        ? iri(((Shape.Focus)value).resolve(resource.stringValue()))
+			        : RDFFormat._value(value);
         }
 
         private Set<Value> values(final Collection<Object> values) {
@@ -347,8 +347,8 @@ abstract class GraphProcessor {
 
         @Override public Collection<Statement> probe(final Stats stats) {
 
-            final Shape shape=stats.getShape();
-            final List<IRI> path=stats.getPath().stream().map(RDFFormat::iri).collect(toList());
+	        final Shape shape=stats.getShape();
+	        final List<IRI> path=stats.getPath().stream().map(RDFFormat::_iri).collect(toList());
 
             final Model model=new LinkedHashModel();
 
@@ -443,8 +443,8 @@ abstract class GraphProcessor {
 
         @Override public Collection<Statement> probe(final Terms terms) {
 
-            final Shape shape=terms.getShape();
-            final List<IRI> path=terms.getPath().stream().map(RDFFormat::iri).collect(toList());
+	        final Shape shape=terms.getShape();
+	        final List<IRI> path=terms.getPath().stream().map(RDFFormat::_iri).collect(toList());
 
             final Model model=new LinkedHashModel();
 
@@ -567,8 +567,8 @@ abstract class GraphProcessor {
             return snippet(orders.stream()
                     .filter(order -> !order.getPath().isEmpty()) // root already retrieved
                     .map(order -> snippet(
-                            "optional { {root} {path} {order} }\n", var(root),
-                            path(order.getPath().stream().map(RDFFormat::iri).collect(toList())), var(order))
+		                    "optional { {root} {path} {order} }\n", var(root),
+		                    path(order.getPath().stream().map(RDFFormat::_iri).collect(toList())), var(order))
                     )
             );
         }
@@ -626,8 +626,8 @@ abstract class GraphProcessor {
 
             @Override public Stream<Integer> probe(final Field field) {
 
-                final IRI iri=iri(field.getName());
-                final Shape shape=field.getShape();
+	            final IRI iri=_iri(field.getName());
+	            final Shape shape=field.getShape();
 
                 final Integer source=identifier.apply(focus);
                 final Integer target=identifier.apply(shape);
@@ -683,7 +683,7 @@ abstract class GraphProcessor {
 
             @Override public Snippet probe(final Datatype datatype) {
 
-                final IRI iri=iri(datatype.getName());
+	            final IRI iri=_iri(datatype.getName());
 
                 return iri.equals(ValueType) ? nothing() : snippet(
 
@@ -701,7 +701,7 @@ abstract class GraphProcessor {
             }
 
             @Override public Snippet probe(final Clazz clazz) {
-                return snippet(var(source), " a/rdfs:subClassOf* ", format(iri(clazz.getName())), " .");
+	            return snippet(var(source), " a/rdfs:subClassOf* ", format(_iri(clazz.getName())), " .");
             }
 
             @Override public Snippet probe(final MinExclusive minExclusive) {
@@ -770,8 +770,8 @@ abstract class GraphProcessor {
 
             @Override public Snippet probe(final Field field) {
 
-                final IRI iri=iri(field.getName());
-                final Shape shape=field.getShape();
+	            final IRI iri=_iri(field.getName());
+	            final Shape shape=field.getShape();
 
                 final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
                 final Optional<Set<Value>> any=any(shape).map(values1 -> values(values1));
@@ -837,8 +837,8 @@ abstract class GraphProcessor {
 
             @Override public Snippet probe(final Field field) {
 
-                final IRI iri=iri(field.getName());
-                final Shape shape=field.getShape();
+	            final IRI iri=_iri(field.getName());
+	            final Shape shape=field.getShape();
 
                 return snippet( // (€) optional unless universal constraints are present
 

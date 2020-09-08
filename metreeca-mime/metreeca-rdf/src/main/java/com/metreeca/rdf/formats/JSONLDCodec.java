@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.formats.RDFFormat._iri;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -48,8 +48,8 @@ final class JSONLDCodec {
 				.map(new Redactor(Shape.Area, values -> true))
 				.map(new Redactor(Shape.Mode, Shape.Convey)) // remove internal filtering shapes
 
-				.map(new RDFInferencer()) // infer implicit constraints to drive json shorthands
-				.map(new RDFOptimizer());
+				.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
+				.map(new _RDFOptimizer());
 
 	}
 
@@ -124,7 +124,7 @@ final class JSONLDCodec {
 
 		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI name=iri(field.getName());
+			final IRI name=_iri(field.getName());
 
 			return Optional
 					.of(NamedIRIPattern.matcher(name.stringValue()))
@@ -141,7 +141,7 @@ final class JSONLDCodec {
 
 		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI name=iri(field.getName());
+			final IRI name=_iri(field.getName());
 			final Shape shape=field.getShape();
 
 			return alias(shape)

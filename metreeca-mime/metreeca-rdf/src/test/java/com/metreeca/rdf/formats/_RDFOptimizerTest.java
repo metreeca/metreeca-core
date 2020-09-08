@@ -39,7 +39,7 @@ import static com.metreeca.json.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class RDFOptimizerTest {
+final class _RDFOptimizerTest {
 
 	private static final Shape x=datatype(RDF.NIL);
 	private static final Shape y=minCount(1);
@@ -182,7 +182,7 @@ final class RDFOptimizerTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape optimize(final Shape shape) {
-		return shape.map(new RDFOptimizer());
+		return shape.map(new _RDFOptimizer());
 	}
 
 }

@@ -22,18 +22,15 @@ import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import javax.json.JsonException;
-import java.io.*;
 
 import static com.metreeca.core.Response.UnsupportedMediaType;
 import static com.metreeca.core.formats.InputFormat.input;
-import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.core.formats.TextFormat.text;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.shapes.And.and;
@@ -43,7 +40,6 @@ import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -119,7 +115,7 @@ final class RDFFormatTest {
 
 	}
 
-	@Nested final class Getter {
+	@Nested final class Decoder {
 
 		@Test void testHandleMissingInput() {
 			exec(() -> new Request().body(rdf()).fold(
@@ -135,31 +131,9 @@ final class RDFFormatTest {
 			));
 		}
 
-		@Test void testRewriteRequestBody() {
-			exec(() -> new Request()
-
-					.base(internal)
-					.path("/")
-					.header(RDFFormat.ExternalBase, external)
-					.body(input(), () -> new ByteArrayInputStream(
-							"<http://example.com/container> ldp:contains <http://example.com/resource> .".getBytes(UTF_8)
-					))
-
-					.body(rdf())
-
-					.fold(
-							error -> fail("unexpected error {"+error+"}"),
-							statements -> assertThat(statements).isIsomorphicTo(decode(
-									"<app://local/container> ldp:contains <app://local/resource> ."
-							))
-					)
-
-			);
-		}
-
 	}
 
-	@Nested final class Setter {
+	@Nested final class Encoder {
 
 		@Test void testConfigureWriterBaseIRI() {
 			exec(() -> new Request()
@@ -174,41 +148,10 @@ final class RDFFormatTest {
 					)
 
 					.accept(response -> ResponseAssert.assertThat(response)
-							.hasBody(text(), text -> Assertions.assertThat(text)
+							.hasBody(text(), text -> assertThat(text)
 									.contains("@base <"+ValuesTest.Base+"context/container/"+">")
 							)
 					)
-			);
-		}
-
-
-		@Test void testRewriteResponseBody() {
-			exec(() -> new Response(new Request().base(internal))
-
-					.header(RDFFormat.ExternalBase, external)
-					.body(rdf(), decode("<app://local/container> ldp:contains <app://local/resource> ."))
-
-					.body(output())
-
-					.fold(error -> fail("unexpected error {"+error+"}"), target -> {
-
-						try ( final ByteArrayOutputStream stream=new ByteArrayOutputStream() ) {
-
-							target.accept(stream);
-
-							assertThat(decode(new String(stream.toByteArray(), UTF_8)))
-									.isIsomorphicTo(decode("<http://example.com/container> ldp:contains "
-											+"<http://example"
-											+".com/resource> ."));
-
-							return target;
-
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-
-					})
-
 			);
 		}
 

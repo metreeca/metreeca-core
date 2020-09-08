@@ -23,14 +23,13 @@ import com.metreeca.rdf.ValuesTest;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.*;
-import org.eclipse.rdf4j.rio.RDFWriter;
-import org.eclipse.rdf4j.rio.Rio;
 import org.junit.jupiter.api.Test;
 
 import javax.json.*;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -45,15 +44,91 @@ import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.ValuesTest.item;
-import static com.metreeca.rdf.formats.RDFJSONTest.*;
+import static com.metreeca.rdf.formats.JSONLDCodecTest.*;
 
 
-final class RDFJSONWriterTest {
+final class JSONLDEncoderTest_ { // !!! merge into JSONLDEncoderTest
 
 	private final String value=RDF.VALUE.stringValue();
 
 
-	//// Objects ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JsonStructure write(final Collection<Statement> model) {
+		return write(model, null);
+	}
+
+	private JsonStructure write(final Collection<Statement> model, final Resource focus) {
+		return write(model, focus, null);
+	}
+
+	private JsonStructure write(final Collection<Statement> model, final Resource focus, final Shape shape) {
+		return write(model, focus, shape, ValuesTest.Base);
+	}
+
+	private JsonStructure write(final Collection<Statement> model, final Resource focus, final Shape shape,
+			final String base) {
+		try ( final StringWriter buffer=new StringWriter(1000) ) {
+
+			Json.createWriter(buffer).write(new JSONLDEncoder(base, Context) {}.encode(focus, shape, model));
+
+			try ( final JsonReader reader=Json.createReader(new StringReader(buffer.toString())) ) {
+				return reader.read();
+			}
+
+		} catch ( final IOException e ) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+
+	//// !!! review
+	// //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private void assertEquivalent(final String message, final JsonValue expected, final JsonValue actual) {
+		assertThat(strip(actual))
+				.as(message)
+				.isEqualTo(strip(expected));
+	}
+
+
+	private JsonValue strip(final JsonValue value) {
+		return value instanceof JsonArray ? strip((JsonArray)value)
+				: value instanceof JsonObject ? strip((JsonObject)value)
+				: value;
+	}
+
+	private JsonArray strip(final JsonArray array) {
+
+		final JsonArrayBuilder builder=Json.createArrayBuilder();
+
+		for (final JsonValue value : array) {
+			builder.add(strip(value));
+		}
+
+		return builder.build();
+	}
+
+	private JsonObject strip(final JsonObject object) {
+
+		final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+		for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
+
+			final String key=entry.getKey();
+			final JsonValue value=entry.getValue();
+
+			if ( !(key.equals("id") && value instanceof JsonString && ((JsonString)value).getString().startsWith("_:")) ) {
+				builder.add(key, strip(value));
+			}
+		}
+
+		return builder.build();
+	}
+
+
+	//// Objects
+	// /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testNoObjects() {
 		assertThat(write(decode("")))
@@ -409,86 +484,6 @@ final class RDFJSONWriterTest {
 						entry("value", list("_:x")))
 				));
 
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private JsonStructure write(final Iterable<Statement> model) {
-		return write(model, null);
-	}
-
-	private JsonStructure write(final Iterable<Statement> model, final Resource focus) {
-		return write(model, focus, null);
-	}
-
-	private JsonStructure write(final Iterable<Statement> model, final Resource focus, final Shape shape) {
-		return write(model, focus, shape, ValuesTest.Base);
-	}
-
-	private JsonStructure write(final Iterable<Statement> model, final Resource focus, final Shape shape,
-			final String base) {
-		try ( final StringWriter buffer=new StringWriter(1000) ) {
-
-			final RDFWriter writer=new RDFJSONWriter(buffer, base);
-
-			writer.set(RDFFormat.RioFocus, focus);
-			writer.set(RDFFormat.RioShape, shape);
-			writer.set(RDFFormat.RioContext, JSONLDCodecTest.Context);
-
-			Rio.write(model, writer);
-
-			try ( final JsonReader reader=Json.createReader(new StringReader(buffer.toString())) ) {
-				return reader.read();
-			}
-
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-
-	//// !!! review ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private void assertEquivalent(final String message, final JsonValue expected, final JsonValue actual) {
-		assertThat(strip(actual))
-				.as(message)
-				.isEqualTo(strip(expected));
-	}
-
-
-	private JsonValue strip(final JsonValue value) {
-		return value instanceof JsonArray ? strip((JsonArray)value)
-				: value instanceof JsonObject ? strip((JsonObject)value)
-				: value;
-	}
-
-	private JsonArray strip(final JsonArray array) {
-
-		final JsonArrayBuilder builder=Json.createArrayBuilder();
-
-		for (final JsonValue value : array) {
-			builder.add(strip(value));
-		}
-
-		return builder.build();
-	}
-
-	private JsonObject strip(final JsonObject object) {
-
-		final JsonObjectBuilder builder=Json.createObjectBuilder();
-
-		for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
-
-			final String key=entry.getKey();
-			final JsonValue value=entry.getValue();
-
-			if ( !(key.equals("id") && value instanceof JsonString && ((JsonString)value).getString().startsWith("_:")) ) {
-				builder.add(key, strip(value));
-			}
-		}
-
-		return builder.build();
 	}
 
 }

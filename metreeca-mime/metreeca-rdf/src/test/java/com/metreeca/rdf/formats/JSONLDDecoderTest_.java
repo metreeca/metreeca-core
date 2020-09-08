@@ -18,22 +18,17 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.ValuesTest;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.RDFParser;
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
-import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
-import javax.json.JsonValue;
-import java.io.*;
+import javax.json.JsonException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
@@ -41,6 +36,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static com.metreeca.core.EitherAssert.assertThat;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -48,15 +44,16 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.ValuesTest.decode;
-import static com.metreeca.rdf.ValuesTest.term;
-import static com.metreeca.rdf.formats.RDFJSONTest.*;
+import static com.metreeca.rdf.ValuesTest.*;
+import static com.metreeca.rdf.formats.JSONLDCodecTest.*;
+import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static java.util.stream.Collectors.toMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-final class RDFJSONParserTest {
+final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
 
 	private final String first=RDF.FIRST.stringValue();
 
@@ -69,29 +66,38 @@ final class RDFJSONParserTest {
 	}
 
 
-	@SuppressWarnings("unchecked") private JsonValue json(final Object json) {
-		return json instanceof Map ? Json.createObjectBuilder((Map<String, Object>)json).build()
-				: json instanceof Collection ? Json.createArrayBuilder((Collection<?>)json).build()
-				: null;
+	private Model rdf(final Object json) {
+		return rdf(json, null);
+	}
+
+	private Model rdf(final Object json, final Resource focus) {
+		return rdf(json, focus, null);
+	}
+
+	private Model rdf(final Object json, final Resource focus, final Shape shape) {
+		return rdf(json, focus, shape, Base);
+	}
+
+	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
+		try ( final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString()) ) {
+
+			return new LinkedHashModel(new JSONLDDecoder(base, Context) {}.decode(focus, shape,
+					Json.createReader(reader).read()));
+
+		}
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testReportRDFParseException() {
-		assertThatExceptionOfType(RDFParseException.class).isThrownBy(() -> {
-
-			final RDFJSONParser parser=new RDFJSONParser();
-
-			parser.setRDFHandler(new StatementCollector());
-
-			parser.parse(new StringReader(""), "");
-
-		});
+	@Test void testReportParseException() {
+		assertThat(jsonld(new StringReader(""), "", RDF.NIL, and(), Context))
+				.hasLeft(e -> assertThat(e).isInstanceOf(JsonException.class));
 	}
 
 
-	//// Objects ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Objects
+	// /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testNoObjects() {
 
@@ -99,7 +105,7 @@ final class RDFJSONParserTest {
 				.as("empty object")
 				.isEqualTo(decode(""));
 
-		assertThat(rdf(RDFJSONTest.array(), RDF.NIL))
+		assertThat(rdf(array(), RDF.NIL))
 				.as("empty array")
 				.isEqualTo(decode(""));
 
@@ -181,7 +187,8 @@ final class RDFJSONParserTest {
 	}
 
 
-	//// Focus /////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Focus
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testAssumeFocusAsSubject() {
 		assertThat(rdf(
@@ -214,7 +221,8 @@ final class RDFJSONParserTest {
 	}
 
 
-	//// Shared References /////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shared References
+	// ///////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testHandleNamedLoops() {
 		assertThat(rdf(map(
@@ -272,7 +280,8 @@ final class RDFJSONParserTest {
 	}
 
 
-	//// Aliases ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Aliases
+	// /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testParseAliasedFields() {
 
@@ -315,7 +324,7 @@ final class RDFJSONParserTest {
 	}
 
 	@Test void testHandleAliasClashes() {
-		assertThatExceptionOfType(RDFParseException.class).isThrownBy(() -> rdf(
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() -> rdf(
 				map(entry("first", map())),
 				null,
 				and(
@@ -326,7 +335,7 @@ final class RDFJSONParserTest {
 	}
 
 	@Test void testResolveAliasesOnlyIfShapeIsSet() {
-		assertThatExceptionOfType(RDFParseException.class).isThrownBy(() -> rdf(
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() -> rdf(
 				map(entry("id", "_:x"), entry("first", map())),
 				null,
 				null
@@ -334,7 +343,8 @@ final class RDFJSONParserTest {
 	}
 
 
-	//// Focus-Relative Paths //////////////////////////////////////////////////////////////////////////////////////////
+	//// Focus-Relative Paths
+	// ////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testResolveRelativeIRIs() {
 
@@ -342,7 +352,7 @@ final class RDFJSONParserTest {
 				map(entry("id", s), entry(this.first, o)),
 				null,
 				field(RDF.FIRST, datatype(IRIType)),
-				ValuesTest.Base+"relative/"
+				Base+"relative/"
 		);
 
 		assertThat(statament.apply("x", "http://example.com/y"))
@@ -372,7 +382,8 @@ final class RDFJSONParserTest {
 	}
 
 
-	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shapes
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testParseNamedReverseLinks() {
 		assertThat(rdf(
@@ -490,53 +501,8 @@ final class RDFJSONParserTest {
 				entry("value", "22/5/2018"),
 				entry("type", XSD.DATETIME.stringValue())
 
-		))))).isInstanceOf(RDFParseException.class);
+		))))).isInstanceOf(JsonException.class);
 
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Model rdf(final Object json) {
-		return rdf(json, null);
-	}
-
-	private Model rdf(final Object json, final Resource focus) {
-		return rdf(json, focus, null);
-	}
-
-	private Model rdf(final Object json, final Resource focus, final Shape shape) {
-		return rdf(json, focus, shape, ValuesTest.Base);
-	}
-
-	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
-		try ( final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString()) ) {
-
-			final StatementCollector collector=new StatementCollector();
-
-			final RDFParser parser=new RDFJSONParser();
-
-			parser.set(RDFFormat.RioFocus, focus);
-			parser.set(RDFFormat.RioShape, shape);
-			parser.set(RDFFormat.RioContext, JSONLDCodecTest.Context);
-
-			parser.set(BasicParserSettings.PRESERVE_BNODE_IDS, true);
-
-			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
-			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);
-
-			parser.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true);
-			parser.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
-
-			parser.setRDFHandler(collector);
-
-			parser.parse(reader, base);
-
-			return new LinkedHashModel(collector.getStatements());
-
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
-		}
 	}
 
 }

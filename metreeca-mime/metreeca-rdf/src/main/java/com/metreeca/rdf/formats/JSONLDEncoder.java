@@ -40,7 +40,7 @@ import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
 import static com.metreeca.rdf.formats.JSONLDCodec.driver;
 import static com.metreeca.rdf.formats.JSONLDFormat.aliaser;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.formats.RDFFormat._iri;
 import static java.util.stream.Collectors.toCollection;
 
 
@@ -56,11 +56,11 @@ abstract class JSONLDEncoder {
 	}
 
 
-	JsonObject encode(final Resource focus, final Shape shape, final Collection<Statement> model) {
+	JsonValue encode(final Resource focus, final Shape shape, final Collection<Statement> model) {
 
 		final Shape driver=shape == null || pass(shape) ? null : driver(shape);
 
-		return (JsonObject)json(model, driver, focus);
+		return json(model, driver, focus);
 	}
 
 
@@ -153,7 +153,7 @@ abstract class JSONLDEncoder {
 
 				for (final Map.Entry<Object, Shape> entry : fields.entrySet()) {
 
-					final IRI predicate=iri(entry.getKey());
+					final IRI predicate=_iri(entry.getKey());
 					final boolean direct=direct(predicate);
 
 					final Shape nestedShape=entry.getValue();

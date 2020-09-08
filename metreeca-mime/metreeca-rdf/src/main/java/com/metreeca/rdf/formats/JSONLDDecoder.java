@@ -72,7 +72,7 @@ abstract class JSONLDDecoder {
 	}
 
 
-	Collection<Statement> decode(final Resource focus, final Shape shape, final JsonObject json) throws JsonException {
+	Collection<Statement> decode(final Resource focus, final Shape shape, final JsonValue json) throws JsonException {
 
 		final Collection<Statement> model=new ArrayList<>();
 		final Shape driver=shape == null || pass(shape) ? null : driver(shape);
@@ -156,7 +156,7 @@ abstract class JSONLDDecoder {
 
 			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
 
-			fields.keySet().stream().map(RDFFormat::iri).forEach(edge -> {
+			fields.keySet().stream().map(RDFFormat::_iri).forEach(edge -> {
 				index.put(format(edge), edge); // inside angle brackets
 				index.put(edge.toString(), edge); // naked IRI
 			});
@@ -247,7 +247,7 @@ abstract class JSONLDDecoder {
 
 				: (value != null) ? (type != null) ? literal(value, iri(type))
 				: (language != null) ? literal(value, language)
-				: literal(value, datatype(shape).map(RDFFormat::iri).orElse(XSD.STRING))
+				: literal(value, datatype(shape).map(RDFFormat::_iri).orElse(XSD.STRING))
 
 				: focus != null ? focus : bnode();
 
@@ -272,7 +272,7 @@ abstract class JSONLDDecoder {
 
 	private Map.Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).map(RDFFormat::iri).orElse(null);
+		final IRI datatype=datatype(shape).map(RDFFormat::_iri).orElse(null);
 
 		final Literal value
 

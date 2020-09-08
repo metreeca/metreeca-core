@@ -26,7 +26,7 @@ import com.metreeca.rdf.Values;
  *
  * <p>Recursively removes redundant constructs from a shape.</p>
  */
-final class RDFOptimizer extends Optimizer {
+final class _RDFOptimizer extends Optimizer {
 
 	@Override protected boolean derives(final Object upper, final Object lower) {
 		return upper.equals(Values.ValueType)

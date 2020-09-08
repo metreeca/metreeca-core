@@ -40,16 +40,9 @@ import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.UnprocessableEntity;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Trace.trace;
-import static com.metreeca.rdf.Values.compare;
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.format;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.Values.is;
-import static com.metreeca.rdf.Values.pattern;
-import static com.metreeca.rdf.Values.text;
+import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
-import static com.metreeca.rdf.formats.RDFFormat.iri;
+import static com.metreeca.rdf.formats.RDFFormat._iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Snippets.source;
 import static java.util.Collections.*;
@@ -145,7 +138,7 @@ final class GraphValidator extends GraphProcessor {
 		private Value value(final Object value) {
 			return value instanceof Shape.Focus
 					? iri(((Shape.Focus)value).resolve(resource.stringValue()))
-					: RDFFormat.value(value);
+					: RDFFormat._value(value);
 		}
 
 		private Set<Value> values(final Collection<Object> values) {
@@ -175,7 +168,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final Datatype datatype) {
 
-			final IRI iri=iri(datatype.getName());
+			final IRI iri=_iri(datatype.getName());
 
 			return trace(focus.stream()
 					.filter(negate(value -> is(value, iri)))
@@ -196,7 +189,7 @@ final class GraphValidator extends GraphProcessor {
 								+"\n"
 								+"select distinct ?class { ?class rdfs:subClassOf* {root} }",
 
-						format(iri(clazz.getName()))
+						format(_iri(clazz.getName()))
 
 				)).evaluate())
 
@@ -390,7 +383,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final Field field) {
 
-			final IRI iri=iri(field.getName());
+			final IRI iri=_iri(field.getName());
 			final Shape shape=field.getShape();
 
 			return focus.stream().map(value -> { // for each focus value
