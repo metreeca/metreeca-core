@@ -190,6 +190,12 @@ public final class Values {
 
 	//// Factories ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	public static ValueFactory factory() {
+		return factory;
+	}
+
+
 	public static String uuid() {
 		return randomUUID().toString();
 	}

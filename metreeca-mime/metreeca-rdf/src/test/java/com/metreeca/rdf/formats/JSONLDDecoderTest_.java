@@ -81,8 +81,8 @@ final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
 	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
 		try ( final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString()) ) {
 
-			return new LinkedHashModel(new JSONLDDecoder(base, Context) {}.decode(focus, shape,
-					Json.createReader(reader).read()));
+			return new LinkedHashModel(new JSONLDDecoder(base, Context) {}
+					.decode(focus, shape, Json.createReader(reader).read()));
 
 		}
 	}

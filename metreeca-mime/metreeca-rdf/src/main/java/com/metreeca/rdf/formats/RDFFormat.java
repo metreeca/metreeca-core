@@ -261,8 +261,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 			final String base=focus.stringValue();
 			final String type=message.header("Content-Type").orElse("");
 
-			final RDFParser parser=service(RDFParserRegistry.getInstance(), TURTLE, types(type))
-					.getParser();
+			final RDFParser parser=service(RDFParserRegistry.getInstance(), TURTLE, types(type)).getParser();
 
 			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
 			parser.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true);

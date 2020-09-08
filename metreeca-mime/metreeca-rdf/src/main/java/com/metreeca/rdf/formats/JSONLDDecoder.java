@@ -23,6 +23,9 @@ import com.metreeca.rdf.Values;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.rio.ParserConfig;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.helpers.*;
 
 import javax.json.*;
 import java.net.URI;
@@ -32,6 +35,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.pass;
@@ -47,8 +51,6 @@ import static java.util.stream.Collectors.toMap;
 
 abstract class JSONLDDecoder {
 
-	private static final JsonString Default=Json.createValue("");
-
 	private static final Pattern StepPattern=Pattern.compile(
 			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
 	);
@@ -57,6 +59,13 @@ abstract class JSONLDDecoder {
 	private static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
 		return new AbstractMap.SimpleImmutableEntry<>(key, value);
 	}
+
+	private static final ParserConfig config=new ParserConfig()
+
+			.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true)
+			.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, true)
+			.set(BasicParserSettings.VERIFY_LANGUAGE_TAGS, true)
+			.set(BasicParserSettings.NORMALIZE_LANGUAGE_TAGS, true);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,8 +96,7 @@ abstract class JSONLDDecoder {
 	}
 
 
-	//// Factories
-	// ///////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Factories ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	String resolve(final String iri) {
 		try {
@@ -100,8 +108,9 @@ abstract class JSONLDDecoder {
 
 
 	protected Resource resource(final String id) {
-		return id.isEmpty() ? Values.bnode() : id.startsWith("_:") ? Values.bnode(id.substring(2)) :
-				Values.iri(resolve(id));
+		return id.isEmpty() ? factory().createBNode()
+				: id.startsWith("_:") ? factory().createBNode(id.substring(2))
+				: factory().createIRI(resolve(id));
 	}
 
 	protected Resource bnode() {
@@ -109,7 +118,9 @@ abstract class JSONLDDecoder {
 	}
 
 	protected Resource bnode(final String id) {
-		return id.isEmpty() ? Values.bnode() : id.startsWith("_:") ? Values.bnode(id.substring(2)) : Values.bnode(id);
+		return id.isEmpty() ? Values.bnode()
+				: id.startsWith("_:") ? Values.bnode(id.substring(2))
+				: Values.bnode(id);
 	}
 
 	protected IRI iri() {
@@ -120,12 +131,35 @@ abstract class JSONLDDecoder {
 		return iri.isEmpty() ? Values.iri() : Values.iri(resolve(iri));
 	}
 
-	protected Literal literal(final String text, final IRI type) {
-		return Values.literal(text, type);
-	}
+	protected Literal literal(final String text, final IRI type) { return literal(text, null, type);}
 
 	protected Literal literal(final String text, final String lang) {
-		return Values.literal(text, lang);
+		return literal(text, lang, null);
+	}
+
+	protected Literal literal(final String text, final String lang, final IRI type) {
+
+		try {
+			final ParseErrorCollector listener=new ParseErrorCollector();
+
+			final Literal literal=RDFParserHelper.createLiteral(text, lang, type, config, listener, factory());
+
+			final String errors=Stream.of(listener.getFatalErrors(), listener.getErrors())
+
+					.flatMap(Collection::stream)
+					.collect(Collectors.joining("; "));
+
+			if ( !errors.isEmpty() ) {
+				throw new JsonException(errors);
+			}
+
+			return literal;
+
+		} catch ( final RDFParseException e ) {
+
+			throw new JsonException(e.getMessage());
+
+		}
 	}
 
 	protected Statement statement(final Resource subject, final IRI predicate, final Value object) {
@@ -137,7 +171,7 @@ abstract class JSONLDDecoder {
 	}
 
 
-	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Paths ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected List<IRI> path(final String path, final Shape shape) {
 
@@ -186,9 +220,10 @@ abstract class JSONLDDecoder {
 	}
 
 
-	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Map<Value, Stream<Statement>> values(final JsonValue value, final Shape shape, final Resource focus) {
+	protected Map<Value, Stream<Statement>> values(
+			final JsonValue value, final Shape shape, final Resource focus) {
 		return (value instanceof JsonArray
 
 				? value.asJsonArray().stream().map(v -> value(v, shape, focus))
@@ -197,24 +232,25 @@ abstract class JSONLDDecoder {
 		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Stream::concat));
 	}
 
-	protected Map.Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape,
-			final Resource focus) {
+	protected Map.Entry<Value, Stream<Statement>> value(
+			final JsonValue value, final Shape shape, final Resource focus) {
 		return value instanceof JsonArray ? value(value.asJsonArray(), shape, focus)
 				: value instanceof JsonObject ? value(value.asJsonObject(), shape, focus)
 				: value instanceof JsonString ? value((JsonString)value, shape)
 				: value instanceof JsonNumber ? value((JsonNumber)value, shape)
-				: value.equals(JsonValue.TRUE) ? entry(Values.True, Stream.empty())
-				: value.equals(JsonValue.FALSE) ? entry(Values.False, Stream.empty())
+				: value.equals(JsonValue.TRUE) ? entry(True, Stream.empty())
+				: value.equals(JsonValue.FALSE) ? entry(False, Stream.empty())
 				: error("unsupported JSON value <"+value+">");
 	}
 
 
-	private Map.Entry<Value, Stream<Statement>> value(final JsonArray array, final Shape shape, final Resource focus) {
+	private Map.Entry<Value, Stream<Statement>> value(
+			final JsonArray array, final Shape shape, final Resource focus) {
 		return error("unsupported JSON value <"+array+">");
 	}
 
-	private Map.Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape,
-			final Resource focus) {
+	private Map.Entry<Value, Stream<Statement>> value(
+			final JsonObject object, final Shape shape, final Resource focus) {
 
 		String id=null;
 		String value=null;
@@ -257,7 +293,8 @@ abstract class JSONLDDecoder {
 
 	}
 
-	private Map.Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
+	private Map.Entry<Value, Stream<Statement>> value(
+			final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
 		final IRI type=datatype(shape).filter(o -> o instanceof IRI).map(o -> (IRI)o).orElse(XSD.STRING);
@@ -270,7 +307,8 @@ abstract class JSONLDDecoder {
 		return entry(value, Stream.empty());
 	}
 
-	private Map.Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
+	private Map.Entry<Value, Stream<Statement>> value(
+			final JsonNumber number, final Shape shape) {
 
 		final IRI datatype=datatype(shape).map(RDFFormat::_iri).orElse(null);
 
@@ -294,8 +332,8 @@ abstract class JSONLDDecoder {
 	}
 
 
-	private Map.Entry<Value, Stream<Statement>> properties(final JsonObject object, final Shape shape,
-			final Resource source) {
+	private Map.Entry<Value, Stream<Statement>> properties(
+			final JsonObject object, final Shape shape, final Resource source) {
 
 		final Map<Object, Shape> fields=fields(shape);
 
