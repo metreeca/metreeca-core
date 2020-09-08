@@ -87,7 +87,7 @@ final class JSONLDCodecTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Map<IRI, String> aliases(final Shape shape) {
-		return JSONLDCodec.aliases(shape);
+		return new JSONLDCodec() {}.aliases(shape);
 	}
 
 

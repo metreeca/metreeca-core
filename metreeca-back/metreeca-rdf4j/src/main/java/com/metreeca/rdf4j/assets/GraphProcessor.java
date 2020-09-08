@@ -26,7 +26,7 @@ import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.formats.JSONLDFormat;
+import com.metreeca.rdf.formats._ValueParser;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -64,7 +64,7 @@ import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.formats.JSONLDFormat._iri;
+import static com.metreeca.rdf.formats._ValueParser._iri;
 import static com.metreeca.rdf4j.assets.Snippets.*;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
@@ -158,7 +158,7 @@ abstract class GraphProcessor {
         private Value value(final Object value) {
 	        return value instanceof Shape.Focus
 			        ? iri(((Shape.Focus)value).resolve(resource.stringValue()))
-			        : JSONLDFormat._value(value);
+			        : _ValueParser._value(value);
         }
 
         private Set<Value> values(final Collection<Object> values) {
@@ -348,7 +348,7 @@ abstract class GraphProcessor {
         @Override public Collection<Statement> probe(final Stats stats) {
 
 	        final Shape shape=stats.getShape();
-	        final List<IRI> path=stats.getPath().stream().map(JSONLDFormat::_iri).collect(toList());
+	        final List<IRI> path=stats.getPath().stream().map(_ValueParser::_iri).collect(toList());
 
 	        final Model model=new LinkedHashModel();
 
@@ -444,7 +444,7 @@ abstract class GraphProcessor {
         @Override public Collection<Statement> probe(final Terms terms) {
 
 	        final Shape shape=terms.getShape();
-	        final List<IRI> path=terms.getPath().stream().map(JSONLDFormat::_iri).collect(toList());
+	        final List<IRI> path=terms.getPath().stream().map(_ValueParser::_iri).collect(toList());
 
 	        final Model model=new LinkedHashModel();
 
@@ -568,7 +568,7 @@ abstract class GraphProcessor {
                     .filter(order -> !order.getPath().isEmpty()) // root already retrieved
                     .map(order -> snippet(
 		                    "optional { {root} {path} {order} }\n", var(root),
-		                    path(order.getPath().stream().map(JSONLDFormat::_iri).collect(toList())), var(order))
+		                    path(order.getPath().stream().map(_ValueParser::_iri).collect(toList())), var(order))
                     )
             );
         }

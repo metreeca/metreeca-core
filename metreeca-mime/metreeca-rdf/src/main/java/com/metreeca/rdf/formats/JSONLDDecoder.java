@@ -43,22 +43,40 @@ import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
-import static com.metreeca.rdf.formats.JSONLDCodec.driver;
-import static com.metreeca.rdf.formats.JSONLDFormat.resolver;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 
-abstract class JSONLDDecoder {
+final class JSONLDDecoder extends JSONLDCodec {
 
-	private static final Pattern StepPattern=Pattern.compile(
+	private static final Pattern StepPattern=Pattern.compile( // !!! review/remove
 			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
 	);
 
 
 	private static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
 		return new AbstractMap.SimpleImmutableEntry<>(key, value);
+	}
+
+
+	/**
+	 * Resolves JSON-LD property names.
+	 *
+	 * @param context the JSON-LD context property names are to be resolved against
+	 *
+	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m
+	 * defaulting to
+	 * the alias if no property name is found
+	 *
+	 * @throws NullPointerException if {@code context} is null
+	 */
+	private static Function<String, String> resolver(final JsonObject context) {
+
+		if ( context == null ) {
+			throw new NullPointerException("null context");
+		}
+
+		return alias -> context.getString(alias, alias);
 	}
 
 
@@ -94,7 +112,7 @@ abstract class JSONLDDecoder {
 
 	//// Factories ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	String resolve(final String iri) {
+	private String resolve(final String iri) {
 		try {
 			return base == null ? iri : base.resolve(new URI(iri)).toString();
 		} catch ( final URISyntaxException e ) {
@@ -103,37 +121,37 @@ abstract class JSONLDDecoder {
 	}
 
 
-	protected Resource resource(final String id) {
+	private Resource resource(final String id) {
 		return id.isEmpty() ? factory().createBNode()
 				: id.startsWith("_:") ? factory().createBNode(id.substring(2))
 				: factory().createIRI(resolve(id));
 	}
 
-	protected Resource bnode() {
+	private Resource bnode() {
 		return Values.bnode();
 	}
 
-	protected Resource bnode(final String id) {
+	private Resource bnode(final String id) {
 		return id.isEmpty() ? Values.bnode()
 				: id.startsWith("_:") ? Values.bnode(id.substring(2))
 				: Values.bnode(id);
 	}
 
-	protected IRI iri() {
+	private IRI iri() {
 		return Values.iri();
 	}
 
-	protected IRI iri(final String iri) {
+	private IRI iri(final String iri) {
 		return iri.isEmpty() ? Values.iri() : Values.iri(resolve(iri));
 	}
 
-	protected Literal literal(final String text, final IRI type) { return literal(text, null, type);}
+	private Literal literal(final String text, final IRI type) { return literal(text, null, type);}
 
-	protected Literal literal(final String text, final String lang) {
+	private Literal literal(final String text, final String lang) {
 		return literal(text, lang, null);
 	}
 
-	protected Literal literal(final String text, final String lang, final IRI type) {
+	private Literal literal(final String text, final String lang, final IRI type) {
 		try {
 
 			final ParseErrorCollector listener=new ParseErrorCollector();
@@ -158,18 +176,18 @@ abstract class JSONLDDecoder {
 		}
 	}
 
-	protected Statement statement(final Resource subject, final IRI predicate, final Value object) {
+	private Statement statement(final Resource subject, final IRI predicate, final Value object) {
 		return Values.statement(subject, predicate, object);
 	}
 
-	protected <V> V error(final String message) {
+	private <V> V error(final String message) {
 		throw new JsonException(message);
 	}
 
 
 	//// Paths ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected List<IRI> path(final String path, final Shape shape) {
+	List<IRI> path(final String path, final Shape shape) { // !!! remove
 
 		final List<IRI> steps=new ArrayList<>();
 		final Matcher matcher=StepPattern.matcher(path);
@@ -186,7 +204,7 @@ abstract class JSONLDDecoder {
 
 			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
 
-			fields.keySet().stream().map(JSONLDFormat::_iri).forEach(edge -> {
+			fields.keySet().stream().map(_ValueParser::_iri).forEach(edge -> {
 				index.put(format(edge), edge); // inside angle brackets
 				index.put(edge.toString(), edge); // naked IRI
 			});
@@ -218,7 +236,7 @@ abstract class JSONLDDecoder {
 
 	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Map<Value, Stream<Statement>> values(
+	Map<Value, Stream<Statement>> values( // !!! private
 			final JsonValue value, final Shape shape, final Resource focus) {
 		return (value instanceof JsonArray
 
@@ -228,7 +246,7 @@ abstract class JSONLDDecoder {
 		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Stream::concat));
 	}
 
-	protected Map.Entry<Value, Stream<Statement>> value(
+	Map.Entry<Value, Stream<Statement>> value( // !!! private
 			final JsonValue value, final Shape shape, final Resource focus) {
 		return value instanceof JsonArray ? value(value.asJsonArray(), shape, focus)
 				: value instanceof JsonObject ? value(value.asJsonObject(), shape, focus)
@@ -279,7 +297,7 @@ abstract class JSONLDDecoder {
 
 				: (value != null) ? (type != null) ? literal(value, iri(type))
 				: (language != null) ? literal(value, language)
-				: literal(value, datatype(shape).map(JSONLDFormat::_iri).orElse(XSD.STRING))
+				: literal(value, datatype(shape).map(_ValueParser::_iri).orElse(XSD.STRING))
 
 				: focus != null ? focus : bnode();
 
@@ -306,7 +324,7 @@ abstract class JSONLDDecoder {
 	private Map.Entry<Value, Stream<Statement>> value(
 			final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).map(JSONLDFormat::_iri).orElse(null);
+		final IRI datatype=datatype(shape).map(_ValueParser::_iri).orElse(null);
 
 		final Literal value
 

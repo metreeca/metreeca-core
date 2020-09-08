@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.formats.JSONLDFormat._iri;
+import static com.metreeca.rdf.formats._ValueParser._iri;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -38,9 +38,9 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 
-final class JSONLDCodec {
+abstract class JSONLDCodec {
 
-	static Shape driver(final Shape shape) { // !!! caching
+	protected Shape driver(final Shape shape) { // !!! caching
 		return shape
 
 				.map(new Redactor(Shape.Role, values -> true))
@@ -53,7 +53,7 @@ final class JSONLDCodec {
 
 	}
 
-	static Map<IRI, String> aliases(final Shape shape) {
+	protected Map<IRI, String> aliases(final Shape shape) {
 
 		if ( shape == null ) { return emptyMap(); } else {
 
@@ -151,10 +151,5 @@ final class JSONLDCodec {
 		}
 
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private JSONLDCodec() {}
 
 }

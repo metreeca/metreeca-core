@@ -37,7 +37,7 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.formats.JSONLDFormat._iri;
+import static com.metreeca.rdf.formats._ValueParser._iri;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -79,7 +79,7 @@ final class _RDFInferencer extends Inspector<Shape> {
 	@Override public Shape probe(final In in) {
 
 		final Set<Object> values=in.getValues();
-		final Set<Object> types=values.stream().map(JSONLDFormat::_value).map(Values::type).collect(toSet());
+		final Set<Object> types=values.stream().map(_ValueParser::_value).map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
 		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();

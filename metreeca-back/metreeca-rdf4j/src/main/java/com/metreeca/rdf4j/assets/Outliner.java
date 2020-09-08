@@ -20,7 +20,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf.formats.JSONLDFormat;
+import com.metreeca.rdf.formats._ValueParser;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -70,12 +70,12 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return sources.stream()
 				.filter(Resource.class::isInstance)
-				.map(source -> statement((Resource)source, RDF.TYPE, JSONLDFormat._iri(clazz.getName())));
+				.map(source -> statement((Resource)source, RDF.TYPE, _ValueParser._iri(clazz.getName())));
 	}
 
 	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=JSONLDFormat._iri(field.getName());
+		final IRI iri=_ValueParser._iri(field.getName());
 		final Shape shape=field.getShape();
 
 		return Stream.concat(
@@ -115,8 +115,8 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	private Stream<Value> values(final Stream<Object> objects) {
 		return objects.flatMap(o -> o instanceof Shape.Focus
 				? sources.stream().map(s -> s instanceof IRI ? iri(((Shape.Focus)o).resolve(s.stringValue())) :
-				JSONLDFormat._value(s))
-				: Stream.of(JSONLDFormat._value(o)));
+				_ValueParser._value(s))
+				: Stream.of(_ValueParser._value(o)));
 	}
 
 }

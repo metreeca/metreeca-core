@@ -21,13 +21,14 @@ import com.metreeca.core.*;
 import com.metreeca.core.formats.*;
 import com.metreeca.json.Shape;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.ParserConfig;
 
 import javax.json.*;
 import java.io.*;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.metreeca.core.Context.asset;
@@ -47,65 +48,23 @@ import static com.metreeca.rdf.Values.iri;
  */
 public final class JSONLDFormat extends Format<Collection<Statement>> {
 
-	///// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static List<IRI> path(final String base, final Shape shape, final String path) {
-		return new JSONLDDecoder(base, asset(context()), new ParserConfig()) {}.path(path, shape);
-	}
-
-	public static Object value(final String base, final Shape shape, final JsonValue value) {
-		// !!! pass base as argument and factor decoder instance
-		return new JSONLDDecoder(base, asset(context()), new ParserConfig()) {}.value(value, shape, null).getKey();
-	}
-
-	/**
-	 * Converts an object to an IRI.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
-	 */
-	public static IRI _iri(final Object object) {
-		return as(object, IRI.class);
-	}
-
-	/**
-	 * Converts an object to a value.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
-	 */
-	public static Value _value(final Object object) {
-		return as(object, Value.class);
-	}
-
-	private static <T> T as(final Object object, final Class<T> type) {
-		if ( object == null || type.isInstance(object) ) {
-
-			return type.cast(object);
-
-		} else {
-
-			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
-					object.getClass().getName(), type.getName()
-			));
-
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * The default MIME type for JSON-LD messages ({@value}).
 	 */
 	public static final String MIME="application/ld+json";
 
+
+	/**
+	 * Creates a JSON-LD message format.
+	 *
+	 * @return a new JON-LD message format
+	 */
+	public static JSONLDFormat jsonld() {
+		return new JSONLDFormat();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * The JSON-LD {@value} keyword.
@@ -129,69 +88,12 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 
 	/**
-	 * Creates a JSON-LD message format.
-	 *
-	 * @return a new JON-LD message format
-	 */
-	public static JSONLDFormat jsonld() {
-		return new JSONLDFormat();
-	}
-
-
-	/**
 	 * Retrieves the default JSON-LD context factory.
 	 *
 	 * @return the default JSON-LD context factory, which returns an amepty context
 	 */
 	public static Supplier<JsonObject> context() {
 		return () -> JsonValue.EMPTY_JSON_OBJECT;
-	}
-
-	/**
-	 * Aliases JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be aliased against
-	 *
-	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
-	 * property name if no alias is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	public static Function<String, String> aliaser(final JsonObject context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		final Map<String, String> aliases=new HashMap<>();
-
-		context.forEach((alias, name) -> {
-			if ( !alias.startsWith("@") && name instanceof JsonString ) {
-				aliases.put(((JsonString)name).getString(), alias);
-			}
-		});
-
-		return name -> aliases.getOrDefault(name, name);
-	}
-
-	/**
-	 * Resolves JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be resolved against
-	 *
-	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m
-	 * defaulting to
-	 * the alias if no property name is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	public static Function<String, String> resolver(final JsonObject context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		return alias -> context.getString(alias, alias);
 	}
 
 
@@ -225,7 +127,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 		return json(reader).fold(Either::Left, json -> {
 			try {
 
-				return Right(new JSONLDDecoder(base, context, new ParserConfig()) {}.decode(focus, shape, json));
+				return Right(new JSONLDDecoder(base, context, new ParserConfig()).decode(focus, shape, json));
 
 			} catch ( final JsonException e ) {
 
@@ -269,7 +171,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null model or model statement");
 		}
 
-		return json(writer, (JsonObject)new JSONLDEncoder(base, context) {}.encode(focus, shape, model));
+		return json(writer, (JsonObject)new JSONLDEncoder(base, context).encode(focus, shape, model));
 
 	}
 

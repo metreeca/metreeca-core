@@ -45,7 +45,7 @@ final class JSONLDEncoderTest {
 
 
 	private JSONLDEncoder encoder() {
-		return new JSONLDEncoder(ValuesTest.Base, JSONLDCodecTest.Context) {};
+		return new JSONLDEncoder(ValuesTest.Base, JSONLDCodecTest.Context);
 	}
 
 

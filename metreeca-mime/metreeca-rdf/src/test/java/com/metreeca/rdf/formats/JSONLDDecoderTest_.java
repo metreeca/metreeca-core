@@ -85,7 +85,7 @@ final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
 
 			return new LinkedHashModel(new JSONLDDecoder(base, Context,
 					new ParserConfig().set(VERIFY_DATATYPE_VALUES, true)
-			) {}
+			)
 					.decode(focus, shape, Json.createReader(reader).read()));
 
 		}

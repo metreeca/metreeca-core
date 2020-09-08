@@ -70,7 +70,7 @@ final class JSONLDEncoderTest_ { // !!! merge into JSONLDEncoderTest
 			final String base) {
 		try ( final StringWriter buffer=new StringWriter(1000) ) {
 
-			Json.createWriter(buffer).write(new JSONLDEncoder(base, Context) {}.encode(focus, shape, model));
+			Json.createWriter(buffer).write(new JSONLDEncoder(base, Context).encode(focus, shape, model));
 
 			try ( final JsonReader reader=Json.createReader(new StringReader(buffer.toString())) ) {
 				return reader.read();

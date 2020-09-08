@@ -37,14 +37,40 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
-import static com.metreeca.rdf.formats.JSONLDCodec.driver;
-import static com.metreeca.rdf.formats.JSONLDFormat._iri;
-import static com.metreeca.rdf.formats.JSONLDFormat.aliaser;
+import static com.metreeca.rdf.formats._ValueParser._iri;
 import static java.util.stream.Collectors.toCollection;
 
 
-abstract class JSONLDEncoder {
+final class JSONLDEncoder extends JSONLDCodec {
+
+	/**
+	 * Aliases JSON-LD property names.
+	 *
+	 * @param context the JSON-LD context property names are to be aliased against
+	 *
+	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
+	 * property name if no alias is found
+	 *
+	 * @throws NullPointerException if {@code context} is null
+	 */
+	private static Function<String, String> aliaser(final Map<String, JsonValue> context) {
+
+		if ( context == null ) {
+			throw new NullPointerException("null context");
+		}
+
+		final Map<String, String> aliases=new HashMap<>();
+
+		context.forEach((alias, name) -> {
+			if ( !alias.startsWith("@") && name instanceof JsonString ) {
+				aliases.put(((JsonString)name).getString(), alias);
+			}
+		});
+
+		return name -> aliases.getOrDefault(name, name);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final String base;
 	private final Function<String, String> aliaser;
@@ -66,7 +92,7 @@ abstract class JSONLDEncoder {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) {
+	JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) { // !!! private?
 		return (focus != null)
 				? json(model, shape, focus, resource -> false)
 				: json(model, shape, subjects(model), resource -> false);
