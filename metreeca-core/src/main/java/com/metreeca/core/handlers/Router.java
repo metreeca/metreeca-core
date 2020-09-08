@@ -25,6 +25,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,7 +62,7 @@ import java.util.regex.Pattern;
  */
 public final class Router implements Handler {
 
-	private static final String RoutingPrefix="-Routing-Prefix";
+	private static final Supplier<String> RoutingPrefix=() -> "";
 
 	private static final Pattern KeyPattern=Pattern.compile(
 			"\\{(?<key>[^}]*)}"
@@ -143,8 +144,8 @@ public final class Router implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Function<Request, Optional<Future<Response>>> route(final String prefix, final String suffix,
-			final Handler handler) {
+	private Function<Request, Optional<Future<Response>>> route(
+			final String prefix, final String suffix, final Handler handler) {
 
 		final Collection<String> keys=new LinkedHashSet<>();
 
@@ -173,7 +174,7 @@ public final class Router implements Handler {
 
 		return request -> {
 
-			final String head=request.header(RoutingPrefix).orElse("");
+			final String head=request.attribute(RoutingPrefix);
 			final String tail=request.path().substring(head.length());
 
 			return Optional.of(pattern.matcher(tail))
@@ -190,7 +191,7 @@ public final class Router implements Handler {
 							}
 						});
 
-						return request.header(RoutingPrefix, head+matcher.group(1));
+						return request.attribute(RoutingPrefix, head+matcher.group(1));
 
 					})
 
