@@ -34,6 +34,7 @@ import java.util.*;
 import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.*;
 import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.rdf.Formats.types;
 
 
 /**
@@ -155,7 +156,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final BooleanQueryResultWriterFactory factory=Formats.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
@@ -170,7 +171,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final TupleQueryResultWriterFactory factory=Formats.service(
-				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
+				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
@@ -199,7 +200,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final RDFWriterFactory factory=Formats.service(
-				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
+				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
@@ -231,7 +232,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final BooleanQueryResultWriterFactory factory=Formats.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())

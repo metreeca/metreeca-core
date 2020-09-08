@@ -45,6 +45,7 @@ import static com.metreeca.core.Response.BadRequest;
 import static com.metreeca.core.Response.UnsupportedMediaType;
 import static com.metreeca.core.formats.InputFormat.input;
 import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.rdf.Formats.types;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.JSONLDFormat.context;
 import static java.lang.Boolean.FALSE;
@@ -185,7 +186,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 			final String type=message.header("Content-Type").orElse("");
 
 			final RDFParser parser=Formats
-					.service(RDFParserRegistry.getInstance(), TURTLE, type)
+					.service(RDFParserRegistry.getInstance(), TURTLE, types(type))
 					.getParser();
 
 			parser.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, true);
@@ -281,7 +282,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 
-		final List<String> types=Formats.types(message.request().headers("Accept"));
+		final List<String> types=types(message.request().header("Accept").orElse(""));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
 		final RDFWriterFactory factory=Formats.service(registry, TURTLE, types);

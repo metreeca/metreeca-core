@@ -43,6 +43,7 @@ import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.json.Shape.only;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.rdf.Formats.types;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
@@ -90,7 +91,7 @@ public final class Graphs extends Endpoint<Graphs> {
 			final boolean catalog=request.parameters().isEmpty();
 
 			final String target=graph(request);
-			final Iterable<String> accept=request.headers("Accept");
+			final String accept=request.header("Accept").orElse("");
 
 			if ( target == null && !catalog ) {
 
@@ -126,7 +127,7 @@ public final class Graphs extends Endpoint<Graphs> {
 			} else {
 
 				final RDFWriterFactory factory=Formats.service(
-						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, accept);
+						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, types(accept));
 
 				final RDFFormat format=factory.getRDFFormat();
 
@@ -167,13 +168,14 @@ public final class Graphs extends Endpoint<Graphs> {
 			} else {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
-				final Iterable<String> content=request.headers("Content-Type");
+				final String content=request.header("Content-Type").orElse("");
 
 				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=Formats.service(
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content) // !!! review fallback
+						// handling
 				);
 
 				graph().exec(connection -> { // binary format >> no rewriting
@@ -279,13 +281,13 @@ public final class Graphs extends Endpoint<Graphs> {
 			} else {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
-				final Iterable<String> content=request.headers("Content-Type");
+				final String content=request.header("Content-Type").orElse("");
 
 				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content));
 
 				graph().exec(connection -> { // binary format >> no rewriting
 					try ( final InputStream input=request.body(input()).fold(e -> Xtream.input(), Supplier::get) ) {

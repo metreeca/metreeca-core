@@ -26,8 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Float.parseFloat;
-import static java.util.Arrays.asList;
-import static java.util.Collections.sort;
 import static java.util.stream.Collectors.toList;
 
 
@@ -45,11 +43,7 @@ public final class Formats {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static List<String> types(final String... types) {
-		return types(asList(types));
-	}
-
-	public static List<String> types(final Iterable<String> types) {
+	public static List<String> types(final String types) {
 
 		if ( types == null ) {
 			throw new NullPointerException("null mime types");
@@ -57,29 +51,21 @@ public final class Formats {
 
 		final List<Map.Entry<String, Float>> entries=new ArrayList<>();
 
-		for (final String type : types) {
+		final Matcher matcher=MimePattern.matcher(types);
 
-			if ( type == null ) {
-				throw new NullPointerException("null mime type");
+		while ( matcher.find() ) {
+
+			final String media=matcher.group(1).toLowerCase(Locale.ROOT);
+			final String quality=matcher.group(2);
+
+			try {
+				entries.add(new SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
+			} catch ( final NumberFormatException ignored ) {
+				entries.add(new SimpleImmutableEntry<>(media, 0f));
 			}
-
-			final Matcher matcher=MimePattern.matcher(type);
-
-			while ( matcher.find() ) {
-
-				final String media=matcher.group(1).toLowerCase(Locale.ROOT);
-				final String quality=matcher.group(2);
-
-				try {
-					entries.add(new SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
-				} catch ( final NumberFormatException ignored ) {
-					entries.add(new SimpleImmutableEntry<>(media, 0f));
-				}
-			}
-
 		}
 
-		sort(entries, (x, y) -> -Float.compare(x.getValue(), y.getValue()));
+		entries.sort((x, y) -> -Float.compare(x.getValue(), y.getValue()));
 
 		return entries.stream().map(Map.Entry::getKey).collect(toList());
 	}
@@ -88,12 +74,7 @@ public final class Formats {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static <F extends FileFormat, S> S service(
-			final FileFormatServiceRegistry<F, S> registry, final F fallback, final String... mimes) {
-		return service(registry, fallback, asList(mimes));
-	}
-
-	public static <F extends FileFormat, S> S service(
-			final FileFormatServiceRegistry<F, S> registry, final F fallback, final Iterable<String> mimes) {
+			final FileFormatServiceRegistry<F, S> registry, final F fallback, final Collection<String> types) {
 
 		if ( registry == null ) {
 			throw new NullPointerException("null registry");
@@ -103,13 +84,13 @@ public final class Formats {
 			throw new NullPointerException("null fallback");
 		}
 
-		if ( mimes == null ) {
-			throw new NullPointerException("null mimes");
+		if ( types == null || types.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null types");
 		}
 
 		return registry
 
-				.get(types(mimes).stream()
+				.get(types.stream()
 
 						.map(type -> type.equals("*/*") ? Optional.of(fallback)
 								: type.endsWith("/*") ? match(type, registry.getKeys())
