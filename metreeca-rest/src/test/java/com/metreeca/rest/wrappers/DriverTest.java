@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.core.RequestAssert.assertThat;
 import static com.metreeca.core.Response.OK;
 import static com.metreeca.core.ResponseAssert.assertThat;
-import static com.metreeca.core.formats.TextFormat.text;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.MinCount.minCount;
@@ -81,25 +80,6 @@ final class DriverTest {
 						"processed",
 						"<http://example.org/resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy"
 				));
-	}
-
-	@Test void testHandleSpecsQuery() {
-		new Driver(TestShape)
-
-				.wrap(request -> request.reply(response -> response))
-
-				.handle(request()
-						.roles(None)
-						.query("specs")
-				)
-
-				.accept(response -> assertThat(response)
-						.hasStatus(OK)
-						.hasBody(text(), text -> assertThat(text)
-								.as("redacted according to role/mode")
-								.isEqualTo(NoneShape.toString())
-						)
-				);
 	}
 
 }
