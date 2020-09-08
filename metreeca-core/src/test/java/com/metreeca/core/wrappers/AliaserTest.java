@@ -37,7 +37,7 @@ final class AliaserTest {
 	}
 
 	private Aliaser aliaser(final String canonical) {
-		return new Aliaser(request ->
+		return Aliaser.aliaser(request ->
 				request.path().equals("/alias") ? Optional.of(canonical) : Optional.empty()
 		);
 	}

@@ -53,7 +53,7 @@ final class SPARQLTest {
 
 
 	private SPARQL endpoint() {
-		return new SPARQL().query(Root).update(Root);
+		return SPARQL.sparql().query(Root).update(Root);
 	}
 
 

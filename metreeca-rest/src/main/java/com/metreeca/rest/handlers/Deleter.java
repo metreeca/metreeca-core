@@ -30,19 +30,34 @@ import static com.metreeca.core.Wrapper.wrapper;
  * <p>Performs:</p>
  *
  * <ul>
+ *
  * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Shape#Delete} task and the {@linkplain Shape#Holder} area, when operating on
  * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
  * resources;</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#delete(Request) deletion}.</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
 public final class Deleter extends Actor {
 
-	public Deleter() {
-		delegate(deleter()
+	/**
+	 * Creates a resource deleter.
+	 *
+	 * @return a new resource deleter
+	 */
+	public static Deleter deleter() {
+		return new Deleter();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Deleter() {
+		delegate(_deleter()
 
 				.with(connector())
 				.with(wrapper(Request::collection,

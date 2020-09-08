@@ -32,21 +32,37 @@ import static com.metreeca.json.Shape.*;
  * <p>Performs:</p>
  *
  * <ul>
+ *
  * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Shape#Relate} task and {@linkplain Shape#Holder}/{@linkplain Shape#Digest} areas, when operating on
  * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
  * resources;</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
+ *
  * <li>engine-assisted response shape/payload {@linkplain Engine#trim(Message) trimming}, considering shapes as above
  * .</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
 public final class Relator extends Actor {
 
-	public Relator() {
-		delegate(relator()
+	/**
+	 * Creates a resource relator.
+	 *
+	 * @return a new resource relator
+	 */
+	public static Relator relator() {
+		return new Relator();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Relator() {
+		delegate(_relator()
 
 				.with(connector())
 				.with(trimmer())

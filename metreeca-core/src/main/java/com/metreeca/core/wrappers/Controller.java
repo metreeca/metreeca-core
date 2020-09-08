@@ -34,35 +34,46 @@ import static java.util.Arrays.asList;
  */
 public final class Controller implements Wrapper {
 
-	private final Set<Object> roles;
-
-
 	/**
 	 * Creates a controller.
 	 *
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access
 	 *
+	 * @return a new controller
+	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final Object... roles) {
-		this(asList(roles));
+	public static Controller controller(final Object... roles) {
+		return new Controller(asList(roles));
 	}
 
 	/**
 	 * Creates a controller.
 	 *
-	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
+	 * @param roles the user {@linkplain Request#roles(Collection) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access
+	 *
+	 * @return a new controller
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final Collection<Object> roles) {
+	public static Controller controller(final Collection<Object> roles) {
 
 		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");
 		}
 
+		return new Controller(roles);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Set<Object> roles;
+
+
+	private Controller(final Collection<Object> roles) {
 		this.roles=new HashSet<>(roles);
 	}
 

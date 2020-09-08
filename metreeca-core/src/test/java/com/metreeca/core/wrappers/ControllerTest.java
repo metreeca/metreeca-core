@@ -44,7 +44,7 @@ final class ControllerTest {
 
 
 	@Test void testAcceptedPublic() {
-		exec(() -> new Controller()
+		exec(() -> Controller.controller()
 
 				.wrap(handler())
 
@@ -55,7 +55,7 @@ final class ControllerTest {
 	}
 
 	@Test void testAcceptedControlled() {
-		exec(() -> new Controller("x", "y")
+		exec(() -> Controller.controller("x", "y")
 
 				.with((Wrapper)handler -> request -> {
 
@@ -74,7 +74,7 @@ final class ControllerTest {
 	}
 
 	@Test void testUnauthorized() {
-		exec(() -> new Controller("x", "y")
+		exec(() -> Controller.controller("x", "y")
 
 				.wrap(handler())
 

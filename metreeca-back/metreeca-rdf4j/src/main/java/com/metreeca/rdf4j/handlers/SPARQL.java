@@ -49,8 +49,20 @@ import static com.metreeca.core.formats.OutputFormat.output;
  */
 public final class SPARQL extends Endpoint<SPARQL> {
 
-	public SPARQL() {
-		delegate(new Router()
+	/**
+	 * Creates a SPARQL endpoint
+	 *
+	 * @return a new SPARQL endpoint
+	 */
+	public static SPARQL sparql() {
+		return new SPARQL();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private SPARQL() {
+		delegate(Router.router()
 				.get(this::process)
 				.post(this::process)
 		);

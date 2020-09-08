@@ -31,32 +31,47 @@ import static com.metreeca.core.Wrapper.wrapper;
  * <p>Performs:</p>
  *
  * <ul>
+ *
  * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based
- * {@linkplain Actor#throttler(Object, Object...)
- * authorization}, considering shapes enabled by the {@linkplain Shape#Update} task and the {@linkplain Shape#Holder}
- * area, when operating on
+ * {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Shape#Update} task and the {@linkplain Shape#Holder} area, when operating on
  * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
  * resources;</li>
+ *
  * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
 public final class Updater extends Actor {
 
-    public Updater() {
-        delegate(updater()
+	/**
+	 * Creates a resource updater.
+	 *
+	 * @return a new resource updater
+	 */
+	public static Updater updater() {
+		return new Updater();
+	}
 
-                .with(connector())
-                .with(wrapper(Request::collection,
-                        throttler(Shape.Update, Shape.Holder),
-                        throttler(Shape.Update, Shape.Detail)
-                ))
-                .with(validator())
 
-        );
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    }
+	private Updater() {
+		delegate(_updater()
+
+				.with(connector())
+				.with(wrapper(Request::collection,
+						throttler(Shape.Update, Shape.Holder),
+						throttler(Shape.Update, Shape.Detail)
+				))
+				.with(validator())
+
+		);
+
+	}
 
 }

@@ -40,12 +40,6 @@ public final class Bearer implements Wrapper {
 
 	private static final Pattern BearerPattern=Pattern.compile("\\s*Bearer\\s*(?<token>\\S*)\\s*");
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final BiFunction<String, Request, Optional<Request>> authenticator;
-
-
 	/**
 	 * Creates a key-based bearer token authenticator.
 	 *
@@ -53,15 +47,12 @@ public final class Bearer implements Wrapper {
 	 * @param roles a collection of values uniquely identifying the roles to be {@linkplain Request#role(Object...)
 	 *              assigned} to the request user on successful {@code key} validation
 	 *
+	 * @return a new key-based bearer token authenticator
+	 *
 	 * @throws NullPointerException     if {@code roles} is null or contains a {@code null} value
 	 * @throws IllegalArgumentException if {@code key} is empty
 	 */
-	public Bearer(final String key, final Object... roles) {
-
-		this((token, request) -> token.equals(key)
-				? Optional.of(request.roles(roles))
-				: Optional.empty()
-		);
+	public static Bearer bearer(final String key, final Object... roles) {
 
 		if ( key == null ) {
 			throw new NullPointerException("null key");
@@ -75,6 +66,10 @@ public final class Bearer implements Wrapper {
 			throw new NullPointerException("null roles");
 		}
 
+		return new Bearer((token, request) -> token.equals(key)
+				? Optional.of(request.roles(roles))
+				: Optional.empty()
+		);
 	}
 
 	/**
@@ -84,14 +79,26 @@ public final class Bearer implements Wrapper {
 	 *                      request and the request itself; returns an optional configured request on successful token
 	 *                      validation or an empty optional otherwise
 	 *
+	 * @return a new a bearer token authenticator
+	 *
 	 * @throws NullPointerException if {@code authenticator} is null
 	 */
-	public Bearer(final BiFunction<String, Request, Optional<Request>> authenticator) {
+	public static Bearer bearer(final BiFunction<String, Request, Optional<Request>> authenticator) {
 
 		if ( authenticator == null ) {
 			throw new NullPointerException("null authenticator");
 		}
 
+		return new Bearer(authenticator);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final BiFunction<? super String, Request, Optional<Request>> authenticator;
+
+
+	private Bearer(final BiFunction<? super String, Request, Optional<Request>> authenticator) {
 		this.authenticator=authenticator;
 	}
 
@@ -109,7 +116,7 @@ public final class Bearer implements Wrapper {
 
 	/**
 	 * @return a wrapper adding authentication challenge to unauthorized responses, unless already provided by nested
-	 * 		authorization schemes
+	 * authorization schemes
 	 */
 	private Wrapper challenger() {
 		return handler -> request -> handler.handle(request).map(response ->

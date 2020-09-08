@@ -44,9 +44,21 @@ public final class Gateway implements Wrapper {
 	private static final Pattern URLEncodedPattern=Pattern.compile("application/x-www-form-urlencoded\\b");
 
 
+	/**
+	 * Creates an API gateway.
+	 *
+	 * @return a new API gateway
+	 */
+	public static Gateway gateway() {
+		return new Gateway();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Logger logger=asset(logger());
+
+	private Gateway() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

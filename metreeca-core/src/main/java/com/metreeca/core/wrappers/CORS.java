@@ -24,7 +24,7 @@ import static java.lang.String.join;
 
 
 /**
- * CORS request manager.
+ * CORS filter.
  *
  * <p>Manages CORS HTTP requests.</p>
  *
@@ -34,6 +34,20 @@ import static java.lang.String.join;
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>
  */
 public final class CORS implements Wrapper {
+
+	/**
+	 * Creates a CORS filter
+	 *
+	 * @return a new CORS filter
+	 */
+	public static CORS cors() {
+		return new CORS();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private CORS() {}
 
 	// !!! https://www.html5rocks.com/static/images/cors_server_flowchart.png
 

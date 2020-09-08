@@ -37,9 +37,6 @@ import static java.util.Objects.requireNonNull;
  */
 public final class Aliaser implements Wrapper {
 
-	private final Function<Request, Optional<String>> resolver;
-
-
 	/**
 	 * Creates a resource aliaser.
 	 *
@@ -47,14 +44,25 @@ public final class Aliaser implements Wrapper {
 	 *                 the aliased request {@linkplain Request#item() item}, if one was identified, or an empty
 	 *                 optional, otherwise
 	 *
+	 * @return a new resource aliaser
+	 *
 	 * @throws NullPointerException if {@code resolver} is null or returns a null value
 	 */
-	public Aliaser(final Function<Request, Optional<String>> resolver) {
+	public static Aliaser aliaser(final Function<Request, Optional<String>> resolver) {
 
 		if ( resolver == null ) {
 			throw new NullPointerException("null resolver");
 		}
 
+		return new Aliaser(resolver);
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Function<Request, Optional<String>> resolver;
+
+
+	private Aliaser(final Function<Request, Optional<String>> resolver) {
 		this.resolver=resolver;
 	}
 

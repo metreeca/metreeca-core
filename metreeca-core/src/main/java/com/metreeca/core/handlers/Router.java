@@ -97,10 +97,23 @@ public final class Router implements Handler {
 	));
 
 
+	/**
+	 * Creates a request router
+	 *
+	 * @return a new request router
+	 */
+	public static Router router() {
+		return new Router();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<String, Function<Request, Optional<Future<Response>>>> routes=new LinkedHashMap<>();
 	private final Map<String, Handler> methods=new LinkedHashMap<>(singletonMap(Request.OPTIONS, this::options));
+
+
+	private Router() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

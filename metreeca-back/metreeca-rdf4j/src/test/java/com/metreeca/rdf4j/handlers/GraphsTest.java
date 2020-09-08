@@ -93,7 +93,7 @@ final class GraphsTest {
 
 
 	private Graphs endpoint() {
-		return new Graphs().query(Root).update(Root);
+		return Graphs.graphs().query(Root).update(Root);
 	}
 
 	private Request request() {

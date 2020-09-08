@@ -17,7 +17,8 @@
 
 package com.metreeca.core.wrappers;
 
-import com.metreeca.core.*;
+import com.metreeca.core.Context;
+import com.metreeca.core.Request;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
@@ -29,6 +30,7 @@ import static com.metreeca.core.Response.InternalServerError;
 import static com.metreeca.core.Response.OK;
 import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.core.formats.TextFormat.text;
+import static com.metreeca.core.wrappers.Gateway.gateway;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -44,9 +46,9 @@ final class GatewayTest {
 
 
 		@Test void testPreprocessQueryParameters() {
-			new Context().get(Gateway::new)
+			new Context().get(Gateway::gateway)
 
-					.wrap((Handler)request -> {
+					.wrap(request -> {
 
 						Assertions.assertThat(request.parameters()).containsExactly(
 								parameter("one", singletonList("1")),
@@ -65,9 +67,9 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessBodyParameters() {
-			new Context().get(Gateway::new)
+			new Context().get(Gateway::gateway)
 
-					.wrap((Handler)request -> {
+					.wrap(request -> {
 
 						Assertions.assertThat(request.parameters()).containsExactly(
 								parameter("one", singletonList("1")),
@@ -87,9 +89,9 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessDontOverwriteExistingParameters() {
-			new Context().get(Gateway::new)
+			new Context().get(Gateway::gateway)
 
-					.wrap((Handler)request -> {
+					.wrap(request -> {
 
 						Assertions.assertThat(request.parameters()).containsExactly(
 								parameter("existing", singletonList("true"))
@@ -108,9 +110,9 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessQueryOnlyOnGET() {
-			new Context().get(Gateway::new)
+			new Context().get(Gateway::gateway)
 
-					.wrap((Handler)request -> {
+					.wrap(request -> {
 
 						Assertions.assertThat(request.parameters()).isEmpty();
 
@@ -126,9 +128,9 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessBodyOnlyOnPOST() {
-			new Context().get(Gateway::new)
+			new Context().get(Gateway::gateway)
 
-					.wrap((Handler)request -> {
+					.wrap(request -> {
 
 						Assertions.assertThat(request.parameters()).isEmpty();
 
@@ -149,7 +151,7 @@ final class GatewayTest {
 	@Nested final class ErrorHandling {
 
 		@Test void testTrapStrayExceptions() {
-			new Context().exec(() -> new Gateway()
+			new Context().exec(() -> gateway()
 
 					.wrap((Request request) -> { throw new UnsupportedOperationException("stray"); })
 

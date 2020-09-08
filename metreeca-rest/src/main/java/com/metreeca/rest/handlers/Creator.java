@@ -35,13 +35,17 @@ import static java.util.UUID.randomUUID;
  * <p>Performs:</p>
  *
  * <ul>
+ *
  * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based
- * {@linkplain Actor#throttler(Object, Object...)
- * authorization}, considering shapes enabled by the {@linkplain Shape#Create} task and the {@linkplain Shape#Detail}
- * area;</li>
+ * {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Shape#Create} task and the {@linkplain Shape#Detail} area;</li>
+ *
  * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ *
  * <li>resource {@linkplain #Creator(Function) slug} generation;</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#create(Request) creation}.</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
@@ -50,14 +54,13 @@ public final class Creator extends Actor {
 
 	private static final Object monitor=new Object();
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * Creates a resource creator with a UUID-based slug generator.
+	 *
+	 * @return a new resource creator
 	 */
-	public Creator() {
-		this(request -> randomUUID().toString());
+	public static Creator creator() {
+		return creator(request -> randomUUID().toString());
 	}
 
 	/**
@@ -66,21 +69,17 @@ public final class Creator extends Actor {
 	 * @param slug a function mapping from the creation request to the identifier to be assigned to the newly created
 	 *             resource; must return a non-null non-clashing value
 	 *
+	 * @return a new resource creator
+	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */
-	public Creator(final Function<Request, String> slug) {
+	public static Creator creator(final Function<Request, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");
 		}
 
-		delegate(wrapper(slug).wrap(creator()) // chain slug immediately before handler after custom wrappers
-
-				.with(connector())
-				.with(throttler(Shape.Create, Shape.Detail))
-				.with(validator())
-
-		);
+		return new Creator(slug);
 	}
 
 	/**
@@ -89,13 +88,29 @@ public final class Creator extends Actor {
 	 * @param <T>    the type of the message body to be inspected during slug generation
 	 * @param format the format of the message body to be inspected during slug generation
 	 * @param slug   a function mapping from the creation request and its payload to the identifier to be assigned to
-	 *               the
-	 *               newly created resource; must return a non-null non-clashing value
+	 *               the newly created resource; must return a non-null non-clashing value
+	 *
+	 * @return a new resource creator
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code slug} is null
 	 */
-	public <T> Creator(final Format<T> format, final BiFunction<? super Request, T, String> slug) {
-		this(request -> request.body(format).fold(failure -> "", value -> slug.apply(request, value)));
+	public static <T> Creator creator(
+			final Format<T> format, final BiFunction<? super Request, ? super T, String> slug
+	) {
+		return new Creator(request -> request.body(format).fold(error -> "", value -> slug.apply(request, value)));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Creator(final Function<Request, String> slug) {
+		delegate(wrapper(slug).wrap(_creator()) // chain slug immediately before handler after custom wrappers
+
+				.with(connector())
+				.with(throttler(Shape.Create, Shape.Detail))
+				.with(validator())
+
+		);
 	}
 
 

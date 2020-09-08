@@ -67,10 +67,20 @@ public final class Graphs extends Endpoint<Graphs> {
 	));
 
 
+	/**
+	 * Creates a graph store endpoint
+	 *
+	 * @return a new graph store endpoint
+	 */
+	public static Graphs graphs() {
+		return new Graphs();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Graphs() {
-		delegate(new Router()
+	private Graphs() {
+		delegate(Router.router()
 				.get(this::get)
 				.put(this::put)
 				.delete(this::delete)

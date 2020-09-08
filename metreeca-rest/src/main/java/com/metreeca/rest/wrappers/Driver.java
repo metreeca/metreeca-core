@@ -54,22 +54,31 @@ import static com.metreeca.json.Shape.shape;
  */
 public final class Driver implements Wrapper {
 
-	private final Shape shape;
-
-
 	/**
 	 * Creates a content driver.
 	 *
 	 * @param shape the shape driving the lifecycle of the linked data resources managed by the wrapped handler
 	 *
+	 * @return a new shape-based content drive
+	 *
 	 * @throws NullPointerException if {@code shape} is null
 	 */
-	public Driver(final Shape shape) {
+	public static Driver driver(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
+		return new Driver(shape);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Shape shape;
+
+
+	private Driver(final Shape shape) {
 		this.shape=shape.map(new Optimizer());
 	}
 

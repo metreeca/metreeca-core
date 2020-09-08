@@ -41,7 +41,7 @@ final class ValidatorTest {
 
 
 	@Test void testAcceptValidRequests() {
-		exec(() -> new Validator(request -> emptyList())
+		exec(() -> Validator.validator(request -> emptyList())
 
 				.wrap(handler())
 
@@ -54,7 +54,7 @@ final class ValidatorTest {
 	}
 
 	@Test void testRejectInvalidRequests() {
-		exec(() -> new Validator(request -> asList("issue", "issue"))
+		exec(() -> Validator.validator(request -> asList("issue", "issue"))
 
 				.wrap(handler())
 
