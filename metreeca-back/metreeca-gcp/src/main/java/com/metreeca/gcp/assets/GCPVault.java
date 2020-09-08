@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.gcp.services;
+package com.metreeca.gcp.assets;
 
 import com.metreeca.core.assets.Vault;
 
