@@ -31,10 +31,10 @@ import org.eclipse.rdf4j.rio.*;
 
 import java.util.*;
 
+import static com.metreeca.core.Message.types;
 import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.*;
 import static com.metreeca.core.formats.OutputFormat.output;
-import static com.metreeca.rdf.Formats.types;
 
 
 /**

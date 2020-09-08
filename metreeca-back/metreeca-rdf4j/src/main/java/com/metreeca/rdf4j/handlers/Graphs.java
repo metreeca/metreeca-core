@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static com.metreeca.core.Message.types;
 import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.BadRequest;
 import static com.metreeca.core.Response.InternalServerError;
@@ -43,7 +44,6 @@ import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.json.Shape.only;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.Formats.types;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;

@@ -20,13 +20,7 @@ package com.metreeca.rdf;
 import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.lang.Float.parseFloat;
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -34,42 +28,8 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Formats {
 
-	private static final Pattern MimePattern=
-			Pattern.compile("((?:[-+\\w]+|\\*)/(?:[-+\\w]+|\\*))(?:\\s*;\\s*q\\s*=\\s*(\\d*(?:\\.\\d+)?))?");
-
 
 	private Formats() {} // a utility class
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static List<String> types(final String types) {
-
-		if ( types == null ) {
-			throw new NullPointerException("null mime types");
-		}
-
-		final List<Map.Entry<String, Float>> entries=new ArrayList<>();
-
-		final Matcher matcher=MimePattern.matcher(types);
-
-		while ( matcher.find() ) {
-
-			final String media=matcher.group(1).toLowerCase(Locale.ROOT);
-			final String quality=matcher.group(2);
-
-			try {
-				entries.add(new SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
-			} catch ( final NumberFormatException ignored ) {
-				entries.add(new SimpleImmutableEntry<>(media, 0f));
-			}
-		}
-
-		entries.sort((x, y) -> -Float.compare(x.getValue(), y.getValue()));
-
-		return entries.stream().map(Map.Entry::getKey).collect(toList());
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

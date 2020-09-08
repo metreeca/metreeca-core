@@ -24,10 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static com.metreeca.rdf.Formats.types;
+import static com.metreeca.core.Message.types;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -39,68 +37,7 @@ final class FormatsTest {
 	private static final TestService Binary=new TestService(RDFFormat.BINARY);
 
 
-	//// Types
-	// ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testTypesParseStrings() {
-
-		assertThat(emptyList())
-				.as("empty")
-				.isEqualTo(types(""));
-
-		assertThat(singletonList("text/turtle"))
-				.as("single")
-				.isEqualTo(types("text/turtle"));
-
-		assertThat(asList("text/turtle", "text/plain"))
-				.as("multiple")
-				.isEqualTo(types("text/turtle, text/plain"));
-
-		assertThat(singletonList("*/*"))
-				.as("wildcard")
-				.isEqualTo(types("*/*"));
-
-		assertThat(singletonList("text/*"))
-				.as("type wildcard")
-				.isEqualTo(types("text/*"));
-
-	}
-
-	@Test void testTypesParseLeniently() {
-
-		assertThat(singletonList("text/plain"))
-				.as("normalize case")
-				.isEqualTo(types("text/Plain"));
-
-		assertThat(singletonList("text/plain"))
-				.as("ignores spaces")
-				.isEqualTo(types(" text/plain ; q = 0.3"));
-
-		assertThat(asList("text/turtle", "text/plain", "text/csv"))
-				.as("lenient separators")
-				.isEqualTo(types("text/turtle, text/plain\ttext/csv"));
-
-	}
-
-	@Test void testSortOnQuality() {
-
-		assertThat(asList("text/plain", "text/turtle"))
-				.as("sorted")
-				.isEqualTo(types("text/turtle;q=0.1, text/plain;q=0.2"));
-
-		assertThat(asList("text/plain", "text/turtle"))
-				.as("sorted with default values")
-				.isEqualTo(types("text/turtle;q=0.1, text/plain"));
-
-		assertThat(asList("text/plain", "text/turtle"))
-				.as("sorted with corrupt values")
-				.isEqualTo(types("text/turtle;q=x, text/plain"));
-
-	}
-
-
-	//// Service
-	// /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Service //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testServiceScanMimeTypes() {
 
