@@ -1,5 +1,18 @@
 /*
- * Copyright © 2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -15,9 +28,9 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Path.direct;
-import static com.metreeca.rdf.Path.union;
-import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.Values.statement;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Objects.requireNonNull;
@@ -50,6 +63,83 @@ public final class Cell implements Resource {
 		}
 
 		return new Builder(cell.focus, cell.model);
+	}
+
+
+	public static Path direct(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return (subject, model) -> model.stream()
+
+				.peek(Objects::requireNonNull)
+
+				.filter(s -> s.getSubject().equals(subject))
+				.filter(s -> s.getPredicate().equals(predicate))
+
+				.map(Statement::getObject);
+	}
+
+	public static Path inverse(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return (subject, model) -> model.stream()
+
+				.peek(Objects::requireNonNull)
+
+				.filter(s -> s.getObject().equals(subject))
+				.filter(s -> s.getPredicate().equals(predicate))
+
+				.map(Statement::getSubject);
+	}
+
+
+	public static Path union(final IRI... predicates) {
+
+		if ( predicates == null || Arrays.stream(predicates).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null paths");
+		}
+
+		final Collection<IRI> paths=new HashSet<>(asList(predicates));
+
+		return (subject, model) -> model.stream()
+
+				.peek(Objects::requireNonNull)
+
+				.filter(s -> s.getSubject().equals(subject))
+				.filter(s -> paths.contains(s.getPredicate()))
+
+				.map(Statement::getObject);
+	}
+
+	public static Path union(final Path... paths) {
+
+		if ( paths == null || Arrays.stream(paths).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null paths");
+		}
+
+		return union(asList(paths));
+	}
+
+	public static Path union(final Collection<Path> paths) {
+
+		if ( paths == null || paths.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null paths");
+		}
+
+		return (subject, model) -> paths.stream().flatMap(path -> path.follow(subject, model));
+	}
+
+
+	@FunctionalInterface public static interface Path {
+
+		public Stream<Value> follow(final Resource subject, final Collection<Statement> model);
+
 	}
 
 
@@ -258,7 +348,7 @@ public final class Cell implements Resource {
 
 				model.add(Values.direct(predicate)
 						? statement(focus, predicate, cell.focus)
-						: statement(cell.focus, inverse(predicate), focus)
+						: statement(cell.focus, Values.inverse(predicate), focus)
 				);
 
 				model.addAll(cell.model);
@@ -271,7 +361,7 @@ public final class Cell implements Resource {
 
 				} else if ( object instanceof Resource ) {
 
-					model.add(statement((Resource)object, inverse(predicate), focus));
+					model.add(statement((Resource)object, Values.inverse(predicate), focus));
 
 				}
 
