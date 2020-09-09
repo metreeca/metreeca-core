@@ -116,61 +116,6 @@ import static java.util.Objects.requireNonNull;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Folds alternative values.
-	 *
-	 * @param <V>   the type of the folded value
-	 * @param left  a function mapping from the left alternative value to the folded value
-	 * @param right a function mapping from the right alternative value to the folded value
-	 *
-	 * @return the folded value, generated as required either by {@code right} or {@code left}
-	 *
-	 * @throws NullPointerException if either {@code right} or {@code left} is null or returns a null value
-	 */
-	public <V> V fold(final Function<L, V> left, final Function<R, V> right);
-
-	/**
-	 * Consumes alternative values.
-	 *
-	 * @param left  a consumer for the left alternative value
-	 * @param right a consumer for the right alternative value
-	 *
-	 * @throws NullPointerException if either {@code right} or {@code left} is null
-	 */
-	public default void accept(final Consumer<L> left, final Consumer<R> right) {
-
-		if ( left == null ) {
-			throw new NullPointerException("null left");
-		}
-
-		if ( right == null ) {
-			throw new NullPointerException("null right");
-		}
-
-		fold(
-				value -> {
-					left.accept(value);
-					return this;
-				},
-				value -> {
-					right.accept(value);
-					return this;
-				}
-		);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves the right value.
-	 *
-	 * @return an optional containing the right value of this pair, if one is present, or an empty optional, otherwise
-	 */
-	public default Optional<R> get() {
-		return fold(l -> Optional.empty(), Optional::of);
-	}
-
-	/**
 	 * Maps the right value.
 	 *
 	 * @param mapper the right value mapping function
@@ -211,6 +156,61 @@ import static java.util.Objects.requireNonNull;
 
 		return fold(Either::Left, value ->
 				requireNonNull(mapper.apply(value), "null mapper return value")
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the right value.
+	 *
+	 * @return an optional containing the right value of this pair, if one is present, or an empty optional, otherwise
+	 */
+	public default Optional<R> get() {
+		return fold(l -> Optional.empty(), Optional::of);
+	}
+
+	/**
+	 * Folds alternative values.
+	 *
+	 * @param <V>   the type of the folded value
+	 * @param left  a function mapping from the left alternative value to the folded value
+	 * @param right a function mapping from the right alternative value to the folded value
+	 *
+	 * @return the folded value, generated as required either by {@code right} or {@code left}
+	 *
+	 * @throws NullPointerException if either {@code right} or {@code left} is null or returns a null value
+	 */
+	public <V> V fold(final Function<L, V> left, final Function<R, V> right);
+
+	/**
+	 * Consumes alternative values.
+	 *
+	 * @param left  a consumer for the left alternative value
+	 * @param right a consumer for the right alternative value
+	 *
+	 * @throws NullPointerException if either {@code right} or {@code left} is null
+	 */
+	public default void accept(final Consumer<L> left, final Consumer<R> right) {
+
+		if ( left == null ) {
+			throw new NullPointerException("null left");
+		}
+
+		if ( right == null ) {
+			throw new NullPointerException("null right");
+		}
+
+		fold(
+				value -> {
+					left.accept(value);
+					return this;
+				},
+				value -> {
+					right.accept(value);
+					return this;
+				}
 		);
 	}
 

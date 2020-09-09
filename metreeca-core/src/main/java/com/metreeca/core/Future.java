@@ -50,18 +50,6 @@ import static java.util.Objects.requireNonNull;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Connects a consumer to this future value.
-	 *
-	 * @param consumer the consumer for the lazily generated value
-	 *
-	 * @throws NullPointerException if {@code value} is null
-	 */
-	public void accept(final Consumer<T> consumer);
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
 	 * Maps this future value.
 	 *
 	 * @param mapper a value mapping function; must return a non-null value
@@ -102,5 +90,17 @@ import static java.util.Objects.requireNonNull;
 				requireNonNull(mapper.apply(value), "null mapper return value").accept(consumer)
 		);
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Connects a consumer to this future value.
+	 *
+	 * @param consumer the consumer for the lazily generated value
+	 *
+	 * @throws NullPointerException if {@code value} is null
+	 */
+	public void accept(final Consumer<T> consumer);
 
 }
