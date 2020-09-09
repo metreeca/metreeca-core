@@ -18,11 +18,12 @@
 package com.metreeca.core;
 
 import com.metreeca.core.formats.JSONFormat;
-import com.metreeca.core.formats.TextFormat;
 
 import javax.json.JsonObject;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
+
+import static com.metreeca.core.formats.TextFormat.text;
 
 /**
  * Message exception.
@@ -162,8 +163,10 @@ public final class MessageException extends RuntimeException implements Handler,
 		super(String.format("%3d %s", status, details));
 
 		this.status=status;
-		this.report=response -> status < 500
-				? response.status(status).body(TextFormat.text(), details)
+		this.report=response -> status >= 301 && status <= 303 || status >= 307 && status <= 308
+				? response.status(status).header("Location", details)
+				: status < 500
+				? response.status(status).body(text(), details)
 				: response.status(status).cause(new Exception(details));
 	}
 
@@ -185,7 +188,7 @@ public final class MessageException extends RuntimeException implements Handler,
 
 		this.status=status;
 		this.report=response -> status < 500
-				? response.status(status).cause(cause).body(TextFormat.text(), message)
+				? response.status(status).cause(cause).body(text(), message)
 				: response.status(status).cause(cause);
 	}
 
