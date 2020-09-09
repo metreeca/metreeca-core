@@ -200,7 +200,7 @@ public abstract class Server implements Filter {
 	}
 
 	private void response(final HttpServletResponse http, final Response response) {
-		if ( response.status() > 0 ) { // only if actually processed
+		if ( response.status() > 0 ) { // unprocessed requests fall through the host container
 
 			http.setStatus(response.status());
 
@@ -208,9 +208,7 @@ public abstract class Server implements Filter {
 					values.forEach(value -> http.addHeader(name, value))
 			);
 
-			// ignore missing response bodies
-
-			response.body(output()).accept(e -> {}, target -> {
+			response.body(output()).accept(e -> {}, target -> { // ignore missing response bodies
 				try {
 
 					target.accept(http.getOutputStream());
