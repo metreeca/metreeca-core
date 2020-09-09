@@ -107,7 +107,7 @@ public final class Meta implements Shape {
 		return Optional.ofNullable(shape.map(new MetaProbe(label)));
 	}
 
-	private static <T> Optional<T> meta(final Object label, final Shape shape, final Class<T> clazz) {
+	public static <T> Optional<T> meta(final Object label, final Shape shape, final Class<T> clazz) {
 		return meta(label, shape)
 				.filter(clazz::isInstance)
 				.map(clazz::cast);

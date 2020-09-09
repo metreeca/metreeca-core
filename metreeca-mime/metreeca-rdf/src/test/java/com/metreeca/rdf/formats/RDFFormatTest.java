@@ -31,6 +31,7 @@ import java.util.List;
 
 import static com.metreeca.core.Message.types;
 import static com.metreeca.core.Response.UnsupportedMediaType;
+import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.core.formats.InputFormat.input;
 import static com.metreeca.core.formats.TextFormat.text;
 import static com.metreeca.json.Shape.shape;
@@ -46,10 +47,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 final class RDFFormatTest {
-
-	private static final String external="http://example.com/";
-	private static final String internal="app://local/";
-
 
 	private void exec(final Runnable... tasks) {
 		new Context().exec(tasks).clear();
@@ -181,7 +178,7 @@ final class RDFFormatTest {
 							.body(rdf(), decode("</context/container/> ldp:contains </context/container/x>."))
 					)
 
-					.accept(response -> ResponseAssert.assertThat(response)
+					.accept(response -> assertThat(response)
 							.hasBody(text(), text -> assertThat(text)
 									.contains("@base <"+ValuesTest.Base+"context/container/"+">")
 							)

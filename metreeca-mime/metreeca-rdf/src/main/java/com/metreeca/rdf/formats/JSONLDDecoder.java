@@ -29,8 +29,10 @@ import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 import org.eclipse.rdf4j.rio.helpers.RDFParserHelper;
 
 import javax.json.*;
+import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -43,11 +45,13 @@ import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
+import static com.metreeca.rdf.formats.JSONLDCodecs.driver;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 
-final class JSONLDDecoder extends JSONLDCodec {
+final class JSONLDDecoder {
 
 	private static final Pattern StepPattern=Pattern.compile( // !!! review/remove
 			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
@@ -55,52 +59,74 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 
 	private static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
-		return new AbstractMap.SimpleImmutableEntry<>(key, value);
+		return new SimpleImmutableEntry<>(key, value);
 	}
 
 
-	/**
-	 * Resolves JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be resolved against
-	 *
-	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m
-	 * defaulting to
-	 * the alias if no property name is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
+	/*
+	 * Creates a function mapping from property aliases to property ids, defaulting to the alias if no id is found.
 	 */
-	private static Function<String, String> resolver(final JsonObject context) {
+	private static Function<String, String> keywords(final Shape shape) {
 
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
+		final Map<String, String> keywords=JSONLDCodecs.keywords(shape)
 
-		return alias -> context.getString(alias, alias);
+				.collect(toMap(Map.Entry::getValue, Map.Entry::getKey, (x, y) -> {
+
+					if ( !x.equals(y) ) {
+						throw new IllegalArgumentException("conflicting aliases for JSON-LD keywords");
+					}
+
+					return x;
+
+				}));
+
+		return alias -> keywords.getOrDefault(alias, alias);
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final URI base;
+	private final Resource focus;
+	private final Shape shape;
+	private final ParserConfig options;
 
-	private final Function<String, String> resolver;
-	private final ParserConfig config;
+	private final Function<String, String> keywords;
 
+	JSONLDDecoder(final String base, final Resource focus, final Shape shape, final ParserConfig options) {
 
-	JSONLDDecoder(final String base, final JsonObject context, final ParserConfig config) {
 		this.base=(base == null) ? null : URI.create(base);
-		this.resolver=resolver(context);
-		this.config=config;
+		this.focus=focus;
+		this.shape=(shape == null || pass(shape)) ? null : driver(shape);
+		this.options=options;
+
+		this.keywords=(shape == null) ? identity() : keywords(shape);
+
 	}
 
 
-	Collection<Statement> decode(final Resource focus, final Shape shape, final JsonValue json) throws JsonException {
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Collection<Statement> decode(final Reader reader) throws JsonException {
+
+		if ( reader == null ) {
+			throw new NullPointerException("null reader");
+		}
+
+		return decode(Json.createReader(reader).readObject());
+
+	}
+
+	public Collection<Statement> decode(final JsonValue json) throws JsonException {
+
+		if ( json == null ) {
+			throw new NullPointerException("null json");
+		}
 
 		final Collection<Statement> model=new ArrayList<>();
-		final Shape driver=shape == null || pass(shape) ? null : driver(shape);
 
-		values(json, driver, focus)
+		values(json, shape, focus)
 				.values()
 				.stream()
 				.flatMap(identity())
@@ -137,10 +163,6 @@ final class JSONLDDecoder extends JSONLDCodec {
 				: Values.bnode(id);
 	}
 
-	private IRI iri() {
-		return Values.iri();
-	}
-
 	private IRI iri(final String iri) {
 		return iri.isEmpty() ? Values.iri() : Values.iri(resolve(iri));
 	}
@@ -156,7 +178,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 			final ParseErrorCollector listener=new ParseErrorCollector();
 
-			final Literal literal=RDFParserHelper.createLiteral(text, lang, type, config, listener, factory());
+			final Literal literal=RDFParserHelper.createLiteral(text, lang, type, options, listener, factory());
 
 			final String errors=Stream.of(listener.getFatalErrors(), listener.getErrors())
 
@@ -209,9 +231,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 				index.put(edge.toString(), edge); // naked IRI
 			});
 
-			aliases.forEach((iri, alias) ->
-					index.put(alias, iri)
-			);
+			aliases.forEach((iri, alias) -> index.put(alias, iri));
 
 			final String step=matcher.group("step");
 			final IRI iri=index.get(step);
@@ -236,7 +256,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Map<Value, Stream<Statement>> values( // !!! private
+	private Map<Value, Stream<Statement>> values(
 			final JsonValue value, final Shape shape, final Resource focus) {
 		return (value instanceof JsonArray
 
@@ -273,7 +293,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 		for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
 
-			final String label=resolver.apply(entry.getKey());
+			final String label=keywords.apply(entry.getKey());
 
 			final Supplier<String> string=() -> entry.getValue() instanceof JsonString
 					? ((JsonString)entry.getValue()).getString()
@@ -311,7 +331,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 			final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
-		final IRI type=datatype(shape).filter(o -> o instanceof IRI).map(o -> (IRI)o).orElse(XSD.STRING);
+		final IRI type=datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
 
 		final Value value=ResourceType.equals(type) ? resource(text)
 				: BNodeType.equals(type) ? bnode(text)
@@ -353,7 +373,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 		return entry(source, object.entrySet().stream().flatMap(field -> {
 
-			final String label=resolver.apply(field.getKey());
+			final String label=keywords.apply(field.getKey());
 			final JsonValue value=field.getValue();
 
 			if ( label.equals(JSONLDFormat.type) && value instanceof JsonString ) {
@@ -437,5 +457,6 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 		}
 	}
+
 
 }

@@ -21,7 +21,6 @@ package com.metreeca.rdf.formats;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.ValuesTest;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +30,7 @@ import java.util.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
+import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
 import static java.util.Arrays.asList;
@@ -40,14 +40,14 @@ import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class JSONLDCodecTest {
+final class JSONLDCodecsTest {
 
-	static final JsonObject Context=Json.createObjectBuilder()
-			.add("id", JSONLDFormat.id)
-			.add("value", JSONLDFormat.value)
-			.add("type", JSONLDFormat.type)
-			.add("language", JSONLDFormat.language)
-			.build();
+	static final Shape Keywords=and(
+			meta(JSONLDFormat.id, "id"),
+			meta(JSONLDFormat.value, "value"),
+			meta(JSONLDFormat.type, "type"),
+			meta(JSONLDFormat.language, "language")
+	);
 
 
 	//// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,105 +86,98 @@ final class JSONLDCodecTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Map<IRI, String> aliases(final Shape shape) {
-		return new JSONLDCodec() {}.aliases(shape);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Test void testGuessAliasFromIRI() {
 
-		assertThat(aliases(field(RDF.VALUE)))
+		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE)))
 				.as("direct")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
-		assertThat(aliases(field(inverse(RDF.VALUE))))
+		assertThat(JSONLDCodecs.aliases(field(inverse(RDF.VALUE))))
 				.as("inverse")
 				.isEqualTo(singletonMap(inverse(RDF.VALUE), "valueOf"));
 
 	}
 
 	@Test void testRetrieveUserDefinedAlias() {
-		assertThat(aliases(field(RDF.VALUE, alias("alias"))))
+		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, alias("alias"))))
 				.as("user-defined")
 				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 	}
 
 	@Test void testPreferUserDefinedAliases() {
-		assertThat(aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
+		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
 				.as("user-defined")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "alias")));
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
 	}
 
 
 	@Test void testRetrieveAliasFromNestedShapes() {
 
-		assertThat(aliases(and(field(RDF.VALUE, alias("alias")))))
+		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("alias")))))
 				.as("group")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "alias")));
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
 
-		assertThat(aliases(field(RDF.VALUE, and(alias("alias")))))
+		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, and(alias("alias")))))
 				.as("conjunction")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "alias")));
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
 
 	}
 
 	@Test void testMergeDuplicateFields() {
 
 		// nesting required to prevent and() from collapsing duplicates
-		assertThat(aliases(and(field(RDF.VALUE), and(field(RDF.VALUE)))))
+		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE), and(field(RDF.VALUE)))))
 				.as("system-guessed")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "value")));
+				.isEqualTo(map(entry(RDF.VALUE, "value")));
 
 		// nesting required to prevent and() from collapsing duplicates
-		assertThat(aliases(and(field(RDF.VALUE, alias("alias")), and(field(RDF.VALUE, alias("alias"))))))
+		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("alias")), and(field(RDF.VALUE, alias("alias"))))))
 				.as("user-defined")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "alias")));
+				.isEqualTo(map(entry(RDF.VALUE, "alias")));
 
 	}
 
 
 	@Test void testHandleMultipleAliases() {
 
-		assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("two")))))
+		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, and(alias("one"), alias("two")))))
 				.as("clashing")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "value")));
+				.isEqualTo(map(entry(RDF.VALUE, "value")));
 
-		assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
+		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
 				.as("repeated")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "one")));
+				.isEqualTo(map(entry(RDF.VALUE, "one")));
 
 	}
 
 	@Test void testMergeAliases() {
-		assertThat(aliases(and(field(RDF.TYPE), field(RDF.VALUE))))
+		assertThat(JSONLDCodecs.aliases(and(field(RDF.TYPE), field(RDF.VALUE))))
 				.as("merged")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.TYPE, "type"),
-						JSONLDCodecTest.entry(RDF.VALUE, "value")));
+				.isEqualTo(map(entry(RDF.TYPE, "type"),
+						entry(RDF.VALUE, "value")));
 	}
 
 	@Test void testIgnoreClashingAliases() {
 
-		assertThat(aliases(and(field(RDF.VALUE), field(iri("urn:example:value")))))
+		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE), field(iri("urn:example:value")))))
 				.as("different fields")
 				.isEmpty();
 
 		// fall back to system-guess alias
 
-		assertThat(aliases(and(field(RDF.VALUE, alias("one")), field(RDF.VALUE, alias("two")))))
+		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("one")), field(RDF.VALUE, alias("two")))))
 				.as("same field")
-				.isEqualTo(JSONLDCodecTest.map(JSONLDCodecTest.entry(RDF.VALUE, "value")));
+				.isEqualTo(map(entry(RDF.VALUE, "value")));
 
 	}
 
 	@Test void testIgnoreReservedAliases() {
 
-		assertThat(aliases(field(iri(ValuesTest.Base, "@id"))))
+		assertThat(JSONLDCodecs.aliases(field(iri(ValuesTest.Base, "@id"))))
 				.as("ignore reserved system-guessed aliases")
 				.isEmpty();
 
-		assertThat(aliases(field(RDF.VALUE, alias("@id"))))
+		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, alias("@id"))))
 				.as("ignore reserved user-defined aliases")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 

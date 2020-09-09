@@ -20,27 +20,24 @@ package com.metreeca.rdf.formats;
 import com.metreeca.core.*;
 import com.metreeca.core.formats.*;
 import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Meta;
 
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.ParserConfig;
 
-import javax.json.*;
+import javax.json.JsonException;
 import java.io.*;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.*;
 
-import static com.metreeca.core.Context.asset;
 import static com.metreeca.core.Either.Left;
 import static com.metreeca.core.Either.Right;
 import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.BadRequest;
 import static com.metreeca.core.Response.UnsupportedMediaType;
 import static com.metreeca.core.formats.InputFormat.input;
-import static com.metreeca.core.formats.JSONFormat.json;
 import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.json.Shape.shape;
+import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf.Values.iri;
 
 /**
@@ -64,7 +61,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * The JSON-LD {@value} keyword.
@@ -88,99 +85,38 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 
 	/**
-	 * Retrieves the default JSON-LD context factory.
+	 * Creates a wrapper for global JSON-LD keyword mappings.
 	 *
-	 * @return the default JSON-LD context factory, which returns an amepty context
+	 * @param mappings an array of annotations with a JSON-LD keyword as label and an alias as value
+	 *
+	 * @return a wrapper extending the {@linkplain Shape#shape() shape} attribute of incoming requests and outgoing
+	 * responses with the provided keyword {@code mappings}
+	 *
+	 * @throws NullPointerException if {@code mapping} is null or contains null values
 	 */
-	public static Supplier<JsonObject> context() {
-		return () -> JsonValue.EMPTY_JSON_OBJECT;
-	}
+	public static Wrapper keywords(final Meta... mappings) {
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Parses a JSON-LD model.
-	 *
-	 * <p><strong>Warning</strong> / Parsing is completely driven by the provided shape: embedded {@code @context}
-	 * objects are ignored.</p>
-	 *
-	 * @param reader  the reader the JSON-LD object is to be parsed from
-	 * @param base    the base IRI for the JSON-LD model to be parsed
-	 * @param focus
-	 * @param shape
-	 * @param context
-	 *
-	 * @return either a parsing exception or the RDF model parsed from {@code reader}
-	 *
-	 * @throws NullPointerException if {@code reader} is null
-	 */
-	public static Either<JsonException, Collection<Statement>> jsonld(
-			final Reader reader, final String base,
-			final Resource focus, final Shape shape, final JsonObject context // !!! get from shape
-	) {
-
-		if ( reader == null ) {
-			throw new NullPointerException("null reader");
+		if ( mappings == null || Arrays.stream(mappings).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null mappings");
 		}
 
-		return json(reader).fold(Either::Left, json -> {
-			try {
-
-				return Right(new JSONLDDecoder(base, context, new ParserConfig()).decode(focus, shape, json));
-
-			} catch ( final JsonException e ) {
-
-				return Left(e);
-
-			}
-		});
-
-	}
-
-	/**
-	 * Writes a JSON-LD model.
-	 *
-	 * <p><strong>Warning</strong> / To be fixed: {@code @context} objects generaed from the provided shape are
-	 * currently not emitted.</p>
-	 *
-	 * @param <W>     the type of the {@code writer} the JSON-LD model is to be written to
-	 * @param writer  the writer the JSON-LD model is to be written to
-	 * @param base  the base IRI for the JSON-LD model to be written
-	 * @param focus
-	 * @param shape
-	 * @param context
-	 * @param model   the JSON-LD model to be written
-	 *
-	 * @return the target {@code writer}
-	 *
-	 * @throws NullPointerException if either {@code writer} or {@code model} is null or if {@code model} contains
-	 *                              null statements
-	 */
-	public static <W extends Writer> W jsonld(
-			final W writer, final String base,
-			final Resource focus, final Shape shape, final JsonObject context, // !!! get from shape
-			final Collection<Statement> model
-	) {
-
-		if ( writer == null ) {
-			throw new NullPointerException("null writer");
+		if ( Arrays.stream(mappings).anyMatch(meta -> !meta.getLabel().toString().startsWith("@")) ) {
+			throw new IllegalArgumentException("illegal mapping keywords");
 		}
 
-		if ( model == null || model.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null model or model statement");
-		}
+		final Shape keywords=and(mappings);
 
-		return json(writer, (JsonObject)new JSONLDEncoder(base, context).encode(focus, shape, model));
+		return handler -> request -> handler
 
+				.handle(request.attribute(shape(), and(request.attribute(shape()), keywords)))
+
+				.map(response -> response.attribute(shape(), and(response.attribute(shape()), keywords)));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private JSONLDFormat() {}
-
-	private final JsonObject context=asset(context());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,6 +125,9 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * Decodes the JSON-LD {@code message} body from the input stream supplied by the {@code message}
 	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is either
 	 * missing or  matched by {@link JSONFormat#MIMEPattern}
+	 *
+	 * <p><strong>Warning</strong> / Decoding is completely driven by the {@code message} {@linkplain Shape#shape()
+	 * shape attribute}: embedded {@code @context} objects are ignored.</p>
 	 */
 	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
 		return message.header("Content-Type").filter(JSONFormat.MIMEPattern.asPredicate().or(String::isEmpty))
@@ -200,11 +139,16 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
-						return jsonld(reader, message.request().base(),
-								iri(message.item()), message.attribute(shape()), context
-						).fold(e -> Left(status(BadRequest, e)), Either::Right);
+						return Right(new JSONLDDecoder(
 
-					} catch ( final UnsupportedEncodingException e ) {
+								message.request().base(),
+								iri(message.item()),
+								message.attribute(shape()),
+								new ParserConfig()
+
+						).decode(reader));
+
+					} catch ( final UnsupportedEncodingException|JsonException e ) {
 
 						return Left(status(BadRequest, e));
 
@@ -223,6 +167,9 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * Configures {@code message} {@code Content-Type} header to {@value JSONFormat#MIME}, unless already defined, and
 	 * encodes the JSON-LD model {@code value} into the output stream accepted by the {@code message}
 	 * {@link OutputFormat} body
+	 *
+	 * <p><strong>Warning</strong> / {@code @context} objects generated from the {@code message}
+	 * {@linkplain Shape#shape() shape attribute} are currently not embedded.</p>
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 		return message
@@ -232,9 +179,12 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 				.body(output(), output -> {
 					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
-						jsonld(writer, message.request().base(),
-								iri(message.item()), message.attribute(shape()), context, value
-						);
+						new JSONLDEncoder(
+
+								iri(message.item()),
+								message.attribute(shape())
+
+						).encode(writer, value);
 
 					} catch ( final IOException e ) {
 

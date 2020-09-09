@@ -24,9 +24,11 @@ import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.Values.direct;
@@ -38,9 +40,9 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 
-abstract class JSONLDCodec {
+final class JSONLDCodecs {
 
-	protected Shape driver(final Shape shape) { // !!! caching
+	public static Shape driver(final Shape shape) { // !!! caching
 		return shape
 
 				.map(new Redactor(Shape.Role, values -> true))
@@ -53,7 +55,51 @@ abstract class JSONLDCodec {
 
 	}
 
-	protected Map<IRI, String> aliases(final Shape shape) {
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Stream<Map.Entry<String, String>> keywords(final Shape shape) {
+		return shape.map(new KeywordsProbe());
+	}
+
+
+	private static final class KeywordsProbe extends Traverser<Stream<Map.Entry<String, String>>> {
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Shape shape) {
+			return Stream.empty();
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Meta meta) {
+
+			final String label=meta.getLabel().toString();
+
+			return label.startsWith("@")
+					? Stream.of(new SimpleImmutableEntry<>(label, meta.getValue().toString()))
+					: Stream.empty();
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Field field) {
+			return Stream.empty();
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final And and) {
+			return and.getShapes().stream().flatMap(s -> s.map(this));
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Or or) {
+			return or.getShapes().stream().flatMap(s -> s.map(this));
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final When when) {
+			return Stream.of(when.getPass(), when.getFail()).flatMap(s -> s.map(this));
+		}
+
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Map<IRI, String> aliases(final Shape shape) {
 
 		if ( shape == null ) { return emptyMap(); } else {
 
@@ -66,8 +112,6 @@ abstract class JSONLDCodec {
 		}
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private abstract static class AliasesProbe extends Traverser<Map<IRI, String>> {
 
@@ -151,5 +195,10 @@ abstract class JSONLDCodec {
 		}
 
 	}
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JSONLDCodecs() {}
 
 }

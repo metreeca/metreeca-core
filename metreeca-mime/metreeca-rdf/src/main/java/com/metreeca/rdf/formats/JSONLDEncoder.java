@@ -18,13 +18,14 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -32,80 +33,106 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
-import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.formats.JSONLDCodecs.*;
 import static com.metreeca.rdf.formats._ValueParser._iri;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toMap;
 
 
-final class JSONLDEncoder extends JSONLDCodec {
+final class JSONLDEncoder {
 
-	/**
-	 * Aliases JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be aliased against
-	 *
-	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
-	 * property name if no alias is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	private static Function<String, String> aliaser(final Map<String, JsonValue> context) {
+	private static final JsonWriterFactory JsonWriters=Json
+			.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true));
 
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
 
-		final Map<String, String> aliases=new HashMap<>();
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		context.forEach((alias, name) -> {
-			if ( !alias.startsWith("@") && name instanceof JsonString ) {
-				aliases.put(((JsonString)name).getString(), alias);
-			}
-		});
+	private final Resource focus;
+	private final Shape shape;
 
-		return name -> aliases.getOrDefault(name, name);
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final String base;
+	private final String root;
 	private final Function<String, String> aliaser;
 
 
-	JSONLDEncoder(final CharSequence base, final JsonObject context) {
-		this.base=root(base);
-		aliaser=aliaser(context);
+	JSONLDEncoder(final IRI focus, final Shape shape) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		this.focus=focus;
+		this.shape=driver(shape);
+
+		this.root=Optional.of(focus.stringValue())
+				.map(IRIPattern::matcher)
+				.filter(Matcher::matches)
+				.map(matcher -> matcher.group("schemeall")+matcher.group("hostall")+"/")
+				.orElse("/");
+
+		final Map<String, String> keyword2aliases=keywords(shape)
+
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
+
+					if ( !x.equals(y) ) {
+						throw new IllegalArgumentException("conflicting aliases for JSON-LD keywords");
+					}
+
+					return x;
+
+				}));
+
+		this.aliaser=keyword -> keyword2aliases.getOrDefault(keyword, keyword);
 	}
 
 
-	JsonValue encode(final Resource focus, final Shape shape, final Collection<Statement> model) {
+	public JsonObject encode(final Collection<Statement> model) {
 
-		final Shape driver=shape == null || pass(shape) ? null : driver(shape);
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
 
-		return json(model, driver, focus);
+		return json(model, shape, focus, resource -> false).asJsonObject();
+	}
+
+	public <W extends Writer> W encode(final W writer, final Collection<Statement> model) {
+
+		if ( writer == null ) {
+			throw new NullPointerException("null writer");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		try ( final JsonWriter jsonWriter=JsonWriters.createWriter(writer) ) {
+
+			jsonWriter.writeObject(encode(model));
+
+			return writer;
+
+		}
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	JsonValue json(final Collection<Statement> model, final Shape shape, final Resource focus) { // !!! private?
-		return (focus != null)
-				? json(model, shape, focus, resource -> false)
-				: json(model, shape, subjects(model), resource -> false);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private JsonValue json(final Collection<Statement> model,
 			final Shape shape, final Collection<? extends Value> values, final Predicate<Resource> trail) {
-		if ( shape != null && maxCount(shape).map(limit -> limit == 1).orElse(false) ) { // single subject
 
-			return values.isEmpty() ? JsonValue.EMPTY_JSON_OBJECT : json(model, shape, values.iterator().next(), trail);
+		if ( maxCount(shape).map(limit -> limit == 1).orElse(false) ) { // single subject
+
+			return values.isEmpty()
+					? JsonValue.EMPTY_JSON_OBJECT
+					: json(model, shape, values.iterator().next(), trail);
 
 		} else { // multiple subjects
 
@@ -116,6 +143,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 			return array.build();
 
 		}
+
 	}
 
 	private JsonValue json(final Collection<Statement> model,
@@ -127,15 +155,18 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 	}
 
+
+	//// Resources ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private JsonValue json(final Collection<Statement> model,
 			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
 
 		final Object datatype=datatype(shape).orElse(null);
 		final Map<Object, Shape> fields=fields(shape);
 
-		final boolean inlineable=
-				IRIType.equals(datatype) || BNodeType.equals(datatype) || ResourceType.equals(datatype);
-
+		final boolean inlineable=IRIType.equals(datatype)
+				|| BNodeType.equals(datatype)
+				|| ResourceType.equals(datatype);
 
 		final String id=id(resource);
 
@@ -165,51 +196,42 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 			};
 
-			if ( shape == null ) { // write all direct fields
+			final Map<IRI, String> aliases=aliases(shape);
 
-				for (final IRI predicate : predicates(model, resource)) {
-					object.add(predicate.stringValue(),
-							json(model, null, objects(model, resource, predicate), nestedTrail)
-					);
-				}
+			for (final Map.Entry<Object, Shape> entry : fields.entrySet()) {
 
-			} else { // write direct/inverse fields as specified by the shape
+				final IRI predicate=_iri(entry.getKey());
+				final boolean direct=direct(predicate);
 
-				final Map<IRI, String> aliases=aliases(shape);
+				final Shape nestedShape=entry.getValue();
 
-				for (final Map.Entry<Object, Shape> entry : fields.entrySet()) {
+				final String alias=Optional.ofNullable(aliases.get(predicate))
+						.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
 
-					final IRI predicate=_iri(entry.getKey());
-					final boolean direct=direct(predicate);
+				final Collection<? extends Value> values=direct
+						? objects(model, resource, predicate)
+						: subjects(model, resource, inverse(predicate));
 
-					final Shape nestedShape=entry.getValue();
+				if ( !values.isEmpty() ) { // omit null value and empty arrays
 
-					final String alias=Optional.ofNullable(aliases.get(predicate))
-							.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
-
-					final Collection<? extends Value> values=direct
-							? objects(model, resource, predicate)
-							: subjects(model, resource, inverse(predicate));
-
-					if ( !values.isEmpty() ) { // omit null value and empty arrays
-
-						object.add(alias, json(model, nestedShape, values, nestedTrail));
-
-					}
+					object.add(alias, json(model, nestedShape, values, nestedTrail));
 
 				}
 
 			}
 
-			if ( resource instanceof BNode && references.isEmpty() ) {
-				object.remove(aliaser.apply(JSONLDFormat.id)); // drop id field for blank nodes without back-references
+			if ( resource instanceof BNode && references.isEmpty() ) { // no back-references > drop id
+				object.remove(aliaser.apply(JSONLDFormat.id));
 			}
 
 			return object.build();
 
 		}
+
 	}
 
+
+	//// Literals /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private JsonValue json(final Literal literal, final Shape shape) {
 
@@ -222,8 +244,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 					: datatype.equals(XSD.INTEGER) ? json(literal.integerValue())
 					: datatype.equals(XSD.DECIMAL) ? json(literal.decimalValue())
 					: datatype.equals(RDF.LANGSTRING) ? json(literal, literal.getLanguage().orElse(""))
-					: datatype(shape).isPresent() ? Json.createValue(literal.stringValue()) // only lexical value of
-					// type is known
+					: datatype(shape).isPresent() ? json(literal.stringValue()) // only lexical value if type is known
 					: json(literal, datatype);
 
 		} catch ( final IllegalArgumentException ignored ) { // malformed literals
@@ -264,42 +285,18 @@ final class JSONLDEncoder extends JSONLDCodec {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String id(final Resource resource) {
 		return resource instanceof BNode ? "_:"+resource.stringValue() : relativize(resource.stringValue());
 	}
 
-
-	private String root(final CharSequence base) {
-		if ( base == null ) { return null; } else {
-
-			final Matcher matcher=Values.IRIPattern.matcher(base);
-
-			return matcher.matches() ? matcher.group("schemeall")+matcher.group("hostall")+"/" : null;
-
-		}
-	}
-
 	private String relativize(final String iri) {
-		return base != null && iri.startsWith(base) ? iri.substring(base.length()-1) : iri;
+		return iri.startsWith(root) ? iri.substring(root.length()-1) : iri;
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Set<Resource> subjects(final Collection<Statement> model) {
-		return model.stream()
-				.map(Statement::getSubject)
-				.collect(toCollection(LinkedHashSet::new));
-	}
-
-	private Set<IRI> predicates(final Collection<Statement> model, final Value resource) {
-		return model.stream()
-				.filter(pattern(resource, null, null))
-				.map(Statement::getPredicate)
-				.collect(toCollection(LinkedHashSet::new));
-	}
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Set<Resource> subjects(final Collection<Statement> model, final Value resource, final Value predicate) {
 		return model.stream()

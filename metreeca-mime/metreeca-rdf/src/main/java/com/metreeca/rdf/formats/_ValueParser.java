@@ -26,17 +26,16 @@ import org.eclipse.rdf4j.rio.ParserConfig;
 import javax.json.JsonValue;
 import java.util.List;
 
-import static com.metreeca.core.Context.asset;
-
 public final class _ValueParser {
 
 	public static List<IRI> path(final String base, final Shape shape, final String path) {
-		return new JSONLDDecoder(base, asset(JSONLDFormat.context()), new ParserConfig()).path(path, shape);
+		return new JSONLDDecoder(base, null, shape, new ParserConfig())
+				.path(path, shape);
 	}
 
 	public static Object value(final String base, final Shape shape, final JsonValue value) {
-		// !!! pass base as argument and factor decoder instance
-		return new JSONLDDecoder(base, asset(JSONLDFormat.context()), new ParserConfig()).value(value, shape, null).getKey();
+		return new JSONLDDecoder(base, null, shape, new ParserConfig())
+				.value(value, shape, null).getKey();
 	}
 
 

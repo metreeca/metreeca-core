@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
-import static com.metreeca.core.EitherAssert.assertThat;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -46,16 +45,14 @@ import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.ValuesTest.*;
-import static com.metreeca.rdf.formats.JSONLDCodecTest.*;
-import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
+import static com.metreeca.rdf.formats.JSONLDCodecsTest.*;
 import static java.util.stream.Collectors.toMap;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.eclipse.rdf4j.rio.helpers.BasicParserSettings.VERIFY_DATATYPE_VALUES;
 
 
-final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
+final class JSONLDDecoderTest_ {
 
 	private final String first=RDF.FIRST.stringValue();
 
@@ -83,10 +80,14 @@ final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
 	private Model rdf(final Object json, final Resource focus, final Shape shape, final String base) {
 		try ( final StringReader reader=new StringReader((json instanceof String ? json : json(json)).toString()) ) {
 
-			return new LinkedHashModel(new JSONLDDecoder(base, Context,
+			return new LinkedHashModel(new JSONLDDecoder(
+					base,
+					focus,
+					shape == null ? Keywords : and(shape, Keywords),
 					new ParserConfig().set(VERIFY_DATATYPE_VALUES, true)
 			)
-					.decode(focus, shape, Json.createReader(reader).read()));
+
+					.decode(Json.createReader(reader).read()));
 
 		}
 	}
@@ -95,8 +96,9 @@ final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testReportParseException() {
-		assertThat(jsonld(new StringReader(""), "", RDF.NIL, and(), Context))
-				.hasLeft(e -> assertThat(e).isInstanceOf(JsonException.class));
+		assertThatThrownBy(() -> new JSONLDDecoder("", RDF.NIL, and(), new ParserConfig()).decode(new StringReader(
+				"")))
+				.isInstanceOf(JsonException.class);
 	}
 
 
@@ -349,34 +351,34 @@ final class JSONLDDecoderTest_ { // !!! merge into JSONLDDecoderTest
 
 	@Test void testResolveRelativeIRIs() {
 
-		final BiFunction<String, String, Collection<Statement>> statament=(s, o) -> rdf(
-				map(entry("id", s), entry(this.first, o)),
+		final BiFunction<String, String, Collection<Statement>> statement=(s, o) -> rdf(
+				map(entry("id", s), entry(first, o)),
 				null,
 				field(RDF.FIRST, datatype(IRIType)),
 				Base+"relative/"
 		);
 
-		assertThat(statament.apply("x", "http://example.com/y"))
+		assertThat(statement.apply("x", "http://example.com/y"))
 				.as("base relative subject")
 				.isEqualTo(decode("<http://example.com/relative/x> rdf:first <y> ."));
 
-		assertThat(statament.apply("/x", "http://example.com/y"))
+		assertThat(statement.apply("/x", "http://example.com/y"))
 				.as("root relative subject")
 				.isEqualTo(decode("<http://example.com/x> rdf:first <y>."));
 
-		assertThat(statament.apply("http://example.com/absolute/x", "http://example.com/y"))
+		assertThat(statement.apply("http://example.com/absolute/x", "http://example.com/y"))
 				.as("absolute subject")
 				.isEqualTo(decode("<http://example.com/absolute/x> rdf:first <y>."));
 
-		assertThat(statament.apply("http://example.com/x", "y"))
+		assertThat(statement.apply("http://example.com/x", "y"))
 				.as("base relative object")
 				.isEqualTo(decode("<x> rdf:first <http://example.com/relative/y> ."));
 
-		assertThat(statament.apply("http://example.com/x", "/y"))
+		assertThat(statement.apply("http://example.com/x", "/y"))
 				.as("root relative object")
 				.isEqualTo(decode("<x> rdf:first <http://example.com/y>."));
 
-		assertThat(statament.apply("http://example.com/x", "http://example.com/absolute/y"))
+		assertThat(statement.apply("http://example.com/x", "http://example.com/absolute/y"))
 				.as("absolute object")
 				.isEqualTo(decode("<x> rdf:first <http://example.com/absolute/y>."));
 
