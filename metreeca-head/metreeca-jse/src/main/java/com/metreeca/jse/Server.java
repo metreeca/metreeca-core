@@ -30,11 +30,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.metreeca.core.MessageException.status;
 import static com.metreeca.core.Response.NotFound;
 import static com.metreeca.core.assets.Logger.logger;
 import static com.metreeca.core.formats.InputFormat.input;
 import static com.metreeca.core.formats.OutputFormat.output;
+import static java.util.function.Function.identity;
 
 /**
  * Java SE HTTP server adapter.
@@ -58,7 +58,7 @@ public final class Server {
 	private final int backlog=128;
 	private final int delay=0;
 
-	private Function<Context, Handler> factory=context -> request -> request.reply(status(NotFound));
+	private Function<Context, Handler> factory=context -> request -> request.reply(identity());
 
 	private final Context context=new Context();
 
@@ -110,8 +110,9 @@ public final class Server {
 			server.createContext(root, exchange -> {
 				try {
 
-					context.exec(() ->
-							handler.handle(request(exchange)).accept(response -> response(exchange, response))
+					context.exec(() -> handler.handle(request(exchange))
+							.map(response -> response.status() > 0 ? response : response.status(NotFound))
+							.accept(response -> response(exchange, response))
 					);
 
 				} catch ( final RuntimeException e ) {
