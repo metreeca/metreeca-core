@@ -117,8 +117,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * @return a message filter executing the SPARQL graph {@code query} on target messages with {@linkplain
 	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations;
-	 * returns the
-	 * input model extended with the statements returned by {@code query}
+	 * returns the input model extended with the statements returned by {@code query}
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
