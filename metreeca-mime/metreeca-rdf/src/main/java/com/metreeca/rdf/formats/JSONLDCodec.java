@@ -22,125 +22,12 @@ import com.metreeca.json.probes.Redactor;
 import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.shapes.*;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 import java.util.stream.Stream;
-
-import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.formats._RDFCasts._iri;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
 
 
 abstract class JSONLDCodec {
-
-	public static Map<IRI, String> aliases(final Shape shape) {
-
-		if ( shape == null ) { return emptyMap(); } else {
-
-			final Map<IRI, String> aliases=new LinkedHashMap<>();
-
-			aliases.putAll(shape.map(new SystemAliasesProbe()));
-			aliases.putAll(shape.map(new UserAliasesProbe()));
-
-			return aliases;
-		}
-	}
-
-
-	private abstract static class AliasesProbe extends Traverser<Map<IRI, String>> {
-
-		@Override public Map<IRI, String> probe(final Shape shape) { return emptyMap(); }
-
-
-		@Override public Map<IRI, String> probe(final And and) {
-			return aliases(and.getShapes());
-		}
-
-		@Override public Map<IRI, String> probe(final Or or) {
-			return aliases(or.getShapes());
-		}
-
-		@Override public Map<IRI, String> probe(final When when) {
-			return aliases(asList(when.getPass(), when.getFail()));
-		}
-
-
-		private Map<IRI, String> aliases(final Collection<Shape> shapes) {
-			return shapes.stream()
-
-					// collect field-to-alias mappings from nested shapes
-
-					.flatMap(shape -> shape.map(this).entrySet().stream())
-
-					// remove duplicate mappings
-
-					.distinct()
-
-					// group by field and remove edges mapped to multiple aliases
-
-					.collect(groupingBy(Map.Entry::getKey)).values().stream()
-					.filter(group -> group.size() == 1)
-					.map(group -> group.get(0))
-
-					// group by alias and remove aliases mapped from multiple fields
-
-					.collect(groupingBy(Map.Entry::getValue)).values().stream()
-					.filter(group -> group.size() == 1)
-					.map(group -> group.get(0))
-
-					// collect non-clashing mappings
-
-					.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-		}
-
-	}
-
-	private static final class SystemAliasesProbe extends AliasesProbe {
-
-		private static final Pattern NamedIRIPattern=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
-
-
-		@Override public Map<IRI, String> probe(final Field field) {
-
-			final IRI name=_iri(field.getName());
-
-			return Optional
-					.of(NamedIRIPattern.matcher(name.stringValue()))
-					.filter(Matcher::find)
-					.map(matcher -> matcher.group("name"))
-					.filter(alias -> !alias.startsWith("@"))
-					.map(alias -> singletonMap(name, direct(name) ? alias : alias+"Of"))
-					.orElse(emptyMap());
-		}
-
-	}
-
-	private static final class UserAliasesProbe extends AliasesProbe {
-
-		@Override public Map<IRI, String> probe(final Field field) {
-
-			final IRI name=_iri(field.getName());
-			final Shape shape=field.getShape();
-
-			return alias(shape)
-					.filter(alias -> !alias.startsWith("@"))
-					.map(alias -> singletonMap(name, alias))
-					.orElse(emptyMap());
-		}
-
-	}
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	protected Shape driver(final Shape shape) { // !!! caching
 		return shape
@@ -155,13 +42,12 @@ abstract class JSONLDCodec {
 
 	}
 
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static Stream<Map.Entry<String, String>> keywords(final Shape shape) {
+	protected Stream<Map.Entry<String, String>> keywords(final Shape shape) {
 		return shape.map(new KeywordsProbe());
 	}
 
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final class KeywordsProbe extends Traverser<Stream<Map.Entry<String, String>>> {
 

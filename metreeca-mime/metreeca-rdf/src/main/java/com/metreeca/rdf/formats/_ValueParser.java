@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
+import static com.metreeca.rdf.formats._Aliases.aliases;
 
 public final class _ValueParser {
 

@@ -77,7 +77,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 		this.base=URI.create(focus.stringValue());
 
-		final Map<String, String> aliases2keywords=JSONLDCodec.keywords(shape)
+		final Map<String, String> aliases2keywords=keywords(shape)
 
 				.collect(toMap(Entry::getValue, Entry::getKey, (x, y) -> {
 
@@ -215,7 +215,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 		final Map<Object, Shape> fields=Field.fields(shape);
 
-		final Map<String, IRI> aliases=aliases(shape)
+		final Map<String, IRI> aliases=_Aliases.aliases(shape)
 				.entrySet()
 				.stream()
 				.collect(toMap(Entry::getValue, Entry::getKey));

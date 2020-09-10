@@ -38,6 +38,7 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rdf.formats._Aliases.aliases;
 import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toCollection;
