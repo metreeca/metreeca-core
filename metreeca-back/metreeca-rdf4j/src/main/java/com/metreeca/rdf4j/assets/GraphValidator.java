@@ -250,7 +250,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(minExclusive.getValue());
 
 			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) > 0))
+					.filter(negate(value -> comparator.compare(value, limit) > 0))
 					.collect(toMap(v -> issue(minExclusive), Collections::singleton))
 			);
 		}
@@ -260,7 +260,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(maxExclusive.getValue());
 
 			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) < 0))
+					.filter(negate(value -> comparator.compare(value, limit) < 0))
 					.collect(toMap(v -> issue(maxExclusive), Collections::singleton))
 			);
 		}
@@ -270,7 +270,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(minInclusive.getValue());
 
 			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) >= 0))
+					.filter(negate(value -> comparator.compare(value, limit) >= 0))
 					.collect(toMap(v -> issue(minInclusive), Collections::singleton))
 			);
 		}
@@ -280,7 +280,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(maxInclusive.getValue());
 
 			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) <= 0))
+					.filter(negate(value -> comparator.compare(value, limit) <= 0))
 					.collect(toMap(v -> issue(maxInclusive), Collections::singleton))
 			);
 		}

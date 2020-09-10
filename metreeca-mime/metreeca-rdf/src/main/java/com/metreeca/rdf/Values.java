@@ -20,16 +20,12 @@ package com.metreeca.rdf;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.*;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.Rio;
 
 import javax.xml.bind.DatatypeConverter;
-import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.*;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -61,8 +57,9 @@ public final class Values {
 	/**
 	 * A pattern matching IRI components.
 	 *
-	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
-	 * 		Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
+	 * @see
+	 * <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
+	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
 	public static final Pattern IRIPattern=Pattern.compile("^"
 			+"(?<schemeall>(?<scheme>[^:/?#]+):)?"
@@ -75,8 +72,6 @@ public final class Values {
 
 
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
-
-	private static final Comparator<Value> comparator=new ValueComparator();
 
 
 	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
@@ -144,7 +139,7 @@ public final class Values {
 	 * @param iri the IRI identifying the predicate
 	 *
 	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
-	 *        #inverse(IRI)} predicate
+	 * #inverse(IRI)} predicate
 	 *
 	 * @throws NullPointerException if {@code iri } is null
 	 */
@@ -163,11 +158,6 @@ public final class Values {
 				-> (subject == null || subject.equals(statement.getSubject()))
 				&& (predicate == null || predicate.equals(statement.getPredicate()))
 				&& (object == null || object.equals(statement.getObject()));
-	}
-
-
-	public static int compare(final Value x, final Value y) {
-		return comparator.compare(x, y);
 	}
 
 
@@ -322,9 +312,9 @@ public final class Values {
 	 *
 	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri}
 	 * , if
-	 *        {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
-	 *        value of
-	 *        {@code iri}, otherwise
+	 * {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
+	 * value of
+	 * {@code iri}, otherwise
 	 */
 	public static IRI inverse(final IRI iri) { // !!! remove
 		return iri == null ? null
@@ -441,7 +431,7 @@ public final class Values {
 	 * @param millis if {@code true}, milliseconds are included in the literal textual representation
 	 *
 	 * @return an {@code xsd:dateTime} literal representing the current system with second or millisecond precision as
-	 * 		specified by {@code millis}
+	 * specified by {@code millis}
 	 */
 	public static Literal time(final boolean millis) {
 		return time(Instant.now(), millis);
@@ -468,7 +458,7 @@ public final class Values {
 	 * @param millis if {@code true}, includes milliseconds in the literal textual representation
 	 *
 	 * @return an {@code xsd:dateTime} literal representing {@code time} with second or millisecond precision as
-	 * 		specified by {@code millis}
+	 * specified by {@code millis}
 	 */
 	public static Literal time(final long time, final boolean millis) {
 		return time(Instant.ofEpochMilli(time), millis);
@@ -482,7 +472,7 @@ public final class Values {
 	 *
 	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant
 	 * } is
-	 * 		not null; {@code null}, otherwise
+	 * not null; {@code null}, otherwise
 	 */
 	public static Literal time(final Instant instant) {
 		return time(instant, false);
@@ -495,7 +485,7 @@ public final class Values {
 	 * @param millis  if {@code true}, includes milliseconds in the literal textual representation
 	 *
 	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second or millisecond precision as
-	 * 		specified by {@code millis}, if {@code instant} is not null; {@code null}, otherwise
+	 * specified by {@code millis}, if {@code instant} is not null; {@code null}, otherwise
 	 */
 	public static Literal time(final Instant instant, final boolean millis) {
 		return instant == null ? null : literal(
@@ -573,33 +563,28 @@ public final class Values {
 	//// Formatters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String format(final Iterable<Statement> statements) {
-		return format(statements, null);
-	}
-
-	public static String format(final Iterable<Statement> statements, final String base) {
 		if ( statements == null ) { return null; } else {
 
-			try ( final StringWriter writer=new StringWriter() ) {
+			final StringBuilder builder=new StringBuilder(100);
 
-				Rio.write(statements, writer, base == null ? Internal : base, RDFFormat.TURTLE);
-
-				return writer.toString();
-
-			} catch ( final URISyntaxException e ) {
-				throw new RuntimeException(e);
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
+			for (final Statement statement : statements) {
+				builder.append(format(statement.getSubject())).append(" ")
+						.append(format(statement.getPredicate())).append(" ")
+						.append(format(statement.getObject())).append(" .\n");
 			}
+
+			return builder.toString();
 		}
 	}
 
-
 	public static String format(final Statement statement) {
-		return statement == null ? null
-				: format(statement.getSubject())
-				+" "+format(statement.getPredicate())
-				+" "+format(statement.getObject())
-				+".";
+		return statement == null
+
+				? null
+
+				: format(statement.getSubject())+" "
+				+format(statement.getPredicate())+" "
+				+format(statement.getObject())+" .";
 	}
 
 

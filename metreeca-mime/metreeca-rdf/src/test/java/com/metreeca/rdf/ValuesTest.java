@@ -237,8 +237,9 @@ public final class ValuesTest {
 		return decode(rdf, format, Base);
 	}
 
-	public static Model decode(final String rdf, final RDFFormat format, final String base) { // includes default
-		// base/prefixes
+	public static Model decode(final String rdf, final RDFFormat format, final String base) {
+
+		// includes default base/prefixes
 
 		if ( rdf == null ) {
 			throw new NullPointerException("null rdf");
