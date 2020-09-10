@@ -22,7 +22,7 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Trace;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
-import com.metreeca.rdf.formats._ValueParser;
+import com.metreeca.rdf.formats._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -42,7 +42,7 @@ import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Trace.trace;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
-import static com.metreeca.rdf.formats._ValueParser._iri;
+import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Snippets.source;
 import static java.util.Collections.*;
@@ -138,7 +138,7 @@ final class GraphValidator extends GraphProcessor {
 		private Value value(final Object value) {
 			return value instanceof Shape.Focus
 					? iri(((Shape.Focus)value).resolve(resource.stringValue()))
-					: _ValueParser._value(value);
+					: _RDFCasts._value(value);
 		}
 
 		private Set<Value> values(final Collection<Object> values) {

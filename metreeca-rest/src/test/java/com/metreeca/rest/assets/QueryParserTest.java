@@ -110,11 +110,11 @@ final class QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new QueryParser("app:/", shape,
+		return new QueryParser(shape,
 
-				(base, _shape, path) -> path.isEmpty() ? Collections.emptyList() : asList((Object[])path.split("\\.")),
+				(_shape, path) -> path.isEmpty() ? Collections.emptyList() : asList((Object[])path.split("\\.")),
 
-				(base, _shape, value) -> value.equals(JsonValue.TRUE) ? true
+				(_shape, value) -> value.equals(JsonValue.TRUE) ? true
 						: value.equals(JsonValue.FALSE) ? false
 						: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ?
 						((JsonNumber)value).longValue()

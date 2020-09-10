@@ -33,13 +33,13 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
+import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class JSONLDCodecsTest {
+final class JSONLDCodecTest {
 
 	@Nested final class Aliases {
 

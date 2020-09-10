@@ -20,7 +20,6 @@ package com.metreeca.rdf.formats;
 import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.rio.ParserConfig;
 
 import javax.json.JsonException;
@@ -32,7 +31,7 @@ import java.util.regex.Pattern;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf.Values.format;
 import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
+import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
 
 public final class _ValueParser {
 
@@ -41,7 +40,7 @@ public final class _ValueParser {
 	);
 
 
-	public static List<IRI> path(final String base, final Shape shape, final String path) {
+	public static List<IRI> path(final Shape shape, final String path) {
 
 		final List<IRI> steps=new ArrayList<>();
 		final Matcher matcher=StepPattern.matcher(path);
@@ -58,7 +57,7 @@ public final class _ValueParser {
 
 			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
 
-			fields.keySet().stream().map(_ValueParser::_iri).forEach(edge -> {
+			fields.keySet().stream().map(_RDFCasts::_iri).forEach(edge -> {
 				index.put(format(edge), edge); // inside angle brackets
 				index.put(edge.toString(), edge); // naked IRI
 			});
@@ -91,50 +90,6 @@ public final class _ValueParser {
 
 		return new JSONLDDecoder(focus, shape, new ParserConfig())
 				.value(value, shape).getKey();
-	}
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Converts an object to an IRI.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return an IRI obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to an IRI
-	 */
-	public static IRI _iri(final Object object) {
-		return as(object, IRI.class);
-	}
-
-	/**
-	 * Converts an object to a value.
-	 *
-	 * @param object the object to be converted; may be null
-	 *
-	 * @return a value obtained by converting {@code object} or {@code null} if {@code object} is null
-	 *
-	 * @throws UnsupportedOperationException if {@code object} cannot be converted to a value
-	 */
-	public static Value _value(final Object object) {
-		return as(object, Value.class);
-	}
-
-
-	private static <T> T as(final Object object, final Class<T> type) {
-		if ( object == null || type.isInstance(object) ) {
-
-			return type.cast(object);
-
-		} else {
-
-			throw new UnsupportedOperationException(String.format("unsupported type {%s} / expected %s",
-					object.getClass().getName(), type.getName()
-			));
-
-		}
 	}
 
 }

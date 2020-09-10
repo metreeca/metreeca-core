@@ -82,7 +82,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates a wrapper setting global JSON-LD keyword mappings.
+	 * Creates a wrapper managing global JSON-LD keyword mappings.
 	 *
 	 * @param mappings an array of annotations with a JSON-LD keyword as label and an alias as value
 	 *

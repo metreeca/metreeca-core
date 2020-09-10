@@ -42,14 +42,12 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
-import static com.metreeca.rdf.formats.JSONLDCodecs.driver;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 
 
-final class JSONLDDecoder {
+final class JSONLDDecoder extends JSONLDCodec {
 
 	private final IRI focus;
 	private final Shape shape;
@@ -79,7 +77,7 @@ final class JSONLDDecoder {
 
 		this.base=URI.create(focus.stringValue());
 
-		final Map<String, String> aliases2keywords=JSONLDCodecs.keywords(shape)
+		final Map<String, String> aliases2keywords=JSONLDCodec.keywords(shape)
 
 				.collect(toMap(Entry::getValue, Entry::getKey, (x, y) -> {
 
@@ -173,7 +171,7 @@ final class JSONLDDecoder {
 				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
 				: (language != null) ? entry(literal(value, language), Stream.empty())
 
-				: entry(literal(value, datatype(shape).map(_ValueParser::_iri).orElse(XSD.STRING)), Stream.empty());
+				: entry(literal(value, datatype(shape).map(_RDFCasts::_iri).orElse(XSD.STRING)), Stream.empty());
 	}
 
 	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
@@ -191,7 +189,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).map(_ValueParser::_iri).orElse(null);
+		final IRI datatype=datatype(shape).map(_RDFCasts::_iri).orElse(null);
 
 		final Literal value
 

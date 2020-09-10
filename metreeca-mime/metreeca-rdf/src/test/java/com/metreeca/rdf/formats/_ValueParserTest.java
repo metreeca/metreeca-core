@@ -46,35 +46,35 @@ final class _ValueParserTest { // !!! remove
 	@Test void testParsePaths() {
 		exec(() -> {
 
-			assertThat(_ValueParser.path("app:/", shape, ""))
+			assertThat(_ValueParser.path(shape, ""))
 					.as("empty")
 					.isEmpty();
 
-			assertThat(_ValueParser.path("app:/", shape, "<"+RDF.FIRST+">"))
+			assertThat(_ValueParser.path(shape, "<"+RDF.FIRST+">"))
 					.as("direct iri")
 					.containsExactly(RDF.FIRST);
 
-			assertThat(_ValueParser.path("app:/", shape, "^<"+RDF.FIRST+">"))
+			assertThat(_ValueParser.path(shape, "^<"+RDF.FIRST+">"))
 					.as("inverse iri")
 					.containsExactly(inverse(RDF.FIRST));
 
-			assertThat(_ValueParser.path("app:/", shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
+			assertThat(_ValueParser.path(shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
 					.as("iri slash path")
 					.containsExactly(RDF.FIRST, RDF.REST);
 
-			assertThat(_ValueParser.path("app:/", shape, "first"))
+			assertThat(_ValueParser.path(shape, "first"))
 					.as("direct alias")
 					.containsExactly(RDF.FIRST);
 
-			assertThat(_ValueParser.path("app:/", shape, "firstOf"))
+			assertThat(_ValueParser.path(shape, "firstOf"))
 					.as("inverse alias")
 					.containsExactly(inverse(RDF.FIRST));
 
-			assertThat(_ValueParser.path("app:/", shape, "first/rest"))
+			assertThat(_ValueParser.path(shape, "first/rest"))
 					.as("alias slash path")
 					.containsExactly(RDF.FIRST, RDF.REST);
 
-			assertThat(_ValueParser.path("app:/", shape, "firstOf.rest"))
+			assertThat(_ValueParser.path(shape, "firstOf.rest"))
 					.as("alias dot path")
 					.containsExactly(inverse(RDF.FIRST), RDF.REST);
 
@@ -84,12 +84,12 @@ final class _ValueParserTest { // !!! remove
 
 	@Test void testRejectUnknownPathSteps() {
 		exec(() -> assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> _ValueParser.path("app:/", shape, "first/unknown")));
+				.isThrownBy(() -> _ValueParser.path(shape, "first/unknown")));
 	}
 
 	@Test void testRejectMalformedPaths() {
 		exec(() -> assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> _ValueParser.path("app:/", shape, "---")));
+				.isThrownBy(() -> _ValueParser.path(shape, "---")));
 	}
 
 }

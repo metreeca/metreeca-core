@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.formats._ValueParser._iri;
+import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -40,64 +40,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toMap;
 
 
-final class JSONLDCodecs {
-
-	public static Shape driver(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Shape.Role, values -> true))
-				.map(new Redactor(Shape.Task, values -> true))
-				.map(new Redactor(Shape.Area, values -> true))
-				.map(new Redactor(Shape.Mode, Shape.Convey)) // remove internal filtering shapes
-
-				.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
-				.map(new _RDFOptimizer());
-
-	}
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static Stream<Map.Entry<String, String>> keywords(final Shape shape) {
-		return shape.map(new KeywordsProbe());
-	}
-
-
-	private static final class KeywordsProbe extends Traverser<Stream<Map.Entry<String, String>>> {
-
-		@Override public Stream<Map.Entry<String, String>> probe(final Shape shape) {
-			return Stream.empty();
-		}
-
-		@Override public Stream<Map.Entry<String, String>> probe(final Meta meta) {
-
-			final String label=meta.getLabel().toString();
-
-			return label.startsWith("@")
-					? Stream.of(new SimpleImmutableEntry<>(label, meta.getValue().toString()))
-					: Stream.empty();
-		}
-
-		@Override public Stream<Map.Entry<String, String>> probe(final Field field) {
-			return Stream.empty();
-		}
-
-		@Override public Stream<Map.Entry<String, String>> probe(final And and) {
-			return and.getShapes().stream().flatMap(s -> s.map(this));
-		}
-
-		@Override public Stream<Map.Entry<String, String>> probe(final Or or) {
-			return or.getShapes().stream().flatMap(s -> s.map(this));
-		}
-
-		@Override public Stream<Map.Entry<String, String>> probe(final When when) {
-			return Stream.of(when.getPass(), when.getFail()).flatMap(s -> s.map(this));
-		}
-
-	}
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+abstract class JSONLDCodec {
 
 	public static Map<IRI, String> aliases(final Shape shape) {
 
@@ -199,6 +142,58 @@ final class JSONLDCodecs {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSONLDCodecs() {}
+	protected Shape driver(final Shape shape) { // !!! caching
+		return shape
+
+				.map(new Redactor(Shape.Role, values -> true))
+				.map(new Redactor(Shape.Task, values -> true))
+				.map(new Redactor(Shape.Area, values -> true))
+				.map(new Redactor(Shape.Mode, Shape.Convey)) // remove internal filtering shapes
+
+				.map(new _RDFInferencer()) // infer implicit constraints to drive json shorthands
+				.map(new _RDFOptimizer());
+
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Stream<Map.Entry<String, String>> keywords(final Shape shape) {
+		return shape.map(new KeywordsProbe());
+	}
+
+
+	private static final class KeywordsProbe extends Traverser<Stream<Map.Entry<String, String>>> {
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Shape shape) {
+			return Stream.empty();
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Meta meta) {
+
+			final String label=meta.getLabel().toString();
+
+			return label.startsWith("@")
+					? Stream.of(new SimpleImmutableEntry<>(label, meta.getValue().toString()))
+					: Stream.empty();
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Field field) {
+			return Stream.empty();
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final And and) {
+			return and.getShapes().stream().flatMap(s -> s.map(this));
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final Or or) {
+			return or.getShapes().stream().flatMap(s -> s.map(this));
+		}
+
+		@Override public Stream<Map.Entry<String, String>> probe(final When when) {
+			return Stream.of(when.getPass(), when.getFail()).flatMap(s -> s.map(this));
+		}
+
+	}
 
 }

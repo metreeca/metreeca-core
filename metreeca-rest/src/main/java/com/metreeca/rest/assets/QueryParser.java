@@ -46,17 +46,13 @@ import static java.util.stream.Collectors.toMap;
 
 final class QueryParser {
 
-	private final String base;
 	private final Shape shape;
 
 	private final Parser<String, List<?>> paths;
 	private final Parser<JsonValue, Object> values;
 
 
-	QueryParser(final String base, final Shape shape,
-			final Parser<String, List<?>> paths, final Parser<JsonValue, Object> values
-	) {
-		this.base=base;
+	QueryParser(final Shape shape, final Parser<String, List<?>> paths, final Parser<JsonValue, Object> values) {
 		this.shape=shape;
 		this.paths=paths;
 		this.values=values;
@@ -346,7 +342,7 @@ final class QueryParser {
 	private List<?> steps(final String path, final Shape shape) {
 		try {
 
-			return paths.parse(base, shape, path.trim());
+			return paths.parse(shape, path.trim());
 
 		} catch ( final JsonException e ) {
 
@@ -390,7 +386,7 @@ final class QueryParser {
 	}
 
 	private Object value(final JsonValue value, final Shape shape) {
-		return values.parse(base, shape, value);
+		return values.parse(shape, value);
 	}
 
 

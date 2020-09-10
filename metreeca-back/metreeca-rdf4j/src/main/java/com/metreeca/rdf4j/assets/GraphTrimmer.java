@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
-import static com.metreeca.rdf.formats._ValueParser._iri;
+import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;

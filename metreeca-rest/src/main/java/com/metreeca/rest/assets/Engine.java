@@ -85,7 +85,7 @@ public interface Engine {
 
 		try {
 
-			return Right(new QueryParser(request.base(), shape, paths, values).parse(request.query()));
+			return Right(new QueryParser(shape, paths, values).parse(request.query()));
 
 		} catch ( final JsonException e ) {
 
@@ -101,7 +101,7 @@ public interface Engine {
 
 	@FunctionalInterface public static interface Parser<V, R> {
 
-		public R parse(final String base, final Shape shape, final V v);
+		public R parse(final Shape shape, final V v);
 
 	}
 
