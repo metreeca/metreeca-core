@@ -25,71 +25,67 @@ import org.eclipse.rdf4j.rio.ParserConfig;
 import javax.json.JsonException;
 import javax.json.JsonValue;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.rdf.Values.format;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.JSONLDCodec.aliases;
 
 public final class _ValueParser {
 
-	private static final Pattern StepPattern=Pattern.compile( // !!! review/remove
-			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
-	);
+	private static final Pattern DotPattern=Pattern.compile("\\.");
 
 
-	public static List<IRI> path(final Shape shape, final String path) {
+	public static List<IRI> path(final Shape shape, final String path) throws JsonException {
 
-		final List<IRI> steps=new ArrayList<>();
-		final Matcher matcher=StepPattern.matcher(path);
-
-		int last=0;
-		Shape reference=shape;
-
-		while ( matcher.lookingAt() ) {
-
-			final Map<Object, Shape> fields=fields(reference);
-			final Map<IRI, String> aliases=aliases(reference);
-
-			final Map<String, IRI> index=new HashMap<>();
-
-			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
-
-			fields.keySet().stream().map(_RDFCasts::_iri).forEach(edge -> {
-				index.put(format(edge), edge); // inside angle brackets
-				index.put(edge.toString(), edge); // naked IRI
-			});
-
-			aliases.forEach((iri, alias) -> index.put(alias, iri));
-
-			final String step=matcher.group("step");
-			final IRI iri=index.get(step);
-
-			if ( iri == null ) {
-				throw new JsonException("unknown path step ["+step+"]");
-			}
-
-			steps.add(iri);
-			reference=fields.get(iri);
-
-			matcher.region(last=matcher.end(), path.length());
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
 		}
 
-		if ( last != path.length() ) {
-			throw new JsonException("malformed path ["+path+"]");
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		final List<IRI> steps=new ArrayList<>();
+
+		Shape reference=shape;
+
+		for (final String step : DotPattern.split(path)) {
+			if ( !step.isEmpty() ) {
+
+				final Map<Object, Shape> fields=fields(reference);
+				final Map<IRI, String> aliases=aliases(reference);
+
+				final IRI iri=aliases.entrySet().stream()
+
+						.filter(entry -> entry.getValue().equals(step))
+						.map(Map.Entry::getKey)
+						.findFirst()
+
+						.orElseThrow(() -> new JsonException("unknown path step <"+step+">"));
+
+
+				steps.add(iri);
+				reference=fields.get(iri);
+			}
 		}
 
 		return steps;
 	}
 
-	public static Object value(final Shape shape, final JsonValue value) {
+	public static Object value(final Shape shape, final JsonValue value) throws JsonException {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
 
 		final IRI focus=iri();
 
-		return new JSONLDDecoder(focus, shape, new ParserConfig())
-				.value(value, shape).getKey();
+		return new JSONLDDecoder(focus, shape, new ParserConfig()).value(value, shape).getKey();
 	}
 
 }

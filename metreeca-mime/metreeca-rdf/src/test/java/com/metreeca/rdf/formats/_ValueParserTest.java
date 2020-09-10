@@ -17,7 +17,6 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.core.Context;
 import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -28,14 +27,11 @@ import javax.json.JsonException;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.rdf.formats._ValueParser.path;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-final class _ValueParserTest { // !!! remove
-
-	private void exec(final Runnable... tasks) {
-		new Context().exec(tasks).clear();
-	}
+final class _ValueParserTest {
 
 	private final Shape shape=and(
 			field(RDF.FIRST, field(RDF.REST)),
@@ -43,53 +39,30 @@ final class _ValueParserTest { // !!! remove
 	);
 
 
-	@Test void testParsePaths() {
-		exec(() -> {
+	@Test void testEmptyPath() {
+		assertThat(path(shape, "")).isEmpty();
+	}
 
-			assertThat(_ValueParser.path(shape, ""))
-					.as("empty")
-					.isEmpty();
+	@Test void testDirectAlias() {
+		assertThat(path(shape, "first")).containsExactly(RDF.FIRST);
+	}
 
-			assertThat(_ValueParser.path(shape, "<"+RDF.FIRST+">"))
-					.as("direct iri")
-					.containsExactly(RDF.FIRST);
+	@Test void testInverseAlias() { // !!! firstOf
+		assertThat(path(shape, "firstOf")).containsExactly(inverse(RDF.FIRST));
+	}
 
-			assertThat(_ValueParser.path(shape, "^<"+RDF.FIRST+">"))
-					.as("inverse iri")
-					.containsExactly(inverse(RDF.FIRST));
-
-			assertThat(_ValueParser.path(shape, "<"+RDF.FIRST+">/<"+RDF.REST+">"))
-					.as("iri slash path")
-					.containsExactly(RDF.FIRST, RDF.REST);
-
-			assertThat(_ValueParser.path(shape, "first"))
-					.as("direct alias")
-					.containsExactly(RDF.FIRST);
-
-			assertThat(_ValueParser.path(shape, "firstOf"))
-					.as("inverse alias")
-					.containsExactly(inverse(RDF.FIRST));
-
-			assertThat(_ValueParser.path(shape, "first/rest"))
-					.as("alias slash path")
-					.containsExactly(RDF.FIRST, RDF.REST);
-
-			assertThat(_ValueParser.path(shape, "firstOf.rest"))
-					.as("alias dot path")
-					.containsExactly(inverse(RDF.FIRST), RDF.REST);
-
-		});
+	@Test void testMultipleSteps() {
+		assertThat(path(shape, "first.rest")).containsExactly(RDF.FIRST, RDF.REST);
+		assertThat(path(shape, "firstOf.rest")).containsExactly(inverse(RDF.FIRST), RDF.REST);
 	}
 
 
 	@Test void testRejectUnknownPathSteps() {
-		exec(() -> assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> _ValueParser.path(shape, "first/unknown")));
+		assertThatThrownBy(() -> path(shape, "first/unknown")).isInstanceOf(JsonException.class);
 	}
 
 	@Test void testRejectMalformedPaths() {
-		exec(() -> assertThatExceptionOfType(JsonException.class)
-				.isThrownBy(() -> _ValueParser.path(shape, "---")));
+		assertThatThrownBy(() -> path(shape, "---")).isInstanceOf(JsonException.class);
 	}
 
 }
