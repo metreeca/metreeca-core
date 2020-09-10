@@ -36,6 +36,7 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
+import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rdf.Values.*;
 import static java.util.Arrays.asList;
@@ -514,9 +515,37 @@ final class JSONLDEncoderTest {
 							.add("@id", "/z")
 					)
 			);
-
 		}
 
+		@Test void testHandleKeywordAliases() {
+			assertThat(encode(x,
+
+					and(
+							meta("@id", "id"),
+							meta("@value", "value"),
+							meta("@type", "type"),
+							meta("@language", "language"),
+
+							field(RDF.VALUE)
+					),
+
+					statement(x, RDF.VALUE, literal("string", "en")),
+					statement(x, RDF.VALUE, literal("2020-09-10", XSD.DATE))
+
+			)).isEqualTo(createObjectBuilder()
+					.add("id", "/x")
+					.add("value", createArrayBuilder()
+							.add(createObjectBuilder()
+									.add("value", "string")
+									.add("language", "en")
+							)
+							.add(createObjectBuilder()
+									.add("value", "2020-09-10")
+									.add("type", XSD.DATE.stringValue())
+							)
+					)
+			);
+		}
 
 	}
 

@@ -40,7 +40,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
@@ -74,7 +73,7 @@ final class JSONLDDecoder {
 		}
 
 		this.focus=focus;
-		this.shape=pass(shape) ? null : driver(shape);
+		this.shape=driver(shape);
 		this.options=options;
 
 		this.base=URI.create(focus.stringValue());
@@ -340,7 +339,7 @@ final class JSONLDDecoder {
 						Entry::getKey,
 
 						e -> e.getValue() instanceof JsonString ? ((JsonString)e.getValue()).getString()
-								: error("<'%s'> field is not a string", e.getKey()),
+								: error("<%s> field is not a string", e.getKey()),
 
 						(x, y) -> x.equals(y) ? x
 								: error("conflicting values for JSON-LD keyword <%s> / <%s>", x, y)

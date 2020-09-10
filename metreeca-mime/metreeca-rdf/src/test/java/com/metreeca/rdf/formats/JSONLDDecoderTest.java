@@ -23,8 +23,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.rio.ParserConfig;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.json.*;
 import java.math.BigDecimal;
@@ -402,19 +401,23 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Test void testHandleInferredAliasClashes() {
+		@Test void testHandleAliasClashes() {
 			assertThat(decode(x,
 
 					and(
-							field(RDF.VALUE),
-							field(iri(base, "value"))
+							field(iri("http://example.org/value")),
+							field(iri("http://example.net/value"))
 					),
 
 					createObjectBuilder()
 
-							.add("value", "x")
+							.add("value", "x") // no unique alias > resolved as relative IRI
 
-			)).isIsomorphicTo();
+			)).isIsomorphicTo(
+
+					statement(x, iri(base, "value"), literal("x"))
+
+			);
 		}
 
 
@@ -558,6 +561,41 @@ final class JSONLDDecoderTest {
 			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal(1.0))
+
+			);
+		}
+
+
+		@Disabled @Test void testHandleKeywordAliases() {
+			assertThat(decode(x,
+
+					and(
+							meta("@id", "id"),
+							meta("@value", "value"),
+							meta("@type", "type"),
+							meta("@language", "language"),
+
+							field(RDF.VALUE)
+
+					),
+
+					createObjectBuilder()
+							.add("id", "/x")
+							.add("value", createArrayBuilder()
+									.add(createObjectBuilder()
+											.add("value", "string")
+											.add("language", "en")
+									)
+									.add(createObjectBuilder()
+											.add("value", "2020-09-10")
+											.add("type", XSD.DATE.stringValue())
+									)
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal("string", "en")),
+					statement(x, RDF.VALUE, literal("2020-09-10", XSD.DATE))
 
 			);
 		}
