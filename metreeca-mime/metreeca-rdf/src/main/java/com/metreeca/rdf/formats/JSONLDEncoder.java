@@ -57,6 +57,8 @@ final class JSONLDEncoder {
 	private final Shape shape;
 
 	private final String root;
+
+	private final Predicate<String> aliased;
 	private final Function<String, String> aliaser;
 
 
@@ -95,6 +97,7 @@ final class JSONLDEncoder {
 
 				}));
 
+		this.aliased=keywords2aliases::containsValue;
 		this.aliaser=keyword -> keywords2aliases.getOrDefault(keyword, keyword);
 	}
 
@@ -212,8 +215,10 @@ final class JSONLDEncoder {
 
 				final Shape nestedShape=entry.getValue();
 
-				final String alias=Optional.ofNullable(aliases.get(predicate))
-						.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue());
+				final String alias=Optional
+						.ofNullable(aliases.get(predicate))
+						.filter(aliased.negate()) // keyword aliases override field aliases
+						.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue()); // !!! supported?
 
 				final Collection<? extends Value> values=direct
 						? objects(model, resource, predicate)

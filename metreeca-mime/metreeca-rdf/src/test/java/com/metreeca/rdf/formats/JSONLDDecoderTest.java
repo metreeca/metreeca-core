@@ -23,7 +23,8 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.rio.ParserConfig;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import javax.json.*;
 import java.math.BigDecimal;
@@ -566,7 +567,7 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Disabled @Test void testHandleKeywordAliases() {
+		@Test void testHandleKeywordAliases() {
 			assertThat(decode(x,
 
 					and(
@@ -581,7 +582,7 @@ final class JSONLDDecoderTest {
 
 					createObjectBuilder()
 							.add("id", "/x")
-							.add("value", createArrayBuilder()
+							.add(RDF.VALUE.stringValue(), createArrayBuilder() // keyword alias overrides field alias
 									.add(createObjectBuilder()
 											.add("value", "string")
 											.add("language", "en")

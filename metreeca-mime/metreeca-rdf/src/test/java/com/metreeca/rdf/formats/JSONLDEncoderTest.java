@@ -534,7 +534,7 @@ final class JSONLDEncoderTest {
 
 			)).isEqualTo(createObjectBuilder()
 					.add("id", "/x")
-					.add("value", createArrayBuilder()
+					.add(RDF.VALUE.stringValue(), createArrayBuilder() // keyword alias overrides field alias
 							.add(createObjectBuilder()
 									.add("value", "string")
 									.add("language", "en")

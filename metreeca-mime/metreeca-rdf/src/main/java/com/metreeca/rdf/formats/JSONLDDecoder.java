@@ -56,6 +56,7 @@ final class JSONLDDecoder {
 	private final ParserConfig options;
 
 	private final URI base;
+
 	private final Function<String, String> resolver;
 
 	JSONLDDecoder(final IRI focus, final Shape shape, final ParserConfig options) {
