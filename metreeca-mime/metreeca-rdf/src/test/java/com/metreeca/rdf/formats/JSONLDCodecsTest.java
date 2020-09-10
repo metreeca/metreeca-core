@@ -43,10 +43,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class JSONLDCodecsTest {
 
 	static final Shape Keywords=and(
-			meta(JSONLDFormat.id, "id"),
-			meta(JSONLDFormat.value, "value"),
-			meta(JSONLDFormat.type, "type"),
-			meta(JSONLDFormat.language, "language")
+			meta("@id", "id"),
+			meta("@value", "value"),
+			meta("@type", "type"),
+			meta("@language", "language")
 	);
 
 

@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.rio.ParserConfig;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -47,20 +48,20 @@ final class JSONLDEncoderTest {
 	private final String base="http://example.com/";
 
 	private final IRI w=iri(base, "w");
-	private final IRI z=iri(base, "z");
-	private final IRI y=iri(base, "y");
 	private final IRI x=iri(base, "x");
+	private final IRI y=iri(base, "y");
+	private final IRI z=iri(base, "z");
 
 
 	private JsonObject encode(final IRI focus, final Shape shape, final Statement... model) {
-		return new JSONLDEncoder(focus, shape).encode(asList(model));
+		return new JSONLDEncoder(focus, shape, new ParserConfig()).encode(asList(model));
 	}
 
 
 	@Nested final class Values {
 
 		private JsonValue encode(final Value value) {
-			return new JSONLDEncoder(iri(base), field(RDF.VALUE, optional()))
+			return new JSONLDEncoder(iri(base), field(RDF.VALUE, optional()), new ParserConfig())
 					.encode(singleton(statement(iri(base), RDF.VALUE, value))) // wrap value inside root object
 					.get("value"); // then unwrap
 		}
@@ -101,7 +102,6 @@ final class JSONLDEncoderTest {
 			assertThat(encode(literal(decimal(1)))).isEqualTo(createValue(decimal(1)));
 		}
 
-
 		@Test void testInt() {
 			assertThat(encode(literal(1))).isEqualTo(createObjectBuilder()
 					.add("@value", createValue("1"))
@@ -117,10 +117,10 @@ final class JSONLDEncoderTest {
 		}
 
 
-		@Test void testCustom() {
-			assertThat(encode(literal("value", iri(base, "type")))).isEqualTo(createObjectBuilder()
-					.add("@value", createValue("value"))
-					.add("@type", createValue(iri(base, "type").stringValue()))
+		@Test void testTyped() {
+			assertThat(encode(literal("2019-04-03", XSD.DATE))).isEqualTo(createObjectBuilder()
+					.add("@value", createValue("2019-04-03"))
+					.add("@type", createValue(XSD.DATE.stringValue()))
 			);
 		}
 
@@ -131,12 +131,6 @@ final class JSONLDEncoderTest {
 			);
 		}
 
-		@Test void testTyped() {
-			assertThat(encode(literal("2019-04-03", XSD.DATE))).isEqualTo(createObjectBuilder()
-					.add("@value", createValue("2019-04-03"))
-					.add("@type", createValue(XSD.DATE.stringValue()))
-			);
-		}
 
 		@Test void testMalformed() {
 			assertThat(encode(literal("none", XSD.BOOLEAN))).isEqualTo(createObjectBuilder()
@@ -180,7 +174,7 @@ final class JSONLDEncoderTest {
 
 	}
 
-	@Nested final class SharedReferences {
+	@Nested final class References {
 
 		@Test void testExpandSharedTrees() {
 			assertThat(encode(x,

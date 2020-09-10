@@ -17,6 +17,535 @@
 
 package com.metreeca.rdf.formats;
 
+import com.metreeca.json.Shape;
+
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.rio.ParserConfig;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import javax.json.*;
+import java.math.BigDecimal;
+import java.util.Collection;
+
+import static com.metreeca.json.Shape.optional;
+import static com.metreeca.json.Shape.required;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Meta.alias;
+import static com.metreeca.json.shapes.Meta.meta;
+import static com.metreeca.rdf.ModelAssert.assertThat;
+import static com.metreeca.rdf.ValueAssert.assertThat;
+import static com.metreeca.rdf.Values.*;
+import static javax.json.Json.*;
+import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 final class JSONLDDecoderTest {
+
+	private final String base="http://example.com/";
+
+	private final BNode a=bnode();
+	private final BNode b=bnode();
+
+	private final IRI w=iri(base, "w");
+	private final IRI x=iri(base, "x");
+	private final IRI y=iri(base, "y");
+	private final IRI z=iri(base, "z");
+
+
+	private Collection<Statement> decode(final IRI focus, final Shape shape, final JsonObjectBuilder object) {
+		return decode(focus, shape, object.build());
+	}
+
+	private Collection<Statement> decode(final IRI focus, final Shape shape, final JsonObject object) {
+		return new JSONLDDecoder(focus, shape, new ParserConfig()).decode(object);
+	}
+
+
+	@Nested final class Syntax {
+
+		@Test void testReportMalformedKeywords() {
+			assertThatThrownBy(() -> decode(x, and(), createObjectBuilder()
+
+					.add("@id", createValue(1))
+
+			)).isInstanceOf(JsonException.class);
+		}
+
+		@Test void testReportConflictingKeywords() {
+			assertThatThrownBy(() -> decode(x, meta("@id", "id"), createObjectBuilder()
+
+					.add("id", "/x")
+					.add("@id", "/y")
+
+			)).isInstanceOf(JsonException.class);
+		}
+
+		@Test void testIgnoreDuplicateKeywords() {
+			assertThat(decode(x, meta("@id", "id"), createObjectBuilder()
+
+					.add("id", "/x")
+					.add("@id", "/x")
+
+			)).isIsomorphicTo();
+		}
+
+		@Test void testIgnoreNullFields() {
+			assertThat(decode(x, field(RDF.VALUE), createObjectBuilder()
+
+					.addNull("value")
+
+			)).isIsomorphicTo();
+		}
+
+	}
+
+	@Nested final class Values {
+
+		private Value decode(final JsonObjectBuilder value) {
+			return decode(value.build());
+		}
+
+		private Value decode(final JsonValue value) {
+			return new JSONLDDecoder(iri(base), field(RDF.VALUE, optional()), new ParserConfig())
+
+					.decode(createObjectBuilder().add("value", value).build())
+
+					.stream()
+					.filter(s -> s.getPredicate().equals(RDF.VALUE))
+					.findFirst()
+					.map(Statement::getObject)
+					.orElse(null);
+		}
+
+
+		@Test void testBNodeAnonymous() {
+			assertThat(decode(EMPTY_JSON_OBJECT)).isInstanceOf(BNode.class);
+		}
+
+		@Test void testBNodeLabelled() {
+			assertThat(decode(createObjectBuilder().add("@id", "_:x"))).isEqualTo(bnode("x"));
+		}
+
+		@Test void testBNodeEmptyLabel() {
+			assertThat(decode(createObjectBuilder().add("@id", ""))).isInstanceOf(BNode.class);
+		}
+
+
+		@Test void testIRIRelative() {
+			assertThat(decode(createObjectBuilder().add("@id", "x"))).isEqualTo(iri(base, "x"));
+		}
+
+		@Test void testIRIAbsolute() {
+			assertThat(decode(createObjectBuilder().add("@id", "http://x.net/"))).isEqualTo(iri("http://x.net/"));
+		}
+
+
+		@Test void testBoolean() {
+			assertThat(decode(JsonValue.TRUE)).isEqualTo(literal(true));
+			assertThat(decode(JsonValue.FALSE)).isEqualTo(literal(false));
+		}
+
+		@Test void testString() {
+			assertThat(decode(createValue("string"))).isEqualTo(literal("string"));
+		}
+
+		@Test void testInteger() {
+			assertThat(decode(createValue(1))).isEqualTo(literal(integer(1)));
+		}
+
+		@Test void testDecimal() {
+			assertThat(decode(createValue(1.0))).isEqualTo(literal(decimal(1.0)));
+		}
+
+
+		@Test void testTyped() {
+			assertThat(decode(createObjectBuilder()
+
+					.add("@value", createValue("value"))
+					.add("@type", createValue(iri(base, "type").stringValue()))
+
+			)).isEqualTo(literal("value", iri(base, "type")));
+		}
+
+		@Test void testTypedWithRelativeDatatype() {
+			assertThat(decode(createObjectBuilder()
+
+					.add("@value", createValue("value"))
+					.add("@type", createValue("type"))
+
+			)).isEqualTo(literal("value", iri(base, "type")));
+		}
+
+		@Test void testTagged() {
+			assertThat(decode(createObjectBuilder()
+
+					.add("@value", createValue("value"))
+					.add("@language", createValue("en"))
+
+			)).isEqualTo(literal("value", "en"));
+		}
+
+
+		@Test void testMalformed() {
+			assertThat(decode(createObjectBuilder()
+
+					.add("@value", createValue("none"))
+					.add("@type", createValue(XSD.BOOLEAN.toString()))
+
+			)).isEqualTo(literal("none", XSD.BOOLEAN));
+		}
+
+	}
+
+	@Nested final class Focus {
+
+		@Test void testDecodeEmptyObject() {
+			assertThat(decode(x,
+
+					and(),
+
+					EMPTY_JSON_OBJECT
+
+			)).isIsomorphicTo();
+		}
+
+		@Test void testAssumeFocusAsSubject() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, optional()),
+
+					createObjectBuilder()
+							.add("value", createObjectBuilder()
+									.add("@id", "/y")
+							)
+
+			)).isIsomorphicTo(
+					statement(x, RDF.VALUE, y)
+			);
+		}
+
+		@Test void testReportConflictingFocus() {
+			assertThatThrownBy(() -> decode(x,
+
+					and(),
+
+					createObjectBuilder()
+							.add("@id", "/z")
+
+			)).isInstanceOf(JsonException.class);
+		}
+
+	}
+
+	@Nested final class References {
+
+		@Test void testHandleNamedLoops() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required(),
+							field(RDF.VALUE, required())
+					)),
+
+					createObjectBuilder()
+							.add("value", createObjectBuilder()
+									.add("@id", "y")
+									.add("value", createObjectBuilder()
+											.add("@id", "x")
+									)
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, y),
+					statement(y, RDF.VALUE, x)
+
+			);
+		}
+
+		@Test void testHandleBlankLoops() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required(),
+							field(RDF.VALUE,
+									field(RDF.VALUE, required())
+							)
+					)),
+
+					createObjectBuilder()
+							.add("value", createObjectBuilder()
+									.add("@id", "_:x")
+									.add("value", createObjectBuilder()
+											.add("value", createObjectBuilder()
+													.add("@id", "_:x")
+											)
+									)
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, a),
+					statement(a, RDF.VALUE, b),
+					statement(b, RDF.VALUE, a)
+
+			);
+		}
+
+	}
+
+	@Nested final class Aliases {
+
+		@Test void testDecodeAbsoluteFieldIRIs() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required())),
+
+					createObjectBuilder()
+							.add(RDF.VALUE.stringValue(), createObjectBuilder()
+									.add("@id", "y")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, y)
+
+			);
+		}
+
+		@Test void testDecodeDirectInferredAliases() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required())),
+
+					createObjectBuilder()
+							.add("value", createObjectBuilder()
+									.add("@id", "y")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, y)
+
+			);
+		}
+
+		@Test void testDecodeInverseInferredAliases() {
+			assertThat(decode(x,
+
+					field(inverse(RDF.VALUE), and(required())),
+
+					createObjectBuilder()
+							.add("valueOf", createObjectBuilder() // !!! valueOf?
+									.add("@id", "y")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(y, RDF.VALUE, x)
+
+			);
+		}
+
+		@Test void testDecodeDirectUserDefinedAliases() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(alias("alias"), required())),
+
+					createObjectBuilder()
+							.add("alias", createObjectBuilder()
+									.add("@id", "y")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, y)
+
+			);
+		}
+
+		@Test void testDecodeInverseUserDefinedAliases() {
+			assertThat(decode(x,
+
+					field(inverse(RDF.VALUE), and(alias("alias"), required())),
+
+					createObjectBuilder()
+							.add("alias", createObjectBuilder()
+									.add("@id", "y")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(y, RDF.VALUE, x)
+
+			);
+		}
+
+
+		@Test void testHandleInferredAliasClashes() {
+			assertThat(decode(x,
+
+					and(
+							field(RDF.VALUE),
+							field(iri(base, "value"))
+					),
+
+					createObjectBuilder()
+
+							.add("value", "x")
+
+			)).isIsomorphicTo();
+		}
+
+
+	}
+
+	@Nested final class Shapes {
+
+		@Test void testDecodeProvedResources() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, datatype(ResourceType)),
+
+					createObjectBuilder()
+
+							.add("value", createArrayBuilder()
+
+									.add("x")
+									.add("_:x")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, x),
+					statement(x, RDF.VALUE, bnode("_:x"))
+
+			);
+		}
+
+
+		@Test void testDecodedProvedBNodes() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, datatype(BNodeType)),
+
+					createObjectBuilder()
+
+							.add("value", "x")
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, bnode("_:x"))
+
+			);
+		}
+
+		@Test void testDecodedProvedIRIs() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, datatype(IRIType)),
+
+					createObjectBuilder()
+
+							.add("value", "x")
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, x)
+
+			);
+		}
+
+
+		@Test void testDecodeProvedBNodeBackReferences() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required(),
+							field(RDF.VALUE, and(required(), datatype(BNodeType)))
+					)),
+
+					createObjectBuilder()
+							.add("value", createObjectBuilder()
+									.add("@id", "_:x")
+									.add("value", "_:x")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, b),
+					statement(b, RDF.VALUE, b)
+
+			);
+		}
+
+		@Test void testDecodeProvedIRIBackReferences() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required(), datatype(IRIType))),
+
+					createObjectBuilder()
+							.add("value", "x")
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, x)
+
+			);
+		}
+
+
+		@Test void testDecodeProvedTypedLiterals() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required(), datatype(XSD.DATE))),
+
+					createObjectBuilder()
+
+							.add("value", "2016-08-11")
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal("2016-08-11", XSD.DATE))
+
+			);
+		}
+
+		@Test void testDecodeProvedDecimalsLeniently() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required(), datatype(XSD.DECIMAL))),
+
+					createObjectBuilder()
+
+							.add("value", 1)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal(new BigDecimal("1")))
+
+			);
+		}
+
+		@Test void testDecodeProvedDoublesLeniently() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, and(required(), datatype(XSD.DOUBLE))),
+
+					createObjectBuilder()
+
+							.add("value", 1)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal(1.0))
+
+			);
+		}
+
+
+	}
 
 }

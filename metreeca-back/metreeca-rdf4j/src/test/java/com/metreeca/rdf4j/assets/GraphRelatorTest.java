@@ -31,6 +31,7 @@ import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.literal;
@@ -180,7 +181,7 @@ final class GraphRelatorTest {
 
 							.hasStatus(NotImplemented)
 
-							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(and()))
+							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(or()))
 
 					)
 			);

@@ -136,7 +136,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 * @return a new RDF message format
 	 */
 	public static RDFFormat rdf() {
-		return rdf(codec -> {});
+		return rdf(options -> {});
 	}
 
 	/**

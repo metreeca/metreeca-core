@@ -24,10 +24,12 @@ import com.metreeca.json.shapes.Meta;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.ParserConfig;
+import org.eclipse.rdf4j.rio.RioConfig;
 
 import javax.json.JsonException;
 import java.io.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.metreeca.core.Either.Left;
 import static com.metreeca.core.Either.Right;
@@ -57,40 +59,35 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * @return a new JON-LD message format
 	 */
 	public static JSONLDFormat jsonld() {
-		return new JSONLDFormat();
+		return new JSONLDFormat(options -> {});
+	}
+
+	/**
+	 * Creates a customized JSON-LD message format.
+	 *
+	 * @param customizer the JSON-LD parser/writer customizer; takes as argument a customizable RIO configuration
+	 *
+	 * @return a new customized JSON-LD message format
+	 */
+	public static JSONLDFormat rdf(final Consumer<RioConfig> customizer) {
+
+		if ( customizer == null ) {
+			throw new NullPointerException("null customizer");
+		}
+
+		return new JSONLDFormat(customizer);
 	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String id="@id";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String value="@value";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String type="@type";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String language="@language";
-
-
-	/**
-	 * Creates a wrapper for global JSON-LD keyword mappings.
+	 * Creates a wrapper setting global JSON-LD keyword mappings.
 	 *
 	 * @param mappings an array of annotations with a JSON-LD keyword as label and an alias as value
 	 *
 	 * @return a wrapper extending the {@linkplain Shape#shape() shape} attribute of incoming requests and outgoing
-	 * responses with the provided keyword {@code mappings}
+	 * responses with the provided JSON-LD keyword {@code mappings}
 	 *
 	 * @throws NullPointerException if {@code mapping} is null or contains null values
 	 */
@@ -116,7 +113,11 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSONLDFormat() {}
+	private final Consumer<RioConfig> customizer;
+
+	private JSONLDFormat(final Consumer<RioConfig> customizer) {
+		this.customizer=customizer;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -139,12 +140,13 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
+						final ParserConfig options=new ParserConfig();
+
+						customizer.accept(options);
+
 						return Right(new JSONLDDecoder(
 
-								message.request().base(),
-								iri(message.item()),
-								message.attribute(shape()),
-								new ParserConfig()
+								iri(message.item()), message.attribute(shape()), options
 
 						).decode(reader));
 
@@ -179,10 +181,13 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 				.body(output(), output -> {
 					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
+						final ParserConfig options=new ParserConfig();
+
+						customizer.accept(options);
+
 						new JSONLDEncoder(
 
-								iri(message.item()),
-								message.attribute(shape())
+								iri(message.item()), message.attribute(shape()), options
 
 						).encode(writer, value);
 

@@ -577,12 +577,11 @@ public final class Values {
 	}
 
 	public static String format(final Iterable<Statement> statements, final String base) {
-		if ( statements == null ) {
-			return null;
-		} else {
+		if ( statements == null ) { return null; } else {
+
 			try ( final StringWriter writer=new StringWriter() ) {
 
-				Rio.write(statements, writer, base, RDFFormat.TURTLE);
+				Rio.write(statements, writer, base == null ? Internal : base, RDFFormat.TURTLE);
 
 				return writer.toString();
 

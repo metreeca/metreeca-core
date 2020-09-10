@@ -23,21 +23,78 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.rio.ParserConfig;
 
+import javax.json.JsonException;
 import javax.json.JsonValue;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.metreeca.json.shapes.Field.fields;
+import static com.metreeca.rdf.Values.format;
+import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
 
 public final class _ValueParser {
 
+	private static final Pattern StepPattern=Pattern.compile( // !!! review/remove
+			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
+	);
+
+
 	public static List<IRI> path(final String base, final Shape shape, final String path) {
-		return new JSONLDDecoder(base, null, shape, new ParserConfig())
-				.path(path, shape);
+
+		final List<IRI> steps=new ArrayList<>();
+		final Matcher matcher=StepPattern.matcher(path);
+
+		int last=0;
+		Shape reference=shape;
+
+		while ( matcher.lookingAt() ) {
+
+			final Map<Object, Shape> fields=fields(reference);
+			final Map<IRI, String> aliases=aliases(reference);
+
+			final Map<String, IRI> index=new HashMap<>();
+
+			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
+
+			fields.keySet().stream().map(_ValueParser::_iri).forEach(edge -> {
+				index.put(format(edge), edge); // inside angle brackets
+				index.put(edge.toString(), edge); // naked IRI
+			});
+
+			aliases.forEach((iri, alias) -> index.put(alias, iri));
+
+			final String step=matcher.group("step");
+			final IRI iri=index.get(step);
+
+			if ( iri == null ) {
+				throw new JsonException("unknown path step ["+step+"]");
+			}
+
+			steps.add(iri);
+			reference=fields.get(iri);
+
+			matcher.region(last=matcher.end(), path.length());
+		}
+
+		if ( last != path.length() ) {
+			throw new JsonException("malformed path ["+path+"]");
+		}
+
+		return steps;
 	}
 
-	public static Object value(final String base, final Shape shape, final JsonValue value) {
-		return new JSONLDDecoder(base, null, shape, new ParserConfig())
-				.value(value, shape, null).getKey();
+	public static Object value(final Shape shape, final JsonValue value) {
+
+		final IRI focus=iri();
+
+		return new JSONLDDecoder(focus, shape, new ParserConfig())
+				.value(value, shape).getKey();
 	}
 
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Converts an object to an IRI.

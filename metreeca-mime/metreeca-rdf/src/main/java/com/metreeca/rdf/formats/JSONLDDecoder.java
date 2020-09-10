@@ -18,6 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Field;
 import com.metreeca.rdf.Values;
 
 import org.eclipse.rdf4j.model.*;
@@ -34,43 +35,53 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
 import static com.metreeca.rdf.formats.JSONLDCodecs.driver;
-import static java.util.function.Function.identity;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
+import static javax.json.Json.createObjectBuilder;
 
 
 final class JSONLDDecoder {
 
-	private static final Pattern StepPattern=Pattern.compile( // !!! review/remove
-			"(?:^|[./])(?<step>(?<alias>\\w+)|(?<inverse>\\^)?((?<naked>\\w+:.*)|<(?<bracketed>\\w+:[^>]*)>))"
-	);
+	private final IRI focus;
+	private final Shape shape;
+	private final ParserConfig options;
 
+	private final URI base;
+	private final Function<String, String> resolver;
 
-	private static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
-		return new SimpleImmutableEntry<>(key, value);
-	}
+	JSONLDDecoder(final IRI focus, final Shape shape, final ParserConfig options) {
 
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
 
-	/*
-	 * Creates a function mapping from property aliases to property ids, defaulting to the alias if no id is found.
-	 */
-	private static Function<String, String> keywords(final Shape shape) {
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
 
-		final Map<String, String> keywords=JSONLDCodecs.keywords(shape)
+		if ( options == null ) {
+			throw new NullPointerException("null options");
+		}
 
-				.collect(toMap(Map.Entry::getValue, Map.Entry::getKey, (x, y) -> {
+		this.focus=focus;
+		this.shape=pass(shape) ? null : driver(shape);
+		this.options=options;
+
+		this.base=URI.create(focus.stringValue());
+
+		final Map<String, String> aliases2keywords=JSONLDCodecs.keywords(shape)
+
+				.collect(toMap(Entry::getValue, Entry::getKey, (x, y) -> {
 
 					if ( !x.equals(y) ) {
 						throw new IllegalArgumentException("conflicting aliases for JSON-LD keywords");
@@ -80,33 +91,36 @@ final class JSONLDDecoder {
 
 				}));
 
-		return alias -> keywords.getOrDefault(alias, alias);
+		this.resolver=alias -> aliases2keywords.getOrDefault(alias, alias);
 	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final URI base;
-	private final Resource focus;
-	private final Shape shape;
-	private final ParserConfig options;
+	public Collection<Statement> decode(final JsonObject json) throws JsonException {
 
-	private final Function<String, String> keywords;
+		if ( json == null ) {
+			throw new NullPointerException("null json");
+		}
 
-	JSONLDDecoder(final String base, final Resource focus, final Shape shape, final ParserConfig options) {
+		final Map<String, String> keywords=keywords(json);
 
-		this.base=(base == null) ? null : URI.create(base);
-		this.focus=focus;
-		this.shape=(shape == null || pass(shape)) ? null : driver(shape);
-		this.options=options;
+		final String expected=focus.stringValue();
+		final String declared=resolve(keywords.getOrDefault("@id", expected));
 
-		this.keywords=(shape == null) ? identity() : keywords(shape);
+		if ( !declared.equals(expected) ) {
+			error("conflicting object identifiers: expected <%s>, declared <%s>", expected, declared);
+		}
 
+		final JsonObject object=keywords.containsKey("@id") ? // make sure the root object contains @id
+				json : createObjectBuilder(json).add("@id", expected).build();
+
+		final Collection<Statement> model=new ArrayList<>();
+
+		value(object, shape).getValue().forEachOrdered(model::add);
+
+		return model;
 	}
-
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Collection<Statement> decode(final Reader reader) throws JsonException {
 
@@ -114,38 +128,137 @@ final class JSONLDDecoder {
 			throw new NullPointerException("null reader");
 		}
 
-		return decode(Json.createReader(reader).readObject());
+		try ( final JsonReader jsonReader=Json.createReader(reader) ) {
+			return decode(jsonReader.readObject());
+		}
 
 	}
 
-	public Collection<Statement> decode(final JsonValue json) throws JsonException {
 
-		if ( json == null ) {
-			throw new NullPointerException("null json");
-		}
+	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		final Collection<Statement> model=new ArrayList<>();
+	private Stream<Entry<Value, Stream<Statement>>> values(final JsonValue value, final Shape shape) {
+		return (value instanceof JsonArray
 
-		values(json, shape, focus)
-				.values()
+				? value.asJsonArray().stream().map(v -> value(v, shape))
+				: Stream.of(value(value, shape))
+
+		).collect(toMap(Entry::getKey, Entry::getValue, Stream::concat)).entrySet().stream();
+	}
+
+	/* !!! private */ Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape) {
+		return value instanceof JsonArray ? error("unsupported JSON value <%s>", value.asJsonArray())
+				: value instanceof JsonObject ? value(value.asJsonObject(), shape)
+				: value instanceof JsonString ? value((JsonString)value, shape)
+				: value instanceof JsonNumber ? value((JsonNumber)value, shape)
+				: value.equals(JsonValue.TRUE) ? entry(True, Stream.empty())
+				: value.equals(JsonValue.FALSE) ? entry(False, Stream.empty())
+				: error("unsupported JSON value <%s>", value);
+	}
+
+
+	private Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape) {
+
+		final Map<String, String> keywords=keywords(object);
+
+		final String id=keywords.get("@id");
+		final String value=keywords.get("@value");
+		final String type=keywords.get("@type");
+		final String language=keywords.get("@language");
+
+		return (id != null) ? fields(object, shape, resource(id))
+
+				: (value == null) ? fields(object, shape, bnode())
+
+				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
+				: (language != null) ? entry(literal(value, language), Stream.empty())
+
+				: entry(literal(value, datatype(shape).map(_ValueParser::_iri).orElse(XSD.STRING)), Stream.empty());
+	}
+
+	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
+
+		final String text=string.getString();
+		final IRI type=datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
+
+		final Value value=ResourceType.equals(type) ? resource(text)
+				: BNodeType.equals(type) ? bnode(text)
+				: IRIType.equals(type) ? iri(text)
+				: literal(text, type);
+
+		return entry(value, Stream.empty());
+	}
+
+	private Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
+
+		final IRI datatype=datatype(shape).map(_ValueParser::_iri).orElse(null);
+
+		final Literal value
+
+				=XSD.DECIMAL.equals(datatype) ? Values.literal(number.bigDecimalValue())
+				: XSD.INTEGER.equals(datatype) ? Values.literal(number.bigIntegerValue())
+
+				: XSD.DOUBLE.equals(datatype) ? Values.literal(number.numberValue().doubleValue())
+				: XSD.FLOAT.equals(datatype) ? Values.literal(number.numberValue().floatValue())
+
+				: XSD.LONG.equals(datatype) ? Values.literal(number.numberValue().longValue())
+				: XSD.INTEGER.equals(datatype) ? Values.literal(number.numberValue().intValue())
+				: XSD.SHORT.equals(datatype) ? Values.literal(number.numberValue().shortValue())
+				: XSD.BYTE.equals(datatype) ? Values.literal(number.numberValue().byteValue())
+
+				: number.isIntegral() ? Values.literal(number.bigIntegerValue())
+				: Values.literal(number.bigDecimalValue());
+
+		return entry(value, Stream.empty());
+	}
+
+
+	private Entry<Value, Stream<Statement>> fields(final JsonObject object, final Shape shape, final Resource focus) {
+
+		final Map<Object, Shape> fields=Field.fields(shape);
+
+		final Map<String, IRI> aliases=aliases(shape)
+				.entrySet()
 				.stream()
-				.flatMap(identity())
-				.forEachOrdered(model::add);
+				.collect(toMap(Entry::getValue, Entry::getKey));
 
-		return model;
+		return entry(focus, object.entrySet().stream().flatMap(field -> {
+
+			final String label=resolver.apply(field.getKey());
+			final JsonValue value=field.getValue();
+
+			if ( label.equals("@type") && value instanceof JsonString ) {
+
+				return Stream.of(statement(focus, RDF.TYPE, iri(((JsonString)value).getString())));
+
+			} else if ( !label.startsWith("@") && !value.equals(JsonValue.NULL) ) {
+
+				final IRI property=aliases.computeIfAbsent(label, this::iri);
+
+				return values(value, fields.get(property)).flatMap(entry -> {
+
+					final Value target=entry.getKey();
+					final Stream<Statement> model=entry.getValue();
+
+					final Statement edge=direct(property) ? statement(focus, property, target)
+							: target instanceof Resource ? statement((Resource)target, inverse(property), focus)
+							: error("target for inverse property is not a resource <%s: %s>", label, entry);
+
+					return Stream.concat(Stream.of(edge), model);
+
+				});
+
+			} else {
+
+				return Stream.empty();
+
+			}
+
+		}));
 	}
 
 
 	//// Factories ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private String resolve(final String iri) {
-		try {
-			return base == null ? iri : base.resolve(new URI(iri)).toString();
-		} catch ( final URISyntaxException e ) {
-			throw new JsonException(String.format("invalid IRI: %s", e.getMessage()));
-		}
-	}
-
 
 	private Resource resource(final String id) {
 		return id.isEmpty() ? factory().createBNode()
@@ -153,19 +266,22 @@ final class JSONLDDecoder {
 				: factory().createIRI(resolve(id));
 	}
 
-	private Resource bnode() {
+
+	private BNode bnode() {
 		return Values.bnode();
 	}
 
-	private Resource bnode(final String id) {
+	private BNode bnode(final String id) {
 		return id.isEmpty() ? Values.bnode()
 				: id.startsWith("_:") ? Values.bnode(id.substring(2))
 				: Values.bnode(id);
 	}
 
+
 	private IRI iri(final String iri) {
 		return iri.isEmpty() ? Values.iri() : Values.iri(resolve(iri));
 	}
+
 
 	private Literal literal(final String text, final IRI type) { return literal(text, null, type);}
 
@@ -198,265 +314,47 @@ final class JSONLDDecoder {
 		}
 	}
 
-	private Statement statement(final Resource subject, final IRI predicate, final Value object) {
-		return Values.statement(subject, predicate, object);
-	}
 
-	private <V> V error(final String message) {
-		throw new JsonException(message);
-	}
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private String resolve(final String iri) {
+		try {
 
-	//// Paths ////////////////////////////////////////////////////////////////////////////////////////////////////////
+			return base.resolve(new URI(iri)).toString();
 
-	List<IRI> path(final String path, final Shape shape) { // !!! remove
+		} catch ( final URISyntaxException e ) {
 
-		final List<IRI> steps=new ArrayList<>();
-		final Matcher matcher=StepPattern.matcher(path);
-
-		int last=0;
-		Shape reference=shape;
-
-		while ( matcher.lookingAt() ) {
-
-			final Map<Object, Shape> fields=fields(reference);
-			final Map<IRI, String> aliases=aliases(reference);
-
-			final Map<String, IRI> index=new HashMap<>();
-
-			// leading '^' for inverse edges added by Values.Inverse.toString() and Values.format(IRI)
-
-			fields.keySet().stream().map(_ValueParser::_iri).forEach(edge -> {
-				index.put(format(edge), edge); // inside angle brackets
-				index.put(edge.toString(), edge); // naked IRI
-			});
-
-			aliases.forEach((iri, alias) -> index.put(alias, iri));
-
-			final String step=matcher.group("step");
-			final IRI iri=index.get(step);
-
-			if ( iri == null ) {
-				throw new JsonException("unknown path step ["+step+"]");
-			}
-
-			steps.add(iri);
-			reference=fields.get(iri);
-
-			matcher.region(last=matcher.end(), path.length());
-		}
-
-		if ( last != path.length() ) {
-			throw new JsonException("malformed path ["+path+"]");
-		}
-
-		return steps;
-	}
-
-
-	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Map<Value, Stream<Statement>> values(
-			final JsonValue value, final Shape shape, final Resource focus) {
-		return (value instanceof JsonArray
-
-				? value.asJsonArray().stream().map(v -> value(v, shape, focus))
-				: Stream.of(value(value, shape, focus))
-
-		).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, Stream::concat));
-	}
-
-	Map.Entry<Value, Stream<Statement>> value( // !!! private
-			final JsonValue value, final Shape shape, final Resource focus) {
-		return value instanceof JsonArray ? value(value.asJsonArray(), shape, focus)
-				: value instanceof JsonObject ? value(value.asJsonObject(), shape, focus)
-				: value instanceof JsonString ? value((JsonString)value, shape)
-				: value instanceof JsonNumber ? value((JsonNumber)value, shape)
-				: value.equals(JsonValue.TRUE) ? entry(True, Stream.empty())
-				: value.equals(JsonValue.FALSE) ? entry(False, Stream.empty())
-				: error("unsupported JSON value <"+value+">");
-	}
-
-
-	private Map.Entry<Value, Stream<Statement>> value(
-			final JsonArray array, final Shape shape, final Resource focus) {
-		return error("unsupported JSON value <"+array+">");
-	}
-
-	private Map.Entry<Value, Stream<Statement>> value(
-			final JsonObject object, final Shape shape, final Resource focus) {
-
-		String id=null;
-		String value=null;
-		String type=null;
-		String language=null;
-
-		for (final Map.Entry<String, JsonValue> entry : object.entrySet()) {
-
-			final String label=keywords.apply(entry.getKey());
-
-			final Supplier<String> string=() -> entry.getValue() instanceof JsonString
-					? ((JsonString)entry.getValue()).getString()
-					: error("'"+entry.getKey()+"' field is not a string");
-
-			if ( label.equals(JSONLDFormat.id) ) {
-				id=string.get();
-			} else if ( label.equals(JSONLDFormat.value) ) {
-				value=string.get();
-			} else if ( label.equals(JSONLDFormat.type) ) {
-				type=string.get();
-			} else if ( label.equals(JSONLDFormat.language) ) {
-				language=string.get();
-			}
+			return error("invalid IRI <%s>", e.getMessage());
 
 		}
-
-		final Value _value
-
-				=(id != null) ? resource(id)
-
-				: (value != null) ? (type != null) ? literal(value, iri(type))
-				: (language != null) ? literal(value, language)
-				: literal(value, datatype(shape).map(_ValueParser::_iri).orElse(XSD.STRING))
-
-				: focus != null ? focus : bnode();
-
-		return focus != null && !focus.equals(_value) ? entry(focus, Stream.empty())
-				: _value instanceof Resource ? properties(object, shape, (Resource)_value)
-				: entry(_value, Stream.empty());
-
 	}
 
-	private Map.Entry<Value, Stream<Statement>> value(
-			final JsonString string, final Shape shape) {
+	private Map<String, String> keywords(final Map<String, JsonValue> object) {
+		return object.entrySet().stream()
 
-		final String text=string.getString();
-		final IRI type=datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
+				.map(e -> entry(resolver.apply(e.getKey()), e.getValue()))
+				.filter(e -> e.getKey().startsWith("@"))
 
-		final Value value=ResourceType.equals(type) ? resource(text)
-				: BNodeType.equals(type) ? bnode(text)
-				: IRIType.equals(type) ? iri(text)
-				: literal(text, type);
+				.collect(toMap(
 
-		return entry(value, Stream.empty());
-	}
+						Entry::getKey,
 
-	private Map.Entry<Value, Stream<Statement>> value(
-			final JsonNumber number, final Shape shape) {
+						e -> e.getValue() instanceof JsonString ? ((JsonString)e.getValue()).getString()
+								: error("<'%s'> field is not a string", e.getKey()),
 
-		final IRI datatype=datatype(shape).map(_ValueParser::_iri).orElse(null);
+						(x, y) -> x.equals(y) ? x
+								: error("conflicting values for JSON-LD keyword <%s> / <%s>", x, y)
 
-		final Literal value
-
-				=XSD.DECIMAL.equals(datatype) ? Values.literal(number.bigDecimalValue())
-				: XSD.INTEGER.equals(datatype) ? Values.literal(number.bigIntegerValue())
-
-				: XSD.DOUBLE.equals(datatype) ? Values.literal(number.numberValue().doubleValue())
-				: XSD.FLOAT.equals(datatype) ? Values.literal(number.numberValue().floatValue())
-
-				: XSD.LONG.equals(datatype) ? Values.literal(number.numberValue().longValue())
-				: XSD.INTEGER.equals(datatype) ? Values.literal(number.numberValue().intValue())
-				: XSD.SHORT.equals(datatype) ? Values.literal(number.numberValue().shortValue())
-				: XSD.BYTE.equals(datatype) ? Values.literal(number.numberValue().byteValue())
-
-				: number.isIntegral() ? Values.literal(number.bigIntegerValue())
-				: Values.literal(number.bigDecimalValue());
-
-		return entry(value, Stream.empty());
+				));
 	}
 
 
-	private Map.Entry<Value, Stream<Statement>> properties(
-			final JsonObject object, final Shape shape, final Resource source) {
-
-		final Map<Object, Shape> fields=fields(shape);
-
-		return entry(source, object.entrySet().stream().flatMap(field -> {
-
-			final String label=keywords.apply(field.getKey());
-			final JsonValue value=field.getValue();
-
-			if ( label.equals(JSONLDFormat.type) && value instanceof JsonString ) {
-
-				return Stream.of(statement(source, RDF.TYPE, iri(((JsonString)value).getString())));
-
-			} else if ( !label.startsWith("@") ) {
-
-				final IRI property=property(label, shape);
-
-				return values(value, fields.get(property), null).entrySet().stream().flatMap(entry -> {
-
-					final Value target=entry.getKey();
-					final Stream<Statement> model=entry.getValue();
-
-					final Statement edge=direct(property) ? statement(source, property, target)
-							: target instanceof Resource ? statement((Resource)target, inverse(property), source)
-							: error(String.format("target for inverse property is not a resource [%s: %s]", label,
-							entry));
-
-					return Stream.concat(Stream.of(edge), model);
-
-				});
-
-			} else {
-
-				return Stream.empty();
-
-			}
-
-		}));
+	private <K, V> Entry<K, V> entry(final K key, final V value) {
+		return new SimpleImmutableEntry<>(key, value);
 	}
 
-	private IRI property(final String label, final Shape shape) {
-
-		final Matcher matcher=StepPattern.matcher(label);
-
-		if ( matcher.matches() ) {
-
-			final String alias=matcher.group("alias");
-
-			final boolean inverse=matcher.group("inverse") != null;
-			final String naked=matcher.group("naked");
-			final String bracketed=matcher.group("bracketed");
-
-			if ( naked != null ) {
-
-				final IRI iri=iri(naked);
-
-				return inverse ? inverse(iri) : iri;
-
-			} else if ( bracketed != null ) {
-
-				final IRI iri=iri(bracketed);
-
-				return inverse ? inverse(iri) : iri;
-
-			} else if ( shape != null ) {
-
-				final Map<String, IRI> aliases=aliases(shape)
-						.entrySet().stream()
-						.collect(toMap(Map.Entry::getValue, Map.Entry::getKey));
-
-				final IRI iri=aliases.get(alias);
-
-				if ( iri == null ) {
-					error(String.format("undefined property alias [%s]", alias));
-				}
-
-				return iri;
-
-			} else {
-
-				return error(String.format("no shape available to resolve property alias [%s]", alias));
-
-			}
-
-		} else {
-
-			return error(String.format("malformed object property [%s]", label));
-
-		}
+	private <V> V error(final String format, final Object... args) {
+		throw new JsonException(format(format, args));
 	}
-
 
 }

@@ -69,7 +69,8 @@ final class GraphRelator extends GraphProcessor {
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
-				) : query(request, and(all(item), shape), _ValueParser::path, _ValueParser::value).fold(
+				) : query(request, and(all(item), shape), _ValueParser::path,
+						(base, shape2, value2) -> _ValueParser.value(shape2, value2)).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
@@ -123,7 +124,8 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return query(request, digest, _ValueParser::path, _ValueParser::value).fold(
+				return query(request, digest, _ValueParser::path, (shape, value, value2) -> _ValueParser.value(value,
+						value2)).fold(
 
 						response::map, query -> graph.exec(connection -> {
 

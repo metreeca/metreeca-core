@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.rio.ParserConfig;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
@@ -59,7 +60,7 @@ final class JSONLDEncoder {
 	private final Function<String, String> aliaser;
 
 
-	JSONLDEncoder(final IRI focus, final Shape shape) {
+	JSONLDEncoder(final IRI focus, final Shape shape, final ParserConfig options) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -67,6 +68,10 @@ final class JSONLDEncoder {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
+		}
+
+		if ( options == null ) {
+			throw new NullPointerException("null options");
 		}
 
 		this.focus=focus;
@@ -78,7 +83,7 @@ final class JSONLDEncoder {
 				.map(matcher -> matcher.group("schemeall")+matcher.group("hostall")+"/")
 				.orElse("/");
 
-		final Map<String, String> keyword2aliases=keywords(shape)
+		final Map<String, String> keywords2aliases=keywords(shape)
 
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
 
@@ -90,9 +95,11 @@ final class JSONLDEncoder {
 
 				}));
 
-		this.aliaser=keyword -> keyword2aliases.getOrDefault(keyword, keyword);
+		this.aliaser=keyword -> keywords2aliases.getOrDefault(keyword, keyword);
 	}
 
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public JsonObject encode(final Collection<Statement> model) {
 
@@ -174,7 +181,7 @@ final class JSONLDEncoder {
 
 			return inlineable
 					? Json.createValue(id)
-					: Json.createObjectBuilder().add(aliaser.apply(JSONLDFormat.id), id).build();
+					: Json.createObjectBuilder().add(aliaser.apply("@id"), id).build();
 
 		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
 
@@ -182,7 +189,7 @@ final class JSONLDEncoder {
 
 		} else {
 
-			final JsonObjectBuilder object=Json.createObjectBuilder().add(aliaser.apply(JSONLDFormat.id), id);
+			final JsonObjectBuilder object=Json.createObjectBuilder().add(aliaser.apply("@id"), id);
 
 			final Collection<Resource> references=new ArrayList<>();
 
@@ -221,7 +228,7 @@ final class JSONLDEncoder {
 			}
 
 			if ( resource instanceof BNode && references.isEmpty() ) { // no back-references > drop id
-				object.remove(aliaser.apply(JSONLDFormat.id));
+				object.remove(aliaser.apply("@id"));
 			}
 
 			return object.build();
@@ -272,15 +279,15 @@ final class JSONLDEncoder {
 
 	private JsonValue json(final Value literal, final String lang) {
 		return Json.createObjectBuilder()
-				.add(aliaser.apply(JSONLDFormat.value), literal.stringValue())
-				.add(aliaser.apply(JSONLDFormat.language), lang)
+				.add(aliaser.apply("@value"), literal.stringValue())
+				.add(aliaser.apply("@language"), lang)
 				.build();
 	}
 
 	private JsonValue json(final Value literal, final Value datatype) {
 		return Json.createObjectBuilder()
-				.add(aliaser.apply(JSONLDFormat.value), literal.stringValue())
-				.add(aliaser.apply(JSONLDFormat.type), datatype.stringValue())
+				.add(aliaser.apply("@value"), literal.stringValue())
+				.add(aliaser.apply("@type"), datatype.stringValue())
 				.build();
 	}
 
