@@ -94,12 +94,29 @@ final class JSONLDDecoderTest {
 			)).isIsomorphicTo();
 		}
 
+
 		@Test void testIgnoreNullFields() {
 			assertThat(decode(x, field(RDF.VALUE), createObjectBuilder()
 
 					.addNull("value")
 
 			)).isIsomorphicTo();
+		}
+
+		@Test void testHandleArrays() {
+			assertThat(decode(x, field(RDF.VALUE), createObjectBuilder()
+
+					.add("value", createArrayBuilder()
+
+							.add("x")
+							.add("y")
+					)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal("x")),
+					statement(x, RDF.VALUE, literal("y"))
+			);
 		}
 
 	}
@@ -163,7 +180,7 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Test void testTyped() {
+		@Test void testTypedLiterals() {
 			assertThat(decode(createObjectBuilder()
 
 					.add("@value", createValue("value"))
@@ -172,7 +189,7 @@ final class JSONLDDecoderTest {
 			)).isEqualTo(literal("value", iri(base, "type")));
 		}
 
-		@Test void testTypedWithRelativeDatatype() {
+		@Test void testTypedLiteralsWithRelativeDatatype() {
 			assertThat(decode(createObjectBuilder()
 
 					.add("@value", createValue("value"))
@@ -181,7 +198,7 @@ final class JSONLDDecoderTest {
 			)).isEqualTo(literal("value", iri(base, "type")));
 		}
 
-		@Test void testTagged() {
+		@Test void testTaggedLiterals() {
 			assertThat(decode(createObjectBuilder()
 
 					.add("@value", createValue("value"))
@@ -191,7 +208,7 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Test void testMalformed() {
+		@Test void testMalformedLiterals() {
 			assertThat(decode(createObjectBuilder()
 
 					.add("@value", createValue("none"))

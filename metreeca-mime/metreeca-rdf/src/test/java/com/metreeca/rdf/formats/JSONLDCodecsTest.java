@@ -18,23 +18,22 @@
 package com.metreeca.rdf.formats;
 
 
-import com.metreeca.json.Shape;
 import com.metreeca.rdf.ValuesTest;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.*;
-import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.Values.iri;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
+import static com.metreeca.rdf.formats.JSONLDCodecs.aliases;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,144 +41,110 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class JSONLDCodecsTest {
 
-	static final Shape Keywords=and(
-			meta("@id", "id"),
-			meta("@value", "value"),
-			meta("@type", "type"),
-			meta("@language", "language")
-	);
+	@Nested final class Aliases {
+
+		@Test void testGuessAliasFromIRI() {
+
+			assertThat(aliases(field(RDF.VALUE)))
+					.as("direct")
+					.isEqualTo(singletonMap(RDF.VALUE, "value"));
+
+			assertThat(aliases(field(inverse(RDF.VALUE))))
+					.as("inverse")
+					.isEqualTo(singletonMap(inverse(RDF.VALUE), "valueOf")); // !!! valueOf?
+
+		}
+
+		@Test void testRetrieveUserDefinedAlias() {
+			assertThat(aliases(field(RDF.VALUE, alias("alias"))))
+					.as("user-defined")
+					.isEqualTo(singletonMap(RDF.VALUE, "alias"));
+		}
+
+		@Test void testPreferUserDefinedAliases() {
+			assertThat(aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
+					.as("user-defined")
+					.isEqualTo(singletonMap(RDF.VALUE, "alias"));
+		}
 
 
-	//// !!! /////////////////////////////////////////////////////////////////////////////////////////////////////////
+		@Test void testRetrieveAliasFromNestedShapes() {
 
-	@SuppressWarnings("unchecked") static JsonValue json(final Object json) {
-		return json instanceof Map ? Json.createObjectBuilder((Map<String, Object>)json).build()
-				: json instanceof Collection ? Json.createArrayBuilder((Collection<?>)json).build()
-				: null;
-	}
+			assertThat(aliases(and(field(RDF.VALUE, alias("alias")))))
+					.as("group")
+					.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 
+			assertThat(aliases(field(RDF.VALUE, and(alias("alias")))))
+					.as("conjunction")
+					.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 
-	static JsonArray array(final Object... items) {
-		return Json.createArrayBuilder(asList(items)).build();
-	}
+		}
 
-	static JsonObject object(final Map<String, Object> fields) {
-		return Json.createObjectBuilder(fields).build();
-	}
+		@Test void testMergeDuplicateFields() {
 
-	@SafeVarargs static <T> List<T> list(final T... items) {
-		return asList(items);
-	}
+			// nesting required to prevent and() from collapsing duplicates
 
-	static <K, V> Map<K, V> map() {
-		return emptyMap();
-	}
+			assertThat(aliases(and(field(RDF.VALUE), and(field(RDF.VALUE)))))
+					.as("system-guessed")
+					.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
-	@SafeVarargs static <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
-		return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
+			// nesting required to prevent and() from collapsing duplicates
 
-	static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
-		return new AbstractMap.SimpleImmutableEntry<>(key, value);
-	}
+			assertThat(aliases(and(field(RDF.VALUE, alias("alias")), and(field(RDF.VALUE, alias("alias"))))))
+					.as("user-defined")
+					.isEqualTo(singletonMap(RDF.VALUE, "alias"));
+
+		}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		@Test void testHandleMultipleAliases() {
 
-	@Test void testGuessAliasFromIRI() {
+			assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("two")))))
+					.as("clashing")
+					.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
-		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE)))
-				.as("direct")
-				.isEqualTo(singletonMap(RDF.VALUE, "value"));
+			assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
+					.as("repeated")
+					.isEqualTo(singletonMap(RDF.VALUE, "one"));
 
-		assertThat(JSONLDCodecs.aliases(field(inverse(RDF.VALUE))))
-				.as("inverse")
-				.isEqualTo(singletonMap(inverse(RDF.VALUE), "valueOf"));
+		}
 
-	}
+		@Test void testMergeAliases() {
+			assertThat(aliases(and(field(RDF.TYPE), field(RDF.VALUE))))
+					.as("merged")
+					.isEqualTo(Stream.of(
 
-	@Test void testRetrieveUserDefinedAlias() {
-		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, alias("alias"))))
-				.as("user-defined")
-				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
-	}
+							new SimpleImmutableEntry<>(RDF.TYPE, "type"),
+							new SimpleImmutableEntry<>(RDF.VALUE, "value")
 
-	@Test void testPreferUserDefinedAliases() {
-		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
-				.as("user-defined")
-				.isEqualTo(map(entry(RDF.VALUE, "alias")));
-	}
+					).collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+		}
 
+		@Test void testIgnoreClashingAliases() {
 
-	@Test void testRetrieveAliasFromNestedShapes() {
+			assertThat(aliases(and(field(RDF.VALUE), field(iri("urn:example:value")))))
+					.as("different fields")
+					.isEmpty();
 
-		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("alias")))))
-				.as("group")
-				.isEqualTo(map(entry(RDF.VALUE, "alias")));
+			// fall back to system-guess alias
 
-		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, and(alias("alias")))))
-				.as("conjunction")
-				.isEqualTo(map(entry(RDF.VALUE, "alias")));
+			assertThat(aliases(and(field(RDF.VALUE, alias("one")), field(RDF.VALUE, alias("two")))))
+					.as("same field")
+					.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
-	}
+		}
 
-	@Test void testMergeDuplicateFields() {
+		@Test void testIgnoreReservedAliases() {
 
-		// nesting required to prevent and() from collapsing duplicates
-		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE), and(field(RDF.VALUE)))))
-				.as("system-guessed")
-				.isEqualTo(map(entry(RDF.VALUE, "value")));
+			assertThat(aliases(field(iri(ValuesTest.Base, "@id"))))
+					.as("ignore reserved system-guessed aliases")
+					.isEmpty();
 
-		// nesting required to prevent and() from collapsing duplicates
-		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("alias")), and(field(RDF.VALUE, alias("alias"))))))
-				.as("user-defined")
-				.isEqualTo(map(entry(RDF.VALUE, "alias")));
+			assertThat(aliases(field(RDF.VALUE, alias("@id"))))
+					.as("ignore reserved user-defined aliases")
+					.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
-	}
-
-
-	@Test void testHandleMultipleAliases() {
-
-		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, and(alias("one"), alias("two")))))
-				.as("clashing")
-				.isEqualTo(map(entry(RDF.VALUE, "value")));
-
-		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
-				.as("repeated")
-				.isEqualTo(map(entry(RDF.VALUE, "one")));
-
-	}
-
-	@Test void testMergeAliases() {
-		assertThat(JSONLDCodecs.aliases(and(field(RDF.TYPE), field(RDF.VALUE))))
-				.as("merged")
-				.isEqualTo(map(entry(RDF.TYPE, "type"),
-						entry(RDF.VALUE, "value")));
-	}
-
-	@Test void testIgnoreClashingAliases() {
-
-		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE), field(iri("urn:example:value")))))
-				.as("different fields")
-				.isEmpty();
-
-		// fall back to system-guess alias
-
-		assertThat(JSONLDCodecs.aliases(and(field(RDF.VALUE, alias("one")), field(RDF.VALUE, alias("two")))))
-				.as("same field")
-				.isEqualTo(map(entry(RDF.VALUE, "value")));
-
-	}
-
-	@Test void testIgnoreReservedAliases() {
-
-		assertThat(JSONLDCodecs.aliases(field(iri(ValuesTest.Base, "@id"))))
-				.as("ignore reserved system-guessed aliases")
-				.isEmpty();
-
-		assertThat(JSONLDCodecs.aliases(field(RDF.VALUE, alias("@id"))))
-				.as("ignore reserved user-defined aliases")
-				.isEqualTo(singletonMap(RDF.VALUE, "value"));
+		}
 
 	}
 
