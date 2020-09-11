@@ -19,7 +19,7 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.core.*;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -58,7 +58,7 @@ public final class GraphTest {
 
 
 	public static void exec(final Runnable... tasks) {
-		new Context()
+		new com.metreeca.rest.Context()
 				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 				.exec(tasks)
 				.clear();
@@ -66,7 +66,7 @@ public final class GraphTest {
 
 
 	@Test void testConfigureRequest() {
-		exec(() -> assertThat(Graph.<Request>query(
+		exec(() -> assertThat(Graph.<com.metreeca.rest.Request>query(
 
 				sparql("\n"
 						+"construct { \n"
@@ -89,9 +89,9 @@ public final class GraphTest {
 
 				)
 
-						.apply(new Request()
+						.apply(new com.metreeca.rest.Request()
 
-										.method(Request.POST)
+										.method(com.metreeca.rest.Request.POST)
 										.base(Base)
 										.path("/test/request"),
 
@@ -123,7 +123,7 @@ public final class GraphTest {
 	}
 
 	@Test void testConfigureResponse() {
-		exec(() -> assertThat(Graph.<Response>query(
+		exec(() -> assertThat(Graph.<com.metreeca.rest.Response>query(
 
 				sparql("\n"
 						+"construct { \n"
@@ -147,9 +147,9 @@ public final class GraphTest {
 
 				)
 
-						.apply(new Response(new Request()
+						.apply(new com.metreeca.rest.Response(new com.metreeca.rest.Request()
 
-										.method(Request.POST)
+										.method(com.metreeca.rest.Request.POST)
 										.base(Base)
 										.path("/test/request"))
 
@@ -188,9 +188,9 @@ public final class GraphTest {
 	@Test void testGenerateAutoIncrementingIds() {
 		exec(() -> {
 
-			final Function<Request, String> auto=auto();
+			final Function<com.metreeca.rest.Request, String> auto=auto();
 
-			final Request request=new Request().base(Base).path("/target/");
+			final com.metreeca.rest.Request request=new com.metreeca.rest.Request().base(Base).path("/target/");
 
 			final String one=auto.apply(request);
 			final String two=auto.apply(request);
@@ -209,24 +209,24 @@ public final class GraphTest {
 
 
 	public static Model model(final Resource... contexts) {
-		return Context.asset(graph()).exec(connection -> { return export(connection, contexts); });
+		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return Context.asset(graph()).exec(connection -> { return construct(connection, sparql); });
+		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return construct(connection, sparql); });
 	}
 
 	public static List<Map<String, Value>> tuples(final String sparql) {
-		return Context.asset(graph()).exec(connection -> { return select(connection, sparql); });
+		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> Context.asset(graph()).exec(connection -> { connection.add(model, contexts); });
+		return () -> com.metreeca.rest.Context.asset(graph()).exec(connection -> { connection.add(model, contexts); });
 	}
 
 
-	//// Graph Operations //////////////////////////////////////////////////////////////////////////////////////////////
+	//// Graph Operations /////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String sparql(final String sparql) {
 		return SPARQLPrefixes+"\n\n"+sparql; // !!! avoid prefix clashes

@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.core.*;
-import com.metreeca.core.handlers.Router;
 import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.handlers.Router;
 
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.*;
@@ -30,10 +30,10 @@ import org.eclipse.rdf4j.rio.*;
 
 import java.util.*;
 
-import static com.metreeca.core.Message.types;
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.*;
-import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.formats.OutputFormat.output;
 
 
 /**
@@ -71,7 +71,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> process(final Request request) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request) {
 		return consumer -> graph().exec(connection -> {
 			try {
 
@@ -85,7 +85,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 						|| operation instanceof Update && !updatable(request.roles())
 				) {
 
-					request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
+					request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
 
 				} else if ( operation instanceof BooleanQuery ) {
 
@@ -127,7 +127,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		});
 	}
 
-	private Operation operation(final Request request, final RepositoryConnection connection) {
+	private Operation operation(final com.metreeca.rest.Request request, final RepositoryConnection connection) {
 
 		final Optional<String> query=request.parameter("query");
 		final Optional<String> update=request.parameter("update");
@@ -160,7 +160,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> process(final Request request, final BooleanQuery query) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final BooleanQuery query) {
 
 		final boolean result=query.evaluate();
 
@@ -169,13 +169,13 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
 				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
 
-		return request.reply(response -> response.status(Response.OK)
+		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
 				.body(output(), output -> factory.getWriter(output).handleBoolean(result))
 		);
 	}
 
-	private Future<Response> process(final Request request, final TupleQuery query) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final TupleQuery query) {
 
 		final TupleQueryResult result=query.evaluate();
 
@@ -184,7 +184,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final TupleQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
 				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, types(accept));
 
-		return request.reply(response -> response.status(Response.OK)
+		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
 				.body(output(), output -> {
 					try {
@@ -204,7 +204,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				}));
 	}
 
-	private Future<Response> process(final Request request, final GraphQuery query) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final GraphQuery query) {
 
 		final GraphQueryResult result=query.evaluate();
 
@@ -213,7 +213,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
 				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, types(accept));
 
-		return request.reply(response -> response.status(Response.OK)
+		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
 				.body(output(), output -> {
 
@@ -236,7 +236,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				}));
 	}
 
-	private Future<Response> process(final Request request, final Update update) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final Update update) {
 
 		update.execute();
 

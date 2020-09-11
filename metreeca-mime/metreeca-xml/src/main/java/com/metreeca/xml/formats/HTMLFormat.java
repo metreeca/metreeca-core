@@ -17,9 +17,9 @@
 
 package com.metreeca.xml.formats;
 
-import com.metreeca.core.*;
-import com.metreeca.core.formats.InputFormat;
-import com.metreeca.core.formats.OutputFormat;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.InputFormat;
+import com.metreeca.rest.formats.OutputFormat;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.w3c.dom.Document;
@@ -35,13 +35,13 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.core.Either.Left;
-import static com.metreeca.core.Either.Right;
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.BadRequest;
-import static com.metreeca.core.Response.UnsupportedMediaType;
-import static com.metreeca.core.formats.InputFormat.input;
-import static com.metreeca.core.formats.OutputFormat.output;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.regex.Pattern.compile;
 
 

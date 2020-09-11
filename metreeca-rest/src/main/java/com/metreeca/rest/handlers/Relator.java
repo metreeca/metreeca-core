@@ -17,13 +17,12 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.core.Message;
-import com.metreeca.core.Request;
 import com.metreeca.json.Shape;
+import com.metreeca.rest.Message;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 
-import static com.metreeca.core.Wrapper.wrapper;
-import static com.metreeca.json.Shape.*;
+import static com.metreeca.rest.Wrapper.wrapper;
 
 
 /**
@@ -67,8 +66,8 @@ public final class Relator extends Actor {
 				.with(connector())
 				.with(trimmer())
 				.with(wrapper(Request::collection,
-						throttler(Relate, Holder, Digest),
-						throttler(Relate, Detail)
+						throttler(Shape.Relate, Shape.Holder, Shape.Digest),
+						throttler(Shape.Relate, Shape.Detail)
 				))
 
 		);

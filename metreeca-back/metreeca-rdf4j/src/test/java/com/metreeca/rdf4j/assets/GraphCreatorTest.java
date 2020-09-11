@@ -18,11 +18,11 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.core.*;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Redactor;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -31,7 +31,6 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.json.Shape.filter;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -45,8 +44,8 @@ import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 final class GraphCreatorTest {
 
@@ -61,8 +60,8 @@ final class GraphCreatorTest {
 
 	@Nested final class Holder {
 
-		private Request request() {
-			return new Request()
+		private com.metreeca.rest.Request request() {
+			return new com.metreeca.rest.Request()
 					.base(ValuesTest.Base)
 					.path("/employees/")
 					.header("Slug", "slug")
@@ -88,7 +87,7 @@ final class GraphCreatorTest {
 								.orElse(null);
 
 						assertThat(response)
-								.hasStatus(Response.Created)
+								.hasStatus(com.metreeca.rest.Response.Created)
 								.doesNotHaveBody();
 
 						assertThat(location)
@@ -118,7 +117,7 @@ final class GraphCreatorTest {
 				creator.handle(request()).accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.InternalServerError);
+							.hasStatus(com.metreeca.rest.Response.InternalServerError);
 
 					assertThat(model())
 							.as("graph unchanged")
@@ -136,7 +135,7 @@ final class GraphCreatorTest {
 		@Test void testNotImplemented() {
 			exec(() -> new GraphCreator()
 
-					.handle(new Request()
+					.handle(new com.metreeca.rest.Request()
 							.roles(ValuesTest.Manager)
 							.base(ValuesTest.Base)
 							.path("/employees/9999").attribute(Shape.shape(), ValuesTest.Employee)
@@ -147,7 +146,7 @@ final class GraphCreatorTest {
 						assertThat(response)
 								.hasStatus(Response.InternalServerError);
 
-						assertThat(Context.asset(graph()).exec(RepositoryConnection::isEmpty))
+						assertThat(com.metreeca.rest.Context.asset(graph()).exec(RepositoryConnection::isEmpty))
 								.as("storage unchanged")
 								.isTrue();
 

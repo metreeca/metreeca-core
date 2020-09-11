@@ -26,7 +26,7 @@
 	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
-	<name>Metreeca Linked Data Framework</name>
+	<name>Metreeca REST/JSON-LD Framework</name>
 	<description>A declarative model-driven framework for rapid linked data service development.</description>
 	<url>https://github.com/metreeca/link</url>
 	<inceptionYear>2013</inceptionYear>
@@ -99,7 +99,6 @@
 
 	<modules>
 
-		<module>metreeca-core</module>
 		<module>metreeca-json</module>
 		<module>metreeca-rest</module>
 
@@ -482,15 +481,11 @@
 
 							<groups> <!-- colon-separated patterns / single line -->
 								<group>
-									<title>Core Web Framework</title>
-									<packages>com.metreeca.core*</packages>
-								</group>
-									<group>
-									<title>JSON-LD Modelling Framework</title>
+									<title>JSON-LD Modelling</title>
 									<packages>com.metreeca.json*</packages>
 								</group>
 								<group>
-									<title>Model-Driven REST/JSON-LD Framework</title>
+									<title>JSON-LD Publishing</title>
 									<packages>com.metreeca.rest*</packages>
 								</group>
 								<group>
@@ -502,13 +497,13 @@
 								<group>
 									<title>Server Adapters</title>
 									<packages>
-										com.metreeca.jee*:com.metreeca.jse
+										com.metreeca.jee*:com.metreeca.jse*
 									</packages>
 								</group>
 								<group>
 									<title>Backend Adapters</title>
 									<packages>
-										com.metreeca.rdf4j*<!--:com.metreeca.gcp*-->
+										com.metreeca.rdf4j*
 									</packages>
 								</group>
 							</groups>

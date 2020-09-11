@@ -39,7 +39,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-core</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 		</dependency>
 
 		<dependency> <!-- TagSoup SAX HTML Parser -->

@@ -17,11 +17,11 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.core.Context;
-import com.metreeca.core.Request;
-import com.metreeca.core.assets.Logger;
-import com.metreeca.core.handlers.Delegator;
 import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rest.Context;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.handlers.Delegator;
 
 import java.util.*;
 

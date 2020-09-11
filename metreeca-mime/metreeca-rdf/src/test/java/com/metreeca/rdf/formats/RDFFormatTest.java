@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.core.*;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
@@ -29,17 +29,17 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static com.metreeca.core.Message.types;
-import static com.metreeca.core.Response.UnsupportedMediaType;
-import static com.metreeca.core.ResponseAssert.assertThat;
-import static com.metreeca.core.formats.InputFormat.input;
-import static com.metreeca.core.formats.TextFormat.text;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.TextFormat.text;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;

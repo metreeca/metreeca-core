@@ -17,8 +17,6 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.core.Context;
-import com.metreeca.core.assets.Logger;
 import com.metreeca.json.Query;
 import com.metreeca.json.*;
 import com.metreeca.json.probes.Redactor;
@@ -27,6 +25,7 @@ import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats._RDFCasts;
+import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -42,8 +41,6 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.core.assets.Logger.logger;
-import static com.metreeca.core.assets.Logger.time;
 import static com.metreeca.json.Shape.focus;
 import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.shapes.All.all;
@@ -66,6 +63,9 @@ import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static com.metreeca.rdf4j.assets.Snippets.*;
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
@@ -115,9 +115,9 @@ abstract class GraphProcessor {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Logger logger=Context.asset(logger());
+	private final Logger logger=asset(logger());
 
 
 	//// Tracing //////////////////////////////////////////////////////////////////////////////////////////////////////

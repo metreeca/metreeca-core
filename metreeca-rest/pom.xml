@@ -31,33 +31,14 @@
 	<artifactId>metreeca-rest</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca Model-Driven REST/JSON-LD Framework</name>
-	<description>A model-driven REST/JSON-LD framework.</description>
+	<name>Metreeca JSON-LD Publishing</name>
+	<description>A lightweight server-agnostic REST/JSON-LD framework.</description>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-json</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-core</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-json</artifactId>
-			<type>test-jar</type>
-			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

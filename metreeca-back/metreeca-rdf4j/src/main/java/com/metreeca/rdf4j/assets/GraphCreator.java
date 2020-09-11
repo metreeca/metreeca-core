@@ -18,23 +18,23 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.core.*;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
 import java.util.UUID;
 
-import static com.metreeca.core.Context.asset;
-import static com.metreeca.core.Either.Left;
-import static com.metreeca.core.Either.Right;
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.InternalServerError;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.InternalServerError;
 import static java.util.stream.Collectors.toList;
 
 
@@ -43,14 +43,14 @@ final class GraphCreator extends GraphProcessor {
 	private final Graph graph=asset(graph());
 
 
-	Future<Response> handle(final Request request) {
+	com.metreeca.rest.Future<com.metreeca.rest.Response> handle(final com.metreeca.rest.Request request) {
 		return request.collection() ? holder(request) : member(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> holder(final Request request) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> holder(final com.metreeca.rest.Request request) {
 		return request
 
 				.body(jsonld())
@@ -59,7 +59,7 @@ final class GraphCreator extends GraphProcessor {
 
 					final IRI holder=iri(request.item());
 					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
-							.map(Xtream::encode)  // encode slug as IRI path component
+							.map(com.metreeca.rest.Xtream::encode)  // encode slug as IRI path component
 							.orElseGet(() -> UUID.randomUUID().toString()) // !! sequential generator
 					);
 
@@ -77,7 +77,7 @@ final class GraphCreator extends GraphProcessor {
 						connection.add(rewrite(member, holder, rdf));
 
 						return Right(request.reply(response -> response
-								.status(Response.Created)
+								.status(com.metreeca.rest.Response.Created)
 								.header("Location", member.stringValue()))
 						);
 
@@ -88,7 +88,7 @@ final class GraphCreator extends GraphProcessor {
 				.fold(request::reply, future -> future);
 	}
 
-	private Future<Response> member(final Request request) {
+	private com.metreeca.rest.Future<Response> member(final com.metreeca.rest.Request request) {
 		return request.reply(status(InternalServerError, new UnsupportedOperationException("member POST "
 				+"method")));
 	}

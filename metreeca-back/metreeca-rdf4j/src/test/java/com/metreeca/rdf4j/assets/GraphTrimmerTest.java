@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.core.Request;
-import com.metreeca.core.Response;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.RDF;

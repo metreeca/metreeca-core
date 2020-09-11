@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf4j.actions;
 
-import com.metreeca.core.Context;
-import com.metreeca.core.assets.Logger;
 import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rest.Context;
+import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -28,8 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import static com.metreeca.core.assets.Logger.logger;
-import static com.metreeca.core.assets.Logger.time;
+import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 

@@ -18,8 +18,8 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.core.*;
 import com.metreeca.json.Shape;
+import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 
 import java.util.Objects;

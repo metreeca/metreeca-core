@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import static com.metreeca.core.formats.JSONAssert.assertThat;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -39,6 +38,7 @@ import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rdf.Values.*;
+import static com.metreeca.rest.formats.JSONAssert.assertThat;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static javax.json.Json.*;

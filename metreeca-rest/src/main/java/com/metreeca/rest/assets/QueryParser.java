@@ -17,12 +17,12 @@
 
 package com.metreeca.rest.assets;
 
-import com.metreeca.core.Request;
 import com.metreeca.json.*;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine.Parser;
 
 import javax.json.*;

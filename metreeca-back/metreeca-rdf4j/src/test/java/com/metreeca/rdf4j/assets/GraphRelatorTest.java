@@ -17,17 +17,15 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.core.Request;
-import com.metreeca.core.Response;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.ValuesTest;
+import com.metreeca.rest.Request;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.core.Response.NotImplemented;
-import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
@@ -40,8 +38,9 @@ import static com.metreeca.rdf.ValuesTest.term;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
+import static com.metreeca.rest.Response.NotImplemented;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 final class GraphRelatorTest {
 

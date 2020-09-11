@@ -17,19 +17,15 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.core.*;
-import com.metreeca.core.handlers.Delegator;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Redactor;
+import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 
 import java.util.function.Function;
 
-import static com.metreeca.core.Response.Forbidden;
-import static com.metreeca.core.Response.Unauthorized;
-import static com.metreeca.json.Shape.empty;
-import static com.metreeca.json.Shape.shape;
-import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.Response.Forbidden;
+import static com.metreeca.rest.Response.Unauthorized;
 import static java.util.function.Function.identity;
 
 
@@ -40,7 +36,7 @@ import static java.util.function.Function.identity;
  */
 public abstract class Actor extends Delegator {
 
-	private final Engine engine=Context.asset(engine());
+	private final Engine engine=Context.asset(Engine.engine());
 
 
 	/**
@@ -66,7 +62,7 @@ public abstract class Actor extends Delegator {
 	protected Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
 		return handler -> request -> {
 
-			final Shape shape=request.attribute(shape());
+			final Shape shape=request.attribute(Shape.shape());
 
 			final Shape baseline=shape // visible to anyone taking into account task/area
 
@@ -85,7 +81,7 @@ public abstract class Actor extends Delegator {
 
 			// request shape redactor
 
-			final Function<Request, Request> pre=message -> message.attribute(shape(), message.attribute(shape())
+			final Function<Request, Request> pre=message -> message.attribute(Shape.shape(), message.attribute(Shape.shape())
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
@@ -95,7 +91,7 @@ public abstract class Actor extends Delegator {
 
 			// response shape redactor
 
-			final Function<Response, Response> post=message -> message.attribute(shape(), message.attribute(shape())
+			final Function<Response, Response> post=message -> message.attribute(Shape.shape(), message.attribute(Shape.shape())
 
 					.map(new Redactor(Shape.Role, request.roles()))
 					.map(new Redactor(Shape.Task, task))
@@ -104,8 +100,8 @@ public abstract class Actor extends Delegator {
 
 			);
 
-			return empty(baseline) ? request.reply(response -> response.status(Forbidden))
-					: empty(authorized) ? request.reply(response -> response.status(Unauthorized))
+			return Shape.empty(baseline) ? request.reply(response -> response.status(Forbidden))
+					: Shape.empty(authorized) ? request.reply(response -> response.status(Unauthorized))
 					: handler.handle(request.map(pre)).map(post);
 
 		};

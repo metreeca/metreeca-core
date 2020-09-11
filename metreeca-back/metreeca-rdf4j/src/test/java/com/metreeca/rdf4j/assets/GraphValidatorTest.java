@@ -17,9 +17,9 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.core.*;
 import com.metreeca.json.Shape;
 import com.metreeca.rdf.Values;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -29,7 +29,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.core.EitherAssert.assertThat;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
@@ -53,6 +52,7 @@ import static com.metreeca.rdf.Values.literal;
 import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
+import static com.metreeca.rest.EitherAssert.assertThat;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.joining;
@@ -72,12 +72,12 @@ final class GraphValidatorTest {
 	}
 
 
-	private Either<MessageException, Request> validate(final Shape shape, final String... model) {
+	private com.metreeca.rest.Either<com.metreeca.rest.MessageException, com.metreeca.rest.Request> validate(final Shape shape, final String... model) {
 		return validate(shape, model(model));
 	}
 
 	private Either<MessageException, Request> validate(final Shape shape, final Collection<Statement> model) {
-		return new GraphValidator().validate(new Request()
+		return new GraphValidator().validate(new com.metreeca.rest.Request()
 				.body(jsonld(), model).attribute(Shape.shape(), field(RDF.VALUE, shape))
 		);
 	}

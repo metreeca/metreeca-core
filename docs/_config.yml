@@ -13,5 +13,5 @@ defaults:
     values:
       project: "metreeca-link"
       version: "0.0.0-SNAPSHOT"
-      tagline: "Metreeca Linked Data Framework"
+      tagline: "Metreeca REST/JSON-LD Framework"
       release: "https://github.com/metreeca/link/releases/tag/v0.0.0-SNAPSHOT"

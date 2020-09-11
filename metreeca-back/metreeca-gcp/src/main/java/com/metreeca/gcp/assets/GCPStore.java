@@ -17,7 +17,7 @@
 
 package com.metreeca.gcp.assets;
 
-import com.metreeca.core.assets.Store;
+import com.metreeca.rest.assets.Store;
 
 import com.google.cloud.storage.*;
 

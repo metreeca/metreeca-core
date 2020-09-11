@@ -17,10 +17,10 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.core.*;
-import com.metreeca.core.formats.*;
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Meta;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.*;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.rio.ParserConfig;
@@ -31,16 +31,16 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.metreeca.core.Either.Left;
-import static com.metreeca.core.Either.Right;
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.BadRequest;
-import static com.metreeca.core.Response.UnsupportedMediaType;
-import static com.metreeca.core.formats.InputFormat.input;
-import static com.metreeca.core.formats.OutputFormat.output;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 
 /**
  * Model-driven JSON-LD message format.

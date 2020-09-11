@@ -17,8 +17,8 @@
 
 package com.metreeca.xml.actions;
 
-import com.metreeca.core.*;
-import com.metreeca.core.actions.*;
+import com.metreeca.rest.*;
+import com.metreeca.rest.actions.*;
 import com.metreeca.xml.formats.HTMLFormat;
 
 import org.w3c.dom.Document;
@@ -33,8 +33,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.core.Request.HEAD;
-import static com.metreeca.core.actions.Regex.Regex;
+import static com.metreeca.rest.Request.HEAD;
+import static com.metreeca.rest.actions.Regex.Regex;
 import static com.metreeca.xml.actions.XPath.XPath;
 import static com.metreeca.xml.formats.HTMLFormat.html;
 import static java.lang.Runtime.getRuntime;

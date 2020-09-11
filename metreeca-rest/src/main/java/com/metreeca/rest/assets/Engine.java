@@ -17,9 +17,9 @@
 
 package com.metreeca.rest.assets;
 
-import com.metreeca.core.*;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
+import com.metreeca.rest.*;
 
 import javax.json.JsonException;
 import javax.json.JsonValue;
@@ -27,11 +27,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-import static com.metreeca.core.Either.Left;
-import static com.metreeca.core.Either.Right;
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.BadRequest;
-import static com.metreeca.core.Response.UnprocessableEntity;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnprocessableEntity;
 
 
 /**
@@ -85,15 +83,15 @@ public interface Engine {
 
 		try {
 
-			return Right(new QueryParser(shape, paths, values).parse(request.query()));
+			return Either.Right(new QueryParser(shape, paths, values).parse(request.query()));
 
 		} catch ( final JsonException e ) {
 
-			return Left(status(BadRequest, e));
+			return Either.Left(status(BadRequest, e));
 
 		} catch ( final NoSuchElementException e ) {
 
-			return Left(status(UnprocessableEntity, e));
+			return Either.Left(status(UnprocessableEntity, e));
 
 		}
 	}

@@ -17,11 +17,11 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.core.*;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
 import com.metreeca.rdf.formats._ValueParser;
+import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -31,8 +31,6 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.*;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.All.all;
@@ -41,6 +39,8 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.assets.Engine.query;
 
 
@@ -52,10 +52,10 @@ final class GraphRelator extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Graph graph=Context.asset(graph());
+	private final Graph graph=com.metreeca.rest.Context.asset(graph());
 
 
-	Future<Response> handle(final Request request) {
+	com.metreeca.rest.Future<com.metreeca.rest.Response> handle(final com.metreeca.rest.Request request) {
 		return request.reply(response -> {
 
 			final boolean resource=!request.collection();
@@ -79,7 +79,7 @@ final class GraphRelator extends GraphProcessor {
 							// containers are currently virtual and respond always with 200 OK even if not described in
 							// the graph
 
-							final Message<Response> message=response
+							final com.metreeca.rest.Message<Response> message=response
 
 									// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
@@ -188,7 +188,7 @@ final class GraphRelator extends GraphProcessor {
 		return "return=representation; include=\""+include+"\"";
 	}
 
-	private boolean include(final Request request, final IRI include) {
+	private boolean include(final com.metreeca.rest.Request request, final IRI include) {
 
 		// !!! handle multiple uris in include parameter
 		// !!! handle omit parameter (with multiple uris)

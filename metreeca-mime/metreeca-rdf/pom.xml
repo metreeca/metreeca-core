@@ -38,7 +38,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-core</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 		</dependency>
 
 		<dependency>
@@ -59,7 +59,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-core</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>

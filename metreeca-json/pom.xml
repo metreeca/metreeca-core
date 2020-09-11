@@ -31,7 +31,7 @@
 	<artifactId>metreeca-json</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca JSON-LD Modelling Framework</name>
+	<name>Metreeca JSON-LD Modelling</name>
 	<description>A shape-based JSON-LD modelling framework.</description>
 
 </project>

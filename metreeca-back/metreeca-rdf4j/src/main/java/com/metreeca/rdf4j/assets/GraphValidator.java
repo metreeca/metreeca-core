@@ -17,12 +17,12 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.core.*;
 import com.metreeca.json.Shape;
 import com.metreeca.json.Trace;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats._RDFCasts;
+import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -33,11 +33,6 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.metreeca.core.Context.asset;
-import static com.metreeca.core.Either.Left;
-import static com.metreeca.core.Either.Right;
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.Response.UnprocessableEntity;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Trace.trace;
 import static com.metreeca.rdf.Values.*;
@@ -45,6 +40,11 @@ import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Snippets.source;
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.UnprocessableEntity;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -55,7 +55,7 @@ final class GraphValidator extends GraphProcessor {
 	private final Graph graph=asset(graph());
 
 
-	<M extends Message<M>> Either<MessageException, M> validate(final M message) {
+	<M extends com.metreeca.rest.Message<M>> com.metreeca.rest.Either<com.metreeca.rest.MessageException, M> validate(final M message) {
 		return message
 
 				.body(jsonld())

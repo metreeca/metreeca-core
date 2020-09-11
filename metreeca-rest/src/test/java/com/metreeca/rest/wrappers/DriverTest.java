@@ -17,19 +17,17 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.core.Request;
 import com.metreeca.json.Shape;
+import com.metreeca.rest.*;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.core.MessageException.status;
-import static com.metreeca.core.RequestAssert.assertThat;
-import static com.metreeca.core.Response.OK;
-import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -65,7 +63,7 @@ final class DriverTest {
 
 				.wrap(request -> {
 
-					assertThat(request)
+					RequestAssert.assertThat(request)
 							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(TestShape));
 
 					return request.reply(status(OK));
@@ -74,7 +72,7 @@ final class DriverTest {
 
 				.handle(request())
 
-				.accept(response -> assertThat(response)
+				.accept(response -> ResponseAssert.assertThat(response)
 						.hasStatus(OK)
 				);
 	}

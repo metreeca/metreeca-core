@@ -17,11 +17,11 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.core.*;
-import com.metreeca.core.formats.InputFormat;
 import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rdf4j.assets.GraphTest;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.InputFormat;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 
-import static com.metreeca.core.ResponseAssert.assertThat;
 import static com.metreeca.rdf.ModelAssert.assertThat;
 import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.Values.statement;
@@ -39,6 +38,7 @@ import static com.metreeca.rdf.ValuesTest.encode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.export;
+import static com.metreeca.rest.ResponseAssert.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toCollection;
@@ -60,7 +60,7 @@ final class GraphsTest {
 	}
 
 	private Model dflt() {
-		return Context.asset(Graph.graph()).exec(connection -> {
+		return com.metreeca.rest.Context.asset(Graph.graph()).exec(connection -> {
 
 			return export(connection, (Resource)null);
 
@@ -68,7 +68,7 @@ final class GraphsTest {
 	}
 
 	private Model named() {
-		return Context.asset(Graph.graph()).exec(connection -> {
+		return com.metreeca.rest.Context.asset(Graph.graph()).exec(connection -> {
 
 			return export(connection, RDF.NIL).stream()
 					.map(s -> statement(s.getSubject(), s.getPredicate(), s.getObject())) // strip context info
@@ -96,8 +96,8 @@ final class GraphsTest {
 		return Graphs.graphs().query(Root).update(Root);
 	}
 
-	private Request request() {
-		return new Request().base(ValuesTest.Base);
+	private com.metreeca.rest.Request request() {
+		return new com.metreeca.rest.Request().base(ValuesTest.Base);
 	}
 
 
@@ -110,45 +110,45 @@ final class GraphsTest {
 	}
 
 
-	private Request anonymous(final Request request) {
+	private com.metreeca.rest.Request anonymous(final com.metreeca.rest.Request request) {
 		return request;
 	}
 
-	private Request authenticated(final Request request) {
+	private com.metreeca.rest.Request authenticated(final com.metreeca.rest.Request request) {
 		return request.roles(Root);
 	}
 
 
-	private Request catalog(final Request request) {
-		return request.method(Request.GET);
+	private com.metreeca.rest.Request catalog(final com.metreeca.rest.Request request) {
+		return request.method(com.metreeca.rest.Request.GET);
 	}
 
-	private Request get(final Request request) {
-		return request.method(Request.GET);
+	private com.metreeca.rest.Request get(final com.metreeca.rest.Request request) {
+		return request.method(com.metreeca.rest.Request.GET);
 	}
 
-	private Request put(final Request request) {
-		return request.method(Request.PUT).body(InputFormat.input(), () ->
+	private com.metreeca.rest.Request put(final com.metreeca.rest.Request request) {
+		return request.method(com.metreeca.rest.Request.PUT).body(InputFormat.input(), () ->
 				new ByteArrayInputStream(encode(model(Rest)).getBytes(UTF_8))
 		);
 	}
 
-	private Request delete(final Request request) {
-		return request.method(Request.DELETE);
+	private com.metreeca.rest.Request delete(final com.metreeca.rest.Request request) {
+		return request.method(com.metreeca.rest.Request.DELETE);
 	}
 
-	private Request post(final Request request) {
-		return request.method(Request.POST).body(InputFormat.input(), () ->
+	private com.metreeca.rest.Request post(final com.metreeca.rest.Request request) {
+		return request.method(com.metreeca.rest.Request.POST).body(InputFormat.input(), () ->
 				new ByteArrayInputStream(encode(model(Rest)).getBytes(UTF_8))
 		);
 	}
 
 
-	private Request dflt(final Request request) {
+	private com.metreeca.rest.Request dflt(final com.metreeca.rest.Request request) {
 		return request.parameter("default", "");
 	}
 
-	private Request named(final Request request) {
+	private com.metreeca.rest.Request named(final com.metreeca.rest.Request request) {
 		return request.parameter("graph", RDF.NIL.stringValue());
 	}
 
@@ -163,7 +163,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 				})
@@ -176,7 +176,7 @@ final class GraphsTest {
 				.handle(authenticated(catalog(request())))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(catalog())
 						)));
@@ -188,7 +188,7 @@ final class GraphsTest {
 				.handle(anonymous(catalog(request())))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(catalog())
 						)));
@@ -201,7 +201,7 @@ final class GraphsTest {
 				.handle(authenticated(catalog(request())))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(catalog())
 						)));
@@ -218,7 +218,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 				}));
@@ -230,7 +230,7 @@ final class GraphsTest {
 				.handle(authenticated(dflt(get(request()))))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(First)
 						)
@@ -244,7 +244,7 @@ final class GraphsTest {
 				.handle(anonymous(dflt(get(request()))))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(First)
 						)));
@@ -256,7 +256,7 @@ final class GraphsTest {
 				.handle(authenticated(dflt(get(request()))))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(First)
 						)
@@ -271,7 +271,7 @@ final class GraphsTest {
 				.handle(anonymous(named(get(request()))))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.Unauthorized)
+						.hasStatus(com.metreeca.rest.Response.Unauthorized)
 						.doesNotHaveBody()));
 	}
 
@@ -281,7 +281,7 @@ final class GraphsTest {
 				.handle(authenticated(named(get(request()))))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(Rest)
 						)));
@@ -293,7 +293,7 @@ final class GraphsTest {
 				.handle(anonymous(named(get(request()))))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(Rest)
 						)));
@@ -305,7 +305,7 @@ final class GraphsTest {
 				.handle(authenticated(named(get(request()))))
 
 				.accept(response -> assertThat(response)
-						.hasStatus(Response.OK)
+						.hasStatus(com.metreeca.rest.Response.OK)
 						.hasBody(rdf(), rdf -> assertThat(rdf)
 								.isIsomorphicTo(Rest)
 						)));
@@ -322,7 +322,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(dflt())
@@ -354,7 +354,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(dflt())
@@ -387,7 +387,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(named())
@@ -419,7 +419,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(named())
@@ -456,7 +456,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(dflt())
@@ -490,7 +490,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(dflt())
@@ -525,7 +525,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(named())
@@ -557,7 +557,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(named())
@@ -592,7 +592,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(dflt())
@@ -624,7 +624,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(dflt())
@@ -659,7 +659,7 @@ final class GraphsTest {
 				.accept(response -> {
 
 					assertThat(response)
-							.hasStatus(Response.Unauthorized)
+							.hasStatus(com.metreeca.rest.Response.Unauthorized)
 							.doesNotHaveBody();
 
 					assertThat(named())

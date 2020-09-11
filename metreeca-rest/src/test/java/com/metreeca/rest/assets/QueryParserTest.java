@@ -21,6 +21,7 @@ import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.*;
+import com.metreeca.json.shapes.Datatype;
 import com.metreeca.json.shapes.Field;
 
 import org.assertj.core.api.Assertions;
@@ -120,7 +121,7 @@ final class QueryParserTest {
 						((JsonNumber)value).longValue()
 						: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
 						: value instanceof JsonString ?
-						((JsonString)value).getString()+datatype(_shape).map(t -> "^"+t).orElse("")
+						((JsonString)value).getString()+Datatype.datatype(_shape).map(t -> "^"+t).orElse("")
 						: null
 
 		)

@@ -16,7 +16,7 @@
  */
 
 /**
- * Java EE adapter.
+ * Java EE Servlet adapter.
  *
  * <p>Provides an adapter for deploying apps based on Metreeca/Link as web applications managed by a Servlet 3.1
  * container.</p>
@@ -86,8 +86,8 @@
  *
  * } }</pre>
  *
- * <p>Standard wrappers and handler building blocks are provided by the {@link com.metreeca.core.wrappers} and {@link
- * com.metreeca.core.handlers} packages.</p>
+ * <p>Standard wrappers and handler building blocks are provided by the {@link com.metreeca.rest.wrappers} and {@link
+ * com.metreeca.rest.handlers} packages.</p>
  */
 
 package com.metreeca.jee;
