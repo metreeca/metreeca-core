@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf;
+package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.*;

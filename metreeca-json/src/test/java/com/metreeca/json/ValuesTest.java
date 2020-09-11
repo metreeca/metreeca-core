@@ -15,10 +15,11 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf;
+package com.metreeca.json;
 
-import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Datatype;
 
+import org.assertj.core.api.Assertions;
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -44,11 +45,9 @@ import static com.metreeca.json.shapes.MaxLength.maxLength;
 import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.Pattern.pattern;
-import static com.metreeca.rdf.Values.*;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 
@@ -92,7 +91,7 @@ public final class ValuesTest {
 			convey().then(
 
 					server().then(
-							field(RDF.TYPE, and(required(), datatype(IRIType))),
+							field(RDF.TYPE, and(required(), Datatype.datatype(Values.IRIType))),
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(required(), datatype(XSD.STRING), pattern("\\d+")))
 					),
@@ -108,15 +107,16 @@ public final class ValuesTest {
 					role(Manager).then(
 
 							field(term("seniority"), and(required(), datatype(XSD.INTEGER),
-									minInclusive(literal(integer(1))), maxInclusive(literal(integer(5))))),
+									minInclusive(Values.literal(Values.integer(1))),
+									maxInclusive(Values.literal(Values.integer(5))))),
 
 							field(term("supervisor"), and(
-									optional(), datatype(IRIType), clazz(term("Employee")),
+									optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							)),
 
 							field(term("subordinate"), and(
-									optional(), datatype(IRIType), clazz(term("Employee")),
+									optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							))
 
@@ -161,7 +161,8 @@ public final class ValuesTest {
 	private static final Map<String, Model> DatasetCache=new HashMap<>();
 
 
-	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Factories
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static IRI term(final String name) {
 
@@ -169,7 +170,7 @@ public final class ValuesTest {
 			throw new NullPointerException("null name");
 		}
 
-		return iri(Namespace, name);
+		return Values.iri(Namespace, name);
 	}
 
 	public static IRI item(final String name) {
@@ -178,11 +179,12 @@ public final class ValuesTest {
 			throw new NullPointerException("null name");
 		}
 
-		return iri(Base, name);
+		return Values.iri(Base, name);
 	}
 
 
-	//// Datasets //////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Datasets
+	// ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Model small() {
 		return dataset(ValuesTest.class.getResource("ValuesTestSmall.ttl"));
@@ -283,10 +285,10 @@ public final class ValuesTest {
 
 	@Test void testAnnotatedIRIs() {
 
-		assertThat(direct(RDF.NIL)).isTrue();
-		assertThat(direct(inverse(RDF.NIL))).isFalse();
+		Assertions.assertThat(Values.direct(RDF.NIL)).isTrue();
+		Assertions.assertThat(Values.direct(Values.inverse(RDF.NIL))).isFalse();
 
-		assertThat(inverse(inverse(RDF.NIL))).as("symmetric").isEqualTo(RDF.NIL);
+		Assertions.assertThat(Values.inverse(Values.inverse(RDF.NIL))).as("symmetric").isEqualTo(RDF.NIL);
 
 	}
 

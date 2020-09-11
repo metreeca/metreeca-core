@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rdf.ValuesTest;
+import com.metreeca.json.ValuesTest;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
@@ -26,11 +26,11 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf.formats._Aliases.aliases;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf;
+package com.metreeca.json;
 
 import org.assertj.core.api.AbstractAssert;
 import org.eclipse.rdf4j.model.*;
@@ -26,8 +26,7 @@ import org.eclipse.rdf4j.model.util.Models;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static com.metreeca.rdf.Values.format;
-import static com.metreeca.rdf.ValuesTest.encode;
+import static com.metreeca.json.ValuesTest.encode;
 
 
 public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
@@ -237,7 +236,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		if ( matching.isEmpty() ) {
 			failWithMessage(
 					"expected <%s> to contain statements matching <{%s %s %s}> but has none",
-					encode(actual), format(subject), format(predicate), format(object)
+					encode(actual), Values.format(subject), Values.format(predicate), Values.format(object)
 			);
 		}
 
@@ -256,7 +255,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		if ( !matching.isEmpty() ) {
 			failWithMessage(
 					"expected model to contain no statements matching <{%s %s %s}> but has <%s>",
-					format(subject), format(predicate), format(object), encode(matching)
+					Values.format(subject), Values.format(predicate), Values.format(object), encode(matching)
 			);
 		}
 

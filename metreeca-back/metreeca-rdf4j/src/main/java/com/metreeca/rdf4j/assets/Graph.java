@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.rdf.Values;
+import com.metreeca.json.Values;
 import com.metreeca.rdf.formats._RDFCasts;
 import com.metreeca.rest.Response;
 
@@ -32,7 +32,7 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import java.util.*;
 import java.util.function.*;
 
-import static com.metreeca.rdf.Values.*;
+import static com.metreeca.json.Values.*;
 import static java.util.Objects.requireNonNull;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 import static org.eclipse.rdf4j.repository.util.Connections.getStatement;

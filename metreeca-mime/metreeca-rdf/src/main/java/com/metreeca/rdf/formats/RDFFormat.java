@@ -38,7 +38,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static com.metreeca.rdf.Values.iri;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.Message.types;

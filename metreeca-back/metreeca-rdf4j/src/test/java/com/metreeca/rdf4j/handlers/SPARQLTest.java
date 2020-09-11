@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.rdf.Values;
+import com.metreeca.json.Values;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.JSONAssert;
@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 import javax.json.JsonValue;
 import java.util.function.Consumer;
 
-import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.json.ModelAssert.assertThat;
+import static com.metreeca.json.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;

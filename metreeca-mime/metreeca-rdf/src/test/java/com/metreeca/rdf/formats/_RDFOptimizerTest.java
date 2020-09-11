@@ -18,7 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
+import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;

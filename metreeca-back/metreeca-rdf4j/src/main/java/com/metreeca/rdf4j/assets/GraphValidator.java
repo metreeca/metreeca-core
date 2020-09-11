@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats._RDFCasts;
 import com.metreeca.rest.Either;
 
@@ -34,7 +33,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Trace.trace;
-import static com.metreeca.rdf.Values.*;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;

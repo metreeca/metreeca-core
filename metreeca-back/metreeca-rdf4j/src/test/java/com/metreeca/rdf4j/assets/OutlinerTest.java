@@ -27,14 +27,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.focus;
+import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.ValuesTest.decode;
 import static java.util.stream.Collectors.toSet;
 
 

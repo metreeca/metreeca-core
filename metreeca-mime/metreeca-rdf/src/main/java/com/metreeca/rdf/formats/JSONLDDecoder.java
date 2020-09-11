@@ -18,8 +18,8 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.rdf.Values;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -40,8 +40,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.rdf.Values.*;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;

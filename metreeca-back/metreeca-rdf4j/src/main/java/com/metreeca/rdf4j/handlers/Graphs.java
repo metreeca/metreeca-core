@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
+import com.metreeca.json.Values;
 import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.handlers.Router;
@@ -35,10 +35,10 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static com.metreeca.json.Shape.only;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.Message.types;
 import static com.metreeca.rest.MessageException.status;

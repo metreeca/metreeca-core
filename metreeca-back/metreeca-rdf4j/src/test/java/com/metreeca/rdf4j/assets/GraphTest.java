@@ -36,9 +36,9 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.ValuesTest.*;
+import static com.metreeca.json.ModelAssert.assertThat;
+import static com.metreeca.json.Values.*;
+import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.rdf4j.assets.Graph.auto;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static java.util.Collections.singleton;

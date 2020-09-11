@@ -17,7 +17,7 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.rdf.Values;
+import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -30,8 +30,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.rdf.Values.direct;
-import static com.metreeca.rdf.Values.inverse;
+import static com.metreeca.json.Values.direct;
+import static com.metreeca.json.Values.inverse;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyIterator;
 

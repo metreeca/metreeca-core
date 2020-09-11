@@ -32,8 +32,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static com.metreeca.json.Shape.shape;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;

@@ -15,14 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf;
+package com.metreeca.json;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Condition;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-
-import static com.metreeca.rdf.Values.format;
 
 
 public final class ValueAssert extends AbstractAssert<ValueAssert, Value> {
@@ -45,7 +43,7 @@ public final class ValueAssert extends AbstractAssert<ValueAssert, Value> {
 		return isNotNull().satisfies(new Condition<>(
 				value -> value instanceof IRI,
 				"expected <%s> to be an IRI",
-				format(actual)
+				Values.format(actual)
 		));
 	}
 
@@ -58,7 +56,7 @@ public final class ValueAssert extends AbstractAssert<ValueAssert, Value> {
 		return isIRI().satisfies(new Condition<>(
 				value -> ((IRI)value).getNamespace().equals(namespace),
 				"expected <%s> to be in the <%s> namespace",
-				format(actual), namespace
+				Values.format(actual), namespace
 		));
 	}
 

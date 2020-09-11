@@ -29,10 +29,10 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import java.util.function.Supplier;
 
 import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.Values.iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 
 

@@ -24,9 +24,9 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.JsonException;
 
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.Values.inverse;
 import static com.metreeca.rdf.formats._ValueParser.path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

@@ -34,10 +34,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.rdf.Values.*;
 import static com.metreeca.rdf.formats._Aliases.aliases;
 import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static java.util.Collections.singletonMap;

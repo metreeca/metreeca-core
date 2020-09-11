@@ -17,9 +17,7 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
+import com.metreeca.json.*;
 import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.*;
@@ -32,9 +30,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.Values.*;
+import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.queries.Stats.stats;
 import static com.metreeca.json.queries.Terms.terms;
@@ -59,9 +60,6 @@ import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.When.when;
-import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.Values.*;
-import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
 import static java.util.stream.Collectors.toList;

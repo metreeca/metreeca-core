@@ -29,8 +29,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
-import static com.metreeca.rdf.Values.*;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 

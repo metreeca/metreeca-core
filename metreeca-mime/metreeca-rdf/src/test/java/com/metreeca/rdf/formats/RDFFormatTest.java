@@ -17,8 +17,7 @@
 
 package com.metreeca.rdf.formats;
 
-import com.metreeca.rdf.Values;
-import com.metreeca.rdf.ValuesTest;
+import com.metreeca.json.Values;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
@@ -29,11 +28,12 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.shape;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.ValuesTest.decode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rest.Message.types;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
@@ -41,6 +41,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -169,18 +170,20 @@ final class RDFFormatTest {
 		@Test void testConfigureWriterBaseIRI() {
 			exec(() -> new Request()
 
-					.base(ValuesTest.Base+"context/")
-					.path("/container/")
+					.base("http://example.com/base/")
+					.path("/")
 
 					.reply(response -> response
 							.status(Response.OK)
 							.attribute(shape(), field(LDP.CONTAINS, datatype(Values.IRIType)))
-							.body(rdf(), decode("</context/container/> ldp:contains </context/container/x>."))
+							.body(rdf(), singletonList(statement(
+									iri("http://example.com/base/"), LDP.CONTAINS, iri("http://example.com/base/x")
+							)))
 					)
 
 					.accept(response -> assertThat(response)
 							.hasBody(text(), text -> assertThat(text)
-									.contains("@base <"+ValuesTest.Base+"context/container/"+">")
+									.contains("@base <"+"http://example.com/base/"+">")
 							)
 					)
 			);

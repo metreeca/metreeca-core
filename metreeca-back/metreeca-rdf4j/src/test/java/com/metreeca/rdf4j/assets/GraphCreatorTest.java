@@ -18,10 +18,8 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.json.probes.Redactor;
-import com.metreeca.rdf.Values;
-import com.metreeca.rdf.ValuesTest;
 import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -31,15 +29,15 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.filter;
+import static com.metreeca.json.ValueAssert.assertThat;
+import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.ModelAssert.assertThat;
-import static com.metreeca.rdf.ValueAssert.assertThat;
-import static com.metreeca.rdf.Values.literal;
-import static com.metreeca.rdf.Values.statement;
-import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;

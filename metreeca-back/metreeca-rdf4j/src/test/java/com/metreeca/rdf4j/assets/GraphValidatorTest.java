@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
+import com.metreeca.json.Values;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,6 +29,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
@@ -47,9 +50,6 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.literal;
-import static com.metreeca.rdf.ValuesTest.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rest.EitherAssert.assertThat;

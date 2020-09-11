@@ -18,7 +18,7 @@
 package com.metreeca.rdf.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
+import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
@@ -27,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
@@ -39,8 +41,6 @@ import static com.metreeca.json.shapes.Meta.hint;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
-import static com.metreeca.rdf.Values.inverse;
-import static com.metreeca.rdf.Values.literal;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
