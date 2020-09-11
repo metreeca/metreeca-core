@@ -328,16 +328,15 @@ public final class Values {
 				: value instanceof BigInteger ? literal((BigInteger)value)
 				: value instanceof BigDecimal ? literal((BigDecimal)value)
 
-				: value instanceof Date ? literal((Date)value)
 				: value instanceof LocalDate ? literal((LocalDate)value)
 				: value instanceof LocalDateTime ? literal((LocalDateTime)value)
 				: value instanceof OffsetDateTime ? literal((OffsetDateTime)value)
-
 
 				: value instanceof byte[] ? literal((byte[])value)
 
 				: literal(value.toString());
 	}
+
 
 	public static Literal literal(final boolean value) {
 		return factory.createLiteral(value);
