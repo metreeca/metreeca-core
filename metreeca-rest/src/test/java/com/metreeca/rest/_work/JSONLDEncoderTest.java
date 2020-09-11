@@ -15,14 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.eclipse.rdf4j.rio.ParserConfig;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -55,14 +54,14 @@ final class JSONLDEncoderTest {
 
 
 	private JsonObject encode(final IRI focus, final Shape shape, final Statement... model) {
-		return new JSONLDEncoder(focus, shape, new ParserConfig()).encode(asList(model));
+		return new JSONLDEncoder(focus, shape).encode(asList(model));
 	}
 
 
 	@Nested final class Values {
 
 		private JsonValue encode(final Value value) {
-			return new JSONLDEncoder(iri(base), field(RDF.VALUE, optional()), new ParserConfig())
+			return new JSONLDEncoder(iri(base), field(RDF.VALUE, optional()))
 					.encode(singleton(statement(iri(base), RDF.VALUE, value))) // wrap value inside root object
 					.get("value"); // then unwrap
 		}

@@ -15,30 +15,26 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
+import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
-import com.metreeca.json.shapes.Meta;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.*;
 
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RioConfig;
+import org.eclipse.rdf4j.model.*;
 
 import javax.json.JsonException;
+import javax.json.JsonValue;
 import java.io.*;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -59,65 +55,54 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * @return a new JON-LD message format
 	 */
 	public static JSONLDFormat jsonld() {
-		return new JSONLDFormat(options -> {});
-	}
-
-	/**
-	 * Creates a customized JSON-LD message format.
-	 *
-	 * @param customizer the JSON-LD parser/writer customizer; takes as argument a customizable RIO configuration
-	 *
-	 * @return a new customized JSON-LD message format
-	 */
-	public static JSONLDFormat rdf(final Consumer<RioConfig> customizer) {
-
-		if ( customizer == null ) {
-			throw new NullPointerException("null customizer");
-		}
-
-		return new JSONLDFormat(customizer);
+		return new JSONLDFormat();
 	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates a wrapper managing global JSON-LD keyword mappings.
+	 * Decodes a shape-based query.
 	 *
-	 * @param mappings an array of annotations with a JSON-LD keyword as label and an alias as value
+	 * @param query the query to be decoded
+	 * @param shape the base shape for the decoded query
 	 *
-	 * @return a wrapper extending the {@linkplain Shape#shape() shape} attribute of incoming requests and outgoing
-	 * responses with the provided JSON-LD keyword {@code mappings}
+	 * @return either a message exception reporting a decoding issue or the decoded query
 	 *
-	 * @throws NullPointerException if {@code mapping} is null or contains null values
+	 * @throws NullPointerException if either {@code query} or {@code shape} is null
 	 */
-	public static Wrapper keywords(final Meta... mappings) {
+	public static Either<MessageException, Query> query(
+			final String query, final Shape shape,
+			final _Parser<String, List<IRI>> paths, final _Parser<JsonValue, Value> values
+	) {
 
-		if ( mappings == null || Arrays.stream(mappings).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null mappings");
+		if ( query == null ) {
+			throw new NullPointerException("null query");
 		}
 
-		if ( Arrays.stream(mappings).anyMatch(meta -> !meta.label().toString().startsWith("@")) ) {
-			throw new IllegalArgumentException("illegal mapping keywords");
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
 		}
 
-		final Shape keywords=and(mappings);
+		try {
 
-		return handler -> request -> handler
+			return Right(new _QueryParser(shape, paths, values).parse(query));
 
-				.handle(request.attribute(shape(), and(request.attribute(shape()), keywords)))
+		} catch ( final JsonException e ) {
 
-				.map(response -> response.attribute(shape(), and(response.attribute(shape()), keywords)));
+			return Left(status(BadRequest, e));
+
+		} catch ( final NoSuchElementException e ) {
+
+			return Left(status(UnprocessableEntity, e));
+
+		}
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Consumer<RioConfig> customizer;
-
-	private JSONLDFormat(final Consumer<RioConfig> customizer) {
-		this.customizer=customizer;
-	}
+	private JSONLDFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,13 +125,9 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 							final Reader reader=new InputStreamReader(input, message.charset())
 					) {
 
-						final ParserConfig options=new ParserConfig();
-
-						customizer.accept(options);
-
 						return Right(new JSONLDDecoder(
 
-								iri(message.item()), message.attribute(shape()), options
+								iri(message.item()), message.attribute(shape())
 
 						).decode(reader));
 
@@ -181,13 +162,10 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 				.body(output(), output -> {
 					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
-						final ParserConfig options=new ParserConfig();
-
-						customizer.accept(options);
 
 						new JSONLDEncoder(
 
-								iri(message.item()), message.attribute(shape()), options
+								iri(message.item()), message.attribute(shape())
 
 						).encode(writer, value);
 

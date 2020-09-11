@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.assets;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.*;
 import com.metreeca.json.probes.Optimizer;
@@ -23,7 +23,6 @@ import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.assets.Engine.Parser;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -48,15 +47,16 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 
-final class QueryParser {
+public final class _QueryParser {
 
 	private final Shape shape;
 
-	private final Parser<String, List<IRI>> paths;
-	private final Parser<JsonValue, Value> values;
+	private final _Parser<String, List<IRI>> paths;
+	private final _Parser<JsonValue, Value> values;
 
 
-	QueryParser(final Shape shape, final Parser<String, List<IRI>> paths, final Parser<JsonValue, Value> values) {
+	public _QueryParser(final Shape shape, final _Parser<String, List<IRI>> paths,
+			final _Parser<JsonValue, Value> values) {
 		this.shape=shape;
 		this.paths=paths;
 		this.values=values;

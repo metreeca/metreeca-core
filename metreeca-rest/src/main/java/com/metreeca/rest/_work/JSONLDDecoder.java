@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
@@ -25,10 +25,6 @@ import com.metreeca.json.shapes.Field;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.eclipse.rdf4j.rio.ParserConfig;
-import org.eclipse.rdf4j.rio.RDFParseException;
-import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
-import org.eclipse.rdf4j.rio.helpers.RDFParserHelper;
 
 import javax.json.*;
 import java.io.Reader;
@@ -38,7 +34,6 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
@@ -52,13 +47,12 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 	private final IRI focus;
 	private final Shape shape;
-	private final ParserConfig options;
 
 	private final URI base;
 
 	private final Function<String, String> resolver;
 
-	JSONLDDecoder(final IRI focus, final Shape shape, final ParserConfig options) {
+	JSONLDDecoder(final IRI focus, final Shape shape) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -68,13 +62,8 @@ final class JSONLDDecoder extends JSONLDCodec {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( options == null ) {
-			throw new NullPointerException("null options");
-		}
-
 		this.focus=focus;
 		this.shape=driver(shape);
-		this.options=options;
 
 		this.base=URI.create(focus.stringValue());
 
@@ -282,35 +271,10 @@ final class JSONLDDecoder extends JSONLDCodec {
 	}
 
 
-	private Literal literal(final String text, final IRI type) { return literal(text, null, type);}
+	private Literal literal(final String text, final IRI type) { return Values.literal(text, type);}
 
 	private Literal literal(final String text, final String lang) {
-		return literal(text, lang, null);
-	}
-
-	private Literal literal(final String text, final String lang, final IRI type) {
-		try {
-
-			final ParseErrorCollector listener=new ParseErrorCollector();
-
-			final Literal literal=RDFParserHelper.createLiteral(text, lang, type, options, listener, factory());
-
-			final String errors=Stream.of(listener.getFatalErrors(), listener.getErrors())
-
-					.flatMap(Collection::stream)
-					.collect(Collectors.joining("; "));
-
-			if ( !errors.isEmpty() ) {
-				throw new JsonException(errors);
-			}
-
-			return literal;
-
-		} catch ( final RDFParseException e ) {
-
-			throw new JsonException(e.getMessage());
-
-		}
+		return Values.literal(text, lang);
 	}
 
 

@@ -30,11 +30,11 @@ import static com.metreeca.json.Shape.convey;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest._work.JSONLDFormat.jsonld;
 
 
 final class GraphUpdaterTest {

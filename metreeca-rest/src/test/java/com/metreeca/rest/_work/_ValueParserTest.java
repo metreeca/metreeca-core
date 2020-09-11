@@ -22,7 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import javax.json.JsonException;
+import java.util.NoSuchElementException;
 
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.And.and;
@@ -58,11 +58,11 @@ final class _ValueParserTest {
 
 
 	@Test void testRejectUnknownPathSteps() {
-		assertThatThrownBy(() -> path(shape, "first/unknown")).isInstanceOf(JsonException.class);
+		assertThatThrownBy(() -> path(shape, "first/unknown")).isInstanceOf(NoSuchElementException.class);
 	}
 
 	@Test void testRejectMalformedPaths() {
-		assertThatThrownBy(() -> path(shape, "---")).isInstanceOf(JsonException.class);
+		assertThatThrownBy(() -> path(shape, "---")).isInstanceOf(NoSuchElementException.class);
 	}
 
 }

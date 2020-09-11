@@ -62,7 +62,7 @@ public final class _ValueParser {
 						.map(Map.Entry::getKey)
 						.findFirst()
 
-						.orElseThrow(() -> new JsonException("unknown path step <"+step+">"));
+						.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
 
 
 				steps.add(iri);
@@ -85,9 +85,7 @@ public final class _ValueParser {
 
 		final IRI focus=iri();
 
-		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
-
-		//return new JSONLDDecoder(focus, shape, new ParserConfig()).value(value, shape).getKey();
+		return new JSONLDDecoder(focus, shape).value(value, shape).getKey();
 	}
 
 }

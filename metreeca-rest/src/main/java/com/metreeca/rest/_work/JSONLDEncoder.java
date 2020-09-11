@@ -15,14 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.eclipse.rdf4j.rio.ParserConfig;
 
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
@@ -61,7 +60,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 	private final Function<String, String> aliaser;
 
 
-	JSONLDEncoder(final IRI focus, final Shape shape, final ParserConfig options) {
+	JSONLDEncoder(final IRI focus, final Shape shape) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -69,10 +68,6 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
-		}
-
-		if ( options == null ) {
-			throw new NullPointerException("null options");
 		}
 
 		this.focus=focus;

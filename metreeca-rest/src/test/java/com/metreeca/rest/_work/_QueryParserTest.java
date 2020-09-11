@@ -15,14 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.assets;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.rest._work._ValueParser;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.Value;
@@ -35,6 +34,7 @@ import java.util.function.Consumer;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
+import static com.metreeca.json.Values.integer;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -57,10 +57,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
-final class QueryParserTest {
+final class _QueryParserTest {
 
-	private static final Value One=literal(1L);
-	private static final Value Ten=literal(10L);
+	private static final Value One=literal(integer(1));
+	private static final Value Ten=literal(integer(10));
 
 	private static final Shape shape=field(RDF.FIRST, field(RDF.REST, and()));
 
@@ -112,7 +112,7 @@ final class QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new QueryParser(shape, _ValueParser::path, _ValueParser::value)
+		return new _QueryParser(shape, _ValueParser::path, _ValueParser::value)
 				.parse(query.replace('\'', '"'));
 	}
 
@@ -293,12 +293,12 @@ final class QueryParserTest {
 
 		items("{ '%': 'first' }", shape, items -> assertThat(items.shape())
 				.as("in (singleton)")
-				.isEqualTo(filter(shape, in(RDF.FIRST)))
+				.isEqualTo(filter(shape, in(literal("first"))))
 		);
 
 		items("{ '%': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 				.as("in (multiple)")
-				.isEqualTo(filter(shape, in(RDF.FIRST, RDF.REST)))
+				.isEqualTo(filter(shape, in(literal("first"), literal("rest"))))
 		);
 
 
@@ -309,12 +309,12 @@ final class QueryParserTest {
 
 		items("{ '!': 'first' }", shape, items -> assertThat(items.shape())
 				.as("universal (singleton)")
-				.isEqualTo(filter(shape, all(RDF.FIRST)))
+				.isEqualTo(filter(shape, all(literal("first"))))
 		);
 
 		items("{ '!': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 				.as("universal (multiple)")
-				.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
+				.isEqualTo(filter(shape, all(literal("first"), literal("rest"))))
 		);
 
 
@@ -325,12 +325,12 @@ final class QueryParserTest {
 
 		items("{ '?': 'first' }", shape, items -> assertThat(items.shape())
 				.as("existential (singleton)")
-				.isEqualTo(filter(shape, any(RDF.FIRST)))
+				.isEqualTo(filter(shape, any(literal("first"))))
 		);
 
 		items("{ '?': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 				.as("existential (multiple)")
-				.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
+				.isEqualTo(filter(shape, any(literal("first"), literal("rest"))))
 		);
 
 	}

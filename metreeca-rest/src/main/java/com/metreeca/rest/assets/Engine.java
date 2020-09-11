@@ -17,22 +17,10 @@
 
 package com.metreeca.rest.assets;
 
-import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
-
-import javax.json.JsonException;
-import javax.json.JsonValue;
-import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.function.Supplier;
-
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Response.UnprocessableEntity;
 
 
 /**
@@ -50,60 +38,6 @@ public interface Engine {
 	 */
 	public static Supplier<Engine> engine() {
 		return () -> { throw new IllegalStateException("undefined engine service"); };
-	}
-
-
-	//// !!!
-	// /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	///**
-	// * Retrieves the shape-based query of this request.
-	// *
-	// * @param request
-	// * @param shape  the base shape for the query
-	// *
-	// * @param format the format supporting {@linkplain Format#path(String, Shape, String) path}/{@linkplain
-	// *               Format#value(String, Shape, JsonValue)  value} parsing
-	// * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	// * {@linkplain Request#query() query} string, if successfully parsed using {@code format} parsing methods; an
-	// error
-	// * providing access to the parsing failure, otherwise
-	// *
-	// * @throws NullPointerException if any argument is null
-	// */
-	public static Either<MessageException, Query> query(
-			final Request request, final Shape shape,
-			final Parser<String, List<IRI>> paths, final Parser<JsonValue, Value> values
-	) {
-
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		try {
-
-			return Either.Right(new QueryParser(shape, paths, values).parse(request.query()));
-
-		} catch ( final JsonException e ) {
-
-			return Either.Left(status(BadRequest, e));
-
-		} catch ( final NoSuchElementException e ) {
-
-			return Either.Left(status(UnprocessableEntity, e));
-
-		}
-	}
-
-
-	@FunctionalInterface public static interface Parser<V, R> {
-
-		public R parse(final Shape shape, final V v);
-
 	}
 
 
