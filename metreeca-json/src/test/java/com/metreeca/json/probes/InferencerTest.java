@@ -37,7 +37,6 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.json.shapes.Meta.hint;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
@@ -45,26 +44,19 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class _RDFInferencerTest {
+final class InferencerTest {
 
-	@Test void testHint() {
-
-		assertImplies("hinted shapes are resources",
-				hint("/resources/"), datatype(Values.ResourceType));
-
-	}
-
-	@Test void testUniversal() {
+	@Test void testAll() {
 		assertImplies("minimum focus size is equal to the size of the required value set",
 				all(literal(1), literal(2)), minCount(2));
 	}
 
-	@Test void testExistential() {
+	@Test void testAny() {
 		assertImplies("minimum focus size is 1",
 				any(literal(1), literal(2)), minCount(1));
 	}
 
-	@Test void testType() { // !!! improve testing of multiple implications
+	@Test void testDatatype() { // !!! improve testing of multiple implications
 
 		assertImplies("xsd:boolean has closed range",
 				datatype(XSD.BOOLEAN), and(maxCount(1), in(literal(false), literal(true))));
@@ -123,19 +115,19 @@ final class _RDFInferencerTest {
 		);
 	}
 
-	@Test void testConjunction() {
+	@Test void testAnd() {
 		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResourceType),
 				(s, i) -> and(Stream.concat(s.shapes().stream(), Stream.of(i)).collect(toList()))); // outer and()
 		// stripped by optimization
 	}
 
-	@Test void testDisjunction() {
+	@Test void testOr() {
 		assertImplies("nested shapes are expanded", or(clazz(RDF.NIL)), datatype(Values.ResourceType),
 				(s, i) -> and(Stream.concat(s.shapes().stream(), Stream.of(i)).collect(toList()))); // outer or()
 		// stripped by optimization
 	}
 
-	@Test void testOption() { // !!! uncomment when filtering constraints are accepted by when()
+	@Test void testWhen() { // !!! uncomment when filtering constraints are accepted by when()
 		assertImplies("nested shapes are expanded",
 				when(and()/* !!! clazz(RDF.NIL) */, clazz(RDF.NIL), clazz(RDF.NIL)),
 				datatype(Values.ResourceType),
@@ -161,7 +153,7 @@ final class _RDFInferencerTest {
 	}
 
 	private Shape expand(final Shape shape) {
-		return optimize(shape.map(new _RDFInferencer()));
+		return optimize(shape.map(new Inferencer()));
 	}
 
 }
