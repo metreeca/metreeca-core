@@ -34,7 +34,7 @@ import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest._work.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 
 
 final class GraphUpdaterTest {

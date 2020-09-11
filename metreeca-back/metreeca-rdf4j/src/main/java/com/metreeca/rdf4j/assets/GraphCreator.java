@@ -34,7 +34,7 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.InternalServerError;
-import static com.metreeca.rest._work.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static java.util.stream.Collectors.toList;
 
 

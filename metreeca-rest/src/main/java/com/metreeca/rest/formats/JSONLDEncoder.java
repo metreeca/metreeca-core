@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
 
@@ -51,7 +51,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Resource focus;
+	private final IRI focus;
 	private final Shape shape;
 
 	private final String root;
@@ -98,16 +98,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public JsonObject encode(final Collection<Statement> model) {
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		return json(model, shape, focus, resource -> false).asJsonObject();
-	}
-
-	public <W extends Writer> W encode(final W writer, final Collection<Statement> model) {
+	<W extends Writer> W encode(final W writer, final Collection<Statement> model) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
@@ -124,6 +115,15 @@ final class JSONLDEncoder extends JSONLDCodec {
 			return writer;
 
 		}
+	}
+
+	JsonObject encode(final Collection<Statement> model) {
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return json(model, shape, focus, resource -> false).asJsonObject();
 	}
 
 

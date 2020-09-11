@@ -40,7 +40,7 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnprocessableEntity;
-import static com.metreeca.rest._work.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;

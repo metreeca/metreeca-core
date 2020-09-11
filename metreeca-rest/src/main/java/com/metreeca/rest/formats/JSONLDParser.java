@@ -15,79 +15,62 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.rest.formats;
 
 import com.metreeca.json.*;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rest.Request;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import javax.json.*;
-import java.io.*;
-import java.net.URLDecoder;
+import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.stream.Stream;
+import java.util.regex.Matcher;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.probes._Aliases.aliases;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.fields;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.metreeca.rest.Request.search;
+import static com.metreeca.rest.Xtream.decode;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+final class JSONLDParser {
 
-public final class _QueryParser {
+	private static final java.util.regex.Pattern StepPattern=java.util.regex.Pattern.compile("(?:^|\\.)(\\w+\\b)");
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
 
+	private final JSONLDDecoder decoder;
 
-	public _QueryParser(final Shape shape) {
+
+	JSONLDParser(final IRI focus, final Shape shape) {
 		this.shape=shape;
+		this.decoder=new JSONLDDecoder(focus, shape);
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Parses a JSON object encoding a query.
-	 *
-	 * @param query either a URL-encoded JSON object or URL query parameters representing a shape-driven linked data
-	 *              query
-	 *
-	 * @return the parsed query
-	 *
-	 * @throws NullPointerException   if {@code query} is null
-	 * @throws JsonException          if {@code query} is malformed
-	 * @throws NoSuchElementException if {@code query} refers to data outside the parser shape envelope
-	 */
-	public Query parse(final String query) throws JsonException, NoSuchElementException {
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
-		try {
-
-			return query.isEmpty() ? items(shape)
-					: query.startsWith("%7B") ? json(URLDecoder.decode(query, UTF_8.name()))
-					: query.startsWith("{") ? json(query)
-					: form(query);
-
-		} catch ( final UnsupportedEncodingException unexpected ) {
-			throw new UncheckedIOException(unexpected);
-		}
-
+	Query parse(final String query) throws JsonException, NoSuchElementException {
+		return query.isEmpty() ? items(shape)
+				: query.startsWith("%7B") ? json(decode(query))
+				: query.startsWith("{") ? json(query)
+				: form(query);
 	}
 
 
@@ -123,7 +106,7 @@ public final class _QueryParser {
 
 
 	private Query form(final String query) {
-		return json(Json.createObjectBuilder(Request.search(query).entrySet().stream()
+		return json(Json.createObjectBuilder(search(query).entrySet().stream()
 
 				.collect(toMap(Map.Entry::getKey, this::value))
 
@@ -177,7 +160,7 @@ public final class _QueryParser {
 	}
 
 
-	//// Query Properties //////////////////////////////////////////////////////////////////////////////////////////////
+	//// Query Properties /////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape filter(final JsonObject query) {
 		return and(query.entrySet().stream()
@@ -335,15 +318,48 @@ public final class _QueryParser {
 	}
 
 
-	//// Paths
-	// ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Paths ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private List<IRI> steps(final String path, final Shape shape) {
 		try {
 
-			return _ValueParser.path(shape, path.trim());
+			final String path1=path.trim();
 
-		} catch ( final JsonException e ) {
+			final List<IRI> steps=new ArrayList<>();
+			final Matcher matcher=StepPattern.matcher(path1);
+
+			int last=0;
+			Shape reference=shape;
+
+			while ( matcher.lookingAt() ) {
+
+				final Map<IRI, Shape> fields=fields(reference);
+				final Map<IRI, String> aliases=aliases(reference);
+
+				final String step=matcher.group(1);
+
+				final IRI iri=aliases.entrySet().stream()
+
+						.filter(entry -> entry.getValue().equals(step))
+						.map(Map.Entry::getKey)
+						.findFirst()
+
+						.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
+
+
+				steps.add(iri);
+				reference=fields.get(iri);
+
+				matcher.region(last=matcher.end(), path1.length());
+			}
+
+			if ( last != path1.length() ) {
+				throw new JsonException("malformed path ["+path1+"]");
+			}
+
+			return steps;
+
+		} catch ( final JsonException|NoSuchElementException e ) {
 
 			throw e;
 
@@ -369,29 +385,25 @@ public final class _QueryParser {
 		final Shape nested=fields(shape).get(name);
 
 		if ( nested == null ) {
-			throw new NoSuchElementException("unknown path step ["+name+"]");
+			throw new NoSuchElementException("unknown path step <"+name+">");
 		}
 
 		return nested;
 	}
 
 
-	//// Values
-	// //////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private List<Value> values(final JsonValue value, final Shape shape) {
-		return (value instanceof JsonArray ? ((JsonArray)value).stream() : Stream.of(value))
-				.map(v -> value(v, shape))
-				.collect(toList());
+		return decoder.values(value, shape).map(Map.Entry::getKey).collect(toList());
 	}
 
 	private Value value(final JsonValue value, final Shape shape) {
-		return _ValueParser.value(shape, value);
+		return decoder.value(value, shape).getKey();
 	}
 
 
-	//// Shapes
-	// //////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shapes ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape datatype(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString

@@ -42,7 +42,7 @@ import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest._work.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static org.assertj.core.api.Assertions.assertThat;
 
 final class GraphCreatorTest {

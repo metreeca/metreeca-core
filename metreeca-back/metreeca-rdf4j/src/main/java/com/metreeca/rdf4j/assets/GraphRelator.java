@@ -41,8 +41,8 @@ import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest._work.JSONLDFormat.jsonld;
-import static com.metreeca.rest._work.JSONLDFormat.query;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.query;
 
 
 final class GraphRelator extends GraphProcessor {
@@ -70,7 +70,7 @@ final class GraphRelator extends GraphProcessor {
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
-				) : query(request.query(), and(all(item), shape)).fold(
+				) : query(request.query(), iri(request.item()), and(all(item), shape)).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
@@ -124,7 +124,7 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return query(request.query(), digest).fold(
+				return query(request.query(), iri(request.item()), digest).fold(
 
 						response::map, query -> graph.exec(connection -> {
 

@@ -32,7 +32,7 @@ import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
-import static com.metreeca.rest._work.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static java.util.Collections.emptySet;
 
 

@@ -15,11 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
-import com.metreeca.json.probes._Aliases;
 import com.metreeca.json.shapes.Field;
 
 import org.eclipse.rdf4j.model.*;
@@ -37,6 +36,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.probes._Aliases.aliases;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
@@ -51,6 +51,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 	private final URI base;
 
 	private final Function<String, String> resolver;
+
 
 	JSONLDDecoder(final IRI focus, final Shape shape) {
 
@@ -85,7 +86,19 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Collection<Statement> decode(final JsonObject json) throws JsonException {
+	Collection<Statement> decode(final Reader reader) throws JsonException {
+
+		if ( reader == null ) {
+			throw new NullPointerException("null reader");
+		}
+
+		try ( final JsonReader jsonReader=Json.createReader(reader) ) {
+			return decode(jsonReader.readObject());
+		}
+
+	}
+
+	Collection<Statement> decode(final JsonObject json) throws JsonException {
 
 		if ( json == null ) {
 			throw new NullPointerException("null json");
@@ -110,31 +123,16 @@ final class JSONLDDecoder extends JSONLDCodec {
 		return model;
 	}
 
-	public Collection<Statement> decode(final Reader reader) throws JsonException {
 
-		if ( reader == null ) {
-			throw new NullPointerException("null reader");
-		}
-
-		try ( final JsonReader jsonReader=Json.createReader(reader) ) {
-			return decode(jsonReader.readObject());
-		}
-
+	Stream<Entry<Value, Stream<Statement>>> values(final JsonValue value, final Shape shape) {
+		return (value instanceof JsonArray ? value.asJsonArray().stream() : Stream.of(value))
+				.map(v -> value(v, shape))
+				.collect(toMap(Entry::getKey, Entry::getValue, Stream::concat))
+				.entrySet()
+				.stream();
 	}
 
-
-	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Stream<Entry<Value, Stream<Statement>>> values(final JsonValue value, final Shape shape) {
-		return (value instanceof JsonArray
-
-				? value.asJsonArray().stream().map(v -> value(v, shape))
-				: Stream.of(value(value, shape))
-
-		).collect(toMap(Entry::getKey, Entry::getValue, Stream::concat)).entrySet().stream();
-	}
-
-	/* !!! private */ Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape) {
+	Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape) {
 		return value instanceof JsonArray ? error("unsupported JSON value <%s>", value.asJsonArray())
 				: value instanceof JsonObject ? value(value.asJsonObject(), shape)
 				: value instanceof JsonString ? value((JsonString)value, shape)
@@ -144,6 +142,8 @@ final class JSONLDDecoder extends JSONLDCodec {
 				: error("unsupported JSON value <%s>", value);
 	}
 
+
+	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape) {
 
@@ -161,7 +161,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
 				: (language != null) ? entry(literal(value, language), Stream.empty())
 
-				: entry(literal(value, datatype(shape).map(iri -> iri).orElse(XSD.STRING)), Stream.empty());
+				: entry(literal(value, datatype(shape).orElse(XSD.STRING)), Stream.empty());
 	}
 
 	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
@@ -205,7 +205,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 		final Map<IRI, Shape> fields=Field.fields(shape);
 
-		final Map<String, IRI> aliases=_Aliases.aliases(shape)
+		final Map<String, IRI> aliases=aliases(shape)
 				.entrySet()
 				.stream()
 				.collect(toMap(Entry::getValue, Entry::getKey));

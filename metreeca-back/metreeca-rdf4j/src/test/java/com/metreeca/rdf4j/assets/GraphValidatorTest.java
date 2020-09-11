@@ -52,7 +52,7 @@ import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rest.EitherAssert.assertThat;
-import static com.metreeca.rest._work.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.joining;

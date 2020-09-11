@@ -31,7 +31,7 @@
 	<artifactId>metreeca-gcp</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca Google Cloud Platform Adapter</name>
+	<name>Metreeca Google Cloud Adapter</name>
 	<description>Adapter kit for Google Cloud.</description>
 
 	<dependencies>

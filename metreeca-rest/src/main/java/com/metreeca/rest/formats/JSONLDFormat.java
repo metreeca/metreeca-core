@@ -15,13 +15,13 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.rest.formats;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.*;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
 import javax.json.JsonException;
@@ -65,18 +65,21 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * Decodes a shape-based query.
 	 *
 	 * @param query the query to be decoded
+	 * @param focus the target IRI fr the decoding process; relative IRIs will be resolved against it
 	 * @param shape the base shape for the decoded query
 	 *
 	 * @return either a message exception reporting a decoding issue or the decoded query
 	 *
-	 * @throws NullPointerException if either {@code query} or {@code shape} is null
+	 * @throws NullPointerException if any parameter is null
 	 */
-	public static Either<MessageException, Query> query(
-			final String query, final Shape shape
-	) {
+	public static Either<MessageException, Query> query(final String query, final IRI focus, final Shape shape) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");
+		}
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
 		}
 
 		if ( shape == null ) {
@@ -85,7 +88,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		try {
 
-			return Right(new _QueryParser(shape).parse(query));
+			return Right(new JSONLDParser(focus, shape).parse(query));
 
 		} catch ( final JsonException e ) {
 
