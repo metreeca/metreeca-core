@@ -36,12 +36,14 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.*;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.joining;
 
 
 /**
@@ -563,28 +565,16 @@ public final class Values {
 	//// Formatters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static String format(final Iterable<Statement> statements) {
-		if ( statements == null ) { return null; } else {
-
-			final StringBuilder builder=new StringBuilder(100);
-
-			for (final Statement statement : statements) {
-				builder.append(format(statement.getSubject())).append(" ")
-						.append(format(statement.getPredicate())).append(" ")
-						.append(format(statement.getObject())).append(" .\n");
-			}
-
-			return builder.toString();
-		}
+		return statements == null ? null : StreamSupport
+				.stream(statements.spliterator(), false)
+				.map(Values::format)
+				.collect(joining("\n"));
 	}
 
 	public static String format(final Statement statement) {
-		return statement == null
-
-				? null
-
-				: format(statement.getSubject())+" "
-				+format(statement.getPredicate())+" "
-				+format(statement.getObject())+" .";
+		return statement == null ? null : String.format("%s %s %s .",
+				format(statement.getSubject()), format(statement.getPredicate()), format(statement.getObject())
+		);
 	}
 
 

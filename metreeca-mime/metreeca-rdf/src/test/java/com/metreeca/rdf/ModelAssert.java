@@ -26,6 +26,9 @@ import org.eclipse.rdf4j.model.util.Models;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static com.metreeca.rdf.Values.format;
+import static com.metreeca.rdf.ValuesTest.encode;
+
 
 public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 
@@ -56,7 +59,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		isNotNull();
 
 		if ( !actual.isEmpty() ) {
-			failWithMessage("expected model to be empty but was <\n%s\n>", indent(Values.format(actual)));
+			failWithMessage("expected model to be empty but was <\n%s\n>", indent(encode(actual)));
 		}
 
 		return this;
@@ -98,7 +101,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		if ( !Models.isomorphic(actual, model) ) {
 			failWithMessage(
 					"model <\n%s\n> to be isomorphic to <\n%s\n>",
-					indent(Values.format(new TreeModel(actual))), indent(Values.format(new TreeModel(model)))
+					indent(encode(new TreeModel(actual))), indent(encode(new TreeModel(model)))
 			);
 		}
 
@@ -136,8 +139,8 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 
 			failWithMessage(
 					"expected model <\n%s\n> to be subset of <\n%s\n> but <\n%s\n> was found",
-					indent(Values.format(new TreeModel(actual))), indent(Values.format(expected)),
-					indent(Values.format(exceeding))
+					indent(encode(new TreeModel(actual))), indent(encode(expected)),
+					indent(encode(exceeding))
 			);
 		}
 
@@ -175,8 +178,8 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 
 			failWithMessage(
 					"expected model <\n%s\n> to have subset <\n%s\n> but <\n%s\n> was missing",
-					indent(Values.format(new TreeModel(actual))), indent(Values.format(expected)),
-					indent(Values.format(missing))
+					indent(encode(new TreeModel(actual))), indent(encode(expected)),
+					indent(encode(missing))
 			);
 		}
 
@@ -214,7 +217,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 
 			failWithMessage(
 					"expected model not to have subset <\n%s\n> but <\n%s\n> was present",
-					indent(Values.format(expected)), indent(Values.format(present))
+					indent(encode(expected)), indent(encode(present))
 			);
 		}
 
@@ -234,7 +237,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		if ( matching.isEmpty() ) {
 			failWithMessage(
 					"expected <%s> to contain statements matching <{%s %s %s}> but has none",
-					Values.format(actual), Values.format(subject), Values.format(predicate), Values.format(object)
+					encode(actual), format(subject), format(predicate), format(object)
 			);
 		}
 
@@ -253,7 +256,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 		if ( !matching.isEmpty() ) {
 			failWithMessage(
 					"expected model to contain no statements matching <{%s %s %s}> but has <%s>",
-					Values.format(subject), Values.format(predicate), Values.format(object), Values.format(matching)
+					format(subject), format(predicate), format(object), encode(matching)
 			);
 		}
 
