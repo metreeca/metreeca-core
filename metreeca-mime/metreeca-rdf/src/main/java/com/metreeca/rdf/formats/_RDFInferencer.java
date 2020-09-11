@@ -53,12 +53,12 @@ final class _RDFInferencer extends Inspector<Shape> {
 
 
 	@Override public Shape probe(final Meta meta) {
-		return meta.getLabel().equals(Shape.Hint) ? and(meta, datatype(ResourceType)) : meta;
+		return meta.label().equals(Shape.Hint) ? and(meta, datatype(ResourceType)) : meta;
 	}
 
 
 	@Override public Shape probe(final Datatype datatype) {
-		return datatype.getName().equals(XSD.BOOLEAN) ? and(datatype,
+		return datatype.id().equals(XSD.BOOLEAN) ? and(datatype,
 				in(literal(false), literal(true)), maxCount(1)
 		) : datatype;
 	}
@@ -69,7 +69,7 @@ final class _RDFInferencer extends Inspector<Shape> {
 
 
 	@Override public Shape probe(final All all) {
-		return and(all, minCount(all.getValues().size()));
+		return and(all, minCount(all.values().size()));
 	}
 
 	@Override public Shape probe(final Any any) {
@@ -78,7 +78,7 @@ final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final In in) {
 
-		final Set<Object> values=in.getValues();
+		final Set<Object> values=in.values();
 		final Set<Object> types=values.stream().map(_RDFCasts::_value).map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
@@ -90,8 +90,8 @@ final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final IRI iri=_iri(field.getName());
-		final Shape shape=field.getShape().map(this);
+		final IRI iri=_iri(field.name());
+		final Shape shape=field.shape().map(this);
 
 		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(ResourceType))), datatype(ResourceType))
 				: direct(iri) ? and(field(iri, shape), datatype(ResourceType))
@@ -100,18 +100,18 @@ final class _RDFInferencer extends Inspector<Shape> {
 
 
 	@Override public Shape probe(final And and) {
-		return and(and.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		return and(and.shapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
 	@Override public Shape probe(final Or or) {
-		return or(or.getShapes().stream().map(s -> s.map(this)).collect(toList()));
+		return or(or.shapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
 	@Override public Shape probe(final When when) {
 		return when(
-				when.getTest().map(this),
-				when.getPass().map(this),
-				when.getFail().map(this)
+				when.test().map(this),
+				when.pass().map(this),
+				when.fail().map(this)
 		);
 	}
 

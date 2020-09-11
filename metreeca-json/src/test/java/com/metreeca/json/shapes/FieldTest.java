@@ -42,7 +42,7 @@ final class FieldTest {
 
 		assertThat(fields(field))
 				.as("singleton field map")
-				.isEqualTo(singletonMap(field.getName(), field.getShape()));
+				.isEqualTo(singletonMap(field.name(), field.shape()));
 
 	}
 
@@ -55,14 +55,14 @@ final class FieldTest {
 		assertThat(fields(and(x, y)))
 				.as("union field map")
 				.isEqualTo(map(
-						entry(x.getName(), x.getShape()),
-						entry(y.getName(), y.getShape())
+						entry(x.name(), x.shape()),
+						entry(y.name(), y.shape())
 				));
 
 		assertThat(fields(and(y, z)))
 				.as("merged field map")
 				.isEqualTo(map(
-						entry(y.getName(), and(y.getShape(), z.getShape()))
+						entry(y.name(), and(y.shape(), z.shape()))
 				));
 
 	}
@@ -76,14 +76,14 @@ final class FieldTest {
 		assertThat(fields(or(x, y)))
 				.as("union field map")
 				.isEqualTo(map(
-						entry(x.getName(), x.getShape()),
-						entry(y.getName(), y.getShape())
+						entry(x.name(), x.shape()),
+						entry(y.name(), y.shape())
 				));
 
 		assertThat(fields(or(y, z)))
 				.as("merged field map")
 				.isEqualTo(map(
-						entry(y.getName(), and(y.getShape(), z.getShape()))
+						entry(y.name(), and(y.shape(), z.shape()))
 				));
 
 	}
@@ -97,14 +97,14 @@ final class FieldTest {
 		assertThat(fields(when(and(), x, y)))
 				.as("union field map")
 				.isEqualTo(map(
-						entry(x.getName(), x.getShape()),
-						entry(y.getName(), y.getShape())
+						entry(x.name(), x.shape()),
+						entry(y.name(), y.shape())
 				));
 
 		assertThat(fields(when(or(), y, z)))
 				.as("merged field map")
 				.isEqualTo(map(
-						entry(y.getName(), and(y.getShape(), z.getShape()))
+						entry(y.name(), and(y.shape(), z.shape()))
 				));
 
 	}

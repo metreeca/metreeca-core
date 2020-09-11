@@ -33,7 +33,7 @@ final class MaxCountTest {
 		final MaxCount count=maxCount(10);
 
 		assertThat(maxCount(count))
-				.contains(count.getLimit());
+				.contains(count.limit());
 	}
 
 	@Test void testInspectConjunction() {

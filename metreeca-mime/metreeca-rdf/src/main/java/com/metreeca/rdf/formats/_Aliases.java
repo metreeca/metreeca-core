@@ -59,15 +59,15 @@ public final class _Aliases {
 
 
 		@Override public Map<IRI, String> probe(final And and) {
-			return aliases(and.getShapes());
+			return aliases(and.shapes());
 		}
 
 		@Override public Map<IRI, String> probe(final Or or) {
-			return aliases(or.getShapes());
+			return aliases(or.shapes());
 		}
 
 		@Override public Map<IRI, String> probe(final When when) {
-			return aliases(asList(when.getPass(), when.getFail()));
+			return aliases(asList(when.pass(), when.fail()));
 		}
 
 
@@ -109,7 +109,7 @@ public final class _Aliases {
 
 		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI name=_iri(field.getName());
+			final IRI name=_iri(field.name());
 
 			return Optional
 					.of(NamedIRIPattern.matcher(name.stringValue()))
@@ -126,8 +126,8 @@ public final class _Aliases {
 
 		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI name=_iri(field.getName());
-			final Shape shape=field.getShape();
+			final IRI name=_iri(field.name());
+			final Shape shape=field.shape();
 
 			return alias(shape)
 					.filter(alias -> !alias.startsWith("@"))

@@ -100,8 +100,8 @@ public final class Redactor extends Optimizer {
 
 
 	@Override public Shape probe(final Guard guard) {
-		return axis.equals(guard.getAxis())
-				? condition.test(guard.getValues()) ? and() : or()
+		return axis.equals(guard.axis())
+				? condition.test(guard.values()) ? and() : or()
 				: guard; // ignore unrelated variables
 	}
 

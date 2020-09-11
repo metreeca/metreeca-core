@@ -64,7 +64,7 @@ public final class In implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Set<Object> getValues() {
+	public Set<Object> values() {
 		return unmodifiableSet(values);
 	}
 
@@ -80,6 +80,8 @@ public final class In implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof In

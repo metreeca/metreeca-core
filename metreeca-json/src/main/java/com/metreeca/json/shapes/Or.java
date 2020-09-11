@@ -69,7 +69,7 @@ public final class Or implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Collection<Shape> getShapes() {
+	public Collection<Shape> shapes() {
 		return Collections.unmodifiableCollection(shapes);
 	}
 
@@ -85,6 +85,8 @@ public final class Or implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Or

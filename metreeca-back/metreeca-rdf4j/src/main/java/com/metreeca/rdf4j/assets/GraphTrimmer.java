@@ -74,8 +74,8 @@ final class GraphTrimmer extends GraphProcessor {
 
 		@Override public Stream<Statement> probe(final Field field) {
 
-			final IRI iri=_iri(field.getName());
-			final Shape shape=field.getShape();
+			final IRI iri=_iri(field.name());
+			final Shape shape=field.shape();
 
 			final IRI inverse=inverse(iri);
 
@@ -98,15 +98,15 @@ final class GraphTrimmer extends GraphProcessor {
 
 
 		@Override public Stream<Statement> probe(final And and) {
-			return and.getShapes().stream().flatMap(s -> s.map(this));
+			return and.shapes().stream().flatMap(s -> s.map(this));
 		}
 
 		@Override public Stream<Statement> probe(final Or or) {
-			return or.getShapes().stream().flatMap(s -> s.map(this));
+			return or.shapes().stream().flatMap(s -> s.map(this));
 		}
 
 		@Override public Stream<Statement> probe(final When when) {
-			return Stream.of(when.getPass(), when.getFail()).flatMap(s -> s.map(this));
+			return Stream.of(when.pass(), when.fail()).flatMap(s -> s.map(this));
 		}
 
 	}

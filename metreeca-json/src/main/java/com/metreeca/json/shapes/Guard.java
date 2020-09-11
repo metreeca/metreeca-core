@@ -73,11 +73,11 @@ public final class Guard implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getAxis() {
+	public Object axis() {
 		return axis;
 	}
 
-	public Set<Object> getValues() {
+	public Set<Object> values() {
 		return unmodifiableSet(values);
 	}
 
@@ -93,6 +93,8 @@ public final class Guard implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Guard

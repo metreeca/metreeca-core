@@ -70,13 +70,13 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return sources.stream()
 				.filter(Resource.class::isInstance)
-				.map(source -> statement((Resource)source, RDF.TYPE, _RDFCasts._iri(clazz.getName())));
+				.map(source -> statement((Resource)source, RDF.TYPE, _RDFCasts._iri(clazz.id())));
 	}
 
 	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=_RDFCasts._iri(field.getName());
-		final Shape shape=field.getShape();
+		final IRI iri=_RDFCasts._iri(field.name());
+		final Shape shape=field.shape();
 
 		return Stream.concat(
 
@@ -97,12 +97,12 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	@Override public Stream<Statement> probe(final And and) {
 		return Stream.concat(
 
-				and.getShapes().stream()
+				and.shapes().stream()
 
 						.flatMap(shape -> shape.map(this)),
 
 
-				all(and).map(values -> and.getShapes().stream()
+				all(and).map(values -> and.shapes().stream()
 
 						.flatMap(shape -> shape.map(new Outliner(values(values.stream()).collect(toSet()))))
 

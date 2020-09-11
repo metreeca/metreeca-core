@@ -80,19 +80,19 @@ public final class Items implements Query {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Shape getShape() {
+	public Shape shape() {
 		return shape;
 	}
 
-	public List<Order> getOrders() {
+	public List<Order> orders() {
 		return unmodifiableList(orders);
 	}
 
-	public int getOffset() {
+	public int offset() {
 		return offset;
 	}
 
-	public int getLimit() {
+	public int limit() {
 		return limit;
 	}
 
@@ -110,7 +110,6 @@ public final class Items implements Query {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Items

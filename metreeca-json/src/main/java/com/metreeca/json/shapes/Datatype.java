@@ -52,23 +52,23 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object name;
+	private final Object id;
 
 
-	private Datatype(final Object name) {
+	private Datatype(final Object id) {
 
-		if ( name == null ) {
-			throw new NullPointerException("null name");
+		if ( id == null ) {
+			throw new NullPointerException("null id");
 		}
 
-		this.name=name;
+		this.id=id;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getName() {
-		return name;
+	public Object id() {
+		return id;
 	}
 
 
@@ -84,17 +84,19 @@ public final class Datatype implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Datatype
-				&& name.equals(((Datatype)object).name);
+				&& id.equals(((Datatype)object).id);
 	}
 
 	@Override public int hashCode() {
-		return name.hashCode();
+		return id.hashCode();
 	}
 
 	@Override public String toString() {
-		return "datatype("+name+")";
+		return "datatype("+id+")";
 	}
 
 
@@ -103,15 +105,15 @@ public final class Datatype implements Shape {
 	private static final class TypeProbe extends Inspector<Object> {
 
 		@Override public Object probe(final Datatype datatype) {
-			return datatype.getName();
+			return datatype.id();
 		}
 
 		@Override public Object probe(final And and) {
-			return type(and.getShapes());
+			return type(and.shapes());
 		}
 
 		@Override public Object probe(final Or or) {
-			return type(or.getShapes());
+			return type(or.shapes());
 		}
 
 

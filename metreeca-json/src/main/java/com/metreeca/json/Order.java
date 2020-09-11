@@ -29,48 +29,48 @@ import static java.util.Collections.unmodifiableList;
 public final class Order {
 
 	public static Order increasing(final Object... path) {
-		return new Order(asList(path), false);
+		return new Order(false, asList(path));
 	}
 
 	public static Order increasing(final List<?> path) {
-		return new Order(path, false);
+		return new Order(false, path);
 	}
 
 
 	public static Order decreasing(final Object... path) {
-		return new Order(asList(path), true);
+		return new Order(true, asList(path));
 	}
 
 	public static Order decreasing(final List<?> path) {
-		return new Order(path, true);
+		return new Order(true, path);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final List<Object> path;
 	private final boolean inverse;
+	private final List<Object> path;
 
 
-	private Order(final List<?> path, final boolean inverse) {
+	private Order(final boolean inverse, final List<?> path) {
 
 		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null path or path step");
 		}
 
-		this.path=new ArrayList<>(path);
 		this.inverse=inverse;
+		this.path=new ArrayList<>(path);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public List<Object> getPath() {
-		return unmodifiableList(path);
+	public boolean inverse() {
+		return inverse;
 	}
 
-	public boolean isInverse() {
-		return inverse;
+	public List<Object> path() {
+		return unmodifiableList(path);
 	}
 
 

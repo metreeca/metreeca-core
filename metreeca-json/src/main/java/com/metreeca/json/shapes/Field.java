@@ -75,11 +75,11 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getName() {
+	public Object name() {
 		return name;
 	}
 
-	public Shape getShape() {
+	public Shape shape() {
 		return shape;
 	}
 
@@ -95,6 +95,8 @@ public final class Field implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Field
@@ -119,20 +121,20 @@ public final class Field implements Shape {
 
 
 		@Override public Map<Object, Shape> probe(final Field field) {
-			return singletonMap(field.getName(), field.getShape());
+			return singletonMap(field.name(), field.shape());
 		}
 
 
 		@Override public Map<Object, Shape> probe(final And and) {
-			return fields(and.getShapes().stream());
+			return fields(and.shapes().stream());
 		}
 
 		@Override public Map<Object, Shape> probe(final Or or) {
-			return fields(or.getShapes().stream());
+			return fields(or.shapes().stream());
 		}
 
 		@Override public Map<Object, Shape> probe(final When when) {
-			return fields(Stream.of(when.getPass(), when.getFail()));
+			return fields(Stream.of(when.pass(), when.fail()));
 		}
 
 

@@ -177,10 +177,10 @@ abstract class GraphProcessor {
 
 		@Override public Collection<Statement> probe(final Items items) {
 
-			final Shape shape=items.getShape();
-			final List<Order> orders=items.getOrders();
-			final int offset=items.getOffset();
-			final int limit=items.getLimit();
+			final Shape shape=items.shape();
+			final List<Order> orders=items.orders();
+			final int offset=items.offset();
+			final int limit=items.limit();
 
 			final Object root=new Object(); // root object
 
@@ -351,8 +351,8 @@ abstract class GraphProcessor {
 
 		@Override public Collection<Statement> probe(final Stats stats) {
 
-			final Shape shape=stats.getShape();
-			final List<IRI> path=stats.getPath().stream().map(_RDFCasts::_iri).collect(toList());
+			final Shape shape=stats.shape();
+			final List<IRI> path=stats.path().stream().map(_RDFCasts::_iri).collect(toList());
 
 			final Model model=new LinkedHashModel();
 
@@ -447,8 +447,8 @@ abstract class GraphProcessor {
 
 		@Override public Collection<Statement> probe(final Terms terms) {
 
-			final Shape shape=terms.getShape();
-			final List<IRI> path=terms.getPath().stream().map(_RDFCasts::_iri).collect(toList());
+			final Shape shape=terms.shape();
+			final List<IRI> path=terms.path().stream().map(_RDFCasts::_iri).collect(toList());
 
 			final Model model=new LinkedHashModel();
 
@@ -570,10 +570,10 @@ abstract class GraphProcessor {
 
 		private Snippet sorters(final Object root, final Collection<Order> orders) {
 			return snippet(orders.stream()
-					.filter(order -> !order.getPath().isEmpty()) // root already retrieved
+					.filter(order -> !order.path().isEmpty()) // root already retrieved
 					.map(order -> snippet(
 							"optional { {root} {path} {order} }\n", var(root),
-							path(order.getPath().stream().map(_RDFCasts::_iri).collect(toList())), var(order))
+							path(order.path().stream().map(_RDFCasts::_iri).collect(toList())), var(order))
 					)
 			);
 		}
@@ -582,12 +582,12 @@ abstract class GraphProcessor {
 			return list(Stream.concat(
 
 					orders.stream().map(order -> snippet(
-							order.isInverse() ? "desc({criterion})" : "asc({criterion})",
-							var(order.getPath().isEmpty() ? root : order)
+							order.inverse() ? "desc({criterion})" : "asc({criterion})",
+							var(order.path().isEmpty() ? root : order)
 					)),
 
 					orders.stream()
-							.map(Order::getPath)
+							.map(Order::path)
 							.filter(List::isEmpty)
 							.findFirst()
 							.map(empty -> Stream.empty())
@@ -631,8 +631,8 @@ abstract class GraphProcessor {
 
 			@Override public Stream<Integer> probe(final Field field) {
 
-				final IRI iri=_iri(field.getName());
-				final Shape shape=field.getShape();
+				final IRI iri=_iri(field.name());
+				final Shape shape=field.shape();
 
 				final Integer source=identifier.apply(focus);
 				final Integer target=identifier.apply(shape);
@@ -651,17 +651,17 @@ abstract class GraphProcessor {
 
 
 			@Override public Stream<Integer> probe(final And and) {
-				return and.getShapes().stream().flatMap(shape -> shape.map(this));
+				return and.shapes().stream().flatMap(shape -> shape.map(this));
 			}
 
 			@Override public Stream<Integer> probe(final Or or) {
-				return or.getShapes().stream().flatMap(shape -> shape.map(this));
+				return or.shapes().stream().flatMap(shape -> shape.map(this));
 			}
 
 			@Override public Stream<Integer> probe(final When when) {
 				return Stream.concat(
-						when.getPass().map(this),
-						when.getFail().map(this)
+						when.pass().map(this),
+						when.fail().map(this)
 				);
 			}
 
@@ -688,7 +688,7 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Datatype datatype) {
 
-				final IRI iri=_iri(datatype.getName());
+				final IRI iri=_iri(datatype.id());
 
 				return iri.equals(ValueType) ? nothing() : snippet(
 
@@ -706,28 +706,28 @@ abstract class GraphProcessor {
 			}
 
 			@Override public Snippet probe(final Clazz clazz) {
-				return snippet(var(source), " a/rdfs:subClassOf* ", format(_iri(clazz.getName())), " .");
+				return snippet(var(source), " a/rdfs:subClassOf* ", format(_iri(clazz.id())), " .");
 			}
 
 			@Override public Snippet probe(final MinExclusive minExclusive) {
-				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.getValue())));
+				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.value())));
 			}
 
 			@Override public Snippet probe(final MaxExclusive maxExclusive) {
-				return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.getValue())));
+				return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.value())));
 			}
 
 			@Override public Snippet probe(final MinInclusive minInclusive) {
-				return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.getValue())));
+				return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.value())));
 			}
 
 			@Override public Snippet probe(final MaxInclusive maxInclusive) {
-				return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.getValue())));
+				return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.value())));
 			}
 
 			@Override public Snippet probe(final Pattern pattern) {
 				return snippet("filter regex({source}, '{pattern}', '{flags}')",
-						var(source), pattern.getText().replace("\\", "\\\\"), pattern.getFlags()
+						var(source), pattern.text().replace("\\", "\\\\"), pattern.flags()
 				);
 			}
 
@@ -738,11 +738,11 @@ abstract class GraphProcessor {
 			}
 
 			@Override public Snippet probe(final MinLength minLength) {
-				return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.getLimit());
+				return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.limit());
 			}
 
 			@Override public Snippet probe(final MaxLength maxLength) {
-				return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.getLimit());
+				return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.limit());
 			}
 
 
@@ -768,15 +768,15 @@ abstract class GraphProcessor {
 				// values-based filtering (as opposed to in-based filtering) works also or root terms // !!!
 				// performance?
 
-				return any.getValues().size() > 1 ? values(source, values(any.getValues())) : nothing();
+				return any.values().size() > 1 ? values(source, values(any.values())) : nothing();
 
 			}
 
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=_iri(field.getName());
-				final Shape shape=field.getShape();
+				final IRI iri=_iri(field.name());
+				final Shape shape=field.shape();
 
 				final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
 				final Optional<Set<Value>> any=any(shape).map(values1 -> values(values1));
@@ -807,12 +807,12 @@ abstract class GraphProcessor {
 
 
 			@Override public Snippet probe(final And and) {
-				return snippet(and.getShapes().stream().map(shape -> shape.map(this)));
+				return snippet(and.shapes().stream().map(shape -> shape.map(this)));
 			}
 
 			@Override public Snippet probe(final Or or) {
 				return list(
-						or.getShapes().stream().map(s -> snippet("{\f{branch}\f}", s.map(this))),
+						or.shapes().stream().map(s -> snippet("{\f{branch}\f}", s.map(this))),
 						" union "
 				);
 			}
@@ -842,8 +842,8 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=_iri(field.getName());
-				final Shape shape=field.getShape();
+				final IRI iri=_iri(field.name());
+				final Shape shape=field.shape();
 
 				return snippet( // (€) optional unless universal constraints are present
 
@@ -859,11 +859,11 @@ abstract class GraphProcessor {
 
 
 			@Override public Snippet probe(final And and) {
-				return snippet(and.getShapes().stream().map(s -> s.map(this)));
+				return snippet(and.shapes().stream().map(s -> s.map(this)));
 			}
 
 			@Override public Snippet probe(final Or or) {
-				return snippet(or.getShapes().stream().map(s -> s.map(this)));
+				return snippet(or.shapes().stream().map(s -> s.map(this)));
 			}
 
 			@Override public Snippet probe(final When when) {

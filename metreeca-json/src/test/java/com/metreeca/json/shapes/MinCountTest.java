@@ -35,7 +35,7 @@ final class MinCountTest {
 		final MinCount count=minCount(10);
 
 		assertThat(minCount(count)
-				.filter(limit -> limit.equals(count.getLimit()))
+				.filter(limit -> limit.equals(count.limit()))
 				.isPresent()).as("defined").isTrue();
 	}
 
@@ -45,11 +45,11 @@ final class MinCountTest {
 		final MinCount y=minCount(100);
 
 		assertThat(minCount(and(x, y))
-				.filter(limit1 -> limit1.equals(max(x.getLimit(), y.getLimit())))
+				.filter(limit1 -> limit1.equals(max(x.limit(), y.limit())))
 				.isPresent()).as("all defined").isTrue();
 
 		assertThat(minCount(and(x, and()))
-				.filter(limit -> limit.equals(x.getLimit()))
+				.filter(limit -> limit.equals(x.limit()))
 				.isPresent()).as("some defined").isTrue();
 
 		assertThat(minCount(and(and(), and()))
@@ -63,11 +63,11 @@ final class MinCountTest {
 		final MinCount y=minCount(100);
 
 		assertThat(minCount(or(x, y))
-				.filter(limit1 -> limit1.equals(min(x.getLimit(), y.getLimit())))
+				.filter(limit1 -> limit1.equals(min(x.limit(), y.limit())))
 				.isPresent()).as("all defined").isTrue();
 
 		assertThat(minCount(or(x, and()))
-				.filter(limit -> limit.equals(x.getLimit()))
+				.filter(limit -> limit.equals(x.limit()))
 				.isPresent()).as("some defined").isTrue();
 
 		assertThat(minCount(or(and(), and()))
@@ -81,11 +81,11 @@ final class MinCountTest {
 		final MinCount y=minCount(100);
 
 		assertThat(minCount(when(and(), x, y))
-				.filter(limit1 -> limit1.equals(min(x.getLimit(), y.getLimit())))
+				.filter(limit1 -> limit1.equals(min(x.limit(), y.limit())))
 				.isPresent()).as("all defined").isTrue();
 
 		assertThat(minCount(when(and(), x, and()))
-				.filter(limit -> limit.equals(x.getLimit()))
+				.filter(limit -> limit.equals(x.limit()))
 				.isPresent()).as("some defined").isTrue();
 
 		assertThat(minCount(when(and(), and(), and()))

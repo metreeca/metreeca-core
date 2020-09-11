@@ -34,7 +34,7 @@ final class AllTest {
 		final All all=all(1, 2, 3);
 
 		assertThat(all(all))
-				.contains(all.getValues());
+				.contains(all.values());
 	}
 
 	@Test void testInspectConjunction() {
@@ -44,11 +44,11 @@ final class AllTest {
 
 		assertThat(all(and(x, y)))
 				.as("all defined")
-				.contains(Stream.concat(x.getValues().stream(), y.getValues().stream()).collect(toSet()));
+				.contains(Stream.concat(x.values().stream(), y.values().stream()).collect(toSet()));
 
 		assertThat(all(and(x, and())))
 				.as("some defined")
-				.contains(x.getValues());
+				.contains(x.values());
 
 		assertThat(all(and(and(), and())))
 				.as("none defined")

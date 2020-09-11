@@ -50,7 +50,7 @@ public final class MaxLength implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public int getLimit() {
+	public int limit() {
 		return limit;
 	}
 
@@ -66,6 +66,8 @@ public final class MaxLength implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof MaxLength

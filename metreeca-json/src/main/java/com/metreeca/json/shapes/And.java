@@ -68,7 +68,7 @@ public final class And implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Collection<Shape> getShapes() {
+	public Collection<Shape> shapes() {
 		return Collections.unmodifiableCollection(shapes);
 	}
 
@@ -84,6 +84,8 @@ public final class And implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof And

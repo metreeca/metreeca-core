@@ -97,7 +97,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null mappings");
 		}
 
-		if ( Arrays.stream(mappings).anyMatch(meta -> !meta.getLabel().toString().startsWith("@")) ) {
+		if ( Arrays.stream(mappings).anyMatch(meta -> !meta.label().toString().startsWith("@")) ) {
 			throw new IllegalArgumentException("illegal mapping keywords");
 		}
 

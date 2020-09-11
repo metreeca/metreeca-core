@@ -57,10 +57,10 @@ abstract class JSONLDCodec {
 
 		@Override public Stream<Map.Entry<String, String>> probe(final Meta meta) {
 
-			final String label=meta.getLabel().toString();
+			final String label=meta.label().toString();
 
 			return label.startsWith("@")
-					? Stream.of(new SimpleImmutableEntry<>(label, meta.getValue().toString()))
+					? Stream.of(new SimpleImmutableEntry<>(label, meta.value().toString()))
 					: Stream.empty();
 		}
 
@@ -69,15 +69,15 @@ abstract class JSONLDCodec {
 		}
 
 		@Override public Stream<Map.Entry<String, String>> probe(final And and) {
-			return and.getShapes().stream().flatMap(s -> s.map(this));
+			return and.shapes().stream().flatMap(s -> s.map(this));
 		}
 
 		@Override public Stream<Map.Entry<String, String>> probe(final Or or) {
-			return or.getShapes().stream().flatMap(s -> s.map(this));
+			return or.shapes().stream().flatMap(s -> s.map(this));
 		}
 
 		@Override public Stream<Map.Entry<String, String>> probe(final When when) {
-			return Stream.of(when.getPass(), when.getFail()).flatMap(s -> s.map(this));
+			return Stream.of(when.pass(), when.fail()).flatMap(s -> s.map(this));
 		}
 
 	}

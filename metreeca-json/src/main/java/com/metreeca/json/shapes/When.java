@@ -26,8 +26,8 @@ import static com.metreeca.json.shapes.And.and;
 /**
  * Conditional logical constraint.
  *
- * <p>States that the focus set is consistent either with a {@linkplain #getPass() positive} shape, if consistent also
- * with a {@linkplain #getTest() test} shape, or with a {@linkplain #getFail() negative} shape, otherwise.</p>
+ * <p>States that the focus set is consistent either with a {@linkplain #pass() positive} shape, if consistent also
+ * with a {@linkplain #test() test} shape, or with a {@linkplain #fail() negative} shape, otherwise.</p>
  *
  *
  * <p><strong>Warning</strong> / Test shapes are currently limited to non-filtering constraints, that is to parametric
@@ -78,15 +78,15 @@ public final class When implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Shape getTest() {
+	public Shape test() {
 		return test;
 	}
 
-	public Shape getPass() {
+	public Shape pass() {
 		return pass;
 	}
 
-	public Shape getFail() {
+	public Shape fail() {
 		return fail;
 	}
 
@@ -102,6 +102,8 @@ public final class When implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof When
@@ -136,21 +138,21 @@ public final class When implements Shape {
 
 
 		@Override public Boolean probe(final Field field) {
-			return field.getShape().map(this);
+			return field.shape().map(this);
 		}
 
 		@Override public Boolean probe(final And and) {
-			return and.getShapes().stream().anyMatch(shape -> shape.map(this));
+			return and.shapes().stream().anyMatch(shape -> shape.map(this));
 		}
 
 		@Override public Boolean probe(final Or or) {
-			return or.getShapes().stream().anyMatch(shape -> shape.map(this));
+			return or.shapes().stream().anyMatch(shape -> shape.map(this));
 		}
 
 		@Override public Boolean probe(final When when) {
-			return when.getTest().map(this)
-					|| when.getPass().map(this)
-					|| when.getFail().map(this);
+			return when.test().map(this)
+					|| when.pass().map(this)
+					|| when.fail().map(this);
 		}
 
 	}

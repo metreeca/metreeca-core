@@ -43,23 +43,23 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object name;
+	private final Object id;
 
 
-	private Clazz(final Object name) {
+	private Clazz(final Object id) {
 
-		if ( name == null ) {
-			throw new NullPointerException("null name");
+		if ( id == null ) {
+			throw new NullPointerException("null id");
 		}
 
-		this.name=name;
+		this.id=id;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getName() {
-		return name;
+	public Object id() {
+		return id;
 	}
 
 
@@ -75,17 +75,19 @@ public final class Clazz implements Shape {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Clazz
-				&& name.equals(((Clazz)object).name);
+				&& id.equals(((Clazz)object).id);
 	}
 
 	@Override public int hashCode() {
-		return name.hashCode();
+		return id.hashCode();
 	}
 
 	@Override public String toString() {
-		return "clazz("+name+")";
+		return "clazz("+id+")";
 	}
 
 
@@ -94,15 +96,15 @@ public final class Clazz implements Shape {
 	private static final class ClazzProbe extends Inspector<Object> {
 
 		@Override public Object probe(final Clazz clazz) {
-			return clazz.getName();
+			return clazz.id();
 		}
 
 		@Override public Object probe(final And and) {
-			return clazz(and.getShapes());
+			return clazz(and.shapes());
 		}
 
 		@Override public Object probe(final Or or) {
-			return clazz(or.getShapes());
+			return clazz(or.shapes());
 		}
 
 

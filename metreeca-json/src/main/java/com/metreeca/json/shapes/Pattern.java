@@ -66,11 +66,11 @@ public final class Pattern implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String getText() {
+	public String text() {
 		return text;
 	}
 
-	public String getFlags() {
+	public String flags() {
 		return flags;
 	}
 
@@ -86,6 +86,8 @@ public final class Pattern implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Pattern

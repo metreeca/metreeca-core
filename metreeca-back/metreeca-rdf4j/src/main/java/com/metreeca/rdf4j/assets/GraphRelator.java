@@ -96,7 +96,7 @@ final class GraphRelator extends GraphProcessor {
 									message.attribute(shape(), query.map(new Query.Probe<Shape>() {
 
 										@Override public Shape probe(final Items items) {
-											return items.getShape(); // !!! add ldp:contains if items.path is not empty
+											return items.shape(); // !!! add ldp:contains if items.path is not empty
 										}
 
 										@Override public Shape probe(final Stats stats) {
@@ -136,7 +136,7 @@ final class GraphRelator extends GraphProcessor {
 										.status(OK).attribute(shape(), query.map(new Query.Probe<Shape>() {
 
 											@Override public Shape probe(final Items items) {
-												return field(LDP.CONTAINS, items.getShape());
+												return field(LDP.CONTAINS, items.shape());
 											}
 
 											@Override public Shape probe(final Stats stats) {

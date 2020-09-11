@@ -68,7 +68,7 @@ public final class Trace {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<String, Collection<Object>> issues;
 	private final Map<Object, Trace> fields;
@@ -88,7 +88,7 @@ public final class Trace {
 				));
 
 		this.fields=fields
-				.filter(field -> !field.getValue().isEmpty())
+				.filter(field -> !field.getValue().empty())
 				.collect(toMap(
 						Map.Entry::getKey, Map.Entry::getValue,
 						(x, y) -> trace(x, y),
@@ -97,19 +97,23 @@ public final class Trace {
 	}
 
 
-	public boolean isEmpty() {
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public boolean empty() {
 		return issues.isEmpty() && fields.isEmpty();
 	}
 
 
-	public Map<String, Collection<Object>> getIssues() {
+	public Map<String, Collection<Object>> issues() {
 		return unmodifiableMap(issues);
 	}
 
-	public Map<Object, Trace> getFields() {
+	public Map<Object, Trace> fields() {
 		return unmodifiableMap(fields);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public JsonObject toJSON() {
 
@@ -162,9 +166,9 @@ public final class Trace {
 			builder.add("", errors);
 		}
 
-		getFields().forEach((name, nested) -> {
+		fields().forEach((name, nested) -> {
 
-			if ( !nested.isEmpty() ) {
+			if ( !nested.empty() ) {
 				builder.add(name.toString(), nested.toJSON());
 			}
 
@@ -174,7 +178,7 @@ public final class Trace {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public String toString() {
 		return String.format("{\n\tissue: %s\n\tfields: %s\n}", issues, fields);

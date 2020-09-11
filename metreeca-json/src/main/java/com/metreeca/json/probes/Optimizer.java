@@ -44,7 +44,7 @@ public class Optimizer extends Traverser<Shape> {
 
 		@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
-		@Override public Stream<Shape> probe(final And and) { return and.getShapes().stream(); }
+		@Override public Stream<Shape> probe(final And and) { return and.shapes().stream(); }
 
 	};
 
@@ -52,7 +52,7 @@ public class Optimizer extends Traverser<Shape> {
 
 		@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
-		@Override public Stream<Shape> probe(final Or or) { return or.getShapes().stream(); }
+		@Override public Stream<Shape> probe(final Or or) { return or.shapes().stream(); }
 
 	};
 
@@ -76,36 +76,36 @@ public class Optimizer extends Traverser<Shape> {
 
 
 	@Override public Shape probe(final All all) {
-		return all.getValues().isEmpty() ? and() : all;
+		return all.values().isEmpty() ? and() : all;
 	}
 
 	@Override public Shape probe(final Any any) {
-		return any.getValues().isEmpty() ? or() : any;
+		return any.values().isEmpty() ? or() : any;
 	}
 
 
 	@Override public Shape probe(final Field field) {
 
-		final Object name=field.getName();
-		final Shape shape=field.getShape().map(this);
+		final Object name=field.name();
+		final Shape shape=field.shape().map(this);
 
 		return shape.equals(or()) ? and() : field(name, shape);
 	}
 
 
 	@Override public Shape probe(final And and) {
-		return optimize(and.getShapes().stream(), AndFlattener, AndPacker, (clazz, constraints)
-				-> clazz.equals(MinCount.class) ? Stream.of(minCount(max(constraints, s -> ((MinCount)s).getLimit())))
-				: clazz.equals(MaxCount.class) ? Stream.of(maxCount(min(constraints, s -> ((MaxCount)s).getLimit())))
+		return optimize(and.shapes().stream(), AndFlattener, AndPacker, (clazz, constraints)
+				-> clazz.equals(MinCount.class) ? Stream.of(minCount(max(constraints, s -> ((MinCount)s).limit())))
+				: clazz.equals(MaxCount.class) ? Stream.of(maxCount(min(constraints, s -> ((MaxCount)s).limit())))
 				: clazz.equals(Datatype.class) ? datatypes(constraints, (x, y) -> derives(x, y)) // ignore super-types
 				: constraints.distinct()
 		);
 	}
 
 	@Override public Shape probe(final Or or) {
-		return optimize(or.getShapes().stream(), OrFlattener, OrPacker, (clazz, constraints)
-				-> clazz.equals(MinCount.class) ? Stream.of(minCount(min(constraints, s -> ((MinCount)s).getLimit())))
-				: clazz.equals(MaxCount.class) ? Stream.of(maxCount(max(constraints, s -> ((MaxCount)s).getLimit())))
+		return optimize(or.shapes().stream(), OrFlattener, OrPacker, (clazz, constraints)
+				-> clazz.equals(MinCount.class) ? Stream.of(minCount(min(constraints, s -> ((MinCount)s).limit())))
+				: clazz.equals(MaxCount.class) ? Stream.of(maxCount(max(constraints, s -> ((MaxCount)s).limit())))
 				: clazz.equals(Datatype.class) ? datatypes(constraints, (x, y) -> derives(y, x)) // ignore sub-types
 				: constraints.distinct()
 		);
@@ -113,9 +113,9 @@ public class Optimizer extends Traverser<Shape> {
 
 	@Override public Shape probe(final When when) {
 
-		final Shape test=when.getTest().map(this);
-		final Shape pass=when.getPass().map(this);
-		final Shape fail=when.getFail().map(this);
+		final Shape test=when.test().map(this);
+		final Shape pass=when.pass().map(this);
+		final Shape fail=when.fail().map(this);
 
 		return test.equals(and()) ? pass // always pass
 				: test.equals(or()) ? fail // always fail
@@ -141,7 +141,7 @@ public class Optimizer extends Traverser<Shape> {
 
 		return datatypes.stream().filter(datatype -> datatypes.stream()
 				.filter(reference -> !datatype.equals(reference))
-				.noneMatch(reference -> ignore.test(datatype.getName(), reference.getName()))
+				.noneMatch(reference -> ignore.test(datatype.id(), reference.id()))
 		);
 	}
 
@@ -173,7 +173,7 @@ public class Optimizer extends Traverser<Shape> {
 
 							@Override public Object probe(final Shape shape) { return shape.getClass(); }
 
-							@Override public Object probe(final Field field) { return field.getName(); }
+							@Override public Object probe(final Field field) { return field.name(); }
 
 						}),
 
@@ -186,7 +186,7 @@ public class Optimizer extends Traverser<Shape> {
 							}
 
 							@Override public Stream<Shape> probe(final Field field) {
-								return Stream.of(field.getShape().map(Optimizer.this));
+								return Stream.of(field.shape().map(Optimizer.this));
 							}
 
 						}), reducing(Stream::concat))

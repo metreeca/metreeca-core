@@ -58,7 +58,7 @@ public final class MinCount implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public int getLimit() {
+	public int limit() {
 		return limit;
 	}
 
@@ -74,6 +74,8 @@ public final class MinCount implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof MinCount
@@ -102,7 +104,7 @@ public final class MinCount implements Shape {
 
 
 		@Override public Integer probe(final MinCount minCount) {
-			return minCount.getLimit();
+			return minCount.limit();
 		}
 
 
@@ -110,21 +112,21 @@ public final class MinCount implements Shape {
 
 
 		@Override public Integer probe(final And and) {
-			return and.getShapes().stream()
+			return and.shapes().stream()
 					.map(shape -> shape.map(this))
 					.reduce(null, max);
 		}
 
 		@Override public Integer probe(final Or or) {
-			return or.getShapes().stream()
+			return or.shapes().stream()
 					.map(shape -> shape.map(this))
 					.reduce(null, min);
 		}
 
 		@Override public Integer probe(final When when) {
 			return min.apply(
-					when.getPass().map(this),
-					when.getFail().map(this));
+					when.pass().map(this),
+					when.fail().map(this));
 		}
 
 	}

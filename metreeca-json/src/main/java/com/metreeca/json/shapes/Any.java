@@ -71,7 +71,7 @@ public final class Any implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Set<Object> getValues() {
+	public Set<Object> values() {
 		return unmodifiableSet(values);
 	}
 
@@ -87,6 +87,8 @@ public final class Any implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Any
@@ -110,11 +112,11 @@ public final class Any implements Shape {
 	private static final class AnyProbe extends Inspector<Set<Object>> {
 
 		@Override public Set<Object> probe(final Any any) {
-			return any.getValues();
+			return any.values();
 		}
 
 		@Override public Set<Object> probe(final Or or) {
-			return or.getShapes().stream()
+			return or.shapes().stream()
 					.map(shape -> shape.map(this))
 					.reduce(null, this::union);
 		}

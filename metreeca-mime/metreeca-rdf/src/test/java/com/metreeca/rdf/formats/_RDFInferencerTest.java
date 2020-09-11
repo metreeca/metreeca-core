@@ -103,35 +103,35 @@ final class _RDFInferencerTest {
 
 		assertImplies("reverse field objects are resources",
 				field(inverse(RDF.VALUE)), datatype(Values.ResourceType),
-				(s, i) -> field(s.getName(), and(s.getShape(), i))
+				(s, i) -> field(s.name(), and(s.shape(), i))
 		);
 
 		assertImplies("reverse field objects are iris if explicitly typed",
 				field(inverse(RDF.VALUE), datatype(Values.IRIType)),
-				datatype(Values.IRIType), (s, i) -> field(s.getName(), and(s.getShape(), i))
+				datatype(Values.IRIType), (s, i) -> field(s.name(), and(s.shape(), i))
 		);
 
 		assertImplies("both subject and object of a rdf:type field are resources",
 				field(RDF.TYPE), datatype(Values.ResourceType),
-				(s, i) -> and(field(s.getName(), and(s.getShape(), i)), i)
+				(s, i) -> and(field(s.name(), and(s.shape(), i)), i)
 		);
 
 		assertImplies("nested shapes are expanded",
 				field(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(field(s.getName(), and(and(s.getShape(), i), datatype(Values.ResourceType))),
+				(s, i) -> and(field(s.name(), and(and(s.shape(), i), datatype(Values.ResourceType))),
 						datatype(Values.ResourceType))
 		);
 	}
 
 	@Test void testConjunction() {
 		assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(Stream.concat(s.getShapes().stream(), Stream.of(i)).collect(toList()))); // outer and()
+				(s, i) -> and(Stream.concat(s.shapes().stream(), Stream.of(i)).collect(toList()))); // outer and()
 		// stripped by optimization
 	}
 
 	@Test void testDisjunction() {
 		assertImplies("nested shapes are expanded", or(clazz(RDF.NIL)), datatype(Values.ResourceType),
-				(s, i) -> and(Stream.concat(s.getShapes().stream(), Stream.of(i)).collect(toList()))); // outer or()
+				(s, i) -> and(Stream.concat(s.shapes().stream(), Stream.of(i)).collect(toList()))); // outer or()
 		// stripped by optimization
 	}
 
@@ -139,7 +139,7 @@ final class _RDFInferencerTest {
 		assertImplies("nested shapes are expanded",
 				when(and()/* !!! clazz(RDF.NIL) */, clazz(RDF.NIL), clazz(RDF.NIL)),
 				datatype(Values.ResourceType),
-				(s, i) -> when(and()/* !!! and(s.getTest(), i)*/, and(s.getPass(), i), and(s.getFail(), i))
+				(s, i) -> when(and()/* !!! and(s.getTest(), i)*/, and(s.pass(), i), and(s.fail(), i))
 		);
 	}
 

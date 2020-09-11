@@ -62,11 +62,11 @@ public final class Terms implements Query {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Shape getShape() {
+	public Shape shape() {
 		return shape;
 	}
 
-	public List<Object> getPath() {
+	public List<Object> path() {
 		return unmodifiableList(path);
 	}
 
@@ -94,7 +94,6 @@ public final class Terms implements Query {
 	@Override public int hashCode() {
 		return shape.hashCode()^path.hashCode();
 	}
-
 
 	@Override public String toString() {
 		return format(

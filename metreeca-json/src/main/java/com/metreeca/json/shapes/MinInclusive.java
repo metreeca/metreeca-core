@@ -50,7 +50,7 @@ public final class MinInclusive implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getValue() {
+	public Object value() {
 		return value;
 	}
 
@@ -66,6 +66,8 @@ public final class MinInclusive implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof MinInclusive

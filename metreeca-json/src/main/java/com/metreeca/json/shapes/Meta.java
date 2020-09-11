@@ -137,11 +137,11 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object getLabel() {
+	public Object label() {
 		return label;
 	}
 
-	public Object getValue() {
+	public Object value() {
 		return value;
 	}
 
@@ -157,6 +157,8 @@ public final class Meta implements Shape {
 		return probe.probe(this);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Meta
@@ -186,7 +188,7 @@ public final class Meta implements Shape {
 
 
 		@Override public Object probe(final Meta meta) {
-			return meta.getLabel().equals(label) ? meta.getValue() : null;
+			return meta.label().equals(label) ? meta.value() : null;
 		}
 
 
@@ -196,15 +198,15 @@ public final class Meta implements Shape {
 
 
 		@Override public Object probe(final And and) {
-			return probe(and.getShapes().stream());
+			return probe(and.shapes().stream());
 		}
 
 		@Override public Object probe(final Or or) {
-			return probe(or.getShapes().stream());
+			return probe(or.shapes().stream());
 		}
 
 		@Override public Object probe(final When when) {
-			return probe(Stream.of(when.getPass(), when.getFail()));
+			return probe(Stream.of(when.pass(), when.fail()));
 		}
 
 

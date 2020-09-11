@@ -99,7 +99,7 @@ final class GraphValidator extends GraphProcessor {
 
 			final Trace merged=trace(trace(issues), trace);
 
-			return merged.isEmpty() ? Right(model) : Left(merged);
+			return merged.empty() ? Right(model) : Left(merged);
 
 		});
 	}
@@ -168,7 +168,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final Datatype datatype) {
 
-			final IRI iri=_iri(datatype.getName());
+			final IRI iri=_iri(datatype.id());
 
 			return trace(focus.stream()
 					.filter(negate(value -> is(value, iri)))
@@ -189,7 +189,7 @@ final class GraphValidator extends GraphProcessor {
 								+"\n"
 								+"select distinct ?class { ?class rdfs:subClassOf* {root} }",
 
-						format(_iri(clazz.getName()))
+						format(_iri(clazz.id()))
 
 				)).evaluate())
 
@@ -247,7 +247,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MinExclusive minExclusive) {
 
-			final Value limit=value(minExclusive.getValue());
+			final Value limit=value(minExclusive.value());
 
 			return trace(focus.stream()
 					.filter(negate(value -> comparator.compare(value, limit) > 0))
@@ -257,7 +257,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MaxExclusive maxExclusive) {
 
-			final Value limit=value(maxExclusive.getValue());
+			final Value limit=value(maxExclusive.value());
 
 			return trace(focus.stream()
 					.filter(negate(value -> comparator.compare(value, limit) < 0))
@@ -267,7 +267,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MinInclusive minInclusive) {
 
-			final Value limit=value(minInclusive.getValue());
+			final Value limit=value(minInclusive.value());
 
 			return trace(focus.stream()
 					.filter(negate(value -> comparator.compare(value, limit) >= 0))
@@ -277,7 +277,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MaxInclusive maxInclusive) {
 
-			final Value limit=value(maxInclusive.getValue());
+			final Value limit=value(maxInclusive.value());
 
 			return trace(focus.stream()
 					.filter(negate(value -> comparator.compare(value, limit) <= 0))
@@ -288,7 +288,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MinLength minLength) {
 
-			final int limit=minLength.getLimit();
+			final int limit=minLength.limit();
 
 			return trace(focus.stream()
 					.filter(negate(value -> text(value).length() >= limit))
@@ -298,7 +298,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MaxLength maxLength) {
 
-			final int limit=maxLength.getLimit();
+			final int limit=maxLength.limit();
 
 			return trace(focus.stream()
 					.filter(negate(value -> text(value).length() <= limit))
@@ -308,8 +308,8 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final Pattern pattern) {
 
-			final String expression=pattern.getText();
-			final String flags=pattern.getFlags();
+			final String expression=pattern.text();
+			final String flags=pattern.flags();
 
 			final java.util.regex.Pattern compiled=java.util.regex.Pattern
 					.compile(flags.isEmpty() ? expression : "(?"+flags+":"+expression+")");
@@ -338,7 +338,7 @@ final class GraphValidator extends GraphProcessor {
 		@Override public Trace probe(final MinCount minCount) {
 
 			final int count=focus.size();
-			final int limit=minCount.getLimit();
+			final int limit=minCount.limit();
 
 			return count >= limit ? trace() : trace(issue(minCount), count);
 		}
@@ -346,14 +346,14 @@ final class GraphValidator extends GraphProcessor {
 		@Override public Trace probe(final MaxCount maxCount) {
 
 			final int count=focus.size();
-			final int limit=maxCount.getLimit();
+			final int limit=maxCount.limit();
 
 			return count <= limit ? trace() : trace(issue(maxCount), count);
 		}
 
 		@Override public Trace probe(final In in) {
 
-			final Set<Value> range=values(in.getValues());
+			final Set<Value> range=values(in.values());
 
 			final List<Value> unexpected=focus
 					.stream()
@@ -365,7 +365,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final All all) {
 
-			final Set<Value> range=values(all.getValues());
+			final Set<Value> range=values(all.values());
 
 			final List<Value> missing=range
 					.stream()
@@ -376,15 +376,15 @@ final class GraphValidator extends GraphProcessor {
 		}
 
 		@Override public Trace probe(final Any any) {
-			return !disjoint(focus, values(any.getValues()))
+			return !disjoint(focus, values(any.values()))
 					? trace() : trace(issue(any));
 		}
 
 
 		@Override public Trace probe(final Field field) {
 
-			final IRI iri=_iri(field.getName());
-			final Shape shape=field.getShape();
+			final IRI iri=_iri(field.name());
+			final Shape shape=field.shape();
 
 			return focus.stream().map(value -> { // for each focus value
 
@@ -421,13 +421,13 @@ final class GraphValidator extends GraphProcessor {
 
 
 		@Override public Trace probe(final And and) {
-			return and.getShapes().stream()
+			return and.shapes().stream()
 					.map(s -> s.map(this))
 					.reduce(trace(), Trace::trace);
 		}
 
 		@Override public Trace probe(final Or or) {
-			return or.getShapes().stream().anyMatch(s -> s.map(this).isEmpty()) ? trace() : trace(issue(or));
+			return or.shapes().stream().anyMatch(s -> s.map(this).empty()) ? trace() : trace(issue(or));
 		}
 
 		@Override public Trace probe(final When when) {

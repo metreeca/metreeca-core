@@ -39,14 +39,14 @@ final class Evaluator extends Traverser<Boolean> {
 	}
 
 	@Override public Boolean probe(final And and) {
-		return and.getShapes().stream()
+		return and.shapes().stream()
 				.filter(shape -> !(shape instanceof Meta))
 				.map(shape -> shape.map(this))
 				.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
 	}
 
 	@Override public Boolean probe(final Or or) {
-		return or.getShapes().stream()
+		return or.shapes().stream()
 				.filter(shape -> !(shape instanceof Meta))
 				.map(shape -> shape.map(this))
 				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
@@ -54,9 +54,9 @@ final class Evaluator extends Traverser<Boolean> {
 
 	@Override public Boolean probe(final When when) {
 
-		final Boolean test=when.getTest().map(this);
-		final Boolean pass=when.getPass().map(this);
-		final Boolean fail=when.getFail().map(this);
+		final Boolean test=when.test().map(this);
+		final Boolean pass=when.pass().map(this);
+		final Boolean fail=when.fail().map(this);
 
 		return TRUE.equals(test) ? pass
 				: FALSE.equals(test) ? fail

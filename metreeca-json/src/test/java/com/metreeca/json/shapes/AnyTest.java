@@ -35,7 +35,7 @@ final class AnyTest {
 		final Any any=any(1, 2, 3);
 
 		assertThat(any(any))
-				.contains(any.getValues());
+				.contains(any.values());
 	}
 
 	@Test void testInspectDisjunction() {
@@ -45,11 +45,11 @@ final class AnyTest {
 
 		assertThat(any(or(x, y)))
 				.as("all defined")
-				.contains(Stream.concat(x.getValues().stream(), y.getValues().stream()).collect(toSet()));
+				.contains(Stream.concat(x.values().stream(), y.values().stream()).collect(toSet()));
 
 		assertThat(any(or(x, and())))
 				.as("some defined")
-				.contains(x.getValues());
+				.contains(x.values());
 
 		assertThat(any(or(and(), and())))
 				.as("none defined")
