@@ -143,8 +143,8 @@ public final class ValuesTest {
 
 
 	public static final Map<String, String> Prefixes=unmodifiableMap(Stream.of(
+			entry("app", "app:/terms#"),
 			entry("", Namespace),
-			entry("app", Internal),
 			entry("birt", Namespace),
 			entry("rdf", RDF.NAMESPACE),
 			entry("rdfs", RDFS.NAMESPACE),

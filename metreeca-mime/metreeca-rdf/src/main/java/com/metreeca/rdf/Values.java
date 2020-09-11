@@ -102,15 +102,9 @@ public final class Values {
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Internal namespace for local references and predicates (<code>{@value}</code>).
-	 */
-	public static final String Internal="app:/terms#";
-
-
 	//// Extended Datatypes ///////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final String Internal="app:/terms#";
 
 	public static final IRI IRIType=iri(Internal, "iri"); // datatype IRI for IRI references
 	public static final IRI BNodeType=iri(Internal, "bnode"); // datatype IRI for blank nodes
@@ -299,11 +293,6 @@ public final class Values {
 	public static IRI iri(final String space, final String name) {
 		return space == null || name == null ? null
 				: factory.createIRI(space, space.endsWith("/") && name.startsWith("/") ? name.substring(1) : name);
-	}
-
-
-	public static IRI internal(final String name) {
-		return iri(Internal, name);
 	}
 
 

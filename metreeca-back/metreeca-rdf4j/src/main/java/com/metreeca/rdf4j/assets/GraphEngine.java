@@ -18,7 +18,6 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.assets.Engine;
@@ -47,7 +46,7 @@ import static com.metreeca.rdf4j.assets.Graph.graph;
  */
 public final class GraphEngine implements Engine {
 
-	static final String Base=Values.Internal;
+	static final String Base="app:/terms#";
 
 	static final IRI terms=iri(Base, "terms");
 	static final IRI stats=iri(Base, "stats");
