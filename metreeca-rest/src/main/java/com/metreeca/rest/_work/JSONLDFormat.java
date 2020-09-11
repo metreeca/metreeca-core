@@ -22,12 +22,12 @@ import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.*;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.Statement;
 
 import javax.json.JsonException;
-import javax.json.JsonValue;
 import java.io.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.NoSuchElementException;
 
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
@@ -72,8 +72,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * @throws NullPointerException if either {@code query} or {@code shape} is null
 	 */
 	public static Either<MessageException, Query> query(
-			final String query, final Shape shape,
-			final _Parser<String, List<IRI>> paths, final _Parser<JsonValue, Value> values
+			final String query, final Shape shape
 	) {
 
 		if ( query == null ) {
@@ -86,7 +85,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		try {
 
-			return Right(new _QueryParser(shape, paths, values).parse(query));
+			return Right(new _QueryParser(shape).parse(query));
 
 		} catch ( final JsonException e ) {
 

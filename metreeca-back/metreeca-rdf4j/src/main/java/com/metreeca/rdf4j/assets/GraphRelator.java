@@ -20,8 +20,8 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest._work._ValueParser;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -38,6 +38,7 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest._work.JSONLDFormat.jsonld;
@@ -52,10 +53,10 @@ final class GraphRelator extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Graph graph=com.metreeca.rest.Context.asset(graph());
+	private final Graph graph=asset(graph());
 
 
-	com.metreeca.rest.Future<com.metreeca.rest.Response> handle(final com.metreeca.rest.Request request) {
+	com.metreeca.rest.Future<Response> handle(final Request request) {
 		return request.reply(response -> {
 
 			final boolean resource=!request.collection();
@@ -69,7 +70,7 @@ final class GraphRelator extends GraphProcessor {
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
-				) : query(request.query(), and(all(item), shape), _ValueParser::path, _ValueParser::value).fold(
+				) : query(request.query(), and(all(item), shape)).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
@@ -123,7 +124,7 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return query(request.query(), digest, _ValueParser::path, _ValueParser::value).fold(
+				return query(request.query(), digest).fold(
 
 						response::map, query -> graph.exec(connection -> {
 

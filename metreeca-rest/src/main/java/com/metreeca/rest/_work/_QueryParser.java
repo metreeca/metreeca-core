@@ -51,15 +51,9 @@ public final class _QueryParser {
 
 	private final Shape shape;
 
-	private final _Parser<String, List<IRI>> paths;
-	private final _Parser<JsonValue, Value> values;
 
-
-	public _QueryParser(final Shape shape, final _Parser<String, List<IRI>> paths,
-			final _Parser<JsonValue, Value> values) {
+	public _QueryParser(final Shape shape) {
 		this.shape=shape;
-		this.paths=paths;
-		this.values=values;
 	}
 
 
@@ -347,7 +341,7 @@ public final class _QueryParser {
 	private List<IRI> steps(final String path, final Shape shape) {
 		try {
 
-			return paths.parse(shape, path.trim());
+			return _ValueParser.path(shape, path.trim());
 
 		} catch ( final JsonException e ) {
 
@@ -370,7 +364,7 @@ public final class _QueryParser {
 	}
 
 
-	private Shape field(final Object name, final Shape shape) {
+	private Shape field(final IRI name, final Shape shape) {
 
 		final Shape nested=fields(shape).get(name);
 
@@ -392,7 +386,7 @@ public final class _QueryParser {
 	}
 
 	private Value value(final JsonValue value, final Shape shape) {
-		return values.parse(shape, value);
+		return _ValueParser.value(shape, value);
 	}
 
 

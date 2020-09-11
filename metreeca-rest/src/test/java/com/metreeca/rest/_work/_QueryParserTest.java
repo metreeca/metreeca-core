@@ -112,7 +112,7 @@ final class _QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new _QueryParser(shape, _ValueParser::path, _ValueParser::value)
+		return new _QueryParser(shape)
 				.parse(query.replace('\'', '"'));
 	}
 
