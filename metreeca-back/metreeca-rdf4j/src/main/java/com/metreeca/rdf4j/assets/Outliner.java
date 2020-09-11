@@ -21,7 +21,7 @@ import com.metreeca.json.Focus;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf.formats._RDFCasts;
+import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -32,7 +32,6 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -81,7 +80,7 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 		return Stream.concat(
 
-				all(shape).map(targets -> values(targets.stream()).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
+				all(shape).map(targets -> targets.stream().flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
 						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) :
 						Stream.empty()
@@ -105,7 +104,7 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 				all(and).map(values -> and.shapes().stream()
 
-						.flatMap(shape -> shape.map(new Outliner(values(values.stream()).collect(toSet()))))
+						.flatMap(shape -> shape.map(new Outliner(values)))
 
 				).orElseGet(Stream::empty)
 
@@ -113,11 +112,11 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	}
 
 
-	private Stream<Value> values(final Stream<Object> objects) {
+	private Stream<Value> values(final Stream<Value> objects) {
 		return objects.flatMap(o -> o instanceof Focus
-				? sources.stream().map(s -> s instanceof IRI ? iri(((Focus)o).resolve(s.stringValue())) :
-				_RDFCasts._value(s))
-				: Stream.of(_RDFCasts._value(o)));
+				? sources.stream().filter(IRI.class::isInstance).map(s -> ((Focus)o).resolve((IRI)s))
+				: Stream.of(_RDFCasts._value(o))
+		);
 	}
 
 }

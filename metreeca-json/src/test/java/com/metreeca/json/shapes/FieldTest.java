@@ -17,6 +17,7 @@
 
 package com.metreeca.json.shapes;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -38,7 +39,7 @@ final class FieldTest {
 
 	@Test void testInspectFields() {
 
-		final Field field=field("value", and());
+		final Field field=field(RDF.VALUE, and());
 
 		assertThat(fields(field))
 				.as("singleton field map")
@@ -48,9 +49,9 @@ final class FieldTest {
 
 	@Test void testInspectConjunctions() {
 
-		final Field x=field("value", and());
-		final Field y=field("type", and());
-		final Field z=field("type", maxCount(1));
+		final Field x=field(RDF.VALUE, and());
+		final Field y=field(RDF.TYPE, and());
+		final Field z=field(RDF.TYPE, maxCount(1));
 
 		assertThat(fields(and(x, y)))
 				.as("union field map")
@@ -69,9 +70,9 @@ final class FieldTest {
 
 	@Test void testInspectDisjunctions() {
 
-		final Field x=field("value", and());
-		final Field y=field("type", and());
-		final Field z=field("type", maxCount(1));
+		final Field x=field(RDF.VALUE, and());
+		final Field y=field(RDF.TYPE, and());
+		final Field z=field(RDF.TYPE, maxCount(1));
 
 		assertThat(fields(or(x, y)))
 				.as("union field map")
@@ -90,9 +91,9 @@ final class FieldTest {
 
 	@Test void testInspectOptions() {
 
-		final Field x=field("value", and());
-		final Field y=field("type", and());
-		final Field z=field("type", maxCount(1));
+		final Field x=field(RDF.VALUE, and());
+		final Field y=field(RDF.TYPE, and());
+		final Field z=field(RDF.TYPE, maxCount(1));
 
 		assertThat(fields(when(and(), x, y)))
 				.as("union field map")

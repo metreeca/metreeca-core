@@ -20,10 +20,13 @@ package com.metreeca.json.probes;
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.UnaryOperator;
 
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.guard;
@@ -37,6 +40,10 @@ final class RedactorTest {
 	private static final UnaryOperator<Shape> first=s -> s.map(new Redactor("value", "first"));
 	private static final UnaryOperator<Shape> rest=s -> s.map(new Redactor("value", "rest"));
 	private static final UnaryOperator<Shape> any=s -> s.map(new Redactor("value", values -> true));
+
+	private static final IRI X=iri("http://example.com/x");
+	private static final IRI Y=iri("http://example.com/y");
+	private static final IRI Z=iri("http://example.com/z");
 
 
 	private Guard value(final Object... values) {
@@ -54,7 +61,7 @@ final class RedactorTest {
 
 	@Test void testReplaceTargetedConditions() {
 
-		final Shape shape=field("type", and());
+		final Shape shape=field(RDF.TYPE, and());
 		final Shape guard=value("first").then(shape);
 
 		assertThat(guard.map(first)).as("included value").isEqualTo(shape);
@@ -65,15 +72,15 @@ final class RedactorTest {
 
 	@Test void testRedactNestedShapes() {
 
-		final Shape x=field("x", and());
-		final Shape y=field("y", and());
-		final Shape z=field("z", and());
+		final Shape x=field(X, and());
+		final Shape y=field(Y, and());
+		final Shape z=field(Z, and());
 
 		final Shape guard=value("first");
 
-		assertThat(field("value", guard.then(x)).map(first))
+		assertThat(field(RDF.VALUE, guard.then(x)).map(first))
 				.as("field")
-				.isEqualTo(field("value", x));
+				.isEqualTo(field(RDF.VALUE, x));
 
 		assertThat(and(guard.then(x), guard.then(y)).map(first))
 				.as("conjunction")
@@ -91,8 +98,8 @@ final class RedactorTest {
 
 	@Test void testHandleWildcards() {
 
-		final Shape x=field("x", and());
-		final Shape y=field("y", and());
+		final Shape x=field(X, and());
+		final Shape y=field(Y, and());
 
 		assertThat(and(value("first").then(x), value("rest").then(y)).map(any))
 				.as("wildcard")
@@ -101,8 +108,8 @@ final class RedactorTest {
 
 
 	@Test void testOptimizeFields() {
-		assertThat(and(field("one", value("first")), field("two", value("rest"))).map(first))
-				.isEqualTo(field("one"));
+		assertThat(and(field(RDF.FIRST, value("first")), field(RDF.REST, value("rest"))).map(first))
+				.isEqualTo(field(RDF.FIRST, and()));
 	}
 
 	@Test void testOptimizeAnds() {

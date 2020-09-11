@@ -17,45 +17,86 @@
 
 package com.metreeca.json;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+
+import java.net.URI;
+import java.util.function.UnaryOperator;
+
+import static com.metreeca.json.Values.iri;
+
 /**
  * Shape focus.
  *
  * <p>Provides a placeholder for a shape value dynamically derived from a target IRI while performing a shape-driven
  * operation, for instance serving a linked data resource.</p>
  */
-@FunctionalInterface public interface Focus {
+public interface Focus extends Value {
+
+	/**
+	 * Creates a target focus value.
+	 *
+	 * @return a focus value resolving to the target IRI of a shape-driven operation
+	 */
+	public static Focus focus() {
+		return new Focus() {
+
+			@Override public String stringValue() { return ""; }
+
+			@Override public IRI resolve(final IRI base) { return base; }
+
+		};
+	}
+
+	/**
+	 * Creates a relative focus value.
+	 *
+	 * @param relative the relative IRI of the focus value
+	 *
+	 * @return a focus value resolving {@code relative} against the target IRI of a shape-driven operation; trailing
+	 * slashes
+	 * in the resolved IRI are removed unless {@code relative} includes one
+	 *
+	 * @throws NullPointerException if {@code relative} is null
+	 */
+	public static Focus focus(final String relative) {
+
+		if ( relative == null ) {
+			throw new NullPointerException("null relative IRI");
+		}
+
+		final boolean slash=relative.endsWith("/");
+
+		final UnaryOperator<String> resolve=path -> URI.create(path).resolve(relative).toString();
+		final UnaryOperator<String> convert=path -> path.endsWith("/") ? path.substring(0, path.length()-1) : path;
+
+		return new Focus() {
+
+			@Override public String stringValue() { return relative; }
+
+			@Override public IRI resolve(final IRI base) {
+				return relative.isEmpty() ? base
+						: slash ? iri(resolve.apply(base.stringValue()))
+						: iri(convert.apply(resolve.apply(base.stringValue())));
+			}
+
+		};
+
+	}
+
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Resolves this focus value.
 	 *
-	 * @param iri the target IRI for a shape-driven operation
+	 * @param base the target IRI for a shape-driven operation
 	 *
-	 * @return the IRI obtained by resolving this focus value against {@code iri}
+	 * @return the IRI obtained by resolving this focus value against {@code base}
 	 *
-	 * @throws NullPointerException     if {@code iri} is {@code null}
-	 * @throws IllegalArgumentException if {@code iri} is malformed
+	 * @throws NullPointerException     if {@code base} is {@code null}
+	 * @throws IllegalArgumentException if {@code base} is malformed
 	 */
-	public String resolve(final String iri);
-
-
-	/**
-	 * Chains a focus value.
-	 *
-	 * @param focus the focus value to be chained to this focus value
-	 *
-	 * @return a combined focus value sequentially resolving target IRIs against {@code focus} and this focus
-	 * value,
-	 * in order
-	 *
-	 * @throws NullPointerException if {@code focus} is null
-	 */
-	public default Focus then(final Focus focus) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		return iri -> focus.resolve(resolve(iri));
-	}
+	public IRI resolve(final IRI base);
 
 }

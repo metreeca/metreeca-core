@@ -21,19 +21,21 @@ import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.*;
-import com.metreeca.json.shapes.Datatype;
 import com.metreeca.json.shapes.Field;
+import com.metreeca.rest._work._ValueParser;
 
 import org.assertj.core.api.Assertions;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
 
-import javax.json.*;
-import java.util.Collections;
-import java.util.NoSuchElementException;
+import javax.json.JsonException;
 import java.util.function.Consumer;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
+import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
@@ -51,17 +53,16 @@ import static com.metreeca.json.shapes.MinExclusive.minExclusive;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Pattern.pattern;
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
 final class QueryParserTest {
 
-	private static final Long One=1L;
-	private static final Long Ten=10L;
+	private static final Value One=literal(1L);
+	private static final Value Ten=literal(10L);
 
-	private static final Shape shape=field("head", field("tail", and()));
+	private static final Shape shape=field(RDF.FIRST, field(RDF.REST, and()));
 
 
 	private void items(final String query, final Shape shape, final Consumer<Items> tester) {
@@ -111,20 +112,7 @@ final class QueryParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new QueryParser(shape,
-
-				(_shape, path) -> path.isEmpty() ? Collections.emptyList() : asList((Object[])path.split("\\.")),
-
-				(_shape, value) -> value.equals(JsonValue.TRUE) ? true
-						: value.equals(JsonValue.FALSE) ? false
-						: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ?
-						((JsonNumber)value).longValue()
-						: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
-						: value instanceof JsonString ?
-						((JsonString)value).getString()+Datatype.datatype(_shape).map(t -> "^"+t).orElse("")
-						: null
-
-		)
+		return new QueryParser(shape, _ValueParser::path, _ValueParser::value)
 				.parse(query.replace('\'', '"'));
 	}
 
@@ -166,19 +154,19 @@ final class QueryParserTest {
 				.isEmpty()
 		);
 
-		stats("{ '_stats': 'head' }", shape, stats -> assertThat(stats.path())
+		stats("{ '_stats': 'first' }", shape, stats -> assertThat(stats.path())
 				.as("direct naked step")
-				.containsExactly("head")
+				.containsExactly(RDF.FIRST)
 		);
 
-		stats("{ '_stats': 'head.tail' }", shape, stats -> assertThat(stats.path())
+		stats("{ '_stats': 'first.rest' }", shape, stats -> assertThat(stats.path())
 				.as("naked dot path")
-				.containsExactly("head", "tail")
+				.containsExactly(RDF.FIRST, RDF.REST)
 		);
 
-		stats("{ '_stats': 'head.tail' }", shape, stats -> assertThat(stats.path())
+		stats("{ '_stats': 'first.rest' }", shape, stats -> assertThat(stats.path())
 				.as("naked dot path")
-				.containsExactly("head", "tail")
+				.containsExactly(RDF.FIRST, RDF.REST)
 		);
 
 	}
@@ -205,28 +193,28 @@ final class QueryParserTest {
 				.containsExactly(decreasing())
 		);
 
-		items("{ '_order': 'head.tail' }", shape, items -> assertThat(items.orders())
+		items("{ '_order': 'first.rest' }", shape, items -> assertThat(items.orders())
 				.as("path")
-				.containsExactly(increasing("head", "tail"))
+				.containsExactly(increasing(RDF.FIRST, RDF.REST))
 		);
 
-		items("{ '_order': '+head.tail' }", shape, items -> assertThat(items.orders())
+		items("{ '_order': '+first.rest' }", shape, items -> assertThat(items.orders())
 				.as("path increasing")
-				.containsExactly(increasing("head", "tail"))
+				.containsExactly(increasing(RDF.FIRST, RDF.REST))
 		);
 
-		items("{ '_order': '-head.tail' }", shape, items -> assertThat(items.orders())
+		items("{ '_order': '-first.rest' }", shape, items -> assertThat(items.orders())
 				.as("path decreasing")
-				.containsExactly(decreasing("head", "tail")));
+				.containsExactly(decreasing(RDF.FIRST, RDF.REST)));
 
 		items("{ '_order': [] }", shape, items -> assertThat(items.orders()).
 				as("empty list")
 				.isEmpty()
 		);
 
-		items("{ '_order': ['+head', '-head.tail'] }", shape, items -> assertThat(items.orders())
+		items("{ '_order': ['+first', '-first.rest'] }", shape, items -> assertThat(items.orders())
 				.as("list")
-				.containsExactly(increasing("head"), decreasing("head", "tail"))
+				.containsExactly(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))
 		);
 
 	}
@@ -234,14 +222,14 @@ final class QueryParserTest {
 
 	@Test void testParseRootFilters() {
 
-		items("{ '@': 'class' }", shape, items -> assertThat(items.shape())
+		items("{ '@': '"+RDF.TYPE+"' }", shape, items -> assertThat(items.shape())
 				.as("class")
-				.isEqualTo(filter(shape, clazz("class")))
+				.isEqualTo(filter(shape, clazz(RDF.TYPE)))
 		);
 
-		items("{ '^': 'datatype' }", shape, items -> assertThat(items.shape())
+		items("{ '^': '"+XSD.DATE+"' }", shape, items -> assertThat(items.shape())
 				.as("type")
-				.isEqualTo(filter(shape, datatype("datatype")))
+				.isEqualTo(filter(shape, datatype(XSD.DATE)))
 		);
 
 
@@ -303,14 +291,14 @@ final class QueryParserTest {
 				.isEqualTo(filter(shape, in()))
 		);
 
-		items("{ '%': 'head' }", shape, items -> assertThat(items.shape())
+		items("{ '%': 'first' }", shape, items -> assertThat(items.shape())
 				.as("in (singleton)")
-				.isEqualTo(filter(shape, in("head")))
+				.isEqualTo(filter(shape, in(RDF.FIRST)))
 		);
 
-		items("{ '%': ['head', 'tail'] }", shape, items -> assertThat(items.shape())
+		items("{ '%': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 				.as("in (multiple)")
-				.isEqualTo(filter(shape, in("head", "tail")))
+				.isEqualTo(filter(shape, in(RDF.FIRST, RDF.REST)))
 		);
 
 
@@ -319,14 +307,14 @@ final class QueryParserTest {
 				.isEqualTo(filter(shape, all()))
 		);
 
-		items("{ '!': 'head' }", shape, items -> assertThat(items.shape())
+		items("{ '!': 'first' }", shape, items -> assertThat(items.shape())
 				.as("universal (singleton)")
-				.isEqualTo(filter(shape, all("head")))
+				.isEqualTo(filter(shape, all(RDF.FIRST)))
 		);
 
-		items("{ '!': ['head', 'tail'] }", shape, items -> assertThat(items.shape())
+		items("{ '!': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 				.as("universal (multiple)")
-				.isEqualTo(filter(shape, all("head", "tail")))
+				.isEqualTo(filter(shape, all(RDF.FIRST, RDF.REST)))
 		);
 
 
@@ -335,44 +323,44 @@ final class QueryParserTest {
 				.isEqualTo(filter(shape, any()))
 		);
 
-		items("{ '?': 'head' }", shape, items -> assertThat(items.shape())
+		items("{ '?': 'first' }", shape, items -> assertThat(items.shape())
 				.as("existential (singleton)")
-				.isEqualTo(filter(shape, any("head")))
+				.isEqualTo(filter(shape, any(RDF.FIRST)))
 		);
 
-		items("{ '?': ['head', 'tail'] }", shape, items -> assertThat(items.shape())
+		items("{ '?': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 				.as("existential (multiple)")
-				.isEqualTo(filter(shape, any("head", "tail")))
+				.isEqualTo(filter(shape, any(RDF.FIRST, RDF.REST)))
 		);
 
 	}
 
 	@Test void testParsePathFilters() {
 
-		items("{ '>= head.tail': 1 }", shape, items -> assertThat(items.shape())
+		items("{ '>= first.rest': 1 }", shape, items -> assertThat(items.shape())
 				.as("nested filter")
-				.isEqualTo(filter(shape, field("head", field("tail", minInclusive(One)))))
+				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, minInclusive(One)))))
 		);
 
-		items("{ 'head.tail': 1 }", shape, items -> assertThat(items.shape())
+		items("{ 'first.rest': 1 }", shape, items -> assertThat(items.shape())
 				.as("nested filter singleton shorthand")
-				.isEqualTo(filter(shape, field("head", field("tail", any(One)))))
+				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One)))))
 		);
 
-		items("{ 'head.tail': [1, 10] }", shape, items -> assertThat(items.shape())
+		items("{ 'first.rest': [1, 10] }", shape, items -> assertThat(items.shape())
 				.as("nested filter multiple shorthand")
-				.isEqualTo(filter(shape, field("head", field("tail", any(One, Ten)))))
+				.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))))
 		);
 
 	}
 
 	@Test void testParseShapedFilters() {
 
-		final Field shape=field("value", datatype("type"));
+		final Field shape=field(RDF.VALUE, datatype(XSD.LONG));
 
 		items("{ 'value': '4' }", shape, items -> assertThat(items.shape())
 				.as("typed value")
-				.isEqualTo(filter(shape, field("value", any("4^type"))))
+				.isEqualTo(filter(shape, field(RDF.VALUE, any(literal("4", XSD.LONG)))))
 		);
 	}
 
@@ -380,55 +368,55 @@ final class QueryParserTest {
 	@Test void testIgnoreNullFilters() {
 
 		items("{ '>': null }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
-		items("{ 'head': null }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
+		items("{ 'first': null }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
 
 	}
 
 
 	@Test void testRejectReferencesOutsideShapeEnvelope() {
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
 				terms("{ '_terms': 'nil' }", shape, items -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
 				stats("{ '_stats': 'nil' }", shape, stats -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
 				items("{ '_order': 'nil' }", shape, items -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
 				items("{ '>= nil': 1 }", shape, items -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'head.nil': 1 }", shape, items -> {})
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
+				items("{ 'first.nil': 1 }", shape, items -> {})
 		);
 
 	}
 
 	@Test void testRejectReferencesForEmptyShape() {
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				terms("{ '_terms': 'head' }", and(), items -> {})
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
+				terms("{ '_terms': 'first' }", and(), items -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				stats("{ '_stats': 'head' }", and(), stats -> {})
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
+				stats("{ '_stats': 'first' }", and(), stats -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
 				items("{ '_order': 'nil' }", and(), items -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
 				items("{ '>= nil': 1 }", and(), items -> {})
 		);
 
-		assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-				items("{ 'head.nil': 1 }", and(), items -> {})
+		assertThatExceptionOfType(JsonException.class).isThrownBy(() ->
+				items("{ 'first.nil': 1 }", and(), items -> {})
 		);
 
 	}
@@ -438,16 +426,16 @@ final class QueryParserTest {
 
 	@Test void testParsePlainQuery() {
 
-		items("head=x&head.tail=y&head.tail=w+z", shape, items -> assertThat(items.shape())
-				.isEqualTo(filter(shape, field("head", and(
-						any("x"),
-						field("tail", any("y", "w z"))
+		items("first=x&first.rest=y&first.rest=w+z", shape, items -> assertThat(items.shape())
+				.isEqualTo(filter(shape, field(RDF.FIRST, and(
+						any(literal("x")),
+						field(RDF.REST, any(literal("y"), literal("w z")))
 				)))));
 
-		items("head=x&head.tail=y&_order=-head.tail&_order=head&_offset=1&_limit=2", shape, items -> {
+		items("first=x&first.rest=y&_order=-first.rest&_order=first&_offset=1&_limit=2", shape, items -> {
 
 			assertThat(items.orders())
-					.containsExactly(decreasing("head", "tail"), increasing("head"));
+					.containsExactly(decreasing(RDF.FIRST, RDF.REST), increasing(RDF.FIRST));
 
 			assertThat(items.offset())
 					.isEqualTo(1);
@@ -456,9 +444,9 @@ final class QueryParserTest {
 					.isEqualTo(2);
 
 			assertThat(items.shape())
-					.isEqualTo(filter(shape, field("head", and(
-							any("x"),
-							field("tail", any("y"))
+					.isEqualTo(filter(shape, field(RDF.FIRST, and(
+							any(literal("x")),
+							field(RDF.REST, any(literal("y")))
 					))));
 		});
 
@@ -478,7 +466,7 @@ final class QueryParserTest {
 
 	@Test void testParseTermsQuery() {
 
-		terms("{ '_terms': 'head.tail' }", shape, terms -> {
+		terms("{ '_terms': 'first.rest' }", shape, terms -> {
 
 			assertThat(filter(shape, and()))
 					.as("shape")
@@ -486,7 +474,7 @@ final class QueryParserTest {
 
 			assertThat(terms.path())
 					.as("path")
-					.containsExactly("head", "tail");
+					.containsExactly(RDF.FIRST, RDF.REST);
 
 		});
 
@@ -494,7 +482,7 @@ final class QueryParserTest {
 
 	@Test void testParseStatsQuery() {
 
-		stats("{ '_stats': 'head.tail' }", shape, stats -> {
+		stats("{ '_stats': 'first.rest' }", shape, stats -> {
 
 			assertThat(filter(shape, and()))
 					.as("shape")
@@ -502,7 +490,7 @@ final class QueryParserTest {
 
 			assertThat(stats.path())
 					.as("path")
-					.containsExactly("head", "tail");
+					.containsExactly(RDF.FIRST, RDF.REST);
 
 		});
 
@@ -513,31 +501,31 @@ final class QueryParserTest {
 
 	@Test void testParseFormBasedQueries() {
 
-		items("~head=keyword", shape, items -> {
+		items("~first=keyword", shape, items -> {
 
-			assertThat(items.shape()).isEqualTo(filter(shape, field("head", like("keyword", true))));
+			assertThat(items.shape()).isEqualTo(filter(shape, field(RDF.FIRST, like("keyword", true))));
 
 		});
 
-		items("_order=%2Bhead.tail&_offset=1&_limit=2", shape, items -> {
+		items("_order=%2Bfirst.rest&_offset=1&_limit=2", shape, items -> {
 
-			assertThat(items.orders()).containsExactly(increasing("head", "tail"));
+			assertThat(items.orders()).containsExactly(increasing(RDF.FIRST, RDF.REST));
 			assertThat(items.offset()).isEqualTo(1L);
 			assertThat(items.limit()).isEqualTo(2L);
 
 		});
 
-		terms("_terms=head.tail", shape, terms -> {
+		terms("_terms=first.rest", shape, terms -> {
 
 			assertThat(filter(shape, and())).isEqualTo(terms.shape());
-			assertThat(terms.path()).containsExactly("head", "tail");
+			assertThat(terms.path()).containsExactly(RDF.FIRST, RDF.REST);
 
 		});
 
-		stats("_stats=head.tail", shape, stats -> {
+		stats("_stats=first.rest", shape, stats -> {
 
 			assertThat(filter(shape, and())).isEqualTo(stats.shape());
-			assertThat(stats.path()).containsExactly("head", "tail");
+			assertThat(stats.path()).containsExactly(RDF.FIRST, RDF.REST);
 
 		});
 

@@ -17,10 +17,12 @@
 
 package com.metreeca.json.shapes;
 
+import org.eclipse.rdf4j.model.Value;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static java.util.stream.Collectors.toSet;
@@ -29,9 +31,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class AllTest {
 
+	private static final Value a=literal(1);
+	private static final Value b=literal(2);
+	private static final Value c=literal(3);
+	private static final Value d=literal(4);
+
 	@Test void testInspectExistential() {
 
-		final All all=all(1, 2, 3);
+		final All all=all(a, b, c);
 
 		assertThat(all(all))
 				.contains(all.values());
@@ -39,8 +46,8 @@ final class AllTest {
 
 	@Test void testInspectConjunction() {
 
-		final All x=all(1, 2, 3);
-		final All y=all(2, 3, 4);
+		final All x=all(a, b, c);
+		final All y=all(b, c, d);
 
 		assertThat(all(and(x, y)))
 				.as("all defined")

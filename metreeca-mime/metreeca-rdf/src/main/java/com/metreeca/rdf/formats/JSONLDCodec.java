@@ -21,6 +21,8 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Redactor;
 import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rest._work._RDFInferencer;
+import com.metreeca.rest._work._RDFOptimizer;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;

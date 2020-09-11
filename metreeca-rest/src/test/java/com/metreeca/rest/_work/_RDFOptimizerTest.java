@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
@@ -142,7 +142,7 @@ final class _RDFOptimizerTest {
 
 	@Test void testOptimizeAnd() {
 
-		assertThat(optimize(and(or(), field(RDF.TYPE)))).as("simplify constants").isEqualTo(or());
+		assertThat(optimize(and(or(), field(RDF.TYPE, and())))).as("simplify constants").isEqualTo(or());
 		assertThat(optimize(and(x))).as("unwrap singletons").isEqualTo(x);
 		assertThat(optimize(and(x, x))).as("unwrap unique values").isEqualTo(x);
 		assertThat(optimize(and(x, x, y))).as("remove duplicates").isEqualTo(and(x, y));
@@ -152,7 +152,7 @@ final class _RDFOptimizerTest {
 
 	@Test void testOptimizeOr() {
 
-		assertThat(optimize(or(and(), field(RDF.TYPE)))).as("simplify constants").isEqualTo(and());
+		assertThat(optimize(or(and(), field(RDF.TYPE, and())))).as("simplify constants").isEqualTo(and());
 		assertThat(optimize(or(x))).as("unwrap singletons").isEqualTo(x);
 		assertThat(optimize(or(x, x))).as("unwrap unique values").isEqualTo(x);
 		assertThat(optimize(or(x, x, y))).as("remove duplicates").isEqualTo(or(x, y));

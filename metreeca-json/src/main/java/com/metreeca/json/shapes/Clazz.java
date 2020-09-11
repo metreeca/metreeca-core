@@ -20,6 +20,8 @@ package com.metreeca.json.shapes;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Inspector;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
@@ -32,21 +34,21 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Clazz implements Shape {
 
-	public static Clazz clazz(final Object name) {
+	public static Clazz clazz(final IRI name) {
 		return new Clazz(name);
 	}
 
-	public static Optional<Object> clazz(final Shape shape) {
+	public static Optional<IRI> clazz(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ClazzProbe()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object id;
+	private final IRI id;
 
 
-	private Clazz(final Object id) {
+	private Clazz(final IRI id) {
 
 		if ( id == null ) {
 			throw new NullPointerException("null id");
@@ -58,7 +60,7 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object id() {
+	public IRI id() {
 		return id;
 	}
 
@@ -93,24 +95,24 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ClazzProbe extends Inspector<Object> {
+	private static final class ClazzProbe extends Inspector<IRI> {
 
-		@Override public Object probe(final Clazz clazz) {
+		@Override public IRI probe(final Clazz clazz) {
 			return clazz.id();
 		}
 
-		@Override public Object probe(final And and) {
+		@Override public IRI probe(final And and) {
 			return clazz(and.shapes());
 		}
 
-		@Override public Object probe(final Or or) {
+		@Override public IRI probe(final Or or) {
 			return clazz(or.shapes());
 		}
 
 
-		private Object clazz(final Collection<Shape> shapes) {
+		private IRI clazz(final Collection<Shape> shapes) {
 
-			final Set<Object> names=shapes.stream()
+			final Set<IRI> names=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());

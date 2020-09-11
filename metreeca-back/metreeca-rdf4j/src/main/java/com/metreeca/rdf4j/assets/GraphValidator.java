@@ -19,8 +19,8 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf.formats._RDFCasts;
 import com.metreeca.rest.Either;
+import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -35,7 +35,6 @@ import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
-import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Snippets.source;
 import static com.metreeca.rest.Context.asset;
@@ -43,6 +42,7 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnprocessableEntity;
+import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -133,13 +133,13 @@ final class GraphValidator extends GraphProcessor {
 		}
 
 
-		private Value value(final Object value) {
+		private Value value(final Value value) {
 			return value instanceof Focus
-					? iri(((Focus)value).resolve(resource.stringValue()))
+					? ((Focus)value).resolve(resource)
 					: _RDFCasts._value(value);
 		}
 
-		private Set<Value> values(final Collection<Object> values) {
+		private Set<Value> values(final Collection<Value> values) {
 			return values.stream()
 					.map(this::value)
 					.collect(toSet());

@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 
@@ -27,15 +27,15 @@ import javax.json.JsonException;
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf.formats._ValueParser.path;
+import static com.metreeca.rest._work._ValueParser.path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class _ValueParserTest {
 
 	private final Shape shape=and(
-			field(RDF.FIRST, field(RDF.REST)),
-			field(inverse(RDF.FIRST), field(RDF.REST))
+			field(RDF.FIRST, field(RDF.REST, and())),
+			field(inverse(RDF.FIRST), field(RDF.REST, and()))
 	);
 
 

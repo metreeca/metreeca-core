@@ -20,6 +20,9 @@ package com.metreeca.json.shapes;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Traverser;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -38,11 +41,15 @@ import static java.util.stream.Collectors.*;
  */
 public final class Field implements Shape {
 
-	public static Field field(final Object name, final Object... values) {
+	public static Field field(final IRI name) {
+		return new Field(name, all());
+	}
+
+	public static Field field(final IRI name, final Value... values) {
 		return new Field(name, all(values));
 	}
 
-	public static Field field(final Object name, final Shape... shapes) {
+	public static Field field(final IRI name, final Shape... shapes) {
 		return new Field(name, shapes.length == 1 ? shapes[0] : and(shapes));
 	}
 
@@ -54,11 +61,11 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object name;
+	private final IRI name;
 	private final Shape shape;
 
 
-	private Field(final Object name, final Shape shape) {
+	private Field(final IRI name, final Shape shape) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -75,7 +82,7 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object name() {
+	public IRI name() {
 		return name;
 	}
 

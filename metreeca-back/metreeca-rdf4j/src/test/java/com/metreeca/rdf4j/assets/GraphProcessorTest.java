@@ -30,10 +30,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
-import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.Shape.convey;
+import static com.metreeca.json.Shape.filter;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.queries.Items.items;

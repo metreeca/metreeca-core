@@ -21,6 +21,9 @@ import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+
 import javax.json.JsonException;
 import javax.json.JsonValue;
 import java.util.List;
@@ -70,7 +73,7 @@ public interface Engine {
 	// */
 	public static Either<MessageException, Query> query(
 			final Request request, final Shape shape,
-			final Parser<String, List<?>> paths, final Parser<JsonValue, Object> values
+			final Parser<String, List<IRI>> paths, final Parser<JsonValue, Value> values
 	) {
 
 		if ( request == null ) {
@@ -102,82 +105,6 @@ public interface Engine {
 		public R parse(final Shape shape, final V v);
 
 	}
-
-	// !!! default path/value parsers (see also RDFFormat)
-
-	///**
-	// * Parses a JSON {@linkplain Request#query(Format, Shape) query} field path.
-	// *
-	// * <p>The default implementation splits paths at dots without further well-formedness checks.</p>
-	// *
-	// * @param base  the base IRI for resolving relative references
-	// * @param shape the base shape for the query
-	// * @param path  the query field path to be parsed; may be empty
-	// *
-	// * @return a list of format-specific path steps parsed from {@code path}
-	// *
-	// * @throws NullPointerException if any argument is null
-	// */
-	//public List<?> path(final String base, final Shape shape, final String path) {
-	//
-	//	if ( base == null ) {
-	//		throw new NullPointerException("null base");
-	//	}
-	//
-	//	if ( shape == null ) {
-	//		throw new NullPointerException("null shape");
-	//	}
-	//
-	//	if ( path == null ) {
-	//		throw new NullPointerException("null path");
-	//	}
-	//
-	//	return asList((Object[])path.split("\\."));
-	//}
-
-	///**
-	// * Parses a JSON {@linkplain Request#query(Format, Shape) query} field value.
-	// *
-	// * <p>The default implementation converts JSON values to their native Java representation, using lists of objects
-	// * for arrays and maps from strings to objects for objects.</p>
-	// *
-	// * @param base  the base IRI for resolving relative references
-	// * @param shape the base shape for the query
-	// * @param value the query value to be parsed
-	// *
-	// * @return a format-specific value parsed from {@code value}
-	// *
-	// * @throws NullPointerException if any argument is null
-	// */
-	//public Object value(final String base, final Shape shape, final JsonValue value) {
-	//
-	//	if ( base == null ) {
-	//		throw new NullPointerException("null base");
-	//	}
-	//
-	//	if ( shape == null ) {
-	//		throw new NullPointerException("null shape");
-	//	}
-	//
-	//	if ( value == null ) {
-	//		throw new NullPointerException("null value");
-	//	}
-	//
-	//	return value.equals(JsonValue.TRUE) ? true
-	//			: value.equals(JsonValue.FALSE) ? false
-	//			: value instanceof JsonNumber && ((JsonNumber)value).isIntegral() ? ((JsonNumber)value).longValue()
-	//			: value instanceof JsonNumber ? ((JsonNumber)value).doubleValue()
-	//			: value instanceof JsonString ? ((JsonString)value).getString()
-	//			: value instanceof JsonArray ?
-	//			((JsonArray)value).stream().map(v -> value(base, shape, v)).collect(toList())
-	//			: value instanceof JsonObject ? ((JsonObject)value).entrySet().stream().collect(toMap(Map.Entry::getKey
-	//			, e -> Optional
-	//					.ofNullable(fields(shape).get(e.getKey()))
-	//					.map(nested -> value(base, nested, e.getValue()))
-	//					.orElseThrow(() -> new JsonException("unknown field {"+e.getKey()+"}"))
-	//	))
-	//			: null;
-	//}
 
 
 	//// Transaction Management ///////////////////////////////////////////////////////////////////////////////////////

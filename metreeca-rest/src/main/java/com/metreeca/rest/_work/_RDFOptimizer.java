@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Values;
 import com.metreeca.json.probes.Optimizer;
@@ -26,7 +26,7 @@ import com.metreeca.json.probes.Optimizer;
  *
  * <p>Recursively removes redundant constructs from a shape.</p>
  */
-final class _RDFOptimizer extends Optimizer {
+public final class _RDFOptimizer extends Optimizer {
 
 	@Override protected boolean derives(final Object upper, final Object lower) {
 		return upper.equals(Values.ValueType)

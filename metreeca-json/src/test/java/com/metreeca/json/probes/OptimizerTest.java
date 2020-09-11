@@ -19,6 +19,7 @@ package com.metreeca.json.probes;
 
 import com.metreeca.json.Shape;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.shapes.All.all;
@@ -38,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class OptimizerTest {
 
-	private static final Shape x=datatype("nil");
+	private static final Shape x=datatype(RDF.NIL);
 	private static final Shape y=minCount(1);
 	private static final Shape z=maxCount(10);
 
@@ -87,29 +88,29 @@ final class OptimizerTest {
 
 	@Test void testOptimizeFields() {
 
-		assertThat(optimize(field("value", and(x))))
+		assertThat(optimize(field(RDF.VALUE, and(x))))
 				.as("optimize nested shape")
-				.isEqualTo(field("value", x));
+				.isEqualTo(field(RDF.VALUE, x));
 
-		assertThat(optimize(field("value", or())))
+		assertThat(optimize(field(RDF.VALUE, or())))
 				.as("remove dead fields")
 				.isEqualTo(and());
 
 
-		assertThat(optimize(and(alias("alias"), field("value", minCount(1)), field("value", maxCount(3)))))
+		assertThat(optimize(and(alias("alias"), field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3)))))
 				.as("merge conjunctive fields")
-				.isEqualTo(and(alias("alias"), field("value", and(minCount(1), maxCount(3)))));
+				.isEqualTo(and(alias("alias"), field(RDF.VALUE, and(minCount(1), maxCount(3)))));
 
-		assertThat(optimize(or(alias("alias"), field("value", minCount(1)), field("value", maxCount(3)))))
+		assertThat(optimize(or(alias("alias"), field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3)))))
 				.as("merge disjunctive fields")
-				.isEqualTo(or(alias("alias"), field("value", or(minCount(1), maxCount(3)))));
+				.isEqualTo(or(alias("alias"), field(RDF.VALUE, or(minCount(1), maxCount(3)))));
 
 	}
 
 
 	@Test void testOptimizeAnd() {
 
-		assertThat(optimize(and(or(), field("type", and())))).as("simplify constants").isEqualTo(or());
+		assertThat(optimize(and(or(), field(RDF.TYPE, and())))).as("simplify constants").isEqualTo(or());
 		assertThat(optimize(and(x))).as("unwrap singletons").isEqualTo(x);
 		assertThat(optimize(and(x, x))).as("unwrap unique values").isEqualTo(x);
 		assertThat(optimize(and(x, x, y))).as("remove duplicates").isEqualTo(and(x, y));
@@ -119,7 +120,7 @@ final class OptimizerTest {
 
 	@Test void testOptimizeOr() {
 
-		assertThat(optimize(or(and(), field("type", and())))).as("simplify constants").isEqualTo(and());
+		assertThat(optimize(or(and(), field(RDF.TYPE, and())))).as("simplify constants").isEqualTo(and());
 		assertThat(optimize(or(x))).as("unwrap singletons").isEqualTo(x);
 		assertThat(optimize(or(x, x))).as("unwrap unique values").isEqualTo(x);
 		assertThat(optimize(or(x, x, y))).as("remove duplicates").isEqualTo(or(x, y));
@@ -132,7 +133,7 @@ final class OptimizerTest {
 		assertThat(optimize(when(and(), x, y))).as("always pass").isEqualTo(x);
 		assertThat(optimize(when(or(), x, y))).as("always fail").isEqualTo(y);
 
-		final Shape x=guard("value", "nil"); // !!! remove when filtering constraints are accepted as tests
+		final Shape x=guard(RDF.VALUE, "nil"); // !!! remove when filtering constraints are accepted as tests
 
 		assertThat(optimize(when(x, y, y))).as("identical options").isEqualTo(y);
 

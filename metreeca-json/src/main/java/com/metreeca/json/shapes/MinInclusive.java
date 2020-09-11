@@ -19,6 +19,8 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import org.eclipse.rdf4j.model.Value;
+
 
 /**
  * Inclusive minimum value constraint.
@@ -28,17 +30,17 @@ import com.metreeca.json.Shape;
  */
 public final class MinInclusive implements Shape {
 
-	public static MinInclusive minInclusive(final Object value) {
+	public static MinInclusive minInclusive(final Value value) {
 		return new MinInclusive(value);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object value;
+	private final Value value;
 
 
-	private MinInclusive(final Object value) {
+	private MinInclusive(final Value value) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
@@ -50,7 +52,7 @@ public final class MinInclusive implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object value() {
+	public Value value() {
 		return value;
 	}
 

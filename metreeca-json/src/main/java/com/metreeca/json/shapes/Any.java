@@ -20,6 +20,8 @@ package com.metreeca.json.shapes;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Inspector;
 
+import org.eclipse.rdf4j.model.Value;
+
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -36,26 +38,26 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Any implements Shape {
 
-	public static Any any(final Object... values) {
+	public static Any any(final Value... values) {
 		return any(asList(values));
 	}
 
-	public static Any any(final Collection<Object> values) {
+	public static Any any(final Collection<Value> values) {
 		return new Any(values);
 	}
 
 
-	public static Optional<Set<Object>> any(final Shape shape) {
+	public static Optional<Set<Value>> any(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AnyProbe()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Set<Object> values;
+	private final Set<Value> values;
 
 
-	private Any(final Collection<Object> values) {
+	private Any(final Collection<Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -71,7 +73,7 @@ public final class Any implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Set<Object> values() {
+	public Set<Value> values() {
 		return unmodifiableSet(values);
 	}
 
@@ -109,20 +111,20 @@ public final class Any implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class AnyProbe extends Inspector<Set<Object>> {
+	private static final class AnyProbe extends Inspector<Set<Value>> {
 
-		@Override public Set<Object> probe(final Any any) {
+		@Override public Set<Value> probe(final Any any) {
 			return any.values();
 		}
 
-		@Override public Set<Object> probe(final Or or) {
+		@Override public Set<Value> probe(final Or or) {
 			return or.shapes().stream()
 					.map(shape -> shape.map(this))
 					.reduce(null, this::union);
 		}
 
 
-		private Set<Object> union(final Set<Object> x, final Set<Object> y) {
+		private Set<Value> union(final Set<Value> x, final Set<Value> y) {
 			return x == null ? y : y == null ? x
 					: unmodifiableSet(Stream.concat(x.stream(), y.stream()).collect(toSet()));
 		}

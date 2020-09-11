@@ -38,11 +38,6 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rest</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-rdf</artifactId>
 		</dependency>
 
@@ -52,7 +47,7 @@
 			<artifactId>rdf4j-repository-api</artifactId>
 		</dependency>
 
-		<dependency>
+		<dependency> <!-- Value comparator -->
 			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-queryalgebra-evaluation</artifactId>
 		</dependency>

@@ -25,6 +25,9 @@ import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine.Parser;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+
 import javax.json.*;
 import java.io.*;
 import java.net.URLDecoder;
@@ -34,6 +37,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.fields;
@@ -48,11 +52,11 @@ final class QueryParser {
 
 	private final Shape shape;
 
-	private final Parser<String, List<?>> paths;
-	private final Parser<JsonValue, Object> values;
+	private final Parser<String, List<IRI>> paths;
+	private final Parser<JsonValue, Value> values;
 
 
-	QueryParser(final Shape shape, final Parser<String, List<?>> paths, final Parser<JsonValue, Object> values) {
+	QueryParser(final Shape shape, final Parser<String, List<IRI>> paths, final Parser<JsonValue, Value> values) {
 		this.shape=shape;
 		this.paths=paths;
 		this.values=values;
@@ -107,8 +111,8 @@ final class QueryParser {
 
 		final Shape filter=filter(json);
 
-		final List<?> terms=terms(json);
-		final List<?> stats=stats(json);
+		final List<IRI> terms=terms(json);
+		final List<IRI> stats=stats(json);
 
 		final List<Order> order=order(json);
 
@@ -226,7 +230,7 @@ final class QueryParser {
 		return filter(steps(path, shape), value, shape, mapper);
 	}
 
-	private Shape filter(final List<?> path,
+	private Shape filter(final List<IRI> path,
 			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper) {
 
 		return path.isEmpty() ? mapper.apply(value, shape)
@@ -234,7 +238,7 @@ final class QueryParser {
 	}
 
 
-	private List<?> terms(final JsonObject query) {
+	private List<IRI> terms(final JsonObject query) {
 		return Optional.ofNullable(query.get("_terms"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -245,7 +249,7 @@ final class QueryParser {
 				.orElse(null);
 	}
 
-	private List<?> stats(final JsonObject query) {
+	private List<IRI> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("_stats"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -257,11 +261,11 @@ final class QueryParser {
 	}
 
 
-	private List<?> path(final String path, final Shape shape) {
+	private List<IRI> path(final String path, final Shape shape) {
 		return path(steps(path, shape), shape);
 	}
 
-	private List<?> path(final List<?> path, final Shape shape) {
+	private List<IRI> path(final List<IRI> path, final Shape shape) {
 
 		if ( !path.isEmpty() ) {
 
@@ -337,9 +341,10 @@ final class QueryParser {
 	}
 
 
-	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Paths
+	// ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<?> steps(final String path, final Shape shape) {
+	private List<IRI> steps(final String path, final Shape shape) {
 		try {
 
 			return paths.parse(shape, path.trim());
@@ -356,11 +361,11 @@ final class QueryParser {
 	}
 
 
-	private Object head(final List<?> path) {
+	private IRI head(final List<IRI> path) {
 		return path.get(0);
 	}
 
-	private List<?> tail(final List<?> path) {
+	private List<IRI> tail(final List<IRI> path) {
 		return path.subList(1, path.size());
 	}
 
@@ -377,30 +382,32 @@ final class QueryParser {
 	}
 
 
-	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Values
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<Object> values(final JsonValue value, final Shape shape) {
+	private List<Value> values(final JsonValue value, final Shape shape) {
 		return (value instanceof JsonArray ? ((JsonArray)value).stream() : Stream.of(value))
 				.map(v -> value(v, shape))
 				.collect(toList());
 	}
 
-	private Object value(final JsonValue value, final Shape shape) {
+	private Value value(final JsonValue value, final Shape shape) {
 		return values.parse(shape, value);
 	}
 
 
-	//// Shapes ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shapes
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Shape datatype(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
-				? Datatype.datatype(((JsonString)value).getString())
+				? Datatype.datatype(iri(((JsonString)value).getString()))
 				: error("datatype value is not a string");
 	}
 
 	private Shape clazz(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
-				? Clazz.clazz(((JsonString)value).getString())
+				? Clazz.clazz(iri(((JsonString)value).getString()))
 				: error("class value is not a string");
 	}
 

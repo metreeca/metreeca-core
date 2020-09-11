@@ -19,6 +19,8 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import org.eclipse.rdf4j.model.Value;
+
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -34,21 +36,21 @@ import static java.util.stream.Collectors.joining;
  */
 public final class In implements Shape {
 
-	public static In in(final Object... values) {
+	public static In in(final Value... values) {
 		return new In(asList(values));
 	}
 
-	public static In in(final Collection<Object> values) {
+	public static In in(final Collection<Value> values) {
 		return new In(values);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Set<Object> values;
+	private final Set<Value> values;
 
 
-	public In(final Collection<Object> values) {
+	public In(final Collection<Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -64,7 +66,7 @@ public final class In implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Set<Object> values() {
+	public Set<Value> values() {
 		return unmodifiableSet(values);
 	}
 

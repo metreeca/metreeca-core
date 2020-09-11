@@ -15,10 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
+import com.metreeca.json.Values;
 import com.metreeca.json.ValuesTest;
 
+import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -31,33 +33,32 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.rdf.formats._Aliases.aliases;
+import static com.metreeca.rest._work._Aliases.aliases;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
-import static org.assertj.core.api.Assertions.assertThat;
 
 final class _AliasesTest {
 
 	@Test void testGuessAliasFromIRI() {
 
-		assertThat(aliases(field(RDF.VALUE)))
+		Assertions.assertThat(aliases(field(RDF.VALUE, and())))
 				.as("direct")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
-		assertThat(aliases(field(inverse(RDF.VALUE))))
+		Assertions.assertThat(aliases(field(inverse(RDF.VALUE), and())))
 				.as("inverse")
 				.isEqualTo(singletonMap(inverse(RDF.VALUE), "valueOf")); // !!! valueOf?
 
 	}
 
 	@Test void testRetrieveUserDefinedAlias() {
-		assertThat(aliases(field(RDF.VALUE, alias("alias"))))
+		Assertions.assertThat(aliases(field(RDF.VALUE, alias("alias"))))
 				.as("user-defined")
 				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 	}
 
 	@Test void testPreferUserDefinedAliases() {
-		assertThat(aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
+		Assertions.assertThat(aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE, and()))))
 				.as("user-defined")
 				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 	}
@@ -65,11 +66,11 @@ final class _AliasesTest {
 
 	@Test void testRetrieveAliasFromNestedShapes() {
 
-		assertThat(aliases(and(field(RDF.VALUE, alias("alias")))))
+		Assertions.assertThat(aliases(and(field(RDF.VALUE, alias("alias")))))
 				.as("group")
 				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 
-		assertThat(aliases(field(RDF.VALUE, and(alias("alias")))))
+		Assertions.assertThat(aliases(field(RDF.VALUE, and(alias("alias")))))
 				.as("conjunction")
 				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 
@@ -79,13 +80,13 @@ final class _AliasesTest {
 
 		// nesting required to prevent and() from collapsing duplicates
 
-		assertThat(aliases(and(field(RDF.VALUE), and(field(RDF.VALUE)))))
+		Assertions.assertThat(aliases(and(field(RDF.VALUE, and()), and(field(RDF.VALUE, and())))))
 				.as("system-guessed")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
 		// nesting required to prevent and() from collapsing duplicates
 
-		assertThat(aliases(and(field(RDF.VALUE, alias("alias")), and(field(RDF.VALUE, alias("alias"))))))
+		Assertions.assertThat(aliases(and(field(RDF.VALUE, alias("alias")), and(field(RDF.VALUE, alias("alias"))))))
 				.as("user-defined")
 				.isEqualTo(singletonMap(RDF.VALUE, "alias"));
 
@@ -94,18 +95,18 @@ final class _AliasesTest {
 
 	@Test void testHandleMultipleAliases() {
 
-		assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("two")))))
+		Assertions.assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("two")))))
 				.as("clashing")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
-		assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
+		Assertions.assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
 				.as("repeated")
 				.isEqualTo(singletonMap(RDF.VALUE, "one"));
 
 	}
 
 	@Test void testMergeAliases() {
-		assertThat(aliases(and(field(RDF.TYPE), field(RDF.VALUE))))
+		Assertions.assertThat(aliases(and(field(RDF.TYPE, and()), field(RDF.VALUE, and()))))
 				.as("merged")
 				.isEqualTo(Stream.of(
 
@@ -117,13 +118,13 @@ final class _AliasesTest {
 
 	@Test void testIgnoreClashingAliases() {
 
-		assertThat(aliases(and(field(RDF.VALUE), field(iri("urn:example:value")))))
+		Assertions.assertThat(aliases(and(field(RDF.VALUE, and()), field(iri("urn:example:value"), and()))))
 				.as("different fields")
 				.isEmpty();
 
 		// fall back to system-guess alias
 
-		assertThat(aliases(and(field(RDF.VALUE, alias("one")), field(RDF.VALUE, alias("two")))))
+		Assertions.assertThat(aliases(and(field(RDF.VALUE, alias("one")), field(RDF.VALUE, alias("two")))))
 				.as("same field")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 
@@ -131,11 +132,11 @@ final class _AliasesTest {
 
 	@Test void testIgnoreReservedAliases() {
 
-		assertThat(aliases(field(iri(ValuesTest.Base, "@id"))))
+		Assertions.assertThat(aliases(field(Values.iri(ValuesTest.Base, "@id"), and())))
 				.as("ignore reserved system-guessed aliases")
 				.isEmpty();
 
-		assertThat(aliases(field(RDF.VALUE, alias("@id"))))
+		Assertions.assertThat(aliases(field(RDF.VALUE, alias("@id"))))
 				.as("ignore reserved user-defined aliases")
 				.isEqualTo(singletonMap(RDF.VALUE, "value"));
 

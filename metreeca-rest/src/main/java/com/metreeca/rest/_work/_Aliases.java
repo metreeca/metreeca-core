@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Traverser;
@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.rdf.formats._RDFCasts._iri;
+import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;

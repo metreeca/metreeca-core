@@ -20,6 +20,8 @@ package com.metreeca.json.probes;
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
@@ -86,7 +88,7 @@ public class Optimizer extends Traverser<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final Object name=field.name();
+		final IRI name=field.name();
 		final Shape shape=field.shape().map(this);
 
 		return shape.equals(or()) ? and() : field(name, shape);
@@ -202,7 +204,7 @@ public class Optimizer extends Traverser<Shape> {
 					final Stream<Shape> nested=entry.getValue().orElseGet(Stream::empty);
 
 					return name instanceof Class ? merger.apply((Class<?>)name, nested)
-							: Stream.of(field(name, packer.apply(nested.collect(toList())).map(this)));
+							: Stream.of(field(((IRI)name), packer.apply(nested.collect(toList())).map(this)));
 
 				})
 

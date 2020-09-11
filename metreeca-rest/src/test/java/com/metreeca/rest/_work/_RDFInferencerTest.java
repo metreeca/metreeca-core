@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
@@ -92,17 +92,17 @@ final class _RDFInferencerTest {
 	@Test void testField() {
 
 		assertImplies("field subjects are resources",
-				field(RDF.VALUE),
+				field(RDF.VALUE, and()),
 				datatype(Values.ResourceType)
 		);
 
 		assertImplies("field subjects are iris if explicitly typed",
-				and(field(RDF.VALUE), datatype(Values.IRIType)),
+				and(field(RDF.VALUE, and()), datatype(Values.IRIType)),
 				datatype(Values.IRIType)
 		);
 
 		assertImplies("reverse field objects are resources",
-				field(inverse(RDF.VALUE)), datatype(Values.ResourceType),
+				field(inverse(RDF.VALUE), and()), datatype(Values.ResourceType),
 				(s, i) -> field(s.name(), and(s.shape(), i))
 		);
 
@@ -112,7 +112,7 @@ final class _RDFInferencerTest {
 		);
 
 		assertImplies("both subject and object of a rdf:type field are resources",
-				field(RDF.TYPE), datatype(Values.ResourceType),
+				field(RDF.TYPE, and()), datatype(Values.ResourceType),
 				(s, i) -> and(field(s.name(), and(s.shape(), i)), i)
 		);
 

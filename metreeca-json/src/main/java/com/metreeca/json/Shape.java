@@ -19,7 +19,8 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
-import java.net.URI;
+import org.eclipse.rdf4j.model.Value;
+
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -143,7 +144,7 @@ public interface Shape {
 	public static Shape multiple() { return and(); }
 
 
-	public static Shape only(final Object... values) { return and(all(values), in(values)); }
+	public static Shape only(final Value... values) { return and(all(values), in(values)); }
 
 
 	//// Parametric Guards ////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,42 +195,6 @@ public interface Shape {
 	public static Shape convey() { return mode(Convey); }
 
 	public static Shape filter() { return mode(Filter); }
-
-
-	//// Relative IRIs ////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a target focus value.
-	 *
-	 * @return a focus value resolving to the target IRI of a shape-driven operation
-	 */
-	public static Focus focus() {
-		return iri -> iri;
-	}
-
-	/**
-	 * Creates a relative focus value.
-	 *
-	 * @param iri the relative IRI of the focus value
-	 *
-	 * @return a focus value resolving {@code iri} against the target IRI of a shape-driven operation; trailing slashes
-	 * in the resolved IRI are removed unless {@code iri} includes one
-	 *
-	 * @throws NullPointerException if {@code iri} is null
-	 */
-	public static Focus focus(final String iri) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		final Focus resolve=path -> URI.create(path).resolve(iri).toString();
-		final Focus convert=path -> path.endsWith("/") ? path.substring(0, path.length()-1) : path;
-
-		return iri.isEmpty() ? path -> path
-				: iri.endsWith("/") ? resolve
-				: resolve.then(convert);
-	}
 
 
 	//// Evaluation ///////////////////////////////////////////////////////////////////////////////////////////////////

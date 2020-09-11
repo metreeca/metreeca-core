@@ -20,6 +20,8 @@ package com.metreeca.json.shapes;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Inspector;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
@@ -41,21 +43,21 @@ public final class Datatype implements Shape {
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */
-	public static Datatype datatype(final Object name) {
+	public static Datatype datatype(final IRI name) {
 		return new Datatype(name);
 	}
 
-	public static Optional<Object> datatype(final Shape shape) {
+	public static Optional<IRI> datatype(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new TypeProbe()));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object id;
+	private final IRI id;
 
 
-	private Datatype(final Object id) {
+	private Datatype(final IRI id) {
 
 		if ( id == null ) {
 			throw new NullPointerException("null id");
@@ -67,7 +69,7 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object id() {
+	public IRI id() {
 		return id;
 	}
 
@@ -102,24 +104,24 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TypeProbe extends Inspector<Object> {
+	private static final class TypeProbe extends Inspector<IRI> {
 
-		@Override public Object probe(final Datatype datatype) {
+		@Override public IRI probe(final Datatype datatype) {
 			return datatype.id();
 		}
 
-		@Override public Object probe(final And and) {
+		@Override public IRI probe(final And and) {
 			return type(and.shapes());
 		}
 
-		@Override public Object probe(final Or or) {
+		@Override public IRI probe(final Or or) {
 			return type(or.shapes());
 		}
 
 
-		private Object type(final Collection<Shape> shapes) {
+		private IRI type(final Collection<Shape> shapes) {
 
-			final Set<Object> names=shapes.stream()
+			final Set<IRI> names=shapes.stream()
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());

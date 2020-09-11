@@ -17,17 +17,19 @@
 
 package com.metreeca.json;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.Shape.focus;
+import static com.metreeca.json.Focus.focus;
+import static com.metreeca.json.Values.iri;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class ShapeTest {
+final class FocusTest {
+
+	private final IRI target=iri("http://example.org/collection/member/nested");
 
 	@Test void testResolveRelativeValues() {
-
-		final String target="http://example.org/collection/member/nested";
 
 		assertThat(focus().resolve(target))
 				.as("target")
@@ -35,28 +37,28 @@ final class ShapeTest {
 
 		assertThat(focus(".").resolve(target))
 				.as("member w/o trailing slash")
-				.isEqualTo("http://example.org/collection/member");
+				.isEqualTo(iri("http://example.org/collection/member"));
 
 		assertThat(focus("./").resolve(target))
 				.as("member w/ trailing slash")
-				.isEqualTo("http://example.org/collection/member/");
+				.isEqualTo(iri("http://example.org/collection/member/"));
 
 		assertThat(focus("..").resolve(target))
 				.as("collection w/o trailing slash")
-				.isEqualTo("http://example.org/collection");
+				.isEqualTo(iri("http://example.org/collection"));
 
 		assertThat(focus("../").resolve(target))
 				.as("collection w/ trailing slash")
-				.isEqualTo("http://example.org/collection/");
+				.isEqualTo(iri("http://example.org/collection/"));
 
 		assertThat(focus("../sibling").resolve(target))
 				.as("sibling")
-				.isEqualTo("http://example.org/collection/sibling");
+				.isEqualTo(iri("http://example.org/collection/sibling"));
 
 
-		assertThat(focus("sibling").resolve("/collection/member"))
+		assertThat(focus("sibling").resolve(target))
 				.as("relative target")
-				.isEqualTo("/collection/sibling");
+				.isEqualTo(iri("http://example.org/collection/member/sibling"));
 
 	}
 

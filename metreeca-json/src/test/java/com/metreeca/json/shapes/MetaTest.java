@@ -17,6 +17,7 @@
 
 package com.metreeca.json.shapes;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.shapes.And.and;
@@ -97,7 +98,7 @@ final class MetaTest {
 
 	@Test void testIgnoreMetadataFromStructuralShapes() {
 
-		assertThat(label(field("value", field("value", label("label")))))
+		assertThat(label(field(RDF.VALUE, field(RDF.VALUE, label("label")))))
 				.as("ignored in fields")
 				.isEmpty();
 

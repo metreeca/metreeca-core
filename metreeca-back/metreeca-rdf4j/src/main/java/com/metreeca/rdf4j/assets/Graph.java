@@ -18,8 +18,8 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Values;
-import com.metreeca.rdf.formats._RDFCasts;
 import com.metreeca.rest.Response;
+import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;

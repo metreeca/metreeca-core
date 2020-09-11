@@ -23,7 +23,7 @@ import com.metreeca.json.probes.Redactor;
 import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf.formats._RDFCasts;
+import com.metreeca.rest._work._RDFCasts;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Shape.focus;
+import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.Values.BNodeType;
 import static com.metreeca.json.Values.IRIType;
@@ -52,7 +52,6 @@ import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.integer;
 import static com.metreeca.json.Values.inverse;
-import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
@@ -60,9 +59,9 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.rdf.formats._RDFCasts._iri;
 import static com.metreeca.rdf4j.assets.Snippets.*;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest._work._RDFCasts._iri;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
@@ -159,13 +158,13 @@ abstract class GraphProcessor {
 		}
 
 
-		private Value value(final Object value) {
+		private Value value(final Value value) {
 			return value instanceof Focus
-					? iri(((Focus)value).resolve(resource.stringValue()))
-					: _RDFCasts._value(value);
+					? ((Focus)value).resolve(resource)
+					: value;
 		}
 
-		private Set<Value> values(final Collection<Object> values) {
+		private Set<Value> values(final Collection<Value> values) {
 			return values.stream()
 					.map(this::value)
 					.collect(toSet());

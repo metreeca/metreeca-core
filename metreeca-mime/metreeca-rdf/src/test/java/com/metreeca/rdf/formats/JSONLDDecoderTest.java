@@ -96,7 +96,7 @@ final class JSONLDDecoderTest {
 
 
 		@Test void testIgnoreNullFields() {
-			assertThat(decode(x, field(RDF.VALUE), createObjectBuilder()
+			assertThat(decode(x, field(RDF.VALUE, and()), createObjectBuilder()
 
 					.addNull("value")
 
@@ -104,7 +104,7 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testHandleArrays() {
-			assertThat(decode(x, field(RDF.VALUE), createObjectBuilder()
+			assertThat(decode(x, field(RDF.VALUE, and()), createObjectBuilder()
 
 					.add("value", createArrayBuilder()
 
@@ -406,8 +406,8 @@ final class JSONLDDecoderTest {
 			assertThat(decode(x,
 
 					and(
-							field(iri("http://example.org/value")),
-							field(iri("http://example.net/value"))
+							field(iri("http://example.org/value"), and()),
+							field(iri("http://example.net/value"), and())
 					),
 
 					createObjectBuilder()
@@ -576,7 +576,7 @@ final class JSONLDDecoderTest {
 							meta("@type", "type"),
 							meta("@language", "language"),
 
-							field(RDF.VALUE)
+							field(RDF.VALUE, and())
 
 					),
 

@@ -17,8 +17,11 @@
 
 package com.metreeca.json;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 
+import static com.metreeca.json.Values.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
@@ -28,20 +31,20 @@ import static java.util.Collections.unmodifiableList;
  */
 public final class Order {
 
-	public static Order increasing(final Object... path) {
+	public static Order increasing(final IRI... path) {
 		return new Order(false, asList(path));
 	}
 
-	public static Order increasing(final List<?> path) {
+	public static Order increasing(final List<IRI> path) {
 		return new Order(false, path);
 	}
 
 
-	public static Order decreasing(final Object... path) {
+	public static Order decreasing(final IRI... path) {
 		return new Order(true, asList(path));
 	}
 
-	public static Order decreasing(final List<?> path) {
+	public static Order decreasing(final List<IRI> path) {
 		return new Order(true, path);
 	}
 
@@ -49,10 +52,10 @@ public final class Order {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final boolean inverse;
-	private final List<Object> path;
+	private final List<IRI> path;
 
 
-	private Order(final boolean inverse, final List<?> path) {
+	private Order(final boolean inverse, final List<IRI> path) {
 
 		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null path or path step");
@@ -69,7 +72,7 @@ public final class Order {
 		return inverse;
 	}
 
-	public List<Object> path() {
+	public List<IRI> path() {
 		return unmodifiableList(path);
 	}
 
@@ -90,13 +93,13 @@ public final class Order {
 
 		final StringBuilder builder=new StringBuilder(20*path.size());
 
-		for (final Object step : path) {
+		for (final IRI step : path) {
 
 			if ( builder.length() > 0 ) {
 				builder.append('/');
 			}
 
-			builder.append(step);
+			builder.append(format(step));
 		}
 
 		return builder.insert(0, inverse ? "-" : "+").toString();

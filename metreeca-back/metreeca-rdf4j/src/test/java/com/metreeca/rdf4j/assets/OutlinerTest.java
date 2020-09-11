@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Shape.focus;
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.shapes.All.all;

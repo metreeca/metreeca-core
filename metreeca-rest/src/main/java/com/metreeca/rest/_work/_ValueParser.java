@@ -15,12 +15,12 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.rio.ParserConfig;
+import org.eclipse.rdf4j.model.Value;
 
 import javax.json.JsonException;
 import javax.json.JsonValue;
@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.rdf.formats._Aliases.aliases;
+import static com.metreeca.rest._work._Aliases.aliases;
 
 public final class _ValueParser {
 
@@ -73,7 +73,7 @@ public final class _ValueParser {
 		return steps;
 	}
 
-	public static Object value(final Shape shape, final JsonValue value) throws JsonException {
+	public static Value value(final Shape shape, final JsonValue value) throws JsonException {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -85,7 +85,9 @@ public final class _ValueParser {
 
 		final IRI focus=iri();
 
-		return new JSONLDDecoder(focus, shape, new ParserConfig()).value(value, shape).getKey();
+		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
+
+		//return new JSONLDDecoder(focus, shape, new ParserConfig()).value(value, shape).getKey();
 	}
 
 }

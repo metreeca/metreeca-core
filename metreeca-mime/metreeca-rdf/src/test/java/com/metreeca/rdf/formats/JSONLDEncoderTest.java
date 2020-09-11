@@ -445,7 +445,7 @@ final class JSONLDEncoderTest {
 		@Test void testOmitEmptyArrays() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE)
+					field(RDF.VALUE, and())
 
 			)).isEqualTo(createObjectBuilder()
 					.add("@id", "/x")
@@ -526,7 +526,7 @@ final class JSONLDEncoderTest {
 							meta("@type", "type"),
 							meta("@language", "language"),
 
-							field(RDF.VALUE)
+							field(RDF.VALUE, and())
 					),
 
 					statement(x, RDF.VALUE, literal("string", "en")),

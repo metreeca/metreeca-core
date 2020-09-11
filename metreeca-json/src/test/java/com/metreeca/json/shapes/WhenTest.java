@@ -17,6 +17,7 @@
 
 package com.metreeca.json.shapes;
 
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.shapes.And.and;
@@ -27,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class WhenTest {
 
 	@Test void testRejectFilteringConstraintsInTests() {
-		assertThatThrownBy(() -> when(and(Clazz.clazz("resource")), and()))
+		assertThatThrownBy(() -> when(and(Clazz.clazz(RDFS.RESOURCE)), and()))
 				.isInstanceOf(UnsupportedOperationException.class);
 	}
 

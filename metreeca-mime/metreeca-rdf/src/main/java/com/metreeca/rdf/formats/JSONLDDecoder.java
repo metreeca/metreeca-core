@@ -20,6 +20,8 @@ package com.metreeca.rdf.formats;
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.json.shapes.Field;
+import com.metreeca.rest._work._Aliases;
+import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;

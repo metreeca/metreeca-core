@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf.formats;
+package com.metreeca.rest._work;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
@@ -23,6 +23,7 @@ import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
@@ -37,7 +38,7 @@ import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
-import static com.metreeca.rdf.formats._RDFCasts._iri;
+import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -47,7 +48,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively expands shapes with additional implied constraints.</p>
  */
-final class _RDFInferencer extends Inspector<Shape> {
+public final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
@@ -78,8 +79,8 @@ final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final In in) {
 
-		final Set<Object> values=in.values();
-		final Set<Object> types=values.stream().map(_RDFCasts::_value).map(Values::type).collect(toSet());
+		final Set<Value> values=in.values();
+		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
 		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();

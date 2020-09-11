@@ -20,6 +20,8 @@ package com.metreeca.json.queries;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 
+import org.eclipse.rdf4j.model.IRI;
+
 import java.util.*;
 
 import static java.lang.String.format;
@@ -29,11 +31,11 @@ import static java.util.Collections.unmodifiableList;
 
 public final class Stats implements Query {
 
-	public static Stats stats(final Shape shape, final Object... path) {
+	public static Stats stats(final Shape shape, final IRI... path) {
 		return new Stats(shape, asList(path));
 	}
 
-	public static Stats stats(final Shape shape, final List<?> path) {
+	public static Stats stats(final Shape shape, final List<IRI> path) {
 		return new Stats(shape, path);
 	}
 
@@ -42,10 +44,10 @@ public final class Stats implements Query {
 
 	private final Shape shape;
 
-	private final List<Object> path;
+	private final List<IRI> path;
 
 
-	private Stats(final Shape shape, final List<?> path) {
+	private Stats(final Shape shape, final List<IRI> path) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -66,7 +68,7 @@ public final class Stats implements Query {
 		return shape;
 	}
 
-	public List<Object> path() {
+	public List<IRI> path() {
 		return unmodifiableList(path);
 	}
 

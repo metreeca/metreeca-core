@@ -125,7 +125,7 @@ public final class ValuesTest {
 			),
 
 			delete().then(
-					field(term("office"))
+					field(term("office"), and())
 			)
 
 	);

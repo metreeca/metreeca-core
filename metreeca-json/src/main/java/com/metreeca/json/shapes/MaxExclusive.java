@@ -19,6 +19,8 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import org.eclipse.rdf4j.model.Value;
+
 
 /**
  * Exclusive maximum value constraint.
@@ -28,17 +30,17 @@ import com.metreeca.json.Shape;
  */
 public final class MaxExclusive implements Shape {
 
-	public static MaxExclusive maxExclusive(final Object value) {
+	public static MaxExclusive maxExclusive(final Value value) {
 		return new MaxExclusive(value);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object value;
+	private final Value value;
 
 
-	private MaxExclusive(final Object value) {
+	private MaxExclusive(final Value value) {
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
@@ -50,7 +52,7 @@ public final class MaxExclusive implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Object value() {
+	public Value value() {
 		return value;
 	}
 

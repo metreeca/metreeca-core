@@ -20,8 +20,8 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
-import com.metreeca.rdf.formats._ValueParser;
 import com.metreeca.rest.Response;
+import com.metreeca.rest._work._ValueParser;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -69,8 +69,7 @@ final class GraphRelator extends GraphProcessor {
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
-				) : query(request, and(all(item), shape), _ValueParser::path,
-						_ValueParser::value).fold(
+				) : query(request, and(all(item), shape), _ValueParser::path, _ValueParser::value).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
