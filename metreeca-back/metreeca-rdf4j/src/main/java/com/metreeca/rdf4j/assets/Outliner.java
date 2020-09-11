@@ -17,6 +17,7 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.json.Focus;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.shapes.*;
@@ -113,8 +114,8 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 
 	private Stream<Value> values(final Stream<Object> objects) {
-		return objects.flatMap(o -> o instanceof Shape.Focus
-				? sources.stream().map(s -> s instanceof IRI ? iri(((Shape.Focus)o).resolve(s.stringValue())) :
+		return objects.flatMap(o -> o instanceof Focus
+				? sources.stream().map(s -> s instanceof IRI ? iri(((Focus)o).resolve(s.stringValue())) :
 				_RDFCasts._value(s))
 				: Stream.of(_RDFCasts._value(o)));
 	}

@@ -17,8 +17,7 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.json.Shape;
-import com.metreeca.json.Trace;
+import com.metreeca.json.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf.Values;
 import com.metreeca.rdf.formats._RDFCasts;
@@ -136,8 +135,8 @@ final class GraphValidator extends GraphProcessor {
 
 
 		private Value value(final Object value) {
-			return value instanceof Shape.Focus
-					? iri(((Shape.Focus)value).resolve(resource.stringValue()))
+			return value instanceof Focus
+					? iri(((Focus)value).resolve(resource.stringValue()))
 					: _RDFCasts._value(value);
 		}
 

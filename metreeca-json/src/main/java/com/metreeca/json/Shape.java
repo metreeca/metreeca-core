@@ -50,8 +50,7 @@ public interface Shape {
 	}
 
 
-	//// Shape Metadata
-	// //////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shape Metadata ///////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Alias annotation.
@@ -113,8 +112,7 @@ public interface Shape {
 	public static final String Index="index";
 
 
-	//// Parametric Axes and Values
-	// //////////////////////////////////////////////////////////////////////////////////
+	//// Parametric Axes and Values ///////////////////////////////////////////////////////////////////////////////////
 
 	public static final String Role="role";
 	public static final String Task="task";
@@ -134,8 +132,7 @@ public interface Shape {
 	public static final String Filter="filter";
 
 
-	//// Shorthands
-	// //////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shorthands ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape required() { return and(minCount(1), maxCount(1)); }
 
@@ -149,8 +146,7 @@ public interface Shape {
 	public static Shape only(final Object... values) { return and(all(values), in(values)); }
 
 
-	//// Parametric Guards
-	// ///////////////////////////////////////////////////////////////////////////////////////////
+	//// Parametric Guards ////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape role(final Object... roles) { return guard(Role, roles); }
 
@@ -200,8 +196,7 @@ public interface Shape {
 	public static Shape filter() { return mode(Filter); }
 
 
-	//// Relative IRIs
-	// ///////////////////////////////////////////////////////////////////////////////////////////////
+	//// Relative IRIs ////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Creates a target focus value.
@@ -237,8 +232,7 @@ public interface Shape {
 	}
 
 
-	//// Evaluation
-	// //////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Evaluation ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Tests if a shape is always matched.
@@ -357,49 +351,6 @@ public interface Shape {
 
 
 	/**
-	 * Shape focus.
-	 *
-	 * <p>Provides a placeholder for a shape value dynamically derived from a target IRI while performing a
-	 * shape-driven operation, for instance serving a linked data resource.</p>
-	 */
-	@FunctionalInterface public static interface Focus {
-
-		/**
-		 * Resolves this focus value.
-		 *
-		 * @param iri the target IRI for a shape-driven operation
-		 *
-		 * @return the IRI obtained by resolving this focus value against {@code iri}
-		 *
-		 * @throws NullPointerException     if {@code iri} is {@code null}
-		 * @throws IllegalArgumentException if {@code iri} is malformed
-		 */
-		public String resolve(final String iri);
-
-
-		/**
-		 * Chains a focus value.
-		 *
-		 * @param focus the focus value to be chained to this focus value
-		 *
-		 * @return a combined focus value sequentially resolving target IRIs against {@code focus} and this focus
-		 * value,
-		 * in order
-		 *
-		 * @throws NullPointerException if {@code focus} is null
-		 */
-		public default Focus then(final Focus focus) {
-
-			if ( focus == null ) {
-				throw new NullPointerException("null focus");
-			}
-
-			return iri -> focus.resolve(resolve(iri));
-		}
-
-	}
-
-	/**
 	 * Shape probe.
 	 *
 	 * <p>Generates a result by probing shapes.</p>
@@ -408,16 +359,14 @@ public interface Shape {
 	 */
 	public static interface Probe<V> {
 
-		//// Annotations
-		// /////////////////////////////////////////////////////////////////////////////////////////////
+		//// Annotations //////////////////////////////////////////////////////////////////////////////////////////////
 
 		public V probe(final Meta meta);
 
 		public V probe(final Guard guard);
 
 
-		//// Term Constraints
-		// ////////////////////////////////////////////////////////////////////////////////////////
+		//// Term Constraints /////////////////////////////////////////////////////////////////////////////////////////
 
 		public V probe(final Datatype datatype);
 
@@ -442,8 +391,7 @@ public interface Shape {
 		public V probe(final Like like);
 
 
-		//// Set Constraints
-		// /////////////////////////////////////////////////////////////////////////////////////////
+		//// Set Constraints //////////////////////////////////////////////////////////////////////////////////////////
 
 		public V probe(final MinCount minCount);
 
@@ -457,14 +405,12 @@ public interface Shape {
 		public V probe(final Any any);
 
 
-		//// Structural Constraints
-		// //////////////////////////////////////////////////////////////////////////////////
+		//// Structural Constraints ///////////////////////////////////////////////////////////////////////////////////
 
 		public V probe(final Field field);
 
 
-		//// Logical Constraints
-		// /////////////////////////////////////////////////////////////////////////////////////
+		//// Logical Constraints //////////////////////////////////////////////////////////////////////////////////////
 
 		public V probe(final And and);
 

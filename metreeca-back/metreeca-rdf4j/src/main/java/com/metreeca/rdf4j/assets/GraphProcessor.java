@@ -161,8 +161,8 @@ abstract class GraphProcessor {
 
 
 		private Value value(final Object value) {
-			return value instanceof Shape.Focus
-					? iri(((Shape.Focus)value).resolve(resource.stringValue()))
+			return value instanceof Focus
+					? iri(((Focus)value).resolve(resource.stringValue()))
 					: _RDFCasts._value(value);
 		}
 
