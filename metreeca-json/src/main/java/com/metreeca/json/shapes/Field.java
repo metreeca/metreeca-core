@@ -54,7 +54,7 @@ public final class Field implements Shape {
 	}
 
 
-	public static Map<Object, Shape> fields(final Shape shape) {
+	public static Map<IRI, Shape> fields(final Shape shape) {
 		return shape == null ? emptyMap() : shape.map(new FieldProbe());
 	}
 
@@ -122,30 +122,30 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class FieldProbe extends Inspector<Map<Object, Shape>> {
+	private static final class FieldProbe extends Inspector<Map<IRI, Shape>> {
 
-		@Override public Map<Object, Shape> probe(final Shape shape) { return emptyMap();}
+		@Override public Map<IRI, Shape> probe(final Shape shape) { return emptyMap();}
 
 
-		@Override public Map<Object, Shape> probe(final Field field) {
+		@Override public Map<IRI, Shape> probe(final Field field) {
 			return singletonMap(field.name(), field.shape());
 		}
 
 
-		@Override public Map<Object, Shape> probe(final And and) {
+		@Override public Map<IRI, Shape> probe(final And and) {
 			return fields(and.shapes().stream());
 		}
 
-		@Override public Map<Object, Shape> probe(final Or or) {
+		@Override public Map<IRI, Shape> probe(final Or or) {
 			return fields(or.shapes().stream());
 		}
 
-		@Override public Map<Object, Shape> probe(final When when) {
+		@Override public Map<IRI, Shape> probe(final When when) {
 			return fields(Stream.of(when.pass(), when.fail()));
 		}
 
 
-		private Map<Object, Shape> fields(final Stream<Shape> stream) {
+		private Map<IRI, Shape> fields(final Stream<Shape> stream) {
 			return stream
 
 					// collect name-to-shape mappings from nested shapes

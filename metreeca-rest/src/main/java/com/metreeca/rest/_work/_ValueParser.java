@@ -53,7 +53,7 @@ public final class _ValueParser {
 		for (final String step : DotPattern.split(path)) {
 			if ( !step.isEmpty() ) {
 
-				final Map<Object, Shape> fields=fields(reference);
+				final Map<IRI, Shape> fields=fields(reference);
 				final Map<IRI, String> aliases=aliases(reference);
 
 				final IRI iri=aliases.entrySet().stream()

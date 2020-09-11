@@ -214,7 +214,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 	private Entry<Value, Stream<Statement>> fields(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final Map<Object, Shape> fields=Field.fields(shape);
+		final Map<IRI, Shape> fields=Field.fields(shape);
 
 		final Map<String, IRI> aliases=_Aliases.aliases(shape)
 				.entrySet()

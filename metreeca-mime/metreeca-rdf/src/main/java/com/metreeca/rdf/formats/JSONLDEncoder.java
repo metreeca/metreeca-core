@@ -171,7 +171,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
 
 		final Object datatype=datatype(shape).orElse(null);
-		final Map<Object, Shape> fields=fields(shape);
+		final Map<IRI, Shape> fields=fields(shape);
 
 		final boolean inlineable=IRIType.equals(datatype)
 				|| BNodeType.equals(datatype)
@@ -207,9 +207,9 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 			final Map<IRI, String> aliases=aliases(shape);
 
-			for (final Map.Entry<Object, Shape> entry : fields.entrySet()) {
+			for (final Map.Entry<IRI, Shape> entry : fields.entrySet()) {
 
-				final IRI predicate=(IRI)entry.getKey();
+				final IRI predicate=entry.getKey();
 				final boolean direct=direct(predicate);
 
 				final Shape nestedShape=entry.getValue();
@@ -217,7 +217,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 				final String alias=Optional
 						.ofNullable(aliases.get(predicate))
 						.filter(aliased.negate()) // keyword aliases override field aliases
-						.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue()); // !!! supported?
+						.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue()); // !!! inverse?
 
 				final Collection<? extends Value> values=direct
 						? objects(model, resource, predicate)
