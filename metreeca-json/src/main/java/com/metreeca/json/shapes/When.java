@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 
 import static com.metreeca.json.shapes.And.and;
 
@@ -127,7 +127,7 @@ public final class When implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class FilteringProbe extends Traverser<Boolean> {
+	private static final class FilteringProbe extends Inspector<Boolean> {
 
 		@Override public Boolean probe(final Shape shape) { return true; }
 

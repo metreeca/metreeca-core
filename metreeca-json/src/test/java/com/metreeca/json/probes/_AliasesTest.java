@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.json.probes;
 
 import com.metreeca.json.Values;
 import com.metreeca.json.ValuesTest;
@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.probes._Aliases.aliases;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.rest._work._Aliases.aliases;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
 

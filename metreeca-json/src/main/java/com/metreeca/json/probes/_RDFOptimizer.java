@@ -15,10 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.json.probes;
 
 import com.metreeca.json.Values;
-import com.metreeca.json.probes.Optimizer;
 
 
 /**

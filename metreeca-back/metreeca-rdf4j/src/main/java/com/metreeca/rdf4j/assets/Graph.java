@@ -17,9 +17,8 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.json.Values;
+import com.metreeca.rest.Message;
 import com.metreeca.rest.Response;
-import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -116,12 +115,14 @@ public final class Graph implements AutoCloseable {
 	 * @param <M>         the type of the target message for the new filter
 	 *
 	 * @return a message filter executing the SPARQL graph {@code query} on target messages with {@linkplain
-	 * #configure(com.metreeca.rest.Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations;
+	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom
+	 * configurations;
 	 * returns the input model extended with the statements returned by {@code query}
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
-	@SafeVarargs public static <M extends com.metreeca.rest.Message<M>> BiFunction<M, Collection<Statement>, Collection<Statement>> query(
+	@SafeVarargs public static <M extends com.metreeca.rest.Message<M>> BiFunction<M, Collection<Statement>,
+			Collection<Statement>> query(
 			final String query, final BiConsumer<M, GraphQuery>... customizers
 	) {
 
@@ -157,7 +158,8 @@ public final class Graph implements AutoCloseable {
 	 * @param <M>         the type of the target message for the new filter
 	 *
 	 * @return a housekeeping task executing the SPARQL {@code update} script on target messages with {@linkplain
-	 * #configure(com.metreeca.rest.Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations;
+	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom
+	 * configurations;
 	 * returns the
 	 * input message without altering it
 	 *
@@ -211,7 +213,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * <tr>
 	 * <td>{@code ?this}</td>
-	 * <td>the {@linkplain com.metreeca.rest.Message#item() focus item} of the filtered message</td>
+	 * <td>the {@linkplain Message#item() focus item} of the filtered message</td>
 	 * </tr>
 	 *
 	 * <tr>
@@ -236,12 +238,13 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * <tr>
 	 * <td>{@code ?item}</td>
-	 * <td>the {@linkplain com.metreeca.rest.Message#item() focus item} of the original request</td>
+	 * <td>the {@linkplain Message#item() focus item} of the original request</td>
 	 * </tr>
 	 *
 	 * <tr>
 	 * <td>{@code ?user}</td>
-	 * <td>the IRI identifying the {@linkplain com.metreeca.rest.Request#user() user} submitting the original request or
+	 * <td>the IRI identifying the {@linkplain com.metreeca.rest.Request#user() user} submitting the original
+	 * request or
 	 * {@linkplain RDF#NIL} if no user is authenticated</td>
 	 * </tr>
 	 *
@@ -249,7 +252,8 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * </table>
 	 *
-	 * <p>If the target message is a {@linkplain com.metreeca.rest.Response response}, the following additional bindings are
+	 * <p>If the target message is a {@linkplain com.metreeca.rest.Response response}, the following additional
+	 * bindings are
 	 * configured:</p>
 	 *
 	 * <table summary="response bindings">
@@ -317,10 +321,11 @@ public final class Graph implements AutoCloseable {
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
 		operation.setBinding("item", iri(request.item()));
-		operation.setBinding("user", request.user().map(_RDFCasts::_iri).orElse(RDF.NIL));
+		operation.setBinding("user",
+				request.user().map(v -> v instanceof Value ? (Value)v : literal(v.toString())).orElse(RDF.NIL));
 
-		if ( message instanceof com.metreeca.rest.Response ) {
-			operation.setBinding("code", literal(Values.integer(((com.metreeca.rest.Response)message).status())));
+		if ( message instanceof Response ) {
+			operation.setBinding("code", literal(integer(((Response)message).status())));
 		}
 
 		for (final BiConsumer<M, O> customizer : customizers) {
@@ -340,7 +345,8 @@ public final class Graph implements AutoCloseable {
 	 * calls are partly serialized in the system {@linkplain Graph#graph() graph} database using an internal lock
 	 * object;
 	 * this strategy may fail for distributed containers or external concurrent updates on the SPARQL endpoint, causing
-	 * requests to fail with an {@link com.metreeca.rest.Response#InternalServerError} or {@link Response#Conflict} status code.</p>
+	 * requests to fail with an {@link com.metreeca.rest.Response#InternalServerError} or {@link Response#Conflict}
+	 * status code.</p>
 	 *
 	 * @return a slug generator returning an auto-incrementing numeric id unique to the focus item of the request
 	 */

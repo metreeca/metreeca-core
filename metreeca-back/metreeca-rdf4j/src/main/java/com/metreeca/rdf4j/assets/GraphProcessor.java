@@ -19,11 +19,10 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.*;
+import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.probes.Redactor;
-import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rest._work._RDFCasts;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
@@ -61,7 +60,6 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rdf4j.assets.Snippets.*;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest._work._RDFCasts._iri;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
@@ -350,7 +348,7 @@ abstract class GraphProcessor {
 		@Override public Collection<Statement> probe(final Stats stats) {
 
 			final Shape shape=stats.shape();
-			final List<IRI> path=stats.path().stream().map(_RDFCasts::_iri).collect(toList());
+			final List<IRI> path=stats.path().stream().map(iri -> iri).collect(toList());
 
 			final Model model=new LinkedHashModel();
 
@@ -446,7 +444,7 @@ abstract class GraphProcessor {
 		@Override public Collection<Statement> probe(final Terms terms) {
 
 			final Shape shape=terms.shape();
-			final List<IRI> path=terms.path().stream().map(_RDFCasts::_iri).collect(toList());
+			final List<IRI> path=terms.path().stream().map(iri -> iri).collect(toList());
 
 			final Model model=new LinkedHashModel();
 
@@ -571,7 +569,7 @@ abstract class GraphProcessor {
 					.filter(order -> !order.path().isEmpty()) // root already retrieved
 					.map(order -> snippet(
 							"optional { {root} {path} {order} }\n", var(root),
-							path(order.path().stream().map(_RDFCasts::_iri).collect(toList())), var(order))
+							path(order.path().stream().map(iri -> iri).collect(toList())), var(order))
 					)
 			);
 		}
@@ -605,7 +603,7 @@ abstract class GraphProcessor {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		private final class TemplateProbe extends Traverser<Stream<Integer>> {
+		private final class TemplateProbe extends Inspector<Stream<Integer>> {
 
 			private final Shape focus;
 
@@ -629,7 +627,7 @@ abstract class GraphProcessor {
 
 			@Override public Stream<Integer> probe(final Field field) {
 
-				final IRI iri=_iri(field.name());
+				final IRI iri=field.name();
 				final Shape shape=field.shape();
 
 				final Integer source=identifier.apply(focus);
@@ -686,7 +684,7 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Datatype datatype) {
 
-				final IRI iri=_iri(datatype.id());
+				final IRI iri=datatype.id();
 
 				return iri.equals(ValueType) ? nothing() : snippet(
 
@@ -704,7 +702,7 @@ abstract class GraphProcessor {
 			}
 
 			@Override public Snippet probe(final Clazz clazz) {
-				return snippet(var(source), " a/rdfs:subClassOf* ", format(_iri(clazz.id())), " .");
+				return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.id()), " .");
 			}
 
 			@Override public Snippet probe(final MinExclusive minExclusive) {
@@ -773,7 +771,7 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=_iri(field.name());
+				final IRI iri=field.name();
 				final Shape shape=field.shape();
 
 				final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
@@ -821,7 +819,7 @@ abstract class GraphProcessor {
 
 		}
 
-		private final class PatternProbe extends Traverser<Snippet> {
+		private final class PatternProbe extends Inspector<Snippet> {
 
 			// !!! (€) remove optionals if term is required or if exists a filter on the same path
 
@@ -840,7 +838,7 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=_iri(field.name());
+				final IRI iri=field.name();
 				final Shape shape=field.shape();
 
 				return snippet( // (€) optional unless universal constraints are present

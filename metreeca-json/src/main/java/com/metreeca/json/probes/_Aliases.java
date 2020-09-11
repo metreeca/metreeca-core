@@ -15,10 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.json.probes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -29,7 +28,6 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
@@ -53,7 +51,7 @@ public final class _Aliases {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private abstract static class AliasesProbe extends Traverser<Map<IRI, String>> {
+	private abstract static class AliasesProbe extends Inspector<Map<IRI, String>> {
 
 		@Override public Map<IRI, String> probe(final Shape shape) { return emptyMap(); }
 
@@ -109,7 +107,7 @@ public final class _Aliases {
 
 		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI name=_iri(field.name());
+			final IRI name=field.name();
 
 			return Optional
 					.of(NamedIRIPattern.matcher(name.stringValue()))
@@ -126,7 +124,7 @@ public final class _Aliases {
 
 		@Override public Map<IRI, String> probe(final Field field) {
 
-			final IRI name=_iri(field.name());
+			final IRI name=field.name();
 			final Shape shape=field.shape();
 
 			return alias(shape)

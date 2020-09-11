@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Either;
 import com.metreeca.rest.MessageException;
@@ -31,7 +31,6 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf.formats.JSONLDFormat.jsonld;
-import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -55,7 +54,7 @@ final class GraphTrimmer extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TrimmerProbe extends Traverser<Stream<Statement>> {
+	private static final class TrimmerProbe extends Inspector<Stream<Statement>> {
 
 		private final Set<Value> focus;
 		private final Collection<Statement> model;
@@ -74,7 +73,7 @@ final class GraphTrimmer extends GraphProcessor {
 
 		@Override public Stream<Statement> probe(final Field field) {
 
-			final IRI iri=_iri(field.name());
+			final IRI iri=field.name();
 			final Shape shape=field.shape();
 
 			final IRI inverse=inverse(iri);

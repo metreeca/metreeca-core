@@ -15,11 +15,10 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest._work;
+package com.metreeca.json.probes;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
-import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -38,7 +37,6 @@ import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
-import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -48,7 +46,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively expands shapes with additional implied constraints.</p>
  */
-public final class _RDFInferencer extends Inspector<Shape> {
+public final class _RDFInferencer extends Traverser<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
@@ -91,7 +89,7 @@ public final class _RDFInferencer extends Inspector<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final IRI iri=_iri(field.name());
+		final IRI iri=field.name();
 		final Shape shape=field.shape().map(this);
 
 		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(ResourceType))), datatype(ResourceType))

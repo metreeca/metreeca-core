@@ -19,9 +19,8 @@ package com.metreeca.rdf.formats;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
+import com.metreeca.json.probes._Aliases;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.rest._work._Aliases;
-import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -173,7 +172,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
 				: (language != null) ? entry(literal(value, language), Stream.empty())
 
-				: entry(literal(value, datatype(shape).map(_RDFCasts::_iri).orElse(XSD.STRING)), Stream.empty());
+				: entry(literal(value, datatype(shape).map(iri -> iri).orElse(XSD.STRING)), Stream.empty());
 	}
 
 	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
@@ -191,7 +190,7 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 	private Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).map(_RDFCasts::_iri).orElse(null);
+		final IRI datatype=datatype(shape).map(iri -> iri).orElse(null);
 
 		final Literal value
 

@@ -19,9 +19,8 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Focus;
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -32,6 +31,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -39,7 +39,7 @@ import static java.util.Arrays.asList;
  *
  * <p>Recursively extracts implied RDF statements from a shape.</p>
  */
-final class Outliner extends Inspector<Stream<Statement>> {
+final class Outliner extends Traverser<Stream<Statement>> {
 
 	private final Collection<Value> sources;
 
@@ -70,17 +70,17 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return sources.stream()
 				.filter(Resource.class::isInstance)
-				.map(source -> statement((Resource)source, RDF.TYPE, _RDFCasts._iri(clazz.id())));
+				.map(source -> statement((Resource)source, RDF.TYPE, clazz.id()));
 	}
 
 	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=_RDFCasts._iri(field.name());
+		final IRI iri=field.name();
 		final Shape shape=field.shape();
 
 		return Stream.concat(
 
-				all(shape).map(targets -> targets.stream().flatMap(target -> sources.stream().flatMap(source -> direct(iri)
+				all(shape).map(targets -> values(targets.stream()).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
 						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) :
 						Stream.empty()
@@ -104,7 +104,7 @@ final class Outliner extends Inspector<Stream<Statement>> {
 
 				all(and).map(values -> and.shapes().stream()
 
-						.flatMap(shape -> shape.map(new Outliner(values)))
+						.flatMap(shape -> shape.map(new Outliner(values(values.stream()).collect(toSet()))))
 
 				).orElseGet(Stream::empty)
 
@@ -112,10 +112,10 @@ final class Outliner extends Inspector<Stream<Statement>> {
 	}
 
 
-	private Stream<Value> values(final Stream<Value> objects) {
-		return objects.flatMap(o -> o instanceof Focus
-				? sources.stream().filter(IRI.class::isInstance).map(s -> ((Focus)o).resolve((IRI)s))
-				: Stream.of(_RDFCasts._value(o))
+	private Stream<Value> values(final Stream<Value> values) {
+		return values.flatMap(value -> value instanceof Focus
+				? sources.stream().filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
+				: Stream.of(value)
 		);
 	}
 

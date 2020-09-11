@@ -20,7 +20,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Either;
-import com.metreeca.rest._work._RDFCasts;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -42,7 +41,6 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnprocessableEntity;
-import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
@@ -136,7 +134,7 @@ final class GraphValidator extends GraphProcessor {
 		private Value value(final Value value) {
 			return value instanceof Focus
 					? ((Focus)value).resolve(resource)
-					: _RDFCasts._value(value);
+					: value;
 		}
 
 		private Set<Value> values(final Collection<Value> values) {
@@ -166,7 +164,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final Datatype datatype) {
 
-			final IRI iri=_iri(datatype.id());
+			final IRI iri=datatype.id();
 
 			return trace(focus.stream()
 					.filter(negate(value -> is(value, iri)))
@@ -187,7 +185,7 @@ final class GraphValidator extends GraphProcessor {
 								+"\n"
 								+"select distinct ?class { ?class rdfs:subClassOf* {root} }",
 
-						format(_iri(clazz.id()))
+						format(clazz.id())
 
 				)).evaluate())
 
@@ -381,7 +379,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final Field field) {
 
-			final IRI iri=_iri(field.name());
+			final IRI iri=field.name();
 			final Shape shape=field.shape();
 
 			return focus.stream().map(value -> { // for each focus value

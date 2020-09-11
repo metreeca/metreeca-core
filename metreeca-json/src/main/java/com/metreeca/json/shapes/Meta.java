@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -177,7 +177,7 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MetaProbe extends Traverser<Object> {
+	private static final class MetaProbe extends Inspector<Object> {
 
 		private final Object label;
 

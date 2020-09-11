@@ -40,60 +40,58 @@ import static java.util.stream.Collectors.toSet;
 
 final class OutlinerTest {
 
+	private Collection<Statement> outline(final Shape shape, final Value... sources) {
+		return shape.map(new Outliner(sources)).collect(toSet());
+	}
+
+
 	@Test void testOutlineFields() {
 
 		assertThat(outline(field(RDF.VALUE, all(RDF.REST)), RDF.FIRST))
 				.as("direct field")
-				.isEqualTo(decode("rdf:first rdf:value rdf:rest."));
+				.isIsomorphicTo(decode("rdf:first rdf:value rdf:rest."));
 
 		assertThat(outline(field(inverse(RDF.VALUE), all(RDF.REST)), RDF.FIRST))
 				.as("inverse field")
-				.isEqualTo(decode("rdf:rest rdf:value rdf:first."));
+				.isIsomorphicTo(decode("rdf:rest rdf:value rdf:first."));
 
 	}
 
 	@Test void testOutlineClasses() {
 		assertThat(outline(and(all(RDF.FIRST), clazz(RDFS.RESOURCE))))
 				.as("classes")
-				.isEqualTo(decode("rdf:first a rdfs:Resource."));
+				.isIsomorphicTo(decode("rdf:first a rdfs:Resource."));
 	}
 
 	@Test void testOutlineSubjectExistentials() {
 		assertThat(outline(and(all(RDF.FIRST, RDF.REST), field(RDF.VALUE, all(RDF.NIL)))))
 				.as("subject existentials")
-				.isEqualTo(decode("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil."));
+				.isIsomorphicTo(decode("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil."));
 	}
 
 	@Test void testOutlineObjectExistentials() {
 		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE, all(RDF.FIRST, RDF.REST)))))
 				.as("object existentials")
-				.isEqualTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
+				.isIsomorphicTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
 	}
 
 	@Test void testOutlineConjunctions() {
 		assertThat(outline(and(all(RDF.NIL), and(field(RDF.VALUE, all(RDF.FIRST))))))
 				.as("value union")
-				.isEqualTo(decode("rdf:nil rdf:value rdf:first."));
+				.isIsomorphicTo(decode("rdf:nil rdf:value rdf:first."));
 	}
 
 	@Test void testOutlineNestedConjunctions() {
 		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE, and(all(RDF.FIRST), all(RDF.REST))))))
 				.as("value union")
-				.isEqualTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
+				.isIsomorphicTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
 	}
 
 
 	@Test void testResolveReferencesToTarget() {
 		assertThat(outline(field(RDF.VALUE, all(focus())), RDF.FIRST))
 				.as("value union")
-				.isEqualTo(decode("rdf:first rdf:value rdf:first."));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Collection<Statement> outline(final Shape shape, final Value... sources) {
-		return shape.map(new Outliner(sources)).collect(toSet());
+				.isIsomorphicTo(decode("rdf:first rdf:value rdf:first."));
 	}
 
 }

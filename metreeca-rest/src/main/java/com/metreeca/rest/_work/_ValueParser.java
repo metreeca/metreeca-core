@@ -28,8 +28,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.probes._Aliases.aliases;
 import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.rest._work._Aliases.aliases;
 
 public final class _ValueParser {
 

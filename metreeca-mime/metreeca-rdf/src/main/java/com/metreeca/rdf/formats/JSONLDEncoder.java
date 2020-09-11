@@ -35,11 +35,10 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.probes._Aliases.aliases;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.rest._work._Aliases.aliases;
-import static com.metreeca.rest._work._RDFCasts._iri;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
@@ -210,7 +209,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 			for (final Map.Entry<Object, Shape> entry : fields.entrySet()) {
 
-				final IRI predicate=_iri(entry.getKey());
+				final IRI predicate=(IRI)entry.getKey();
 				final boolean direct=direct(predicate);
 
 				final Shape nestedShape=entry.getValue();

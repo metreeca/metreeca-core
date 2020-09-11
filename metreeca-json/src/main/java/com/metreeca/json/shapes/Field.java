@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -122,7 +122,7 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class FieldProbe extends Traverser<Map<Object, Shape>> {
+	private static final class FieldProbe extends Inspector<Map<Object, Shape>> {
 
 		@Override public Map<Object, Shape> probe(final Shape shape) { return emptyMap();}
 
