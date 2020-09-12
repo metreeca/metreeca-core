@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -94,7 +93,7 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T map(final Probe<T> probe) {
+	@Override public <V> V map(final Probe<V> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
@@ -123,7 +122,7 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class FieldProbe extends Traverser<Map<IRI, Shape>> {
+	private static final class FieldProbe extends Probe<Map<IRI, Shape>> {
 
 		@Override public Map<IRI, Shape> probe(final Shape shape) { return emptyMap();}
 

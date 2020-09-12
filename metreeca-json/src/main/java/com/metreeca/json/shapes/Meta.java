@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -146,7 +145,7 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T map(final Probe<T> probe) {
+	@Override public <V> V map(final Probe<V> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
@@ -175,7 +174,7 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MetaProbe extends Traverser<Object> {
+	private static final class MetaProbe extends Probe<Object> {
 
 		private final Object label;
 

@@ -20,7 +20,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.*;
 import com.metreeca.json.probes.Redactor;
-import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.assets.Logger;
@@ -143,7 +142,7 @@ abstract class GraphProcessor {
 	}
 
 
-	private final class FetcherProbe implements Query.Probe<Collection<Statement>> { // !!! refactor
+	private final class FetcherProbe extends Query.Probe<Collection<Statement>> { // !!! refactor
 
 		private final RepositoryConnection connection;
 
@@ -603,7 +602,7 @@ abstract class GraphProcessor {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		private final class TemplateProbe extends Traverser<Stream<Integer>> {
+		private final class TemplateProbe extends Shape.Probe<Stream<Integer>> {
 
 			private final Shape focus;
 
@@ -663,7 +662,7 @@ abstract class GraphProcessor {
 
 		}
 
-		private final class FilterProbe implements Shape.Probe<Snippet> {
+		private final class FilterProbe extends Shape.Probe<Snippet> {
 
 			private final Shape source;
 
@@ -819,7 +818,7 @@ abstract class GraphProcessor {
 
 		}
 
-		private final class PatternProbe extends Traverser<Snippet> {
+		private final class PatternProbe extends Shape.Probe<Snippet> {
 
 			// !!! (€) remove optionals if term is required or if exists a filter on the same path
 

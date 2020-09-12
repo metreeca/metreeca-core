@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -51,7 +50,7 @@ public final class _Aliases {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private abstract static class AliasesProbe extends Traverser<Map<IRI, String>> {
+	private abstract static class AliasesProbe extends Shape.Probe<Map<IRI, String>> {
 
 		@Override public Map<IRI, String> probe(final Shape shape) { return emptyMap(); }
 

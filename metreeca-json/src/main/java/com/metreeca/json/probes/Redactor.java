@@ -36,7 +36,7 @@ import static java.util.Collections.disjoint;
  *
  * <p>Recursively evaluates {@linkplain Guard parametric} constraints in a shape.</p>
  */
-public final class Redactor extends Inspector<Shape> {
+public final class Redactor extends Shape.Probe<Shape> {
 
 	private final String axis;
 	private final Predicate<Set<Object>> condition;

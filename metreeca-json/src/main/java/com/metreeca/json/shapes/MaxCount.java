@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
 
 import java.util.Optional;
 import java.util.function.BinaryOperator;
@@ -63,7 +62,7 @@ public final class MaxCount implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <T> T map(final Probe<T> probe) {
+	@Override public <V> V map(final Probe<V> probe) {
 
 		if ( probe == null ) {
 			throw new NullPointerException("null probe");
@@ -91,7 +90,7 @@ public final class MaxCount implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MaxCountProbe extends Traverser<Integer> {
+	private static final class MaxCountProbe extends Probe<Integer> {
 
 		// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
 

@@ -18,7 +18,8 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.*;
+import com.metreeca.json.probes.Inferencer;
+import com.metreeca.json.probes.Redactor;
 import com.metreeca.json.shapes.*;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -47,7 +48,7 @@ abstract class JSONLDCodec {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class KeywordsProbe extends Traverser<Stream<Map.Entry<String, String>>> {
+	private static final class KeywordsProbe extends Shape.Probe<Stream<Map.Entry<String, String>>> {
 
 		@Override public Stream<Map.Entry<String, String>> probe(final Shape shape) {
 			return Stream.empty();

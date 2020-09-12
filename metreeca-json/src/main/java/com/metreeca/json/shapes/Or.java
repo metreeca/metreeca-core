@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -39,7 +38,7 @@ import static java.util.stream.Collectors.*;
  */
 public final class Or implements Shape {
 
-	private static final Or empty=new Or(Collections.emptySet());
+	private static final Shape empty=new Or(Collections.emptySet());
 
 
 	public static Shape or() {
@@ -59,7 +58,7 @@ public final class Or implements Shape {
 
 				// flatten nested shaped shapes of the same type
 
-				.flatMap(new Inspector<Stream<Shape>>() {
+				.flatMap(new Shape.Probe<Stream<Shape>>() {
 
 					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 

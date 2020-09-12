@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -102,7 +101,7 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TypeProbe extends Inspector<IRI> {
+	private static final class TypeProbe extends Probe<IRI> {
 
 		@Override public IRI probe(final Datatype datatype) {
 			return datatype.id();

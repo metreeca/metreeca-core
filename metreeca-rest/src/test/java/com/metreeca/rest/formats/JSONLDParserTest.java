@@ -541,7 +541,7 @@ final class JSONLDParserTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private abstract static class TestQueryProbe implements Query.Probe<Boolean> {
+	private abstract static class TestQueryProbe extends Query.Probe<Boolean> {
 
 		@Override public Boolean probe(final Items items) { return false; }
 

@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -110,7 +109,7 @@ public final class All implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class AllProbe extends Inspector<Set<Value>> {
+	private static final class AllProbe extends Probe<Set<Value>> {
 
 		@Override public Set<Value> probe(final All all) {
 			return all.values();

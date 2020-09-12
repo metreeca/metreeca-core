@@ -103,7 +103,7 @@ final class GraphValidator extends GraphProcessor {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class ValidatorProbe implements Shape.Probe<Trace> {
+	private final class ValidatorProbe extends Shape.Probe<Trace> {
 
 		private final RepositoryConnection connection;
 

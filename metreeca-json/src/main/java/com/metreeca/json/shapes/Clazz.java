@@ -18,7 +18,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -93,7 +92,7 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ClazzProbe extends Inspector<IRI> {
+	private static final class ClazzProbe extends Probe<IRI> {
 
 		@Override public IRI probe(final Clazz clazz) {
 			return clazz.id();
