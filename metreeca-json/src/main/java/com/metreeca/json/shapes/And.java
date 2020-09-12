@@ -90,7 +90,7 @@ public final class And implements Shape {
 	}
 
 	private static Stream<? extends Shape> merge(final Class<? extends Shape> clazz, final Stream<Shape> shapes) {
-		return clazz.equals(Meta.class) ? metas(shapes.map(Meta.class::cast))
+		return clazz.equals(Meta.class) ? Meta.metas(shapes.map(Meta.class::cast))
 				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))
 				: clazz.equals(MaxCount.class) ? maxCounts(shapes.map(MaxCount.class::cast))
@@ -98,24 +98,6 @@ public final class And implements Shape {
 				: shapes;
 	}
 
-
-	private static Stream<? extends Shape> metas(final Stream<Meta> metas) {
-
-		final Collection<Object> aliases=new HashSet<>();
-
-		return metas.filter(meta -> {
-
-			if ( meta.label().equals(Shape.Alias) && aliases.add(meta.value()) && aliases.size() > 1 ) {
-				throw new IllegalArgumentException(String.format("clashing aliases <%s>", aliases.stream()
-						.map(Object::toString)
-						.collect(joining(" / "))
-				));
-			}
-
-			return true;
-
-		});
-	}
 
 	private static Stream<? extends Shape> datatypes(final Stream<Datatype> datatypes) {
 

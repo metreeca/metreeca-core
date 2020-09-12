@@ -52,7 +52,7 @@ public final class Inferencer extends Shape.Probe<Shape> {
 
 
 	@Override public Shape probe(final Meta meta) {
-		return meta.label().equals(Shape.Hint) ? and(meta, datatype(ResourceType)) : meta;
+		return meta.label().equals("hint") ? and(meta, datatype(ResourceType)) : meta;
 	}
 
 

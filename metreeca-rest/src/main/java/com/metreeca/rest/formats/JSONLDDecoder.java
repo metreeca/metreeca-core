@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.json.shapes._Aliases.aliases;
+import static com.metreeca.json.shapes.Meta.aliases;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;

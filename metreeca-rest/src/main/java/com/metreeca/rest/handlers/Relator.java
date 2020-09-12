@@ -33,7 +33,7 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * <ul>
  *
  * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Shape#Relate} task and {@linkplain Shape#Holder}/{@linkplain Shape#Digest} areas, when operating on
+ * {@linkplain Shape#Relate} task and {@linkplain Shape#Target}/{@linkplain Shape#Digest} areas, when operating on
  * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
  * resources;</li>
  *
@@ -66,7 +66,7 @@ public final class Relator extends Actor {
 				.with(connector())
 				.with(trimmer())
 				.with(wrapper(Request::collection,
-						throttler(Shape.Relate, Shape.Holder, Shape.Digest),
+						throttler(Shape.Relate, Shape.Target, Shape.Digest),
 						throttler(Shape.Relate, Shape.Detail)
 				))
 

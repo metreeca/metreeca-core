@@ -32,7 +32,7 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * <ul>
  *
  * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Shape#Delete} task and the {@linkplain Shape#Holder} area, when operating on
+ * {@linkplain Shape#Delete} task and the {@linkplain Shape#Target} area, when operating on
  * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
  * resources;</li>
  *
@@ -61,7 +61,7 @@ public final class Deleter extends Actor {
 
 				.with(connector())
 				.with(wrapper(Request::collection,
-						throttler(Shape.Delete, Shape.Holder),
+						throttler(Shape.Delete, Shape.Target),
 						throttler(Shape.Delete, Shape.Detail)
 				))
 

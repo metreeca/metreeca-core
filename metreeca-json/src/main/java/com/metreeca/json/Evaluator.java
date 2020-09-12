@@ -33,10 +33,6 @@ final class Evaluator extends Shape.Probe<Boolean> {
 	}
 
 
-	@Override public Boolean probe(final Field field) {
-		return null;
-	}
-
 	@Override public Boolean probe(final And and) {
 		return and.shapes().stream()
 				.filter(shape -> !(shape instanceof Meta))

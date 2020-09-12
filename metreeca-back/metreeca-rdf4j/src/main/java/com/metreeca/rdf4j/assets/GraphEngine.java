@@ -200,7 +200,7 @@ public final class GraphEngine implements Engine {
 	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
 	 *
 	 * <li>the response {@linkplain RDFFormat RDF} body includes the RDF description of the container as matched by the
-	 * {@linkplain Shape#Holder} area of request shape, linked using the {@code ldp:contains} property to the RDF
+	 * {@linkplain Shape#Target} area of request shape, linked using the {@code ldp:contains} property to the RDF
 	 * description of the resources matched by the {@linkplain Shape#Filter filtering} constrains of the
 	 * {@linkplain Shape#Digest} area of the request shape;</li>
 	 *

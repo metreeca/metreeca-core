@@ -75,7 +75,7 @@ abstract class GraphProcessor {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Shape holder(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Area, Shape.Holder));
+		return shape.map(new Redactor(Shape.Area, Shape.Target));
 	}
 
 	Shape digest(final Shape shape) { // !!! caching

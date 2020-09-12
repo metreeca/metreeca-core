@@ -37,7 +37,7 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes._Aliases.aliases;
+import static com.metreeca.json.shapes.Meta.aliases;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
 import static java.util.Collections.emptyList;

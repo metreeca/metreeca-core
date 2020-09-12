@@ -51,69 +51,7 @@ public interface Shape {
 	}
 
 
-	//// Shape Metadata ///////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Alias annotation.
-	 *
-	 * <p>The associated string value provides an alternate property name for reporting values for
-	 * the enclosing shape (e.g. in the context of JSON-based serialization results).</p>
-	 */
-	public static final String Alias="alias";
-
-	/**
-	 * Label annotation.
-	 *
-	 * <p>The associated string value provides a human-readable textual label for the enclosing shape.</p>
-	 */
-	public static final String Label="label";
-
-	/**
-	 * Notes annotation.
-	 *
-	 * <p>The associated string value provides a human-readable textual description for the enclosing shape.</p>
-	 */
-	public static final String Notes="notes";
-
-	/**
-	 * Placeholder annotation.
-	 *
-	 * <p>The associated string value provides a human-readable textual placeholder for the expected values
-	 * of the enclosing shape.</p>
-	 */
-	public static final String Placeholder="placeholder";
-
-	/**
-	 * Default value annotation.
-	 *
-	 * <p>The associated object value provides the default for the expected values of enclosing shape.</p>
-	 */
-	public static final String Default="default";
-
-	/**
-	 * Hint annotation.
-	 *
-	 * <p>The associated string value identifies a resource hinting at possible values for the enclosing shape.</p>
-	 */
-	public static final String Hint="hint";
-
-	/**
-	 * Group annotation.
-	 *
-	 * <p>Identifies the enclosing shape as a group for presentation purposes; the associated value provides a
-	 * client-dependent suggested representation mode (list, form, tabbed panes, …).</p>
-	 */
-	public static final String Group="group"; // !!! define standard representations hints
-
-	/**
-	 * Indexing annotation.
-	 *
-	 * <p>The associated boolean value provides a storage indexing hint for the enclosing shape.</p>
-	 */
-	public static final String Index="index";
-
-
-	//// Parametric Axes and Values ///////////////////////////////////////////////////////////////////////////////////
+	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////
 
 	public static final String Role="role";
 	public static final String Task="task";
@@ -125,7 +63,7 @@ public interface Shape {
 	public static final String Update="update";
 	public static final String Delete="delete";
 
-	public static final String Holder="holder";
+	public static final String Target="target";
 	public static final String Digest="digest";
 	public static final String Detail="detail";
 
@@ -133,7 +71,7 @@ public interface Shape {
 	public static final String Filter="filter";
 
 
-	//// Shorthands ///////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape required() { return and(minCount(1), maxCount(1)); }
 
@@ -147,7 +85,7 @@ public interface Shape {
 	public static Shape only(final Value... values) { return and(all(values), in(values)); }
 
 
-	//// Parametric Guards ////////////////////////////////////////////////////////////////////////////////////////////
+	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape role(final Object... roles) { return guard(Role, roles); }
 
@@ -183,7 +121,7 @@ public interface Shape {
 	public static Shape client() { return task(Create, Relate, Delete); }
 
 
-	public static Shape holder() { return area(Holder); }
+	public static Shape target() { return area(Target); }
 
 	public static Shape member() { return area(Digest, Detail); }
 
@@ -215,7 +153,7 @@ public interface Shape {
 			throw new NullPointerException("null shape");
 		}
 
-		return Boolean.TRUE.equals(shape.map(Evaluator.Instance));
+		return shape.equals(and());
 	}
 
 	/**

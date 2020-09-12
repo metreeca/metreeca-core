@@ -26,6 +26,7 @@ import static com.metreeca.json.Values.derives;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
+import static com.metreeca.json.shapes.Meta.metas;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.*;
@@ -99,24 +100,6 @@ public final class Or implements Shape {
 				: shapes;
 	}
 
-
-	private static Stream<? extends Shape> metas(final Stream<Meta> metas) {
-
-		final Collection<Object> aliases=new HashSet<>();
-
-		return metas.filter(meta -> {
-
-			if ( meta.label().equals(Shape.Alias) && aliases.add(meta.value()) && aliases.size() > 1 ) {
-				throw new IllegalArgumentException(String.format("clashing aliases <%s>", aliases.stream()
-						.map(Object::toString)
-						.collect(joining(" / "))
-				));
-			}
-
-			return true;
-
-		});
-	}
 
 	private static Stream<? extends Shape> datatypes(final Stream<Datatype> datatypes) {
 
