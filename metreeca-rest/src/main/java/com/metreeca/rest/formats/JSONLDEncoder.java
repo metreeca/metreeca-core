@@ -24,8 +24,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import javax.json.*;
-import javax.json.stream.JsonGenerator;
-import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -38,18 +36,11 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.aliases;
-import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
 
 
 final class JSONLDEncoder extends JSONLDCodec {
-
-	private static final JsonWriterFactory JsonWriters=Json
-			.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true));
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final IRI focus;
 	private final Shape shape;
@@ -97,25 +88,6 @@ final class JSONLDEncoder extends JSONLDCodec {
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	<W extends Writer> W encode(final W writer, final Collection<Statement> model) {
-
-		if ( writer == null ) {
-			throw new NullPointerException("null writer");
-		}
-
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		try ( final JsonWriter jsonWriter=JsonWriters.createWriter(writer) ) {
-
-			jsonWriter.writeObject(encode(model));
-
-			return writer;
-
-		}
-	}
 
 	JsonObject encode(final Collection<Statement> model) {
 

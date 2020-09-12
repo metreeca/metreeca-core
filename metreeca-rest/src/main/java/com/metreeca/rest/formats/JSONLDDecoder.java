@@ -26,7 +26,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import javax.json.*;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -85,18 +84,6 @@ final class JSONLDDecoder extends JSONLDCodec {
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Collection<Statement> decode(final Reader reader) throws JsonException {
-
-		if ( reader == null ) {
-			throw new NullPointerException("null reader");
-		}
-
-		try ( final JsonReader jsonReader=Json.createReader(reader) ) {
-			return decode(jsonReader.readObject());
-		}
-
-	}
 
 	Collection<Statement> decode(final JsonObject json) throws JsonException {
 

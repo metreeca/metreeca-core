@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.formats.InputFormat.input;
 import static java.util.Collections.singletonMap;
 
 
@@ -137,7 +138,7 @@ public final class JSONFormat extends Format<JsonObject> {
 	@Override public Either<MessageException, JsonObject> decode(final Message<?> message) {
 		return message.header("Content-Type").filter(MIMEPattern.asPredicate().or(String::isEmpty))
 
-				.map(type -> message.body(InputFormat.input()).flatMap(source -> {
+				.map(type -> message.body(input()).flatMap(source -> {
 
 					try (
 							final InputStream input=source.get();

@@ -25,7 +25,6 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
 import javax.json.JsonException;
-import java.io.*;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -35,8 +34,7 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.JSONFormat.json;
 
 /**
  * Model-driven JSON-LD message format.
@@ -120,26 +118,20 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
 		return message.header("Content-Type").filter(JSONFormat.MIMEPattern.asPredicate().or(String::isEmpty))
 
-				.map(type -> message.body(input()).flatMap(source -> {
+				.map(type -> message.body(json()).flatMap(json -> { // parse possibly validated json
 
-					try (
-							final InputStream input=source.get();
-							final Reader reader=new InputStreamReader(input, message.charset())
-					) {
+					try {
 
 						return Right(new JSONLDDecoder(
 
-								iri(message.item()), message.attribute(shape())
+								iri(message.item()),
+								message.attribute(shape())
 
-						).decode(reader));
+						).decode(json));
 
-					} catch ( final UnsupportedEncodingException|JsonException e ) {
+					} catch ( final JsonException e ) {
 
 						return Left(status(BadRequest, e));
-
-					} catch ( final IOException e ) {
-
-						throw new UncheckedIOException(e);
 
 					}
 
@@ -161,22 +153,12 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 				.header("~Content-Type", MIME)
 
-				.body(output(), output -> {
-					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
+				.body(json(), new JSONLDEncoder( // make json available for trimming
 
+						iri(message.item()),
+						message.attribute(shape())
 
-						new JSONLDEncoder(
-
-								iri(message.item()), message.attribute(shape())
-
-						).encode(writer, value);
-
-					} catch ( final IOException e ) {
-
-						throw new UncheckedIOException(e);
-
-					}
-				});
+				).encode(value));
 	}
 
 }
