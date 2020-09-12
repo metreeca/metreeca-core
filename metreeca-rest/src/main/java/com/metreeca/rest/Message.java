@@ -506,7 +506,7 @@ public abstract class Message<T extends Message<T>> {
 
 		final V cached=(V)bodies.get(format);
 
-		return cached != null ? Either.Right(cached) : format.decode(self()).map(value -> {
+		return cached != null ? Either.Right(cached) : format.decode(this).map(value -> {
 
 			bodies.put(format, value);
 

@@ -29,11 +29,14 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.function.Supplier;
 
+import static com.metreeca.json.Shape.optional;
+import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.Context.asset;
 
 
 /**
@@ -58,26 +61,26 @@ public final class GraphEngine implements Engine {
 
 
 	private static final Shape TermShape=and(
-			field(RDFS.LABEL, and(Shape.optional(), datatype(XSD.STRING)))
+			field(RDFS.LABEL, and(optional(), datatype(XSD.STRING)))
 	);
 
 	static final Shape TermsShape=and(
 			field(terms, and(Shape.multiple(),
-					field(value, and(Shape.required(), TermShape)),
-					field(count, and(Shape.required(), datatype(XSD.INTEGER)))
+					field(value, and(required(), TermShape)),
+					field(count, and(required(), datatype(XSD.INTEGER)))
 			))
 	);
 
 	static final Shape StatsShape=and(
 
-			field(count, and(Shape.required(), datatype(XSD.INTEGER))),
-			field(min, and(Shape.optional(), TermShape)),
-			field(max, and(Shape.optional(), TermShape)),
+			field(count, and(required(), datatype(XSD.INTEGER))),
+			field(min, and(optional(), TermShape)),
+			field(max, and(optional(), TermShape)),
 
 			field(stats, and(Shape.multiple(),
-					field(count, and(Shape.required(), datatype(XSD.INTEGER))),
-					field(min, and(Shape.required(), TermShape)),
-					field(max, and(Shape.required(), TermShape))
+					field(count, and(required(), datatype(XSD.INTEGER))),
+					field(min, and(required(), TermShape)),
+					field(max, and(required(), TermShape))
 			))
 
 	);
@@ -85,10 +88,9 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Graph graph=com.metreeca.rest.Context.asset(graph());
+	private final Graph graph=asset(graph());
 
 	private final GraphValidator validator=new GraphValidator();
-	private final GraphTrimmer trimmer=new GraphTrimmer();
 
 	private final GraphCreator creator=new GraphCreator();
 	private final GraphRelator relator=new GraphRelator();
@@ -109,15 +111,6 @@ public final class GraphEngine implements Engine {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public <M extends Message<M>> Either<MessageException, M> trim(final M message) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		return trimmer.trim(message);
-	}
 
 	@Override public <M extends Message<M>> Either<MessageException, M> validate(final M message) {
 

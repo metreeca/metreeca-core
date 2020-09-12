@@ -39,8 +39,6 @@ final class JSONTrimmer {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private JsonObject trim(final Shape shape, final Map<String, JsonValue> object) {
 
 		final Map<IRI, Shape> fields=fields(shape);

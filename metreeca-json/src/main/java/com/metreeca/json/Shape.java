@@ -21,6 +21,7 @@ import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.Value;
 
+import javax.json.JsonObject;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -149,6 +150,18 @@ public interface Shape {
 		}
 
 		return mapper.apply(this);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public default JsonObject trim(final JsonObject object) {
+
+		if ( object == null ) {
+			throw new NullPointerException("null object");
+		}
+
+		return new JSONTrimmer().trim(object, this).asJsonObject();
 	}
 
 

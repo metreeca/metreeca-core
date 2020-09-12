@@ -93,23 +93,6 @@ public interface Engine {
 	//// Payload Management ///////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Trims message payloads.
-	 *
-	 * <p>Rewrites the engine-specific message {@linkplain Message#body(Format) payload} retaining only the subset
-	 * compatible with the envelope of the message {@linkplain Shape#shape() shape}.</p>
-	 *
-	 * @param <M>     the type of {@code message}
-	 * @param message the message whose engine-specific payload is to be trimmed
-	 *
-	 * @return a value providing access to the given {@code message} with an updated payload, if its engine-specific
-	 * {@linkplain Message#body(Format) payload} is well-formed and compatible with its {@linkplain Shape#shape()
-	 * shape}; an error providing access to a failure response builder possibly reporting a validation trace, otherwise
-	 *
-	 * @throws NullPointerException if {@code message} is null
-	 */
-	public <M extends Message<M>> Either<MessageException, M> trim(final M message);
-
-	/**
 	 * Validates message payloads.
 	 *
 	 * <p>Validates the engine-specific message {@linkplain Message#body(Format) payload} against the message

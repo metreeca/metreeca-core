@@ -23,6 +23,7 @@ import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 
+import javax.json.JsonObject;
 import java.util.function.UnaryOperator;
 
 import static com.metreeca.json.Shape.shape;
@@ -31,6 +32,7 @@ import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
+import static com.metreeca.rest.formats.JSONFormat.json;
 import static java.util.function.Function.identity;
 
 
@@ -132,12 +134,17 @@ public abstract class Actor extends Delegator {
 	/**
 	 * Creates a trimmer wrapper.
 	 *
-	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#trim(Message) trimming} of {@linkplain
+	 * @return returns a wrapper performing engine-assisted {@linkplain Shape#trim(JsonObject) trimming} of {@linkplain
 	 * Response#success() successful} response payloads
 	 */
 	protected Wrapper trimmer() {
-		return handler -> request -> handler.handle(request).map(response -> response.success() ?
-				engine.trim(response).fold(response::map, identity()) : response
+		return handler -> request -> handler.handle(request).map(response -> response.success()
+
+				? response.body(json())
+				.map(json -> response.body(json(), response.attribute(shape()).trim(json)))
+				.fold(response::map, identity())
+
+				: response
 		);
 	}
 
