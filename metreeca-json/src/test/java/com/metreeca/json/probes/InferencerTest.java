@@ -19,133 +19,171 @@ package com.metreeca.json.probes;
 
 import com.metreeca.json.Shape;
 
-import java.util.function.BiFunction;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Any.any;
+import static com.metreeca.json.shapes.Clazz.clazz;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.In.in;
+import static com.metreeca.json.shapes.MaxCount.maxCount;
+import static com.metreeca.json.shapes.MinCount.minCount;
+import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class InferencerTest {
 
-	//@Test void testAll() {
-	//	assertImplies("minimum focus size is equal to the size of the required value set",
-	//			all(literal(1), literal(2)), minCount(2));
-	//}
-	//
-	//@Test void testAny() {
-	//	assertImplies("minimum focus size is 1",
-	//			any(literal(1), literal(2)), minCount(1));
-	//}
-	//
-	//@Test void testDatatype() { // !!! improve testing of multiple implications
-	//
-	//	assertImplies("xsd:boolean has closed range",
-	//			datatype(XSD.BOOLEAN), and(maxCount(1), in(literal(false), literal(true))));
-	//
-	//	assertImplies("xsd:boolean has exclusive values",
-	//			datatype(XSD.BOOLEAN), and(maxCount(1), in(literal(false), literal(true))));
-	//
-	//}
-	//
-	//@Test void testClazz() {
-	//	assertImplies("classed values are resources",
-	//			clazz(RDF.NIL), datatype(Values.ResourceType));
-	//}
-	//
-	//@Test void testRange() {
-	//
-	//	assertImplies("maximum focus size is equal to the size of the allowed value set",
-	//			in(literal(1), literal(2.0)), maxCount(2));
-	//
-	//	assertImplies("if unique, focus values share the datatype of the allowed value set",
-	//			in(literal(1), literal(2)), and(maxCount(2), datatype(XSD.INT)));
-	//
-	//}
-	//
-	//@Test void testField() {
-	//
-	//	fail();
-	//
-	//	//assertImplies("field subjects are resources",
-	//	//		field(RDF.VALUE, and()),
-	//	//		datatype(Values.ResourceType)
-	//	//);
-	//	//
-	//	//assertImplies("field subjects are iris if explicitly typed",
-	//	//		and(field(RDF.VALUE, and()), datatype(Values.IRIType)),
-	//	//		datatype(Values.IRIType)
-	//	//);
-	//	//
-	//	//assertImplies("reverse field objects are resources",
-	//	//		field(inverse(RDF.VALUE), and()), datatype(Values.ResourceType),
-	//	//		(s, i) -> field(s.name(), and(s.shape(), i))
-	//	//);
-	//	//
-	//	//assertImplies("reverse field objects are iris if explicitly typed",
-	//	//		field(inverse(RDF.VALUE), datatype(Values.IRIType)),
-	//	//		datatype(Values.IRIType), (s, i) -> field(s.name(), and(s.shape(), i))
-	//	//);
-	//	//
-	//	//assertImplies("both subject and object of a rdf:type field are resources",
-	//	//		field(RDF.TYPE, and()), datatype(Values.ResourceType),
-	//	//		(s, i) -> and(field(s.name(), and(s.shape(), i)), i)
-	//	//);
-	//	//
-	//	//assertImplies("nested shapes are expanded",
-	//	//		field(RDF.VALUE, clazz(RDF.NIL)), datatype(Values.ResourceType),
-	//	//		(s, i) -> and(field(s.name(), and(and(s.shape(), i), datatype(Values.ResourceType))),
-	//	//				datatype(Values.ResourceType))
-	//	//);
-	//}
-	//
-	//@Test void testAnd() {
-	//
-	//	fail(); // !!!
-	//
-	//	//assertImplies("nested shapes are expanded", and(clazz(RDF.NIL)), datatype(Values.ResourceType),
-	//	//		(s, i) -> and(Stream.concat(s.shapes().stream(), Stream.of(i)).collect(toList())));
-	//	// outer and() stripped by optimization
-	//}
-	//
-	//@Test void testOr() {
-	//
-	//	fail(); // !!!
-	//
-	//	//assertImplies("nested shapes are expanded", or(clazz(RDF.NIL)), datatype(Values.ResourceType),
-	//	//		(s, i) -> and(Stream.concat(s.shapes().stream(), Stream.of(i)).collect(toList())));
-	//	// outer or() stripped by optimization
-	//}
-	//
-	//@Test void testWhen() { // !!! uncomment when filtering constraints are accepted by when()
-	//
-	//	fail();
-	//
-	//	assertImplies("nested shapes are expanded",
-	//			when(and()/* !!! clazz(RDF.NIL) */, clazz(RDF.NIL), clazz(RDF.NIL)),
-	//			datatype(Values.ResourceType),
-	//			(s, i) -> when(and()/* !!! and(s.getTest(), i)*/, and(s.pass(), i), and(s.fail(), i))
-	//	);
-	//}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private void assertImplies(final String message, final Shape shape, final Shape inferred) {
-		assertThat(expand(shape)).as(message).isEqualTo(optimize(and(shape, inferred)));
-	}
-
-	private <S extends Shape, I extends Shape> void assertImplies(
-			final String message, final S shape, final I inferred, final BiFunction<S, I, Shape> mapper) {
-		assertThat(expand(shape)).as(message).isEqualTo(optimize(mapper.apply(shape, inferred)));
-	}
-
-
-	private <S extends Shape, I extends Shape> Shape optimize(final Shape shape) {
-		return shape;
-	}
-
 	private Shape expand(final Shape shape) {
-		return optimize(shape.map(new Inferencer()));
+		return shape.map(new Inferencer());
+	}
+
+
+	@Test void testAll() {
+
+		final Shape all=all(literal(1), literal(2));
+
+		assertThat(expand(all))
+				.as("minimum focus size is equal to the size of the required value set")
+				.isEqualTo(and(all, minCount(2)));
+	}
+
+	@Test void testAny() {
+
+		final Shape any=any(literal(1), literal(2));
+
+		assertThat(expand(any))
+				.as("minimum focus size is 1")
+				.isEqualTo(and(any, minCount(1)));
+	}
+
+	@Test void testDatatype() {
+
+		final Shape datatype=datatype(XSD.BOOLEAN);
+
+		assertThat(expand(datatype))
+				.as("xsd:boolean has exclusive values and closed range")
+				.isEqualTo(and(datatype, and(maxCount(1), in(literal(false), literal(true)))));
+	}
+
+	@Test void testClazz() {
+
+		final Shape clazz=clazz(RDF.NIL);
+
+		assertThat(expand(clazz))
+				.as("classed values are resources")
+				.isEqualTo(and(clazz, datatype(ResourceType)));
+	}
+
+	@Test void testIn() {
+
+		final Shape Eterogeneous=in(literal(1), literal(2.0));
+
+		assertThat(expand(Eterogeneous))
+				.as("maximum focus size is equal to the size of the allowed value set")
+				.isEqualTo(and(Eterogeneous, maxCount(2)));
+
+		final Shape inUniform=in(literal(1), literal(2));
+
+		assertThat(expand(inUniform))
+				.as("if unique, focus values share the datatype of the allowed value set")
+				.isEqualTo(and(inUniform, and(maxCount(2), datatype(XSD.INT))));
+
+	}
+
+	@Test void testField() {
+
+		final Shape nested=clazz(RDF.NIL);
+
+		assertThat(expand(field(RDF.VALUE, nested)))
+				.as("nested shapes are expanded")
+				.isEqualTo(and(
+						datatype(ResourceType),
+						field(RDF.VALUE, and(nested, datatype(ResourceType)))
+				));
+
+		assertThat(expand(field(RDF.TYPE)))
+				.as("both subject and object of a rdf:type field are resources")
+				.isEqualTo(and(
+						datatype(ResourceType),
+						and(field(RDF.TYPE, datatype(ResourceType)), datatype(ResourceType))
+				));
+
+	}
+
+	@Test void testFieldDirect() {
+
+		final Shape plain=field(RDF.VALUE);
+
+		assertThat(expand(plain))
+				.as("field subjects are resources")
+				.isEqualTo(and(plain, datatype(ResourceType)));
+
+		final Shape typed=and(field(RDF.VALUE), datatype(IRIType));
+
+		assertThat(expand(typed))
+				.as("field subjects are IRIs if explicitly typed")
+				.isEqualTo(and(typed, and(plain, datatype(IRIType))));
+
+	}
+
+	@Test void testFieldInverse() {
+
+		final Shape plain=field(inverse(RDF.VALUE));
+
+		assertThat(expand(plain))
+				.as("reverse field objects are resources")
+				.isEqualTo(field(inverse(RDF.VALUE), datatype(ResourceType)));
+
+		final Shape typed=field(inverse(RDF.VALUE), datatype(IRIType));
+
+		assertThat(expand(typed))
+				.as("reverse field objects are IRIs if explicitly typed")
+				.isEqualTo(field(inverse(RDF.VALUE), datatype(IRIType)));
+
+	}
+
+	@Test void testAnd() {
+
+		final Shape and=and(clazz(RDF.FIRST), clazz(RDF.REST));
+
+		assertThat(expand(and))
+				.as("nested shapes are expanded")
+				.isEqualTo(and(
+						and(clazz(RDF.FIRST), datatype(ResourceType)),
+						and(clazz(RDF.REST), datatype(ResourceType))
+				));
+	}
+
+	@Test void testOr() {
+
+		final Shape or=or(clazz(RDF.FIRST), clazz(RDF.REST));
+
+		assertThat(expand(or))
+				.as("nested shapes are expanded")
+				.isEqualTo(or(
+						and(clazz(RDF.FIRST), datatype(ResourceType)),
+						and(clazz(RDF.REST), datatype(ResourceType))
+				));
+	}
+
+	@Test void testWhen() {
+
+		final Shape when=when(clazz(RDF.NIL), clazz(RDF.FIRST), clazz(RDF.REST));
+
+		assertThat(expand(when))
+				.as("nested shapes are expanded")
+				.isEqualTo(when(
+						and(clazz(RDF.NIL), datatype(ResourceType)),
+						and(clazz(RDF.FIRST), datatype(ResourceType)),
+						and(clazz(RDF.REST), datatype(ResourceType))
+				));
 	}
 
 }
