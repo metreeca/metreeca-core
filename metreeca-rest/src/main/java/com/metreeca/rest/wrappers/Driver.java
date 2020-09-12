@@ -18,7 +18,6 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Optimizer;
 import com.metreeca.rest.*;
 
 
@@ -77,7 +76,7 @@ public final class Driver implements Wrapper {
 
 
 	private Driver(final Shape shape) {
-		this.shape=shape.map(new Optimizer());
+		this.shape=shape;
 	}
 
 

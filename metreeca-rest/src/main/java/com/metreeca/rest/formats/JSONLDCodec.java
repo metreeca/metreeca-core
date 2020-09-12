@@ -36,8 +36,7 @@ abstract class JSONLDCodec {
 				.map(new Redactor(Shape.Area, values -> true))
 				.map(new Redactor(Shape.Mode, Shape.Convey)) // remove internal filtering shapes
 
-				.map(new Inferencer()) // infer implicit constraints to drive json shorthands
-				.map(new _RDFOptimizer());
+				.map(new Inferencer()); // infer implicit constraints to drive json shorthands
 
 	}
 

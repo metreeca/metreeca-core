@@ -141,7 +141,7 @@ final class InferencerTest {
 
 
 	private <S extends Shape, I extends Shape> Shape optimize(final Shape shape) {
-		return shape.map(new _RDFOptimizer());
+		return shape;
 	}
 
 	private Shape expand(final Shape shape) {

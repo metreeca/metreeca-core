@@ -18,13 +18,15 @@
 package com.metreeca.json.probes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.shapes.Guard;
+import com.metreeca.json.shapes.*;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.When.when;
 import static java.util.Arrays.asList;
 import static java.util.Collections.disjoint;
 
@@ -34,7 +36,7 @@ import static java.util.Collections.disjoint;
  *
  * <p>Recursively evaluates {@linkplain Guard parametric} constraints in a shape.</p>
  */
-public final class Redactor extends Optimizer {
+public final class Redactor extends Inspector<Shape> {
 
 	private final String axis;
 	private final Predicate<Set<Object>> condition;
@@ -98,11 +100,31 @@ public final class Redactor extends Optimizer {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Override public Shape probe(final Shape shape) {
+		return shape;
+	}
 
 	@Override public Shape probe(final Guard guard) {
 		return axis.equals(guard.axis())
 				? condition.test(guard.values()) ? and() : or()
 				: guard; // ignore unrelated variables
+	}
+
+	@Override public Shape probe(final Field field) {
+		return field(field.name(), field.shape().map(this));
+	}
+
+
+	@Override public Shape probe(final And and) {
+		return and(and.shapes().stream().map(this));
+	}
+
+	@Override public Shape probe(final Or or) {
+		return or(or.shapes().stream().map(this));
+	}
+
+	@Override public Shape probe(final When when) {
+		return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
 	}
 
 }

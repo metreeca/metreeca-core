@@ -19,7 +19,6 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.*;
 
 import org.eclipse.rdf4j.model.Value;
@@ -116,7 +115,7 @@ final class JSONLDParserTest {
 
 
 	private Shape filter(final Shape shape, final Shape filter) {
-		return and(shape, Shape.filter().then(filter)).map(new Optimizer());
+		return and(shape, Shape.filter().then(filter));
 	}
 
 

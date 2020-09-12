@@ -18,7 +18,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.*;
-import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
@@ -96,8 +95,7 @@ final class JSONLDParser {
 		final int offset=offset(json);
 		final int limit=limit(json);
 
-		final Shape filtered=and(shape, Shape.filter().then(filter)) // filtering only >> don't include in results
-				.map(new Optimizer());
+		final Shape filtered=and(shape, Shape.filter().then(filter)); // filtering only >> don't include in results
 
 		return terms != null ? Terms.terms(filtered, terms)
 				: stats != null ? Stats.stats(filtered, stats)
