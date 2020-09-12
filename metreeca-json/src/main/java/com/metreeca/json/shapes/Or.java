@@ -18,11 +18,18 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.probes.Inspector;
 
 import java.util.*;
+import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.derives;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.MaxCount.maxCount;
+import static com.metreeca.json.shapes.MinCount.minCount;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.*;
 
 
 /**
@@ -35,16 +42,110 @@ public final class Or implements Shape {
 	private static final Or empty=new Or(Collections.emptySet());
 
 
-	public static Or or() {
+	public static Shape or() {
 		return empty;
 	}
 
-	@SafeVarargs public static <S extends Shape> Or or(final S... shapes) {
-		return new Or(asList(shapes));
+	public static Shape or(final Shape... shapes) {
+		return or(asList(shapes));
 	}
 
-	public static Or or(final Collection<? extends Shape> shapes) {
-		return new Or(shapes);
+	public static Shape or(final Collection<? extends Shape> shapes) {
+		return or(shapes.stream());
+	}
+
+	public static Shape or(final Stream<? extends Shape> shapes) {
+		return pack(shapes
+
+				// flatten nested shaped shapes of the same type
+
+				.flatMap(new Inspector<Stream<Shape>>() {
+
+					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
+
+					@Override public Stream<Shape> probe(final Or or) { return or.shapes().stream(); }
+
+				})
+
+				// group by shape type preserving order
+
+				.collect(groupingBy(Shape::getClass, LinkedHashMap::new, toSet()))
+
+				.entrySet()
+				.stream()
+
+				// merge shapes sets
+
+				.flatMap(entry -> merge(entry.getKey(), entry.getValue().stream()))
+
+				.collect(toList())
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static Shape pack(final List<? extends Shape> shapes) {
+		return shapes.contains(and()) ? and() // always pass
+				: shapes.size() == 1 ? shapes.iterator().next()
+				: new Or(shapes);
+	}
+
+	private static Stream<? extends Shape> merge(final Class<? extends Shape> clazz, final Stream<Shape> shapes) {
+		return clazz.equals(Meta.class) ? metas(shapes.map(Meta.class::cast))
+				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
+				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))
+				: clazz.equals(MaxCount.class) ? maxCounts(shapes.map(MaxCount.class::cast))
+				: clazz.equals(Field.class) ? fields(shapes.map(Field.class::cast))
+				: shapes;
+	}
+
+
+	private static Stream<? extends Shape> metas(final Stream<Meta> metas) {
+
+		final Collection<Object> aliases=new HashSet<>();
+
+		return metas.filter(meta -> {
+
+			if ( meta.label().equals(Shape.Alias) && aliases.add(meta.value()) && aliases.size() > 1 ) {
+				throw new IllegalArgumentException(String.format("clashing aliases <%s>", aliases.stream()
+						.map(Object::toString)
+						.collect(joining(" / "))
+				));
+			}
+
+			return true;
+
+		});
+	}
+
+	private static Stream<? extends Shape> datatypes(final Stream<Datatype> datatypes) {
+
+		final Collection<Datatype> space=datatypes.collect(toList());
+
+		return space.stream().filter(lower -> space.stream()
+				.filter(upper -> !upper.equals(lower))
+				.noneMatch(upper -> derives(upper.id(), lower.id()))
+		);
+	}
+
+	private static Stream<? extends Shape> minCounts(final Stream<MinCount> minCounts) {
+		return Stream.of(minCount(minCounts.mapToInt(MinCount::limit).min().orElse(Integer.MIN_VALUE)));
+	}
+
+	private static Stream<? extends Shape> maxCounts(final Stream<MaxCount> maxCounts) {
+		return Stream.of(maxCount(maxCounts.mapToInt(MaxCount::limit).max().orElse(Integer.MAX_VALUE)));
+	}
+
+	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
+		return fields // group by name preserving order
+
+				.collect(toMap(Field::name, f -> Stream.of(f.shape()), Stream::concat, LinkedHashMap::new))
+
+				.entrySet()
+				.stream()
+
+				.map(entry -> field(entry.getKey(), or(entry.getValue())));
 	}
 
 
@@ -66,8 +167,6 @@ public final class Or implements Shape {
 		this.shapes=new LinkedHashSet<>(shapes);
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Collection<Shape> shapes() {
 		return Collections.unmodifiableCollection(shapes);

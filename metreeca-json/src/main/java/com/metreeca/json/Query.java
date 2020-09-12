@@ -48,7 +48,12 @@ public interface Query {
 	 *
 	 * @param <V> the type of the generated result value
 	 */
-	public static interface Probe<V> {
+	public static interface Probe<V> extends Function<Query, V> {
+
+		@Override default V apply(final Query query) {
+			return query == null ? null : query.map(this);
+		}
+
 
 		public V probe(final Items items);
 

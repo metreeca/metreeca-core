@@ -18,9 +18,10 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.probes.Traverser;
 
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Or.or;
 
 
 /**
@@ -36,12 +37,15 @@ import static com.metreeca.json.shapes.And.and;
  */
 public final class When implements Shape {
 
-	public static When when(final Shape test, final Shape pass) {
-		return new When(test, pass, and());
+	public static Shape when(final Shape test, final Shape pass) {
+		return when(test, pass, and());
 	}
 
-	public static When when(final Shape test, final Shape pass, final Shape fail) {
-		return new When(test, pass, fail);
+	public static Shape when(final Shape test, final Shape pass, final Shape fail) {
+		return test.equals(and()) ? pass
+				: test.equals(or()) ? fail
+				: pass.equals(fail) ? pass
+				: new When(test, pass, fail);
 	}
 
 
@@ -75,8 +79,6 @@ public final class When implements Shape {
 		this.fail=fail;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Shape test() {
 		return test;
@@ -127,7 +129,7 @@ public final class When implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class FilteringProbe extends Inspector<Boolean> {
+	private static final class FilteringProbe extends Traverser<Boolean> {
 
 		@Override public Boolean probe(final Shape shape) { return true; }
 

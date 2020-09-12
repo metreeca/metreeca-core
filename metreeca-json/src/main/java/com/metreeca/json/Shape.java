@@ -322,7 +322,12 @@ public interface Shape {
 	 *
 	 * @param <V> the type of the generated result value
 	 */
-	public static interface Probe<V> {
+	public static interface Probe<V> extends Function<Shape, V> {
+
+		@Override default V apply(final Shape shape) {
+			return shape == null ? null : shape.map(this);
+		}
+
 
 		//// Annotations //////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -19,8 +19,8 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.*;
-import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.probes.Redactor;
+import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.assets.Logger;
@@ -603,7 +603,7 @@ abstract class GraphProcessor {
 
 		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		private final class TemplateProbe extends Inspector<Stream<Integer>> {
+		private final class TemplateProbe extends Traverser<Stream<Integer>> {
 
 			private final Shape focus;
 
@@ -706,15 +706,15 @@ abstract class GraphProcessor {
 			}
 
 			@Override public Snippet probe(final MinExclusive minExclusive) {
-				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.value())));
+				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.limit())));
 			}
 
 			@Override public Snippet probe(final MaxExclusive maxExclusive) {
-				return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.value())));
+				return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.limit())));
 			}
 
 			@Override public Snippet probe(final MinInclusive minInclusive) {
-				return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.value())));
+				return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.limit())));
 			}
 
 			@Override public Snippet probe(final MaxInclusive maxInclusive) {
@@ -819,7 +819,7 @@ abstract class GraphProcessor {
 
 		}
 
-		private final class PatternProbe extends Inspector<Snippet> {
+		private final class PatternProbe extends Traverser<Snippet> {
 
 			// !!! (€) remove optionals if term is required or if exists a filter on the same path
 

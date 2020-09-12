@@ -18,13 +18,14 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.shapes.And.and;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
@@ -38,12 +39,16 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class All implements Shape {
 
-	public static All all(final Value... values) {
+	public static Shape all(final Value... values) {
 		return all(asList(values));
 	}
 
-	public static All all(final Collection<Value> values) {
-		return new All(values);
+	public static Shape all(final Collection<? extends Value> values) {
+		return all(new LinkedHashSet<>(values));
+	}
+
+	public static Shape all(final Set<? extends Value> values) {
+		return values.isEmpty() ? and() : new All(values);
 	}
 
 
@@ -52,12 +57,12 @@ public final class All implements Shape {
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Set<Value> values;
 
 
-	private All(final Collection<Value> values) {
+	private All(final Collection<? extends Value> values) {
 
 		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
@@ -67,14 +72,12 @@ public final class All implements Shape {
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public Set<Value> values() {
 		return unmodifiableSet(values);
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public <T> T map(final Probe<T> probe) {
 
@@ -86,7 +89,7 @@ public final class All implements Shape {
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof All
@@ -105,9 +108,9 @@ public final class All implements Shape {
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class AllProbe extends Traverser<Set<Value>> {
+	private static final class AllProbe extends Inspector<Set<Value>> {
 
 		@Override public Set<Value> probe(final All all) {
 			return all.values();

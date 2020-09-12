@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Clazz implements Shape {
 
-	public static Clazz clazz(final IRI name) {
+	public static Shape clazz(final IRI name) {
 		return new Clazz(name);
 	}
 
@@ -57,8 +57,6 @@ public final class Clazz implements Shape {
 		this.id=id;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public IRI id() {
 		return id;
@@ -95,7 +93,7 @@ public final class Clazz implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ClazzProbe extends Traverser<IRI> {
+	private static final class ClazzProbe extends Inspector<IRI> {
 
 		@Override public IRI probe(final Clazz clazz) {
 			return clazz.id();

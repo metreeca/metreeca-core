@@ -30,30 +30,28 @@ import org.eclipse.rdf4j.model.Value;
  */
 public final class MinExclusive implements Shape {
 
-	public static MinExclusive minExclusive(final Value value) {
+	public static Shape minExclusive(final Value value) {
 		return new MinExclusive(value);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Value value;
+	private final Value limit;
 
 
-	private MinExclusive(final Value value) {
+	private MinExclusive(final Value limit) {
 
-		if ( value == null ) {
+		if ( limit == null ) {
 			throw new NullPointerException("null value");
 		}
 
-		this.value=value;
+		this.limit=limit;
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public Value value() {
-		return value;
+	public Value limit() {
+		return limit;
 	}
 
 
@@ -73,15 +71,15 @@ public final class MinExclusive implements Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof MinExclusive
-				&& value.equals(((MinExclusive)object).value);
+				&& limit.equals(((MinExclusive)object).limit);
 	}
 
 	@Override public int hashCode() {
-		return value.hashCode();
+		return limit.hashCode();
 	}
 
 	@Override public String toString() {
-		return "minExclusive("+value+")";
+		return "minExclusive("+limit+")";
 	}
 
 }

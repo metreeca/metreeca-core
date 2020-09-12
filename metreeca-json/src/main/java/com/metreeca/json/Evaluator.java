@@ -17,14 +17,14 @@
 
 package com.metreeca.json;
 
-import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.shapes.*;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 
-final class Evaluator extends Inspector<Boolean> {
+final class Evaluator extends Traverser<Boolean> {
 
 	static final Evaluator Instance=new Evaluator();
 

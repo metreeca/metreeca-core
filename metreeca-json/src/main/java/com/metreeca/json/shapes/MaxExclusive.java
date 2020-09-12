@@ -30,30 +30,28 @@ import org.eclipse.rdf4j.model.Value;
  */
 public final class MaxExclusive implements Shape {
 
-	public static MaxExclusive maxExclusive(final Value value) {
+	public static Shape maxExclusive(final Value value) {
 		return new MaxExclusive(value);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Value value;
+	private final Value limit;
 
 
-	private MaxExclusive(final Value value) {
+	private MaxExclusive(final Value limit) {
 
-		if ( value == null ) {
-			throw new NullPointerException("null value");
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
 		}
 
-		this.value=value;
+		this.limit=limit;
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public Value value() {
-		return value;
+	public Value limit() {
+		return limit;
 	}
 
 
@@ -73,15 +71,15 @@ public final class MaxExclusive implements Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof MaxExclusive
-				&& value.equals(((MaxExclusive)object).value);
+				&& limit.equals(((MaxExclusive)object).limit);
 	}
 
 	@Override public int hashCode() {
-		return value.hashCode();
+		return limit.hashCode();
 	}
 
 	@Override public String toString() {
-		return "maxExclusive("+value+")";
+		return "maxExclusive("+limit+")";
 	}
 
 }

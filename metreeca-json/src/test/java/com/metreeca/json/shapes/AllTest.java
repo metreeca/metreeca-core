@@ -18,54 +18,49 @@
 package com.metreeca.json.shapes;
 
 import org.eclipse.rdf4j.model.Value;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Stream;
-
-import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class AllTest {
 
-	private static final Value a=literal(1);
-	private static final Value b=literal(2);
-	private static final Value c=literal(3);
-	private static final Value d=literal(4);
+	@Nested final class Optimization {
 
-	@Test void testInspectExistential() {
+		@Test void testIgnoreEmptyValueSet() {
+			assertThat(all()).isEqualTo(and());
+		}
 
-		final All all=all(a, b, c);
-
-		assertThat(all(all))
-				.contains(all.values());
-	}
-
-	@Test void testInspectConjunction() {
-
-		final All x=all(a, b, c);
-		final All y=all(b, c, d);
-
-		assertThat(all(and(x, y)))
-				.as("all defined")
-				.contains(Stream.concat(x.values().stream(), y.values().stream()).collect(toSet()));
-
-		assertThat(all(and(x, and())))
-				.as("some defined")
-				.contains(x.values());
-
-		assertThat(all(and(and(), and())))
-				.as("none defined")
-				.isEmpty();
+		@Test void testCollapseDuplicates() {
+			assertThat(all(True, True, False)).isEqualTo(all(True, False));
+		}
 
 	}
 
-	@Test void testInspectOtherShape() {
-		assertThat(all(and()))
-				.isEmpty();
-	}
+	@Nested final class Inspection {
 
+		private final Value a=literal(1);
+		private final Value b=literal(2);
+		private final Value c=literal(3);
+
+		@Test void testInspectAll() {
+			assertThat(all(all(a, b, c)))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectAnd() {
+			assertThat(all(and(all(a, b), all(b, c))))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectOtherShape() {
+			assertThat(all(and()))
+					.isEmpty();
+		}
+
+	}
 }

@@ -30,30 +30,28 @@ import org.eclipse.rdf4j.model.Value;
  */
 public final class MaxInclusive implements Shape {
 
-	public static MaxInclusive maxInclusive(final Value value) {
+	public static Shape maxInclusive(final Value value) {
 		return new MaxInclusive(value);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Value value;
+	private final Value limit;
 
 
-	private MaxInclusive(final Value value) {
+	private MaxInclusive(final Value limit) {
 
-		if ( value == null ) {
-			throw new NullPointerException("null value");
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
 		}
 
-		this.value=value;
+		this.limit=limit;
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public Value value() {
-		return value;
+		return limit;
 	}
 
 
@@ -73,15 +71,15 @@ public final class MaxInclusive implements Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof MaxInclusive
-				&& value.equals(((MaxInclusive)object).value);
+				&& limit.equals(((MaxInclusive)object).limit);
 	}
 
 	@Override public int hashCode() {
-		return value.hashCode();
+		return limit.hashCode();
 	}
 
 	@Override public String toString() {
-		return "maxInclusive("+value+")";
+		return "maxInclusive("+limit+")";
 	}
 
 }

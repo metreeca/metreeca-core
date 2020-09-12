@@ -19,7 +19,6 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.Datatype;
 
-import org.assertj.core.api.Assertions;
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -36,6 +35,8 @@ import java.util.logging.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.*;
+import static com.metreeca.json.Values.direct;
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -48,6 +49,7 @@ import static com.metreeca.json.shapes.Pattern.pattern;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 
@@ -285,10 +287,10 @@ public final class ValuesTest {
 
 	@Test void testAnnotatedIRIs() {
 
-		Assertions.assertThat(Values.direct(RDF.NIL)).isTrue();
-		Assertions.assertThat(Values.direct(Values.inverse(RDF.NIL))).isFalse();
+		assertThat(direct(RDF.NIL)).isTrue();
+		assertThat(direct(inverse(RDF.NIL))).isFalse();
 
-		Assertions.assertThat(Values.inverse(Values.inverse(RDF.NIL))).as("symmetric").isEqualTo(RDF.NIL);
+		assertThat(inverse(inverse(RDF.NIL))).as("symmetric").isEqualTo(RDF.NIL);
 
 	}
 

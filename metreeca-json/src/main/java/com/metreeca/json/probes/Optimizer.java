@@ -40,9 +40,9 @@ import static java.util.stream.Collectors.*;
  *
  * <p>Recursively removes redundant constructs from a shape.</p>
  */
-public class Optimizer extends Inspector<Shape> {
+public class Optimizer extends Traverser<Shape> {
 
-	private static final Shape.Probe<Stream<Shape>> AndFlattener=new Traverser<Stream<Shape>>() {
+	private static final Shape.Probe<Stream<Shape>> AndFlattener=new Inspector<Stream<Shape>>() {
 
 		@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
@@ -50,7 +50,7 @@ public class Optimizer extends Inspector<Shape> {
 
 	};
 
-	private static final Shape.Probe<Stream<Shape>> OrFlattener=new Traverser<Stream<Shape>>() {
+	private static final Shape.Probe<Stream<Shape>> OrFlattener=new Inspector<Stream<Shape>>() {
 
 		@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
@@ -99,7 +99,7 @@ public class Optimizer extends Inspector<Shape> {
 		return optimize(and.shapes().stream(), AndFlattener, AndPacker, (clazz, constraints)
 				-> clazz.equals(MinCount.class) ? Stream.of(minCount(max(constraints, s -> ((MinCount)s).limit())))
 				: clazz.equals(MaxCount.class) ? Stream.of(maxCount(min(constraints, s -> ((MaxCount)s).limit())))
-				: clazz.equals(Datatype.class) ? datatypes(constraints, (x, y) -> derives(x, y)) // ignore super-types
+				: clazz.equals(Datatype.class) ? datatypes(constraints, this::derives) // ignore super-types
 				: constraints.distinct()
 		);
 	}
@@ -171,7 +171,7 @@ public class Optimizer extends Inspector<Shape> {
 
 				.collect(groupingBy(
 
-						s -> s.map(new Traverser<Object>() {
+						s -> s.map(new Inspector<Object>() {
 
 							@Override public Object probe(final Shape shape) { return shape.getClass(); }
 
@@ -181,7 +181,7 @@ public class Optimizer extends Inspector<Shape> {
 
 						LinkedHashMap::new, // preserve ordering
 
-						mapping(s -> s.map(new Traverser<Stream<Shape>>() {
+						mapping(s -> s.map(new Inspector<Stream<Shape>>() {
 
 							@Override public Stream<Shape> probe(final Shape shape) {
 								return Stream.of(shape);

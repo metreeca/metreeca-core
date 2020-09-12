@@ -18,55 +18,50 @@
 package com.metreeca.json.shapes;
 
 import org.eclipse.rdf4j.model.Value;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Stream;
-
-import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Or.or;
-import static java.util.stream.Collectors.toSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class AnyTest {
 
-	public static final Value a=literal(1);
-	public static final Value b=literal(1);
-	public static final Value c=literal(1);
-	public static final Value d=literal(1);
+	@Nested final class Optimization {
 
-	@Test void testInspectUniversal() {
+		@Test void testIgnoreEmptyValueSet() {
+			assertThat(any()).isEqualTo(or());
+		}
 
-		final Any any=any(a, b, c);
-
-		assertThat(any(any))
-				.contains(any.values());
-	}
-
-	@Test void testInspectDisjunction() {
-
-		final Any x=any(a, b, c);
-		final Any y=any(b, c, d);
-
-		assertThat(any(or(x, y)))
-				.as("all defined")
-				.contains(Stream.concat(x.values().stream(), y.values().stream()).collect(toSet()));
-
-		assertThat(any(or(x, and())))
-				.as("some defined")
-				.contains(x.values());
-
-		assertThat(any(or(and(), and())))
-				.as("none defined")
-				.isEmpty();
+		@Test void testCollapseDuplicates() {
+			assertThat(any(True, True, False)).isEqualTo(any(True, False));
+		}
 
 	}
 
-	@Test void testInspectOtherShape() {
-		assertThat(any(and()))
-				.isEmpty();
+	@Nested final class Inspection {
+
+		private final Value a=literal(1);
+		private final Value b=literal(2);
+		private final Value c=literal(3);
+
+		@Test void testInspectAny() {
+			assertThat(any(any(a, b, c)))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectOr() {
+			assertThat(any(or(any(a, b), any(b, c))))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectOtherShape() {
+			assertThat(any(and()))
+					.isEmpty();
+		}
 	}
 
 }

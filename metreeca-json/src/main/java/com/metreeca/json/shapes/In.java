@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
+import static com.metreeca.json.shapes.Or.or;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
@@ -36,12 +37,16 @@ import static java.util.stream.Collectors.joining;
  */
 public final class In implements Shape {
 
-	public static In in(final Value... values) {
-		return new In(asList(values));
+	public static Shape in(final Value... values) {
+		return in(asList(values));
 	}
 
-	public static In in(final Collection<Value> values) {
-		return new In(values);
+	public static Shape in(final Collection<? extends Value> values) {
+		return in(new LinkedHashSet<>(values));
+	}
+
+	public static Shape in(final Set<? extends Value> values) {
+		return values.isEmpty() ? or() : new In(values);
 	}
 
 
@@ -50,7 +55,7 @@ public final class In implements Shape {
 	private final Set<Value> values;
 
 
-	public In(final Collection<Value> values) {
+	public In(final Collection<? extends Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -63,8 +68,6 @@ public final class In implements Shape {
 		this.values=new LinkedHashSet<>(values);
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Set<Value> values() {
 		return unmodifiableSet(values);

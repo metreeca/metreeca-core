@@ -21,7 +21,6 @@ import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Optimizer;
 import com.metreeca.json.queries.*;
-import com.metreeca.json.shapes.Field;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -447,7 +446,7 @@ final class JSONLDParserTest {
 
 		@Test void testParseShapedFilters() {
 
-			final Field shape=field(RDF.VALUE, datatype(XSD.LONG));
+			final Shape shape=field(RDF.VALUE, datatype(XSD.LONG));
 
 			items("{ 'value': '4' }", shape, items -> assertThat(items.shape())
 					.as("typed value")

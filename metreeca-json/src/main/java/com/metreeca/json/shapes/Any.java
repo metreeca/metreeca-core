@@ -18,13 +18,14 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.shapes.Or.or;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
@@ -38,12 +39,14 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Any implements Shape {
 
-	public static Any any(final Value... values) {
+	public static Shape any(final Value... values) {
 		return any(asList(values));
 	}
 
-	public static Any any(final Collection<Value> values) {
-		return new Any(values);
+	public static Shape any(final Collection<? extends Value> values) {return any(new LinkedHashSet<>(values));}
+
+	public static Shape any(final LinkedHashSet<? extends Value> values) {
+		return values.isEmpty() ? or() : new Any(values);
 	}
 
 
@@ -57,7 +60,7 @@ public final class Any implements Shape {
 	private final Set<Value> values;
 
 
-	private Any(final Collection<Value> values) {
+	private Any(final Collection<? extends Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -70,8 +73,6 @@ public final class Any implements Shape {
 		this.values=new LinkedHashSet<>(values);
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Set<Value> values() {
 		return unmodifiableSet(values);
@@ -111,7 +112,7 @@ public final class Any implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class AnyProbe extends Traverser<Set<Value>> {
+	private static final class AnyProbe extends Inspector<Set<Value>> {
 
 		@Override public Set<Value> probe(final Any any) {
 			return any.values();

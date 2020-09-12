@@ -37,11 +37,11 @@ import static java.util.stream.Collectors.joining;
  */
 public final class Guard implements Shape {
 
-	public static Guard guard(final Object axis, final Object... values) {
+	public static Shape guard(final Object axis, final Object... values) {
 		return guard(axis, asList(values));
 	}
 
-	public static Guard guard(final Object axis, final Collection<Object> values) {
+	public static Shape guard(final Object axis, final Collection<Object> values) {
 		return new Guard(axis, values);
 	}
 
@@ -70,8 +70,6 @@ public final class Guard implements Shape {
 		this.values=new HashSet<>(values);
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public Object axis() {
 		return axis;

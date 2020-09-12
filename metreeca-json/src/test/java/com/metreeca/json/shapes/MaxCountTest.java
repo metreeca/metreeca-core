@@ -19,6 +19,7 @@ package com.metreeca.json.shapes;
 
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.Shape.detail;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Or.or;
@@ -29,64 +30,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 final class MaxCountTest {
 
 	@Test void testInspectMaxCount() {
-
-		final MaxCount count=maxCount(10);
-
-		assertThat(maxCount(count))
-				.contains(count.limit());
+		assertThat(maxCount(maxCount(10))).contains(10);
 	}
 
-	@Test void testInspectConjunction() {
-
-		final MaxCount x=maxCount(10);
-		final MaxCount y=maxCount(100);
-
-		assertThat(maxCount(and(x, y)))
-				.contains(10);
-
-		assertThat(maxCount(and(x, and())))
-				.contains(10);
-
-		assertThat(maxCount(and(and(), and())))
-				.isEmpty();
-
+	@Test void testInspectAnd() {
+		assertThat(maxCount(and(maxCount(10), maxCount(100)))).contains(10);
 	}
 
-	@Test void testInspectDisjunction() {
-
-		final MaxCount x=maxCount(10);
-		final MaxCount y=maxCount(100);
-
-		assertThat(maxCount(or(x, y)))
-				.contains(100);
-
-		assertThat(maxCount(or(x, and())))
-				.contains(10);
-
-		assertThat(maxCount(or(and(), and())))
-				.isEmpty();
-
+	@Test void testInspectOr() {
+		assertThat(maxCount(or(maxCount(10), maxCount(100)))).contains(100);
 	}
 
 	@Test void testOption() {
-
-		final MaxCount x=maxCount(10);
-		final MaxCount y=maxCount(100);
-
-		assertThat(maxCount(when(and(), x, y)))
-				.contains(100);
-
-		assertThat(maxCount(when(and(), x, and())))
-				.contains(10);
-
-		assertThat(maxCount(when(and(), and(), and())))
-				.isEmpty();
-
+		assertThat(maxCount(when(detail(), maxCount(10), maxCount(100)))).contains(100);
+		assertThat(maxCount(when(detail(), maxCount(10), and()))).contains(10);
+		assertThat(maxCount(when(detail(), and(), and()))).isEmpty();
 	}
 
 	@Test void testInspectOtherShape() {
-		assertThat(maxCount(and()))
-				.isEmpty();
+		assertThat(maxCount(and())).isEmpty();
 	}
 
 }

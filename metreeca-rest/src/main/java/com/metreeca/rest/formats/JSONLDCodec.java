@@ -48,7 +48,7 @@ abstract class JSONLDCodec {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class KeywordsProbe extends Inspector<Stream<Map.Entry<String, String>>> {
+	private static final class KeywordsProbe extends Traverser<Stream<Map.Entry<String, String>>> {
 
 		@Override public Stream<Map.Entry<String, String>> probe(final Shape shape) {
 			return Stream.empty();

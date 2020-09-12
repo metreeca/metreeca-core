@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -43,7 +43,7 @@ public final class Datatype implements Shape {
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */
-	public static Datatype datatype(final IRI name) {
+	public static Shape datatype(final IRI name) {
 		return new Datatype(name);
 	}
 
@@ -66,8 +66,6 @@ public final class Datatype implements Shape {
 		this.id=id;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public IRI id() {
 		return id;
@@ -104,7 +102,7 @@ public final class Datatype implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TypeProbe extends Traverser<IRI> {
+	private static final class TypeProbe extends Inspector<IRI> {
 
 		@Override public IRI probe(final Datatype datatype) {
 			return datatype.id();

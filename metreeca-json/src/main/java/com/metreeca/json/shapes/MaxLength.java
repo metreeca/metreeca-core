@@ -28,7 +28,7 @@ import com.metreeca.json.Shape;
  */
 public final class MaxLength implements Shape {
 
-	public static MaxLength maxLength(final int limit) {
+	public static Shape maxLength(final int limit) {
 		return new MaxLength(limit);
 	}
 

@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.probes.Traverser;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -33,35 +33,35 @@ import static java.util.stream.Collectors.toSet;
  */
 public final class Meta implements Shape {
 
-	public static Meta alias(final String value) {
+	public static Shape alias(final String value) {
 		return new Meta(Shape.Alias, value);
 	}
 
-	public static Meta label(final String value) {
+	public static Shape label(final String value) {
 		return new Meta(Shape.Label, value);
 	}
 
-	public static Meta notes(final String value) {
+	public static Shape notes(final String value) {
 		return new Meta(Shape.Notes, value);
 	}
 
-	public static Meta placeholder(final String value) {
+	public static Shape placeholder(final String value) {
 		return new Meta(Shape.Placeholder, value);
 	}
 
-	public static Meta dflt(final Object value) {
+	public static Shape dflt(final Object value) {
 		return new Meta(Shape.Default, value);
 	}
 
-	public static Meta hint(final String value) {
+	public static Shape hint(final String value) {
 		return new Meta(Shape.Hint, value);
 	}
 
-	public static Meta group(final String value) {
+	public static Shape group(final String value) {
 		return new Meta(Shape.Group, value);
 	}
 
-	public static Meta index(final boolean value) {
+	public static Shape index(final boolean value) {
 		return new Meta(Shape.Index, value);
 	}
 
@@ -135,8 +135,6 @@ public final class Meta implements Shape {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public Object label() {
 		return label;
 	}
@@ -177,7 +175,7 @@ public final class Meta implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MetaProbe extends Inspector<Object> {
+	private static final class MetaProbe extends Traverser<Object> {
 
 		private final Object label;
 

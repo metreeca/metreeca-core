@@ -19,82 +19,36 @@ package com.metreeca.json.shapes;
 
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.Shape.detail;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
-import static java.lang.Integer.max;
-import static java.lang.Integer.min;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class MinCountTest {
 
 	@Test void testInspectMinCount() {
-
-		final MinCount count=minCount(10);
-
-		assertThat(minCount(count)
-				.filter(limit -> limit.equals(count.limit()))
-				.isPresent()).as("defined").isTrue();
+		assertThat(minCount(minCount(10))).contains(10);
 	}
 
-	@Test void testInspectConjunction() {
-
-		final MinCount x=minCount(10);
-		final MinCount y=minCount(100);
-
-		assertThat(minCount(and(x, y))
-				.filter(limit1 -> limit1.equals(max(x.limit(), y.limit())))
-				.isPresent()).as("all defined").isTrue();
-
-		assertThat(minCount(and(x, and()))
-				.filter(limit -> limit.equals(x.limit()))
-				.isPresent()).as("some defined").isTrue();
-
-		assertThat(minCount(and(and(), and()))
-				.isPresent()).as("none defined").isFalse();
-
+	@Test void testInspectAnd() {
+		assertThat(minCount(and(minCount(10), minCount(100)))).contains(100);
 	}
 
 	@Test void testInspectDisjunction() {
-
-		final MinCount x=minCount(10);
-		final MinCount y=minCount(100);
-
-		assertThat(minCount(or(x, y))
-				.filter(limit1 -> limit1.equals(min(x.limit(), y.limit())))
-				.isPresent()).as("all defined").isTrue();
-
-		assertThat(minCount(or(x, and()))
-				.filter(limit -> limit.equals(x.limit()))
-				.isPresent()).as("some defined").isTrue();
-
-		assertThat(minCount(or(and(), and()))
-				.isPresent()).as("none defined").isFalse();
-
+		assertThat(minCount(or(minCount(10), minCount(100)))).contains(10);
 	}
 
 	@Test void testOption() {
-
-		final MinCount x=minCount(10);
-		final MinCount y=minCount(100);
-
-		assertThat(minCount(when(and(), x, y))
-				.filter(limit1 -> limit1.equals(min(x.limit(), y.limit())))
-				.isPresent()).as("all defined").isTrue();
-
-		assertThat(minCount(when(and(), x, and()))
-				.filter(limit -> limit.equals(x.limit()))
-				.isPresent()).as("some defined").isTrue();
-
-		assertThat(minCount(when(and(), and(), and()))
-				.isPresent()).as("none defined").isFalse();
-
+		assertThat(minCount(when(detail(), minCount(10), minCount(100)))).contains(10);
+		assertThat(minCount(when(detail(), minCount(10), and()))).contains(10);
+		assertThat(minCount(when(detail(), and(), and()))).isEmpty();
 	}
 
 	@Test void testInspectOtherShape() {
-		assertThat(minCount(and()).isPresent()).as("not defined").isFalse();
+		assertThat(minCount(and())).isEmpty();
 	}
 
 }

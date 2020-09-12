@@ -18,7 +18,6 @@
 package com.metreeca.json.probes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.shapes.Guard;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -46,14 +45,14 @@ final class RedactorTest {
 	private static final IRI Z=iri("http://example.com/z");
 
 
-	private Guard value(final Object... values) {
+	private Shape value(final Object... values) {
 		return guard("value", values);
 	}
 
 
 	@Test void testIgnoreUnrelatedConditions() {
 
-		final Guard guard=value("first");
+		final Shape guard=value("first");
 
 		assertThat(guard.map(new Redactor("nil", "nil"))).as("undefined variable").isEqualTo(guard);
 

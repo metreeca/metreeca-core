@@ -243,7 +243,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MinExclusive minExclusive) {
 
-			final Value limit=value(minExclusive.value());
+			final Value limit=value(minExclusive.limit());
 
 			return trace(focus.stream()
 					.filter(negate(value -> comparator.compare(value, limit) > 0))
@@ -253,7 +253,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MaxExclusive maxExclusive) {
 
-			final Value limit=value(maxExclusive.value());
+			final Value limit=value(maxExclusive.limit());
 
 			return trace(focus.stream()
 					.filter(negate(value -> comparator.compare(value, limit) < 0))
@@ -263,7 +263,7 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final MinInclusive minInclusive) {
 
-			final Value limit=value(minInclusive.value());
+			final Value limit=value(minInclusive.limit());
 
 			return trace(focus.stream()
 					.filter(negate(value -> comparator.compare(value, limit) >= 0))

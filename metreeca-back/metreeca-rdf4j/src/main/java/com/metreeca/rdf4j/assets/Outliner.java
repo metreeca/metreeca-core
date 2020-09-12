@@ -19,7 +19,7 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Focus;
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Traverser;
+import com.metreeca.json.probes.Inspector;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.*;
@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>Recursively extracts implied RDF statements from a shape.</p>
  */
-final class Outliner extends Traverser<Stream<Statement>> {
+final class Outliner extends Inspector<Stream<Statement>> {
 
 	private final Collection<Value> sources;
 

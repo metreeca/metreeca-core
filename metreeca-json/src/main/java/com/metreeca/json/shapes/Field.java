@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.probes.Traverser;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Or.or;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.*;
@@ -41,16 +42,18 @@ import static java.util.stream.Collectors.*;
  */
 public final class Field implements Shape {
 
-	public static Field field(final IRI name) {
-		return new Field(name, all());
+	public static Shape field(final IRI name) {
+		return field(name, all());
 	}
 
-	public static Field field(final IRI name, final Value... values) {
-		return new Field(name, all(values));
+	public static Shape field(final IRI name, final Value... values) {
+		return field(name, all(values));
 	}
 
-	public static Field field(final IRI name, final Shape... shapes) {
-		return new Field(name, shapes.length == 1 ? shapes[0] : and(shapes));
+	public static Shape field(final IRI name, final Shape... shapes) {return field(name, and(shapes));}
+
+	public static Shape field(final IRI name, final Shape shape) {
+		return shape.equals(or()) ? and() : new Field(name, shape);
 	}
 
 
@@ -79,8 +82,6 @@ public final class Field implements Shape {
 		this.shape=shape;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public IRI name() {
 		return name;
@@ -122,7 +123,7 @@ public final class Field implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class FieldProbe extends Inspector<Map<IRI, Shape>> {
+	private static final class FieldProbe extends Traverser<Map<IRI, Shape>> {
 
 		@Override public Map<IRI, Shape> probe(final Shape shape) { return emptyMap();}
 

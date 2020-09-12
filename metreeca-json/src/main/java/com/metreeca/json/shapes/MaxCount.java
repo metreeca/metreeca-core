@@ -18,7 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.probes.Traverser;
 
 import java.util.Optional;
 import java.util.function.BinaryOperator;
@@ -31,7 +31,7 @@ import java.util.function.BinaryOperator;
  */
 public final class MaxCount implements Shape {
 
-	public static MaxCount maxCount(final int limit) {
+	public static Shape maxCount(final int limit) {
 		return new MaxCount(limit);
 	}
 
@@ -49,14 +49,12 @@ public final class MaxCount implements Shape {
 	private MaxCount(final int limit) {
 
 		if ( limit < 1 ) {
-			throw new IllegalArgumentException("illegal limit ["+limit+"]");
+			throw new IllegalArgumentException("illegal limit <"+limit+">");
 		}
 
 		this.limit=limit;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public int limit() {
 		return limit;
@@ -93,7 +91,7 @@ public final class MaxCount implements Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MaxCountProbe extends Inspector<Integer> {
+	private static final class MaxCountProbe extends Traverser<Integer> {
 
 		// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
 

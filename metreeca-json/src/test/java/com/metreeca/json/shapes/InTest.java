@@ -20,27 +20,22 @@ package com.metreeca.json.shapes;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Meta.alias;
+import static com.metreeca.json.Values.False;
+import static com.metreeca.json.Values.True;
+import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.json.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-final class WhenTest {
+final class InTest {
 
 	@Nested final class Optimization {
 
-		@Test void testOptimizeConstantPassTest() {
-			assertThat((when(and(), alias("pass"), alias("fail")))).isEqualTo(alias("pass"));
+		@Test void testIgnoreEmptyValueSet() {
+			assertThat(in()).isEqualTo(or());
 		}
 
-		@Test void testOptimizeConstantFailTest() {
-			assertThat((when(or(), alias("pass"), alias("fail")))).isEqualTo(alias("fail"));
-		}
-
-		@Test void testCollapseIdenticatBranchesConstantFailTest() {
-			assertThat((when(or(), alias("same"), alias("same")))).isEqualTo(alias("same"));
+		@Test void testCollapseDuplicates() {
+			assertThat(in(True, True, False)).isEqualTo(in(True, False));
 		}
 
 	}

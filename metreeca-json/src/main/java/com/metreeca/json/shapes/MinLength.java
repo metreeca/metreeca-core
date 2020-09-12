@@ -28,7 +28,7 @@ import com.metreeca.json.Shape;
  */
 public final class MinLength implements Shape {
 
-	public static MinLength minLength(final int limit) {
+	public static Shape minLength(final int limit) {
 		return new MinLength(limit);
 	}
 
@@ -47,8 +47,6 @@ public final class MinLength implements Shape {
 		this.limit=limit;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public int limit() {
 		return limit;

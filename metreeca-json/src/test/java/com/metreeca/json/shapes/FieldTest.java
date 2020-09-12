@@ -18,13 +18,16 @@
 package com.metreeca.json.shapes;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Map;
 
+import static com.metreeca.json.Shape.relate;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
@@ -37,91 +40,87 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class FieldTest {
 
-	@Test void testInspectFields() {
+	@Nested final class Optimization {
 
-		final Field field=field(RDF.VALUE, and());
-
-		assertThat(fields(field))
-				.as("singleton field map")
-				.isEqualTo(singletonMap(field.name(), field.shape()));
-
-	}
-
-	@Test void testInspectConjunctions() {
-
-		final Field x=field(RDF.VALUE, and());
-		final Field y=field(RDF.TYPE, and());
-		final Field z=field(RDF.TYPE, maxCount(1));
-
-		assertThat(fields(and(x, y)))
-				.as("union field map")
-				.isEqualTo(map(
-						entry(x.name(), x.shape()),
-						entry(y.name(), y.shape())
-				));
-
-		assertThat(fields(and(y, z)))
-				.as("merged field map")
-				.isEqualTo(map(
-						entry(y.name(), and(y.shape(), z.shape()))
-				));
-
-	}
-
-	@Test void testInspectDisjunctions() {
-
-		final Field x=field(RDF.VALUE, and());
-		final Field y=field(RDF.TYPE, and());
-		final Field z=field(RDF.TYPE, maxCount(1));
-
-		assertThat(fields(or(x, y)))
-				.as("union field map")
-				.isEqualTo(map(
-						entry(x.name(), x.shape()),
-						entry(y.name(), y.shape())
-				));
-
-		assertThat(fields(or(y, z)))
-				.as("merged field map")
-				.isEqualTo(map(
-						entry(y.name(), and(y.shape(), z.shape()))
-				));
-
-	}
-
-	@Test void testInspectOptions() {
-
-		final Field x=field(RDF.VALUE, and());
-		final Field y=field(RDF.TYPE, and());
-		final Field z=field(RDF.TYPE, maxCount(1));
-
-		assertThat(fields(when(and(), x, y)))
-				.as("union field map")
-				.isEqualTo(map(
-						entry(x.name(), x.shape()),
-						entry(y.name(), y.shape())
-				));
-
-		assertThat(fields(when(or(), y, z)))
-				.as("merged field map")
-				.isEqualTo(map(
-						entry(y.name(), and(y.shape(), z.shape()))
-				));
+		@Test void testPruneDeadFields() {
+			assertThat(field(RDF.VALUE, or())).isEqualTo(and());
+		}
 
 	}
 
 
-	@Test void testInspectOtherShapes() {
-		assertThat(fields(and())).as("no fields").isEmpty();
-	}
+	@Nested final class Inspection {
+
+		@SafeVarargs private final <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
+			return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+		}
+
+		private <K, V> Map.Entry<K, V> entry(final K key, final V value) {
+			return new SimpleImmutableEntry<>(key, value);
+		}
 
 
-	@SafeVarargs private final <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
-		return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
+		@Test void testInspectFields() {
+			assertThat(fields(
 
-	private <K, V> Map.Entry<K, V> entry(final K key, final V value) {
-		return new SimpleImmutableEntry<>(key, value);
+					field(RDF.VALUE, and())
+
+			)).isEqualTo(singletonMap(
+
+					RDF.VALUE, and()
+
+			));
+		}
+
+		@Test void testInspectConjunctions() {
+			assertThat(fields(and(
+
+					field(RDF.VALUE, and()),
+					field(RDF.TYPE, clazz(RDF.FIRST)),
+					field(RDF.TYPE, clazz(RDF.REST))
+
+			))).isEqualTo(map(
+
+					entry(RDF.VALUE, and()),
+					entry(RDF.TYPE, and(clazz(RDF.FIRST), clazz(RDF.REST)))
+
+			));
+		}
+
+		@Test void testInspectDisjunctions() {
+			assertThat(fields(or(
+
+					field(RDF.VALUE, and()),
+					field(RDF.TYPE, clazz(RDF.FIRST)),
+					field(RDF.TYPE, clazz(RDF.REST))
+
+			))).isEqualTo(map(
+
+					entry(RDF.VALUE, and()),
+					entry(RDF.TYPE, or(clazz(RDF.FIRST), clazz(RDF.REST)))
+
+			));
+		}
+
+		@Test void testInspectOptions() {
+			assertThat(fields(when(relate(),
+
+					field(RDF.VALUE, and()),
+					field(RDF.TYPE, maxCount(1))
+
+			))).isEqualTo(map(
+
+					entry(RDF.VALUE, and()),
+					entry(RDF.TYPE, maxCount(1))
+
+			));
+		}
+
+
+		@Test void testInspectOtherShapes() {
+			assertThat(fields(and())).isEmpty();
+		}
+
 	}
 
 }

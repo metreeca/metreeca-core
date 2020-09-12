@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Inspector;
+import com.metreeca.json.probes.Traverser;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Either;
 import com.metreeca.rest.MessageException;
@@ -54,7 +54,7 @@ final class GraphTrimmer extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class TrimmerProbe extends Inspector<Stream<Statement>> {
+	private static final class TrimmerProbe extends Traverser<Stream<Statement>> {
 
 		private final Set<Value> focus;
 		private final Collection<Statement> model;

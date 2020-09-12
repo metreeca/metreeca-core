@@ -102,7 +102,7 @@ public final class Values {
 	}
 
 
-	//// Extended Datatypes ///////////////////////////////////////////////////////////////////////////////////////////
+	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final String Internal="app:/terms#";
 
@@ -113,13 +113,30 @@ public final class Values {
 	public static final IRI ValueType=iri(Internal, "value"); // abstract datatype IRI for values
 
 
-	//// Constants ////////////////////////////////////////////////////////////////////////////////////////////////////
+	public static boolean derives(final IRI upper, final IRI lower) {
+		return upper != null && lower != null && (
+				upper.equals(ValueType)
+						|| upper.equals(ResourceType) && resource(lower)
+						|| upper.equals(LiteralType) && literal(lower)
+		);
+	}
+
+	private static boolean resource(final IRI type) {
+		return type.equals(ResourceType) || type.equals(BNodeType) || type.equals(IRIType);
+	}
+
+	private static boolean literal(final IRI type) {
+		return type.equals(LiteralType) || !type.equals(ValueType) && !resource(type);
+	}
+
+
+	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final Literal True=literal(true);
 	public static final Literal False=literal(false);
 
 
-	//// Accessors ////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Accessors /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static boolean is(final Value value, final IRI datatype) {
 		return value != null && (type(value).equals(datatype)
@@ -174,8 +191,7 @@ public final class Values {
 	}
 
 
-	//// Factories ////////////////////////////////////////////////////////////////////////////////////////////////////
-
+	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static ValueFactory factory() {
 		return factory;

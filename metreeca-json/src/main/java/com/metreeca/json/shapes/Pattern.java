@@ -28,11 +28,11 @@ import com.metreeca.json.Shape;
  */
 public final class Pattern implements Shape {
 
-	public static Pattern pattern(final String pattern) {
+	public static Shape pattern(final String pattern) {
 		return pattern(pattern, "");
 	}
 
-	public static Pattern pattern(final String pattern, final String flags) {
+	public static Shape pattern(final String pattern, final String flags) {
 		return new Pattern(pattern, flags);
 	}
 
@@ -63,8 +63,6 @@ public final class Pattern implements Shape {
 		this.flags=flags;
 	}
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public String text() {
 		return text;
