@@ -19,8 +19,7 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rest.Either;
-import com.metreeca.rest.MessageException;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -37,7 +36,7 @@ import static java.util.stream.Collectors.toSet;
 
 final class GraphTrimmer extends GraphProcessor {
 
-	<M extends com.metreeca.rest.Message<M>> Either<MessageException, M> trim(final M message) {
+	<M extends Message<M>> Either<MessageException, M> trim(final M message) {
 		return message.body(jsonld()).map(rdf -> message.body(jsonld(),
 				trim(iri(message.item()), convey(message.attribute(shape())), rdf)
 		));

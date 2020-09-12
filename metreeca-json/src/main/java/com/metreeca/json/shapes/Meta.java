@@ -82,7 +82,7 @@ public final class Meta implements Shape {
 						.orElse(emptyMap());
 			})));
 
-			aliases.putAll(shape.map(new AliasesProbe(field -> { // user-provided aliases  (higher precedence)
+			aliases.putAll(shape.map(new AliasesProbe(field -> { // user-provided aliases (higher precedence)
 
 				final IRI name=field.name();
 

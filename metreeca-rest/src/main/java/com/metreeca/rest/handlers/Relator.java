@@ -22,6 +22,7 @@ import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Wrapper.wrapper;
 
 
@@ -66,8 +67,8 @@ public final class Relator extends Actor {
 				.with(connector())
 				.with(trimmer())
 				.with(wrapper(Request::collection,
-						throttler(Guard.Relate, Guard.Target, Guard.Digest),
-						throttler(Guard.Relate, Guard.Detail)
+						throttler(Relate, Target, Digest),
+						throttler(Relate, Detail)
 				))
 
 		);

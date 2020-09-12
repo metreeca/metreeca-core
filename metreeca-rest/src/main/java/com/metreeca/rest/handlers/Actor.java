@@ -132,7 +132,7 @@ public abstract class Actor extends Delegator {
 	/**
 	 * Creates a trimmer wrapper.
 	 *
-	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#trim(Message) validation} of {@linkplain
+	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#trim(Message) trimming} of {@linkplain
 	 * Response#success() successful} response payloads
 	 */
 	protected Wrapper trimmer() {
