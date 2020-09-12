@@ -19,6 +19,7 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.ValuesTest;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.ValuesTest.small;
@@ -44,11 +44,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class GraphRelatorTest {
 
-	private static final Shape EmployeeShape=member().then(
-			filter().then(
+	private static final Shape EmployeeShape=Guard.member().then(
+			Guard.filter().then(
 					field(RDF.TYPE, term("Employee"))
 			),
-			convey().then(
+			Guard.convey().then(
 					field(RDFS.LABEL),
 					field(term("forename")),
 					field(term("surname")),
@@ -68,7 +68,7 @@ final class GraphRelatorTest {
 			return new Request()
 					.base(ValuesTest.Base)
 					.path("/employees/")
-					.attribute(shape(), EmployeeShape);
+					.attribute(Shape.shape(), EmployeeShape);
 		}
 
 
@@ -80,7 +80,7 @@ final class GraphRelatorTest {
 					.accept(response -> assertThat(response)
 
 							.hasStatus(Response.OK)
-							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
+							.hasAttribute(Shape.shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(jsonld(), rdf -> assertThat(rdf)
 									.hasStatement(iri(response.item()), LDP.CONTAINS, null)
@@ -100,7 +100,7 @@ final class GraphRelatorTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.OK).hasAttribute(shape(),
+							.hasStatus(Response.OK).hasAttribute(Shape.shape(),
 									shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(jsonld(), rdf -> assertThat(rdf)
@@ -129,7 +129,7 @@ final class GraphRelatorTest {
 
 							.hasStatus(Response.OK)
 							.hasHeader("Preference-Applied", response.request().header("Prefer").orElse(""))
-							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
+							.hasAttribute(Shape.shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(jsonld(), rdf -> assertThat(rdf)
 									.doesNotHaveStatement(null, LDP.CONTAINS, null)
@@ -145,7 +145,7 @@ final class GraphRelatorTest {
 		private Request request() {
 			return new Request()
 					.base(ValuesTest.Base)
-					.path("/employees/1370").attribute(shape(), EmployeeShape);
+					.path("/employees/1370").attribute(Shape.shape(), EmployeeShape);
 		}
 
 
@@ -156,7 +156,7 @@ final class GraphRelatorTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.OK).hasAttribute(shape(),
+							.hasStatus(Response.OK).hasAttribute(Shape.shape(),
 									shape -> assertThat(shape).isNotEqualTo(and()))
 
 							.hasBody(jsonld(), rdf -> assertThat(rdf)
@@ -180,7 +180,7 @@ final class GraphRelatorTest {
 
 							.hasStatus(NotImplemented)
 
-							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(or()))
+							.hasAttribute(Shape.shape(), shape -> assertThat(shape).isEqualTo(or()))
 
 					)
 			);

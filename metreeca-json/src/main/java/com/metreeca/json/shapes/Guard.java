@@ -37,6 +37,78 @@ import static java.util.stream.Collectors.joining;
  */
 public final class Guard implements Shape {
 
+	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////
+
+	public static final String Role="role";
+	public static final String Task="task";
+	public static final String Area="area";
+	public static final String Mode="mode";
+
+	public static final String Create="create";
+	public static final String Relate="relate";
+	public static final String Update="update";
+	public static final String Delete="delete";
+
+	public static final String Target="target";
+
+	public static final String Digest="digest";
+	public static final String Detail="detail";
+
+	public static final String Convey="convey";
+	public static final String Filter="filter";
+
+
+	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Shape role(final Object... roles) { return guard(Role, roles); }
+
+	public static Shape task(final Object... tasks) { return guard(Task, tasks); }
+
+	public static Shape area(final Object... areas) { return guard(Area, areas); }
+
+	public static Shape mode(final Object... modes) { return guard(Mode, modes); }
+
+
+	public static Shape create() { return task(Create); }
+
+	public static Shape relate() { return task(Relate); }
+
+	public static Shape update() { return task(Update); }
+
+	public static Shape delete() { return task(Delete); }
+
+	/*
+	 * Marks shapes as server-defined internal.
+	 */
+	public static Shape hidden() { return task(Delete); }
+
+	/*
+	 * Marks shapes as server-defined read-only.
+	 */
+	public static Shape server() { return task(Relate, Delete); }
+
+	/*
+	 * Marks shapes as client-defined write-once.
+	 */
+	public static Shape client() { return task(Create, Relate, Delete); }
+
+
+	public static Shape target() { return area(Target); }
+
+	public static Shape member() { return area(Digest, Detail); }
+
+
+	public static Shape digest() { return area(Digest); }
+
+	public static Shape detail() { return area(Detail); }
+
+	public static Shape convey() { return mode(Convey); }
+
+	public static Shape filter() { return mode(Filter); }
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static Shape guard(final Object axis, final Object... values) {
 		return guard(axis, asList(values));
 	}
@@ -44,6 +116,7 @@ public final class Guard implements Shape {
 	public static Shape guard(final Object axis, final Collection<Object> values) {
 		return new Guard(axis, values);
 	}
+
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

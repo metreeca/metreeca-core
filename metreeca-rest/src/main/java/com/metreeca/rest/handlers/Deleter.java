@@ -17,7 +17,7 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 
@@ -32,8 +32,8 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * <ul>
  *
  * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Shape#Delete} task and the {@linkplain Shape#Target} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
+ * {@linkplain Guard#Delete} task and the {@linkplain Guard#Target} area, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
  * resources;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#delete(Request) deletion}.</li>
@@ -61,8 +61,8 @@ public final class Deleter extends Actor {
 
 				.with(connector())
 				.with(wrapper(Request::collection,
-						throttler(Shape.Delete, Shape.Target),
-						throttler(Shape.Delete, Shape.Detail)
+						throttler(Guard.Delete, Guard.Target),
+						throttler(Guard.Delete, Guard.Detail)
 				))
 
 		);

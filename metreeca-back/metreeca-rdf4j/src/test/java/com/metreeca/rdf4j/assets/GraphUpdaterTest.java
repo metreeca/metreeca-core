@@ -26,10 +26,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Shape.convey;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.convey;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.Response.NotFound;

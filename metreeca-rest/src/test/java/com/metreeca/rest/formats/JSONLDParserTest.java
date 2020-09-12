@@ -20,6 +20,7 @@ package com.metreeca.rest.formats;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
+import com.metreeca.json.shapes.Guard;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -115,7 +116,7 @@ final class JSONLDParserTest {
 
 
 	private Shape filter(final Shape shape, final Shape filter) {
-		return and(shape, Shape.filter().then(filter));
+		return and(shape, Guard.filter().then(filter));
 	}
 
 

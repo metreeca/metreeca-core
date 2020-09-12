@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
-import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -61,7 +60,7 @@ final class JSONLDEncoderTest {
 	@Nested final class Values {
 
 		private JsonValue encode(final Value value) {
-			return new JSONLDEncoder(iri(base), field(RDF.VALUE, optional()))
+			return new JSONLDEncoder(iri(base), field(RDF.VALUE, Shape.optional()))
 					.encode(singleton(statement(iri(base), RDF.VALUE, value))) // wrap value inside root object
 					.get("value"); // then unwrap
 		}
@@ -179,8 +178,8 @@ final class JSONLDEncoderTest {
 		@Test void testExpandSharedTrees() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(repeatable(),
-							field(RDF.VALUE, required())
+					field(RDF.VALUE, and(Shape.repeatable(),
+							field(RDF.VALUE, Shape.required())
 					)),
 
 					statement(x, RDF.VALUE, w),
@@ -214,8 +213,8 @@ final class JSONLDEncoderTest {
 		@Test void testHandleNamedLoops() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE, required())
+					field(RDF.VALUE, and(Shape.required(),
+							field(RDF.VALUE, Shape.required())
 					)),
 
 					statement(x, RDF.VALUE, y),
@@ -239,9 +238,9 @@ final class JSONLDEncoderTest {
 
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE, and(required(),
-									field(RDF.VALUE, required())
+					field(RDF.VALUE, and(Shape.required(),
+							field(RDF.VALUE, and(Shape.required(),
+									field(RDF.VALUE, Shape.required())
 							))
 					)),
 
@@ -266,8 +265,8 @@ final class JSONLDEncoderTest {
 		@Test void testBNodeWithBackLinkToProvedResource() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE, and(required(), datatype(ResourceType)))
+					field(RDF.VALUE, and(Shape.required(),
+							field(RDF.VALUE, and(Shape.required(), datatype(ResourceType)))
 					)),
 
 					statement(x, RDF.VALUE, y),
@@ -289,7 +288,7 @@ final class JSONLDEncoderTest {
 		@Test void testAliasDirectField() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, required()),
+					field(RDF.VALUE, Shape.required()),
 
 					statement(x, RDF.VALUE, y)
 
@@ -304,7 +303,7 @@ final class JSONLDEncoderTest {
 		@Test void testAliasInverseField() {
 			assertThat(encode(x,
 
-					field(inverse(RDF.VALUE), required()),
+					field(inverse(RDF.VALUE), Shape.required()),
 
 					statement(y, RDF.VALUE, x)
 
@@ -317,7 +316,7 @@ final class JSONLDEncoderTest {
 		@Test void testAliasUserLabelledField() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(), alias("alias"))),
+					field(RDF.VALUE, and(Shape.required(), alias("alias"))),
 
 					statement(x, RDF.VALUE, y)
 
@@ -332,8 +331,8 @@ final class JSONLDEncoderTest {
 		@Test void testAliasNestedField() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE, and(required(), alias("alias")))
+					field(RDF.VALUE, and(Shape.required(),
+							field(RDF.VALUE, and(Shape.required(), alias("alias")))
 					)),
 
 					statement(x, RDF.VALUE, y),
@@ -357,8 +356,8 @@ final class JSONLDEncoderTest {
 			assertThat(encode(x,
 
 					and(
-							field(RDF.VALUE, required()),
-							field(value, required())
+							field(RDF.VALUE, Shape.required()),
+							field(value, Shape.required())
 					),
 
 					statement(x, RDF.VALUE, y),
@@ -378,7 +377,7 @@ final class JSONLDEncoderTest {
 		@Test void testIgnoreReservedAliases() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(), alias("@id"))),
+					field(RDF.VALUE, and(Shape.required(), alias("@id"))),
 
 					statement(x, RDF.VALUE, y)
 
@@ -417,7 +416,7 @@ final class JSONLDEncoderTest {
 		@Test void testRelativizeProvedIRIBackReferences() {
 			assertThat(encode(container,
 
-					field(RDF.VALUE, and(required(), datatype(IRIType))),
+					field(RDF.VALUE, and(Shape.required(), datatype(IRIType))),
 
 					statement(container, RDF.VALUE, container)
 
@@ -434,7 +433,7 @@ final class JSONLDEncoderTest {
 		@Test void testOmitMissingValues() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, optional())
+					field(RDF.VALUE, Shape.optional())
 
 			)).isEqualTo(createObjectBuilder()
 					.add("@id", "/x")
@@ -470,7 +469,7 @@ final class JSONLDEncoderTest {
 		@Test void testCompactProvedLeafIRI() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(), datatype(IRIType))),
+					field(RDF.VALUE, and(Shape.required(), datatype(IRIType))),
 
 					statement(x, RDF.VALUE, y)
 
@@ -483,7 +482,7 @@ final class JSONLDEncoderTest {
 		@Test void testCompactProvedTypedLiteral() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(), datatype(XSD.DATE))),
+					field(RDF.VALUE, and(Shape.required(), datatype(XSD.DATE))),
 
 					statement(x, RDF.VALUE, literal("2019-04-03", XSD.DATE))
 
@@ -498,8 +497,8 @@ final class JSONLDEncoderTest {
 			assertThat(encode(x,
 
 					or(
-							field(RDF.FIRST, required()),
-							field(RDF.REST, required())
+							field(RDF.FIRST, Shape.required()),
+							field(RDF.REST, Shape.required())
 					),
 
 					statement(x, RDF.FIRST, y),

@@ -95,7 +95,7 @@ final class JSONLDParser {
 		final int offset=offset(json);
 		final int limit=limit(json);
 
-		final Shape filtered=and(shape, Shape.filter().then(filter)); // filtering only >> don't include in results
+		final Shape filtered=and(shape, Guard.filter().then(filter)); // filtering only >> don't include in results
 
 		return terms != null ? Terms.terms(filtered, terms)
 				: stats != null ? Stats.stats(filtered, stats)

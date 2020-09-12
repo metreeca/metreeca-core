@@ -18,7 +18,7 @@
 package com.metreeca.rest.handlers;
 
 
-import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 
@@ -36,9 +36,9 @@ import static java.util.UUID.randomUUID;
  *
  * <ul>
  *
- * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
  * {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Shape#Create} task and the {@linkplain Shape#Detail} area;</li>
+ * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} area;</li>
  *
  * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
  *
@@ -107,7 +107,7 @@ public final class Creator extends Actor {
 		delegate(wrapper(slug).wrap(_creator()) // chain slug immediately before handler after custom wrappers
 
 				.with(connector())
-				.with(throttler(Shape.Create, Shape.Detail))
+				.with(throttler(Guard.Create, Guard.Detail))
 				.with(validator())
 
 		);

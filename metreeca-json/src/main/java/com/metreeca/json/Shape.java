@@ -27,10 +27,11 @@ import java.util.function.Supplier;
 
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Guard.guard;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
+import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 import static java.util.Arrays.asList;
 
@@ -51,26 +52,6 @@ public interface Shape {
 	}
 
 
-	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////
-
-	public static final String Role="role";
-	public static final String Task="task";
-	public static final String Area="area";
-	public static final String Mode="mode";
-
-	public static final String Create="create";
-	public static final String Relate="relate";
-	public static final String Update="update";
-	public static final String Delete="delete";
-
-	public static final String Target="target";
-	public static final String Digest="digest";
-	public static final String Detail="detail";
-
-	public static final String Convey="convey";
-	public static final String Filter="filter";
-
-
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape required() { return and(minCount(1), maxCount(1)); }
@@ -85,135 +66,42 @@ public interface Shape {
 	public static Shape only(final Value... values) { return and(all(values), in(values)); }
 
 
-	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Shape role(final Object... roles) { return guard(Role, roles); }
-
-	public static Shape task(final Object... tasks) { return guard(Task, tasks); }
-
-	public static Shape area(final Object... areas) { return guard(Area, areas); }
-
-	public static Shape mode(final Object... modes) { return guard(Mode, modes); }
-
-
-	public static Shape create() { return task(Create); }
-
-	public static Shape relate() { return task(Relate); }
-
-	public static Shape update() { return task(Update); }
-
-	public static Shape delete() { return task(Delete); }
-
-
-	/*
-	 * Marks shapes as server-defined internal.
-	 */
-	public static Shape hidden() { return task(Delete); }
-
-	/*
-	 * Marks shapes as server-defined read-only.
-	 */
-	public static Shape server() { return task(Relate, Delete); }
-
-	/*
-	 * Marks shapes as client-defined write-once.
-	 */
-	public static Shape client() { return task(Create, Relate, Delete); }
-
-
-	public static Shape target() { return area(Target); }
-
-	public static Shape member() { return area(Digest, Detail); }
-
-	public static Shape digest() { return area(Digest); }
-
-	public static Shape detail() { return area(Detail); }
-
-
-	public static Shape convey() { return mode(Convey); }
-
-	public static Shape filter() { return mode(Filter); }
-
-
-	//// Evaluation ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Tests if a shape is always matched.
-	 *
-	 * @param shape the shape to be tested
-	 *
-	 * @return {@code true} if {@code shape} is equal to an {@linkplain And#and() empty conjunction}, ignoring
-	 * {@linkplain Meta annotations}; {@code false} otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public static boolean pass(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shape.equals(and());
-	}
-
-	/**
-	 * Tests if a shape is never matched.
-	 *
-	 * @param shape the shape to be tested
-	 *
-	 * @return {@code true} if {@code shape} is equal to an {@linkplain Or#or() empty disjunction}, ignoring
-	 * {@linkplain
-	 * Meta annotations}; {@code false} otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public static boolean fail(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return Boolean.FALSE.equals(shape.map(Evaluator.Instance));
-	}
-
-	/**
-	 * Tests if a shape is empty.
-	 *
-	 * @param shape the shape to be tested
-	 *
-	 * @return {@code true} if {@code shape} is equal either to an {@linkplain And#and() empty conjunction} or to an
-	 * {@linkplain Or#or() empty disjunction}, ignoring {@linkplain Meta annotations}; {@code false} otherwise
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public static boolean empty(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shape.map(Evaluator.Instance) != null;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public <V> V map(final Probe<V> probe);
-
-	public default <V> V map(final Function<Shape, V> mapper) {
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return mapper.apply(this);
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Use this shape as a test condition.
+	 * Removes annotations.
+	 *
+	 * @return a copy of this shape without {@linkplain Meta annotations}.
+	 */
+	public default Shape constraints() {
+		return map(new Probe<Shape>() {
+
+			@Override public Shape probe(final Meta meta) { return and(); }
+
+			@Override public Shape probe(final Field field) {
+				return field(field.name(), field.shape().map(this));
+			}
+
+			@Override public Shape probe(final And and) {
+				return and(and.shapes().stream().map(this));
+			}
+
+			@Override public Shape probe(final Or or) {
+				return or(or.shapes().stream().map(this));
+			}
+
+			@Override public Shape probe(final When when) {
+				return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
+			}
+
+			@Override public Shape probe(final Shape shape) { return shape; }
+
+		});
+	}
+
+
+	/**
+	 * Creates a conditional shape.
 	 *
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
@@ -227,7 +115,7 @@ public interface Shape {
 	}
 
 	/**
-	 * Use this shape as a test condition.
+	 * Creates a conditional shape.
 	 *
 	 * @param shapes the shapes this shape is to be applied as a test condition
 	 *
@@ -247,6 +135,20 @@ public interface Shape {
 		}
 
 		return when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public <V> V map(final Probe<V> probe);
+
+	public default <V> V map(final Function<Shape, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return mapper.apply(this);
 	}
 
 

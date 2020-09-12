@@ -18,6 +18,7 @@
 package com.metreeca.json;
 
 import com.metreeca.json.shapes.Datatype;
+import com.metreeca.json.shapes.Guard;
 
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.*;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.logging.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.And.and;
@@ -86,60 +86,60 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Textual=and(required(), datatype(XSD.STRING));
+	public static final Shape Textual=and(Shape.required(), datatype(XSD.STRING));
 
-	public static final Shape Employee=role(Manager, Salesman).then(
+	public static final Shape Employee=Guard.role(Manager, Salesman).then(
 
-			convey().then(
+			Guard.convey().then(
 
-					server().then(
-							field(RDF.TYPE, and(required(), Datatype.datatype(Values.IRIType))),
+					Guard.server().then(
+							field(RDF.TYPE, and(Shape.required(), Datatype.datatype(Values.IRIType))),
 							field(RDFS.LABEL, Textual),
-							field(term("code"), and(required(), datatype(XSD.STRING), pattern("\\d+")))
+							field(term("code"), and(Shape.required(), datatype(XSD.STRING), pattern("\\d+")))
 					),
 
 					and(
 
-							field(term("forename"), and(required(), datatype(XSD.STRING), maxLength(80))),
-							field(term("surname"), and(required(), datatype(XSD.STRING), maxLength(80))),
-							field(term("email"), and(required(), datatype(XSD.STRING), maxLength(80))),
-							field(term("title"), and(required(), datatype(XSD.STRING), maxLength(80)))
+							field(term("forename"), and(Shape.required(), datatype(XSD.STRING), maxLength(80))),
+							field(term("surname"), and(Shape.required(), datatype(XSD.STRING), maxLength(80))),
+							field(term("email"), and(Shape.required(), datatype(XSD.STRING), maxLength(80))),
+							field(term("title"), and(Shape.required(), datatype(XSD.STRING), maxLength(80)))
 					),
 
-					role(Manager).then(
+					Guard.role(Manager).then(
 
-							field(term("seniority"), and(required(), datatype(XSD.INTEGER),
+							field(term("seniority"), and(Shape.required(), datatype(XSD.INTEGER),
 									minInclusive(Values.literal(Values.integer(1))),
 									maxInclusive(Values.literal(Values.integer(5))))),
 
 							field(term("supervisor"), and(
-									optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, Textual))
+									Shape.optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
+									Guard.relate().then(field(RDFS.LABEL, Textual))
 							)),
 
 							field(term("subordinate"), and(
-									optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, Textual))
+									Shape.optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
+									Guard.relate().then(field(RDFS.LABEL, Textual))
 							))
 
 					)
 
 			),
 
-			delete().then(
+			Guard.delete().then(
 					field(term("office"), and())
 			)
 
 	);
 
-	public static final Shape Employees=role(Manager, Salesman).then(
+	public static final Shape Employees=Guard.role(Manager, Salesman).then(
 			meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
 			meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
 			meta(LDP.MEMBERSHIP_RESOURCE, term("Employee")),
-			convey().then(
+			Guard.convey().then(
 					field(RDFS.LABEL, Textual),
 					field(RDFS.COMMENT, Textual),
-					field(LDP.CONTAINS, and(multiple(), Employee))
+					field(LDP.CONTAINS, and(Shape.multiple(), Employee))
 			)
 	);
 

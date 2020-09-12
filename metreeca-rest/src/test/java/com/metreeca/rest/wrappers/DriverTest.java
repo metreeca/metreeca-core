@@ -18,11 +18,11 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.When.when;
@@ -36,13 +36,13 @@ final class DriverTest {
 	private static final String Root="root";
 	private static final String None="none";
 
-	private static final Shape RootShape=optional();
-	private static final Shape NoneShape=required();
+	private static final Shape RootShape=Shape.optional();
+	private static final Shape NoneShape=Shape.required();
 
 	private static final Shape TestShape=and(
-			filter().then(minCount(1)),
-			when(role(Root), RootShape),
-			when(role(None), NoneShape)
+			Guard.filter().then(minCount(1)),
+			when(Guard.role(Root), RootShape),
+			when(Guard.role(None), NoneShape)
 	);
 
 
@@ -64,7 +64,7 @@ final class DriverTest {
 				.wrap(request -> {
 
 					RequestAssert.assertThat(request)
-							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(TestShape));
+							.hasAttribute(Shape.shape(), shape -> assertThat(shape).isEqualTo(TestShape));
 
 					return request.reply(status(OK));
 

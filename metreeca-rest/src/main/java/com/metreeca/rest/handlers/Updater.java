@@ -17,7 +17,7 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
@@ -32,10 +32,10 @@ import static com.metreeca.rest.Wrapper.wrapper;
  *
  * <ul>
  *
- * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
  * {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Shape#Update} task and the {@linkplain Shape#Target} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other
+ * {@linkplain Guard#Update} task and the {@linkplain Guard#Target} area, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
  * resources;</li>
  *
  * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
@@ -65,8 +65,8 @@ public final class Updater extends Actor {
 
 				.with(connector())
 				.with(wrapper(Request::collection,
-						throttler(Shape.Update, Shape.Target),
-						throttler(Shape.Update, Shape.Detail)
+						throttler(Guard.Update, Guard.Target),
+						throttler(Guard.Update, Guard.Detail)
 				))
 				.with(validator())
 

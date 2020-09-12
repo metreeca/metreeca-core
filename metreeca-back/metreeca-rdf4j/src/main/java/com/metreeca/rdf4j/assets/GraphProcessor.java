@@ -39,7 +39,6 @@ import java.util.function.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Focus.focus;
-import static com.metreeca.json.Shape.pass;
 import static com.metreeca.json.Values.BNodeType;
 import static com.metreeca.json.Values.IRIType;
 import static com.metreeca.json.Values.LiteralType;
@@ -75,24 +74,24 @@ abstract class GraphProcessor {
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Shape holder(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Area, Shape.Target));
+		return shape.map(new Redactor(Guard.Area, Guard.Target));
 	}
 
 	Shape digest(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Area, Shape.Digest));
+		return shape.map(new Redactor(Guard.Area, Guard.Digest));
 	}
 
 	Shape detail(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Area, Shape.Detail));
+		return shape.map(new Redactor(Guard.Area, Guard.Detail));
 	}
 
 
 	Shape convey(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Mode, Shape.Convey));
+		return shape.map(new Redactor(Guard.Mode, Guard.Convey));
 	}
 
 	Shape filter(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Shape.Mode, Shape.Filter));
+		return shape.map(new Redactor(Guard.Mode, Guard.Filter));
 	}
 
 
@@ -102,10 +101,13 @@ abstract class GraphProcessor {
 
 
 	private Shape anchor(final IRI resource, final Shape shape) {
+
+		final boolean empty=shape.constraints().equals(and());
+
 		return resource.stringValue().endsWith("/")
 
-				? pass(shape) ? field(inverse(LDP.CONTAINS), focus()) : shape // holders default to ldp:BasicContainer
-				: pass(shape) ? all(focus()) : and(all(focus()), shape); // members default to self
+				? empty ? field(inverse(LDP.CONTAINS), focus()) : shape // holders default to ldp:BasicContainer
+				: empty ? all(focus()) : and(all(focus()), shape); // members default to self
 
 	}
 

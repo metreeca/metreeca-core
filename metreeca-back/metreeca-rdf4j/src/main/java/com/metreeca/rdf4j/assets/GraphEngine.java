@@ -18,6 +18,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.assets.Engine;
@@ -28,7 +29,6 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.function.Supplier;
 
-import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -58,26 +58,26 @@ public final class GraphEngine implements Engine {
 
 
 	private static final Shape TermShape=and(
-			field(RDFS.LABEL, and(optional(), datatype(XSD.STRING)))
+			field(RDFS.LABEL, and(Shape.optional(), datatype(XSD.STRING)))
 	);
 
 	static final Shape TermsShape=and(
-			field(terms, and(multiple(),
-					field(value, and(required(), TermShape)),
-					field(count, and(required(), datatype(XSD.INTEGER)))
+			field(terms, and(Shape.multiple(),
+					field(value, and(Shape.required(), TermShape)),
+					field(count, and(Shape.required(), datatype(XSD.INTEGER)))
 			))
 	);
 
 	static final Shape StatsShape=and(
 
-			field(count, and(required(), datatype(XSD.INTEGER))),
-			field(min, and(optional(), TermShape)),
-			field(max, and(optional(), TermShape)),
+			field(count, and(Shape.required(), datatype(XSD.INTEGER))),
+			field(min, and(Shape.optional(), TermShape)),
+			field(max, and(Shape.optional(), TermShape)),
 
-			field(stats, and(multiple(),
-					field(count, and(required(), datatype(XSD.INTEGER))),
-					field(min, and(required(), TermShape)),
-					field(max, and(required(), TermShape))
+			field(stats, and(Shape.multiple(),
+					field(count, and(Shape.required(), datatype(XSD.INTEGER))),
+					field(min, and(Shape.required(), TermShape)),
+					field(max, and(Shape.required(), TermShape))
 			))
 
 	);
@@ -200,11 +200,11 @@ public final class GraphEngine implements Engine {
 	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
 	 *
 	 * <li>the response {@linkplain RDFFormat RDF} body includes the RDF description of the container as matched by the
-	 * {@linkplain Shape#Target} area of request shape, linked using the {@code ldp:contains} property to the RDF
-	 * description of the resources matched by the {@linkplain Shape#Filter filtering} constrains of the
-	 * {@linkplain Shape#Digest} area of the request shape;</li>
+	 * {@linkplain Guard#Target} area of request shape, linked using the {@code ldp:contains} property to the RDF
+	 * description of the resources matched by the {@linkplain Guard#Filter filtering} constrains of the
+	 * {@linkplain Guard#Digest} area of the request shape;</li>
 	 *
-	 * <li>{@linkplain Shape#Digest} area of the request shape doesn't contain any {@linkplain Shape#Filter filtering}
+	 * <li>{@linkplain Guard#Digest} area of the request shape doesn't contain any {@linkplain Guard#Filter filtering}
 	 * constrains, member resources explicitely to linked to the target container using the {@code ldp:contains}
 	 * property are included;</li>
 	 *

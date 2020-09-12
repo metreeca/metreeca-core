@@ -19,8 +19,8 @@ package com.metreeca.json.shapes;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.Shape.detail;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Guard.detail;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;

@@ -19,11 +19,16 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Redactor;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
+import static com.metreeca.json.Shape.shape;
+import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
 import static java.util.function.Function.identity;
@@ -54,54 +59,58 @@ public abstract class Actor extends Delegator {
 	/**
 	 * Creates a throttler wrapper.
 	 *
-	 * @param task the accepted value for the {@linkplain Shape#Task task} parametric axis
-	 * @param area the accepted values for the {@linkplain Shape#Area task} parametric axis
+	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
+	 * @param area the accepted values for the {@linkplain Guard#Area task} parametric axis
 	 *
 	 * @return returns a wrapper performing role-based shape redaction and shape-based authorization
 	 */
 	protected Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
 		return handler -> request -> {
 
-			final Shape shape=request.attribute(Shape.shape());
+			final Shape shape=request.attribute(shape());
 
 			final Shape baseline=shape // visible to anyone taking into account task/area
 
-					.map(new Redactor(Shape.Role, values -> true))
-					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
-					.map(new Redactor(Shape.Mode, Shape.Convey));
+					.map(new Redactor(Role, values -> true))
+					.map(new Redactor(Task, task))
+					.map(new Redactor(Area, area))
+					.map(new Redactor(Mode, Convey))
+
+					.constraints();
 
 			final Shape authorized=shape // visible to user taking into account task/area
 
-					.map(new Redactor(Shape.Role, request.roles()))
-					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
-					.map(new Redactor(Shape.Mode, Shape.Convey));
+					.map(new Redactor(Role, request.roles()))
+					.map(new Redactor(Task, task))
+					.map(new Redactor(Area, area))
+					.map(new Redactor(Mode, Convey))
+
+					.constraints();
 
 
 			// request shape redactor
 
-			final Function<Request, Request> pre=message -> message.attribute(Shape.shape(), message.attribute(Shape.shape())
+			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape())
 
-					.map(new Redactor(Shape.Role, request.roles()))
-					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
+					.map(new Redactor(Role, request.roles()))
+					.map(new Redactor(Task, task))
+					.map(new Redactor(Area, area))
 
 			);
 
 			// response shape redactor
 
-			final Function<Response, Response> post=message -> message.attribute(Shape.shape(), message.attribute(Shape.shape())
+			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape())
 
-					.map(new Redactor(Shape.Role, request.roles()))
-					.map(new Redactor(Shape.Task, task))
-					.map(new Redactor(Shape.Area, area))
-					.map(new Redactor(Shape.Mode, Shape.Convey))
+					.map(new Redactor(Role, request.roles()))
+					.map(new Redactor(Task, task))
+					.map(new Redactor(Area, area))
+					.map(new Redactor(Mode, Convey))
 
 			);
 
-			return Shape.empty(baseline) ? request.reply(response -> response.status(Forbidden))
-					: Shape.empty(authorized) ? request.reply(response -> response.status(Unauthorized))
+			return baseline.equals(or()) ? request.reply(status(Forbidden))
+					: authorized.equals(or()) ? request.reply(status(Unauthorized))
 					: handler.handle(request.map(pre)).map(post);
 
 		};
