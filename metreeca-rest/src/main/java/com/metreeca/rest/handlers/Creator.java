@@ -29,6 +29,10 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.json.shapes.Guard.Create;
+import static com.metreeca.json.shapes.Guard.Detail;
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.assets.Engine.engine;
 import static java.util.UUID.randomUUID;
 
 
@@ -40,7 +44,7 @@ import static java.util.UUID.randomUUID;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} area;</li>
  *
  * <li>engine-assisted request payload
@@ -54,7 +58,7 @@ import static java.util.UUID.randomUUID;
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Creator extends Actor {
+public final class Creator extends Delegator {
 
 	private static final Object monitor=new Object();
 
@@ -107,12 +111,16 @@ public final class Creator extends Actor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Creator(final Function<Request, String> slug) {
-		delegate(wrapper(slug).wrap(_creator()) // chain slug immediately before handler after custom wrappers
 
-				.with(connector())
-				.with(throttler(Guard.Create, Guard.Detail))
-				.with(validator())
+	private Creator(final Function<Request, String> slug) {
+
+		final Engine engine=asset(engine());
+
+		delegate(wrapper(slug).wrap(engine::create) // chain slug immediately before handler after custom wrappers
+
+				.with(engine.connector())
+				.with(engine.throttler(Create, Detail))
+				.with(engine.validator())
 
 		);
 	}

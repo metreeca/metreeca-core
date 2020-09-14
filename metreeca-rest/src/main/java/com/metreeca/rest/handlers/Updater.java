@@ -19,11 +19,19 @@ package com.metreeca.rest.handlers;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.Collection;
+
+import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.rest.assets.Engine.engine;
 
 
 /**
@@ -34,12 +42,12 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Update} task and the {@linkplain Guard#Target} area, when operating on
  * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
  * resources;</li>
  *
- * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(Shape, Collection) validation};</li>
+ * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(IRI, Shape, Collection) validation};</li>
  *
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
  *
@@ -47,7 +55,7 @@ import static com.metreeca.rest.Wrapper.wrapper;
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Updater extends Actor {
+public final class Updater extends Delegator {
 
 	/**
 	 * Creates a resource updater.
@@ -62,14 +70,17 @@ public final class Updater extends Actor {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Updater() {
-		delegate(_updater()
 
-				.with(connector())
+		final Engine engine=asset(engine());
+
+		delegate(((Handler)engine::update)
+
+				.with(engine.connector())
 				.with(wrapper(Request::collection,
-						throttler(Guard.Update, Guard.Target),
-						throttler(Guard.Update, Guard.Detail)
+						engine.throttler(Update, Target),
+						engine.throttler(Update, Detail)
 				))
-				.with(validator())
+				.with(engine.validator())
 
 		);
 

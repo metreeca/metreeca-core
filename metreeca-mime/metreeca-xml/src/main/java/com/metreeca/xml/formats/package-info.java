@@ -16,7 +16,7 @@
  */
 
 /**
- * XML message body formats and codecs.
+ * XML message formats.
  */
 
 package com.metreeca.xml.formats;
