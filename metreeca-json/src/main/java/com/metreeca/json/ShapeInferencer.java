@@ -15,10 +15,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.json.probes;
+package com.metreeca.json;
 
-import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -41,12 +39,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
-/**
- * Shape inferencer.
- *
- * <p>Recursively expands shapes with additional implied constraints.</p>
- */
-public final class Inferencer extends Shape.Probe<Shape> {
+final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
@@ -92,7 +85,7 @@ public final class Inferencer extends Shape.Probe<Shape> {
 		final IRI iri=field.label();
 		final Shape shape=field.value().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(ResourceType))), datatype(ResourceType))
+		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(ResourceType))), datatype(IRIType))
 				: direct(iri) ? and(field(iri, shape), datatype(ResourceType))
 				: field(iri, and(shape, datatype(ResourceType)));
 	}

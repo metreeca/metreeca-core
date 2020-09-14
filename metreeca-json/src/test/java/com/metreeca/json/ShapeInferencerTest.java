@@ -15,9 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.json.probes;
-
-import com.metreeca.json.Shape;
+package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
@@ -38,10 +36,10 @@ import static com.metreeca.json.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class InferencerTest {
+final class ShapeInferencerTest {
 
 	private Shape expand(final Shape shape) {
-		return shape.map(new Inferencer());
+		return shape.map(new ShapeInferencer());
 	}
 
 
@@ -109,10 +107,10 @@ final class InferencerTest {
 				));
 
 		assertThat(expand(field(RDF.TYPE)))
-				.as("both subject and object of a rdf:type field are resources")
+				.as("rdf:type field have resource subjects and IRI objects")
 				.isEqualTo(and(
 						datatype(ResourceType),
-						and(field(RDF.TYPE, datatype(ResourceType)), datatype(ResourceType))
+						and(field(RDF.TYPE, datatype(ResourceType)), datatype(IRIType))
 				));
 
 	}

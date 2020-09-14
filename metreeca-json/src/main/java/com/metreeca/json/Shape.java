@@ -52,6 +52,11 @@ public abstract class Shape {
 
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static Shape expanded(final Shape shape) {
+		return shape.map(new ShapeInferencer());
+	}
+
+
 	public static Shape required() { return and(minCount(1), maxCount(1)); }
 
 	public static Shape optional() { return maxCount(1); }
