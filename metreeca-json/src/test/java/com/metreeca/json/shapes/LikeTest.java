@@ -19,14 +19,13 @@ package com.metreeca.json.shapes;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.shapes.Like.like;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class LikeTest {
 
-	private String expression(final String keywords) {
-		return like(keywords, true).toExpression();
+	private String keywords(final CharSequence keywords) {
+		return Like.keywords(keywords, true);
 	}
 
 
@@ -35,18 +34,18 @@ final class LikeTest {
 	@Test void testCompileExpression() {
 		assertThat(" one two three ")
 
-				.as("no keywords").matches(expression(""))
-				.as("junk only").matches(expression("--"))
+				.as("no keywords").matches(keywords(""))
+				.as("junk only").matches(keywords("--"))
 
-				.as("single stem").matches(expression("tw"))
-				.as("multiple stems").matches(expression("tw th"))
+				.as("single stem").matches(keywords("tw"))
+				.as("multiple stems").matches(keywords("tw th"))
 
-				.as("leading junk").matches(expression("--tw"))
-				.as("trailing junk").matches(expression("tw--"))
-				.as("middle junk").matches(expression("tw--th"))
+				.as("leading junk").matches(keywords("--tw"))
+				.as("trailing junk").matches(keywords("tw--"))
+				.as("middle junk").matches(keywords("tw--th"))
 
-				.as("unknown stem").doesNotMatch(expression("x"))
-				.as("missorted stems").doesNotMatch(expression("th tw"));
+				.as("unknown stem").doesNotMatch(keywords("x"))
+				.as("missorted stems").doesNotMatch(keywords("th tw"));
 	}
 
 }

@@ -20,7 +20,7 @@ package com.metreeca.json.shapes;
 import com.metreeca.json.Shape;
 
 import java.text.Normalizer;
-import java.util.function.Predicate;
+import java.text.Normalizer.Form;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +39,24 @@ public final class Like implements Shape {
 	private static final Pattern MarkPattern=Pattern.compile("\\p{M}");
 
 
-	public static Like like(final String keywords, final boolean stemming) {
+	public static String keywords(final CharSequence text, final boolean stemming) {
+
+		if ( text == null ) {
+			throw new NullPointerException("null text");
+		}
+
+		final StringBuilder builder=new StringBuilder(text.length()).append("(?i:.*");
+
+		final String normal=MarkPattern.matcher(Normalizer.normalize(text, Form.NFD)).replaceAll("");
+
+		for (final Matcher matcher=WordPattern.matcher(normal); matcher.find(); ) {
+			builder.append("\\b").append(matcher.group()).append(stemming ? "" : "\\b").append(".*");
+		}
+
+		return builder.append(")").toString();
+	}
+
+	public static Shape like(final String keywords, final boolean stemming) {
 		return new Like(keywords, stemming);
 	}
 
@@ -75,26 +92,7 @@ public final class Like implements Shape {
 	 * @return a regular expression matching strings matched by this like constraint
 	 */
 	public String toExpression() {
-
-		final StringBuilder builder=new StringBuilder(text.length()).append("(?i:.*");
-
-		for (final Matcher matcher=WordPattern.matcher(normalize(text)); matcher.find(); ) {
-			builder.append("\\b").append(matcher.group()).append(stemming ? "" : "\\b").append(".*");
-		}
-
-		return builder.append(")").toString();
-	}
-
-	public Predicate<String> toMatcher() {
-
-		final Pattern pattern=Pattern.compile(toExpression());
-
-		return string -> pattern.matcher(normalize(string)).matches();
-	}
-
-
-	private String normalize(final CharSequence string) {
-		return MarkPattern.matcher(Normalizer.normalize(string, Normalizer.Form.NFD)).replaceAll("");
+		return keywords(text, stemming);
 	}
 
 
