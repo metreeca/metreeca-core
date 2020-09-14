@@ -37,12 +37,13 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Meta.aliases;
+import static com.metreeca.rest.formats.JSONLDFormat.driver;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 
 
-final class JSONLDDecoder extends JSONLDCodec {
+final class JSONLDDecoder {
 
 	private final IRI focus;
 	private final Shape shape;
@@ -52,32 +53,15 @@ final class JSONLDDecoder extends JSONLDCodec {
 	private final Function<String, String> resolver;
 
 
-	JSONLDDecoder(final IRI focus, final Shape shape) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
+	JSONLDDecoder(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
 		this.shape=driver(shape);
 
 		this.base=URI.create(focus.stringValue());
 
-		final Map<String, String> aliases2keywords=keywords(shape)
-
-				.collect(toMap(Entry::getValue, Entry::getKey, (x, y) -> {
-
-					if ( !x.equals(y) ) {
-						throw new IllegalArgumentException("conflicting aliases for JSON-LD keywords");
-					}
-
-					return x;
-
-				}));
+		final Map<String, String> aliases2keywords=keywords
+				.entrySet().stream().collect(toMap(Entry::getValue, Entry::getKey));
 
 		this.resolver=alias -> aliases2keywords.getOrDefault(alias, alias);
 	}

@@ -124,16 +124,17 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return query(request.query(), iri(request.item()), digest).fold(
+				return query(request.query(), iri(request.item()), digest)
 
-						response::map, query -> graph.exec(connection -> {
+						.fold(response::map, query -> graph.exec(connection -> {
 
 							final Collection<Statement> matches=fetch(connection, item, query);
 
 							if ( filtered ) { // matches only
 
 								return response
-										.status(OK).attribute(shape(), query.map(new Query.Probe<Shape>() {
+										.status(OK)
+										.attribute(shape(), query.map(new Query.Probe<Shape>() {
 
 											@Override public Shape probe(final Items items) {
 												return field(LDP.CONTAINS, items.shape());

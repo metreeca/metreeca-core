@@ -35,18 +35,29 @@ import static java.util.Arrays.asList;
 
 
 /**
- * Linked data shape constraint.
+ * JSON-LD shape constraint.
  */
 public abstract class Shape {
 
 	/**
-	 * Retrieves the default shape asset factory.
+	 * Retrieves the default JSON-LD shape asset factory.
 	 *
 	 * @return the default shape factory, which returns an {@linkplain Or#or() empty disjunction}, that is a shape
-	 * the always fail to validate
+	 * the always fails to validate
 	 */
 	public static Supplier<Shape> shape() {
 		return Or::or;
+	}
+
+	/**
+	 * Retrieves the default JSON-LD keywords asset factory.
+	 *
+	 * <p>The keywords asset maps JSON-LD {@code @keywords} to user-defined aliases.</p>
+	 *
+	 * @return the default keywords factory, which returns an empty map
+	 */
+	public static Supplier<Map<String, String>> keywords() {
+		return Collections::emptyMap;
 	}
 
 

@@ -61,11 +61,6 @@ public final class Driver implements Wrapper {
 	 * @throws NullPointerException if {@code shape} is null
 	 */
 	public static Driver driver(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
 		return new Driver(shape);
 	}
 
@@ -76,6 +71,11 @@ public final class Driver implements Wrapper {
 
 
 	private Driver(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
 		this.shape=shape;
 	}
 

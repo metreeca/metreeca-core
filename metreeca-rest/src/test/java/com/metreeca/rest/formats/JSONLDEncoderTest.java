@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.json.JsonObject;
 import javax.json.JsonValue;
+import java.util.Map;
 
 import static com.metreeca.json.JSONAssert.assertThat;
 import static com.metreeca.json.Values.*;
@@ -35,9 +36,9 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.json.shapes.Or.or;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static javax.json.Json.*;
 import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
@@ -52,15 +53,22 @@ final class JSONLDEncoderTest {
 	private final IRI z=iri(base, "z");
 
 
-	private JsonObject encode(final IRI focus, final Shape shape, final Statement... model) {
-		return new JSONLDEncoder(focus, shape).encode(asList(model));
+	private JsonObject encode(
+			final IRI focus, final Shape shape, final Statement... model
+	) {
+		return encode(focus, shape, emptyMap(), model);
+	}
+
+	private JsonObject encode(
+			final IRI focus, final Shape shape, final Map<String, String> keywords, final Statement... model) {
+		return new JSONLDEncoder(focus, shape, keywords).encode(asList(model));
 	}
 
 
 	@Nested final class Values {
 
 		private JsonValue encode(final Value value) {
-			return new JSONLDEncoder(iri(base), field(RDF.VALUE, Shape.optional()))
+			return new JSONLDEncoder(iri(base), field(RDF.VALUE, Shape.optional()), emptyMap())
 					.encode(singleton(statement(iri(base), RDF.VALUE, value))) // wrap value inside root object
 					.get("value"); // then unwrap
 		}
@@ -515,22 +523,26 @@ final class JSONLDEncoderTest {
 			);
 		}
 
+	}
+
+	@Nested final class Keywords {
+
 		@Test void testHandleKeywordAliases() {
 			assertThat(encode(x,
 
-					and(
-							meta("@id", "id"),
-							meta("@value", "value"),
-							meta("@type", "type"),
-							meta("@language", "language"),
+					field(RDF.VALUE),
 
-							field(RDF.VALUE, and())
+					map(
+							entry("@id", "id"),
+							entry("@value", "value"),
+							entry("@type", "type"),
+							entry("@language", "language")
 					),
 
 					statement(x, RDF.VALUE, literal("string", "en")),
-					statement(x, RDF.VALUE, literal("2020-09-10", XSD.DATE))
+					statement(x, RDF.VALUE, literal("2020-09-10", XSD.DATE)))
 
-			)).isEqualTo(createObjectBuilder()
+			).isEqualTo(createObjectBuilder()
 					.add("id", "/x")
 					.add(RDF.VALUE.stringValue(), createArrayBuilder() // keyword alias overrides field alias
 							.add(createObjectBuilder()

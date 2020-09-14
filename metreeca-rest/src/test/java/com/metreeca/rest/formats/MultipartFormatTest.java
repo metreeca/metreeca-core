@@ -25,16 +25,19 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.util.*;
+import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.metreeca.json.Values.entry;
+import static com.metreeca.json.Values.map;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class MultipartFormatTest {
+
 
 	@Nested final class Input {
 
@@ -171,15 +174,6 @@ final class MultipartFormatTest {
 
 	@Nested final class Output {
 
-		@SafeVarargs private final Map<String, Message<?>> map(final Map.Entry<String, Message<?>>... entries) {
-			return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-		}
-
-		private Map.Entry<String, Message<?>> entry(final String item, final Message<?> part) {
-			return new AbstractMap.SimpleImmutableEntry<>(item, part);
-		}
-
-
 		@Test void testGenerateRandomBoundary() {
 			new Request().reply(response -> response
 
@@ -195,7 +189,6 @@ final class MultipartFormatTest {
 							r -> r.header("Content-Type").filter(s -> s.contains("; boundary=")).isPresent(),
 							"multipart boundary set"
 					))
-
 
 			);
 		}
@@ -215,7 +208,7 @@ final class MultipartFormatTest {
 
 							.hasHeader("Content-Type", "multipart/form-data; boundary=1234567890")
 
-							.hasBody(OutputFormat.output(), target -> {
+							.hasBody(output(), target -> {
 
 								final ByteArrayOutputStream output=new ByteArrayOutputStream();
 

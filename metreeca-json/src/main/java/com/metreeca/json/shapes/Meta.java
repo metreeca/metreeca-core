@@ -224,15 +224,15 @@ public final class Meta extends Shape {
 	}
 
 
-	public static Meta meta(final Object label, final Object value) {
+	public static Meta meta(final String label, final Object value) {
 		return new Meta(label, value);
 	}
 
-	public static Optional<Object> meta(final Object label, final Shape shape) {
+	public static Optional<Object> meta(final String label, final Shape shape) {
 		return Optional.ofNullable(shape.map(new MetaProbe(label)));
 	}
 
-	public static <T> Optional<T> meta(final Object label, final Shape shape, final Class<T> clazz) {
+	public static <T> Optional<T> meta(final String label, final Shape shape, final Class<T> clazz) {
 		return meta(label, shape)
 				.filter(clazz::isInstance)
 				.map(clazz::cast);
@@ -261,11 +261,11 @@ public final class Meta extends Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Object label;
+	private final String label;
 	private final Object value;
 
 
-	private Meta(final Object label, final Object value) {
+	private Meta(final String label, final Object value) {
 
 		if ( label == null ) {
 			throw new NullPointerException("null label");
@@ -280,7 +280,7 @@ public final class Meta extends Shape {
 	}
 
 
-	public Object label() {
+	public String label() {
 		return label;
 	}
 

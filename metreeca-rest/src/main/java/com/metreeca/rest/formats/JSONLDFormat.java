@@ -28,8 +28,11 @@ import javax.json.JsonObject;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
+import static com.metreeca.json.Shape.expanded;
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
@@ -86,7 +89,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		try {
 
-			return Right(new JSONLDParser(focus, shape).parse(query));
+			return Right(new JSONLDParser(focus, shape, asset(keywords())).parse(query));
 
 		} catch ( final JsonException e ) {
 
@@ -100,8 +103,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	}
 
 
-	public static Either<Trace, Collection<Statement>> validate(final IRI focus, final Shape shape,
-			final Collection<Statement> model) {
+	public static Either<Trace, Collection<Statement>> validate(
+			final IRI focus, final Shape shape, final Collection<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -132,7 +135,17 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null object");
 		}
 
-		return new JSONTrimmer().trim(focus, object, shape).asJsonObject();
+		return new JSONTrimmer(asset(keywords())).trim(focus, shape, object).asJsonObject();
+	}
+
+
+	static Shape driver(final Shape shape) { // !!! caching
+		return expanded(shape.redact( // add inferred constraints to drive json shorthands
+				retain(Role),
+				retain(Task),
+				retain(Area),
+				retain(Mode, Convey) // remove internal filtering shapes
+		));
 	}
 
 
@@ -161,7 +174,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 						return Right(new JSONLDDecoder(
 
 								iri(message.item()),
-								message.attribute(shape())
+								message.attribute(shape()),
+								asset(keywords())
 
 						).decode(json));
 
@@ -192,7 +206,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 				.body(json(), new JSONLDEncoder( // make json available for trimming
 
 						iri(message.item()),
-						message.attribute(shape())
+						message.attribute(shape()),
+						asset(keywords())
 
 				).encode(value));
 	}

@@ -52,6 +52,7 @@ import static com.metreeca.json.shapes.MinExclusive.minExclusive;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Pattern.pattern;
+import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.*;
 
 
@@ -110,7 +111,7 @@ final class JSONLDParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new JSONLDParser(iri(), shape)
+		return new JSONLDParser(iri(), shape, emptyMap())
 				.parse(query.replace('\'', '"'));
 	}
 

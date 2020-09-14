@@ -18,7 +18,6 @@
 package com.metreeca.json;
 
 import com.metreeca.json.shapes.Datatype;
-import com.metreeca.json.shapes.Guard;
 
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.*;
@@ -35,15 +34,16 @@ import java.util.Map;
 import java.util.logging.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Shape.optional;
 import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.json.shapes.MaxLength.maxLength;
-import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.Pattern.pattern;
 import static java.util.Collections.unmodifiableMap;
@@ -88,11 +88,11 @@ public final class ValuesTest {
 
 	public static final Shape Textual=and(Shape.required(), datatype(XSD.STRING));
 
-	public static final Shape Employee=Guard.role(Manager, Salesman).then(
+	public static final Shape Employee=role(Manager, Salesman).then(
 
-			Guard.convey().then(
+			convey().then(
 
-					Guard.server().then(
+					server().then(
 							field(RDF.TYPE, and(Shape.required(), Datatype.datatype(Values.IRIType))),
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(Shape.required(), datatype(XSD.STRING), pattern("\\d+")))
@@ -106,37 +106,34 @@ public final class ValuesTest {
 							field(term("title"), and(Shape.required(), datatype(XSD.STRING), maxLength(80)))
 					),
 
-					Guard.role(Manager).then(
+					role(Manager).then(
 
 							field(term("seniority"), and(Shape.required(), datatype(XSD.INTEGER),
 									minInclusive(Values.literal(Values.integer(1))),
 									maxInclusive(Values.literal(Values.integer(5))))),
 
 							field(term("supervisor"), and(
-									Shape.optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
-									Guard.relate().then(field(RDFS.LABEL, Textual))
+									optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, Textual))
 							)),
 
 							field(term("subordinate"), and(
-									Shape.optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
-									Guard.relate().then(field(RDFS.LABEL, Textual))
+									optional(), datatype(Values.IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, Textual))
 							))
 
 					)
 
 			),
 
-			Guard.delete().then(
+			delete().then(
 					field(term("office"), and())
 			)
 
 	);
 
-	public static final Shape Employees=Guard.role(Manager, Salesman).then(
-			meta(RDF.TYPE, LDP.DIRECT_CONTAINER),
-			meta(LDP.IS_MEMBER_OF_RELATION, RDF.TYPE),
-			meta(LDP.MEMBERSHIP_RESOURCE, term("Employee")),
-			Guard.convey().then(
+	public static final Shape Employees=role(Manager, Salesman).then(
+			convey().then(
 					field(RDFS.LABEL, Textual),
 					field(RDFS.COMMENT, Textual),
 					field(LDP.CONTAINS, and(Shape.multiple(), Employee))
@@ -163,8 +160,7 @@ public final class ValuesTest {
 	private static final Map<String, Model> DatasetCache=new HashMap<>();
 
 
-	//// Factories
-	// ///////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static IRI term(final String name) {
 
@@ -185,8 +181,7 @@ public final class ValuesTest {
 	}
 
 
-	//// Datasets
-	// ////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Datasets //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Model small() {
 		return dataset(ValuesTest.class.getResource("ValuesTestSmall.ttl"));
@@ -221,8 +216,7 @@ public final class ValuesTest {
 	}
 
 
-	//// RDF Codecs
-	// //////////////////////////////////////////////////////////////////////////////////////////////////
+	//// RDF Codecs ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static String turtle(final String rdf) {
 		return TurtlePrefixes+"\n\n"+rdf; // !!! avoid prefix clashes

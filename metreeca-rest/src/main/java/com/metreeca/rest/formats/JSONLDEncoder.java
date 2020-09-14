@@ -36,11 +36,11 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.aliases;
+import static com.metreeca.rest.formats.JSONLDFormat.driver;
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toMap;
 
 
-final class JSONLDEncoder extends JSONLDCodec {
+final class JSONLDEncoder {
 
 	private final IRI focus;
 	private final Shape shape;
@@ -51,15 +51,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 	private final Function<String, String> aliaser;
 
 
-	JSONLDEncoder(final IRI focus, final Shape shape) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
+	JSONLDEncoder(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
 		this.shape=driver(shape);
@@ -70,17 +62,7 @@ final class JSONLDEncoder extends JSONLDCodec {
 				.map(matcher -> matcher.group("schemeall")+matcher.group("hostall")+"/")
 				.orElse("/");
 
-		final Map<String, String> keywords2aliases=keywords(shape)
-
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
-
-					if ( !x.equals(y) ) {
-						throw new IllegalArgumentException("conflicting aliases for JSON-LD keywords");
-					}
-
-					return x;
-
-				}));
+		final Map<String, String> keywords2aliases=keywords;
 
 		this.aliased=keywords2aliases::containsValue;
 		this.aliaser=keyword -> keywords2aliases.getOrDefault(keyword, keyword);

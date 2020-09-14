@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import javax.json.*;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Map;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.optional;
@@ -39,13 +40,14 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Meta.meta;
+import static java.util.Collections.emptyMap;
 import static javax.json.Json.*;
 import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class JSONLDDecoderTest {
 
-	private final String base="http://example.com/";
+	private static final String base="http://example.com/";
 
 	private final BNode a=bnode();
 	private final BNode b=bnode();
@@ -56,12 +58,16 @@ final class JSONLDDecoderTest {
 	private final IRI z=iri(base, "z");
 
 
-	private Collection<Statement> decode(final IRI focus, final Shape shape, final JsonObjectBuilder object) {
-		return decode(focus, shape, object.build());
+	private Collection<Statement> decode(
+			final IRI focus, final Shape shape, final JsonObjectBuilder object
+	) {
+		return decode(focus, shape, emptyMap(), object);
 	}
 
-	private Collection<Statement> decode(final IRI focus, final Shape shape, final JsonObject object) {
-		return new JSONLDDecoder(focus, shape).decode(object);
+	private Collection<Statement> decode(
+			final IRI focus, final Shape shape, final Map<String, String> keywords, final JsonObjectBuilder object
+	) {
+		return new JSONLDDecoder(focus, shape, keywords).decode(object.build());
 	}
 
 
@@ -83,16 +89,6 @@ final class JSONLDDecoderTest {
 
 			)).isInstanceOf(JsonException.class);
 		}
-
-		@Test void testIgnoreDuplicateKeywords() {
-			assertThat(decode(x, meta("@id", "id"), createObjectBuilder()
-
-					.add("id", "/x")
-					.add("@id", "/x")
-
-			)).isIsomorphicTo();
-		}
-
 
 		@Test void testIgnoreNullFields() {
 			assertThat(decode(x, field(RDF.VALUE, and()), createObjectBuilder()
@@ -127,7 +123,7 @@ final class JSONLDDecoderTest {
 		}
 
 		private Value decode(final JsonValue value) {
-			return new JSONLDDecoder(iri(base), field(RDF.VALUE, optional()))
+			return new JSONLDDecoder(iri(base), field(RDF.VALUE, optional()), emptyMap())
 
 					.decode(createObjectBuilder().add("value", value).build())
 
@@ -225,7 +221,7 @@ final class JSONLDDecoderTest {
 
 					and(),
 
-					EMPTY_JSON_OBJECT
+					createObjectBuilder()
 
 			)).isIsomorphicTo();
 		}
@@ -565,18 +561,20 @@ final class JSONLDDecoderTest {
 			);
 		}
 
+	}
+
+	@Nested final class Keywords {
 
 		@Test void testHandleKeywordAliases() {
 			assertThat(decode(x,
 
-					and(
-							meta("@id", "id"),
-							meta("@value", "value"),
-							meta("@type", "type"),
-							meta("@language", "language"),
+					field(RDF.VALUE),
 
-							field(RDF.VALUE, and())
-
+					map(
+							entry("@id", "id"),
+							entry("@value", "value"),
+							entry("@type", "type"),
+							entry("@language", "language")
 					),
 
 					createObjectBuilder()
@@ -600,6 +598,14 @@ final class JSONLDDecoderTest {
 			);
 		}
 
+		@Test void testIgnoreDuplicateKeywords() {
+			assertThat(decode(x, and(), map(entry("@id", "id")), createObjectBuilder()
+
+					.add("id", "/x")
+					.add("@id", "/x")
+
+			)).isIsomorphicTo();
+		}
 
 	}
 

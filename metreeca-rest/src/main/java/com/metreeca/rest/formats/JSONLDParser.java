@@ -57,9 +57,9 @@ final class JSONLDParser {
 	private final JSONLDDecoder decoder;
 
 
-	JSONLDParser(final IRI focus, final Shape shape) {
+	JSONLDParser(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 		this.shape=shape;
-		this.decoder=new JSONLDDecoder(focus, shape);
+		this.decoder=new JSONLDDecoder(focus, shape, keywords);
 	}
 
 
