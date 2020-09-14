@@ -18,10 +18,13 @@
 package com.metreeca.rest.handlers;
 
 
+import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.formats.JSONLDFormat;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -40,7 +43,8 @@ import static java.util.UUID.randomUUID;
  * {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} area;</li>
  *
- * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ * <li>engine-assisted request payload
+ * {@linkplain JSONLDFormat#validate(org.eclipse.rdf4j.model.IRI, Shape, Collection) validation};</li>
  *
  * <li>resource {@linkplain #Creator(Function) slug} generation;</li>
  *

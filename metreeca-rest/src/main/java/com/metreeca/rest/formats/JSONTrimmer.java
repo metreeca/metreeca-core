@@ -34,14 +34,14 @@ import static javax.json.Json.createObjectBuilder;
 
 final class JSONTrimmer {
 
-	JsonValue trim(final JsonValue value, final Shape shape) {
-		return value instanceof JsonObject ? trim(shape, value.asJsonObject())
-				: value instanceof JsonArray ? trim(shape, value.asJsonArray())
+	JsonValue trim(final IRI focus, final JsonValue value, final Shape shape) {
+		return value instanceof JsonObject ? trim(focus, shape, value.asJsonObject())
+				: value instanceof JsonArray ? trim(focus, shape, value.asJsonArray())
 				: value;
 	}
 
 
-	private JsonObject trim(final Shape shape, final Map<String, JsonValue> object) {
+	private JsonObject trim(final IRI focus, final Shape shape, final Map<String, JsonValue> object) {
 
 		final Map<IRI, Shape> fields=fields(shape);
 		final Map<String, IRI> aliases=aliases(shape)
@@ -55,14 +55,14 @@ final class JSONTrimmer {
 				.map(fields::get)
 
 				.ifPresent(nested ->
-						builder.add(label, trim(value, nested))
+						builder.add(label, trim(focus, value, nested))
 				));
 
 		return builder.build();
 	}
 
-	private JsonArray trim(final Shape shape, final Collection<JsonValue> array) {
-		return Json.createArrayBuilder(array.stream().map(v -> trim(v, shape)).collect(toList())).build();
+	private JsonArray trim(final IRI focus, final Shape shape, final Collection<JsonValue> array) {
+		return Json.createArrayBuilder(array.stream().map(v -> trim(focus, v, shape)).collect(toList())).build();
 	}
 
 }

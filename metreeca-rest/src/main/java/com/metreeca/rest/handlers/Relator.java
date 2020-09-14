@@ -21,6 +21,7 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.formats.JSONLDFormat;
 
 import javax.json.JsonObject;
 
@@ -42,7 +43,9 @@ import static com.metreeca.rest.Wrapper.wrapper;
  *
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
  *
- * <li>engine-assisted response payload {@linkplain Shape#trim(JsonObject) trimming}, considering shapes as above.</li>
+ * <li>engine-assisted response payload {@linkplain JSONLDFormat#trim(org.eclipse.rdf4j.model.IRI, Shape, JsonObject)
+ * trimming}, considering shapes
+ * as above.</li>
  *
  * </ul>
  *

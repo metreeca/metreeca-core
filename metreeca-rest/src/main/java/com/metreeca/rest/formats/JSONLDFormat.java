@@ -17,8 +17,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -55,20 +54,6 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 */
 	public static JSONLDFormat jsonld() {
 		return new JSONLDFormat();
-	}
-
-
-	public static JsonObject trim(final Shape shape, final JsonObject object) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( object == null ) {
-			throw new NullPointerException("null object");
-		}
-
-		return new JSONTrimmer().trim(object, shape).asJsonObject();
 	}
 
 
@@ -112,6 +97,42 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			return Left(status(UnprocessableEntity, e));
 
 		}
+	}
+
+
+	public static Either<Trace, Collection<Statement>> validate(final IRI focus, final Shape shape,
+			final Collection<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( model == null ) {
+			throw new NullPointerException("null model");
+		}
+
+		return new JSONLDValidator().validate(focus, shape, model);
+	}
+
+	public static JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( object == null ) {
+			throw new NullPointerException("null object");
+		}
+
+		return new JSONTrimmer().trim(focus, object, shape).asJsonObject();
 	}
 
 

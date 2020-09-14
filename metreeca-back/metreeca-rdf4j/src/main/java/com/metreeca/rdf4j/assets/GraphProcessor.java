@@ -28,7 +28,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.*;
-import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
@@ -67,8 +66,6 @@ import static java.util.stream.Collectors.toSet;
 
 
 abstract class GraphProcessor {
-
-	static final Comparator<Value> comparator=new ValueComparator();
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -433,12 +430,12 @@ abstract class GraphProcessor {
 
 			mins.stream()
 					.filter(Objects::nonNull)
-					.reduce((x, y) -> comparator.compare(x, y) < 0 ? x : y)
+					.reduce((x, y) -> Values.compare(x, y) < 0 ? x : y)
 					.ifPresent(min -> model.add(resource, GraphEngine.min, min));
 
 			maxs.stream()
 					.filter(Objects::nonNull)
-					.reduce((x, y) -> comparator.compare(x, y) > 0 ? x : y)
+					.reduce((x, y) -> Values.compare(x, y) > 0 ? x : y)
 					.ifPresent(max -> model.add(resource, GraphEngine.max, max));
 
 			return model;

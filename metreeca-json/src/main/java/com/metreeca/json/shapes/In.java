@@ -55,7 +55,7 @@ public final class In extends Shape {
 	private final Set<Value> values;
 
 
-	public In(final Collection<? extends Value> values) {
+	private In(final Collection<? extends Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");

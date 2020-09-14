@@ -41,7 +41,7 @@ public interface Engine {
 	}
 
 
-	//// Transaction Management ///////////////////////////////////////////////////////////////////////////////////////
+	//// Transaction Management ////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Executes a task within a storage transaction.
@@ -90,27 +90,7 @@ public interface Engine {
 	public <R> R exec(final Supplier<R> task);
 
 
-	//// Payload Management ///////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Validates message payloads.
-	 *
-	 * <p>Validates the engine-specific message {@linkplain Message#body(Format) payload} against the message
-	 * {@linkplain Shape#shape() shape}.</p>
-	 *
-	 * @param <M>     the type of {@code message}
-	 * @param message the message whose engine-specific payload is to be validated
-	 *
-	 * @return a value providing access to {@code message}, if its engine-specific {@linkplain Message#body(Format)
-	 * payload} is well-formed and compatible with its {@linkplain Shape#shape() shape}; an error providing access
-	 * to a failure response builder possibly reporting a validation trace, otherwise
-	 *
-	 * @throws NullPointerException if {@code message} is null
-	 */
-	public <M extends Message<M>> Either<MessageException, M> validate(final M message);
-
-
-	//// CRUD Actions /////////////////////////////////////////////////////////////////////////////////////////////////
+	//// CRUD Actions //////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Handles creation requests.

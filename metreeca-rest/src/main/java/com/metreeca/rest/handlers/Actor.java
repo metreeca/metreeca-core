@@ -24,15 +24,18 @@ import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
 import javax.json.JsonObject;
+import java.util.Collection;
 import java.util.function.UnaryOperator;
 
 import static com.metreeca.json.Shape.shape;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.Forbidden;
-import static com.metreeca.rest.Response.Unauthorized;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.JSONFormat.json;
-import static java.util.function.Function.identity;
+import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 
 /**
@@ -117,25 +120,34 @@ public abstract class Actor extends Delegator {
 	/**
 	 * Creates a validator wrapper.
 	 *
-	 * @return returns a wrapper performing engine-assisted {@linkplain Engine#validate(Message) validation} of request
-	 * payloads
+	 * @return returns a wrapper performing model-driven
+	 * {@linkplain JSONLDFormat#validate(org.eclipse.rdf4j.model.IRI, Shape, Collection)
+	 * validation} of request JSON-LD bodies
 	 */
 	protected Wrapper validator() {
-		return handler -> request -> engine.validate(request).fold(request::reply, handler::handle);
+		return handler -> request -> request.body(jsonld())
+
+				.flatMap(object -> validate(iri(request.item()), request.attribute(shape()), object).fold(
+						trace -> Left(status(UnprocessableEntity, trace.toJSON())),
+						model -> Right(handler.handle(request))
+				))
+
+				.fold(request::reply);
 	}
 
 	/**
 	 * Creates a trimmer wrapper.
 	 *
-	 * @return returns a wrapper performing engine-assisted {@linkplain JSONLDFormat#trim(Shape, JsonObject) trimming}
-	 * of {@linkplain Response#success() successful} response payloads
+	 * @return returns a wrapper performing engine-assisted
+	 * {@linkplain JSONLDFormat#trim(org.eclipse.rdf4j.model.IRI, Shape, JsonObject) trimming}
+	 * of {@linkplain Response#success() successful} response JSON-LD bodies
 	 */
 	protected Wrapper trimmer() {
 		return handler -> request -> handler.handle(request).map(response -> response.success()
 
 				? response.body(json())
-				.map(json -> response.body(json(), JSONLDFormat.trim(response.attribute(shape()), json)))
-				.fold(response::map, identity())
+				.map(json -> response.body(json(), trim(iri(response.item()), response.attribute(shape()), json)))
+				.fold(response::map)
 
 				: response
 		);

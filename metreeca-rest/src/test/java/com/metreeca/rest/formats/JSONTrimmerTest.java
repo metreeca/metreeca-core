@@ -21,6 +21,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.JSONAssert.assertThat;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
@@ -33,7 +34,7 @@ final class JSONTrimmerTest {
 	@Test void testPruneField() {
 		assertThat(new JSONTrimmer().trim(
 
-				createObjectBuilder()
+				iri(), createObjectBuilder()
 
 						.add("value", 1)
 						.add("other", 2)
@@ -52,7 +53,7 @@ final class JSONTrimmerTest {
 	@Test void testTraverseAnd() {
 		assertThat(new JSONTrimmer().trim(
 
-				createObjectBuilder()
+				iri(), createObjectBuilder()
 
 						.add("first", 1)
 						.add("rest", 2)
@@ -73,7 +74,7 @@ final class JSONTrimmerTest {
 	@Test void testTraverseField() {
 		assertThat(new JSONTrimmer().trim(
 
-				createObjectBuilder()
+				iri(), createObjectBuilder()
 
 						.add("first", createObjectBuilder()
 								.add("rest", 2)
@@ -97,7 +98,7 @@ final class JSONTrimmerTest {
 	@Test void testTraverseOr() {
 		assertThat(new JSONTrimmer().trim(
 
-				createObjectBuilder()
+				iri(), createObjectBuilder()
 
 						.add("first", 1)
 						.add("rest", 2)
@@ -118,7 +119,7 @@ final class JSONTrimmerTest {
 	@Test void testTraverseWhen() {
 		assertThat(new JSONTrimmer().trim(
 
-				createObjectBuilder()
+				iri(), createObjectBuilder()
 
 						.add("first", 1)
 						.add("rest", 2)

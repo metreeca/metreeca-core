@@ -15,97 +15,66 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rest.formats;
 
 import com.metreeca.json.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rdf4j.assets.Snippets.source;
-import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.UnprocessableEntity;
-import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
-import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 
-final class GraphValidator extends GraphProcessor {
+final class JSONLDValidator {
 
-	private final Graph graph=asset(graph());
+	public Either<Trace, Collection<Statement>> validate(final IRI focus, final Shape shape,
+			final Collection<Statement> model) {
 
+		final Collection<Statement> envelope=new HashSet<>();
 
-	<M extends com.metreeca.rest.Message<M>> com.metreeca.rest.Either<com.metreeca.rest.MessageException, M> validate(final M message) {
-		return message
+		final Trace trace=shape.map(new ValidatorProbe(
+				focus, singleton(focus), model, envelope
+		));
 
-				.body(jsonld())
+		final Map<String, Collection<Object>> issues=model.stream()
 
-				.flatMap(rdf -> validate(iri(message.item()), convey(message.attribute(shape())), rdf).fold(
-						trace -> Left(status(UnprocessableEntity, trace.toJSON())), model -> Right(message)
+				.filter(statement -> !envelope.contains(statement))
+
+				.collect(toMap(
+
+						statement -> statement.getSubject().equals(focus) ?
+								"unexpected property {"+format(statement.getPredicate())+"}"
+								: statement.getObject().equals(focus) ?
+								"unexpected property {^"+format(statement.getPredicate())+"}"
+								: "statement outside shape envelope",
+
+						Collections::singleton,
+
+						(x, y) -> Stream.of(x, y).flatMap(Collection::stream).collect(toSet())
+
 				));
-	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		final Trace merged=trace(trace(issues), trace);
 
-	private Either<Trace, Collection<Statement>> validate(
-			final IRI resource, final Shape shape, final Collection<Statement> model) {
-		return graph.exec(connection -> {
+		return merged.empty() ? Right(model) : Left(merged);
 
-			final Collection<Statement> envelope=new HashSet<>();
-
-			final Trace trace=shape.map(new ValidatorProbe(
-					connection, resource, singleton(resource), model, envelope
-			));
-
-			final Map<String, Collection<Object>> issues=model.stream()
-
-					.filter(statement -> !envelope.contains(statement))
-
-					.collect(toMap(
-
-							statement -> statement.getSubject().equals(resource) ?
-									"unexpected property {"+format(statement.getPredicate())+"}"
-									: statement.getObject().equals(resource) ?
-									"unexpected property {^"+format(statement.getPredicate())+"}"
-									: "statement outside shape envelope",
-
-							Collections::singleton,
-
-							(x, y) -> Stream.of(x, y).flatMap(Collection::stream).collect(toSet())
-
-					));
-
-
-			final Trace merged=trace(trace(issues), trace);
-
-			return merged.empty() ? Right(model) : Left(merged);
-
-		});
 	}
 
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final class ValidatorProbe extends Shape.Probe<Trace> {
-
-		private final RepositoryConnection connection;
 
 		private final IRI resource;
 		private final Collection<Value> focus;
@@ -115,12 +84,9 @@ final class GraphValidator extends GraphProcessor {
 
 
 		private ValidatorProbe(
-				final RepositoryConnection connection,
 				final IRI resource, final Collection<Value> focus,
 				final Collection<Statement> source, final Collection<Statement> target
 		) {
-
-			this.connection=connection;
 
 			this.resource=resource;
 			this.focus=focus;
@@ -152,11 +118,6 @@ final class GraphValidator extends GraphProcessor {
 			return shape.toString().replaceAll("\\s+", " ");
 		}
 
-
-		@Override public Trace probe(final Meta meta) {
-			return trace();
-		}
-
 		@Override public Trace probe(final Guard guard) {
 			throw new UnsupportedOperationException(guard.toString());
 		}
@@ -172,73 +133,73 @@ final class GraphValidator extends GraphProcessor {
 			);
 		}
 
-		@Override public Trace probe(final Clazz clazz) {
-			if ( focus.isEmpty() ) { return trace(); } else {
-
-				// retrieve the class hierarchy rooted in the expected class
-
-				final Set<Value> hierarchy=stream(connection.prepareTupleQuery(source(
-
-						"# clazz hierarchy\n"
-								+"\n"
-								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-								+"\n"
-								+"select distinct ?class { ?class rdfs:subClassOf* {root} }",
-
-						format(clazz.id())
-
-				)).evaluate())
-
-						.map(bindings -> bindings.getValue("class"))
-						.collect(toSet());
-
-
-				// retrieve type info for focus nodes
-
-				final Map<Value, Set<Value>> types=Stream.concat(
-
-						// retrieve type info from the validated model
-
-						focus.stream().flatMap(value -> source.stream()
-								.filter(pattern(value, RDF.TYPE, null))
-								.map(Statement::getObject)
-								.map(type -> new SimpleImmutableEntry<>(value, type))
-						),
-
-						// retrieve type info from graph
-
-						stream(connection.prepareTupleQuery(source(
-
-								"# type info\n"
-										+"\n"
-										+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-										+"\n"
-										+"select ?value ?type {\n"
-										+"\n"
-										+"\tvalues ?value {\n"
-										+"\t\t{values}\n"
-										+"\t}\n"
-										+"\n"
-										+"\t?value a ?type\n"
-										+"\n"
-										+"}",
-
-								Snippets.list(focus.stream().map(Values::format), "\n")
-
-						)).evaluate()).map(bindings -> new SimpleImmutableEntry<>(
-								bindings.getValue("value"),
-								bindings.getValue("type")
-						))
-
-				).collect(groupingBy(Map.Entry::getKey, mapping(Map.Entry::getValue, toSet())));
-
-				return trace(focus.stream()
-						.filter(value -> disjoint(types.getOrDefault(value, emptySet()), hierarchy))
-						.collect(toMap(v -> issue(clazz), Collections::singleton))
-				);
-
-			}
-		}
+		//@Override public Trace probe(final Clazz clazz) {
+		//	if ( focus.isEmpty() ) { return trace(); } else {
+		//
+		//		// retrieve the class hierarchy rooted in the expected class
+		//
+		//		final Set<Value> hierarchy=stream(connection.prepareTupleQuery(Snippets.source(
+		//
+		//				"# clazz hierarchy\n"
+		//						+"\n"
+		//						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+		//						+"\n"
+		//						+"select distinct ?class { ?class rdfs:subClassOf* {root} }",
+		//
+		//				format(clazz.id())
+		//
+		//		)).evaluate())
+		//
+		//				.map(bindings -> bindings.getValue("class"))
+		//				.collect(toSet());
+		//
+		//
+		//		// retrieve type info for focus nodes
+		//
+		//		final Map<Value, Set<Value>> types=Stream.concat(
+		//
+		//				// retrieve type info from the validated model
+		//
+		//				focus.stream().flatMap(value -> source.stream()
+		//						.filter(pattern(value, RDF.TYPE, null))
+		//						.map(Statement::getObject)
+		//						.map(type -> new SimpleImmutableEntry<>(value, type))
+		//				),
+		//
+		//				// retrieve type info from graph
+		//
+		//				stream(connection.prepareTupleQuery(Snippets.source(
+		//
+		//						"# type info\n"
+		//								+"\n"
+		//								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+		//								+"\n"
+		//								+"select ?value ?type {\n"
+		//								+"\n"
+		//								+"\tvalues ?value {\n"
+		//								+"\t\t{values}\n"
+		//								+"\t}\n"
+		//								+"\n"
+		//								+"\t?value a ?type\n"
+		//								+"\n"
+		//								+"}",
+		//
+		//						Snippets.list(focus.stream().map(Values::format), "\n")
+		//
+		//				)).evaluate()).map(bindings -> new SimpleImmutableEntry<>(
+		//						bindings.getValue("value"),
+		//						bindings.getValue("type")
+		//				))
+		//
+		//		).collect(groupingBy(Map.Entry::getKey, mapping(Map.Entry::getValue, toSet())));
+		//
+		//		return trace(focus.stream()
+		//				.filter(value -> disjoint(types.getOrDefault(value, emptySet()), hierarchy))
+		//				.collect(toMap(v -> issue(clazz), Collections::singleton))
+		//		);
+		//
+		//	}
+		//}
 
 
 		@Override public Trace probe(final MinExclusive minExclusive) {
@@ -246,7 +207,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(minExclusive.limit());
 
 			return trace(focus.stream()
-					.filter(negate(value -> comparator.compare(value, limit) > 0))
+					.filter(negate(value -> compare(value, limit) > 0))
 					.collect(toMap(v -> issue(minExclusive), Collections::singleton))
 			);
 		}
@@ -256,7 +217,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(maxExclusive.limit());
 
 			return trace(focus.stream()
-					.filter(negate(value -> comparator.compare(value, limit) < 0))
+					.filter(negate(value -> compare(value, limit) < 0))
 					.collect(toMap(v -> issue(maxExclusive), Collections::singleton))
 			);
 		}
@@ -266,7 +227,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(minInclusive.limit());
 
 			return trace(focus.stream()
-					.filter(negate(value -> comparator.compare(value, limit) >= 0))
+					.filter(negate(value -> compare(value, limit) >= 0))
 					.collect(toMap(v -> issue(minInclusive), Collections::singleton))
 			);
 		}
@@ -276,7 +237,7 @@ final class GraphValidator extends GraphProcessor {
 			final Value limit=value(maxInclusive.value());
 
 			return trace(focus.stream()
-					.filter(negate(value -> comparator.compare(value, limit) <= 0))
+					.filter(negate(value -> compare(value, limit) <= 0))
 					.collect(toMap(v -> issue(maxInclusive), Collections::singleton))
 			);
 		}
@@ -409,7 +370,7 @@ final class GraphValidator extends GraphProcessor {
 				// validate the field shape on the new focus set
 
 				return trace(emptyMap(), singletonMap(iri,
-						shape.map(new ValidatorProbe(connection, resource, focus, source, target))
+						shape.map(new ValidatorProbe(resource, focus, source, target))
 				));
 
 			}).reduce(trace(), Trace::trace);
@@ -428,6 +389,11 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final When when) {
 			throw new UnsupportedOperationException(when.toString());
+		}
+
+
+		@Override public Trace probe(final Shape shape) {
+			return trace();
 		}
 
 	}

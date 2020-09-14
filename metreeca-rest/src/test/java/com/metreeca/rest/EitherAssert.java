@@ -46,7 +46,7 @@ public final class EitherAssert<L, R> extends AbstractAssert<EitherAssert<L, R>,
 	public EitherAssert<L, R> hasLeft(final R expected) {
 		return hasLeft(error -> {
 			if ( !Objects.equals(error, expected) ) {
-				failWithMessage("expected result <%s> to have error <%s>", actual, expected);
+				failWithMessage("expected result <%s> to have left value <%s>", actual, expected);
 			}
 		});
 	}
@@ -68,7 +68,7 @@ public final class EitherAssert<L, R> extends AbstractAssert<EitherAssert<L, R>,
 					return this;
 
 				}, value -> {
-					failWithMessage("expected result <%s> to have error", actual);
+					failWithMessage("expected result <%s> to have left value", actual);
 
 					return this;
 
@@ -87,7 +87,7 @@ public final class EitherAssert<L, R> extends AbstractAssert<EitherAssert<L, R>,
 	public EitherAssert<L, R> hasRight(final L expected) {
 		return hasRight(value -> {
 			if ( !Objects.equals(value, expected) ) {
-				failWithMessage("expected result <%s> to have value <%s>", actual, expected);
+				failWithMessage("expected result <%s> to have right value <%s>", actual, expected);
 			}
 		});
 	}
@@ -104,9 +104,10 @@ public final class EitherAssert<L, R> extends AbstractAssert<EitherAssert<L, R>,
 
 				error -> {
 
-					failWithMessage("expected result <%s> to have value", actual);
+					failWithMessage("expected result <%s> to have right value", actual);
 
 					return this;
+
 				}, value -> {
 
 					assertions.accept(value);

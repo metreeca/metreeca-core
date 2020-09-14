@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.function.Function.identity;
 
 
 /**
@@ -172,13 +173,31 @@ import static java.util.Objects.requireNonNull;
 	}
 
 	/**
+	 * Folds the left value.
+	 *
+	 * @param left a function mapping from the left alternative value to a value of the same type as the right value
+	 *
+	 * @return the folded value, generated as required either by {@code left} or the identity function
+	 *
+	 * @throws NullPointerException if {@code left} is null or returns a null value
+	 */
+	public default R fold(final Function<L, R> left) {
+
+		if ( left == null ) {
+			throw new NullPointerException("null left");
+		}
+
+		return fold(left, identity());
+	}
+
+	/**
 	 * Folds alternative values.
 	 *
 	 * @param <V>   the type of the folded value
 	 * @param left  a function mapping from the left alternative value to the folded value
 	 * @param right a function mapping from the right alternative value to the folded value
 	 *
-	 * @return the folded value, generated as required either by {@code right} or {@code left}
+	 * @return the folded value, generated as required either by {@code left} or {@code right}
 	 *
 	 * @throws NullPointerException if either {@code right} or {@code left} is null or returns a null value
 	 */
@@ -213,5 +232,4 @@ import static java.util.Objects.requireNonNull;
 				}
 		);
 	}
-
 }

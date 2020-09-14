@@ -90,8 +90,6 @@ public final class GraphEngine implements Engine {
 
 	private final Graph graph=asset(graph());
 
-	private final GraphValidator validator=new GraphValidator();
-
 	private final GraphCreator creator=new GraphCreator();
 	private final GraphRelator relator=new GraphRelator();
 	private final GraphUpdater updater=new GraphUpdater();
@@ -107,18 +105,6 @@ public final class GraphEngine implements Engine {
 		}
 
 		return graph.exec(connection -> { return task.get(); });
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public <M extends Message<M>> Either<MessageException, M> validate(final M message) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		return validator.validate(message);
 	}
 
 
@@ -148,7 +134,7 @@ public final class GraphEngine implements Engine {
 	 * <li>the target container identified by the request item is connected to the newly created resource as required
 	 * by the LDP container profile identified by the filtering constraints in the request shape;</li>
 	 *
-	 * <li>the operation is completed with a {@value com.metreeca.rest.Response#Created} status code;</li>
+	 * <li>the operation is completed with a {@value Response#Created} status code;</li>
 	 *
 	 * <li>the IRI of the newly created resource is advertised through the {@code Location} HTTP response header.</li>
 	 *
@@ -158,7 +144,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is reported with a {@linkplain com.metreeca.rest.Response#InternalServerError} status code.</li>
+	 * <li>the request is reported with a {@linkplain Response#InternalServerError} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -168,7 +154,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * @throws NullPointerException if {@code request} is null
 	 */
-	@Override public com.metreeca.rest.Future<com.metreeca.rest.Response> create(final Request request) {
+	@Override public Future<Response> create(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");
@@ -206,7 +192,7 @@ public final class GraphEngine implements Engine {
 	 * <li>if the request contains a {@code Prefer} header requesting the {@code ldp:preferMinimalContainer}
 	 * representation, member descriptions are omitted;</li>
 	 *
-	 * <li>the operation is completed with a {@value com.metreeca.rest.Response#OK} status code.</li>
+	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -222,7 +208,7 @@ public final class GraphEngine implements Engine {
 	 * <li>the response {@link RDFFormat RDF} body contains the RDF description of the request item, as matched by the
 	 * request request shape;</li>
 	 *
-	 * <li>the operation is completed with a {@value com.metreeca.rest.Response#OK} status code.</li>
+	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -230,7 +216,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the operation is reported as unsuccessful with a {@value com.metreeca.rest.Response#NotFound} status code
+	 * <li>the operation is reported as unsuccessful with a {@value Response#NotFound} status code
 	 * .</li>
 	 *
 	 * </ul>
@@ -243,7 +229,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * @throws NullPointerException if {@code request} is null
 	 */
-	@Override public com.metreeca.rest.Future<com.metreeca.rest.Response> relate(final Request request) {
+	@Override public Future<Response> relate(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");
@@ -262,7 +248,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is reported with a {@linkplain com.metreeca.rest.Response#InternalServerError} status code.</li>
+	 * <li>the request is reported with a {@linkplain Response#InternalServerError} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -280,7 +266,7 @@ public final class GraphEngine implements Engine {
 	 * <li>the existing RDF description of the target resource matched by the request shape
 	 * is replaced in the shared {@linkplain Graph graph} with the request RDF body;</li>
 	 *
-	 * <li>the operation is completed with a {@value com.metreeca.rest.Response#NoContent} status code.</li>
+	 * <li>the operation is completed with a {@value Response#NoContent} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -288,7 +274,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the operation is reported with a {@value com.metreeca.rest.Response#NotFound} status code.</li>
+	 * <li>the operation is reported with a {@value Response#NotFound} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -298,7 +284,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * @throws NullPointerException if {@code request} is null
 	 */
-	@Override public com.metreeca.rest.Future<com.metreeca.rest.Response> update(final Request request) {
+	@Override public Future<Response> update(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");
@@ -317,7 +303,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is reported with a {@linkplain com.metreeca.rest.Response#InternalServerError} status code.</li>
+	 * <li>the request is reported with a {@linkplain Response#InternalServerError} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -331,7 +317,7 @@ public final class GraphEngine implements Engine {
 	 * <li>the existing RDF description of the target resource matched by the request shape is removed from the shared
 	 * {@linkplain Graph graph};</li>
 	 *
-	 * <li>the operation is completed with a {@value com.metreeca.rest.Response#NoContent} status code.</li>
+	 * <li>the operation is completed with a {@value Response#NoContent} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -339,7 +325,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the operation is reported with a {@value com.metreeca.rest.Response#NotFound} status code.</li>
+	 * <li>the operation is reported with a {@value Response#NotFound} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -349,7 +335,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * @throws NullPointerException if {@code request} is null
 	 */
-	@Override public com.metreeca.rest.Future<Response> delete(final Request request) {
+	@Override public Future<Response> delete(final Request request) {
 
 		if ( request == null ) {
 			throw new NullPointerException("null request");

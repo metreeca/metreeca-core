@@ -20,6 +20,7 @@ package com.metreeca.json;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.*;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
 import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
@@ -102,6 +103,12 @@ public final class Values {
 	}
 
 
+	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final Literal True=literal(true);
+	public static final Literal False=literal(false);
+
+
 	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final String Internal="app:/terms#";
@@ -130,10 +137,14 @@ public final class Values {
 	}
 
 
-	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Comparator ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final Literal True=literal(true);
-	public static final Literal False=literal(false);
+	private static final Comparator<Value> comparator=new ValueComparator();
+
+
+	public static int compare(final Value x, final Value y) {
+		return comparator.compare(x, y);
+	}
 
 
 	//// Accessors /////////////////////////////////////////////////////////////////////////////////////////////////////

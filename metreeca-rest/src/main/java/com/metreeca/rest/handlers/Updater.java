@@ -17,10 +17,11 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
-import com.metreeca.rest.Message;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.formats.JSONLDFormat;
 
 import static com.metreeca.rest.Wrapper.wrapper;
 
@@ -38,7 +39,7 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
  * resources;</li>
  *
- * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(Shape, Collection) validation};</li>
  *
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
  *
