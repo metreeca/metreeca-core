@@ -29,8 +29,7 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.function.Supplier;
 
-import static com.metreeca.json.Shape.optional;
-import static com.metreeca.json.Shape.required;
+import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -56,32 +55,33 @@ public final class GraphEngine implements Engine {
 
 	static final IRI value=iri(Base, "value");
 	static final IRI count=iri(Base, "count");
+
 	static final IRI max=iri(Base, "max");
 	static final IRI min=iri(Base, "min");
 
 
 	private static final Shape TermShape=and(
-			field(RDFS.LABEL, and(optional(), datatype(XSD.STRING)))
+			field(RDFS.LABEL, optional(), datatype(XSD.STRING))
 	);
 
 	static final Shape TermsShape=and(
-			field(terms, and(Shape.multiple(),
-					field(value, and(required(), TermShape)),
-					field(count, and(required(), datatype(XSD.INTEGER)))
-			))
+			field(terms, multiple(),
+					field(value, required(), TermShape),
+					field(count, required(), datatype(XSD.INTEGER))
+			)
 	);
 
 	static final Shape StatsShape=and(
 
-			field(count, and(required(), datatype(XSD.INTEGER))),
-			field(min, and(optional(), TermShape)),
-			field(max, and(optional(), TermShape)),
+			field(count, required(), datatype(XSD.INTEGER)),
+			field(min, optional(), TermShape),
+			field(max, optional(), TermShape),
 
-			field(stats, and(Shape.multiple(),
-					field(count, and(required(), datatype(XSD.INTEGER))),
-					field(min, and(required(), TermShape)),
-					field(max, and(required(), TermShape))
-			))
+			field(stats, multiple(),
+					field(count, required(), datatype(XSD.INTEGER)),
+					field(min, required(), TermShape),
+					field(max, required(), TermShape)
+			)
 
 	);
 
