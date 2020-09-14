@@ -42,6 +42,7 @@ import java.util.stream.StreamSupport;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.*;
+import static java.util.Collections.emptyMap;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
@@ -61,8 +62,7 @@ public final class Values {
 	/**
 	 * A pattern matching IRI components.
 	 *
-	 * @see
-	 * <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
 	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
 	public static final Pattern IRIPattern=Pattern.compile("^"
@@ -82,6 +82,10 @@ public final class Values {
 		return new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
 	}
 
+
+	public static <K, V> Map<K, V> map() {
+		return emptyMap();
+	}
 
 	@SafeVarargs public static <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
 		return Arrays.stream(entries).filter(Objects::nonNull).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));

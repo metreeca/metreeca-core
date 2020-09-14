@@ -22,26 +22,34 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 
 import javax.json.*;
-import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.Meta.aliases;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 
 
 final class JSONTrimmer {
 
-	JsonValue trim(final IRI focus, final JsonValue value, final Shape shape) {
+	private final Map<String, String> keywords;
+
+
+	JSONTrimmer(final Map<String, String> keywords) {
+		this.keywords=keywords;
+	}
+
+
+	JsonValue trim(final IRI focus, final Shape shape, final JsonValue value) {
 		return value instanceof JsonObject ? trim(focus, shape, value.asJsonObject())
 				: value instanceof JsonArray ? trim(focus, shape, value.asJsonArray())
 				: value;
 	}
 
 
-	private JsonObject trim(final IRI focus, final Shape shape, final Map<String, JsonValue> object) {
+	private JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
 
 		final Map<IRI, Shape> fields=fields(shape);
 		final Map<String, IRI> aliases=aliases(shape)
@@ -49,20 +57,35 @@ final class JSONTrimmer {
 
 		final JsonObjectBuilder builder=createObjectBuilder();
 
-		object.forEach((label, value) -> Optional.of(label)
+		object.forEach((label, value) -> {
+			if ( (label.startsWith("@") || keywords.containsValue(label)) && value instanceof JsonString ) {
 
-				.map(aliases::get)
-				.map(fields::get)
+				builder.add(label, value);
 
-				.ifPresent(nested ->
-						builder.add(label, trim(focus, value, nested))
-				));
+			} else {
+
+				Optional.of(label)
+
+						.map(aliases::get)
+						.map(fields::get)
+
+						.ifPresent(nested ->
+								builder.add(label, trim(focus, nested, value))
+						);
+
+			}
+		});
 
 		return builder.build();
 	}
 
-	private JsonArray trim(final IRI focus, final Shape shape, final Collection<JsonValue> array) {
-		return Json.createArrayBuilder(array.stream().map(v -> trim(focus, v, shape)).collect(toList())).build();
+	private JsonArray trim(final IRI focus, final Shape shape, final JsonArray array) {
+
+		final JsonArrayBuilder builder=Json.createArrayBuilder();
+
+		array.forEach(value -> builder.add(trim(focus, shape, value)));
+
+		return builder.build();
 	}
 
 }

@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 
 import static com.metreeca.json.Values.entry;
 import static com.metreeca.json.Values.map;
+import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
@@ -80,7 +81,7 @@ final class MultipartFormatTest {
 
 					.body(InputFormat.input(), content())
 
-					.body(MultipartFormat.multipart(250, 1000))
+					.body(multipart(250, 1000))
 
 					.fold(
 
@@ -114,11 +115,11 @@ final class MultipartFormatTest {
 					.body(InputFormat.input(), content());
 
 			final Map<String, Message<?>> one=request
-					.body(MultipartFormat.multipart(250, 1000))
+					.body(multipart(250, 1000))
 					.fold(e -> Assertions.fail("missing multipart body"), identity());
 
 			final Map<String, Message<?>> two=request
-					.body(MultipartFormat.multipart())
+					.body(multipart())
 					.fold(e -> Assertions.fail("missing multipart body"), identity());
 
 			assertThat(one)
@@ -133,7 +134,7 @@ final class MultipartFormatTest {
 					.header("Content-Type", "plain/test")
 					.body(InputFormat.input(), content())
 
-					.body(MultipartFormat.multipart())
+					.body(multipart())
 
 					.fold(
 							Assertions::assertThat, parts -> Assertions.fail("unexpected multipart body")
@@ -146,7 +147,7 @@ final class MultipartFormatTest {
 					.header("Content-Type", "multipart/data")
 					.body(InputFormat.input(), content())
 
-					.body(MultipartFormat.multipart())
+					.body(multipart())
 
 					.fold(
 
@@ -178,7 +179,7 @@ final class MultipartFormatTest {
 			new Request().reply(response -> response
 
 					.status(Response.OK)
-					.body(MultipartFormat.multipart(), map(
+					.body(multipart(), map(
 							entry("one", response.link("one").body(TextFormat.text(), "one")),
 							entry("two", response.link("two").body(TextFormat.text(), "two"))
 					))
@@ -200,7 +201,7 @@ final class MultipartFormatTest {
 
 							.status(Response.OK)
 							.header("Content-Type", "multipart/form-data; boundary=1234567890")
-							.body(MultipartFormat.multipart(), map())
+							.body(multipart(), map())
 
 					)
 

@@ -17,33 +17,67 @@
 
 package com.metreeca.rest.formats;
 
+import com.metreeca.json.Shape;
+
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import java.util.Map;
+
 import static com.metreeca.json.JSONAssert.assertThat;
-import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
+import static java.util.Collections.emptyMap;
 import static javax.json.Json.createObjectBuilder;
 
 final class JSONTrimmerTest {
 
+	private JsonValue trim(final Shape shape, final JsonObjectBuilder object) {
+		return trim(shape, emptyMap(), object);
+	}
+
+	private JsonValue trim(final Shape shape, final Map<String, String> keywords, final JsonObjectBuilder object) {
+		return new JSONTrimmer(keywords).trim(iri(), shape, object.build());
+	}
+
+
+	@Test void testPreserveKeywords() {
+		assertThat(trim(field(RDF.VALUE), createObjectBuilder()
+
+				.add("@id", "http://example.com/"))
+
+		).isEqualTo(createObjectBuilder()
+
+				.add("@id", "http://example.com/")
+
+		);
+	}
+
+	@Test void testPreserveAliasedKeywords() {
+		assertThat(trim(field(RDF.VALUE), map(entry("@id", "id")), createObjectBuilder()
+
+				.add("id", "http://example.com/"))
+
+		).isEqualTo(createObjectBuilder()
+
+				.add("id", "http://example.com/")
+
+		);
+	}
+
 	@Test void testPruneField() {
-		assertThat(new JSONTrimmer().trim(
+		assertThat(trim(field(RDF.VALUE), createObjectBuilder()
 
-				iri(), createObjectBuilder()
+				.add("value", 1)
+				.add("other", 2))
 
-						.add("value", 1)
-						.add("other", 2)
-
-						.build(),
-
-				field(RDF.VALUE)
-
-		)).isEqualTo(createObjectBuilder()
+		).isEqualTo(createObjectBuilder()
 
 				.add("value", 1)
 
@@ -51,19 +85,13 @@ final class JSONTrimmerTest {
 	}
 
 	@Test void testTraverseAnd() {
-		assertThat(new JSONTrimmer().trim(
+		assertThat(trim(and(field(RDF.FIRST), field(RDF.REST)), createObjectBuilder()
 
-				iri(), createObjectBuilder()
+				.add("first", 1)
+				.add("rest", 2)
+				.add("other", 3))
 
-						.add("first", 1)
-						.add("rest", 2)
-						.add("other", 3)
-
-						.build(),
-
-				and(field(RDF.FIRST), field(RDF.REST))
-
-		)).isEqualTo(createObjectBuilder()
+		).isEqualTo(createObjectBuilder()
 
 				.add("first", 1)
 				.add("rest", 2)
@@ -72,21 +100,13 @@ final class JSONTrimmerTest {
 	}
 
 	@Test void testTraverseField() {
-		assertThat(new JSONTrimmer().trim(
+		assertThat(trim(field(RDF.FIRST, field(RDF.REST)), createObjectBuilder()
 
-				iri(), createObjectBuilder()
-
-						.add("first", createObjectBuilder()
-								.add("rest", 2)
-								.add("other", 4)
-						)
-						.add("other", 3)
-
-						.build(),
-
-				field(RDF.FIRST, field(RDF.REST))
-
-		)).isEqualTo(createObjectBuilder()
+				.add("first", createObjectBuilder()
+						.add("rest", 2)
+						.add("other", 4)
+				)
+				.add("other", 3))).isEqualTo(createObjectBuilder()
 
 				.add("first", createObjectBuilder()
 						.add("rest", 2)
@@ -96,19 +116,13 @@ final class JSONTrimmerTest {
 	}
 
 	@Test void testTraverseOr() {
-		assertThat(new JSONTrimmer().trim(
+		assertThat(trim(or(field(RDF.FIRST), field(RDF.REST)), createObjectBuilder()
 
-				iri(), createObjectBuilder()
+				.add("first", 1)
+				.add("rest", 2)
+				.add("other", 3))
 
-						.add("first", 1)
-						.add("rest", 2)
-						.add("other", 3)
-
-						.build(),
-
-				or(field(RDF.FIRST), field(RDF.REST))
-
-		)).isEqualTo(createObjectBuilder()
+		).isEqualTo(createObjectBuilder()
 
 				.add("first", 1)
 				.add("rest", 2)
@@ -117,19 +131,13 @@ final class JSONTrimmerTest {
 	}
 
 	@Test void testTraverseWhen() {
-		assertThat(new JSONTrimmer().trim(
+		assertThat(trim(when(clazz(RDF.NIL), field(RDF.FIRST), field(RDF.REST)), createObjectBuilder()
 
-				iri(), createObjectBuilder()
+				.add("first", 1)
+				.add("rest", 2)
+				.add("other", 3))
 
-						.add("first", 1)
-						.add("rest", 2)
-						.add("other", 3)
-
-						.build(),
-
-				when(clazz(RDF.NIL), field(RDF.FIRST), field(RDF.REST)) // !!! actually test
-
-		)).isEqualTo(createObjectBuilder()
+		).isEqualTo(createObjectBuilder()
 
 				.add("first", 1)
 				.add("rest", 2)
