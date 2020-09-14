@@ -34,7 +34,7 @@ import static com.metreeca.json.shapes.Or.or;
  * {@linkplain Guard guards}, logical operators and annotations: full conditional shape matching will be evaluated for
  * future releases.</p>
  */
-public final class When implements Shape {
+public final class When extends Shape {
 
 	public static Shape when(final Shape test, final Shape pass) {
 		return when(test, pass, and());
@@ -135,7 +135,7 @@ public final class When implements Shape {
 
 
 		@Override public Boolean probe(final Field field) {
-			return field.shape().map(this);
+			return field.value().map(this);
 		}
 
 		@Override public Boolean probe(final And and) {

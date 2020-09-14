@@ -38,7 +38,7 @@ import static java.util.Arrays.asList;
 /**
  * Linked data shape constraint.
  */
-public interface Shape {
+public abstract class Shape {
 
 	/**
 	 * Retrieves the default shape asset factory.
@@ -77,7 +77,7 @@ public interface Shape {
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
-	public default Shape then(final Shape... shapes) {
+	public final Shape then(final Shape... shapes) {
 		return then(asList(shapes));
 	}
 
@@ -91,7 +91,7 @@ public interface Shape {
 	 *
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
-	public default Shape then(final Collection<Shape> shapes) {
+	public final Shape then(final Collection<Shape> shapes) {
 
 		if ( shapes == null ) {
 			throw new NullPointerException("null shapes");
@@ -110,7 +110,7 @@ public interface Shape {
 	 *
 	 * @return a copy of this shape without {@linkplain Meta annotations}.
 	 */
-	public default Shape constraints() {
+	public final Shape constraints() {
 		return map(new ShapeEvaluator());
 	}
 
@@ -125,7 +125,7 @@ public interface Shape {
 	 *
 	 * @throws NullPointerException if {@code evaluators} is null or contains null elements
 	 */
-	public default Shape redact(final Function<Guard, Boolean>... evaluators) {
+	@SafeVarargs public final Shape redact(final Function<Guard, Boolean>... evaluators) {
 
 		if ( evaluators == null || Arrays.stream(evaluators).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null evaluators");
@@ -137,9 +137,9 @@ public interface Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public <V> V map(final Probe<V> probe);
+	public abstract <V> V map(final Probe<V> probe);
 
-	public default <V> V map(final Function<Shape, V> mapper) {
+	public final <V> V map(final Function<Shape, V> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -151,7 +151,7 @@ public interface Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public default JsonObject trim(final JsonObject object) {
+	public JsonObject trim(final JsonObject object) {
 
 		if ( object == null ) {
 			throw new NullPointerException("null object");

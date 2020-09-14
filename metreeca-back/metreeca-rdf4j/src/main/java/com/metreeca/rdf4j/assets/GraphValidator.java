@@ -379,8 +379,8 @@ final class GraphValidator extends GraphProcessor {
 
 		@Override public Trace probe(final Field field) {
 
-			final IRI iri=field.name();
-			final Shape shape=field.shape();
+			final IRI iri=field.label();
+			final Shape shape=field.value();
 
 			return focus.stream().map(value -> { // for each focus value
 

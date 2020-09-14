@@ -36,7 +36,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>States that the focus set includes all values from a given set of target values.</p>
  */
-public final class All implements Shape {
+public final class All extends Shape {
 
 	public static Shape all(final Value... values) {
 		return all(asList(values));

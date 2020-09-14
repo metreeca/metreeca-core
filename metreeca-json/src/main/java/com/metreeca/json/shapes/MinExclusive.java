@@ -28,7 +28,7 @@ import org.eclipse.rdf4j.model.Value;
  * <p>States that each term in the focus set is strictly greater than a given minimum value, according to <a
  * href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules.</p>
  */
-public final class MinExclusive implements Shape {
+public final class MinExclusive extends Shape {
 
 	public static Shape minExclusive(final Value value) {
 		return new MinExclusive(value);

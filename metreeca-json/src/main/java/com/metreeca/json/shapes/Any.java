@@ -36,7 +36,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>States that the focus set includes at least one value from a given set of target values.</p>
  */
-public final class Any implements Shape {
+public final class Any extends Shape {
 
 	public static Shape any(final Value... values) {
 		return any(asList(values));

@@ -89,8 +89,8 @@ public final class Inferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final IRI iri=field.name();
-		final Shape shape=field.shape().map(this);
+		final IRI iri=field.label();
+		final Shape shape=field.value().map(this);
 
 		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(ResourceType))), datatype(ResourceType))
 				: direct(iri) ? and(field(iri, shape), datatype(ResourceType))

@@ -30,7 +30,7 @@ final class ShapeEvaluator extends Shape.Probe<Shape> {
 	@Override public Shape probe(final Meta meta) { return and(); }
 
 	@Override public Shape probe(final Field field) {
-		return field(field.name(), field.shape().map(this));
+		return field(field.label(), field.value().map(this));
 	}
 
 	@Override public Shape probe(final And and) {

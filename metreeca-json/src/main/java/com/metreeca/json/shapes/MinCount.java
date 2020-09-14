@@ -28,7 +28,7 @@ import java.util.function.BinaryOperator;
  *
  * <p>States that the size of the focus set is greater than or equal to the given minimum value.</p>
  */
-public final class MinCount implements Shape {
+public final class MinCount extends Shape {
 
 	public static Shape minCount(final int limit) {
 		return new MinCount(limit);

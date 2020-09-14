@@ -31,7 +31,7 @@ import static com.metreeca.json.Values.iri;
  * <p>Provides a placeholder for a shape IRI value dynamically derived from a target IRI while performing a
  * shape-driven operation, for instance serving a linked data resource.</p>
  */
-public interface Focus extends Value {
+public abstract class Focus implements Value {
 
 	/**
 	 * Creates a target focus value.
@@ -85,7 +85,12 @@ public interface Focus extends Value {
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Focus() {}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Resolves this focus value.
@@ -97,6 +102,6 @@ public interface Focus extends Value {
 	 * @throws NullPointerException     if {@code base} is {@code null}
 	 * @throws IllegalArgumentException if {@code base} is malformed
 	 */
-	public IRI resolve(final IRI base);
+	public abstract IRI resolve(final IRI base);
 
 }

@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.*;
  *
  * <p>States that the focus set is consistent with at least one shape in a given target set.</p>
  */
-public final class Or implements Shape {
+public final class Or extends Shape {
 
 	private static final Shape empty=new Or(Collections.emptySet());
 
@@ -122,7 +122,7 @@ public final class Or implements Shape {
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
 		return fields // group by name preserving order
 
-				.collect(toMap(Field::name, f -> Stream.of(f.shape()), Stream::concat, LinkedHashMap::new))
+				.collect(toMap(Field::label, f -> Stream.of(f.value()), Stream::concat, LinkedHashMap::new))
 
 				.entrySet()
 				.stream()

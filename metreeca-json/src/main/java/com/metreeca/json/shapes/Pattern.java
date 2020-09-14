@@ -26,7 +26,7 @@ import com.metreeca.json.Shape;
  * <p>States that the lexical representation of each term in the focus set matches a given {@linkplain
  * java.util.regex.Pattern regular expression}.</p>
  */
-public final class Pattern implements Shape {
+public final class Pattern extends Shape {
 
 	public static Shape pattern(final String pattern) {
 		return pattern(pattern, "");

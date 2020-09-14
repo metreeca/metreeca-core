@@ -628,8 +628,8 @@ abstract class GraphProcessor {
 
 			@Override public Stream<Integer> probe(final Field field) {
 
-				final IRI iri=field.name();
-				final Shape shape=field.shape();
+				final IRI iri=field.label();
+				final Shape shape=field.value();
 
 				final Integer source=identifier.apply(focus);
 				final Integer target=identifier.apply(shape);
@@ -772,8 +772,8 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=field.name();
-				final Shape shape=field.shape();
+				final IRI iri=field.label();
+				final Shape shape=field.value();
 
 				final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
 				final Optional<Set<Value>> any=any(shape).map(values1 -> values(values1));
@@ -839,8 +839,8 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=field.name();
-				final Shape shape=field.shape();
+				final IRI iri=field.label();
+				final Shape shape=field.value();
 
 				return snippet( // (€) optional unless universal constraints are present
 

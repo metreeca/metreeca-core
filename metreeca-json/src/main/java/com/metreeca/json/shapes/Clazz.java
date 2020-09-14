@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>States that each value in the focus set is a member of a given resource class or one of its superclasses.</p>
  */
-public final class Clazz implements Shape {
+public final class Clazz extends Shape {
 
 	public static Shape clazz(final IRI name) {
 		return new Clazz(name);

@@ -26,7 +26,7 @@ import com.metreeca.json.Shape;
  * <p>States that the length of the lexical representation of each term in the focus set is less than or equal to the
  * given maximum value.</p>
  */
-public final class MaxLength implements Shape {
+public final class MaxLength extends Shape {
 
 	public static Shape maxLength(final int limit) {
 		return new MaxLength(limit);

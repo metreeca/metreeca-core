@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.*;
  *
  * <p>States that the focus set is consistent with all shapes in a given target set.</p>
  */
-public final class And implements Shape {
+public final class And extends Shape {
 
 	private static final Shape empty=new And(emptySet());
 
@@ -120,7 +120,7 @@ public final class And implements Shape {
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
 		return fields // group by name preserving order
 
-				.collect(toMap(Field::name, f -> Stream.of(f.shape()), Stream::concat, LinkedHashMap::new))
+				.collect(toMap(Field::label, f -> Stream.of(f.value()), Stream::concat, LinkedHashMap::new))
 
 				.entrySet()
 				.stream()

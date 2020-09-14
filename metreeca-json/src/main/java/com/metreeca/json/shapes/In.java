@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.joining;
  * <p>States that the focus set is a subset a given set of target values (i.e. that each term in the focus set is a
  * member of the given set of target values.</p>
  */
-public final class In implements Shape {
+public final class In extends Shape {
 
 	public static Shape in(final Value... values) {
 		return in(asList(values));

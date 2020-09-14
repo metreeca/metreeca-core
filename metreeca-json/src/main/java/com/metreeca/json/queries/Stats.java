@@ -29,7 +29,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 
-public final class Stats implements Query {
+public final class Stats extends Query {
 
 	public static Stats stats(final Shape shape, final IRI... path) {
 		return new Stats(shape, asList(path));

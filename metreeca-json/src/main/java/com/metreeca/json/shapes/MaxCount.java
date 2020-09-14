@@ -28,7 +28,7 @@ import java.util.function.BinaryOperator;
  *
  * <p>States that the size of the focus set is less than or equal to the given maximum value.</p>
  */
-public final class MaxCount implements Shape {
+public final class MaxCount extends Shape {
 
 	public static Shape maxCount(final int limit) {
 		return new MaxCount(limit);

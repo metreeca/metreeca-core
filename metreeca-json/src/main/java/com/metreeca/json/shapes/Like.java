@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * <p>Sequences of word characters are matched case-insensitively either as whole words or word stems in the order they
  * appear within keywords; non-word characters are ignored.</p>
  */
-public final class Like implements Shape {
+public final class Like extends Shape {
 
 	private static final Pattern WordPattern=Pattern.compile("\\w+");
 	private static final Pattern MarkPattern=Pattern.compile("\\p{M}");

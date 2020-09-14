@@ -28,7 +28,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 
 
-public final class Items implements Query {
+public final class Items extends Query {
 
 	public static Items items(final Shape shape) {
 		return new Items(shape, emptyList(), 0, 0);

@@ -25,11 +25,11 @@ import java.util.function.Function;
 /**
  * Shape-driven linked data query.
  */
-public interface Query {
+public abstract class Query {
 
-	public <V> V map(final Probe<V> probe);
+	public abstract <V> V map(final Probe<V> probe);
 
-	public default <V> V map(final Function<Query, V> mapper) {
+	public final <V> V map(final Function<Query, V> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -48,7 +48,7 @@ public interface Query {
 	 *
 	 * @param <V> the type of the generated result value
 	 */
-	public static abstract class Probe<V> implements Function<Query, V> {
+	public abstract static class Probe<V> implements Function<Query, V> {
 
 		@Override public V apply(final Query query) {
 			return query == null ? null : query.map(this);

@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toMap;
  *
  * <p>States that the enclosing shape has a given value for an annotation property.</p>
  */
-public final class Meta implements Shape {
+public final class Meta extends Shape {
 
 	private static final java.util.regex.Pattern NamedIRIPattern
 			=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
@@ -50,7 +50,8 @@ public final class Meta implements Shape {
 	/**
 	 * Creates an alias annotation.
 	 *
-	 * @param value an alternate property name for reporting values for the enclosing shape (e.g. in the context of JSON-based serialization results)
+	 * @param value an alternate property name for reporting values for the enclosing shape (e.g. in the context of
+	 *                 JSON-based serialization results)
 	 *
 	 * @return a new alias annotation
 	 *
@@ -71,7 +72,7 @@ public final class Meta implements Shape {
 
 			aliases.putAll(shape.map(new AliasesProbe(field -> { // system-guessed aliases
 
-				final IRI name=field.name();
+				final IRI name=field.label();
 
 				return Optional
 						.of(NamedIRIPattern.matcher(name.stringValue()))
@@ -84,9 +85,9 @@ public final class Meta implements Shape {
 
 			aliases.putAll(shape.map(new AliasesProbe(field -> { // user-provided aliases (higher precedence)
 
-				final IRI name=field.name();
+				final IRI name=field.label();
 
-				return alias(field.shape())
+				return alias(field.value())
 						.filter(alias -> !alias.startsWith("@"))
 						.map(alias -> singletonMap(name, alias))
 						.orElse(emptyMap());

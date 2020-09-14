@@ -29,7 +29,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 
-public final class Terms implements Query {
+public final class Terms extends Query {
 
 	public static Terms terms(final Shape shape, final IRI... path) {
 		return new Terms(shape, asList(path));

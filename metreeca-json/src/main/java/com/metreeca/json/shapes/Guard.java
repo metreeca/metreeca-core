@@ -35,7 +35,7 @@ import static java.util.stream.Collectors.joining;
  *
  * @see Shape#redact(Function[])
  */
-public final class Guard implements Shape {
+public final class Guard extends Shape {
 
 	//// Parametric Axes and Values ////////////////////////////////////////////////////////////////////////////////////
 

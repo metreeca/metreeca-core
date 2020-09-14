@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.toSet;
  *
  * <p>States that each value in the focus set has a given datatype.</p>
  */
-public final class Datatype implements Shape {
+public final class Datatype extends Shape {
 
 	/**
 	 * Creates a datatype constraint.
