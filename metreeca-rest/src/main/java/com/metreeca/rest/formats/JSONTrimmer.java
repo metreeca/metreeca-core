@@ -15,7 +15,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.json;
+package com.metreeca.rest.formats;
+
+import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 

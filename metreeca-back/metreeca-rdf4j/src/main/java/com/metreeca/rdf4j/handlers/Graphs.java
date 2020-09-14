@@ -34,7 +34,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static com.metreeca.json.Shape.only;
+import static com.metreeca.json.Shape.exactly;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.And.and;
@@ -63,7 +63,7 @@ import static java.lang.String.format;
 public final class Graphs extends Endpoint<Graphs> {
 
 	private static final Shape GraphsShape=field(RDF.VALUE, and(
-			field(RDF.TYPE, only(VOID.DATASET))
+			field(RDF.TYPE, exactly(VOID.DATASET))
 	));
 
 

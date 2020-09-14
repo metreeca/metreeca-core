@@ -25,6 +25,7 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
 import javax.json.JsonException;
+import javax.json.JsonObject;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -54,6 +55,20 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 */
 	public static JSONLDFormat jsonld() {
 		return new JSONLDFormat();
+	}
+
+
+	public static JsonObject trim(final Shape shape, final JsonObject object) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( object == null ) {
+			throw new NullPointerException("null object");
+		}
+
+		return new JSONTrimmer().trim(object, shape).asJsonObject();
 	}
 
 

@@ -21,7 +21,6 @@ import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.Value;
 
-import javax.json.JsonObject;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -62,10 +61,43 @@ public abstract class Shape {
 	public static Shape multiple() { return and(); }
 
 
-	public static Shape only(final Value... values) { return and(all(values), in(values)); }
+	public static Shape exactly(final Value... values) { return and(all(values), in(values)); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Checks the validation outcome of this shape.
+	 *
+	 * @param outcome the expected validation outcome; {@code true} if this shape is always validated, {@code false}
+	 *                if this shape is never validated, {@code null} otherwise
+	 *
+	 * @return {@code true} if the validation {@code outcome} of this shape is proved to equal the expected value
+	 */
+	public boolean validates(final Boolean outcome) {
+		return outcome.equals(map(new ShapeEvaluator()));
+	}
+
+	/**
+	 * Redact {@linkplain Guard guard} annotations of this shape.
+	 *
+	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
+	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be
+	 *                   removed, {@code null} if the guard is to be retained as is
+	 *
+	 * @return a copy of this shape redacted according to {@code evaluators}.
+	 *
+	 * @throws NullPointerException if {@code evaluators} is null or contains null elements
+	 */
+	@SafeVarargs public final Shape redact(final Function<Guard, Boolean>... evaluators) {
+
+		if ( evaluators == null || Arrays.stream(evaluators).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null evaluators");
+		}
+
+		return map(new ShapeRedactor(evaluators));
+	}
+
 
 	/**
 	 * Creates a conditional shape.
@@ -105,39 +137,6 @@ public abstract class Shape {
 	}
 
 
-	/**
-	 * Checks the validation outcome of this shape.
-	 *
-	 * @param outcome the expected validation outcome; {@code true} if this shape is always validated, {@code false}
-	 *                if this shape is never validated, {@code null} otherwise
-	 *
-	 * @return {@code true} if the validation {@code outcome} of this shape is proved to equal the expected value
-	 */
-	public boolean validates(final Boolean outcome) {
-		return outcome.equals(map(new ShapeEvaluator()));
-	}
-
-	/**
-	 * Redact {@linkplain Guard guard} annotations of this shape.
-	 *
-	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
-	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be
-	 *                   removed, {@code null} if the guard is to be retained as is
-	 *
-	 * @return a copy of this shape redacted according to {@code evaluators}.
-	 *
-	 * @throws NullPointerException if {@code evaluators} is null or contains null elements
-	 */
-	@SafeVarargs public final Shape redact(final Function<Guard, Boolean>... evaluators) {
-
-		if ( evaluators == null || Arrays.stream(evaluators).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null evaluators");
-		}
-
-		return map(new ShapeRedactor(evaluators));
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public abstract <V> V map(final Probe<V> probe);
@@ -149,18 +148,6 @@ public abstract class Shape {
 		}
 
 		return mapper.apply(this);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public JsonObject trim(final JsonObject object) {
-
-		if ( object == null ) {
-			throw new NullPointerException("null object");
-		}
-
-		return new JSONTrimmer().trim(object, this).asJsonObject();
 	}
 
 
