@@ -66,7 +66,7 @@ final class GraphRelator extends GraphProcessor {
 			if ( resource || minimal ) {
 
 				final IRI item=iri(request.item());
-				final Shape shape=resource ? detail(request.attribute(shape())) : holder(request.attribute(shape()));
+				final Shape shape=resource ? detail(request.attribute(shape())) : target(request.attribute(shape()));
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
@@ -119,7 +119,7 @@ final class GraphRelator extends GraphProcessor {
 
 				final IRI item=iri(request.item());
 
-				final Shape holder=holder(request.attribute(shape()));
+				final Shape holder=target(request.attribute(shape()));
 				final Shape digest=digest(request.attribute(shape()));
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph

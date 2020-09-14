@@ -18,7 +18,6 @@
 package com.metreeca.rest.handlers;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Redactor;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
@@ -71,45 +70,44 @@ public abstract class Actor extends Delegator {
 
 			final Shape shape=request.attribute(shape());
 
-			final Shape baseline=shape // visible to anyone taking into account task/area
-
-					.map(new Redactor(Role, values -> true))
-					.map(new Redactor(Task, task))
-					.map(new Redactor(Area, area))
-					.map(new Redactor(Mode, Convey))
+			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
+					retain(Role),
+					retain(Task, task),
+					retain(Area, area),
+					retain(Mode, Convey)
+			)
 
 					.constraints();
 
-			final Shape authorized=shape // visible to user taking into account task/area
+			final Shape authorized=shape.redact( // visible to user taking into account task/area
+					retain(Role, request.roles()),
+					retain(Task, task),
+					retain(Area, area),
+					retain(Mode, Convey)
 
-					.map(new Redactor(Role, request.roles()))
-					.map(new Redactor(Task, task))
-					.map(new Redactor(Area, area))
-					.map(new Redactor(Mode, Convey))
+			)
 
 					.constraints();
 
 
 			// request shape redactor
 
-			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape())
+			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape()).redact(
 
-					.map(new Redactor(Role, request.roles()))
-					.map(new Redactor(Task, task))
-					.map(new Redactor(Area, area))
+					retain(Role, request.roles()),
+					retain(Task, task),
+					retain(Area, area)
 
-			);
+			));
 
 			// response shape redactor
 
-			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape())
-
-					.map(new Redactor(Role, request.roles()))
-					.map(new Redactor(Task, task))
-					.map(new Redactor(Area, area))
-					.map(new Redactor(Mode, Convey))
-
-			);
+			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape()).redact(
+					retain(Role, request.roles()),
+					retain(Task, task),
+					retain(Area, area),
+					retain(Mode, Convey)
+			));
 
 			return baseline.equals(or()) ? request.reply(status(Forbidden))
 					: authorized.equals(or()) ? request.reply(status(Unauthorized))

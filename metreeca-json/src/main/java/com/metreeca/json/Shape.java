@@ -22,17 +22,15 @@ import com.metreeca.json.shapes.*;
 import org.eclipse.rdf4j.model.Value;
 
 import javax.json.JsonObject;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
-import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 import static java.util.Arrays.asList;
 
@@ -70,38 +68,6 @@ public interface Shape {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Removes annotations.
-	 *
-	 * @return a copy of this shape without {@linkplain Meta annotations}.
-	 */
-	public default Shape constraints() {
-		return map(new Probe<Shape>() {
-
-			@Override public Shape probe(final Meta meta) { return and(); }
-
-			@Override public Shape probe(final Field field) {
-				return field(field.name(), field.shape().map(this));
-			}
-
-			@Override public Shape probe(final And and) {
-				return and(and.shapes().stream().map(this));
-			}
-
-			@Override public Shape probe(final Or or) {
-				return or(or.shapes().stream().map(this));
-			}
-
-			@Override public Shape probe(final When when) {
-				return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
-			}
-
-			@Override public Shape probe(final Shape shape) { return shape; }
-
-		});
-	}
-
-
-	/**
 	 * Creates a conditional shape.
 	 *
 	 * @param shapes the shapes this shape is to be applied as a test condition
@@ -136,6 +102,36 @@ public interface Shape {
 		}
 
 		return when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+	}
+
+
+	/**
+	 * Removes annotations.
+	 *
+	 * @return a copy of this shape without {@linkplain Meta annotations}.
+	 */
+	public default Shape constraints() {
+		return map(new ShapeEvaluator());
+	}
+
+	/**
+	 * Evaluates {@linkplain Guard guard} annotations.
+	 *
+	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
+	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be
+	 *                   removed, {@code null} if the guard is to be retained as is
+	 *
+	 * @return a copy of this shape redacted according to {@code evaluators}.
+	 *
+	 * @throws NullPointerException if {@code evaluators} is null or contains null elements
+	 */
+	public default Shape redact(final Function<Guard, Boolean>... evaluators) {
+
+		if ( evaluators == null || Arrays.stream(evaluators).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null evaluators");
+		}
+
+		return map(new ShapeRedactor(evaluators));
 	}
 
 

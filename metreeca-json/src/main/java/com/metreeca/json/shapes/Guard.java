@@ -18,9 +18,9 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.probes.Redactor;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -28,12 +28,12 @@ import static java.util.stream.Collectors.joining;
 
 
 /**
- * Parametric constraint.
+ * Parametric annotation.
  *
  * <p>States that the focus set meets this shape only if at least one of the externally defined values of an axis
  * variable is included in a given set of target values.</p>
  *
- * @see Redactor
+ * @see Shape#redact(Function[])
  */
 public final class Guard implements Shape {
 
@@ -107,6 +107,33 @@ public final class Guard implements Shape {
 	public static Shape filter() { return mode(Filter); }
 
 
+	//// Guard Evaluators //////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Function<Guard, Boolean> retain(final Object axis) {
+		return guard -> guard.axis.equals(axis)
+				? true
+				: null;
+	}
+
+	public static Function<Guard, Boolean> retain(final Object axis, final Object value) {
+		return guard -> guard.axis.equals(axis)
+				? guard.values.contains(value)
+				: null;
+	}
+
+	public static Function<Guard, Boolean> retain(final Object axis, final Object... values) {
+		return guard -> guard.axis.equals(axis)
+				? values.length == 0 || Arrays.stream(values).anyMatch(guard.values::contains)
+				: null;
+	}
+
+	public static Function<Guard, Boolean> retain(final Object axis, final Collection<?> values) {
+		return guard -> guard.axis.equals(axis)
+				? values.isEmpty() || values.stream().anyMatch(guard.values::contains)
+				: null;
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape guard(final Object axis, final Object... values) {
@@ -116,7 +143,6 @@ public final class Guard implements Shape {
 	public static Shape guard(final Object axis, final Collection<Object> values) {
 		return new Guard(axis, values);
 	}
-
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

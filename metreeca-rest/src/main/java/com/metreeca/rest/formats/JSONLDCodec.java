@@ -19,7 +19,6 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.probes.Inferencer;
-import com.metreeca.json.probes.Redactor;
 import com.metreeca.json.shapes.*;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -32,12 +31,12 @@ import static com.metreeca.json.shapes.Guard.*;
 abstract class JSONLDCodec {
 
 	protected Shape driver(final Shape shape) { // !!! caching
-		return shape
-
-				.map(new Redactor(Role, values -> true))
-				.map(new Redactor(Task, values -> true))
-				.map(new Redactor(Area, values -> true))
-				.map(new Redactor(Mode, Convey)) // remove internal filtering shapes
+		return shape.redact(
+				retain(Role),
+				retain(Task),
+				retain(Area),
+				retain(Mode, Convey) // remove internal filtering shapes
+		)
 
 				.map(new Inferencer()); // infer implicit constraints to drive json shorthands
 

@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.*;
-import com.metreeca.json.probes.Redactor;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.assets.Logger;
@@ -55,6 +54,7 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rdf4j.assets.Snippets.*;
 import static com.metreeca.rest.Context.asset;
@@ -73,25 +73,25 @@ abstract class GraphProcessor {
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Shape holder(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Guard.Area, Guard.Target));
+	Shape target(final Shape shape) { // !!! caching
+		return shape.redact(retain(Area, Target));
 	}
 
 	Shape digest(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Guard.Area, Guard.Digest));
+		return shape.redact(retain(Area, Digest));
 	}
 
 	Shape detail(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Guard.Area, Guard.Detail));
+		return shape.redact(retain(Area, Detail));
 	}
 
 
 	Shape convey(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Guard.Mode, Guard.Convey));
+		return shape.redact(retain(Mode, Convey));
 	}
 
 	Shape filter(final Shape shape) { // !!! caching
-		return shape.map(new Redactor(Guard.Mode, Guard.Filter));
+		return shape.redact(retain(Mode, Filter));
 	}
 
 
