@@ -19,8 +19,10 @@ package com.metreeca.rest;
 
 
 import java.util.function.*;
+import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Handler.handler;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 
@@ -93,7 +95,58 @@ import static java.util.Objects.requireNonNull;
 
 
 	/**
-	 * Creates a request wrapper.
+	 * Creates a canonical rewriting wrapper.
+	 *
+	 * <p>Mainly intended to enable development instances to use data dumps from production instances.</p>
+	 *
+	 * <p><strong>Warning</strong> Only <em>host</em> canonical IRIs with a trailing slash and no path/query/fragment
+	 * components are supported: both  production and development instances must be deployed to the root context.</p>
+	 *
+	 * @param canonical the internal canonical canonical base IRI
+	 *
+	 * @return a rewriting wrapper that replaces the canonical IRI of incoming request with the internal {@code
+	 * canonical} base
+	 *
+	 * @throws NullPointerException     if {@code canonical} is null
+	 * @throws IllegalArgumentException if {@code canonical} is malformed or contains path/query/fragment components
+	 */
+	public static Wrapper rewriter(final String canonical) {
+
+		if ( canonical == null ) {
+			throw new NullPointerException("null canonical base");
+		}
+
+		final Pattern pattern=Pattern.compile("^\\w+://[^/]*/$");
+		final String error="malformed host canonical IRI <%s>";
+
+		if ( !pattern.matcher(canonical).matches() ) {
+			throw new IllegalArgumentException(format(error, canonical));
+		}
+
+		return handler -> request -> {
+
+			final String base=request.base();
+
+			if ( base.equals(canonical) ) {
+
+				return handler.handle(request);
+
+			} else if ( pattern.matcher(base).matches() ) {
+
+				return handler.handle(request.base(canonical));
+
+			} else {
+
+				throw new UnsupportedOperationException(format(error, base));
+
+			}
+
+		};
+	}
+
+
+	/**
+	 * Creates a pre-processing wrapper.
 	 *
 	 * @param mapper a request mapping function; must return a non-null value
 	 *
@@ -113,7 +166,7 @@ import static java.util.Objects.requireNonNull;
 	}
 
 	/**
-	 * Creates a request body wrapper.
+	 * Creates a pre-processing body wrapper.
 	 *
 	 * @param <V>    the type of the request body to be pre-processed
 	 * @param format the format of the request body to be pre-processed
@@ -131,14 +184,16 @@ import static java.util.Objects.requireNonNull;
 			throw new NullPointerException("null mapper");
 		}
 
-		return handler -> request -> request.body(format).fold(request::reply, value -> handler.handle(
-				request.body(format, requireNonNull(mapper.apply(request, value), "null mapper return value"))
-		));
+		return handler -> request ->
+				request.body(format).fold(request::reply, value -> handler.handle(
+						request.body(format, requireNonNull(mapper.apply(request, value), "null mapper return value"))
+						)
+				);
 	}
 
 
 	/**
-	 * Creates a response wrapper.
+	 * Creates a post-processing wrapper.
 	 *
 	 * @param mapper a response mapping function; must return a non-null value
 	 *
@@ -158,7 +213,7 @@ import static java.util.Objects.requireNonNull;
 	}
 
 	/**
-	 * Creates a response body wrapper.
+	 * Creates a post-processing body wrapper.
 	 *
 	 * @param <V>    the type of the response body to be post-processed
 	 * @param format the format of the response body to be post-processed
