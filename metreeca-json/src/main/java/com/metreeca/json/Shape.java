@@ -106,16 +106,19 @@ public abstract class Shape {
 
 
 	/**
-	 * Removes annotations.
+	 * Checks the validation outcome of this shape.
 	 *
-	 * @return a copy of this shape without {@linkplain Meta annotations}.
+	 * @param outcome the expected validation outcome; {@code true} if this shape is always validated, {@code false}
+	 *                if this shape is never validated, {@code null} otherwise
+	 *
+	 * @return {@code true} if the validation {@code outcome} of this shape is proved to equal the expected value
 	 */
-	public final Shape constraints() {
-		return map(new ShapeEvaluator());
+	public boolean validates(final Boolean outcome) {
+		return outcome.equals(map(new ShapeEvaluator()));
 	}
 
 	/**
-	 * Evaluates {@linkplain Guard guard} annotations.
+	 * Redact {@linkplain Guard guard} annotations of this shape.
 	 *
 	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
 	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be

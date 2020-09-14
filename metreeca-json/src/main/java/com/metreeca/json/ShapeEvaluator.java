@@ -19,32 +19,47 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
-import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.json.shapes.When.when;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 
-final class ShapeEvaluator extends Shape.Probe<Shape> {
+final class ShapeEvaluator extends Shape.Probe<Boolean> {
 
-	@Override public Shape probe(final Meta meta) { return and(); }
-
-	@Override public Shape probe(final Field field) {
-		return field(field.label(), field.value().map(this));
+	@Override public Boolean probe(final Meta meta) {
+		return true;
 	}
 
-	@Override public Shape probe(final And and) {
-		return and(and.shapes().stream().map(this));
+
+	@Override public Boolean probe(final And and) {
+		return and.shapes().stream()
+				.filter(shape -> !(shape instanceof Meta))
+				.map(shape -> shape.map(this))
+				.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
 	}
 
-	@Override public Shape probe(final Or or) {
-		return or(or.shapes().stream().map(this));
+	@Override public Boolean probe(final Or or) {
+		return or.shapes().stream()
+				.filter(shape -> !(shape instanceof Meta))
+				.map(shape -> shape.map(this))
+				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
 	}
 
-	@Override public Shape probe(final When when) {
-		return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
+	@Override public Boolean probe(final When when) {
+
+		final Boolean test=when.test().map(this);
+		final Boolean pass=when.pass().map(this);
+		final Boolean fail=when.fail().map(this);
+
+		return TRUE.equals(test) ? pass
+				: FALSE.equals(test) ? fail
+				: TRUE.equals(pass) && TRUE.equals(fail) ? TRUE
+				: FALSE.equals(pass) && FALSE.equals(fail) ? FALSE
+				: null;
 	}
 
-	@Override public Shape probe(final Shape shape) { return shape; }
+
+	@Override public Boolean probe(final Shape shape) {
+		return null;
+	}
 
 }

@@ -27,7 +27,6 @@ import java.util.function.UnaryOperator;
 
 import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.shapes.Guard.*;
-import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
@@ -75,9 +74,7 @@ public abstract class Actor extends Delegator {
 					retain(Task, task),
 					retain(Area, area),
 					retain(Mode, Convey)
-			)
-
-					.constraints();
+			);
 
 			final Shape authorized=shape.redact( // visible to user taking into account task/area
 					retain(Role, request.roles()),
@@ -85,10 +82,7 @@ public abstract class Actor extends Delegator {
 					retain(Area, area),
 					retain(Mode, Convey)
 
-			)
-
-					.constraints();
-
+			);
 
 			// request shape redactor
 
@@ -109,8 +103,8 @@ public abstract class Actor extends Delegator {
 					retain(Mode, Convey)
 			));
 
-			return baseline.equals(or()) ? request.reply(status(Forbidden))
-					: authorized.equals(or()) ? request.reply(status(Unauthorized))
+			return baseline.validates(false) ? request.reply(status(Forbidden))
+					: authorized.validates(false) ? request.reply(status(Unauthorized))
 					: handler.handle(request.map(pre)).map(post);
 
 		};

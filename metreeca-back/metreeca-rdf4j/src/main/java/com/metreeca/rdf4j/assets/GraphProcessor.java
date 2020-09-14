@@ -102,7 +102,7 @@ abstract class GraphProcessor {
 
 	private Shape anchor(final IRI resource, final Shape shape) {
 
-		final boolean empty=shape.constraints().equals(and());
+		final boolean empty=shape.validates(true);
 
 		return resource.stringValue().endsWith("/")
 
@@ -349,7 +349,7 @@ abstract class GraphProcessor {
 		@Override public Collection<Statement> probe(final Stats stats) {
 
 			final Shape shape=stats.shape();
-			final List<IRI> path=stats.path().stream().map(iri -> iri).collect(toList());
+			final List<IRI> path=stats.path();
 
 			final Model model=new LinkedHashModel();
 
@@ -406,13 +406,15 @@ abstract class GraphProcessor {
 					final Resource type=(Resource)bindings.getValue("type");
 
 					final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
+
 					final Value min=bindings.getValue("min");
 					final Value max=bindings.getValue("max");
 
 					// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
 					if ( type != null ) { model.add(resource, GraphEngine.stats, type); }
-					if ( type != null && count != null ) { model.add(type, GraphEngine.count, literal(count)); }
+					if ( type != null ) { model.add(type, GraphEngine.count, literal(count)); }
+
 					if ( type != null && min != null ) { model.add(type, GraphEngine.min, min); }
 					if ( type != null && max != null ) { model.add(type, GraphEngine.max, max); }
 
@@ -445,7 +447,7 @@ abstract class GraphProcessor {
 		@Override public Collection<Statement> probe(final Terms terms) {
 
 			final Shape shape=terms.shape();
-			final List<IRI> path=terms.path().stream().map(iri -> iri).collect(toList());
+			final List<IRI> path=terms.path();
 
 			final Model model=new LinkedHashModel();
 
@@ -570,7 +572,7 @@ abstract class GraphProcessor {
 					.filter(order -> !order.path().isEmpty()) // root already retrieved
 					.map(order -> snippet(
 							"optional { {root} {path} {order} }\n", var(root),
-							path(order.path().stream().map(iri -> iri).collect(toList())), var(order))
+							path(order.path().stream().collect(toList())), var(order))
 					)
 			);
 		}
@@ -775,8 +777,8 @@ abstract class GraphProcessor {
 				final IRI iri=field.label();
 				final Shape shape=field.value();
 
-				final Optional<Set<Value>> all=all(shape).map(values1 -> values(values1));
-				final Optional<Set<Value>> any=any(shape).map(values1 -> values(values1));
+				final Optional<Set<Value>> all=all(shape).map(FetcherProbe.this::values);
+				final Optional<Set<Value>> any=any(shape).map(FetcherProbe.this::values);
 
 				final Optional<Value> singleton=any
 						.filter(values -> values.size() == 1)
