@@ -19,6 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
+import com.metreeca.rest.formats.JSONLDFormat;
 
 
 /**
@@ -29,7 +30,7 @@ import com.metreeca.rest.*;
  *
  * <ul>
  *
- * <li>{@linkplain Shape#shape() associates} the driving shape model to incoming requests;</li>
+ * <li>{@linkplain JSONLDFormat#shape() associates} the driving shape model to incoming requests;</li>
  *
  * </ul>
  *
@@ -37,10 +38,10 @@ import com.metreeca.rest.*;
  *
  * <ul>
  *
- * <li>redacting the shape {@linkplain Shape#shape() associated} to incoming request according to the task to be
+ * <li>redacting the shape {@linkplain JSONLDFormat#shape() associated} to incoming request according to the task to be
  * performed;</li>
  *
- * <li>{@linkplain Shape#shape() associating} a shape to outgoing responses in order to drive further processing
+ * <li>{@linkplain JSONLDFormat#shape() associating} a shape to outgoing responses in order to drive further processing
  * (e.g. JSON body mapping).</li>
  *
  * </ul>
@@ -83,7 +84,7 @@ public final class Driver implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request.attribute(Shape.shape(), shape));
+		return request -> handler.handle(request.attribute(JSONLDFormat.shape(), shape));
 	}
 
 }

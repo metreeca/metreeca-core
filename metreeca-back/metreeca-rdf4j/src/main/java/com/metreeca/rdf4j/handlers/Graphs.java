@@ -21,6 +21,7 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.handlers.Router;
 
 import org.eclipse.rdf4j.model.*;
@@ -129,7 +130,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				});
 
 				request.reply(response -> response.status(com.metreeca.rest.Response.OK)
-						.attribute(Shape.shape(), GraphsShape)
+						.attribute(JSONLDFormat.shape(), GraphsShape)
 						.body(rdf(), model)
 				).accept(consumer);
 

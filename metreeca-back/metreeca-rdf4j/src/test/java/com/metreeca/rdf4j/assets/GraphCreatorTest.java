@@ -20,6 +20,7 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
 import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -68,7 +69,7 @@ final class GraphCreatorTest {
 							+" :email 'tfaussone@classicmodelcars.com' ;"
 							+" :title 'Sales Rep' ;"
 							+" :seniority 1 ."
-					)).attribute(Shape.shape(), Employee);
+					)).attribute(JSONLDFormat.shape(), Employee);
 		}
 
 
@@ -135,7 +136,7 @@ final class GraphCreatorTest {
 					.handle(new com.metreeca.rest.Request()
 							.roles(ValuesTest.Manager)
 							.base(ValuesTest.Base)
-							.path("/employees/9999").attribute(Shape.shape(), ValuesTest.Employee)
+							.path("/employees/9999").attribute(JSONLDFormat.shape(), ValuesTest.Employee)
 					)
 
 					.accept(response -> {

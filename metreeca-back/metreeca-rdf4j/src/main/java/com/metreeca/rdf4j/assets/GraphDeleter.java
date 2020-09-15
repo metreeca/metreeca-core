@@ -25,12 +25,12 @@ import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Optional;
 
-import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.InternalServerError;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
 final class GraphDeleter extends GraphProcessor {

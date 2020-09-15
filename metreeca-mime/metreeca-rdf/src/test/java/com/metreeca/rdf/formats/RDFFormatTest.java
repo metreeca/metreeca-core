@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -39,6 +38,7 @@ import static com.metreeca.rest.Message.types;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

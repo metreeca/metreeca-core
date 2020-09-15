@@ -25,7 +25,6 @@ import org.eclipse.rdf4j.model.*;
 import java.util.Collection;
 import java.util.UUID;
 
-import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.rdf4j.assets.Graph.graph;
@@ -35,6 +34,7 @@ import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
 import static java.util.stream.Collectors.toList;
 
 

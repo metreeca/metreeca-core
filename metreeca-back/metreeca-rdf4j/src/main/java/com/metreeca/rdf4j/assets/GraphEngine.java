@@ -22,6 +22,7 @@ import com.metreeca.json.shapes.Guard;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -120,7 +121,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain Shape#shape() shape};</li>
+	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
 	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be
 	 * created matched by the shape using the request {@linkplain Request#item() item} as subject;</li>
@@ -173,7 +174,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a combined container/member {@linkplain Shape#shape() shape};</li>
+	 * <li>the request is expected to include a combined container/member {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
 	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
 	 *
@@ -201,7 +202,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain Shape#shape() shape};</li>
+	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
 	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
 	 *
@@ -257,7 +258,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain Shape#shape() shape};</li>
+	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
 	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be
 	 * updated
@@ -312,7 +313,7 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain Shape#shape() shape};</li>
+	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
 	 * <li>the existing RDF description of the target resource matched by the request shape is removed from the shared
 	 * {@linkplain Graph graph};</li>

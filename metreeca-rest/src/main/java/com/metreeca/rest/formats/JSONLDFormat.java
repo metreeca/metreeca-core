@@ -18,6 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.*;
+import com.metreeca.json.shapes.Or;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -25,11 +26,10 @@ import org.eclipse.rdf4j.model.Statement;
 
 import javax.json.JsonException;
 import javax.json.JsonObject;
-import java.util.Collection;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.function.Supplier;
 
 import static com.metreeca.json.Shape.expanded;
-import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Context.asset;
@@ -57,6 +57,28 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 */
 	public static JSONLDFormat jsonld() {
 		return new JSONLDFormat();
+	}
+
+
+	/**
+	 * Retrieves the default JSON-LD shape asset factory.
+	 *
+	 * @return the default shape factory, which returns an {@linkplain Or#or() empty disjunction}, that is a shape
+	 * the always fails to validate
+	 */
+	public static Supplier<Shape> shape() {
+		return Or::or;
+	}
+
+	/**
+	 * Retrieves the default JSON-LD keywords asset factory.
+	 *
+	 * <p>The keywords asset maps JSON-LD {@code @keywords} to user-defined aliases.</p>
+	 *
+	 * @return the default keywords factory, which returns an empty map
+	 */
+	public static Supplier<Map<String, String>> keywords() {
+		return Collections::emptyMap;
 	}
 
 
@@ -161,7 +183,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is either
 	 * missing or  matched by {@link JSONFormat#MIMEPattern}
 	 *
-	 * <p><strong>Warning</strong> / Decoding is completely driven by the {@code message} {@linkplain Shape#shape()
+	 * <p><strong>Warning</strong> / Decoding is completely driven by the {@code message}
+	 * {@linkplain JSONLDFormat#shape()
 	 * shape attribute}: embedded {@code @context} objects are ignored.</p>
 	 */
 	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
@@ -196,7 +219,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * {@link OutputFormat} body
 	 *
 	 * <p><strong>Warning</strong> / {@code @context} objects generated from the {@code message}
-	 * {@linkplain Shape#shape() shape attribute} are currently not embedded.</p>
+	 * {@linkplain JSONLDFormat#shape() shape attribute} are currently not embedded.</p>
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 		return message

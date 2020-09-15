@@ -20,6 +20,7 @@ package com.metreeca.rest.wrappers;
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
+import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +65,7 @@ final class DriverTest {
 				.wrap(request -> {
 
 					RequestAssert.assertThat(request)
-							.hasAttribute(Shape.shape(), shape -> assertThat(shape).isEqualTo(TestShape));
+							.hasAttribute(JSONLDFormat.shape(), shape -> assertThat(shape).isEqualTo(TestShape));
 
 					return request.reply(status(OK));
 

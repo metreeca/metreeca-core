@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import static com.metreeca.json.Shape.shape;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Either.Left;
@@ -114,7 +113,7 @@ public interface Engine {
 	 *
 	 * <p>Handles creation requests on the linked data resource identified by the request {@linkplain Request#item()
 	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
-	 * {@linkplain Shape#shape() shape}.</p>
+	 * {@linkplain JSONLDFormat#shape() shape}.</p>
 	 *
 	 * @param request a creation request for the managed linked data resource
 	 *
@@ -129,7 +128,7 @@ public interface Engine {
 	 * Handles retrieval requests.
 	 *
 	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using the message {@linkplain Shape#shape() shape}.</p>
+	 * item} possibly using the message {@linkplain JSONLDFormat#shape() shape}.</p>
 	 *
 	 * @param request a retrieval request for the managed linked data resource
 	 *
@@ -145,7 +144,7 @@ public interface Engine {
 	 *
 	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
 	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
-	 * {@linkplain Shape#shape() shape}.</p>
+	 * {@linkplain JSONLDFormat#shape() shape}.</p>
 	 *
 	 * @param request an updating request for the managed linked data resource
 	 *
@@ -160,7 +159,7 @@ public interface Engine {
 	 * Handles deletion requests.
 	 *
 	 * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using  the message {@linkplain Shape#shape() shape}.</p>
+	 * item} possibly using  the message {@linkplain JSONLDFormat#shape() shape}.</p>
 	 *
 	 * @param request a deletion request for the managed linked data resource
 	 *

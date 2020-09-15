@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -35,30 +34,9 @@ import static java.util.Arrays.asList;
 
 
 /**
- * JSON-LD shape constraint.
+ * Linked data shape constraint.
  */
 public abstract class Shape {
-
-	/**
-	 * Retrieves the default JSON-LD shape asset factory.
-	 *
-	 * @return the default shape factory, which returns an {@linkplain Or#or() empty disjunction}, that is a shape
-	 * the always fails to validate
-	 */
-	public static Supplier<Shape> shape() {
-		return Or::or;
-	}
-
-	/**
-	 * Retrieves the default JSON-LD keywords asset factory.
-	 *
-	 * <p>The keywords asset maps JSON-LD {@code @keywords} to user-defined aliases.</p>
-	 *
-	 * @return the default keywords factory, which returns an empty map
-	 */
-	public static Supplier<Map<String, String>> keywords() {
-		return Collections::emptyMap;
-	}
 
 
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
