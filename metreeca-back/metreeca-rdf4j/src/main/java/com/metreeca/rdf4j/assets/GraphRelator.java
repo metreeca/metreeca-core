@@ -20,8 +20,8 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.json.shapes.All;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
-import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.Graph.graph;
@@ -54,7 +53,7 @@ final class GraphRelator extends GraphProcessor {
 	private final Graph graph=asset(graph());
 
 
-	com.metreeca.rest.Future<Response> handle(final Request request) {
+	Future<Response> handle(final Request request) {
 		return request.reply(response -> {
 
 			final boolean resource=!request.collection();
@@ -68,7 +67,7 @@ final class GraphRelator extends GraphProcessor {
 
 				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
 
-				) : query(request.query(), iri(request.item()), and(all(item), shape)).fold(
+				) : query(request.query(), iri(request.item()), and(All.all(item), shape)).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
@@ -77,7 +76,7 @@ final class GraphRelator extends GraphProcessor {
 							// containers are currently virtual and respond always with 200 OK even if not described in
 							// the graph
 
-							final com.metreeca.rest.Message<Response> message=response
+							final Message<Response> message=response
 
 									// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
@@ -182,12 +181,11 @@ final class GraphRelator extends GraphProcessor {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	private String include(final IRI include) {
 		return "return=representation; include=\""+include+"\"";
 	}
 
-	private boolean include(final com.metreeca.rest.Request request, final IRI include) {
+	private boolean include(final Request request, final IRI include) {
 
 		// !!! handle multiple uris in include parameter
 		// !!! handle omit parameter (with multiple uris)

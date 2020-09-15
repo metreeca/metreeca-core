@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.All.all;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 
@@ -79,7 +78,7 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 
 		return Stream.concat(
 
-				all(shape).map(targets -> values(targets.stream()).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
+				GraphProcessor.all(shape).map(targets -> values(targets.stream()).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
 
 						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) :
 						Stream.empty()
@@ -101,7 +100,7 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 						.flatMap(shape -> shape.map(this)),
 
 
-				all(and).map(values -> and.shapes().stream()
+				GraphProcessor.all(and).map(values -> and.shapes().stream()
 
 						.flatMap(shape -> shape.map(new Outliner(values(values.stream()).collect(toSet()))))
 

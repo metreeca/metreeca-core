@@ -22,13 +22,11 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static com.metreeca.json.shapes.Or.or;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -44,11 +42,6 @@ public final class Any extends Shape {
 
 	public static Shape any(final Collection<? extends Value> values) {
 		return values.isEmpty() ? or() : new Any(values);
-	}
-
-
-	public static Optional<Set<Value>> any(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AnyProbe()));
 	}
 
 
@@ -108,25 +101,5 @@ public final class Any extends Shape {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class AnyProbe extends Probe<Set<Value>> {
-
-		@Override public Set<Value> probe(final Any any) {
-			return any.values();
-		}
-
-		@Override public Set<Value> probe(final Or or) {
-			return or.shapes().stream()
-					.map(shape -> shape.map(this))
-					.reduce(null, this::union);
-		}
-
-
-		private Set<Value> union(final Set<Value> x, final Set<Value> y) {
-			return x == null ? y : y == null ? x
-					: unmodifiableSet(Stream.concat(x.stream(), y.stream()).collect(toSet()));
-		}
-
-	}
 
 }

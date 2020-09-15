@@ -25,7 +25,7 @@ import static com.metreeca.json.Values.True;
 import static com.metreeca.json.shapes.Or.or;
 import static org.assertj.core.api.Assertions.assertThat;
 
-final class InTest {
+final class RangeTest {
 
 	@Nested final class Optimization {
 

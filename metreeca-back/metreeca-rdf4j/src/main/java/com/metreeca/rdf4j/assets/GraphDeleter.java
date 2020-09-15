@@ -19,7 +19,7 @@ package com.metreeca.rdf4j.assets;
 
 
 import com.metreeca.json.Shape;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
@@ -35,21 +35,21 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 final class GraphDeleter extends GraphProcessor {
 
-	private final Graph graph=com.metreeca.rest.Context.asset(graph());
+	private final Graph graph=Context.asset(graph());
 
 
-	com.metreeca.rest.Future<com.metreeca.rest.Response> handle(final com.metreeca.rest.Request request) {
+	Future<Response> handle(final Request request) {
 		return request.collection() ? holder(request) : member(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> holder(final com.metreeca.rest.Request request) {
+	private Future<Response> holder(final Request request) {
 		return request.reply(status(InternalServerError, new UnsupportedOperationException("holder DELETE method")));
 	}
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> member(final com.metreeca.rest.Request request) {
+	private Future<Response> member(final Request request) {
 		return request.reply(response -> graph.exec(connection -> {
 
 			final IRI item=iri(request.item());
@@ -66,7 +66,7 @@ final class GraphDeleter extends GraphProcessor {
 						connection.remove(outline(item, filter(shape)));
 						connection.remove(current);
 
-						return response.status(com.metreeca.rest.Response.NoContent);
+						return response.status(Response.NoContent);
 
 					})
 

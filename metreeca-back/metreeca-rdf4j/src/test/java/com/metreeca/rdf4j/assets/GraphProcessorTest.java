@@ -969,4 +969,53 @@ final class GraphProcessorTest {
 		)));
 	}
 
+
+	//// Probes ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	@Nested final class AllProbe {
+
+		private final Value a=literal(1);
+		private final Value b=literal(2);
+		private final Value c=literal(3);
+
+		@Test void testInspectAll() {
+			assertThat(GraphProcessor.all(all(a, b, c)))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectAnd() {
+			assertThat(GraphProcessor.all(and(all(a, b), all(b, c))))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectOtherShape() {
+			assertThat(GraphProcessor.all(and()))
+					.isEmpty();
+		}
+
+	}
+
+	@Nested final class AnyProbe {
+
+		private final Value a=literal(1);
+		private final Value b=literal(2);
+		private final Value c=literal(3);
+
+		@Test void testInspectAny() {
+			assertThat(GraphProcessor._any(any(a, b, c)))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectOr() {
+			assertThat(GraphProcessor._any(or(any(a, b), any(b, c))))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectOtherShape() {
+			assertThat(GraphProcessor._any(and()))
+					.isEmpty();
+		}
+	}
+
 }

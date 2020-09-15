@@ -18,7 +18,7 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -43,14 +43,14 @@ final class GraphCreator extends GraphProcessor {
 	private final Graph graph=asset(graph());
 
 
-	com.metreeca.rest.Future<com.metreeca.rest.Response> handle(final com.metreeca.rest.Request request) {
+	Future<Response> handle(final Request request) {
 		return request.collection() ? holder(request) : member(request);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> holder(final com.metreeca.rest.Request request) {
+	private Future<Response> holder(final Request request) {
 		return request
 
 				.body(jsonld())
@@ -59,7 +59,7 @@ final class GraphCreator extends GraphProcessor {
 
 					final IRI holder=iri(request.item());
 					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
-							.map(com.metreeca.rest.Xtream::encode)  // encode slug as IRI path component
+							.map(Xtream::encode)  // encode slug as IRI path component
 							.orElseGet(() -> UUID.randomUUID().toString()) // !! sequential generator
 					);
 
@@ -77,7 +77,7 @@ final class GraphCreator extends GraphProcessor {
 						connection.add(rewrite(member, holder, rdf));
 
 						return Right(request.reply(response -> response
-								.status(com.metreeca.rest.Response.Created)
+								.status(Response.Created)
 								.header("Location", member.stringValue()))
 						);
 
@@ -88,7 +88,7 @@ final class GraphCreator extends GraphProcessor {
 				.fold(request::reply, future -> future);
 	}
 
-	private com.metreeca.rest.Future<Response> member(final com.metreeca.rest.Request request) {
+	private Future<Response> member(final Request request) {
 		return request.reply(status(InternalServerError, new UnsupportedOperationException("member POST "
 				+"method")));
 	}

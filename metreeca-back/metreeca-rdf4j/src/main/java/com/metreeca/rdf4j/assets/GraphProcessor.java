@@ -49,9 +49,7 @@ import static com.metreeca.json.Values.integer;
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.Values.statement;
-import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.Or.or;
@@ -61,50 +59,101 @@ import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
+import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
 abstract class GraphProcessor {
 
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	Shape target(final Shape shape) { // !!! caching
+	static Shape target(final Shape shape) { // !!! caching
 		return shape.redact(retain(Area, Target));
 	}
 
-	Shape digest(final Shape shape) { // !!! caching
+	static Shape digest(final Shape shape) { // !!! caching
 		return shape.redact(retain(Area, Digest));
 	}
 
-	Shape detail(final Shape shape) { // !!! caching
+	static Shape detail(final Shape shape) { // !!! caching
 		return shape.redact(retain(Area, Detail));
 	}
 
 
-	Shape convey(final Shape shape) { // !!! caching
+	static Shape convey(final Shape shape) { // !!! caching
 		return shape.redact(retain(Mode, Convey));
 	}
 
-	Shape filter(final Shape shape) { // !!! caching
+	static Shape filter(final Shape shape) { // !!! caching
 		return shape.redact(retain(Mode, Filter));
 	}
 
 
-	Iterable<Statement> outline(final IRI resource, final Shape shape) {
-		return anchor(resource, shape).map(new Outliner(resource)).collect(toList());
-	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	private Shape anchor(final IRI resource, final Shape shape) {
+	static Shape anchor(final IRI resource, final Shape shape) {
 
 		final boolean empty=shape.validates(true);
 
 		return resource.stringValue().endsWith("/")
 
 				? empty ? field(inverse(LDP.CONTAINS), focus()) : shape // holders default to ldp:BasicContainer
-				: empty ? all(focus()) : and(all(focus()), shape); // members default to self
+				: empty ? All.all(focus()) : and(All.all(focus()), shape); // members default to self
+
+	}
+
+	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
+		return anchor(resource, shape).map(new Outliner(resource)).collect(toList());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Optional<Set<Value>> all(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AllProbe()));
+	}
+
+	static Optional<Set<Value>> _any(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AnyProbe()));
+	}
+
+
+	private static final class AllProbe extends Probe<Set<Value>> {
+
+		@Override public Set<Value> probe(final All all) {
+			return all.values();
+		}
+
+		@Override public Set<Value> probe(final And and) {
+			return and.shapes().stream()
+					.map(shape -> shape.map(this))
+					.reduce(null, this::union);
+		}
+
+
+		private Set<Value> union(final Set<Value> x, final Set<Value> y) {
+			return x == null ? y : y == null ? x
+					: unmodifiableSet(Stream.concat(x.stream(), y.stream()).collect(toSet()));
+		}
+
+	}
+
+	private static final class AnyProbe extends Probe<Set<Value>> {
+
+		@Override public Set<Value> probe(final Any any) {
+			return any.values();
+		}
+
+		@Override public Set<Value> probe(final Or or) {
+			return or.shapes().stream()
+					.map(shape -> shape.map(this))
+					.reduce(null, this::union);
+		}
+
+
+		private Set<Value> union(final Set<Value> x, final Set<Value> y) {
+			return x == null ? y : y == null ? x
+					: unmodifiableSet(Stream.concat(x.stream(), y.stream()).collect(toSet()));
+		}
 
 	}
 
@@ -776,7 +825,7 @@ abstract class GraphProcessor {
 				final Shape shape=field.value();
 
 				final Optional<Set<Value>> all=all(shape).map(FetcherProbe.this::values);
-				final Optional<Set<Value>> any=any(shape).map(FetcherProbe.this::values);
+				final Optional<Set<Value>> any=_any(shape).map(FetcherProbe.this::values);
 
 				final Optional<Value> singleton=any
 						.filter(values -> values.size() == 1)

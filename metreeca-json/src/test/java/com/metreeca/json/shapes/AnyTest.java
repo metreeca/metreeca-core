@@ -17,12 +17,11 @@
 
 package com.metreeca.json.shapes;
 
-import org.eclipse.rdf4j.model.Value;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.Values.False;
+import static com.metreeca.json.Values.True;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Or.or;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,28 +39,6 @@ final class AnyTest {
 			assertThat(any(True, True, False)).isEqualTo(any(True, False));
 		}
 
-	}
-
-	@Nested final class Inspection {
-
-		private final Value a=literal(1);
-		private final Value b=literal(2);
-		private final Value c=literal(3);
-
-		@Test void testInspectAny() {
-			assertThat(any(any(a, b, c)))
-					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
-		}
-
-		@Test void testInspectOr() {
-			assertThat(any(or(any(a, b), any(b, c))))
-					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
-		}
-
-		@Test void testInspectOtherShape() {
-			assertThat(any(and()))
-					.isEmpty();
-		}
 	}
 
 }
