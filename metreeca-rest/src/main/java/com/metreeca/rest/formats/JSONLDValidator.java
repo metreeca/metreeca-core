@@ -46,7 +46,7 @@ final class JSONLDValidator {
 				focus, singleton(focus), model, envelope
 		));
 
-		final Map<String, Collection<Object>> issues=model.stream()
+		final Map<String, Collection<Value>> issues=model.stream()
 
 				.filter(statement -> !envelope.contains(statement))
 
@@ -58,7 +58,7 @@ final class JSONLDValidator {
 								"unexpected property {^"+format(statement.getPredicate())+"}"
 								: "statement outside shape envelope",
 
-						Collections::singleton,
+						statement -> singleton(statement.getObject()),
 
 						(x, y) -> Stream.of(x, y).flatMap(Collection::stream).collect(toSet())
 
@@ -297,7 +297,7 @@ final class JSONLDValidator {
 			final int count=focus.size();
 			final int limit=minCount.limit();
 
-			return count >= limit ? trace() : trace(issue(minCount), count);
+			return count >= limit ? trace() : trace(issue(minCount), literal(count));
 		}
 
 		@Override public Trace probe(final MaxCount maxCount) {
@@ -305,14 +305,14 @@ final class JSONLDValidator {
 			final int count=focus.size();
 			final int limit=maxCount.limit();
 
-			return count <= limit ? trace() : trace(issue(maxCount), count);
+			return count <= limit ? trace() : trace(issue(maxCount), literal(count));
 		}
 
 		@Override public Trace probe(final In in) {
 
 			final Set<Value> range=values(in.values());
 
-			final List<Value> unexpected=focus
+			final Collection<Value> unexpected=focus
 					.stream()
 					.filter(negate(range::contains))
 					.collect(toList());

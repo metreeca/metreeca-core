@@ -38,7 +38,6 @@ import static java.util.Arrays.asList;
  */
 public abstract class Shape {
 
-
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape expanded(final Shape shape) {
@@ -56,41 +55,6 @@ public abstract class Shape {
 
 
 	public static Shape exactly(final Value... values) { return and(all(values), in(values)); }
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Checks the validation outcome of this shape.
-	 *
-	 * @param outcome the expected validation outcome; {@code true} if this shape is always validated, {@code false}
-	 *                if this shape is never validated, {@code null} otherwise
-	 *
-	 * @return {@code true} if the validation {@code outcome} of this shape is proved to equal the expected value
-	 */
-	public boolean validates(final Boolean outcome) {
-		return outcome.equals(map(new ShapeEvaluator()));
-	}
-
-	/**
-	 * Redact {@linkplain Guard guard} annotations of this shape.
-	 *
-	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
-	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be
-	 *                   removed, {@code null} if the guard is to be retained as is
-	 *
-	 * @return a copy of this shape redacted according to {@code evaluators}.
-	 *
-	 * @throws NullPointerException if {@code evaluators} is null or contains null elements
-	 */
-	@SafeVarargs public final Shape redact(final Function<Guard, Boolean>... evaluators) {
-
-		if ( evaluators == null || Arrays.stream(evaluators).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null evaluators");
-		}
-
-		return map(new ShapeRedactor(evaluators));
-	}
 
 
 	/**
@@ -128,6 +92,41 @@ public abstract class Shape {
 		}
 
 		return when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Checks the validation outcome of this shape.
+	 *
+	 * @param outcome the expected validation outcome; {@code true} if this shape is always validated, {@code false}
+	 *                if this shape is never validated, {@code null} otherwise
+	 *
+	 * @return {@code true} if the validation {@code outcome} of this shape is proved to equal the expected value
+	 */
+	public boolean validates(final Boolean outcome) {
+		return outcome.equals(map(new ShapeEvaluator()));
+	}
+
+	/**
+	 * Redact {@linkplain Guard guard} annotations of this shape.
+	 *
+	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
+	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be
+	 *                   removed, {@code null} if the guard is to be retained as is
+	 *
+	 * @return a copy of this shape redacted according to {@code evaluators}.
+	 *
+	 * @throws NullPointerException if {@code evaluators} is null or contains null elements
+	 */
+	@SafeVarargs public final Shape redact(final Function<Guard, Boolean>... evaluators) {
+
+		if ( evaluators == null || Arrays.stream(evaluators).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null evaluators");
+		}
+
+		return map(new ShapeRedactor(evaluators));
 	}
 
 

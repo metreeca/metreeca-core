@@ -17,12 +17,14 @@
 
 package com.metreeca.json;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+
 import javax.json.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
@@ -55,28 +57,32 @@ public final class Trace {
 		);
 	}
 
-	public static Trace trace(final String issue, final Object... values) {
-		return new Trace(singletonMap(issue, (Collection<Object>)asList(values)).entrySet().stream(), Stream.empty());
+	public static Trace trace(final String issue, final Value... values) {
+		return trace(issue, asList(values));
 	}
 
-	public static Trace trace(final Map<String, Collection<Object>> issues) {
+	public static Trace trace(final String issue, final Collection<Value> values) {
+		return new Trace(singletonMap(issue, values).entrySet().stream(), Stream.empty());
+	}
+
+	public static Trace trace(final Map<String, Collection<Value>> issues) {
 		return new Trace(issues.entrySet().stream(), Stream.empty());
 	}
 
-	public static Trace trace(final Map<String, Collection<Object>> issues, final Map<Object, Trace> fields) {
+	public static Trace trace(final Map<String, Collection<Value>> issues, final Map<IRI, Trace> fields) {
 		return new Trace(issues.entrySet().stream(), fields.entrySet().stream());
 	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Map<String, Collection<Object>> issues;
-	private final Map<Object, Trace> fields;
+	private final Map<String, Collection<Value>> issues;
+	private final Map<IRI, Trace> fields;
 
 
 	private Trace(
-			final Stream<Map.Entry<String, Collection<Object>>> issues,
-			final Stream<Map.Entry<Object, Trace>> fields
+			final Stream<Map.Entry<String, Collection<Value>>> issues,
+			final Stream<Map.Entry<IRI, Trace>> fields
 	) {
 
 		this.issues=issues
@@ -104,11 +110,11 @@ public final class Trace {
 	}
 
 
-	public Map<String, Collection<Object>> issues() {
+	public Map<String, Collection<Value>> issues() {
 		return unmodifiableMap(issues);
 	}
 
-	public Map<Object, Trace> fields() {
+	public Map<IRI, Trace> fields() {
 		return unmodifiableMap(fields);
 	}
 
@@ -128,35 +134,9 @@ public final class Trace {
 				final JsonArrayBuilder objects=Json.createArrayBuilder();
 
 				values.forEach(value -> {
-					if ( value == null ) {
 
-						objects.add(JsonValue.NULL);
+					if ( value != null ) { objects.add(format(value)); }
 
-					} else if ( value instanceof Boolean ) {
-
-						objects.add((Boolean)value);
-
-					} else if ( value instanceof BigDecimal ) {
-
-						objects.add((BigDecimal)value);
-
-					} else if ( value instanceof BigInteger ) {
-
-						objects.add((BigInteger)value);
-
-					} else if ( value instanceof Double || value instanceof Float ) {
-
-						objects.add(((Number)value).doubleValue());
-
-					} else if ( value instanceof Number ) {
-
-						objects.add(((Number)value).longValue());
-
-					} else {
-
-						objects.add(value.toString());
-
-					}
 				});
 
 				errors.add(detail, objects.build());

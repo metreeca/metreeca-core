@@ -537,6 +537,14 @@ public final class Values {
 	}
 
 
+	public static Optional<Boolean> bool(final Value value) {
+		try {
+			return value instanceof Literal ? Optional.of(((Literal)value).booleanValue()) : Optional.empty();
+		} catch ( final IllegalArgumentException e ) {
+			return Optional.empty();
+		}
+	}
+
 	public static Optional<BigInteger> integer(final Value value) {
 		try {
 			return value instanceof Literal ? Optional.of(((Literal)value).integerValue()) : Optional.empty();
@@ -668,9 +676,7 @@ public final class Values {
 	}
 
 	public static String format(final Literal literal, final Map<String, String> namespaces) { // !!! refactor
-		if ( literal == null ) {
-			return null;
-		} else {
+		if ( literal == null ) { return null; } else {
 
 			final IRI type=literal.getDatatype();
 
