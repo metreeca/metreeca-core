@@ -43,10 +43,6 @@ public final class All extends Shape {
 	}
 
 	public static Shape all(final Collection<? extends Value> values) {
-		return all(new LinkedHashSet<>(values));
-	}
-
-	public static Shape all(final Set<? extends Value> values) {
 		return values.isEmpty() ? and() : new All(values);
 	}
 

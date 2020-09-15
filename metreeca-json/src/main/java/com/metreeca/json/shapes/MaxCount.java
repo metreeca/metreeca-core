@@ -34,7 +34,6 @@ public final class MaxCount extends Shape {
 		return new MaxCount(limit);
 	}
 
-
 	public static Optional<Integer> maxCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MaxCountProbe()));
 	}

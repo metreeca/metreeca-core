@@ -42,9 +42,7 @@ public final class Any extends Shape {
 		return any(asList(values));
 	}
 
-	public static Shape any(final Collection<? extends Value> values) {return any(new LinkedHashSet<>(values));}
-
-	public static Shape any(final LinkedHashSet<? extends Value> values) {
+	public static Shape any(final Collection<? extends Value> values) {
 		return values.isEmpty() ? or() : new Any(values);
 	}
 

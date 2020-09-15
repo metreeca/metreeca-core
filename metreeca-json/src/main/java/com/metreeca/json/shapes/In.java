@@ -42,10 +42,6 @@ public final class In extends Shape {
 	}
 
 	public static Shape in(final Collection<? extends Value> values) {
-		return in(new LinkedHashSet<>(values));
-	}
-
-	public static Shape in(final Set<? extends Value> values) {
 		return values.isEmpty() ? or() : new In(values);
 	}
 

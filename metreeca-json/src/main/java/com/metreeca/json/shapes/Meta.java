@@ -43,28 +43,6 @@ import static java.util.stream.Collectors.toMap;
  */
 public final class Meta extends Shape {
 
-	private static final java.util.regex.Pattern NamedIRIPattern
-			=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
-
-
-	/**
-	 * Creates an alias annotation.
-	 *
-	 * @param value an alternate property name for reporting values for the enclosing shape (e.g. in the context of
-	 *                 JSON-based serialization results)
-	 *
-	 * @return a new alias annotation
-	 *
-	 * @throws NullPointerException if {@code value} is null
-	 */
-	public static Shape alias(final String value) {
-		return meta("alias", value);
-	}
-
-	public static Optional<String> alias(final Shape shape) {
-		return meta("alias", shape, String.class);
-	}
-
 	public static Map<IRI, String> aliases(final Shape shape) {
 		if ( shape == null ) { return emptyMap(); } else {
 
@@ -97,6 +75,30 @@ public final class Meta extends Shape {
 		}
 	}
 
+	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final java.util.regex.Pattern NamedIRIPattern
+			=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
+
+
+	/**
+	 * Creates an alias annotation.
+	 *
+	 * @param value an alternate property name for reporting values for the enclosing shape (e.g. in the context of
+	 *              JSON-based serialization results)
+	 *
+	 * @return a new alias annotation
+	 *
+	 * @throws NullPointerException if {@code value} is null
+	 */
+	public static Shape alias(final String value) {
+		return meta("alias", value);
+	}
+
+	public static Optional<String> alias(final Shape shape) {
+		return meta("alias", shape);
+	}
+
 
 	/**
 	 * Creates a label annotation.
@@ -112,7 +114,7 @@ public final class Meta extends Shape {
 	}
 
 	public static Optional<String> label(final Shape shape) {
-		return meta("label", shape, String.class);
+		return meta("label", shape);
 	}
 
 
@@ -130,79 +132,7 @@ public final class Meta extends Shape {
 	}
 
 	public static Optional<String> notes(final Shape shape) {
-		return meta("notes", shape, String.class);
-	}
-
-
-	/**
-	 * Creates a placeholder annotation.
-	 *
-	 * @param value a human-readable textual placeholder for the expected values of the enclosing shape
-	 *
-	 * @return a new placeholder annotation
-	 *
-	 * @throws NullPointerException if {@code value} is null
-	 */
-	public static Shape placeholder(final String value) {
-		return new Meta("placeholder", value);
-	}
-
-	public static Optional<String> placeholder(final Shape shape) {
-		return meta("placeholder", shape, String.class);
-	}
-
-
-	/**
-	 * Creates a default annotation.
-	 *
-	 * @param value a default value for the enclosing shape
-	 *
-	 * @return a new default annotation
-	 *
-	 * @throws NullPointerException if {@code value} is null
-	 */
-	public static Shape dflt(final Object value) {
-		return new Meta("default", value);
-	}
-
-	public static Optional<String> dflt(final Shape shape) {
-		return meta("default", shape, String.class);
-	}
-
-
-	/**
-	 * Creates a hint annotation.
-	 *
-	 * @param value the identifier of a resource hinting at possible values for the enclosing shape
-	 *
-	 * @return a new hint annotation
-	 *
-	 * @throws NullPointerException if {@code value} is null
-	 */
-	public static Shape hint(final String value) {
-		return new Meta("hint", value);
-	}
-
-	public static Optional<String> hint(final Shape shape) {
-		return meta("hint", shape, String.class);
-	}
-
-
-	/**
-	 * Creates a group annotation.
-	 *
-	 * @param value a client-dependent suggested group representation mode (list, form, tabbed panes, …) for the enclosing shape
-	 *
-	 * @return a new group annotation
-	 *
-	 * @throws NullPointerException if {@code value} is null
-	 */
-	public static Shape group(final String value) {
-		return new Meta("group", value);
-	}
-
-	public static Optional<String> group(final Shape shape) {
-		return meta("group", shape, String.class);
+		return meta("notes", shape);
 	}
 
 
@@ -216,30 +146,24 @@ public final class Meta extends Shape {
 	 * @throws NullPointerException if {@code value} is null
 	 */
 	public static Shape index(final boolean value) {
-		return new Meta("index", value);
+		return new Meta("index", Boolean.toString(value));
 	}
 
 	public static Optional<Boolean> index(final Shape shape) {
-		return meta("index", shape, Boolean.class);
+		return meta("index", shape).map(Boolean::parseBoolean);
 	}
 
 
-	public static Meta meta(final String label, final Object value) {
+	public static Meta meta(final String label, final String value) {
 		return new Meta(label, value);
 	}
 
-	public static Optional<Object> meta(final String label, final Shape shape) {
+	public static Optional<String> meta(final String label, final Shape shape) {
 		return Optional.ofNullable(shape.map(new MetaProbe(label)));
 	}
 
-	public static <T> Optional<T> meta(final String label, final Shape shape, final Class<T> clazz) {
-		return meta(label, shape)
-				.filter(clazz::isInstance)
-				.map(clazz::cast);
-	}
 
-
-	static Stream<Meta> metas(final Stream<Meta> metas) { // make sure meta annotatios are unique
+	static Stream<Meta> metas(final Stream<Meta> metas) { // make sure meta annotations are unique
 
 		final Map<Object, Object> mappings=new HashMap<>();
 
@@ -262,10 +186,10 @@ public final class Meta extends Shape {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final String label;
-	private final Object value;
+	private final String value;
 
 
-	private Meta(final String label, final Object value) {
+	private Meta(final String label, final String value) {
 
 		if ( label == null ) {
 			throw new NullPointerException("null label");
@@ -284,7 +208,7 @@ public final class Meta extends Shape {
 		return label;
 	}
 
-	public Object value() {
+	public String value() {
 		return value;
 	}
 
@@ -320,35 +244,35 @@ public final class Meta extends Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class MetaProbe extends Probe<Object> {
+	private static final class MetaProbe extends Probe<String> {
 
-		private final Object label;
+		private final String label;
 
 
-		private MetaProbe(final Object label) {
+		private MetaProbe(final String label) {
 			this.label=label;
 		}
 
 
-		@Override public Object probe(final Meta meta) {
+		@Override public String probe(final Meta meta) {
 			return meta.label().equals(label) ? meta.value() : null;
 		}
 
 
-		@Override public Object probe(final And and) {
+		@Override public String probe(final And and) {
 			return probe(and.shapes().stream());
 		}
 
-		@Override public Object probe(final Or or) {
+		@Override public String probe(final Or or) {
 			return probe(or.shapes().stream());
 		}
 
-		@Override public Object probe(final When when) {
+		@Override public String probe(final When when) {
 			return probe(Stream.of(when.pass(), when.fail()));
 		}
 
 
-		private Object probe(final Stream<Shape> shapes) {
+		private String probe(final Stream<Shape> shapes) {
 			return shapes.map(this).filter(Objects::nonNull).findFirst().orElse(null);
 		}
 

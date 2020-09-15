@@ -34,7 +34,6 @@ public final class MinCount extends Shape {
 		return new MinCount(limit);
 	}
 
-
 	public static Optional<Integer> minCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MinCountProbe()));
 	}

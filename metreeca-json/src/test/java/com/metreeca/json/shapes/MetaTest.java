@@ -187,7 +187,7 @@ final class MetaTest {
 
 			assertThat(label(and(
 					and(
-							placeholder("placeholder"),
+							index(true),
 							notes("notes")
 					),
 					or(

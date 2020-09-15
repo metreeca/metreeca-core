@@ -403,7 +403,7 @@ final class GraphProcessorTest {
 		@Test void testMeta() {
 			exec(() -> assertThat(query(
 
-					Root, items(meta("value", RDF.NIL))
+					Root, items(meta("value", "nil"))
 
 			)).as("ignore annotations")
 					.isEmpty());
