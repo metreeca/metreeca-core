@@ -32,20 +32,34 @@ import static javax.json.Json.createObjectBuilder;
 
 final class JSONTrimmer {
 
+	private final IRI focus;
+	private final Shape shape;
 	private final Map<String, String> keywords;
 
 
-	JSONTrimmer(final Map<String, String> keywords) {
+	JSONTrimmer(final IRI focus, final Shape shape, final Map<String, String> keywords) {
+
+		this.focus=focus;
+		this.shape=shape;
+
 		this.keywords=keywords;
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	JsonValue trim(final JsonValue value) {
+		return trim(focus, shape, value);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	JsonValue trim(final IRI focus, final Shape shape, final JsonValue value) {
 		return value instanceof JsonObject ? trim(focus, shape, value.asJsonObject())
 				: value instanceof JsonArray ? trim(focus, shape, value.asJsonArray())
 				: value;
 	}
-
 
 	private JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
 

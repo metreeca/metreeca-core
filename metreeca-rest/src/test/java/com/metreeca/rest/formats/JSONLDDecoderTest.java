@@ -407,7 +407,7 @@ final class JSONLDDecoderTest {
 
 					createObjectBuilder()
 
-			)).isInstanceOf(JsonException.class);
+			)).isInstanceOf(IllegalArgumentException.class);
 		}
 
 

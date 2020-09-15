@@ -38,6 +38,7 @@ import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
+import static com.metreeca.rest.formats.JSONLDCodec.driver;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -53,14 +54,17 @@ final class JSONLDParser {
 	private final Shape shape;
 	private final Map<String, String> keywords;
 
+	private final Shape baseline;
 
 	private final JSONLDDecoder decoder;
 
 
 	JSONLDParser(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
-		this.shape=shape;
+		this.shape=driver(shape);
 		this.keywords=keywords;
+
+		this.baseline=shape;
 
 		this.decoder=new JSONLDDecoder(focus, shape, keywords);
 	}
@@ -69,7 +73,7 @@ final class JSONLDParser {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Query parse(final String query) throws JsonException, NoSuchElementException {
-		return query.isEmpty() ? items(shape)
+		return query.isEmpty() ? items(baseline)
 				: query.startsWith("%7B") ? json(decode(query))
 				: query.startsWith("{") ? json(query)
 				: form(query);
@@ -100,7 +104,7 @@ final class JSONLDParser {
 		final int offset=offset(json);
 		final int limit=limit(json);
 
-		final Shape filtered=and(shape, Guard.filter().then(filter)); // filtering only >> don't include in results
+		final Shape filtered=and(baseline, Guard.filter().then(filter)); // filtering only >> don't include in results
 
 		return terms != null ? Terms.terms(filtered, terms)
 				: stats != null ? Stats.stats(filtered, stats)
@@ -323,47 +327,37 @@ final class JSONLDParser {
 	}
 
 	private List<Field> steps(final String path, final Shape shape) {
-		try {
 
-			final List<Field> steps=new ArrayList<>();
+		final List<Field> steps=new ArrayList<>();
 
-			final String trimmed=path.trim();
-			final Matcher matcher=StepPattern.matcher(trimmed);
+		final String trimmed=path.trim();
+		final Matcher matcher=StepPattern.matcher(trimmed);
 
-			int last=0;
-			Shape reference=shape;
+		int last=0;
+		Shape reference=shape;
 
-			while ( matcher.lookingAt() ) {
+		while ( matcher.lookingAt() ) {
 
-				final Map<String, Field> fields=JSONLDCodec.fields(reference, keywords);
+			final Map<String, Field> fields=JSONLDCodec.fields(reference, keywords);
 
-				final String step=matcher.group(1);
+			final String step=matcher.group(1);
 
-				final Field field=Optional
-						.ofNullable(fields.get(step))
-						.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
+			final Field field=Optional
+					.ofNullable(fields.get(step))
+					.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
 
-				steps.add(field);
-				reference=field.value();
+			steps.add(field);
+			reference=field.value();
 
-				matcher.region(last=matcher.end(), trimmed.length());
-			}
-
-			if ( last != trimmed.length() ) {
-				throw new JsonException("malformed path ["+trimmed+"]");
-			}
-
-			return steps;
-
-		} catch ( final JsonException|NoSuchElementException e ) {
-
-			throw e;
-
-		} catch ( final RuntimeException e ) {
-
-			throw new JsonException(e.getMessage(), e);
-
+			matcher.region(last=matcher.end(), trimmed.length());
 		}
+
+		if ( last != trimmed.length() ) {
+			throw new JsonException("malformed path ["+trimmed+"]");
+		}
+
+		return steps;
+
 	}
 
 

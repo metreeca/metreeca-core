@@ -25,7 +25,8 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.*;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 import java.util.Map;
 
 import static com.metreeca.json.JSONAssert.assertThat;
@@ -365,7 +366,7 @@ final class JSONLDEncoderTest {
 							field(iri(base, "value"))
 					)
 
-			)).isInstanceOf(JsonException.class);
+			)).isInstanceOf(IllegalArgumentException.class);
 		}
 
 		@Test void testIgnoreReservedAliases() {
@@ -373,7 +374,7 @@ final class JSONLDEncoderTest {
 
 					field(RDF.VALUE, alias("@id"))
 
-			)).isInstanceOf(JsonException.class);
+			)).isInstanceOf(IllegalArgumentException.class);
 		}
 
 	}

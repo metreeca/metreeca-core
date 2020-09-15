@@ -21,7 +21,6 @@ import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.Guard;
-import com.metreeca.json.shapes.Range;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -52,6 +51,7 @@ import static com.metreeca.json.shapes.MinExclusive.minExclusive;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Pattern.pattern;
+import static com.metreeca.json.shapes.Range.range;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.*;
 
@@ -60,7 +60,7 @@ final class JSONLDParserTest {
 	private static final Value One=literal(integer(1));
 	private static final Value Ten=literal(integer(10));
 
-	private static final Shape shape=field(RDF.FIRST, field(RDF.REST, and()));
+	private static final Shape shape=field(RDF.FIRST, field(RDF.REST));
 
 
 	private void items(final String query, final Shape shape, final Consumer<Items> tester) {
@@ -110,7 +110,7 @@ final class JSONLDParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new JSONLDParser(iri(), shape, emptyMap())
+		return new JSONLDParser(iri("http://example.com/"), shape, emptyMap())
 				.parse(query.replace('\'', '"'));
 	}
 
@@ -312,6 +312,9 @@ final class JSONLDParserTest {
 
 		@Test void testParseRootFilters() {
 
+			final Value first=iri("http://example.com/first");
+			final Value rest=iri("http://example.com/rest");
+
 			items("{ '@': '"+RDF.TYPE+"' }", shape, items -> assertThat(items.shape())
 					.as("class")
 					.isEqualTo(filter(shape, clazz(RDF.TYPE)))
@@ -377,18 +380,18 @@ final class JSONLDParserTest {
 
 
 			items("{ '%': [] }", shape, items -> assertThat(items.shape())
-					.as("in (empty)")
-					.isEqualTo(filter(shape, Range.range()))
+					.as("range (empty)")
+					.isEqualTo(filter(shape, range()))
 			);
 
 			items("{ '%': 'first' }", shape, items -> assertThat(items.shape())
-					.as("in (singleton)")
-					.isEqualTo(filter(shape, Range.range(literal("first"))))
+					.as("range (singleton)")
+					.isEqualTo(filter(shape, range(first)))
 			);
 
 			items("{ '%': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 					.as("in (multiple)")
-					.isEqualTo(filter(shape, Range.range(literal("first"), literal("rest"))))
+					.isEqualTo(filter(shape, range(first, rest)))
 			);
 
 
@@ -399,12 +402,12 @@ final class JSONLDParserTest {
 
 			items("{ '!': 'first' }", shape, items -> assertThat(items.shape())
 					.as("universal (singleton)")
-					.isEqualTo(filter(shape, all(literal("first"))))
+					.isEqualTo(filter(shape, all(first)))
 			);
 
 			items("{ '!': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 					.as("universal (multiple)")
-					.isEqualTo(filter(shape, all(literal("first"), literal("rest"))))
+					.isEqualTo(filter(shape, all(first, rest)))
 			);
 
 
@@ -415,12 +418,12 @@ final class JSONLDParserTest {
 
 			items("{ '?': 'first' }", shape, items -> assertThat(items.shape())
 					.as("existential (singleton)")
-					.isEqualTo(filter(shape, any(literal("first"))))
+					.isEqualTo(filter(shape, any(first)))
 			);
 
 			items("{ '?': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 					.as("existential (multiple)")
-					.isEqualTo(filter(shape, any(literal("first"), literal("rest"))))
+					.isEqualTo(filter(shape, any(first, rest)))
 			);
 
 		}
@@ -469,7 +472,7 @@ final class JSONLDParserTest {
 
 			items("first=x&first.rest=y&first.rest=w+z", shape, items -> assertThat(items.shape())
 					.isEqualTo(filter(shape, field(RDF.FIRST, and(
-							any(literal("x")),
+							any(iri("http://example.com/x")),
 							field(RDF.REST, any(literal("y"), literal("w z")))
 					)))));
 
@@ -486,7 +489,7 @@ final class JSONLDParserTest {
 
 				assertThat(items.shape())
 						.isEqualTo(filter(shape, field(RDF.FIRST, and(
-								any(literal("x")),
+								any(iri("http://example.com/x")),
 								field(RDF.REST, any(literal("y")))
 						))));
 			});

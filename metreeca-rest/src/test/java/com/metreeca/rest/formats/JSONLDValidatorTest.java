@@ -38,6 +38,7 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.relate;
 import static com.metreeca.json.shapes.Like.like;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
@@ -49,10 +50,13 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
+import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rest.EitherAssert.assertThat;
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.joining;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 final class JSONLDValidatorTest {
 
@@ -73,7 +77,7 @@ final class JSONLDValidatorTest {
 	}
 
 	private Either<Trace, Collection<Statement>> validate(final Shape shape, final Collection<Statement> model) {
-		return new JSONLDValidator().validate(iri("app:/"), field(RDF.VALUE, shape), model);
+		return new JSONLDValidator(iri("app:/"), field(RDF.VALUE, shape), emptyMap()).validate(model);
 	}
 
 
@@ -138,61 +142,28 @@ final class JSONLDValidatorTest {
 
 		}
 
+		@Test void ValidateWhen() {
+
+			final Shape shape=when(
+					datatype(XSD.INTEGER),
+					maxInclusive(literal(100)),
+					maxInclusive(literal(10))
+			);
+
+			assertThat(validate(shape, "100")).hasRight();
+			assertThat(validate(shape, "100.0")).hasLeft();
+		}
+
+
+		@Test void testReportUnredactedGuard() {
+			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+					validate(when(relate(), maxInclusive(literal(100))))
+			);
+		}
+
 	}
 
 	@Nested final class Constraints {
-
-		@Test void testValidateMinCount() {
-
-			final Shape shape=minCount(2);
-
-			assertThat(validate(shape, "1, 2, 3")).hasRight();
-			assertThat(validate(shape, "1")).hasLeft();
-
-		}
-
-		@Test void testValidateMaxCount() {
-
-			final Shape shape=maxCount(2);
-
-			assertThat(validate(shape, "1, 2")).hasRight();
-			assertThat(validate(shape, "1, 2, 3")).hasLeft();
-
-		}
-
-		@Test void testValidateIn() {
-
-			final Shape shape=Range.range(x, y);
-
-			assertThat(validate(shape, "<x>, <y>")).hasRight();
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasLeft();
-
-			assertThat(validate(shape)).as("empty focus").hasRight();
-
-		}
-
-		@Test void testValidateAll() {
-
-			final Shape shape=all(x, y);
-
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
-			assertThat(validate(shape, "<x>")).hasLeft();
-
-			assertThat(validate(shape)).as("empty focus").hasLeft();
-
-		}
-
-		@Test void testValidateAny() {
-
-			final Shape shape=any(x, y);
-
-			assertThat(validate(shape, "<x>")).hasRight();
-			assertThat(validate(shape, "<z>")).hasLeft();
-
-			assertThat(validate(shape)).as("empty focus").hasLeft();
-
-		}
-
 
 		@Test void testValidateDatatype() {
 
@@ -227,21 +198,16 @@ final class JSONLDValidatorTest {
 
 		}
 
-		//@Test void testValidateClazz() {
-		//
-		//	final Shape shape=and(clazz(term("Employee")), field(RDF.TYPE));
-		//
-		//	// validate using type info retrieved from model
-		//
-		//	assertThat(validate(shape, "<employees/9999>", "<employees/9999> a :Employee")).hasRight();
-		//	assertThat(validate(shape, "<offices/9999>")).hasLeft();
-		//
-		//	// validate using type info retrieved from graph
-		//
-		//	assertThat(validate(shape, "<employees/1370>")).hasRight();
-		//	assertThat(validate(shape, "<offices/1>")).hasLeft();
-		//
-		//}
+		@Test void testValidateRange() {
+
+			final Shape shape=Range.range(x, y);
+
+			assertThat(validate(shape, "<x>, <y>")).hasRight();
+			assertThat(validate(shape, "<x>, <y>, <z>")).hasLeft();
+
+			assertThat(validate(shape)).as("empty focus").hasRight();
+
+		}
 
 
 		@Test void testValidateMinExclusive() {
@@ -346,6 +312,47 @@ final class JSONLDValidatorTest {
 			assertThat(validate(shape, "'100'")).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
+
+		}
+
+
+		@Test void testValidateMinCount() {
+
+			final Shape shape=minCount(2);
+
+			assertThat(validate(shape, "1, 2, 3")).hasRight();
+			assertThat(validate(shape, "1")).hasLeft();
+
+		}
+
+		@Test void testValidateMaxCount() {
+
+			final Shape shape=maxCount(2);
+
+			assertThat(validate(shape, "1, 2")).hasRight();
+			assertThat(validate(shape, "1, 2, 3")).hasLeft();
+
+		}
+
+		@Test void testValidateAll() {
+
+			final Shape shape=all(x, y);
+
+			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
+			assertThat(validate(shape, "<x>")).hasLeft();
+
+			assertThat(validate(shape)).as("empty focus").hasLeft();
+
+		}
+
+		@Test void testValidateAny() {
+
+			final Shape shape=any(x, y);
+
+			assertThat(validate(shape, "<x>")).hasRight();
+			assertThat(validate(shape, "<z>")).hasLeft();
+
+			assertThat(validate(shape)).as("empty focus").hasLeft();
 
 		}
 

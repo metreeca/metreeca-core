@@ -43,7 +43,7 @@ final class JSONTrimmerTest {
 	}
 
 	private JsonValue trim(final Shape shape, final Map<String, String> keywords, final JsonObjectBuilder object) {
-		return new JSONTrimmer(keywords).trim(iri(), shape, object.build());
+		return new JSONTrimmer(iri(), shape, keywords).trim(object.build());
 	}
 
 

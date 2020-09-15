@@ -37,8 +37,22 @@ import static java.util.stream.Collectors.*;
 
 final class JSONLDValidator {
 
-	Either<Trace, Collection<Statement>> validate(final IRI focus, final Shape shape,
-			final Collection<Statement> model) {
+	private final IRI focus;
+	private final Shape shape;
+	private final Map<String, String> keywords;
+
+	JSONLDValidator(final IRI focus, final Shape shape, final Map<String, String> keywords) {
+
+		this.focus=focus;
+		this.shape=shape;
+
+		this.keywords=keywords;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	Either<Trace, Collection<Statement>> validate(final Collection<Statement> model) {
 
 		final Collection<Statement> envelope=new HashSet<>();
 
@@ -118,6 +132,7 @@ final class JSONLDValidator {
 			return shape.toString().replaceAll("\\s+", " ");
 		}
 
+
 		@Override public Trace probe(final Guard guard) {
 			throw new UnsupportedOperationException(guard.toString());
 		}
@@ -132,74 +147,6 @@ final class JSONLDValidator {
 					.collect(toMap(v -> issue(datatype), Collections::singleton))
 			);
 		}
-
-		//@Override public Trace probe(final Clazz clazz) {
-		//	if ( focus.isEmpty() ) { return trace(); } else {
-		//
-		//		// retrieve the class hierarchy rooted in the expected class
-		//
-		//		final Set<Value> hierarchy=stream(connection.prepareTupleQuery(Snippets.source(
-		//
-		//				"# clazz hierarchy\n"
-		//						+"\n"
-		//						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-		//						+"\n"
-		//						+"select distinct ?class { ?class rdfs:subClassOf* {root} }",
-		//
-		//				format(clazz.id())
-		//
-		//		)).evaluate())
-		//
-		//				.map(bindings -> bindings.getValue("class"))
-		//				.collect(toSet());
-		//
-		//
-		//		// retrieve type info for focus nodes
-		//
-		//		final Map<Value, Set<Value>> types=Stream.concat(
-		//
-		//				// retrieve type info from the validated model
-		//
-		//				focus.stream().flatMap(value -> source.stream()
-		//						.filter(pattern(value, RDF.TYPE, null))
-		//						.map(Statement::getObject)
-		//						.map(type -> new SimpleImmutableEntry<>(value, type))
-		//				),
-		//
-		//				// retrieve type info from graph
-		//
-		//				stream(connection.prepareTupleQuery(Snippets.source(
-		//
-		//						"# type info\n"
-		//								+"\n"
-		//								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-		//								+"\n"
-		//								+"select ?value ?type {\n"
-		//								+"\n"
-		//								+"\tvalues ?value {\n"
-		//								+"\t\t{values}\n"
-		//								+"\t}\n"
-		//								+"\n"
-		//								+"\t?value a ?type\n"
-		//								+"\n"
-		//								+"}",
-		//
-		//						Snippets.list(focus.stream().map(Values::format), "\n")
-		//
-		//				)).evaluate()).map(bindings -> new SimpleImmutableEntry<>(
-		//						bindings.getValue("value"),
-		//						bindings.getValue("type")
-		//				))
-		//
-		//		).collect(groupingBy(Map.Entry::getKey, mapping(Map.Entry::getValue, toSet())));
-		//
-		//		return trace(focus.stream()
-		//				.filter(value -> disjoint(types.getOrDefault(value, emptySet()), hierarchy))
-		//				.collect(toMap(v -> issue(clazz), Collections::singleton))
-		//		);
-		//
-		//	}
-		//}
 
 		@Override public Trace probe(final Range range) {
 
@@ -388,7 +335,7 @@ final class JSONLDValidator {
 		}
 
 		@Override public Trace probe(final When when) {
-			throw new UnsupportedOperationException(when.toString());
+			return (when.test().map(this).empty() ? when.pass() : when.fail()).map(this);
 		}
 
 

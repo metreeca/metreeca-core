@@ -138,7 +138,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null model");
 		}
 
-		return new JSONLDValidator().validate(focus, shape, model);
+		return new JSONLDValidator(focus, shape, asset(keywords())).validate(model);
 	}
 
 	public static JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
@@ -155,7 +155,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null object");
 		}
 
-		return new JSONTrimmer(asset(keywords())).trim(focus, shape, object).asJsonObject();
+		return new JSONTrimmer(focus, shape, asset(keywords())).trim(object).asJsonObject();
 	}
 
 

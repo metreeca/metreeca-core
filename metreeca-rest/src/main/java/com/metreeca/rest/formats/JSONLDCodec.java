@@ -22,7 +22,6 @@ import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import javax.json.JsonException;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.regex.Matcher;
@@ -151,7 +150,6 @@ final class JSONLDCodec {
 			return minCount.limit();
 		}
 
-
 		@Override public Integer probe(final And and) {
 			return and.shapes().stream()
 					.map(shape -> shape.map(this))
@@ -167,7 +165,8 @@ final class JSONLDCodec {
 		@Override public Integer probe(final When when) {
 			return min.apply(
 					when.pass().map(this),
-					when.fail().map(this));
+					when.fail().map(this)
+			);
 		}
 
 	}
@@ -177,7 +176,6 @@ final class JSONLDCodec {
 		@Override public Integer probe(final MaxCount maxCount) {
 			return maxCount.limit();
 		}
-
 
 		@Override public Integer probe(final And and) {
 			return and.shapes().stream()
@@ -220,7 +218,7 @@ final class JSONLDCodec {
 
 				.peek(entry -> {
 					if ( !AliasPattern.matcher(entry.getKey()).matches() ) {
-						throw new JsonException(format(
+						throw new IllegalArgumentException(format(
 								"malformed alias <%s> for <%s>", entry.getKey(), entry.getValue()
 						));
 					}
@@ -228,15 +226,15 @@ final class JSONLDCodec {
 
 				.peek(entry -> {
 					if ( entry.getKey().startsWith("@") || keywords.containsValue(entry.getKey()) ) {
-						throw new JsonException(format(
+						throw new IllegalArgumentException(format(
 								"reserved alias <%s> for <%s>", entry.getKey(), entry.getValue()
 						));
 					}
 				})
 
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
-					throw new JsonException(format(
-							"clashing aliases for <%s> / <%s>", x, y
+					throw new IllegalArgumentException(format(
+							"clashing aliases for <field(%s)> / <field(%s)>", x.label(), y.label()
 					));
 				}));
 	}
@@ -248,7 +246,7 @@ final class JSONLDCodec {
 
 		if ( aliases.size() > 1 ) { // clashing aliases
 
-			throw new JsonException(format("multiple aliases for <%s> / <%s>", field, aliases));
+			throw new IllegalArgumentException(format("multiple aliases for <%s> / <%s>", field, aliases));
 
 		} else if ( aliases.size() == 1 ) { // user-defined alias
 
@@ -263,7 +261,7 @@ final class JSONLDCodec {
 					.map(matcher -> matcher.group("name"))
 					.map(alias -> direct(field.label()) ? alias : alias+"Of") // !!! inverse?
 
-					.orElseThrow(() -> new JsonException(format("undefined alias for <%s>", field)));
+					.orElseThrow(() -> new IllegalArgumentException(format("undefined alias for <%s>", field)));
 
 		}
 	}

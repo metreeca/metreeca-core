@@ -23,8 +23,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.JsonException;
-
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
@@ -187,19 +185,19 @@ final class JSONLDCodecTest {
 
 		@Test void testReportConflictingProperties() {
 			assertThatThrownBy(() -> fields(and(field(RDF.VALUE), field(iri("urn:example#value"), and()))))
-					.isInstanceOf(JsonException.class);
+					.isInstanceOf(IllegalArgumentException.class);
 		}
 
 		@Test void testReportReservedAliases() {
 
 			assertThatThrownBy(() -> fields(field(iri(ValuesTest.Base, "@id"), and())))
-					.isInstanceOf(JsonException.class);
+					.isInstanceOf(IllegalArgumentException.class);
 
 			assertThatThrownBy(() -> fields(field(RDF.VALUE, alias("@id"))))
-					.isInstanceOf(JsonException.class);
+					.isInstanceOf(IllegalArgumentException.class);
 
 			assertThatThrownBy(() -> fields(field(RDF.VALUE, alias("id")), singletonMap("@id", "id")))
-					.isInstanceOf(JsonException.class);
+					.isInstanceOf(IllegalArgumentException.class);
 
 		}
 
