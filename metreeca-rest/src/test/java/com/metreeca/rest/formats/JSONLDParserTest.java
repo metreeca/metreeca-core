@@ -21,6 +21,7 @@ import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.Guard;
+import com.metreeca.json.shapes.Range;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -41,7 +42,6 @@ import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.Like.like;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
@@ -378,17 +378,17 @@ final class JSONLDParserTest {
 
 			items("{ '%': [] }", shape, items -> assertThat(items.shape())
 					.as("in (empty)")
-					.isEqualTo(filter(shape, in()))
+					.isEqualTo(filter(shape, Range.range()))
 			);
 
 			items("{ '%': 'first' }", shape, items -> assertThat(items.shape())
 					.as("in (singleton)")
-					.isEqualTo(filter(shape, in(literal("first"))))
+					.isEqualTo(filter(shape, Range.range(literal("first"))))
 			);
 
 			items("{ '%': ['first', 'rest'] }", shape, items -> assertThat(items.shape())
 					.as("in (multiple)")
-					.isEqualTo(filter(shape, in(literal("first"), literal("rest"))))
+					.isEqualTo(filter(shape, Range.range(literal("first"), literal("rest"))))
 			);
 
 

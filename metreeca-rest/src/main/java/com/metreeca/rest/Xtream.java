@@ -193,6 +193,7 @@ public final class Xtream<T> implements Stream<T> {
 
 	}
 
+
 	/**
 	 * Creates an autoclosing function.
 	 *

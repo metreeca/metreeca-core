@@ -30,7 +30,6 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
@@ -51,12 +50,23 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Datatype datatype) {
 		return datatype.id().equals(XSD.BOOLEAN) ? and(datatype,
-				in(literal(false), literal(true)), maxCount(1)
+				Range.range(literal(false), literal(true)), maxCount(1)
 		) : datatype;
 	}
 
 	@Override public Shape probe(final Clazz clazz) {
 		return and(clazz, datatype(ResourceType));
+	}
+
+	@Override public Shape probe(final Range range) {
+
+		final Set<Value> values=range.values();
+		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
+
+		final Shape count=maxCount(values.size());
+		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();
+
+		return and(range, count, type);
 	}
 
 
@@ -66,17 +76,6 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Any any) {
 		return and(any, minCount(1));
-	}
-
-	@Override public Shape probe(final In in) {
-
-		final Set<Value> values=in.values();
-		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
-
-		final Shape count=maxCount(values.size());
-		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();
-
-		return and(in, count, type);
 	}
 
 

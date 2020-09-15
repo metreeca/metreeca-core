@@ -30,19 +30,18 @@ import static java.util.stream.Collectors.joining;
 
 
 /**
- * Range set constraint.
+ * Range value constraint.
  *
- * <p>States that the focus set is a subset a given set of target values (i.e. that each term in the focus set is a
- * member of the given set of target values.</p>
+ * <p>States that each term in the focus set is a member of the given set of target values.</p>
  */
-public final class In extends Shape {
+public final class Range extends Shape {
 
-	public static Shape in(final Value... values) {
-		return in(asList(values));
+	public static Shape range(final Value... values) {
+		return range(asList(values));
 	}
 
-	public static Shape in(final Collection<? extends Value> values) {
-		return values.isEmpty() ? or() : new In(values);
+	public static Shape range(final Collection<? extends Value> values) {
+		return values.isEmpty() ? or() : new Range(values);
 	}
 
 
@@ -51,7 +50,7 @@ public final class In extends Shape {
 	private final Set<Value> values;
 
 
-	private In(final Collection<? extends Value> values) {
+	private Range(final Collection<? extends Value> values) {
 
 		if ( values == null ) {
 			throw new NullPointerException("null values");
@@ -85,8 +84,8 @@ public final class In extends Shape {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof In
-				&& values.equals(((In)object).values);
+		return this == object || object instanceof Range
+				&& values.equals(((Range)object).values);
 	}
 
 	@Override public int hashCode() {

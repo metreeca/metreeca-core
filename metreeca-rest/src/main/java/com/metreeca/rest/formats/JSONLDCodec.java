@@ -37,11 +37,12 @@ final class JSONLDCodec {
 		));
 	}
 
+
 	static Optional<Integer> minCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MinCountProbe()));
 	}
 
-	public static Optional<Integer> maxCount(final Shape shape) {
+	static Optional<Integer> maxCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MaxCountProbe()));
 	}
 
@@ -111,7 +112,8 @@ final class JSONLDCodec {
 		@Override public Integer probe(final When when) {
 			return max.apply(
 					when.pass().map(this),
-					when.fail().map(this));
+					when.fail().map(this)
+			);
 		}
 
 	}

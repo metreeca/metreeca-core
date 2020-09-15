@@ -201,6 +201,18 @@ final class JSONLDValidator {
 		//	}
 		//}
 
+		@Override public Trace probe(final Range range) {
+
+			final Set<Value> values=values(range.values());
+
+			final Collection<Value> unexpected=focus
+					.stream()
+					.filter(negate(values::contains))
+					.collect(toList());
+
+			return unexpected.isEmpty() ? trace() : trace(issue(range), unexpected);
+		}
+
 
 		@Override public Trace probe(final MinExclusive minExclusive) {
 
@@ -306,18 +318,6 @@ final class JSONLDValidator {
 			final int limit=maxCount.limit();
 
 			return count <= limit ? trace() : trace(issue(maxCount), literal(count));
-		}
-
-		@Override public Trace probe(final In in) {
-
-			final Set<Value> range=values(in.values());
-
-			final Collection<Value> unexpected=focus
-					.stream()
-					.filter(negate(range::contains))
-					.collect(toList());
-
-			return unexpected.isEmpty() ? trace() : trace(issue(in), unexpected);
 		}
 
 		@Override public Trace probe(final All all) {

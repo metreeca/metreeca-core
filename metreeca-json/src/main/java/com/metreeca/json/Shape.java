@@ -26,7 +26,6 @@ import java.util.function.Function;
 
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.When.when;
@@ -54,7 +53,7 @@ public abstract class Shape {
 	public static Shape multiple() { return and(); }
 
 
-	public static Shape exactly(final Value... values) { return and(all(values), in(values)); }
+	public static Shape exactly(final Value... values) { return and(all(values), Range.range(values)); }
 
 
 	/**
@@ -173,6 +172,8 @@ public abstract class Shape {
 
 		public V probe(final Clazz clazz) { return probe((Shape)clazz); }
 
+		public V probe(final Range range) { return probe((Shape)range); }
+
 
 		public V probe(final MinExclusive minExclusive) { return probe((Shape)minExclusive); }
 
@@ -197,8 +198,6 @@ public abstract class Shape {
 		public V probe(final MinCount minCount) { return probe((Shape)minCount); }
 
 		public V probe(final MaxCount maxCount) { return probe((Shape)maxCount); }
-
-		public V probe(final In in) { return probe((Shape)in); }
 
 		public V probe(final All all) { return probe((Shape)all); }
 

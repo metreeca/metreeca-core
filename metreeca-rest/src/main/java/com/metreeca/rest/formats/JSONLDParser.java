@@ -483,7 +483,7 @@ final class JSONLDParser {
 	private Shape in(final JsonValue value, final Shape shape) {
 		return value.getValueType() == JsonValue.ValueType.NULL
 				? error("value is null")
-				: In.in(values(value, shape)
+				: Range.range(values(value, shape)
 		);
 	}
 

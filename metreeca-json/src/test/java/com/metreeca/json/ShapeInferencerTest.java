@@ -17,6 +17,8 @@
 
 package com.metreeca.json;
 
+import com.metreeca.json.shapes.Range;
+
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
@@ -28,7 +30,6 @@ import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
@@ -67,7 +68,7 @@ final class ShapeInferencerTest {
 
 		assertThat(expand(datatype))
 				.as("xsd:boolean has exclusive values and closed range")
-				.isEqualTo(and(datatype, and(maxCount(1), in(literal(false), literal(true)))));
+				.isEqualTo(and(datatype, and(maxCount(1), Range.range(literal(false), literal(true)))));
 	}
 
 	@Test void testClazz() {
@@ -81,13 +82,13 @@ final class ShapeInferencerTest {
 
 	@Test void testIn() {
 
-		final Shape Eterogeneous=in(literal(1), literal(2.0));
+		final Shape Eterogeneous=Range.range(literal(1), literal(2.0));
 
 		assertThat(expand(Eterogeneous))
 				.as("maximum focus size is equal to the size of the allowed value set")
 				.isEqualTo(and(Eterogeneous, maxCount(2)));
 
-		final Shape inUniform=in(literal(1), literal(2));
+		final Shape inUniform=Range.range(literal(1), literal(2));
 
 		assertThat(expand(inUniform))
 				.as("if unique, focus values share the datatype of the allowed value set")

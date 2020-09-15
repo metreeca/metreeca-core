@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.False;
 import static com.metreeca.json.Values.True;
-import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.Or.or;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,11 +30,11 @@ final class InTest {
 	@Nested final class Optimization {
 
 		@Test void testIgnoreEmptyValueSet() {
-			assertThat(in()).isEqualTo(or());
+			assertThat(Range.range()).isEqualTo(or());
 		}
 
 		@Test void testCollapseDuplicates() {
-			assertThat(in(True, True, False)).isEqualTo(in(True, False));
+			assertThat(Range.range(True, True, False)).isEqualTo(Range.range(True, False));
 		}
 
 	}

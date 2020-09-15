@@ -705,6 +705,11 @@ abstract class GraphProcessor {
 				return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.id()), " .");
 			}
 
+			@Override public Snippet probe(final Range range) {
+				throw new UnsupportedOperationException("focus range constraint");
+			}
+
+
 			@Override public Snippet probe(final MinExclusive minExclusive) {
 				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.limit())));
 			}
@@ -750,10 +755,6 @@ abstract class GraphProcessor {
 				throw new UnsupportedOperationException("maximum focus size constraint");
 			}
 
-
-			@Override public Snippet probe(final In in) {
-				throw new UnsupportedOperationException("focus range constraint");
-			}
 
 			@Override public Snippet probe(final All all) {
 				return nothing(); // universal constraints handled by field probe

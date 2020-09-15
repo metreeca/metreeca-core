@@ -18,6 +18,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
+import com.metreeca.json.shapes.Range;
 import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.*;
@@ -46,7 +47,6 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
-import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.Like.like;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
@@ -669,7 +669,7 @@ final class GraphProcessorTest {
 		@Test void testIn() {
 			exec(() -> assertThatThrownBy(() -> query(
 
-					Root, items(field(term("office"), in(item("employees/1621"), item("employees/1625"))))
+					Root, items(field(term("office"), Range.range(item("employees/1621"), item("employees/1625"))))
 
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}

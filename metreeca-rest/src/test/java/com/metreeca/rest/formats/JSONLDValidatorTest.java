@@ -18,6 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.*;
+import com.metreeca.json.shapes.Range;
 import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -37,7 +38,6 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.In.in;
 import static com.metreeca.json.shapes.Like.like;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
@@ -162,7 +162,7 @@ final class JSONLDValidatorTest {
 
 		@Test void testValidateIn() {
 
-			final Shape shape=in(x, y);
+			final Shape shape=Range.range(x, y);
 
 			assertThat(validate(shape, "<x>, <y>")).hasRight();
 			assertThat(validate(shape, "<x>, <y>, <z>")).hasLeft();
