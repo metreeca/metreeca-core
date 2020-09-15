@@ -93,7 +93,7 @@ public final class Range extends Shape {
 	}
 
 	@Override public String toString() {
-		return "in("+(values.isEmpty() ? "" : values.stream()
+		return "range("+(values.isEmpty() ? "" : values.stream()
 				.map(v -> v.toString().replace("\n", "\n\t"))
 				.collect(joining(",\n\t", "\n\t", "\n"))
 		)+")";
