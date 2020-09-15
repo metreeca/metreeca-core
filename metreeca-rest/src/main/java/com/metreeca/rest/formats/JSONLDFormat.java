@@ -155,7 +155,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null object");
 		}
 
-		return new JSONTrimmer(focus, shape, asset(keywords())).trim(object).asJsonObject();
+		return new JSONLDTrimmer(focus, shape, asset(keywords())).trim(object).asJsonObject();
 	}
 
 

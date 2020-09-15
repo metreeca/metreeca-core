@@ -36,14 +36,14 @@ import static com.metreeca.json.shapes.When.when;
 import static java.util.Collections.emptyMap;
 import static javax.json.Json.createObjectBuilder;
 
-final class JSONTrimmerTest {
+final class JSONLDTrimmerTest {
 
 	private JsonValue trim(final Shape shape, final JsonObjectBuilder object) {
 		return trim(shape, emptyMap(), object);
 	}
 
 	private JsonValue trim(final Shape shape, final Map<String, String> keywords, final JsonObjectBuilder object) {
-		return new JSONTrimmer(iri(), shape, keywords).trim(object.build());
+		return new JSONLDTrimmer(iri(), shape, keywords).trim(object.build());
 	}
 
 

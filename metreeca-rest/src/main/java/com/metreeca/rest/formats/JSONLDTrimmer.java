@@ -30,14 +30,14 @@ import static com.metreeca.rest.formats.JSONLDCodec.fields;
 import static javax.json.Json.createObjectBuilder;
 
 
-final class JSONTrimmer {
+final class JSONLDTrimmer {
 
 	private final IRI focus;
 	private final Shape shape;
 	private final Map<String, String> keywords;
 
 
-	JSONTrimmer(final IRI focus, final Shape shape, final Map<String, String> keywords) {
+	JSONLDTrimmer(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
 		this.shape=shape;

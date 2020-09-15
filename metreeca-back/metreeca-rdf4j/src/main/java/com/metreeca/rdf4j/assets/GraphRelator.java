@@ -65,9 +65,11 @@ final class GraphRelator extends GraphProcessor {
 				final IRI item=iri(request.item());
 				final Shape shape=resource ? detail(request.attribute(shape())) : target(request.attribute(shape()));
 
-				return filtered ? response.map(status(NotImplemented, "resource filtered retrieval not supported")
+				return filtered
 
-				) : query(request.query(), iri(request.item()), and(All.all(item), shape)).fold(
+						? response.map(status(NotImplemented, "resource filtered retrieval not supported"))
+
+						: query(request.query(), iri(request.item()), and(All.all(item), shape)).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
@@ -125,46 +127,46 @@ final class GraphRelator extends GraphProcessor {
 
 						.fold(response::map, query -> graph.exec(connection -> {
 
-							final Collection<Statement> matches=fetch(connection, item, query);
+									final Collection<Statement> matches=fetch(connection, item, query);
 
-							if ( filtered ) { // matches only
+									if ( filtered ) { // matches only
 
-								return response
-										.status(OK)
-										.attribute(shape(), query.map(new Query.Probe<Shape>() {
+										return response
+												.status(OK)
+												.attribute(shape(), query.map(new Query.Probe<Shape>() {
 
-											@Override public Shape probe(final Items items) {
-												return field(LDP.CONTAINS, items.shape());
-											}
+													@Override public Shape probe(final Items items) {
+														return field(LDP.CONTAINS, items.shape());
+													}
 
-											@Override public Shape probe(final Stats stats) {
+													@Override public Shape probe(final Stats stats) {
 
-												return GraphEngine.StatsShape;
-											}
+														return GraphEngine.StatsShape;
+													}
 
-											@Override public Shape probe(final Terms terms) {
-												return GraphEngine.TermsShape;
-											}
+													@Override public Shape probe(final Terms terms) {
+														return GraphEngine.TermsShape;
+													}
 
-										}))
-										.body(jsonld(), matches);
+												}))
+												.body(jsonld(), matches);
 
-							} else { // include container description
+									} else { // include container description
 
-								// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+										// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
-								matches.addAll(fetch(connection, item, items(holder)));
+										matches.addAll(fetch(connection, item, items(holder)));
 
-								return response
-										.status(OK)
-										.attribute(shape(), and(holder, field(LDP.CONTAINS, digest)))
-										.body(jsonld(), matches);
+										return response
+												.status(OK)
+												.attribute(shape(), and(holder, field(LDP.CONTAINS, digest)))
+												.body(jsonld(), matches);
 
-							}
+									}
 
-						})
+								})
 
-				);
+						);
 
 			}
 
