@@ -24,10 +24,12 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.derives;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.metas;
 import static com.metreeca.json.shapes.MinCount.minCount;
+import static com.metreeca.json.shapes.Range.range;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.*;
 
@@ -94,8 +96,10 @@ public final class Or extends Shape {
 	private static Stream<? extends Shape> merge(final Class<? extends Shape> clazz, final Stream<Shape> shapes) {
 		return clazz.equals(Meta.class) ? metas(shapes.map(Meta.class::cast))
 				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
+				: clazz.equals(Range.class) ? ranges(shapes.map(Range.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))
 				: clazz.equals(MaxCount.class) ? maxCounts(shapes.map(MaxCount.class::cast))
+				: clazz.equals(Any.class) ? anys(shapes.map(Any.class::cast))
 				: clazz.equals(Field.class) ? fields(shapes.map(Field.class::cast))
 				: shapes;
 	}
@@ -111,12 +115,28 @@ public final class Or extends Shape {
 		);
 	}
 
+	private static Stream<? extends Shape> ranges(final Stream<Range> ranges) {
+		return Stream.of(range(ranges // value sets union
+				.map(Range::values)
+				.flatMap(Collection::stream)
+				.collect(toSet())
+		));
+	}
+
 	private static Stream<? extends Shape> minCounts(final Stream<MinCount> minCounts) {
 		return Stream.of(minCount(minCounts.mapToInt(MinCount::limit).min().orElse(Integer.MIN_VALUE)));
 	}
 
 	private static Stream<? extends Shape> maxCounts(final Stream<MaxCount> maxCounts) {
 		return Stream.of(maxCount(maxCounts.mapToInt(MaxCount::limit).max().orElse(Integer.MAX_VALUE)));
+	}
+
+	private static Stream<? extends Shape> anys(final Stream<Any> anys) {
+		return Stream.of(any(anys // value sets union
+				.map(Any::values)
+				.flatMap(Collection::stream)
+				.collect(toSet())
+		));
 	}
 
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {

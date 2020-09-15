@@ -19,14 +19,18 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import org.eclipse.rdf4j.model.Value;
+
 import java.util.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.derives;
+import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.Range.range;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
@@ -92,8 +96,10 @@ public final class And extends Shape {
 	private static Stream<? extends Shape> merge(final Class<? extends Shape> clazz, final Stream<Shape> shapes) {
 		return clazz.equals(Meta.class) ? Meta.metas(shapes.map(Meta.class::cast))
 				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
+				: clazz.equals(Range.class) ? ranges(shapes.map(Range.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))
 				: clazz.equals(MaxCount.class) ? maxCounts(shapes.map(MaxCount.class::cast))
+				: clazz.equals(All.class) ? alls(shapes.map(All.class::cast))
 				: clazz.equals(Field.class) ? fields(shapes.map(Field.class::cast))
 				: shapes;
 	}
@@ -109,12 +115,32 @@ public final class And extends Shape {
 		);
 	}
 
+	private static Stream<? extends Shape> ranges(final Stream<Range> ranges) {
+
+		final List<Set<Value>> sets=ranges.map(Range::values).collect(toList());
+
+		return Stream.of(range(sets // value sets intersection
+				.stream()
+				.flatMap(Collection::stream)
+				.filter(value -> sets.stream().allMatch(set -> set.contains(value)))
+				.collect(toSet())
+		));
+	}
+
 	private static Stream<? extends Shape> minCounts(final Stream<MinCount> minCounts) {
 		return Stream.of(minCount(minCounts.mapToInt(MinCount::limit).max().orElse(Integer.MIN_VALUE)));
 	}
 
 	private static Stream<? extends Shape> maxCounts(final Stream<MaxCount> maxCounts) {
 		return Stream.of(maxCount(maxCounts.mapToInt(MaxCount::limit).min().orElse(Integer.MAX_VALUE)));
+	}
+
+	private static Stream<? extends Shape> alls(final Stream<All> alls) {
+		return Stream.of(all(alls // value sets union
+				.map(All::values)
+				.flatMap(Collection::stream)
+				.collect(toSet())
+		));
 	}
 
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {

@@ -19,18 +19,22 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Values;
 
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.Range.range;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -38,6 +42,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class OrTest {
 
 	@Nested final class Optimization {
+
+		private final Value a=literal(1);
+		private final Value b=literal(2);
+		private final Value c=literal(3);
+
 
 		@Test void testSimplifyConstants() {
 			assertThat(or(and(), field(RDF.TYPE))).isEqualTo(and());
@@ -82,6 +91,10 @@ final class OrTest {
 					.isEqualTo(or(datatype(Values.ResourceType), datatype(XSD.STRING)));
 		}
 
+		@Test void testOptimizeRange() {
+			assertThat(or(range(a, b), range(b, c))).isEqualTo(range(a, b, c));
+		}
+
 
 		@Test void testOptimizeMinCount() {
 			assertThat(or(minCount(10), minCount(100))).isEqualTo(minCount(10));
@@ -89,6 +102,11 @@ final class OrTest {
 
 		@Test void testOptimizeMaxCount() {
 			assertThat(or(maxCount(10), maxCount(100))).isEqualTo(maxCount(100));
+		}
+
+
+		@Test void testOptimizeAny() {
+			assertThat(or(any(a, b), any(b, c))).isEqualTo(any(a, b, c));
 		}
 
 
