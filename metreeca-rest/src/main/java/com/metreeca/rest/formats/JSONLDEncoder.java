@@ -34,9 +34,9 @@ import java.util.regex.Matcher;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.aliases;
-import static com.metreeca.rest.formats.JSONLDFormat.driver;
+import static com.metreeca.rest.formats.JSONLDCodec.driver;
+import static com.metreeca.rest.formats.JSONLDCodec.maxCount;
 import static java.util.stream.Collectors.toCollection;
 
 

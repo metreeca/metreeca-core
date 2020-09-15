@@ -54,7 +54,6 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.joining;
 
-
 final class JSONLDValidatorTest {
 
 	private static final IRI x=item("x");

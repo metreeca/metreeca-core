@@ -55,7 +55,6 @@ import static com.metreeca.json.shapes.Pattern.pattern;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.*;
 
-
 final class JSONLDParserTest {
 
 	private static final Value One=literal(integer(1));

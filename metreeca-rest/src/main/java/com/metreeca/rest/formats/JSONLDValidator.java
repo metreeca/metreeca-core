@@ -37,7 +37,7 @@ import static java.util.stream.Collectors.*;
 
 final class JSONLDValidator {
 
-	public Either<Trace, Collection<Statement>> validate(final IRI focus, final Shape shape,
+	Either<Trace, Collection<Statement>> validate(final IRI focus, final Shape shape,
 			final Collection<Statement> model) {
 
 		final Collection<Statement> envelope=new HashSet<>();
@@ -74,7 +74,7 @@ final class JSONLDValidator {
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class ValidatorProbe extends Shape.Probe<Trace> {
+	private static final class ValidatorProbe extends Shape.Probe<Trace> {
 
 		private final IRI resource;
 		private final Collection<Value> focus;

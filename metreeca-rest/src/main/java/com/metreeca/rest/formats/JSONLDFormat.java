@@ -29,9 +29,7 @@ import javax.json.JsonObject;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static com.metreeca.json.Shape.expanded;
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
@@ -158,16 +156,6 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 		}
 
 		return new JSONTrimmer(asset(keywords())).trim(focus, shape, object).asJsonObject();
-	}
-
-
-	static Shape driver(final Shape shape) { // !!! caching
-		return expanded(shape.redact( // add inferred constraints to drive json shorthands
-				retain(Role),
-				retain(Task),
-				retain(Area),
-				retain(Mode, Convey) // remove internal filtering shapes
-		));
 	}
 
 

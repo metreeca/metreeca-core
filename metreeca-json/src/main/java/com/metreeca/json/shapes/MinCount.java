@@ -19,9 +19,6 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
-import java.util.Optional;
-import java.util.function.BinaryOperator;
-
 
 /**
  * Minimum set size constraint.
@@ -32,10 +29,6 @@ public final class MinCount extends Shape {
 
 	public static Shape minCount(final int limit) {
 		return new MinCount(limit);
-	}
-
-	public static Optional<Integer> minCount(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MinCountProbe()));
 	}
 
 
@@ -90,43 +83,5 @@ public final class MinCount extends Shape {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class MinCountProbe extends Probe<Integer> {
-
-		// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
-
-		private static final BinaryOperator<Integer> min=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) <= 0
-				? x : y;
-		private static final BinaryOperator<Integer> max=(x, y) -> x == null ? y : y == null ? x : x.compareTo(y) >= 0
-				? x : y;
-
-
-		@Override public Integer probe(final MinCount minCount) {
-			return minCount.limit();
-		}
-
-
-		@Override public Integer probe(final Field field) { return null; }
-
-
-		@Override public Integer probe(final And and) {
-			return and.shapes().stream()
-					.map(shape -> shape.map(this))
-					.reduce(null, max);
-		}
-
-		@Override public Integer probe(final Or or) {
-			return or.shapes().stream()
-					.map(shape -> shape.map(this))
-					.reduce(null, min);
-		}
-
-		@Override public Integer probe(final When when) {
-			return min.apply(
-					when.pass().map(this),
-					when.fail().map(this));
-		}
-
-	}
 
 }
