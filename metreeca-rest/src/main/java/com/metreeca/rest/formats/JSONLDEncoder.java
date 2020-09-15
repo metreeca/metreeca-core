@@ -18,6 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Field;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -32,10 +33,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.Meta.aliases;
-import static com.metreeca.rest.formats.JSONLDCodec.driver;
-import static com.metreeca.rest.formats.JSONLDCodec.maxCount;
+import static com.metreeca.rest.formats.JSONLDCodec.*;
 import static java.util.stream.Collectors.toCollection;
 
 
@@ -43,6 +41,8 @@ final class JSONLDEncoder {
 
 	private final IRI focus;
 	private final Shape shape;
+
+	private final Map<String, String> keywords;
 
 	private final String root;
 
@@ -54,6 +54,8 @@ final class JSONLDEncoder {
 
 		this.focus=focus;
 		this.shape=driver(shape);
+
+		this.keywords=keywords;
 
 		this.root=Optional.of(focus.stringValue())
 				.map(IRIPattern::matcher)
@@ -118,8 +120,8 @@ final class JSONLDEncoder {
 	private JsonValue json(final Collection<Statement> model,
 			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
 
-		final Object datatype=JSONLDCodec.datatype(shape).orElse(null);
-		final Map<IRI, Shape> fields=fields(shape);
+		final Object datatype=datatype(shape).orElse(null);
+		final Map<String, Field> fields=fields(shape, keywords);
 
 		final boolean inlineable=IRIType.equals(datatype)
 				|| BNodeType.equals(datatype)
@@ -153,19 +155,16 @@ final class JSONLDEncoder {
 
 			};
 
-			final Map<IRI, String> aliases=aliases(shape);
 
-			for (final Map.Entry<IRI, Shape> entry : fields.entrySet()) {
+			for (final Map.Entry<String, Field> entry : fields.entrySet()) {
 
-				final IRI predicate=entry.getKey();
+				final String alias=entry.getKey();
+				final Field field=entry.getValue();
+
+				final IRI predicate=field.label();
+				final Shape nestedShape=field.value();
+
 				final boolean direct=direct(predicate);
-
-				final Shape nestedShape=entry.getValue();
-
-				final String alias=Optional
-						.ofNullable(aliases.get(predicate))
-						.filter(aliased.negate()) // keyword aliases override field aliases
-						.orElseGet(() -> (direct ? "" : "^")+predicate.stringValue()); // !!! inverse?
 
 				final Collection<? extends Value> values=direct
 						? objects(model, resource, predicate)

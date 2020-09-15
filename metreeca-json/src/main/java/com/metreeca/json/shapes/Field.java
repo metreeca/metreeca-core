@@ -22,15 +22,9 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.*;
-import java.util.stream.Stream;
-
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.*;
 
 
 /**
@@ -53,11 +47,6 @@ public final class Field extends Shape {
 
 	public static Shape field(final IRI name, final Shape shape) {
 		return shape.equals(or()) ? and() : new Field(name, shape);
-	}
-
-
-	public static Map<IRI, Shape> fields(final Shape shape) {
-		return shape == null ? emptyMap() : shape.map(new FieldProbe());
 	}
 
 
@@ -117,49 +106,6 @@ public final class Field extends Shape {
 
 	@Override public String toString() {
 		return "field("+label+(value.equals(and()) ? "" : ", "+value)+")";
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class FieldProbe extends Probe<Map<IRI, Shape>> {
-
-		@Override public Map<IRI, Shape> probe(final Shape shape) { return emptyMap();}
-
-
-		@Override public Map<IRI, Shape> probe(final Field field) {
-			return singletonMap(field.label(), field.value());
-		}
-
-
-		@Override public Map<IRI, Shape> probe(final And and) {
-			return fields(and.shapes().stream());
-		}
-
-		@Override public Map<IRI, Shape> probe(final Or or) {
-			return fields(or.shapes().stream());
-		}
-
-		@Override public Map<IRI, Shape> probe(final When when) {
-			return fields(Stream.of(when.pass(), when.fail()));
-		}
-
-
-		private Map<IRI, Shape> fields(final Stream<Shape> stream) {
-			return stream
-
-					// collect name-to-shape mappings from nested shapes
-
-					.flatMap(shape -> shape.map(this).entrySet().stream())
-
-					// group by name, collect to a set of shapes and convert to an optimized conjunction
-
-					.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new, mapping(Map.Entry::getValue,
-							collectingAndThen(toCollection(LinkedHashSet::new), set ->
-									set.size() == 1 ? set.iterator().next() : and(set))
-					)));
-		}
-
 	}
 
 }

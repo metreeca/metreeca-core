@@ -19,21 +19,11 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
-import org.eclipse.rdf4j.model.IRI;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.direct;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toMap;
 
 
 /**
@@ -42,44 +32,6 @@ import static java.util.stream.Collectors.toMap;
  * <p>States that the enclosing shape has a given value for an annotation property.</p>
  */
 public final class Meta extends Shape {
-
-	public static Map<IRI, String> aliases(final Shape shape) {
-		if ( shape == null ) { return emptyMap(); } else {
-
-			final Map<IRI, String> aliases=new LinkedHashMap<>();
-
-			aliases.putAll(shape.map(new AliasesProbe(field -> { // system-guessed aliases
-
-				final IRI name=field.label();
-
-				return Optional
-						.of(NamedIRIPattern.matcher(name.stringValue()))
-						.filter(Matcher::find)
-						.map(matcher -> matcher.group("name"))
-						.filter(alias -> !alias.startsWith("@"))
-						.map(alias -> singletonMap(name, direct(name) ? alias : alias+"Of")) // !!! inverse?
-						.orElse(emptyMap());
-			})));
-
-			aliases.putAll(shape.map(new AliasesProbe(field -> { // user-provided aliases (higher precedence)
-
-				final IRI name=field.label();
-
-				return alias(field.value())
-						.filter(alias -> !alias.startsWith("@"))
-						.map(alias -> singletonMap(name, alias))
-						.orElse(emptyMap());
-			})));
-
-			return aliases;
-		}
-	}
-
-	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final java.util.regex.Pattern NamedIRIPattern
-			=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
-
 
 	/**
 	 * Creates an alias annotation.
@@ -95,11 +47,6 @@ public final class Meta extends Shape {
 		return meta("alias", value);
 	}
 
-	public static Optional<String> alias(final Shape shape) {
-		return meta("alias", shape);
-	}
-
-
 	/**
 	 * Creates a label annotation.
 	 *
@@ -112,11 +59,6 @@ public final class Meta extends Shape {
 	public static Shape label(final String value) {
 		return new Meta("label", value);
 	}
-
-	public static Optional<String> label(final Shape shape) {
-		return meta("label", shape);
-	}
-
 
 	/**
 	 * Creates a notes annotation.
@@ -131,11 +73,6 @@ public final class Meta extends Shape {
 		return new Meta("notes", value);
 	}
 
-	public static Optional<String> notes(final Shape shape) {
-		return meta("notes", shape);
-	}
-
-
 	/**
 	 * Creates an index annotation.
 	 *
@@ -149,19 +86,13 @@ public final class Meta extends Shape {
 		return new Meta("index", Boolean.toString(value));
 	}
 
-	public static Optional<Boolean> index(final Shape shape) {
-		return meta("index", shape).map(Boolean::parseBoolean);
-	}
-
 
 	public static Meta meta(final String label, final String value) {
 		return new Meta(label, value);
 	}
 
-	public static Optional<String> meta(final String label, final Shape shape) {
-		return Optional.ofNullable(shape.map(new MetaProbe(label)));
-	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	static Stream<Meta> metas(final Stream<Meta> metas) { // make sure meta annotations are unique
 
@@ -239,104 +170,6 @@ public final class Meta extends Shape {
 
 	@Override public String toString() {
 		return "meta("+label+"="+value+")";
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class MetaProbe extends Probe<String> {
-
-		private final String label;
-
-
-		private MetaProbe(final String label) {
-			this.label=label;
-		}
-
-
-		@Override public String probe(final Meta meta) {
-			return meta.label().equals(label) ? meta.value() : null;
-		}
-
-
-		@Override public String probe(final And and) {
-			return probe(and.shapes().stream());
-		}
-
-		@Override public String probe(final Or or) {
-			return probe(or.shapes().stream());
-		}
-
-		@Override public String probe(final When when) {
-			return probe(Stream.of(when.pass(), when.fail()));
-		}
-
-
-		private String probe(final Stream<Shape> shapes) {
-			return shapes.map(this).filter(Objects::nonNull).findFirst().orElse(null);
-		}
-
-	}
-
-	private static final class AliasesProbe extends Probe<Map<IRI, String>> {
-
-		private final Function<Field, Map<IRI, String>> aliaser;
-
-
-		private AliasesProbe(final Function<Field, Map<IRI, String>> aliaser) {
-			this.aliaser=aliaser;
-		}
-
-
-		@Override public Map<IRI, String> probe(final Shape shape) { return emptyMap(); }
-
-
-		@Override public Map<IRI, String> probe(final Field field) {
-			return aliaser.apply(field);
-		}
-
-
-		@Override public Map<IRI, String> probe(final And and) {
-			return aliases(and.shapes());
-		}
-
-		@Override public Map<IRI, String> probe(final Or or) {
-			return aliases(or.shapes());
-		}
-
-		@Override public Map<IRI, String> probe(final When when) {
-			return aliases(asList(when.pass(), when.fail()));
-		}
-
-
-		private Map<IRI, String> aliases(final Collection<Shape> shapes) {
-			return shapes.stream()
-
-					// collect field-to-alias mappings from nested shapes
-
-					.flatMap(shape -> shape.map(this).entrySet().stream())
-
-					// remove duplicate mappings
-
-					.distinct()
-
-					// group by field and remove edges mapped to multiple aliases
-
-					.collect(groupingBy(Map.Entry::getKey)).values().stream()
-					.filter(group -> group.size() == 1)
-					.map(group -> group.get(0))
-
-					// group by alias and remove aliases mapped from multiple fields
-
-					.collect(groupingBy(Map.Entry::getValue)).values().stream()
-					.filter(group -> group.size() == 1)
-					.map(group -> group.get(0))
-
-					// collect non-clashing mappings
-
-					.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-		}
-
 	}
 
 }

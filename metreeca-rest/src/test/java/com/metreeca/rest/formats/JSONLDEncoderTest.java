@@ -25,8 +25,7 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import javax.json.*;
 import java.util.Map;
 
 import static com.metreeca.json.JSONAssert.assertThat;
@@ -42,6 +41,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static javax.json.Json.*;
 import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class JSONLDEncoderTest {
 
@@ -358,43 +358,22 @@ final class JSONLDEncoderTest {
 		}
 
 		@Test void testHandleAliasClashes() {
-
-			final IRI value=iri(base, "value");
-
-			assertThat(encode(x,
+			assertThatThrownBy(() -> encode(x,
 
 					and(
-							field(RDF.VALUE, Shape.required()),
-							field(value, Shape.required())
-					),
-
-					statement(x, RDF.VALUE, y),
-					statement(x, value, y)
-
-			)).isEqualTo(createObjectBuilder()
-					.add("@id", "/x")
-					.add(RDF.VALUE.stringValue(), createObjectBuilder()
-							.add("@id", "/y")
+							field(RDF.VALUE),
+							field(iri(base, "value"))
 					)
-					.add(value.stringValue(), createObjectBuilder()
-							.add("@id", "/y")
-					)
-			);
+
+			)).isInstanceOf(JsonException.class);
 		}
 
 		@Test void testIgnoreReservedAliases() {
-			assertThat(encode(x,
+			assertThatThrownBy(() -> encode(x,
 
-					field(RDF.VALUE, and(Shape.required(), alias("@id"))),
+					field(RDF.VALUE, alias("@id"))
 
-					statement(x, RDF.VALUE, y)
-
-			)).isEqualTo(createObjectBuilder()
-					.add("@id", "/x")
-					.add("value", createObjectBuilder()
-							.add("@id", "/y")
-					)
-			);
+			)).isInstanceOf(JsonException.class);
 		}
 
 	}
@@ -530,7 +509,7 @@ final class JSONLDEncoderTest {
 		@Test void testHandleKeywordAliases() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE),
+					field(RDF.NIL),
 
 					map(
 							entry("@id", "id"),
@@ -539,12 +518,12 @@ final class JSONLDEncoderTest {
 							entry("@language", "language")
 					),
 
-					statement(x, RDF.VALUE, literal("string", "en")),
-					statement(x, RDF.VALUE, literal("2020-09-10", XSD.DATE)))
+					statement(x, RDF.NIL, literal("string", "en")),
+					statement(x, RDF.NIL, literal("2020-09-10", XSD.DATE)))
 
 			).isEqualTo(createObjectBuilder()
 					.add("id", "/x")
-					.add(RDF.VALUE.stringValue(), createArrayBuilder() // keyword alias overrides field alias
+					.add("nil", createArrayBuilder() // keyword alias overrides field alias
 							.add(createObjectBuilder()
 									.add("value", "string")
 									.add("language", "en")

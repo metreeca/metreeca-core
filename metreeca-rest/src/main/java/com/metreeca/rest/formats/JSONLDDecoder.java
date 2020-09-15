@@ -19,6 +19,7 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
+import com.metreeca.json.shapes.Field;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -34,9 +35,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.Meta.aliases;
 import static com.metreeca.rest.formats.JSONLDCodec.driver;
+import static com.metreeca.rest.formats.JSONLDCodec.fields;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
@@ -47,6 +47,8 @@ final class JSONLDDecoder {
 	private final IRI focus;
 	private final Shape shape;
 
+	private final Map<String, String> keywords;
+
 	private final URI base;
 
 	private final Function<String, String> resolver;
@@ -56,6 +58,8 @@ final class JSONLDDecoder {
 
 		this.focus=focus;
 		this.shape=driver(shape);
+
+		this.keywords=keywords;
 
 		this.base=URI.create(focus.stringValue());
 
@@ -174,17 +178,12 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> resource(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final Map<IRI, Shape> fields=fields(shape);
+		final Map<String, Field> fields=fields(shape, keywords);
 
-		final Map<String, IRI> aliases=aliases(shape)
-				.entrySet()
-				.stream()
-				.collect(toMap(Entry::getValue, Entry::getKey));
+		return entry(focus, object.entrySet().stream().flatMap(entry -> {
 
-		return entry(focus, object.entrySet().stream().flatMap(field -> {
-
-			final String label=resolver.apply(field.getKey());
-			final JsonValue value=field.getValue();
+			final String label=resolver.apply(entry.getKey());
+			final JsonValue value=entry.getValue();
 
 			if ( label.equals("@type") && value instanceof JsonString ) {
 
@@ -192,16 +191,21 @@ final class JSONLDDecoder {
 
 			} else if ( !label.startsWith("@") && !value.equals(JsonValue.NULL) ) {
 
-				final IRI property=aliases.computeIfAbsent(label, this::iri);
+				final Field field=fields.get(label);
 
-				return values(value, fields.get(property)).flatMap(entry -> {
+				if ( field == null ) {
+					return error("unknown property label <%s>", label);
+				}
 
-					final Value target=entry.getKey();
-					final Stream<Statement> model=entry.getValue();
+				return values(value, field.value()).flatMap(pair -> {
 
-					final Statement edge=direct(property) ? statement(focus, property, target)
-							: target instanceof Resource ? statement((Resource)target, inverse(property), focus)
-							: error("target for inverse property is not a resource <%s: %s>", label, entry);
+					final IRI iri=field.label();
+					final Value target=pair.getKey();
+					final Stream<Statement> model=pair.getValue();
+
+					final Statement edge=direct(iri) ? statement(focus, iri, target)
+							: target instanceof Resource ? statement((Resource)target, inverse(iri), focus)
+							: error("target for inverse property is not a resource <%s: %s>", label, pair);
 
 					return Stream.concat(Stream.of(edge), model);
 

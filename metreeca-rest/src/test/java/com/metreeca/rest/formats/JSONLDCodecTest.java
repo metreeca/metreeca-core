@@ -17,18 +17,31 @@
 
 package com.metreeca.rest.formats;
 
+import com.metreeca.json.ValuesTest;
+
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import javax.json.JsonException;
+
+import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.detail;
+import static com.metreeca.json.shapes.Guard.relate;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
+import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.rest.formats.JSONLDCodec.fields;
 import static com.metreeca.rest.formats.JSONLDCodec.maxCount;
 import static com.metreeca.rest.formats.JSONLDCodec.minCount;
+import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class JSONLDCodecTest {
 
@@ -58,7 +71,7 @@ final class JSONLDCodecTest {
 
 	}
 
-	static final class MaxCountProbe {
+	@Nested final class MaxCountProbe {
 
 		@Test void testInspectMaxCount() {
 			assertThat(maxCount(maxCount(10))).contains(10);
@@ -83,4 +96,117 @@ final class JSONLDCodecTest {
 		}
 
 	}
+
+	@Nested final class FieldsProbe {
+
+		@Test void testInspectAnd() {
+			assertThat(fields(and(
+
+					field(RDF.FIRST),
+					field(RDF.REST)
+
+			))).containsKeys("first", "rest");
+		}
+
+		@Test void testInspectOr() {
+			assertThat(fields(or(
+
+					field(RDF.FIRST),
+					field(RDF.REST)
+
+			))).containsKeys("first", "rest");
+		}
+
+		@Test void testInspectWhen() {
+			assertThat(fields(when(
+
+					relate(),
+					field(RDF.FIRST),
+					field(RDF.REST)
+
+			))).containsKeys("first", "rest");
+		}
+
+		@Test void testInspectOtherShapes() {
+			assertThat(fields(and())).isEmpty();
+		}
+
+
+		@Test void testGuessAliasFromIRI() {
+
+			assertThat(fields(field(RDF.VALUE)))
+					.as("direct")
+					.containsKey("value");
+
+			assertThat(fields(field(inverse(RDF.VALUE), and())))
+					.as("inverse")
+					.containsKey("valueOf"); // !!! inverse?
+
+		}
+
+		@Test void testRetrieveUserDefinedAlias() {
+			assertThat(fields(field(RDF.VALUE, alias("alias"))))
+					.as("user-defined")
+					.containsKey("alias");
+		}
+
+		@Test void testPreferUserDefinedfields() {
+			assertThat(fields(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
+					.as("user-defined")
+					.containsKey("alias");
+		}
+
+
+		@Test void testReportConflictingAliases() {
+			assertThatThrownBy(() -> fields(field(RDF.VALUE, and(
+					alias("one"),
+					alias("two")
+			)))).isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test void testMergeDuplicateAliases() {
+			assertThat(fields(field(RDF.VALUE, and(alias("one"), alias("one")))))
+					.containsKeys("one");
+		}
+
+
+		@Test void testReportConflictingFields() {
+			assertThatThrownBy(() -> fields(and(
+					field(RDF.VALUE, alias("one")),
+					field(RDF.VALUE, alias("two"))
+			))).isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test void testMergeDuplicateFields() {
+			assertThat(fields(and(
+					field(RDF.VALUE, alias("one")),
+					field(RDF.VALUE, alias("one"))
+			))).containsKeys("one");
+		}
+
+
+		@Test void testReportConflictingProperties() {
+			assertThatThrownBy(() -> fields(and(field(RDF.VALUE), field(iri("urn:example#value"), and()))))
+					.isInstanceOf(JsonException.class);
+		}
+
+		@Test void testReportReservedAliases() {
+
+			assertThatThrownBy(() -> fields(field(iri(ValuesTest.Base, "@id"), and())))
+					.isInstanceOf(JsonException.class);
+
+			assertThatThrownBy(() -> fields(field(RDF.VALUE, alias("@id"))))
+					.isInstanceOf(JsonException.class);
+
+			assertThatThrownBy(() -> fields(field(RDF.VALUE, alias("id")), singletonMap("@id", "id")))
+					.isInstanceOf(JsonException.class);
+
+		}
+
+	}
+
+	@Test void test() {
+		System.out.println(fields(field(RDF.VALUE, alias("alias"))));
+	}
+
 }

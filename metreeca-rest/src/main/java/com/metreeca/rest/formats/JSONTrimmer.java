@@ -18,17 +18,15 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Field;
 
 import org.eclipse.rdf4j.model.IRI;
 
 import javax.json.*;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
-import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.Meta.aliases;
-import static java.util.stream.Collectors.toMap;
+import static com.metreeca.rest.formats.JSONLDCodec.fields;
 import static javax.json.Json.createObjectBuilder;
 
 
@@ -51,9 +49,7 @@ final class JSONTrimmer {
 
 	private JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
 
-		final Map<IRI, Shape> fields=fields(shape);
-		final Map<String, IRI> aliases=aliases(shape)
-				.entrySet().stream().collect(toMap(Entry::getValue, Entry::getKey));
+		final Map<String, Field> fields=fields(shape, keywords);
 
 		final JsonObjectBuilder builder=createObjectBuilder();
 
@@ -64,14 +60,9 @@ final class JSONTrimmer {
 
 			} else {
 
-				Optional.of(label)
-
-						.map(aliases::get)
-						.map(fields::get)
-
-						.ifPresent(nested ->
-								builder.add(label, trim(focus, nested, value))
-						);
+				Optional.of(label).map(fields::get).ifPresent(field ->
+						builder.add(label, trim(focus, field.value(), value))
+				);
 
 			}
 		});

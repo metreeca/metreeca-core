@@ -314,10 +314,10 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeAbsoluteFieldIRIs() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required())),
+					field(RDF.VALUE, required()),
 
 					createObjectBuilder()
-							.add(RDF.VALUE.stringValue(), createObjectBuilder()
+							.add("value", createObjectBuilder()
 									.add("@id", "y")
 							)
 
@@ -397,8 +397,8 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Test void testHandleAliasClashes() {
-			assertThat(decode(x,
+		@Test void testReportCLashingAliases() {
+			assertThatThrownBy(() -> decode(x,
 
 					and(
 							field(iri("http://example.org/value"), and()),
@@ -407,13 +407,7 @@ final class JSONLDDecoderTest {
 
 					createObjectBuilder()
 
-							.add("value", "x") // no unique alias > resolved as relative IRI
-
-			)).isIsomorphicTo(
-
-					statement(x, iri(base, "value"), literal("x"))
-
-			);
+			)).isInstanceOf(JsonException.class);
 		}
 
 
@@ -568,7 +562,7 @@ final class JSONLDDecoderTest {
 		@Test void testHandleKeywordAliases() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE),
+					field(RDF.NIL),
 
 					map(
 							entry("@id", "id"),
@@ -579,7 +573,7 @@ final class JSONLDDecoderTest {
 
 					createObjectBuilder()
 							.add("id", "/x")
-							.add(RDF.VALUE.stringValue(), createArrayBuilder() // keyword alias overrides field alias
+							.add("nil", createArrayBuilder() // keyword alias overrides field alias
 									.add(createObjectBuilder()
 											.add("value", "string")
 											.add("language", "en")
@@ -592,8 +586,8 @@ final class JSONLDDecoderTest {
 
 			)).isIsomorphicTo(
 
-					statement(x, RDF.VALUE, literal("string", "en")),
-					statement(x, RDF.VALUE, literal("2020-09-10", XSD.DATE))
+					statement(x, RDF.NIL, literal("string", "en")),
+					statement(x, RDF.NIL, literal("2020-09-10", XSD.DATE))
 
 			);
 		}

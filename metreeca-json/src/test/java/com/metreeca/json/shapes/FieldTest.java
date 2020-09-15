@@ -21,20 +21,9 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
-import java.util.Map;
-
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.Guard.relate;
-import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.json.shapes.When.when;
-import static java.util.Collections.singletonMap;
-import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -44,81 +33,6 @@ final class FieldTest {
 
 		@Test void testPruneDeadFields() {
 			assertThat(field(RDF.VALUE, or())).isEqualTo(and());
-		}
-
-	}
-
-
-	@Nested final class Inspection {
-
-		@SafeVarargs private final <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
-			return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-		}
-
-		private <K, V> Map.Entry<K, V> entry(final K key, final V value) {
-			return new SimpleImmutableEntry<>(key, value);
-		}
-
-
-		@Test void testInspectFields() {
-			assertThat(fields(
-
-					field(RDF.VALUE, and())
-
-			)).isEqualTo(singletonMap(
-
-					RDF.VALUE, and()
-
-			));
-		}
-
-		@Test void testInspectConjunctions() {
-			assertThat(fields(and(
-
-					field(RDF.VALUE, and()),
-					field(RDF.TYPE, clazz(RDF.FIRST)),
-					field(RDF.TYPE, clazz(RDF.REST))
-
-			))).isEqualTo(map(
-
-					entry(RDF.VALUE, and()),
-					entry(RDF.TYPE, and(clazz(RDF.FIRST), clazz(RDF.REST)))
-
-			));
-		}
-
-		@Test void testInspectDisjunctions() {
-			assertThat(fields(or(
-
-					field(RDF.VALUE, and()),
-					field(RDF.TYPE, clazz(RDF.FIRST)),
-					field(RDF.TYPE, clazz(RDF.REST))
-
-			))).isEqualTo(map(
-
-					entry(RDF.VALUE, and()),
-					entry(RDF.TYPE, or(clazz(RDF.FIRST), clazz(RDF.REST)))
-
-			));
-		}
-
-		@Test void testInspectOptions() {
-			assertThat(fields(when(relate(),
-
-					field(RDF.VALUE, and()),
-					field(RDF.TYPE, maxCount(1))
-
-			))).isEqualTo(map(
-
-					entry(RDF.VALUE, and()),
-					entry(RDF.TYPE, maxCount(1))
-
-			));
-		}
-
-
-		@Test void testInspectOtherShapes() {
-			assertThat(fields(and())).isEmpty();
 		}
 
 	}

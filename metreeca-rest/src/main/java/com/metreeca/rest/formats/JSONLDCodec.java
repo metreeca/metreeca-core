@@ -22,12 +22,20 @@ import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import javax.json.JsonException;
 import java.util.*;
 import java.util.function.BinaryOperator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.expanded;
+import static com.metreeca.json.Values.direct;
+import static com.metreeca.json.Values.entry;
 import static com.metreeca.json.shapes.Guard.*;
+import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 final class JSONLDCodec {
@@ -119,6 +127,15 @@ final class JSONLDCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private static final BinaryOperator<Integer> min=(x, y) ->
+			x == null ? y : y == null ? x : x.compareTo(y) <= 0 ? x : y;
+
+	private static final BinaryOperator<Integer> max=(x, y) ->
+			x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
+
+	// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
+
+
 	static Optional<Integer> minCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MinCountProbe()));
 	}
@@ -126,15 +143,6 @@ final class JSONLDCodec {
 	static Optional<Integer> maxCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MaxCountProbe()));
 	}
-
-
-	//// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing ////////
-
-	private static final BinaryOperator<Integer> min=(x, y) ->
-			x == null ? y : y == null ? x : x.compareTo(y) <= 0 ? x : y;
-
-	private static final BinaryOperator<Integer> max=(x, y) ->
-			x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
 
 
 	private static final class MinCountProbe extends Probe<Integer> {
@@ -188,6 +196,123 @@ final class JSONLDCodec {
 					when.pass().map(this),
 					when.fail().map(this)
 			);
+		}
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final Pattern AliasPattern=Pattern.compile("\\w+");
+	private static final Pattern NamedIRIPattern=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
+
+
+	static Map<String, Field> fields(final Shape shape) {
+		return fields(shape, emptyMap());
+	}
+
+	static Map<String, Field> fields(final Shape shape, final Map<String, String> keywords) {
+		return shape == null ? emptyMap() : shape
+
+				.map(new FieldsProbe())
+
+				.map(field -> entry(alias(field), field))
+
+				.peek(entry -> {
+					if ( !AliasPattern.matcher(entry.getKey()).matches() ) {
+						throw new JsonException(format(
+								"malformed alias <%s> for <%s>", entry.getKey(), entry.getValue()
+						));
+					}
+				})
+
+				.peek(entry -> {
+					if ( entry.getKey().startsWith("@") || keywords.containsValue(entry.getKey()) ) {
+						throw new JsonException(format(
+								"reserved alias <%s> for <%s>", entry.getKey(), entry.getValue()
+						));
+					}
+				})
+
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
+					throw new JsonException(format(
+							"clashing aliases for <%s> / <%s>", x, y
+					));
+				}));
+	}
+
+
+	private static String alias(final Field field) {
+
+		final Set<String> aliases=field.value().map(new AliasesProbe()).collect(toSet());
+
+		if ( aliases.size() > 1 ) { // clashing aliases
+
+			throw new JsonException(format("multiple aliases for <%s> / <%s>", field, aliases));
+
+		} else if ( aliases.size() == 1 ) { // user-defined alias
+
+			return aliases.iterator().next();
+
+		} else { // system-inferred alias
+
+			return Optional
+
+					.of(NamedIRIPattern.matcher(field.label().stringValue()))
+					.filter(Matcher::find)
+					.map(matcher -> matcher.group("name"))
+					.map(alias -> direct(field.label()) ? alias : alias+"Of") // !!! inverse?
+
+					.orElseThrow(() -> new JsonException(format("undefined alias for <%s>", field)));
+
+		}
+	}
+
+
+	private static final class FieldsProbe extends Probe<Stream<Field>> {
+
+		@Override public Stream<Field> probe(final Field field) {
+			return Stream.of(field);
+		}
+
+		@Override public Stream<Field> probe(final And and) {
+			return and.shapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<Field> probe(final Or or) {
+			return or.shapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<Field> probe(final When when) {
+			return Stream.of(when.pass(), when.fail()).flatMap(this);
+		}
+
+		@Override public Stream<Field> probe(final Shape shape) {
+			return Stream.empty();
+		}
+
+	}
+
+	private static final class AliasesProbe extends Probe<Stream<String>> {
+
+		@Override public Stream<String> probe(final Meta meta) {
+			return meta.label().equals("alias") ? Stream.of(meta.value()) : Stream.empty();
+		}
+
+		@Override public Stream<String> probe(final And and) {
+			return and.shapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<String> probe(final Or or) {
+			return or.shapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<String> probe(final When when) {
+			return Stream.of(when.pass(), when.fail()).flatMap(this);
+		}
+
+		@Override public Stream<String> probe(final Shape shape) {
+			return Stream.empty();
 		}
 
 	}
