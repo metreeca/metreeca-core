@@ -20,11 +20,15 @@ package com.metreeca.rest.formats;
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
 
-import java.util.Optional;
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.*;
 import java.util.function.BinaryOperator;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.expanded;
 import static com.metreeca.json.shapes.Guard.*;
+import static java.util.stream.Collectors.toSet;
 
 final class JSONLDCodec {
 
@@ -38,6 +42,83 @@ final class JSONLDCodec {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static Optional<IRI> datatype(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new DatatypeProbe()));
+	}
+
+	static Optional<IRI> _clazz(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ClazzProbe()));
+	}
+
+
+	private static final class DatatypeProbe extends Probe<IRI> {
+
+		@Override public IRI probe(final Datatype datatype) {
+			return datatype.id();
+		}
+
+		@Override public IRI probe(final And and) {
+			return type(and.shapes().stream());
+		}
+
+		@Override public IRI probe(final Or or) {
+			return type(or.shapes().stream());
+		}
+
+		@Override public IRI probe(final When when) {
+			return type(Stream.of(when.pass(), when.fail()));
+		}
+
+		private IRI type(final Stream<Shape> shapes) {
+
+			final Set<IRI> names=shapes
+					.map(shape -> shape.map(this))
+					.filter(Objects::nonNull)
+					.collect(toSet());
+
+			return names.size() == 1 ? names.iterator().next() : null;
+
+		}
+
+	}
+
+	private static final class ClazzProbe extends Probe<IRI> {
+
+		@Override public IRI probe(final Clazz clazz) {
+			return clazz.id();
+		}
+
+		@Override public IRI probe(final And and) {
+			return clazz(and.shapes().stream());
+		}
+
+		@Override public IRI probe(final Or or) {
+			return clazz(or.shapes().stream());
+		}
+
+		@Override public IRI probe(final When when) {
+			return clazz(Stream.of(when.pass(), when.fail()));
+		}
+
+
+		private IRI clazz(final Stream<Shape> shapes) {
+
+			final Set<IRI> names=shapes
+					.map(shape -> shape.map(this))
+					.filter(Objects::nonNull)
+					.collect(toSet());
+
+			return names.size() == 1 ? names.iterator().next() : null;
+
+		}
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	static Optional<Integer> minCount(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new MinCountProbe()));
 	}
@@ -47,14 +128,7 @@ final class JSONLDCodec {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private JSONLDCodec() {}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
+	//// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing ////////
 
 	private static final BinaryOperator<Integer> min=(x, y) ->
 			x == null ? y : y == null ? x : x.compareTo(y) <= 0 ? x : y;
@@ -117,5 +191,10 @@ final class JSONLDCodec {
 		}
 
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JSONLDCodec() {}
 
 }

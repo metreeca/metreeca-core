@@ -21,10 +21,6 @@ import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.*;
-
-import static java.util.stream.Collectors.toSet;
-
 
 /**
  * Class value constraint.
@@ -35,10 +31,6 @@ public final class Clazz extends Shape {
 
 	public static Shape clazz(final IRI name) {
 		return new Clazz(name);
-	}
-
-	public static Optional<IRI> clazz(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ClazzProbe()));
 	}
 
 
@@ -87,37 +79,6 @@ public final class Clazz extends Shape {
 
 	@Override public String toString() {
 		return "clazz("+id+")";
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class ClazzProbe extends Probe<IRI> {
-
-		@Override public IRI probe(final Clazz clazz) {
-			return clazz.id();
-		}
-
-		@Override public IRI probe(final And and) {
-			return clazz(and.shapes());
-		}
-
-		@Override public IRI probe(final Or or) {
-			return clazz(or.shapes());
-		}
-
-
-		private IRI clazz(final Collection<Shape> shapes) {
-
-			final Set<IRI> names=shapes.stream()
-					.map(shape -> shape.map(this))
-					.filter(Objects::nonNull)
-					.collect(toSet());
-
-			return names.size() == 1 ? names.iterator().next() : null;
-
-		}
-
 	}
 
 }

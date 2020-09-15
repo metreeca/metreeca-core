@@ -21,10 +21,6 @@ import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.*;
-
-import static java.util.stream.Collectors.toSet;
-
 
 /**
  * Datatype value constraint.
@@ -44,10 +40,6 @@ public final class Datatype extends Shape {
 	 */
 	public static Shape datatype(final IRI name) {
 		return new Datatype(name);
-	}
-
-	public static Optional<IRI> datatype(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new TypeProbe()));
 	}
 
 
@@ -96,37 +88,6 @@ public final class Datatype extends Shape {
 
 	@Override public String toString() {
 		return "datatype("+id+")";
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class TypeProbe extends Probe<IRI> {
-
-		@Override public IRI probe(final Datatype datatype) {
-			return datatype.id();
-		}
-
-		@Override public IRI probe(final And and) {
-			return type(and.shapes());
-		}
-
-		@Override public IRI probe(final Or or) {
-			return type(or.shapes());
-		}
-
-
-		private IRI type(final Collection<Shape> shapes) {
-
-			final Set<IRI> names=shapes.stream()
-					.map(shape -> shape.map(this))
-					.filter(Objects::nonNull)
-					.collect(toSet());
-
-			return names.size() == 1 ? names.iterator().next() : null;
-
-		}
-
 	}
 
 }

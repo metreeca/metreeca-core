@@ -32,7 +32,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.Meta.aliases;
 import static com.metreeca.rest.formats.JSONLDCodec.driver;
@@ -119,7 +118,7 @@ final class JSONLDEncoder {
 	private JsonValue json(final Collection<Statement> model,
 			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
 
-		final Object datatype=datatype(shape).orElse(null);
+		final Object datatype=JSONLDCodec.datatype(shape).orElse(null);
 		final Map<IRI, Shape> fields=fields(shape);
 
 		final boolean inlineable=IRIType.equals(datatype)
@@ -204,7 +203,8 @@ final class JSONLDEncoder {
 					: datatype.equals(XSD.INTEGER) ? json(literal.integerValue())
 					: datatype.equals(XSD.DECIMAL) ? json(literal.decimalValue())
 					: datatype.equals(RDF.LANGSTRING) ? json(literal, literal.getLanguage().orElse(""))
-					: datatype(shape).isPresent() ? json(literal.stringValue()) // only lexical value if type is known
+					: JSONLDCodec.datatype(shape).isPresent() ? json(literal.stringValue()) // only lexical value if
+					// type is known
 					: json(literal, datatype);
 
 		} catch ( final IllegalArgumentException ignored ) { // malformed literals

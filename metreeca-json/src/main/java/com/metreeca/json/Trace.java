@@ -97,7 +97,7 @@ public final class Trace {
 				.filter(field -> !field.getValue().empty())
 				.collect(toMap(
 						Map.Entry::getKey, Map.Entry::getValue,
-						(x, y) -> trace(x, y),
+						Trace::trace,
 						LinkedHashMap::new
 				));
 	}

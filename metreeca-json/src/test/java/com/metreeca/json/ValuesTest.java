@@ -17,8 +17,6 @@
 
 package com.metreeca.json;
 
-import com.metreeca.json.shapes.Datatype;
-
 import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -93,7 +91,7 @@ public final class ValuesTest {
 			convey().then(
 
 					server().then(
-							field(RDF.TYPE, and(Shape.required(), Datatype.datatype(Values.IRIType))),
+							field(RDF.TYPE, and(Shape.required(), datatype(Values.IRIType))),
 							field(RDFS.LABEL, Textual),
 							field(term("code"), and(Shape.required(), datatype(XSD.STRING), pattern("\\d+")))
 					),
@@ -113,7 +111,7 @@ public final class ValuesTest {
 									maxInclusive(Values.literal(Values.integer(5))))),
 
 							field(term("supervisor"), and(
-									optional(), Datatype.datatype(Values.IRIType), clazz(term("Employee")),
+									optional(), datatype(Values.IRIType), clazz(term("Employee")),
 									relate().then(field(RDFS.LABEL, Textual))
 							)),
 

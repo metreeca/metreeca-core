@@ -34,7 +34,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.Meta.aliases;
 import static com.metreeca.rest.formats.JSONLDCodec.driver;
@@ -132,13 +131,14 @@ final class JSONLDDecoder {
 				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
 				: (language != null) ? entry(literal(value, language), Stream.empty())
 
-				: entry(literal(value, datatype(shape).orElse(XSD.STRING)), Stream.empty());
+				: entry(literal(value, JSONLDCodec.datatype(shape).orElse(XSD.STRING)), Stream.empty());
 	}
 
 	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
-		final IRI type=datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
+		final IRI type=
+				JSONLDCodec.datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
 
 		final Value value=ResourceType.equals(type) ? resource(text)
 				: BNodeType.equals(type) ? bnode(text)
@@ -150,7 +150,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).orElse(null);
+		final IRI datatype=JSONLDCodec.datatype(shape).orElse(null);
 
 		final Literal value
 
