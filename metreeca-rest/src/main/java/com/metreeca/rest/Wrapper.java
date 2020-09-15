@@ -193,11 +193,11 @@ import static java.util.Objects.requireNonNull;
 
 
 	/**
-	 * Creates a post-processing wrapper.
+	 * Creates a  {@linkplain Response#success() successful} post-processing wrapper.
 	 *
 	 * @param mapper a response mapping function; must return a non-null value
 	 *
-	 * @return a wrapper that post-process responses using {@code mapper}
+	 * @return a wrapper that post-process successful responses using {@code mapper}
 	 *
 	 * @throws NullPointerException if {@code mapper} is null or returns a null value
 	 */
@@ -207,20 +207,21 @@ import static java.util.Objects.requireNonNull;
 			throw new NullPointerException("null mapper");
 		}
 
-		return handler -> request -> handler.handle(request).map(response ->
-				requireNonNull(mapper.apply(response), "null mapper return values")
+		return handler -> request -> handler.handle(request).map(response -> response.success()
+				? requireNonNull(mapper.apply(response), "null mapper return values")
+				: response
 		);
 	}
 
 	/**
-	 * Creates a post-processing body wrapper.
+	 * Creates a {@linkplain Response#success() successful} post-processing body wrapper.
 	 *
 	 * @param <V>    the type of the response body to be post-processed
 	 * @param format the format of the response body to be post-processed
 	 * @param mapper the response body mapper; takes as argument a response and its {@code format} body and must
 	 *               return a non-null updated value
 	 *
-	 * @return a wrapper that post-process response {@code format} bodies using {@code mapper}
+	 * @return a wrapper that post-process successful response {@code format} bodies using {@code mapper}
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
@@ -232,9 +233,10 @@ import static java.util.Objects.requireNonNull;
 		}
 
 		return handler -> request -> handler.handle(request).map(response ->
-				response.body(format).fold(error -> { throw error; }, value -> response.body(format,
-						requireNonNull(mapper.apply(response, value), "null mapper return value")
-				))
+				response.success() ? response.body(format).fold(error -> { throw error; },
+						value -> response.body(format,
+								requireNonNull(mapper.apply(response, value), "null mapper return value")
+				)) : response
 		);
 	}
 
