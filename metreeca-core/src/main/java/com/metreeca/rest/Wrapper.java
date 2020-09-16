@@ -19,10 +19,8 @@ package com.metreeca.rest;
 
 
 import java.util.function.*;
-import java.util.regex.Pattern;
 
 import static com.metreeca.rest.Handler.handler;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 
@@ -91,57 +89,6 @@ import static java.util.Objects.requireNonNull;
 		}
 
 		return handler -> handler(test, pass.wrap(handler), fail.wrap(handler));
-	}
-
-
-	/**
-	 * Creates a canonical rewriting wrapper.
-	 *
-	 * <p>Mainly intended to enable development instances to use data dumps from production instances.</p>
-	 *
-	 * <p><strong>Warning</strong> Only <em>host</em> canonical IRIs with a trailing slash and no path/query/fragment
-	 * components are supported: both  production and development instances must be deployed to the root context.</p>
-	 *
-	 * @param canonical the internal canonical canonical base IRI
-	 *
-	 * @return a rewriting wrapper that replaces the canonical IRI of incoming request with the internal {@code
-	 * canonical} base
-	 *
-	 * @throws NullPointerException     if {@code canonical} is null
-	 * @throws IllegalArgumentException if {@code canonical} is malformed or contains path/query/fragment components
-	 */
-	public static Wrapper rewriter(final String canonical) {
-
-		if ( canonical == null ) {
-			throw new NullPointerException("null canonical base");
-		}
-
-		final Pattern pattern=Pattern.compile("^\\w+://[^/]*/$");
-		final String error="malformed host canonical IRI <%s>";
-
-		if ( !pattern.matcher(canonical).matches() ) {
-			throw new IllegalArgumentException(format(error, canonical));
-		}
-
-		return handler -> request -> {
-
-			final String base=request.base();
-
-			if ( base.equals(canonical) ) {
-
-				return handler.handle(request);
-
-			} else if ( pattern.matcher(base).matches() ) {
-
-				return handler.handle(request.base(canonical));
-
-			} else {
-
-				throw new UnsupportedOperationException(format(error, base));
-
-			}
-
-		};
 	}
 
 
