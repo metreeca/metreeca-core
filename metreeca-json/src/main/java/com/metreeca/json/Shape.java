@@ -21,7 +21,8 @@ import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static com.metreeca.json.shapes.All.all;
@@ -30,7 +31,6 @@ import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
-import static java.util.Arrays.asList;
 
 
 /**
@@ -68,30 +68,12 @@ public abstract class Shape {
 	 * @throws NullPointerException if {@code shapes} is null or contains null items
 	 */
 	public final Shape then(final Shape... shapes) {
-		return then(asList(shapes));
-	}
 
-	/**
-	 * Creates a conditional shape.
-	 *
-	 * @param shapes the shapes this shape is to be applied as a test condition
-	 *
-	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
-	 * shapes}
-	 *
-	 * @throws NullPointerException if {@code shapes} is null or contains null items
-	 */
-	public final Shape then(final Collection<Shape> shapes) {
-
-		if ( shapes == null ) {
+		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null shapes");
 		}
 
-		if ( shapes.contains(null) ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return when(this, shapes.size() == 1 ? shapes.iterator().next() : and(shapes));
+		return when(this, and(shapes));
 	}
 
 
