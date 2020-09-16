@@ -38,7 +38,7 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.relate;
+import static com.metreeca.json.shapes.Guard.guard;
 import static com.metreeca.json.shapes.Like.like;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
@@ -157,7 +157,7 @@ final class JSONLDValidatorTest {
 
 		@Test void testReportUnredactedGuard() {
 			assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
-					validate(when(relate(), maxInclusive(literal(100))))
+					validate(when(guard("axis", "value"), maxInclusive(literal(100))))
 			);
 		}
 

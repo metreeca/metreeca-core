@@ -31,6 +31,7 @@ import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
+import static com.metreeca.rest.formats.JSONLDCodec.driver;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
@@ -44,7 +45,7 @@ final class JSONLDValidator {
 	JSONLDValidator(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
-		this.shape=shape;
+		this.shape=driver(shape);
 
 		this.keywords=keywords;
 	}

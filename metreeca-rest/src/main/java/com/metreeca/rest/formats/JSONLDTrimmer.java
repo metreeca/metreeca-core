@@ -26,6 +26,7 @@ import javax.json.*;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.metreeca.rest.formats.JSONLDCodec.driver;
 import static com.metreeca.rest.formats.JSONLDCodec.fields;
 import static javax.json.Json.createObjectBuilder;
 
@@ -40,7 +41,7 @@ final class JSONLDTrimmer {
 	JSONLDTrimmer(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
-		this.shape=shape;
+		this.shape=driver(shape);
 
 		this.keywords=keywords;
 	}
