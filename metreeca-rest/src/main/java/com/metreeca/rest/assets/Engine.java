@@ -201,7 +201,7 @@ public interface Engine {
 			final Shape shape=request.attribute(shape());
 
 			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
-					retain(Role),
+					retain(Role, true),
 					retain(Task, task),
 					retain(Area, area),
 					retain(Mode, Convey)

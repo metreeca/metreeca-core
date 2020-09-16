@@ -41,9 +41,9 @@ final class JSONLDCodec {
 
 	static Shape driver(final Shape shape) { // !!! caching
 		return expanded(shape.redact( // add inferred constraints to drive json shorthands
-				retain(Role),
-				retain(Task),
-				retain(Area),
+				retain(Role, true),
+				retain(Task, true),
+				retain(Area, true),
 				retain(Mode, Convey) // remove internal filtering shapes
 		));
 	}

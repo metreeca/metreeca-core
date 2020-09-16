@@ -21,25 +21,28 @@ import com.metreeca.json.shapes.Guard;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
+import static com.metreeca.json.Shape.exactly;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.guard;
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
+import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ShapeRedactorTest {
 
-	private static final Function<Guard, Boolean> first=Guard.retain("value", "first");
-
-	private static final Function<Guard, Boolean> rest=Guard.retain("value", "rest");
-	private static final Function<Guard, Boolean> any=Guard.retain("value", new Object[0]);
+	private static final Function<Guard, Boolean> first=retain("value", "first");
+	private static final Function<Guard, Boolean> rest=retain("value", "rest");
+	private static final Function<Guard, Boolean> any=retain("value", true);
+	private static final Function<Guard, Boolean> none=retain("value");
 
 	private static final IRI X=iri("http://example.com/x");
 	private static final IRI Y=iri("http://example.com/y");
@@ -55,7 +58,7 @@ final class ShapeRedactorTest {
 
 		final Shape guard=value("first");
 
-		assertThat(guard.redact(Guard.retain("nil", "nil")))
+		assertThat(guard.redact(retain("nil", "nil")))
 				.as("undefined variable")
 				.isEqualTo(guard);
 
@@ -105,8 +108,12 @@ final class ShapeRedactorTest {
 		final Shape y=field(Y, and());
 
 		assertThat(and(value("first").then(x), value("rest").then(y)).redact(any))
-				.as("wildcard")
 				.isEqualTo(and(x, y));
+	}
+
+	@Test void testHandleEMptyValueSets() {
+		assertThat(value("first").redact(none))
+				.isEqualTo(or());
 	}
 
 
@@ -118,6 +125,45 @@ final class ShapeRedactorTest {
 	@Test void testOptimizeAnds() {
 		assertThat(and(and(value("first"))).redact(first))
 				.isEqualTo(and());
+	}
+
+	@Test void test() {
+		and(
+
+				or(relate(), role(RDF.NIL)),
+
+				and(
+
+						member().then(
+
+								convey().then(
+
+										field(RDF.TYPE, exactly(RDF.NIL)),
+
+										field(RDFS.LABEL),
+										field(RDFS.COMMENT)
+
+
+								)
+
+						)
+
+				)
+		)
+				.redact(
+						retain(Role, emptySet()),
+						retain(Task, Create),
+						retain(Area, Digest, Detail),
+						retain(Mode, Convey)
+				)
+
+				.map(shape -> {
+
+					System.out.println(shape);
+
+					return shape;
+
+				});
 	}
 
 }

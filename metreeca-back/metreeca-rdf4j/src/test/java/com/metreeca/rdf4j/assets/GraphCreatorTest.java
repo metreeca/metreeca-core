@@ -50,8 +50,8 @@ final class GraphCreatorTest {
 	private static final Shape Employee=and(
 			filter().then(field(RDF.TYPE, all(term("Employee")))),
 			ValuesTest.Employee.redact(
-					retain(Role),
-					retain(Task),
+					retain(Role, true),
+					retain(Task, true),
 					retain(Area, Detail)
 			));
 

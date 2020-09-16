@@ -109,9 +109,9 @@ public final class Guard extends Shape {
 
 	//// Guard Evaluators //////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Function<Guard, Boolean> retain(final Object axis) {
+	public static Function<Guard, Boolean> retain(final Object axis, final boolean status) {
 		return guard -> guard.axis.equals(axis)
-				? true
+				? status
 				: null;
 	}
 
@@ -123,13 +123,13 @@ public final class Guard extends Shape {
 
 	public static Function<Guard, Boolean> retain(final Object axis, final Object... values) {
 		return guard -> guard.axis.equals(axis)
-				? values.length == 0 || Arrays.stream(values).anyMatch(guard.values::contains)
+				? Arrays.stream(values).anyMatch(guard.values::contains)
 				: null;
 	}
 
 	public static Function<Guard, Boolean> retain(final Object axis, final Collection<?> values) {
 		return guard -> guard.axis.equals(axis)
-				? values.isEmpty() || values.stream().anyMatch(guard.values::contains)
+				? values.stream().anyMatch(guard.values::contains)
 				: null;
 	}
 
