@@ -10,7 +10,7 @@ In the following sections you will learn how to use the framework to develop a l
 
 In the tutorial we will work with a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
 
-We will walk through the REST API development process focusing on the task of publishing the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog as a [Linked Data Platform](https://www.w3.org/TR/ldp-primer/) (LDP) Basic Container and a collection of associated RDF resources.
+We will walk through the REST API development process focusing on the task of publishing the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog.
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
 
@@ -30,7 +30,7 @@ To get started, set up a Maven Java 1.8 project, importing the BOM module for Me
 
     <groupId>com.example</groupId>
     <artifactId>demo</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>war</packaging>
 
     <properties>
@@ -47,7 +47,7 @@ To get started, set up a Maven Java 1.8 project, importing the BOM module for Me
             <dependency>
                 <groupId>com.metreeca</groupId>
                 <artifactId>metreeca-link</artifactId>
-                <version>0.0.0-SNAPSHOT</version>
+                <version>{version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -66,7 +66,7 @@ Then, add the required dependencies for the Metreeca/Link [adapters](../javadocs
 
     <dependency>
         <groupId>com.metreeca</groupId>
-        <artifactId>metreeca-servlet</artifactId>
+        <artifactId>metreeca-jee</artifactId>
     </dependency>
 
     <dependency>
@@ -101,43 +101,39 @@ Note that the Metreeca/Link BOM module re-exports the BOM module for the target 
 Finally, define a minimal server stub like:
 
 ```java
-import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.Context;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.wrappers.Server;
-import com.metreeca.servlet.Gateway;
+package com.metreeca.demo;
+
+import com.metreeca.jee.Server;
+import com.metreeca.rdf4j.assets.Graph;
 
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import javax.servlet.annotation.WebFilter;
 
-import static com.metreeca.rdf4j.services.Graph.graph;
+import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.wrappers.Gateway.gateway;
 
 
-@WebFilter(urlPatterns="/*") public final class Demo extends Gateway {
+@WebFilter(urlPatterns="/*") public final class Demo extends Server {
 
-    @Override protected Handler load(final Context context) {
+	public Demo() {
+		handler(context -> context
 
-        return context
+				.get(() -> gateway()
 
-                .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
-                
-                .get(() -> new API()
+						.wrap(request -> request.reply(status(OK)))
 
-                        .wrap(request -> request.reply(response ->
-                                response.status(Response.OK))
-                        )
-
-                );
-    }
+				)
+		);
+	}
 
 }
 ```
 
-The stub configures the application to handle any resource using a barebone [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with a [response](../javadocs/?com/metreeca/rest/Response.html) including a `200` HTTP status code. The standard [Server](../javadocs/?com/metreeca/rest/wrappers/Server.html) wrapper provides default pre/postprocessing services and shared error handling.
+The stub configures the application to handle any resource using a barebone [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with a [response](../javadocs/?com/metreeca/rest/Response.html) including a `200` HTTP status code. The standard [Gateway](../javadocs/?com/metreeca/rest/wrappers/Gateway.html) wrapper provides default pre/postprocessing services and shared error handling.
 
 Compile and deploy the web app to your favorite servlet container and try your first request:
 
@@ -147,138 +143,137 @@ Compile and deploy the web app to your favorite servlet container and try your f
 HTTP/1.1 200
 ```
 
-The [context](../javadocs/?com/metreeca/rest/Context.html) argument handled to the app loader lambda manages the shared system-provided services and can be used to customize them and to run app initialization tasks. Copy [BIRT.ttl](assets/BIRT.ttl) to the `src/main/resources/` directory and extend the stub as follows:
+The [context](../javadocs/?com/metreeca/rest/Context.html) argument handled to the app loader lambda manages the shared system-provided assets and can be used to customize them and to run app initialization tasks. Copy [BIRT.ttl](assets/BIRT.ttl) to the `src/main/resources/` directory and extend the stub as follows:
 
 ```java
-@Override protected Handler load(final Context context) {
+public Demo() {
+	handler(context -> context
+			
+			.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 
-    return context
+			.exec(() -> asset(graph()).exec(connection -> {
+				try {
+					connection.add(
+							Demo.class.getResourceAsStream("BIRT.ttl"),
+							"https://example.com/", RDFFormat.TURTLE
+					);
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			}))
 
-            .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+			.get(() -> gateway()
 
-            .exec(() -> service(graph()).exec(connection -> {
-                try {
-                    connection.add(
-                            Demo.class.getResourceAsStream("BIRT.ttl"),
-                            "https://example.com/", RDFFormat.TURTLE
-                    );
-                } catch ( final IOException e ) {
-                    throw new UncheckedIOException(e);
-                }
-            }))
+					.wrap(request -> request.reply(status(OK)))
 
-            .get(() -> new API()
-
-                    .wrap(request -> request.reply(response ->
-                            response.status(Response.OK))
-                    )
-
-            );
+			)
+	);
 }
 ```
 
-Here we are customizing the shared system-wide [graph](../javadocs/?com/metreeca/rdf4j/services/Graph.html) database as an ephemeral memory-based RDF4J store, initializing it on demand with the BIRT dataset.
+Here we are customizing the shared system-wide [graph](../javadocs/?com/metreeca/rdf4j/assets/Graph.html) database as an ephemeral memory-based RDF4J store, initializing it on demand with the BIRT dataset.
 
-The static [Context.service()](../javadocs/?com/metreeca/rest/Context.html#service-java.util.function.Supplier-) service locator method provides access to shared services inside context initialisation tasks and wrapper/handlers constructors.
+The static [Context.asset()](../javadocs/?com/metreeca/rest/Context.html#asset-java.util.function.Supplier-) locator method provides access to shared assets.
 
 Complex initialization tasks can be easily factored to a dedicated class:
 
 ```java
+package com.metreeca.demo;
+
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import static com.metreeca.rdf4j.services.Graph.graph;
-import static com.metreeca.rest.Context.service;
+import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.Context.asset;
 
 public final class BIRT implements Runnable {
 
-    public static final String BASE="https://example.com/";
-    public static final String NAMESPACE=BASE+"terms#";
+	public static final String Base="https://demo.metreeca.com/";
+	public static final String Namespace=Base+"terms#";
 
-
-    @Override public void run() {
-        service(graph()).exec(connection -> {
-            try {
-                
-                connection.add(BIRT.class.getResourceAsStream("BIRT.ttl"), BASE, RDFFormat.TURTLE);
-                
-            } catch ( final IOException e ) {
-                throw new UncheckedIOException(e);
-            }
-        });
-    }
+	@Override public void run() {
+		asset(graph()).exec(connection -> {
+			if ( !connection.hasStatement(null, null, null, false) ) {
+				try {
+					connection.setNamespace("demo", Namespace);
+					connection.add(getClass().getResourceAsStream("BIRT.ttl"), Base, RDFFormat.TURTLE);
+				} catch ( final IOException e ) {
+					throw new UncheckedIOException(e);
+				}
+			}
+		});
+	}
 
 }
 ```
 
 ```java
-@Override protected Handler load(final Context context) {
+public Demo() {
+	handler(context -> context
 
-    return context
+			.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 
-            .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+			.exec(new BIRT())
 
-            .exec(new BIRT())
+			.get(() -> gateway()
 
-            .get(() -> new API()
+					.with(preprocessor(request -> request.base(BIRT.Base)))
 
-                    .with(new Rewriter(BIRT.BASE))
+					.wrap(request -> request.reply(status(OK)))
 
-                    .wrap(request -> request.reply(response ->
-                            response.status(Response.OK))
-                    )
-
-            );
+			)
+	);
 }
-
 ```
 
 [Wrappers](../javadocs/?com/metreeca/rest/Wrapper.html) inspect and possibly alter incoming requests and outgoing responses before they are forwarded to wrapped handlers and returned to wrapping containers.
 
-The [rewriter](../javadocs/?com/metreeca/rest/wrappers/Rewriter.html) wrapper rewrites incoming and outgoing RDF payloads from the external network-visible server base (`http://localhost:8080/`) to an internal canonical base (`https://example.com/`), ensuring data portability between development and production environments and making it possible to load the static RDF dataset during server initialization, while the external and possibly request-dependent base is not yet known. When external and internal bases match, as in production, rewriting is effectively disabled avoiding any performance hit.
+The preprocessor rebases RDF payloads from the external network-visible server base (`http://localhost:8080/`) to an internal canonical base (`https://demo.metreeca.com/`), ensuring data portability between development and production environments and making it possible to load the static RDF dataset during server initialization, while the external and possibly request-dependent base is not yet known. When external and internal bases match, as in production, rewriting is effectively disabled avoiding any performance hit.
 
 # Handling Requests
 
 Requests are dispatched to their final handlers through a hierarchy of wrappers and delegating handlers.
 
 ```java
-() -> new API()
+get(() -> gateway()
 
-    .with(new Rewriter(BIRT.BASE))
+		.with(preprocessor(request -> request.base(BIRT.Base)))
 
-    .wrap(new Router()
+		.wrap(router()
 
-            .path("/products/*", new Router()
+				.path("/products/*", router()
 
-                    .path("/", new Worker()
-                            .get(request -> request.reply(response -> response
-                                    .status(Response.OK)
-                                    .body(rdf(), service(graph()).exec(connection -> {
-                                        return stream(connection
-                                                .getStatements(null, RDF.TYPE, iri(BIRT.NAMESPACE, "Product"))
-                                        )
-                                                .map(Statement::getSubject)
-                                                .map(p -> statement(iri(request.item()), LDP.CONTAINS, p))
-                                                .collect(toList());
-                                    }))
-                            ))
-                    )
+						.path("/", router()
+								.get(request -> request.reply(response -> response
+										.status(OK)
+										.body(rdf(), asset(graph()).exec(connection -> {
+											return stream(connection
+													.getStatements(null, RDF.TYPE, iri(BIRT.Namespace, "Product"))
+											)
+													.map(Statement::getSubject)
+													.map(p -> statement(iri(request.item()), LDP.CONTAINS, p))
+													.collect(toList());
+										}))
+								))
+						)
 
-                    .path("/{code}", new Worker()
-                            .get(request -> request.reply(response -> response
-                                    .status(Response.OK)
-                                    .body(rdf(), service(graph()).exec(connection -> {
-                                        return asList(connection.getStatements(iri(request.item()), null, null));
-                                    }))
-                            ))
-                    )
+						.path("/{code}", router()
+								.get(request -> request.reply(response -> response
+										.status(OK)
+										.body(rdf(), asset(graph()).exec(connection -> {
+											return asList(connection.getStatements(iri(request.item()), null, null));
+										}))
+								))
+						)
 
-            )
+				)
 
-    )
+		)
 
+
+)
 ```
 
 ```sh
@@ -301,9 +296,9 @@ Content-Type: text/turtle;charset=UTF-8
   ⋮
 ```
 
-## Routers
+## Request Routing
 
-[Routers](../javadocs/?com/metreeca/rest/handlers/Router.html) dispatch requests on the basis of the [request path](../javadocs/?com/metreeca/rest/Request.html#path--), ignoring the leading segment possibly already matched by wrapping routers.
+[Routers](../javadocs/?com/metreeca/rest/handlers/Router.html) dispatch requests on the basis of the [request path](../javadocs/?com/metreeca/rest/Request.html#path--) and the [request method](../javadocs/?com/metreeca/rest/Request.html#method--), ignoring leading path segments possibly already matched by wrapping routers.
 
 Requests are forwarded to a registered handler if their path is matched by an associated pattern defined by a sequence of steps according to the following rules:
 
@@ -319,58 +314,58 @@ Registered path patterns are tested in order of definition.
 
 If the router doesn't contain a matching handler, no action is performed giving the container adapter a fall-back opportunity to handle the request.
 
-## Workers
-
-[Workers](../javadocs/?com/metreeca/rest/handlers/Worker.html) dispatch requests on the basis of the [request method](../javadocs/?com/metreeca/rest/Request.html#method--), providing overridable default implementation for `OPTIONS` and `HEAD` methods.
-
-## Delegators
+## Combo Handlers
 
 Again, complex handlers can be easily factored to dedicated classes:
 
 ```java
-() -> new API()
+() -> gateway()
 
-        .with(new Rewriter(BIRT.BASE))
+		.with(preprocessor(request -> request.base(BIRT.Base)))
 
-        .wrap(new Router()
+		.wrap(router()
 
-            .path("/products/*", new Products())
+				.path("/products/*", new Products())
+				
+		)
 
-        )
+)
 ```
 
 ```java
 public final class Products extends Delegator {
 
-    public static final IRI PRODUCT=iri(BIRT.NAMESPACE, "Product");
+	public static final IRI Product=iri(BIRT.Namespace, "Product");
 
-    public Products() {
-        delegate(new Router()
+	public Products() {
+		delegate(router()
 
-                .path("/", new Worker()
-                        .get(request -> request.reply(response -> response
-                                .status(Response.OK)
-                                .body(rdf(), service(graph()).exec(connection -> {
-                                    return stream(connection.getStatements(null, RDF.TYPE, PRODUCT))
-                                            .map(Statement::getSubject)
-                                            .map(p -> statement(iri(request.item()), LDP.CONTAINS, p))
-                                            .collect(toList());
-                                }))
-                        ))
-                )
+				.path("/", router()
+						.get(request -> request.reply(response -> response
+								.status(OK)
+								.body(rdf(), asset(graph()).exec(connection -> {
+									return stream(connection
+											.getStatements(null, RDF.TYPE, Product)
+									)
+											.map(Statement::getSubject)
+											.map(product -> statement(iri(request.item()), LDP.CONTAINS, product))
+											.collect(toList());
+								}))
+						))
+				)
 
-                .path("/{code}", new Worker()
-                        .get(request -> request.reply(response -> response
-                                .status(Response.OK)
-                                .body(rdf(), service(graph()).exec(connection -> {
-                                    return asList(connection.getStatements(iri(request.item()), null, null));
-                                }))
-                        ))
-                )
+				.path("/{code}", router()
+						.get(request -> request.reply(response -> response
+								.status(OK)
+								.body(rdf(), asset(graph()).exec(connection -> {
+									return asList(connection.getStatements(iri(request.item()), null, null));
+								}))
+						))
+				)
 
-        );
-    }
-
+		);
+	}
+    
 }
 ```
 
@@ -378,38 +373,38 @@ The [Delegator](../javadocs/?com/metreeca/rest/handlers/Delegator.html) abstract
 
 # Model-Driven Handlers
 
-Standard resource action handlers can be defined using high-level declarative models that drive automatic fine‑grained role‑based read/write access control, faceted search,  incoming data validation and bidirectional conversion between RDF and [idiomatic](../references/idiomatic-json) JSON payloads, as demonstrated in the [REST APIs interaction tutorial](interacting-with-ldp-apis).
+Standard resource action handlers can be defined using high-level declarative models that drive automatic fine‑grained role‑based read/write access control, faceted search,  incoming data validation and bidirectional conversion between RDF and [compacted/framed](../references/idiomatic-json) JSON-LD payloads, as demonstrated in the [REST APIs interaction tutorial](interacting-with-ldp-apis).
 
-[Actors](../javadocs/?com/metreeca/rest/handlers/handlers/Actor.html) provide default shape-driven implementations for CRUD actions on LDP resources and containers identified by the request [focus item](../javadocs/?com/metreeca/rest/Request.html#item--).
+Actors provide default shape-driven implementations for CRUD actions on resources and containers identified by the request [focus item](../javadocs/?com/metreeca/rest/Request.html#item--).
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/actors/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](interacting-with-ldp-apis#faceted-search), sorting and pagination |
-| [Creator](../javadocs/?com/metreeca/rest/handlers/actors/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
-| [Updater](../javadocs/?com/metreeca/rest/handlers/actors/Updater.html) | resource updating / updates the detailed RDF description of the target item |
-| [Deleter](../javadocs/?com/metreeca/rest/handlers/actors/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
-
-<p class="warning">Only LDP Basic and Direct Containers are currently supported.</p>
+| [Relator](../javadocs/?com/metreeca/rest/handlers/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](interacting-with-ldp-apis#faceted-search), sorting and pagination |
+| [Creator](../javadocs/?com/metreeca/rest/handlers/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
+| [Updater](../javadocs/?com/metreeca/rest/handlers/Updater.html) | resource updating / updates the detailed RDF description of the target item |
+| [Deleter](../javadocs/?com/metreeca/rest/handlers/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
 
 ```diff
-\@Override protected Handler load(final Context context) {
-    return context
+public Demo() {
+	handler(context -> context
 
-            .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+			.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 +           .set(engine(), GraphEngine::new)
 
-            .exec(new BIRT())
+			.exec(new BIRT())
 
-            .get(() -> new API()
+			.get(() -> gateway()
 
-                    .with(new Rewriter(BIRT.BASE))
+					.with(preprocessor(request -> request.base(BIRT.Base)))
 
-                    .wrap(new Router()
+					.wrap(router()
 
-                            .path("/products/*", new Products())
+							.path("/products/*", new Products())
 
-                    )
-            );
+					)
+
+			)
+	);
 }
 ```
 
@@ -425,43 +420,39 @@ Let's start by defining a barebone model stating that all resources of class `Pr
 public final class Products extends Delegator {
 
     public Products() {
-        delegate(new Driver(and(
+		delegate(driver(
 
-                field(RDF.TYPE),
-                field(RDFS.LABEL),
-                field(RDFS.COMMENT)
+				field(RDF.TYPE),
+				field(RDFS.LABEL),
+				field(RDFS.COMMENT)
 
-        )).wrap(new Router()
+		).wrap(router()
+				
+				.path("/",router()
+						.get(relator())
+						.post(creator())
+				)
 
+				.path("/*",router()
+						.get(relator())
+						.put(updater())
+						.delete(deleter())
+				)
 
-                .path("/", new Worker()
-                        .get(new Relator())
-                        .post(new Creator())
-                )
-
-                .path("/*", new Worker()
-                        .get(new Relator())
-                        .put(new Updater())
-                        .delete(new Deleter())
-                )
-
-        ));
-    }
+		));
+	}
 
 }
 ```
 
 The [Driver](../javadocs/index.html?com/metreeca/rest/wrappers/Driver.html) wrapper associated a linked data model to incoming requests, driving the operations of nested actors and other model-aware handlers.
 
-Linked data models are defined with a [SHACL](https://www.w3.org/TR/shacl/)-based [specification language](../references/spec-language), assembling shape [building blocks](../references/spec-language#shapes) using a simple Java DSL.
+Linked data models are defined with a shape-based [specification language](../references/spec-language), assembling shape [building blocks](../references/spec-language#shapes) using a simple Java DSL.
 
-<p class="note">Direct import of of SHACL specs is planned.</p>
 As soon as the server is redeployed, the updated REST API exposes only the data specified in the driving model.
 
 ```sh
-% curl --include \
-	--header 'Accept: application/json' \
-	'http://localhost:8080/products/S18_4409'
+% curl --include 'http://localhost:8080/products/S18_4409'
 
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -483,141 +474,126 @@ Content-Type: application/json;charset=UTF-8
 We'll now refine the initial barebone model, exposing more properties and detailing properties roles and constraints.
 
 ```java
+package com.metreeca.demo;
+
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.rio.RDFFormat;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf4j.services.Graph.graph;
-import static com.metreeca.rest.Context.service;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.Context.asset;
 
 public final class BIRT implements Runnable {
 
-    public static final String BASE="https://example.com/";
-    public static final String NAMESPACE=BASE+"terms#";
+	public static final String Base="https://example.com/";
+	public static final String Namespace=Base+"terms#";
 
-    public static final IRI staff=birt("staff");
+	public static final IRI staff=birt("staff");
 
-    public static final IRI Order=birt("Order");
-    public static final IRI Product=birt("Product");
-    public static final IRI ProductLine=birt("ProductLine");
+	public static final IRI Order=birt("Order");
+	public static final IRI Product=birt("Product");
+	public static final IRI ProductLine=birt("ProductLine");
 
-    public static final IRI amount=birt("amount");
-    public static final IRI buy=birt("buy");
-    public static final IRI code=birt("code");
-    public static final IRI customer=birt("customer");
-    public static final IRI line=birt("line");
-    public static final IRI product=birt("product");
-    public static final IRI order=birt("order");
-    public static final IRI scale=birt("scale");
-    public static final IRI sell=birt("sell");
-    public static final IRI size=birt("size");
-    public static final IRI status=birt("status");
-    public static final IRI stock=birt("stock");
-    public static final IRI vendor=birt("vendor");
-
-
-    private static IRI birt(final String name) {
-        return iri(NAMESPACE, name);
-    }
+	public static final IRI amount=birt("amount");
+	public static final IRI buy=birt("buy");
+	public static final IRI code=birt("code");
+	public static final IRI customer=birt("customer");
+	public static final IRI line=birt("line");
+	public static final IRI product=birt("product");
+	public static final IRI order=birt("order");
+	public static final IRI scale=birt("scale");
+	public static final IRI sell=birt("sell");
+	public static final IRI size=birt("size");
+	public static final IRI status=birt("status");
+	public static final IRI stock=birt("stock");
+	public static final IRI vendor=birt("vendor");
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    @Override public void run() {
-        service(graph()).exec(connection -> {
-            try {
+	private static IRI birt(final String name) {
+		return iri(Namespace, name);
+	}
 
-                connection.add(BIRT.class.getResourceAsStream("BIRT.ttl"), BASE, RDFFormat.TURTLE);
 
-            } catch ( final IOException e ) {
-                throw new UncheckedIOException(e);
-            }
-        });
-    }
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public void run() {
+		asset(graph()).exec(connection -> {
+			try {
+
+				connection.add(BIRT.class.getResourceAsStream("BIRT.ttl"), Base, RDFFormat.TURTLE);
+
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		});
+	}
 
 }
 ```
 
 ```java
-new Driver(member().then(
+driver(member().then(
 
-        filter().then(
-                field(RDF.TYPE, BIRT.Product)
-        ),
+	filter().then(
+			field(RDF.TYPE, BIRT.Product)
+	),
 
-        convey().then(
+	convey().then(
 
-                field(RDF.TYPE, required()),
+			field(RDF.TYPE, exactly(BIRT.Product)),
 
-                field(RDFS.LABEL, required(),
-                        datatype(XMLSchema.STRING),
-                        maxLength(50)
-                ),
+			field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
+			field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
 
-                field(RDFS.COMMENT, required(),
-                        datatype(XMLSchema.STRING),
-                        maxLength(500)
-                ),
+			and(
 
-                and(
+					server().then(field(BIRT.code, required())),
 
-                        server().then(field(BIRT.code, required())),
+					field(BIRT.line, required(), clazz(BIRT.ProductLine),
 
-                        field(BIRT.line, required(), clazz(BIRT.ProductLine),
+							relate().then(field(RDFS.LABEL, required()))
 
-                                relate().then(field(RDFS.LABEL, required()))
-                        ),
+					),
 
-                        field(BIRT.scale, required(),
-                                datatype(XMLSchema.STRING),
-                                placeholder("1:N"),
-                                pattern("1:[1-9][0-9]{1,2}")
-                        ),
+					field(BIRT.scale, required(),
+							datatype(XSD.STRING),
+							pattern("1:[1-9][0-9]{1,2}")
+					),
 
-                        field(BIRT.vendor, required(),
-                                datatype(XMLSchema.STRING),
-                                maxLength(50)
-                        )
+					field(BIRT.vendor, required(), datatype(XSD.STRING), maxLength(50))
 
-                ),
+			),
 
-                and(
+			and(
 
-                        server().then(field(BIRT.stock, required(),
-                                datatype(XMLSchema.INTEGER),
-                                minInclusive(literal(integer(0))),
-                                maxExclusive(literal(integer(10000)))
-                        )),
+					server().then(field(BIRT.stock, required(),
+							datatype(XSD.INTEGER),
+							minInclusive(literal(integer(0))),
+							maxExclusive(literal(integer(10000)))
+					)),
 
-                        field(BIRT.sell, alias("price"), required(),
-                                datatype(XMLSchema.DECIMAL),
-                                minExclusive(literal(decimal(0))),
-                                maxExclusive(literal(decimal(1000)))
-                        ),
+					field(BIRT.sell, alias("price"), required(),
+							datatype(XSD.DECIMAL),
+							minExclusive(literal(decimal(0))),
+							maxExclusive(literal(decimal(1000)))
+					),
 
-                        role(BIRT.staff).then(field(BIRT.buy, required(),
-                                datatype(XMLSchema.DECIMAL),
-                                minInclusive(literal(decimal(0))),
-                                maxInclusive(literal(decimal(1000)))
-                        ))
+					role(BIRT.staff).then(field(BIRT.buy, required(),
+							datatype(XSD.DECIMAL),
+							minInclusive(literal(decimal(0))),
+							maxInclusive(literal(decimal(1000)))
+					))
 
-                )
+			)
 
-        )
-
+	)
 ))
 ```
 
-The `filter` section states that this model describes resources living inside an LDP Basic Container defined by the following LDP properties (that is, a container whose member are the instances of class `birt:Product`):
-
-```turtle
-<products/> a ldp:BasicContainer;
-	ldp:isMemberOfRelation rdf:type;
-	ldp:membershipResource birt:Product.
-```
+The `filter` section states that this model describes a container whose member are the instances of the `birt:Product` class.
 
 The extended resource model makes use of a number of additional blocks to precisely define the expected shape of the RDF description of the member resources, for instance including `required` and `datatype` and `pattern` constraints to state that `rdfs:label`, `rdfs:comment`, `birt:code`, `birt:scale` and `birt:vendor` values are expected:
 
@@ -626,9 +602,7 @@ The extended resource model makes use of a number of additional blocks to precis
 - to possibly match a specific regular expression pattern.
 
 ```sh
-% curl --include \
-	--header 'Accept: application/json' \
-	'http://localhost:8080/products/S18_4409'
+% curl --include 'http://localhost:8080/products/S18_4409'
 	
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -671,45 +645,43 @@ In the most general form, models may be parameterized on for different [axes](..
 Parametric models support the definition of fine-grained access control rules and role-dependent read/write resource views.
 
 ```java
-role(BIRT.staff).then(field(BIRT.buy, and(required(),
-		datatype(XMLSchema.DECIMAL),
+role(BIRT.staff).then(field(BIRT.buy, required(),
+		datatype(XSD.DECIMAL),
 		minInclusive(literal(decimal(0))),
 		maxInclusive(literal(decimal(1000)))
-)))
+))
 ```
 
 This `role` guard states that the `birt:buy` price will be visible only if the request is performed by a user in the `birt:staff` role, usually as verified by authtentication/authorization wrappers, like in the following naive sample:
 
-```java
-private static boolean authorized(final Request request) {
-    return request.header("Authorization").orElse("").equals("Bearer secret");
+```diff
+public Demo() {
+	handler(context -> context
+
+			.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+			.set(engine(), GraphEngine::new)
+
+			.exec(new BIRT())
+
+			.get(() -> gateway()
+
+					.with(preprocessor(request -> request.base(BIRT.Base)))
+					
++					.with(bearer("secret", BIRT.staff))
+
+					.wrap(router()
+
+							.path("/products/*", new Products())
+
+					)
+
+			)
+	);
 }
 ```
 
-```java
-() -> new API()
-
-    .with(new Rewriter(BIRT.BASE))
-  
-  	// set request roles if user is authorized
-
-    .with(handler -> request ->
-          authorized(request) ? handler.handle(request.roles(BIRT.staff))
-              : request.safe() ? handler.handle(request)
-              : request.reply(response -> response.status(Response.Unauthorized))
-     )
-
-    .wrap(new Router()
-
-            .path("/products/*", new Products())
-
-    )
-```
-
 ```shell
-% curl --include \
-	--header 'Accept: application/json' \
-	'http://localhost:8080/products/S18_4409'
+% curl --include 'http://localhost:8080/products/S18_4409'
 
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -726,7 +698,6 @@ Content-Type: application/json;charset=UTF-8
 ```shell
 % curl --include \
 	--header 'Authorization: Bearer secret' \
-	--header 'Accept: application/json' \
 	'http://localhost:8080/products/S18_4409'
 	
 HTTP/1.1 200 
@@ -751,62 +722,55 @@ We'll now complete the product catalog, adding:
 
 Copy [ProductsCreate.ql](assets/ProductsCreate.ql) to the `src/main/resources/` directory and extend `Products` as follows:
 
-```java
-new Router()
+```diff
+router()
 
-        .path("/", new Worker()
-                .get(new Relator())
-                .post(new Creator(new ScaleSlug())
-                        .with(postprocessor(update(Codecs.text(Products.class, "ProductsCreate.ql"))))
-                )
-        )
-
-        .path("/*", new Worker()
-                .get(new Relator())
-                .put(new Updater())
-                .delete(new Deleter())
-        )
+	.path("/", router()
+			.get(relator())
++			.post(creator(new ScaleSlug())
++					.with(postprocessor(update(text(Products.class, "ProductsCreate.ql"))))
++			)
+	)
 ```
 
 ```java
 private static final class ScaleSlug implements Function<Request, String> {
 
-    private final Graph graph=service(graph());
+	private final Graph graph=asset(graph());
 
 
-    @Override public String apply(final Request request) {
-        return graph.exec(connection -> {
+	@Override public String apply(final Request request) {
+		return graph.exec(connection -> {
 
-            final Value scale=request.body(rdf())
-                    .value()
-                    .flatMap(model -> new LinkedHashModel(model)
-                            .filter(null, BIRT.scale, null)
-                            .objects()
-                            .stream()
-                            .findFirst()
-                    )
-                    .orElse(literal("1:1"));
+			final Value scale=request.body(jsonld()).get()
+					.flatMap(model -> new LinkedHashModel(model)
+							.filter(null, BIRT.scale, null)
+							.objects()
+							.stream()
+							.findFirst()
+					)
+					.orElse(literal("1:1"));
 
-            int serial=0;
+			int serial=0;
 
-            try ( final RepositoryResult<Statement> matches=connection.getStatements(
-                    null, BIRT.scale, scale
-            ) ) {
-                for (; matches.hasNext(); matches.next()) { ++serial; }
-            }
+			try ( final RepositoryResult<Statement> matches=connection.getStatements(
+					null, BIRT.scale, scale
+			) ) {
+				for (; matches.hasNext(); matches.next()) { ++serial; }
+			}
 
-            String code="";
+			String code="";
 
-            do {
-                code=String.format("S%s_%d", scale.stringValue().substring(2), serial);
-            } while ( connection.hasStatement(
-                    null, BIRT.code, literal(code), true
-            ) );
+			do {
+				code=String.format("S%s_%d", scale.stringValue().substring(2), serial);
+			} while ( connection.hasStatement(
+					null, BIRT.code, literal(code), true
+			) );
 
-            return code;
+			return code;
 
-        });
-    }
+		});
+	}
 
 }
 ```
@@ -819,19 +783,21 @@ prefix birt: <terms#>
 prefix owl: <http://www.w3.org/2002/07/owl#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
-#### assign the unique scale-based product code generated by the slug function ####
+
+#### assign the unique scale-based product code generated by the slug function #########################################
 
 insert { $this birt:code $name } where {};
 
 
-#### initialize stock #############################################################
+#### initialize stock ##################################################################################################
 
 insert { $this birt:stock 0 } where {};
+
 ```
 
 The *ProductsCreate.ql* SPARQL Update postprocessing script updates server-managed `birt:code` and `birt:stock` properties after a new product is added to the catalog.
 
-SPARQL Update postprocessing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](../javadocs/?com/metreeca/rdf/services/Graph.html#configure-M-O-java.util.function.BiConsumer...-) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
+SPARQL Update postprocessing scripts are executed after the state-mutating HTTP request is successfully completed, with some [pre-defined bindings](../javadocs/?com/metreeca/rdf/assets/Graph.html#configure-M-O-java.util.function.BiConsumer...-) like the `$this` variable holding the IRI of the targe resource either as derived from the HTTP request or as defined by the `Location` HTTP header after a POST request.
 
 Request and response RDF payloads may also be [pre](../javadocs/?com/metreeca/rest/Wrapper.html#preprocessor-java.util.function.Function-) and [post](../javadocs/?com/metreeca/rest/Wrapper.html#postprocessor-java.util.function.Function-)-processed using custom filtering functions.
 
@@ -840,4 +806,4 @@ Request and response RDF payloads may also be [pre](../javadocs/?com/metreeca/re
 To complete your tour of the framework:
 
 - walk through the [interaction tutorial](interacting-with-ldp-apis) to learn how to interact with model-driven REST APIs to power client apps like the demo [online product catalog](https://demo.metreeca.com/apps/shop/);
-- explore the standard [library](../javadocs/?overview-summary.html) to learn how to develop your own custom wrappers and handlers and to extend your server with additional services like [SPARQL endpoints](../javadocs/?com/metreeca/rdf/handlers/package-summary.html).
+- explore the [framework](../javadocs/?overview-summary.html) to learn how to develop your own custom wrappers and handlers and to extend your server with additional services.
