@@ -29,20 +29,20 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class FrameTest {
+final class TemplateTest {
 
-    private void exec(final Runnable task) {
-        new Context().exec(task).clear();
-    }
+	private void exec(final Runnable task) {
+		new Context().exec(task).clear();
+	}
 
 
-    private Stream<String> fill(final String template, final String name, final String value) {
-        return new Frame<>()
+	private Stream<String> fill(final String template, final String name, final String value) {
+		return new Template<>()
 
-                .model(template)
-                .value(name, value)
+				.model(template)
+				.value(name, value)
 
-                .apply(value);
+				.apply(value);
     }
 
 
@@ -91,15 +91,15 @@ final class FrameTest {
                     assertThat
 
                             (Xtream
-                                    .of("test")
+		                            .of("test")
 
-                                    .flatMap(new Frame<String>()
+		                            .flatMap(new Template<String>()
 
-                                            .model("{base}:{x}{y}")
-                                            .values("base", Stream::of)
-                                            .values("x", string -> Stream.of("1", "2"))
-                                            .values("y", string -> Stream.of("2", "3"))
-                                    )
+				                            .model("{base}:{x}{y}")
+				                            .values("base", Stream::of)
+				                            .values("x", string -> Stream.of("1", "2"))
+				                            .values("y", string -> Stream.of("2", "3"))
+		                            )
 
                                     .collect(toList())
                             )

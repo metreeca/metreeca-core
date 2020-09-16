@@ -120,21 +120,19 @@ public final class Frame implements Resource {
 		return seq(Arrays.stream(path).map(Frame::seq).collect(toList()));
 	}
 
-	public static Function<Frame, Group> seq(final Collection<Function<Frame, Group>> paths) {
+	public static Function<Frame, Group> seq(final Iterable<Function<Frame, Group>> paths) {
 		return frame -> {
 
-			Set<Object> values=singleton(frame);
+			Set<Value> values=singleton(frame);
 
-			for (final Iterator<Function<Frame, Group>> steps=paths.iterator(); steps.hasNext(); ) {
-
-				final Function<Frame, Group> step=steps.next();
+			for (final Function<Frame, Group> path : paths) {
 
 				values=values.stream()
 
 						.filter(Frame.class::isInstance)
 						.map(Frame.class::cast)
 
-						.flatMap(value -> step.apply(value).values.stream())
+						.flatMap(value -> path.apply(value).values.stream())
 
 						.collect(toCollection(LinkedHashSet::new));
 			}
@@ -159,10 +157,10 @@ public final class Frame implements Resource {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Resource focus;
-	private final Map<IRI, Set<Object>> fields;
+	private final Map<IRI, Set<Value>> fields;
 
 
-	private Frame(final Resource focus, final Map<IRI, Set<Object>> fields) {
+	private Frame(final Resource focus, final Map<IRI, Set<Value>> fields) {
 		this.focus=focus;
 		this.fields=fields;
 	}
@@ -198,7 +196,7 @@ public final class Frame implements Resource {
 				final boolean frame=value instanceof Frame;
 
 				final Statement statement=direct
-						? statement(focus, predicate, frame ? ((Frame)value).focus : (Value)value)
+						? statement(focus, predicate, frame ? ((Frame)value).focus : value)
 						: statement(frame ? ((Frame)value).focus : (Resource)value, inverse, focus);
 
 				return Stream.concat(Stream.of(statement), frame ? ((Frame)value).stream() : Stream.empty());
@@ -234,7 +232,15 @@ public final class Frame implements Resource {
 		return set(field, asList(values));
 	}
 
-	public Frame set(final IRI field, final List<Value> values) {
+	public Frame set(final IRI field, final Optional<? extends Value> value) {
+		return set(field, value.map(Collections::singleton).orElse(emptySet()));
+	}
+
+	public Frame set(final IRI field, final Stream<? extends Value> values) {
+		return set(field, values.collect(toList()));
+	}
+
+	public Frame set(final IRI field, final Collection<? extends Value> values) {
 
 		if ( field == null ) {
 			throw new NullPointerException("null field");
@@ -248,7 +254,7 @@ public final class Frame implements Resource {
 			throw new IllegalArgumentException("literal values for inverse field");
 		}
 
-		final Map<IRI, Set<Object>> map=new LinkedHashMap<>(fields);
+		final Map<IRI, Set<Value>> map=new LinkedHashMap<>(fields);
 
 		map.put(field, new LinkedHashSet<>(values));
 
@@ -282,10 +288,10 @@ public final class Frame implements Resource {
 
 	public static final class Group {
 
-		private final Set<Object> values;
+		private final Set<Value> values;
 
 
-		private Group(final Set<Object> values) {
+		private Group(final Set<Value> values) {
 			this.values=values;
 		}
 
@@ -322,7 +328,7 @@ public final class Frame implements Resource {
 		}
 
 		public Stream<Value> values() {
-			return values.stream().map(value -> value instanceof Frame ? ((Frame)value).focus : (Value)value);
+			return values.stream().map(value -> value instanceof Frame ? ((Frame)value).focus : value);
 		}
 
 	}
