@@ -539,62 +539,69 @@ public final class BIRT implements Runnable {
 ```
 
 ```java
-driver(member().then(
+driver(
 
-	filter().then(
-			field(RDF.TYPE, BIRT.Product)
-	),
+	or(relate(), role(BIRT.staff)),
 
-	convey().then(
+	member().then(
 
-			field(RDF.TYPE, exactly(BIRT.Product)),
-
-			field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
-			field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
-
-			and(
-
-					server().then(field(BIRT.code, required())),
-
-					field(BIRT.line, required(), clazz(BIRT.ProductLine),
-
-							relate().then(field(RDFS.LABEL, required()))
-
-					),
-
-					field(BIRT.scale, required(),
-							datatype(XSD.STRING),
-							pattern("1:[1-9][0-9]{1,2}")
-					),
-
-					field(BIRT.vendor, required(), datatype(XSD.STRING), maxLength(50))
-
+			filter().then(
+					field(RDF.TYPE, BIRT.Product)
 			),
 
-			and(
+			convey().then(
 
-					server().then(field(BIRT.stock, required(),
-							datatype(XSD.INTEGER),
-							minInclusive(literal(integer(0))),
-							maxExclusive(literal(integer(10000)))
-					)),
+					field(RDF.TYPE, exactly(BIRT.Product)),
 
-					field(BIRT.sell, alias("price"), required(),
-							datatype(XSD.DECIMAL),
-							minExclusive(literal(decimal(0))),
-							maxExclusive(literal(decimal(1000)))
+					field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
+					field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
+
+					and(
+
+							server().then(field(BIRT.code, required())),
+
+							field(BIRT.line, required(), clazz(BIRT.ProductLine),
+
+									relate().then(field(RDFS.LABEL, required()))
+
+							),
+
+							field(BIRT.scale, required(),
+									datatype(XSD.STRING),
+									pattern("1:[1-9][0-9]{1,2}")
+							),
+
+							field(BIRT.vendor, required(), datatype(XSD.STRING), maxLength(50))
+
 					),
 
-					role(BIRT.staff).then(field(BIRT.buy, required(),
-							datatype(XSD.DECIMAL),
-							minInclusive(literal(decimal(0))),
-							maxInclusive(literal(decimal(1000)))
-					))
+					and(
+
+							server().then(field(BIRT.stock, required(),
+									datatype(XSD.INTEGER),
+									minInclusive(literal(integer(0))),
+									maxExclusive(literal(integer(10_000)))
+							)),
+
+							field(BIRT.sell, alias("price"), required(),
+									datatype(XSD.DECIMAL),
+									minExclusive(literal(decimal(0))),
+									maxExclusive(literal(decimal(1000)))
+							),
+
+							role(BIRT.staff).then(field(BIRT.buy, required(),
+									datatype(XSD.DECIMAL),
+									minInclusive(literal(decimal(0))),
+									maxInclusive(literal(decimal(1000)))
+							))
+
+					)
 
 			)
 
 	)
-))
+
+)
 ```
 
 The `filter` section states that this model describes a container whose member are the instances of the `birt:Product` class.
@@ -646,7 +653,15 @@ In the most general form, models may be parameterized on for different [axes](..
 
 ## Controlling Access
 
-Parametric models support the definition of fine-grained access control rules and role-dependent read/write resource views.
+Parametric models support the definition of resource-level task/role-based access control rules.
+
+```java
+or(relate(), role(BIRT.staff))
+```
+
+This guard states that the product catalog and the contained resources are accessible only if the request **either** has a `GET` method **or** is performed by a user in the `birt:staff` role.
+
+Parametric models support also the definition of fine-grained access control rules and role-dependent read/write resource views.
 
 ```java
 role(BIRT.staff).then(field(BIRT.buy, required(),
@@ -656,7 +671,9 @@ role(BIRT.staff).then(field(BIRT.buy, required(),
 ))
 ```
 
-This `role` guard states that the `birt:buy` price will be visible only if the request is performed by a user in the `birt:staff` role, usually as verified by authtentication/authorization wrappers, like in the following naive sample:
+This `role` guard states that the `birt:buy` price will be visible only if the request is performed by a user in the `birt:staff` role.
+
+User roles are usually granted to requests by authentication/authorization wrappers, like in the following naive sample:
 
 ```diff
 public Demo() {

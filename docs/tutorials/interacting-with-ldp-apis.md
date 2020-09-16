@@ -41,12 +41,13 @@ Linked data REST APIs published by Metreeca/Link API engine support controlled r
 
 User authorization and user-specific content generation are performed according to [role‑based](../references/spec-language#parameters) rules integrated in the linked data model driving the API publishing process.
 
-## RDF Resources
+## Resources
 
-To retrieve the RDF description of a published resource, as specified by the associated data model, just perform a `GET` operation on the URL identifying the resource.
+To retrieve the description of a published resource, as specified by the associated data model, just perform a `GET` operation on the URL identifying the resource.
 
 ```sh
-% curl --include "http://localhost:8080/products/S18_3140"
+% curl --include \
+	"http://localhost:8080/products/S18_3140"
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -73,7 +74,9 @@ Metreeca/Link produces and accepts an idiomatic [compacted/framed](../references
 To include context information, specify the `application/ld+json` MIME type in the `Accept` HTTP request header.
 
 ```sh
-% curl --include --header 'Accept: application/ld+json' "http://localhost:8080/products/S18_3140"
+% curl --include \
+	--header "Accept: application/ld+json" \
+	"http://localhost:8080/products/S18_3140"
 
 
 ```
@@ -81,7 +84,9 @@ To include context information, specify the `application/ld+json` MIME type in t
 Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Reserved properties are included only if the request is properly authenticated.
 
 ```sh
-% curl --include --header 'Authorization: Bearer secret' "http://localhost:8080/products/S18_3140"
+% curl --include \
+	--header "Authorization: Bearer secret" \
+	"http://localhost:8080/products/S18_3140"
     
 HTTP/1.1 200  
 Content-Type: application/json;charset=UTF-8
@@ -97,9 +102,9 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-## RDF Containers
+## Collections
 
-To retrieve the RDF description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
+To retrieve the description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
 
 ```sh
 % curl --include "http://localhost:8080/products/"
@@ -132,7 +137,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-By default, container descriptions include a digest description of each container item, but a concise description of the container itself may be retrieved using the standard LDP `Prefer` HTTP request header.
+By default, collections descriptions include a digest description of each collection item, but a concise description of the collection itself may be retrieved using the standard LDP `Prefer` HTTP request header.
 
 ```sh
 % curl --include \
@@ -150,22 +155,24 @@ Content-Type: application/json;charset=UTF-8
 
 # Write Operations
 
-Linked data REST APIs published by Metreeca/Link API engine support controlled write access to  RDF contents managed by the underlying graph storage layer.
+Linked data REST APIs published by Metreeca/Link API engine support controlled write access to contents managed by the underlying graph storage layer.
 
 User authorization and user-specific content validation are performed according to [role‑based](../references/spec-language#parameters) rules integrated in the linked data model driving the API publishing process.
 
 ## Creating Resources
 
-New RDF resources are created by submitting an RDF description to the REST API of a writable RDF collection using the `POST` HTTP method.
+New resources are created by submitting an description to the REST API of a writable collection using the `POST` HTTP method.
 
 Note that property values that may be inferred from the associated linked data model, like `rdf:type`, may be safely omitted.
 
 ```sh
 % curl --include --request POST \
     --header 'Authorization: Bearer secret' \
+    --header 'Content-Type: application/json' \
     "http://localhost:8080/products/" \
     --data @- <<EOF
 {
+	"type": "/terms#Product",
 	"label": "Piaggio Vespa",
 	"comment": "The iconic Piaggio's scooter…",
 	"scale": "1:10",
@@ -189,9 +196,11 @@ Submitted data is automatically validated against the constraints specified in t
 ```sh
 % curl --include --request POST \
     --header 'Authorization: Bearer secret' \
-    "http://localhost:8080/products/" \
+    --header 'Content-Type: application/json' \
+  "http://localhost:8080/products/" \
     --data @- <<EOF
 {
+	"type": "/terms#Product",
 	"label": "Piaggio Vespa",
 	"comment": "The iconic Piaggio's scooter…",
 	"scale": "1:10",
@@ -202,29 +211,23 @@ Submitted data is automatically validated against the constraints specified in t
 }
 EOF
 
-HTTP/2 201 Created
-Location: /products/S10_6
-
 HTTP/1.1 422 Unprocessable Entity
 Location: http://localhost:8080/products/
 Content-Type: application/json;charset=UTF-8
 
 {
-    "error": "data-invalid",
-    "trace": {
-        "https://demo.metreeca.com/terms#buy": {
-            "": {
-                "minInclusive(\"0.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
-                    "\"-101.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>"
-                ]
-            }
-        },
-        "https://demo.metreeca.com/terms#sell": {
-            "": {
-                "maxExclusive(\"1000.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
-                    "\"9999.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>"
-                ]
-            }
+    "https://demo.metreeca.com/terms#buy": {
+        "": {
+            "minInclusive(\"0.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
+                "-101.0"
+            ]
+        }
+    },
+    "https://demo.metreeca.com/terms#sell": {
+        "": {
+            "maxExclusive(\"1000.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
+                "9999.0"
+            ]
         }
     }
 }
@@ -234,9 +237,11 @@ Submitted data is automatically matched against the allowed envelope specified i
 
 ```sh
 % curl --include --request POST \
-    "http://localhost:8080/products/" \
+    --header 'Content-Type: application/json' \
+   "http://localhost:8080/products/" \
     --data @- <<EOF
 {
+	"type": "/terms#Product",
     "label": "Piaggio Ciao",
     "comment" : "The sturdy Piaggio's velo bike…",
     "scale": "1:10",
@@ -339,7 +344,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-Note that container descriptions are omitted from faceted search results.
+Note that collection descriptions are omitted from faceted search results.
 
 ## Sorting and Pagination
 
