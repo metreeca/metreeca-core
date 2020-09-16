@@ -18,7 +18,8 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.json.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.ValuesTest;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.JSONLDFormat;
 
@@ -31,8 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.ValueAssert.assertThat;
-import static com.metreeca.json.Values.literal;
-import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -60,7 +60,7 @@ final class GraphCreatorTest {
 
 		private com.metreeca.rest.Request request() {
 			return new com.metreeca.rest.Request()
-					.base(ValuesTest.Base)
+					.base(Base)
 					.path("/employees/")
 					.header("Slug", "slug")
 					.body(jsonld(), decode("</employees/>"
@@ -81,7 +81,7 @@ final class GraphCreatorTest {
 					.accept(response -> {
 
 						final IRI location=response.header("Location")
-								.map(Values::iri)
+								.map(path -> iri(response.request().base(), path)) // resolve root-relative location
 								.orElse(null);
 
 						assertThat(response)
@@ -134,8 +134,8 @@ final class GraphCreatorTest {
 			exec(() -> new GraphCreator()
 
 					.handle(new com.metreeca.rest.Request()
-							.roles(ValuesTest.Manager)
-							.base(ValuesTest.Base)
+							.roles(Manager)
+							.base(Base)
 							.path("/employees/9999").attribute(JSONLDFormat.shape(), ValuesTest.Employee)
 					)
 

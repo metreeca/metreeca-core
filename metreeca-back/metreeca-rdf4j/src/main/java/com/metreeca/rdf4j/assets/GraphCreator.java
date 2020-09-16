@@ -22,16 +22,16 @@ import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
 
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.Created;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
@@ -76,10 +76,15 @@ final class GraphCreator extends GraphProcessor {
 						connection.add(outline(member, filter(request.attribute(shape()))));
 						connection.add(rewrite(member, holder, rdf));
 
-						return Right(request.reply(response -> response
-								.status(Response.Created)
-								.header("Location", member.stringValue()))
-						);
+						final String location=member.stringValue();
+
+						return Right(request.reply(status(Created, Optional // root-relative to support relocation
+								.of(member.stringValue())
+								.map(IRIPattern::matcher)
+								.filter(Matcher::matches)
+								.map(matcher -> matcher.group("pathall"))
+								.orElse(location)
+						)));
 
 					}
 
