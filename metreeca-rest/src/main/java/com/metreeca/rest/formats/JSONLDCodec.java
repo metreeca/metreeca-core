@@ -30,8 +30,8 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.expanded;
 import static com.metreeca.json.Values.direct;
-import static com.metreeca.json.Values.entry;
 import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.rest.Xtream.entry;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;

@@ -17,10 +17,8 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.json.JSONAssert;
 import com.metreeca.json.Values;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;

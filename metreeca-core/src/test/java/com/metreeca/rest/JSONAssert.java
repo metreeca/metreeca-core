@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.json;
+package com.metreeca.rest;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Condition;

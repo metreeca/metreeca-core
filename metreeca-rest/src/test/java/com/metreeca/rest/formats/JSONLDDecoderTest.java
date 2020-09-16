@@ -18,6 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -564,11 +565,11 @@ final class JSONLDDecoderTest {
 
 					field(RDF.NIL),
 
-					map(
-							entry("@id", "id"),
-							entry("@value", "value"),
-							entry("@type", "type"),
-							entry("@language", "language")
+					Xtream.map(
+							Xtream.entry("@id", "id"),
+							Xtream.entry("@value", "value"),
+							Xtream.entry("@type", "type"),
+							Xtream.entry("@language", "language")
 					),
 
 					createObjectBuilder()
@@ -593,7 +594,7 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testIgnoreDuplicateKeywords() {
-			assertThat(decode(x, and(), map(entry("@id", "id")), createObjectBuilder()
+			assertThat(decode(x, and(), Xtream.map(Xtream.entry("@id", "id")), createObjectBuilder()
 
 					.add("id", "/x")
 					.add("@id", "/x")

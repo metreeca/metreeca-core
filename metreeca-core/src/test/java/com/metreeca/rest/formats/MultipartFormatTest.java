@@ -28,8 +28,8 @@ import java.io.*;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.metreeca.json.Values.entry;
-import static com.metreeca.json.Values.map;
+import static com.metreeca.rest.Xtream.entry;
+import static com.metreeca.rest.Xtream.map;
 import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.nio.charset.StandardCharsets.UTF_8;

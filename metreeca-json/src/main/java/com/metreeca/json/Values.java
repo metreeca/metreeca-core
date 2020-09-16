@@ -42,11 +42,9 @@ import java.util.stream.StreamSupport;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.*;
-import static java.util.Collections.emptyMap;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
 
 
 /**
@@ -80,19 +78,6 @@ public final class Values {
 
 	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
 		return new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
-	}
-
-
-	public static <K, V> Map<K, V> map() {
-		return emptyMap();
-	}
-
-	@SafeVarargs public static <K, V> Map<K, V> map(final Map.Entry<K, V>... entries) {
-		return Arrays.stream(entries).filter(Objects::nonNull).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-	}
-
-	public static <K, V> Map.Entry<K, V> entry(final K key, final V value) {
-		return new AbstractMap.SimpleImmutableEntry<>(key, value);
 	}
 
 

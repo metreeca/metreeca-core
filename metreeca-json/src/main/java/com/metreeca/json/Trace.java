@@ -20,11 +20,9 @@ package com.metreeca.json;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import javax.json.*;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
@@ -116,45 +114,6 @@ public final class Trace {
 
 	public Map<IRI, Trace> fields() {
 		return unmodifiableMap(fields);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public JsonObject toJSON() {
-
-		final JsonObjectBuilder builder=Json.createObjectBuilder();
-
-		if ( !issues.isEmpty() ) {
-
-			final JsonObjectBuilder errors=Json.createObjectBuilder();
-
-			issues.forEach((detail, values) -> {
-
-				final JsonArrayBuilder objects=Json.createArrayBuilder();
-
-				values.forEach(value -> {
-
-					if ( value != null ) { objects.add(format(value)); }
-
-				});
-
-				errors.add(detail, objects.build());
-
-			});
-
-			builder.add("", errors);
-		}
-
-		fields().forEach((name, nested) -> {
-
-			if ( !nested.empty() ) {
-				builder.add(name.toString(), nested.toJSON());
-			}
-
-		});
-
-		return builder.build();
 	}
 
 

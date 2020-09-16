@@ -18,6 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -29,7 +30,6 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import java.util.Map;
 
-import static com.metreeca.json.JSONAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -37,6 +37,7 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.rest.JSONAssert.assertThat;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
@@ -512,11 +513,11 @@ final class JSONLDEncoderTest {
 
 					field(RDF.NIL),
 
-					map(
-							entry("@id", "id"),
-							entry("@value", "value"),
-							entry("@type", "type"),
-							entry("@language", "language")
+					Xtream.map(
+							Xtream.entry("@id", "id"),
+							Xtream.entry("@value", "value"),
+							Xtream.entry("@type", "type"),
+							Xtream.entry("@language", "language")
 					),
 
 					statement(x, RDF.NIL, literal("string", "en")),

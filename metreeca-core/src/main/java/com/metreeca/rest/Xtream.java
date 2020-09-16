@@ -26,6 +26,7 @@ import java.util.function.*;
 import java.util.stream.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
@@ -159,7 +160,20 @@ public final class Xtream<T> implements Stream<T> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Functional Utilities //////////////////////////////////////////////////////////////////////////////////////////
+
+	public static <K, V> Map<K, V> map() {
+		return emptyMap();
+	}
+
+	@SafeVarargs public static <K, V> Map<K, V> map(final Entry<K, V>... entries) {
+		return Arrays.stream(entries).filter(Objects::nonNull).collect(toMap(Entry::getKey, Entry::getValue));
+	}
+
+	public static <K, V> Entry<K, V> entry(final K key, final V value) {
+		return new AbstractMap.SimpleImmutableEntry<>(key, value);
+	}
+
 
 	/**
 	 * Creates a guarded function.
@@ -232,7 +246,7 @@ public final class Xtream<T> implements Stream<T> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// IO Utilities //////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * URL-encode a string.

@@ -18,6 +18,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
@@ -26,13 +27,13 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import java.util.Map;
 
-import static com.metreeca.json.JSONAssert.assertThat;
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.rest.JSONAssert.assertThat;
 import static java.util.Collections.emptyMap;
 import static javax.json.Json.createObjectBuilder;
 
@@ -60,7 +61,7 @@ final class JSONLDTrimmerTest {
 	}
 
 	@Test void testPreserveAliasedKeywords() {
-		assertThat(trim(field(RDF.VALUE), map(entry("@id", "id")), createObjectBuilder()
+		assertThat(trim(field(RDF.VALUE), Xtream.map(Xtream.entry("@id", "id")), createObjectBuilder()
 
 				.add("id", "http://example.com/"))
 
