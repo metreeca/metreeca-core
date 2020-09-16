@@ -61,7 +61,7 @@ public final class And extends Shape {
 
 				// flatten nested shaped shapes of the same type
 
-				.flatMap(new Shape.Probe<Stream<Shape>>() {
+				.flatMap(new Probe<Stream<Shape>>() {
 
 					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
@@ -71,7 +71,7 @@ public final class And extends Shape {
 
 				// group by shape type preserving order
 
-				.collect(groupingBy(Shape::getClass, LinkedHashMap::new, toSet()))
+				.collect(groupingBy(Shape::getClass, toCollection(LinkedHashSet::new)))
 
 				.entrySet()
 				.stream()

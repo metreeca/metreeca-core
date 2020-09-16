@@ -17,6 +17,7 @@
 
 package com.metreeca.json.shapes;
 
+import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.Value;
@@ -24,6 +25,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collection;
 
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
@@ -62,6 +65,14 @@ final class AndTest {
 
 		@Test void testCollapseDuplicates() {
 			assertThat(and(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(and(datatype(RDF.NIL), minCount(1)));
+		}
+
+		@Test void testPreserveOrder() {
+			assertThat(and(field(RDF.FIRST), field(RDF.REST)).map(new Shape.Probe<Collection<Shape>>() {
+
+				@Override public Collection<Shape> probe(final And and) { return and.shapes(); }
+
+			})).containsExactly(field(RDF.FIRST), field(RDF.REST));
 		}
 
 
