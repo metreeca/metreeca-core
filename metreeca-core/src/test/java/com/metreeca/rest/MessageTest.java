@@ -38,6 +38,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 final class MessageTest {
 
+	private Message<?> message() {
+		return new Request();
+	}
+
+
 	@Nested final class MIMETypes {
 
 		@Test void testTypesParseStrings() {
@@ -101,28 +106,28 @@ final class MessageTest {
 	@Nested final class Headers {
 
 		@Test void testHeadersNormalizeHeaderNames() {
-			assertThat(new MessageMock()
+			assertThat(message()
 					.headers("TEST-header", "value")
 			)
 					.hasHeader("TEST-Header");
 		}
 
 		@Test void testHeadersIgnoreHeaderCase() {
-			assertThat(new MessageMock()
+			assertThat(message()
 					.header("TEST-header", "value")
 			)
 					.hasHeader("test-header", "value");
 		}
 
 		@Test void testHeadersIgnoreEmptyHeaders() {
-			assertThat(new MessageMock()
+			assertThat(message()
 					.headers("test-header", emptySet())
 			)
 					.doesNotHaveHeader("test-header");
 		}
 
 		@Test void testHeadersOverwritesValues() {
-			assertThat(new MessageMock()
+			assertThat(message()
 					.header("test-header", "one")
 					.header("test-header", "two")
 			)
@@ -131,7 +136,7 @@ final class MessageTest {
 
 		@Test void testDefaultsValues() {
 
-			final MessageMock message=new MessageMock()
+			final Message<?> message=message()
 					.header("+present", "one")
 					.header("~present", "two")
 					.header("~missing", "two");
@@ -173,7 +178,7 @@ final class MessageTest {
 
 		@Test void testBodyCaching() {
 
-			final MessageMock message=new MessageMock()
+			final Message<?> message=message()
 					.body(InputFormat.input(), () -> new ByteArrayInputStream("test".getBytes(UTF_8)));
 
 			final Function<Message<?>, String> accessor=m -> m

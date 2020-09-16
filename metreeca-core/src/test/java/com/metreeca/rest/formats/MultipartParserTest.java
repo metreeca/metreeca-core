@@ -51,7 +51,7 @@ final class MultipartParserTest {
 					mapping(Entry::getValue, toList())
 			));
 
-			parts.put("part"+parts.size(), new MessageMock()
+			parts.put("part"+parts.size(), new Request()
 					.headers(map)
 					.body(InputFormat.input(), () -> body)
 			);
