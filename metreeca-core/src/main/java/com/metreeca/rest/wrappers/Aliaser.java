@@ -23,6 +23,8 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.SeeOther;
 import static java.util.Objects.requireNonNull;
 
 
@@ -82,10 +84,7 @@ public final class Aliaser implements Wrapper {
 				.filter(resource -> !resource.isEmpty())
 				.filter(resource -> !idempotent(request.item(), resource))
 
-				.map(resource -> request.reply(response -> response
-						.status(Response.SeeOther)
-						.header("Location", resource)
-				));
+				.map(resource -> request.reply(status(SeeOther, resource)));
 	}
 
 
