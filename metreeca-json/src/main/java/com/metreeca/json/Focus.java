@@ -26,7 +26,7 @@ import java.util.function.UnaryOperator;
 import static com.metreeca.json.Values.iri;
 
 /**
- * Shape focus.
+ * Shape focus value.
  *
  * <p>Provides a placeholder for a shape IRI value dynamically derived from a target IRI while performing a
  * shape-driven operation, for instance serving a linked data resource.</p>
