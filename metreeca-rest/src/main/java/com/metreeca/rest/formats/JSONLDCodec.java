@@ -218,25 +218,31 @@ final class JSONLDCodec {
 
 				.peek(entry -> {
 					if ( !AliasPattern.matcher(entry.getKey()).matches() ) {
+
 						throw new IllegalArgumentException(format(
-								"malformed alias <%s> for <%s>", entry.getKey(), entry.getValue()
+								"malformed alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().label()
 						));
+
 					}
 				})
 
 				.peek(entry -> {
 					if ( entry.getKey().startsWith("@") || keywords.containsValue(entry.getKey()) ) {
+
 						throw new IllegalArgumentException(format(
-								"reserved alias <%s> for <%s>", entry.getKey(), entry.getValue()
+								"reserved alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().label()
 						));
+
 					}
 				})
 
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
+
 					throw new IllegalArgumentException(format(
 							"clashing aliases for <field(%s)> / <field(%s)>", x.label(), y.label()
 					));
-				}));
+
+				}, LinkedHashMap::new));
 	}
 
 
@@ -246,7 +252,9 @@ final class JSONLDCodec {
 
 		if ( aliases.size() > 1 ) { // clashing aliases
 
-			throw new IllegalArgumentException(format("multiple aliases for <%s> / <%s>", field, aliases));
+			throw new IllegalArgumentException(format(
+					"multiple aliases for <field(%s)> / <%s>", field.label(), aliases
+			));
 
 		} else if ( aliases.size() == 1 ) { // user-defined alias
 
@@ -261,7 +269,9 @@ final class JSONLDCodec {
 					.map(matcher -> matcher.group("name"))
 					.map(alias -> direct(field.label()) ? alias : alias+"Of") // !!! inverse?
 
-					.orElseThrow(() -> new IllegalArgumentException(format("undefined alias for <%s>", field)));
+					.orElseThrow(() -> new IllegalArgumentException(format(
+							"undefined alias for <field(%s)>", field.label()
+					)));
 
 		}
 	}
