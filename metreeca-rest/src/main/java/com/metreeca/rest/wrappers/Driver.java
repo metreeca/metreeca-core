@@ -21,6 +21,8 @@ import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 
+import static com.metreeca.json.shapes.And.and;
+
 
 /**
  * Shape-based content driver.
@@ -55,14 +57,14 @@ public final class Driver implements Wrapper {
 	/**
 	 * Creates a content driver.
 	 *
-	 * @param shape the shape driving the lifecycle of the linked data resources managed by the wrapped handler
+	 * @param shapes the shapes driving the lifecycle of the linked data resources managed by the wrapped handler
 	 *
-	 * @return a new shape-based content drive
+	 * @return a new shape-based content driver
 	 *
-	 * @throws NullPointerException if {@code shape} is null
+	 * @throws NullPointerException if {@code shape} is null of ccntains null elements
 	 */
-	public static Driver driver(final Shape shape) {
-		return new Driver(shape);
+	public static Driver driver(final Shape... shapes) {
+		return new Driver(and(shapes));
 	}
 
 
