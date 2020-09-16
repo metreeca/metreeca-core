@@ -66,10 +66,11 @@ public final class Values {
 	public static final Pattern IRIPattern=Pattern.compile("^"
 			+"(?<schemeall>(?<scheme>[^:/?#]+):)?"
 			+"(?<hostall>//(?<host>[^/?#]*))?"
+			+"(?<pathall>"
 			+"(?<path>[^?#]*)"
 			+"(?<queryall>\\?(?<query>[^#]*))?"
 			+"(?<fragmentall>#(?<fragment>.*))?"
-			+"$"
+			+")$"
 	);
 
 
