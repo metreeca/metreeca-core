@@ -21,19 +21,17 @@ import com.metreeca.json.shapes.Guard;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Function;
 
-import static com.metreeca.json.Shape.exactly;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.guard;
+import static com.metreeca.json.shapes.Guard.retain;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
-import static java.util.Collections.emptySet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -125,45 +123,6 @@ final class ShapeRedactorTest {
 	@Test void testOptimizeAnds() {
 		assertThat(and(and(value("first"))).redact(first))
 				.isEqualTo(and());
-	}
-
-	@Test void test() {
-		and(
-
-				or(relate(), role(RDF.NIL)),
-
-				and(
-
-						member().then(
-
-								convey().then(
-
-										field(RDF.TYPE, exactly(RDF.NIL)),
-
-										field(RDFS.LABEL),
-										field(RDFS.COMMENT)
-
-
-								)
-
-						)
-
-				)
-		)
-				.redact(
-						retain(Role, emptySet()),
-						retain(Task, Create),
-						retain(Area, Digest, Detail),
-						retain(Mode, Convey)
-				)
-
-				.map(shape -> {
-
-					System.out.println(shape);
-
-					return shape;
-
-				});
 	}
 
 }
