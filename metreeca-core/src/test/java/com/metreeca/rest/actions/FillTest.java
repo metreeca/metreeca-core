@@ -29,7 +29,7 @@ import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class TemplateTest {
+final class FillTest {
 
 	private void exec(final Runnable task) {
 		new Context().exec(task).clear();
@@ -37,13 +37,13 @@ final class TemplateTest {
 
 
 	private Stream<String> fill(final String template, final String name, final String value) {
-		return new Template<>()
+		return new Fill<>()
 
 				.model(template)
 				.value(name, value)
 
 				.apply(value);
-    }
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ final class TemplateTest {
                             (Xtream
 		                            .of("test")
 
-		                            .flatMap(new Template<String>()
+		                            .flatMap(new Fill<String>()
 
 				                            .model("{base}:{x}{y}")
 				                            .values("base", Stream::of)

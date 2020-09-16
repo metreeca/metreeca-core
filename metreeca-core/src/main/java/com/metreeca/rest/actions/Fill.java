@@ -51,7 +51,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @param <V> the type of the input values used to generate strings
  */
-public final class Template<V> implements Function<V, Stream<String>> {
+public final class Fill<V> implements Function<V, Stream<String>> {
 
 	private static final Pattern PlaceholderPattern=Pattern.compile("(?<modifier>[\\\\%])?\\{(?<name>\\w+)}");
 
@@ -72,7 +72,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if {@code model} is null
 	 */
-	public Template<V> model(final String model) {
+	public Fill<V> model(final String model) {
 
 		if ( model == null ) {
 			throw new NullPointerException("null model");
@@ -94,7 +94,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if either {@code name}
 	 */
-	public Template<V> value(final String name) {
+	public Fill<V> value(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -113,7 +113,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code value} is null
 	 */
-	public Template<V> value(final String name, final Object value) {
+	public Fill<V> value(final String name, final Object value) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -135,7 +135,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code expression} is null
 	 */
-	public Template<V> value(final String name, final Function<V, String> expression) {
+	public Fill<V> value(final String name, final Function<V, String> expression) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -159,7 +159,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is null
 	 */
-	public Template<V> values(final String name, final Object... values) {
+	public Fill<V> values(final String name, final Object... values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -182,7 +182,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is null
 	 */
-	public Template<V> values(final String name, final Collection<Object> values) {
+	public Fill<V> values(final String name, final Collection<Object> values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -205,7 +205,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is null
 	 */
-	public Template<V> values(final String name, final Stream<Object> values) {
+	public Fill<V> values(final String name, final Stream<Object> values) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -231,7 +231,7 @@ public final class Template<V> implements Function<V, Stream<String>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code expression} is null
 	 */
-	public Template<V> values(final String name, final Function<V, Stream<String>> expression) {
+	public Fill<V> values(final String name, final Function<V, Stream<String>> expression) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
