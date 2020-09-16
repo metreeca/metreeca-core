@@ -170,14 +170,7 @@ final class GraphRelator extends GraphProcessor {
 
 			}
 
-		}).map(response -> response.success() ? response
-				.headers("+Vary", "Accept", "Prefer")
-				.headers("+Link",
-						"<"+LDP.RESOURCE+">; rel=\"type\"",
-						"<"+LDP.RDF_SOURCE+">; rel=\"type\"",
-						request.collection() ? "<"+LDP.CONTAINER+">; rel=\"type\"" : ""
-				) : response
-		);
+		});
 	}
 
 
