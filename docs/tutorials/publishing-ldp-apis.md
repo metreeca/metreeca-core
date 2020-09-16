@@ -373,7 +373,11 @@ The [Delegator](../javadocs/?com/metreeca/rest/handlers/Delegator.html) abstract
 
 # Model-Driven Handlers
 
-Standard resource action handlers can be defined using high-level declarative models that drive automatic fine‑grained role‑based read/write access control, faceted search,  incoming data validation and bidirectional conversion between RDF and [compacted/framed](../references/idiomatic-json) JSON-LD payloads, as demonstrated in the [REST APIs interaction tutorial](interacting-with-ldp-apis).
+Standard resource action handlers can be defined using high-level declarative
+ models that drive automatic fine‑grained role‑based read/write access
+  control, faceted search,  incoming data validation and bidirectional
+   conversion between RDF and idiomatic [compacted/framed](../references/jsonld
+   -format) JSON-LD payloads, as demonstrated in the [REST APIs interaction tutorial](interacting-with-ldp-apis).
 
 Actors provide default shape-driven implementations for CRUD actions on resources and containers identified by the request [focus item](../javadocs/?com/metreeca/rest/Request.html#item--).
 

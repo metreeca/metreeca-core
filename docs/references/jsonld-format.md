@@ -1,6 +1,6 @@
 ---
-title:		Idiomatic RDF/JSON Serialization Reference
-excerpt:	Idiomatic RDF/JSON serialization format codecs and grammar
+title:		JSON-LD Serialization Reference
+excerpt:	JSON-LD serialization format grammar
 ---
 
 Beside the standardized  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialization, the framework supports a simpler idiomatic JSON‑based format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language#shapes).

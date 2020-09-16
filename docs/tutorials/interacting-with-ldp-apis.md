@@ -10,7 +10,7 @@ In the following sections you will learn how to interact with REST APIs publishe
 
 In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publishing-ldp-apis), using a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
 
-We will walk through the REST API interaction process focusing on the task of consuming the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog as a [Linked Data Platform](https://www.w3.org/TR/ldp-primer/) (LDP) Basic Container.
+We will walk through the REST API interaction process focusing on the task of consuming the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog.
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
 
@@ -43,92 +43,12 @@ User authorization and user-specific content generation are performed according 
 
 ## RDF Resources
 
-RDF resources managed by the underlying graph storage are exposed by the Metreeca REST API engine as [Linked Data Platform (LDP) RDF Sources](https://www.w3.org/TR/ldp/#ldprs).
-
 To retrieve the RDF description of a published resource, as specified by the associated data model, just perform a `GET` operation on the URL identifying the resource.
 
 ```sh
 % curl --include "http://localhost:8080/products/S18_3140"
-
-HTTP/1.1 200 
-Vary: Accept
-Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
-Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
-Link: <http://localhost:8080/products/S18_3140?specs>;
-		rel=http://www.w3.org/ns/ldp#constrainedBy
-Content-Type: text/turtle;charset=UTF-8
-
-
-@base <http://localhost:8080/products/S18_3140> .
-
-<> a </terms#Product>;
-  </terms#code> "S18_3140";
-  </terms#line> </product-lines/vintage-cars>;
-  </terms#scale> "1:18";
-  </terms#sell> 136.59;
-  </terms#stock> 3913;
-  </terms#vendor> "Unimax Art Galleries";
-  <http://www.w3.org/2000/01/rdf-schema#comment> "Features opening trunk,…";
-  <http://www.w3.org/2000/01/rdf-schema#label> "1903 Ford Model A" .
-
-</product-lines/vintage-cars> <http://www.w3.org/2000/01/rdf-schema#label> "Vintage Cars" .
-```
-
-Standard content negotiation is supported, so you may ask for resource descriptions in a suitable RDF concrete syntax ([Turtle](https://www.w3.org/TR/turtle/), [N-Triples](https://www.w3.org/TR/n-triples/), [RDF/XML](https://www.w3.org/TR/rdf-syntax-grammar/), …) specifying the associated MIME type in the `Accept` HTTP request header.
-
-```sh
-% curl --include --header 'Accept: application/rdf+xml' \
-    "http://localhost:8080/products/S18_3140"
-
-HTTP/1.1 200 
-Vary: Accept
-Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
-Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
-Link: <http://localhost:8080/products/S18_3140?specs>;
-		rel=http://www.w3.org/ns/ldp#constrainedBy
-Content-Type: application/rdf+xml
-
-<?xml version="1.0" encoding="UTF-8"?>
-<rdf:RDF
-        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-        xml:base="http://localhost:8080/products/S18_3140">
-
-<rdf:Description rdf:about="">
-        <rdf:type rdf:resource="/terms#Product"/>
-        <label xmlns="http://www.w3.org/2000/01/rdf-schema#">1903 Ford Model A</label>
-        <comment xmlns="http://www.w3.org/2000/01/rdf-schema#">Features opening trunk, …</comment>
-        <code xmlns="http://localhost:8080/terms#">S18_3140</code>
-        <line xmlns="http://localhost:8080/terms#" rdf:resource="/product-lines/vintage-cars"/>
-</rdf:Description>
-
-<rdf:Description rdf:about="/product-lines/vintage-cars">
-        <label xmlns="http://www.w3.org/2000/01/rdf-schema#">Vintage Cars</label>
-</rdf:Description>
-
-<rdf:Description rdf:about="">
-        <scale xmlns="http://localhost:8080/terms#">1:18</scale>
-        <vendor xmlns="http://localhost:8080/terms#">Unimax Art Galleries</vendor>
-        <stock xmlns="http://localhost:8080/terms#" rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3913</stock>
-        <sell xmlns="http://localhost:8080/terms#" rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">136.59</sell>
-</rdf:Description>
-
-</rdf:RDF>
-```
-
-JSON-based formats are especially convenient for front-end development: beside the standardised  [JSON-LD](https://www.w3.org/TR/json-ld/) RDF serialisation, Metreeca supports a simpler [idiomatic](../references/idiomatic-json) JSON-based format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
-
-To ask for resource descriptions in the idiomatic JSON format, specify the `application/json` MIME type in the `Accept` HTTP request header.
-
-```sh
-% curl --include --header 'Accept: application/json' \
-    "http://localhost:8080/products/S18_3140"
     
 HTTP/1.1 200 
-Vary: Accept
-Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
-Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
-Link: <http://localhost:8080/products/S18_3140?specs>;
-		rel=http://www.w3.org/ns/ldp#constrainedBy
 Content-Type: application/json;charset=UTF-8
 
 {
@@ -148,14 +68,20 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-If available, the linked data model associated with a resource can be [retrieved and inspected](../references/spec-language.html#rdf-encoding) from the URL provided in the `Link rel="ldp:constrainedBy"`HTTP response header. The information provided by the associated model could be used, for instance, to optimize or dynamically build user interfaces or to automaticaly provide client-side validation on data forms.
+Metreeca/Link produces and accepts an idiomatic [compacted/framed](../references/jsonld-format) JSON-LD format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
+
+To include context information, specify the `application/ld+json` MIME type in the `Accept` HTTP request header.
+
+```sh
+% curl --include --header 'Accept: application/ld+json' "http://localhost:8080/products/S18_3140"
+
+
+```
 
 Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Reserved properties are included only if the request is properly authenticated.
 
 ```sh
-% curl --include --header 'Accept: application/json' \
-	--header 'Authorization: Bearer secret' \
-    "http://localhost:8080/products/S18_3140"
+% curl --include --header 'Authorization: Bearer secret' "http://localhost:8080/products/S18_3140"
     
 HTTP/1.1 200  
 Content-Type: application/json;charset=UTF-8
@@ -173,22 +99,12 @@ Content-Type: application/json;charset=UTF-8
 
 ## RDF Containers
 
-RDF resource collections managed by the underlying graph storage are exposed by the Metreeca/Link REST API engine as [Linked Data Platform (LDP) Containers](https://www.w3.org/TR/ldp/#ldpc).
-
 To retrieve the RDF description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
 
 ```sh
-% curl --include --header 'Accept: application/json' \
-    "http://localhost:8080/products/"
+% curl --include "http://localhost:8080/products/"
     
 HTTP/1.1 200 
-Vary: Accept
-Vary: Prefer
-Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
-Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
-Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
-Link: <http://localhost:8080/products/?specs>;
-		rel=http://www.w3.org/ns/ldp#constrainedBy
 Content-Type: application/json;charset=UTF-8
 
 {
@@ -219,28 +135,18 @@ Content-Type: application/json;charset=UTF-8
 By default, container descriptions include a digest description of each container item, but a concise description of the container itself may be retrieved using the standard LDP `Prefer` HTTP request header.
 
 ```sh
-% curl --include --header 'Accept: application/json' \
+% curl --include \
     --header 'Prefer: return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"' \
     "http://localhost:8080/products/"
     
 HTTP/1.1 200 
-Vary: Accept
-Vary: Prefer
-Link: <http://www.w3.org/ns/ldp#Resource>; rel="type"
-Link: <http://www.w3.org/ns/ldp#RDFSource>; rel="type"
-Link: <http://www.w3.org/ns/ldp#Container>; rel="type"
-Link: <http://localhost:8080/products/?specs>;
-		rel=http://www.w3.org/ns/ldp#constrainedBy
-Preference-Applied: return=representation;
-		include="http://www.w3.org/ns/ldp#PreferMinimalContainer"
+Preference-Applied: return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"
 Content-Type: application/json;charset=UTF-8
 
 {
     "id": "/products/",
 }
 ```
-
-Again, if available, the linked data model associated with a collection can be retrieved and inspected from the URL provided in the `Link rel="ldp:constrainedBy"` HTTP response header.
 
 # Write Operations
 
@@ -252,86 +158,52 @@ User authorization and user-specific content validation are performed according 
 
 New RDF resources are created by submitting an RDF description to the REST API of a writable RDF collection using the `POST` HTTP method.
 
-Standard content negotiation is supported, so you may submit resource descriptions in a suitable RDF concrete syntax ([Turtle](https://www.w3.org/TR/turtle/), [N-Triples](https://www.w3.org/TR/n-triples/), [RDF/XML](https://www.w3.org/TR/rdf-syntax-grammar/), …) specifying the associated MIME type in the `Content-Type` HTTP request header.
-
 Note that property values that may be inferred from the associated linked data model, like `rdf:type`, may be safely omitted.
 
 ```sh
 % curl --include --request POST \
     --header 'Authorization: Bearer secret' \
-		--header 'Content-Type: text/turtle' \
-    "http://localhost:8080/products/" \
-    --data @- <<EOF
-    
-@prefix demo: <http://localhost:8080/terms#>.
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-
-<>
-		rdf:type </terms#Product>;
-    rdfs:label "Piaggio Vespa";
-    rdfs:comment "The iconic Piaggio's scooter…";
-    demo:scale "1:10";
-    demo:vendor "Autoart Studio Design";
-    demo:buy 101.0;
-    demo:sell 123.0;
-    demo:line </product-lines/motorcycles>.
-EOF
-
-HTTP/2 201 Created
-Location: http://localhost:8080/products/S10_6
-```
-
-The newly created resource is immediately available for retrieval at the URL returned in the `Location` HTTP response header.
-
-The idiomatic model-driven JSON format is supported also for write operations, specifying the `application/json` MIME type in the `Content-Type` HTTP request header.
-
-Note that the `line` property is included in a shorthand form, as it is inferred to be a resource IRI from the associated linked data model.
-
-```sh
-% curl --include --request POST \
-    --header 'Authorization: Bearer secret' \
-    --header 'Content-Type: application/json' \
     "http://localhost:8080/products/" \
     --data @- <<EOF
 {
-		"type": "/terms#Product",
-    "label": "Piaggio Ciao",
-    "comment" : "The sturdy Piaggio's velo bike…",
-    "scale": "1:10",
-    "vendor": "Autoart Studio Design",
-    "buy": 87.0,
-    "price": 99.0,
-    "line": "/product-lines/motorcycles" 
+	"label": "Piaggio Vespa",
+	"comment": "The iconic Piaggio's scooter…",
+	"scale": "1:10",
+	"vendor": "Autoart Studio Design",
+	"buy": 101.0,
+	"price": 123.0,
+	"line": "/product-lines/motorcycles"
 }
 EOF
 
 HTTP/2 201 Created
-Location: https://demo.metreeca.com/products/S10_7
+Location: /products/S10_6
 ```
+
+Note that the `line` property is included in a shorthand form, as it is inferred to be a resource IRI from the associated linked data model.
+
+The newly created resource is immediately available for retrieval at the URL returned in the `Location` HTTP response header.
 
 Submitted data is automatically validated against the constraints specified in the linked data model driving the target REST API. Submiting, for instance, out of range price data would return an error and a structured error report.
 
 ```sh
 % curl --include --request POST \
     --header 'Authorization: Bearer secret' \
-    --header 'Content-Type: text/turtle' \
     "http://localhost:8080/products/" \
     --data @- <<EOF
-    
-@prefix demo: <http://localhost:8080/terms#>.
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-
-<>
-  	rdf:type </terms#Product>;
-		rdfs:label "Piaggio Vespa";
-    rdfs:comment "The iconic Piaggio's scooter…";
-    demo:scale "1:10";
-    demo:vendor "Autoart Studio Design";
-    demo:buy -101.0;
-    demo:sell 9999.0;
-    demo:line <http://localhost:8080/product-lines/motorcycles>.
-    
+{
+	"label": "Piaggio Vespa",
+	"comment": "The iconic Piaggio's scooter…",
+	"scale": "1:10",
+	"vendor": "Autoart Studio Design",
+	"buy": -101.0,
+	"price": 9999.0,
+	"line": "/product-lines/motorcycles"
+}
 EOF
+
+HTTP/2 201 Created
+Location: /products/S10_6
 
 HTTP/1.1 422 Unprocessable Entity
 Location: http://localhost:8080/products/
@@ -362,7 +234,6 @@ Submitted data is automatically matched against the allowed envelope specified i
 
 ```sh
 % curl --include --request POST \
-    --header 'Content-Type: application/json' \
     "http://localhost:8080/products/" \
     --data @- <<EOF
 {
@@ -383,14 +254,11 @@ HTTP/1.1 401 Unauthorized
 
 Existing writable RDF resources are updated by submitting an RDF description to their REST API using the `PUT` HTTP method.
 
-Standard content negotiation is as usual supported through the `Content-Type` HTTP request header, also for the idiomatic JSON format.
-
 Note that  server-managed properties like `demo:code` and `demo:stock` are omitted, as they are inherited from the existing description.
 
 ```sh
 % curl --include --request PUT \
     --header 'Authorization: Bearer secret' \
-    --header 'Content-Type: application/json' \
     "http://localhost:8080/products/S18_3140" \
     --data @- <<EOF
 {
@@ -428,7 +296,7 @@ The deleted resource is immediately no longer available for retrieval at the pre
 
 # Faceted Search
 
-Metreeca/Link REST APIs engine extends [Linked Data Platform (LDP) Containers](https://www.w3.org/TR/ldp/#ldpc) with faceted search and supporting facet-related queries.
+Metreeca/Link REST APIs engine supports model-driven faceted search and related facet-related queries without additional effort.
 
 To retrieve a digest description of collection items matching a set of facet filters, perform a `GET` operation on the URL identifying the collection, appending a URL-encoded JSON query object [describing the filters](../references/faceted-search) to be applied.
 
@@ -440,7 +308,7 @@ To retrieve a digest description of collection items matching a set of facet fil
 ```
 
 ```sh
-% curl --include --header 'Accept: application/json' \
+% curl --include \
     'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations'
     
 HTTP/1.1 200 
@@ -471,7 +339,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-Note that RDF container descriptions are omitted from faceted search results.
+Note that container descriptions are omitted from faceted search results.
 
 ## Sorting and Pagination
 
@@ -498,17 +366,17 @@ To retrieve datatype, count and range stats for a facet, taking into account app
 
 ```json
 {
-  
-  ">= price" : 100, 
-  "vendor": "Classic Metal Creations",
-
+    
 	"_stats": "price"
+
+	">= price" : 100, 
+	"vendor": "Classic Metal Creations",
   
 }
 ```
 
 ```sh
-% curl --include --header 'Accept: application/json' \
+% curl --include \
     'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_stats=price'
 
 HTTP/2 200 OK
@@ -534,17 +402,17 @@ To list available options and counts for a facet, taking into account applied fi
 
 ```json
 {
-  
-  ">= price" : 100, 
-  "vendor": "Classic Metal Creations",
-
-	"_terms": "line"
+	
+    "_terms": "line"
+    
+  	">= price" : 100, 
+  	"vendor": "Classic Metal Creations",
   
 }
 ```
 
 ```sh
-% curl --include --header 'Accept: application/json' \
+% curl --include \
     'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_terms=line'
 
 HTTP/2 200 OK
