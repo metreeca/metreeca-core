@@ -142,79 +142,6 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	/**
-	 * Lift a message into this message.
-	 *
-	 * <p>Mainly intended to be used inside wrappers to lift the main message part in {@linkplain MultipartFormat
-	 * multipart} requests for further downstream processing, as for instance in:</p>
-	 *
-	 * <pre>{@code handler -> request -> request.body(multipart(1000, 10_000)).fold(
-	 *
-	 *     parts -> Optional.ofNullable(parts.get("main"))
-	 *
-	 *         .map(main -> {
-	 *
-	 *           ... // process ancillary body parts
-	 *
-	 *           return handler.handle(request.merge(main));
-	 *
-	 *         })
-	 *
-	 *         .orElseGet(() -> request.reply(new Failure()
-	 *             .status(BadRequest)
-	 *             .cause("missing main body part")
-	 *         )),
-	 *
-	 *     request::reply
-	 *
-	 * )}</pre>
-	 *
-	 * @param message the source message to be merged into this message
-	 *
-	 * @return this message modified as follows:
-	 * <ul>
-	 * <li>source message headers are copied to this message overriding existing values;</li>
-	 * <li>source message body representations are copied to this message replacing all existing values.</li>
-	 * </ul>
-	 *
-	 * @throws NullPointerException if {@code message} is null
-	 */
-	public T lift(final Message<?> message) {
-
-		if ( message == null ) {
-			throw new NullPointerException("null message");
-		}
-
-		headers.putAll(message.headers); // value lists are read-only
-
-		bodies.clear();
-		bodies.putAll(message.bodies);
-
-		return self();
-	}
-
-	/**
-	 * Creates a linked message.
-	 *
-	 * @param item the (possibly relative)) IRI identifying the {@linkplain #item() focus item} of the new linked
-	 *             message; will be resolved against the message {@linkplain #item() item} IRI
-	 *
-	 * @return a new linked message with a focus item identified by {@code item} and the same {@linkplain #request()
-	 * originating request} as this message
-	 *
-	 * @throws NullPointerException     if {@code item} is null
-	 * @throws IllegalArgumentException if {@code item} is not a legal (possibly relative) IRI
-	 */
-	public Message<?> link(final String item) {
-
-		if ( item == null ) {
-			throw new NullPointerException("null item");
-		}
-
-		return new Part(URI.create(item()).resolve(item).toString(), this);
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -234,6 +161,79 @@ public abstract class Message<T extends Message<T>> {
 				.map(matcher -> matcher.group("charset"))
 
 				.orElse(UTF_8.name());
+	}
+
+
+	/**
+	 * Creates a message part.
+	 *
+	 * @param item the (possibly relative)) IRI identifying the {@linkplain #item() focus item} of the new message
+	 *             part; will be resolved against the message {@linkplain #item() item} IRI
+	 *
+	 * @return a new message part with a focus item identified by {@code item} and the same {@linkplain #request()
+	 * originating request} as this message
+	 *
+	 * @throws NullPointerException     if {@code item} is null
+	 * @throws IllegalArgumentException if {@code item} is not a legal (possibly relative) IRI
+	 */
+	public Message<?> part(final String item) {
+
+		if ( item == null ) {
+			throw new NullPointerException("null item");
+		}
+
+		return new Part(URI.create(item()).resolve(item).toString(), this);
+	}
+
+	/**
+	 * Lift a message part into this message.
+	 *
+	 * <p>Mainly intended to be used inside wrappers to lift the main message part in {@linkplain MultipartFormat
+	 * multipart} requests for further downstream processing, as for instance in:</p>
+	 *
+	 * <pre>{@code handler -> request -> request.body(multipart(1000, 10_000)).fold(
+	 *
+	 *     parts -> Optional.ofNullable(parts.get("main"))
+	 *
+	 *         .map(main -> {
+	 *
+	 *           ... // process ancillary body parts
+	 *
+	 *           return handler.handle(request.lift(main));
+	 *
+	 *         })
+	 *
+	 *         .orElseGet(() -> request.reply(new Failure()
+	 *             .status(BadRequest)
+	 *             .cause("missing main body part")
+	 *         )),
+	 *
+	 *     request::reply
+	 *
+	 * )}</pre>
+	 *
+	 * @param message the message part to be lifted into this message
+	 *
+	 * @return this message modified as follows:
+	 * <ul>
+	 * <li>source {@code message} headers are copied to this message overriding existing matching values;</li>
+	 * <li>source {@code message} body representations are copied to this message replacing all existing values.</li>
+	 * </ul>
+	 *
+	 * @throws NullPointerException if {@code message} is null
+	 */
+	public T lift(final Message<?> message) {
+
+		if ( message == null ) {
+			throw new NullPointerException("null message");
+		}
+
+		headers.putAll(message.headers); // value lists are read-only
+
+		bodies.clear();
+		bodies.putAll(message.bodies);
+
+		return self();
 	}
 
 
@@ -418,8 +418,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
 	 *                              {@code null} value
-	 * @see
-	 * <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
 	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final String... values) {
@@ -440,8 +439,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
 	 *                              {@code null} value
-	 * @see
-	 * <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
+	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
 	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final Collection<String> values) {

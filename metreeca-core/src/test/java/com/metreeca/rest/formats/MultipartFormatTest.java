@@ -32,6 +32,7 @@ import static com.metreeca.rest.Xtream.entry;
 import static com.metreeca.rest.Xtream.map;
 import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.formats.TextFormat.text;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,7 +98,7 @@ final class MultipartFormatTest {
 										.as("part available by name")
 										.hasItem("file:example.txt")
 										.hasHeader("Content-Disposition")
-										.hasBody(TextFormat.text(), text -> assertThat(text)
+										.hasBody(text(), text -> assertThat(text)
 												.isEqualTo("text")
 										);
 
@@ -180,8 +181,8 @@ final class MultipartFormatTest {
 
 					.status(Response.OK)
 					.body(multipart(), map(
-							entry("one", response.link("one").body(TextFormat.text(), "one")),
-							entry("two", response.link("two").body(TextFormat.text(), "two"))
+							entry("one", response.part("one").body(text(), "one")),
+							entry("two", response.part("two").body(text(), "two"))
 					))
 
 			).accept(response -> MessageAssert.assertThat(response)

@@ -179,7 +179,7 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 									.map(s -> "file:"+s)
 									.orElseGet(() -> "uuid:"+UUID.randomUUID());
 
-							parts.put(name, message.link(item)
+							parts.put(name, message.part(item)
 
 									.headers((Map<String, List<String>>)headers.stream().collect(groupingBy(
 											Map.Entry::getKey,
