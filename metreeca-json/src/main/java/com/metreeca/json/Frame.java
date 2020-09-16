@@ -35,7 +35,7 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
 /**
- * Graph frame value.
+ * Graph frame.
  *
  * <p>Describes a graph frame centered on a focus IRI.</p>
  */
@@ -123,7 +123,7 @@ public final class Frame implements Resource {
 	public static Function<Frame, Group> seq(final Collection<Function<Frame, Group>> paths) {
 		return frame -> {
 
-			Set<Value> values=singleton(frame);
+			Set<Object> values=singleton(frame);
 
 			for (final Iterator<Function<Frame, Group>> steps=paths.iterator(); steps.hasNext(); ) {
 
@@ -134,9 +134,7 @@ public final class Frame implements Resource {
 						.filter(Frame.class::isInstance)
 						.map(Frame.class::cast)
 
-						.flatMap(value -> {
-							return step.apply(value).values();
-						})
+						.flatMap(value -> step.apply(value).values.stream())
 
 						.collect(toCollection(LinkedHashSet::new));
 			}
@@ -161,10 +159,10 @@ public final class Frame implements Resource {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Resource focus;
-	private final Map<IRI, Set<Value>> fields;
+	private final Map<IRI, Set<Object>> fields;
 
 
-	private Frame(final Resource focus, final Map<IRI, Set<Value>> fields) {
+	private Frame(final Resource focus, final Map<IRI, Set<Object>> fields) {
 		this.focus=focus;
 		this.fields=fields;
 	}
@@ -200,7 +198,7 @@ public final class Frame implements Resource {
 				final boolean frame=value instanceof Frame;
 
 				final Statement statement=direct
-						? statement(focus, predicate, frame ? ((Frame)value).focus : value)
+						? statement(focus, predicate, frame ? ((Frame)value).focus : (Value)value)
 						: statement(frame ? ((Frame)value).focus : (Resource)value, inverse, focus);
 
 				return Stream.concat(Stream.of(statement), frame ? ((Frame)value).stream() : Stream.empty());
@@ -250,7 +248,7 @@ public final class Frame implements Resource {
 			throw new IllegalArgumentException("literal values for inverse field");
 		}
 
-		final Map<IRI, Set<Value>> map=new LinkedHashMap<>(fields);
+		final Map<IRI, Set<Object>> map=new LinkedHashMap<>(fields);
 
 		map.put(field, new LinkedHashSet<>(values));
 
@@ -284,10 +282,10 @@ public final class Frame implements Resource {
 
 	public static final class Group {
 
-		private final Set<Value> values;
+		private final Set<Object> values;
 
 
-		private Group(final Set<Value> values) {
+		private Group(final Set<Object> values) {
 			this.values=values;
 		}
 
@@ -324,7 +322,7 @@ public final class Frame implements Resource {
 		}
 
 		public Stream<Value> values() {
-			return values.stream().map(value -> value instanceof Frame ? ((Frame)value).focus : value);
+			return values.stream().map(value -> value instanceof Frame ? ((Frame)value).focus : (Value)value);
 		}
 
 	}
