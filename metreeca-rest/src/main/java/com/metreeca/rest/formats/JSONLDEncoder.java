@@ -34,6 +34,7 @@ import java.util.regex.Matcher;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toCollection;
 
 
@@ -43,29 +44,32 @@ final class JSONLDEncoder {
 	private final Shape shape;
 
 	private final Map<String, String> keywords;
+	private final boolean context;
 
 	private final String root;
 
-	private final Predicate<String> aliased;
 	private final Function<String, String> aliaser;
 
 
-	JSONLDEncoder(final IRI focus, final Shape shape, final Map<String, String> keywords) {
+	JSONLDEncoder(final IRI focus, final Shape shape, final Map<String, String> keywords, final boolean context) {
 
 		this.focus=focus;
 		this.shape=driver(shape);
 
 		this.keywords=keywords;
+		this.context=context;
 
 		this.root=Optional.of(focus.stringValue())
 				.map(IRIPattern::matcher)
 				.filter(Matcher::matches)
-				.map(matcher -> matcher.group("schemeall")+matcher.group("hostall")+"/")
+				.map(matcher -> Optional.ofNullable(matcher.group("schemeall")).orElse("")
+						+Optional.ofNullable(matcher.group("hostall")).orElse("")
+						+"/"
+				)
 				.orElse("/");
 
 		final Map<String, String> keywords2aliases=keywords;
 
-		this.aliased=keywords2aliases::containsValue;
 		this.aliaser=keyword -> keywords2aliases.getOrDefault(keyword, keyword);
 	}
 
@@ -78,26 +82,28 @@ final class JSONLDEncoder {
 			throw new NullPointerException("null model");
 		}
 
-		return json(model, shape, focus, resource -> false).asJsonObject();
+		return resource(focus, shape, model, resource -> false).asJsonObject();
 	}
 
 
 	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue json(final Collection<Statement> model,
-			final Shape shape, final Collection<? extends Value> values, final Predicate<Resource> trail) {
+	private JsonValue values(
+			final Collection<? extends Value> values, final Shape shape,
+			final Collection<Statement> model, final Predicate<Resource> trail
+	) {
 
 		if ( maxCount(shape).map(limit -> limit == 1).orElse(false) ) { // single subject
 
 			return values.isEmpty()
 					? JsonValue.EMPTY_JSON_OBJECT
-					: json(model, shape, values.iterator().next(), trail);
+					: value(values.iterator().next(), shape, model, trail);
 
 		} else { // multiple subjects
 
 			final JsonArrayBuilder array=Json.createArrayBuilder();
 
-			values.stream().map(value -> json(model, shape, value, trail)).forEach(array::add);
+			values.stream().map(value -> value(value, shape, model, trail)).forEach(array::add);
 
 			return array.build();
 
@@ -105,11 +111,13 @@ final class JSONLDEncoder {
 
 	}
 
-	private JsonValue json(final Collection<Statement> model,
-			final Shape shape, final Value value, final Predicate<Resource> trail) {
+	private JsonValue value(
+			final Value value, final Shape shape,
+			final Collection<Statement> model, final Predicate<Resource> trail
+	) {
 
-		return value instanceof Resource ? json(model, shape, (Resource)value, trail)
-				: value instanceof Literal ? json((Literal)value, shape)
+		return value instanceof Resource ? resource((Resource)value, shape, model, trail)
+				: value instanceof Literal ? literal((Literal)value, shape)
 				: null;
 
 	}
@@ -117,8 +125,10 @@ final class JSONLDEncoder {
 
 	//// Resources ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue json(final Collection<Statement> model,
-			final Shape shape, final Resource resource, final Predicate<Resource> trail) { // !!! refactor
+	private JsonValue resource(
+			final Resource resource, final Shape shape,
+			final Collection<Statement> model, final Predicate<Resource> trail
+	) { // !!! refactor
 
 		final Object datatype=datatype(shape).orElse(null);
 		final Map<String, Field> fields=fields(shape, keywords);
@@ -172,7 +182,7 @@ final class JSONLDEncoder {
 
 				if ( !values.isEmpty() ) { // omit null value and empty arrays
 
-					object.add(alias, json(model, nestedShape, values, nestedTrail));
+					object.add(alias, values(values, nestedShape, model, nestedTrail));
 
 				}
 
@@ -182,61 +192,94 @@ final class JSONLDEncoder {
 				object.remove(aliaser.apply("@id"));
 			}
 
+			if ( context ) {
+				context(resource.equals(focus) ? keywords : emptyMap(), fields).ifPresent(context ->
+						object.add("@context", context)
+				);
+			}
+
 			return object.build();
 
 		}
 
 	}
 
+	private Optional<JsonObject> context(final Map<String, String> keywords, final Map<String, Field> fields) {
+		if ( keywords.isEmpty() && fields.isEmpty() ) { return Optional.empty(); } else {
+
+			final JsonObjectBuilder context=Json.createObjectBuilder();
+
+			keywords.forEach((keyword, alias) ->
+
+					context.add(alias, keyword)
+
+			);
+
+			fields.forEach((alias, field) -> {
+
+				final IRI iri=field.label();
+				final String value=iri.stringValue();
+
+				context.add(alias, direct(iri)
+						? Json.createValue(value)
+						: Json.createObjectBuilder().add("@reverse", value).build()
+				);
+
+			});
+
+			return Optional.of(context.build());
+
+		}
+	}
+
 
 	//// Literals /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue json(final Literal literal, final Shape shape) {
+	private JsonValue literal(final Literal literal, final Shape shape) {
 
 		final IRI datatype=literal.getDatatype();
 
 		try {
 
-			return datatype.equals(XSD.BOOLEAN) ? json(literal.booleanValue())
-					: datatype.equals(XSD.STRING) ? json(literal.stringValue())
-					: datatype.equals(XSD.INTEGER) ? json(literal.integerValue())
-					: datatype.equals(XSD.DECIMAL) ? json(literal.decimalValue())
-					: datatype.equals(RDF.LANGSTRING) ? json(literal, literal.getLanguage().orElse(""))
-					: JSONLDCodec.datatype(shape).isPresent() ? json(literal.stringValue()) // only lexical value if
-					// type is known
-					: json(literal, datatype);
+			return datatype.equals(XSD.BOOLEAN) ? literal(literal.booleanValue())
+					: datatype.equals(XSD.STRING) ? literal(literal.stringValue())
+					: datatype.equals(XSD.INTEGER) ? literal(literal.integerValue())
+					: datatype.equals(XSD.DECIMAL) ? literal(literal.decimalValue())
+					: datatype.equals(RDF.LANGSTRING) ? literal(literal, literal.getLanguage().orElse(""))
+					: datatype(shape).isPresent() ? literal(literal.stringValue()) // only lexical if type is known
+					: literal(literal, datatype);
 
 		} catch ( final IllegalArgumentException ignored ) { // malformed literals
-			return json(literal, datatype);
+			return literal(literal, datatype);
 		}
 	}
 
 
-	private JsonValue json(final boolean value) {
+	private JsonValue literal(final boolean value) {
 		return value ? JsonValue.TRUE : JsonValue.FALSE;
 	}
 
-	private JsonValue json(final String value) {
+	private JsonValue literal(final String value) {
 		return Json.createValue(value);
 	}
 
-	private JsonValue json(final BigInteger value) {
+	private JsonValue literal(final BigInteger value) {
 		return Json.createValue(value);
 	}
 
-	private JsonValue json(final BigDecimal value) {
+	private JsonValue literal(final BigDecimal value) {
 		return Json.createValue(value);
 	}
 
 
-	private JsonValue json(final Value literal, final String lang) {
+	private JsonValue literal(final Value literal, final String lang) {
 		return Json.createObjectBuilder()
 				.add(aliaser.apply("@value"), literal.stringValue())
 				.add(aliaser.apply("@language"), lang)
 				.build();
 	}
 
-	private JsonValue json(final Value literal, final Value datatype) {
+	private JsonValue literal(final Value literal, final IRI datatype) {
 		return Json.createObjectBuilder()
 				.add(aliaser.apply("@value"), literal.stringValue())
 				.add(aliaser.apply("@type"), datatype.stringValue())

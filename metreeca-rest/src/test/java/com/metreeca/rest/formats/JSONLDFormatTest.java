@@ -17,67 +17,166 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Context;
-import com.metreeca.rest.Request;
+import com.metreeca.rest.*;
 
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import javax.json.Json;
+
+import static com.metreeca.json.Shape.required;
+import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Meta.alias;
+import static com.metreeca.rest.JSONAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
-import static java.util.Collections.emptyList;
+import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.JSONLDFormat.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonMap;
 
 final class JSONLDFormatTest {
 
-	private void exec(final Runnable... tasks) {
-		new Context().exec(tasks).clear();
-	}
-
-
 	@Nested final class Encoder {
 
-		@Test void testHandleGenericRequests() {
-			exec(() -> new Request()
+		private static final String base="http://example.com/";
 
-					.reply(response -> response.status(OK)
-							.body(jsonld(), emptyList())
-					)
+		private final IRI direct=iri(base, "/direct");
+		private final IRI nested=iri(base, "/nested");
+		private final IRI reverse=iri(base, "/reverse");
+
+
+		private Request request() {
+			return new Request()
+
+					.base(base);
+		}
+
+		private Response response(final Response response) {
+
+			final IRI item=iri(response.item());
+			final BNode bnode=bnode();
+
+			return response.status(OK)
+
+					.attribute(shape(), and(
+
+							field(direct, required(),
+									field(nested, required())
+							),
+
+							field(inverse(reverse), alias("reverse"), required())
+
+					))
+
+					.body(jsonld(), asList(
+
+							statement(item, direct, bnode),
+							statement(bnode, nested, item),
+							statement(bnode, reverse, item)
+
+					));
+		}
+
+
+		@Test void testHandleGenericRequests() {
+			new Context().exec(() -> request()
+
+					.reply(this::response)
 
 					.accept(response -> assertThat(response)
 							.hasHeader("Content-Type", JSONFormat.MIME)
+							.hasBody(json(), json -> assertThat(json)
+									.doesNotHaveField("@context")
+							)
 					)
-			);
+
+			).clear();
 		}
 
 		@Test void testHandlePlainJSONRequests() {
-			exec(() -> new Request()
+			new Context().exec(() -> request()
 
 					.header("Accept", JSONFormat.MIME)
 
-					.reply(response -> response.status(OK)
-							.body(jsonld(), emptyList())
-					)
+					.reply(this::response)
 
 					.accept(response -> assertThat(response)
 							.hasHeader("Content-Type", JSONFormat.MIME)
+							.hasBody(json(), json -> assertThat(json)
+									.doesNotHaveField("@context")
+							)
 					)
-			);
+
+			).clear();
 		}
 
 		@Test void testHandleJSONLDRequests() {
-			exec(() -> new Request()
+			new Context().exec(() -> request()
 
-					.header("Accept", JSONLDFormat.MIME)
+					.header("Accept", MIME)
 
-					.reply(response -> response.status(OK)
-							.body(jsonld(), emptyList())
-					)
+					.reply(this::response)
 
 					.accept(response -> assertThat(response)
-							.hasHeader("Content-Type", JSONLDFormat.MIME)
+							.hasHeader("Content-Type", MIME)
+							.hasBody(json(), json -> assertThat(json)
+									.hasField("@context")
+							)
 					)
-			);
+
+			).clear();
+		}
+
+		@Test void testGenerateJSONLDContextObjects() {
+			new Context()
+
+					.set(keywords(), () -> singletonMap("@id", "id"))
+
+					.exec(() -> request()
+
+							.header("Accept", MIME)
+
+							.reply(this::response)
+
+							.accept(response -> assertThat(response)
+
+									.hasHeader("Content-Type", MIME)
+
+									.hasBody(json(), json -> assertThat(json)
+
+											.hasField("@context", context -> assertThat(context)
+
+													.hasField("id", "@id") // keywords at top level
+
+													.hasField("direct", direct.stringValue())
+													.hasField("reverse", Json.createObjectBuilder()
+															.add("@reverse", reverse.stringValue())
+													)
+
+											)
+
+											.hasField("direct", value -> assertThat(value)
+
+													.hasField("@context", context -> assertThat(context)
+
+															.doesNotHaveField("id") // keywords only at top level
+
+															.hasField("nested", nested.stringValue())
+
+													)
+
+											)
+
+									)
+							)
+					)
+
+					.clear();
 		}
 
 	}

@@ -238,7 +238,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 						iri(message.item()),
 						message.attribute(shape()),
-						asset(keywords())
+						asset(keywords()),
+						mime.equals(MIME) // include context objects for application/ld+json
 
 				).encode(value));
 	}

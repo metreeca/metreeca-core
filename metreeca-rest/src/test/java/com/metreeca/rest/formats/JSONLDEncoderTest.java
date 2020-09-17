@@ -63,14 +63,14 @@ final class JSONLDEncoderTest {
 
 	private JsonObject encode(
 			final IRI focus, final Shape shape, final Map<String, String> keywords, final Statement... model) {
-		return new JSONLDEncoder(focus, shape, keywords).encode(asList(model));
+		return new JSONLDEncoder(focus, shape, keywords, false).encode(asList(model));
 	}
 
 
 	@Nested final class Values {
 
 		private JsonValue encode(final Value value) {
-			return new JSONLDEncoder(iri(base), field(RDF.VALUE, Shape.optional()), emptyMap())
+			return new JSONLDEncoder(iri(base), field(RDF.VALUE, Shape.optional()), emptyMap(), false)
 					.encode(singleton(statement(iri(base), RDF.VALUE, value))) // wrap value inside root object
 					.get("value"); // then unwrap
 		}
