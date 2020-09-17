@@ -62,6 +62,7 @@ Primitive shapes specifying constraints to be individually met by each RDF term 
 | [maxLength](../javadocs/com/metreeca/json/shapes/MaxLength.html)(length) | the length of the lexical representation of each term in the focus set is less than or equal to the given maximum value |
 | [pattern](../javadocs/com/metreeca/json/shapes/Pattern.html)("pattern") | the lexical representation of each term in the focus set matches a given [regular expression](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html#sum) pattern |
 | [like](../javadocs/com/metreeca/json/shapes/Like.html)("keywords") | the lexical representation of each term in the focus set matches the given full-text keywords |
+| [stem](../javadocs/com/metreeca/json/shapes/Stem.html)("prefix") | the lexical representation of each term in the focus set starts with the given prefix |
 
 ## Set Constraints
 
@@ -119,7 +120,7 @@ Guards may be applied to groups of shapes either explicitely assembly a `when` s
 when(<guard>, and(<shape>, …))
 ```
 
-or using the shorthand [then](../javadocs/com/metreeca/json/Shape.html#then-com.metreeca.tree.Shape...-) method, like:
+or using the shorthand [then](../javadocs/com/metreeca/json/Shape.html#then-com.metreeca.json.Shape...-) method, like:
 
 ```
 <guard>.then(<shape>, …)
@@ -131,7 +132,7 @@ Parametric guards for the [role](../javadocs/com/metreeca/json/Shape.html#role) 
 
 | shorthand | usage context |
 |-------|-------------|
-|[role](../javadocs/com/metreeca/json/Shape.html#role-java.util.Set-com.metreeca.tree.Shape...-)(value, …)| target shapes are to be considered only if the sets of [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the user performing a request contains at least one of the given role values |
+|[role](../javadocs/com/metreeca/json/Shape.html#role-java.util.Set-com.metreeca.json.Shape...-)(value, …)| target shapes are to be considered only if the sets of [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the user performing a request contains at least one of the given role values |
 
 
 ## Task Axis
@@ -140,12 +141,12 @@ Parametric guards for the [task](../javadocs/com/metreeca/json/Shape.html#task) 
 
 | shorthand                                                    | HTTP/S method   | usage context                                                |
 | ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| [create](../javadocs/com/metreeca/json/Shape.html#create-com.metreeca.tree.Shape...-)() | POST            | resource creation                                            |
-| [relate](../javadocs/com/metreeca/json/Shape.html#relate-com.metreeca.tree.Shape...-)() | GET             | resource retrieval                                           |
-| [update](../javadocs/com/metreeca/json/Shape.html#update-com.metreeca.tree.Shape...-)([) | PUT             | resource updating                                            |
-| [delete](../javadocs/com/metreeca/json/Shape.html#delete-com.metreeca.tree.Shape...-)() | DELETE          | resouce deletion                                             |
-| [client](../javadocs/com/metreeca/json/Shape.html#server-com.metreeca.tree.Shape...-)() | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
-| [server](../javadocs/com/metreeca/json/Shape.html#server-com.metreeca.tree.Shape...-)() | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
+| [create](../javadocs/com/metreeca/json/Shape.html#create-com.metreeca.json.Shape...-)() | POST            | resource creation                                            |
+| [relate](../javadocs/com/metreeca/json/Shape.html#relate-com.metreeca.json.Shape...-)() | GET             | resource retrieval                                           |
+| [update](../javadocs/com/metreeca/json/Shape.html#update-com.metreeca.json.Shape...-)([) | PUT             | resource updating                                            |
+| [delete](../javadocs/com/metreeca/json/Shape.html#delete-com.metreeca.json.Shape...-)() | DELETE          | resouce deletion                                             |
+| [client](../javadocs/com/metreeca/json/Shape.html#server-com.metreeca.json.Shape...-)() | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
+| [server](../javadocs/com/metreeca/json/Shape.html#server-com.metreeca.json.Shape...-)() | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
 
 ## Area Axis
 
@@ -155,8 +156,8 @@ Parametric guards for the [area](../javadocs/com/metreeca/json/Shape.html#Area) 
 | ------------------------------------------------------------ | ----------------------------------------------------------- |
 | [holder](../javadocs/com/metreeca/json/Shape.html#holder--)() | collection holder description                               |
 | [member](../javadocs/com/metreeca/json/Shape.html#member--)() | collection member description (shorthand for digest+detail) |
-| [digest](../javadocs/com/metreeca/json/Shape.html#digest-com.metreeca.tree.Shape...-)() | short resource description, e.g. inside search result sets  |
-| [detail](../javadocs/com/metreeca/json/Shape.html#detail-com.metreeca.tree.Shape...-)() | full resource description                                   |
+| [digest](../javadocs/com/metreeca/json/Shape.html#digest-com.metreeca.json.Shape...-)() | short resource description, e.g. inside search result sets  |
+| [detail](../javadocs/com/metreeca/json/Shape.html#detail-com.metreeca.json.Shape...-)() | full resource description                                   |
 
 ## Mode Axis
 
@@ -164,5 +165,5 @@ Parametric guards for the [mode](../javadocs/com/metreeca/json/Shape.html#Mode) 
 
 | shorthand                                                    | usage pattern                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [convey](../javadocs/com/metreeca/json/Shape.html#convey-com.metreeca.tree.Shape...-)() | target shapes are to be used only for validating incoming data or extracting outgoing data and not for selecting existing resources to be processed |
-| [filter](../javadocs/com/metreeca/json/Shape.html#filter-com.metreeca.tree.Shape...-)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data or extracting outgoing data |
+| [convey](../javadocs/com/metreeca/json/Shape.html#convey-com.metreeca.json.Shape...-)() | target shapes are to be used only for validating incoming data or extracting outgoing data and not for selecting existing resources to be processed |
+| [filter](../javadocs/com/metreeca/json/Shape.html#filter-com.metreeca.json.Shape...-)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data or extracting outgoing data |

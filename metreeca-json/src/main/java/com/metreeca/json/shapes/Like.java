@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 /**
  * Lexical full-text constraint.
  *
- * <p>States that the lexical representation of each term in the focus set matches the given full-text keywords.</p>
+ * <p>States that the lexical representation of each value in the focus set matches the given full-text keywords.</p>
  *
  * <p>Sequences of word characters are matched case-insensitively either as whole words or word stems in the order they
  * appear within keywords; non-word characters are ignored.</p>
@@ -120,7 +120,7 @@ public final class Like extends Shape {
 	}
 
 	@Override public String toString() {
-		return "like("+(stemming ? "stemming" : "")+text+")";
+		return "like("+text+(stemming ? ", stemming" : "")+")";
 	}
 
 }

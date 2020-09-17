@@ -59,6 +59,7 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
+import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
@@ -419,7 +420,7 @@ final class GraphProcessorTest {
 
 	}
 
-	@Nested final class TermConstraints {
+	@Nested final class ValueConstraints {
 
 		@Test void testDatatype() {
 			exec(() -> {
@@ -628,6 +629,27 @@ final class GraphProcessorTest {
 			exec(() -> assertThat(query(
 
 					Root, items(field(RDFS.LABEL, like("ger bo", true)))
+
+			)).isIsomorphicTo(graph(
+
+					"construct { \n"
+							+"\n"
+							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t?item rdfs:label ?label.\n"
+							+"\t \n"
+							+"} where { \n"
+							+"\n"
+							+"\t?item rdfs:label ?label, 'Gerard Bondur'^^xsd:string\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
+		@Test void testStem() {
+			exec(() -> assertThat(query(
+
+					Root, items(field(RDFS.LABEL, stem("Gerard B")))
 
 			)).isIsomorphicTo(graph(
 

@@ -775,18 +775,6 @@ abstract class GraphProcessor {
 				return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.value())));
 			}
 
-			@Override public Snippet probe(final Pattern pattern) {
-				return snippet("filter regex({source}, '{pattern}', '{flags}')",
-						var(source), pattern.text().replace("\\", "\\\\"), pattern.flags()
-				);
-			}
-
-			@Override public Snippet probe(final Like like) {
-				return snippet("filter regex({source}, '{pattern}')",
-						var(source), like.toExpression().replace("\\", "\\\\")
-				);
-			}
-
 			@Override public Snippet probe(final MinLength minLength) {
 				return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.limit());
 			}
@@ -802,6 +790,24 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final MaxCount maxCount) {
 				throw new UnsupportedOperationException("maximum focus size constraint");
+			}
+
+			@Override public Snippet probe(final Pattern pattern) {
+				return snippet("filter regex({source}, '{pattern}', '{flags}')",
+						var(source), pattern.text().replace("\\", "\\\\"), pattern.flags()
+				);
+			}
+
+			@Override public Snippet probe(final Like like) {
+				return snippet("filter regex({source}, '{pattern}')",
+						var(source), like.toExpression().replace("\\", "\\\\")
+				);
+			}
+
+			@Override public Snippet probe(final Stem stem) {
+				return snippet("filter strstarts({source}, '{stem}')",
+						var(source), stem.prefix()
+				);
 			}
 
 

@@ -193,6 +193,7 @@ final class JSONLDParser {
 							: key.startsWith("$<") ? filter(key.substring(2), value, shape, this::maxLength)
 							: key.startsWith("*") ? filter(key.substring(1), value, shape, this::pattern)
 							: key.startsWith("~") ? filter(key.substring(1), value, shape, this::like)
+							: key.startsWith("'") ? filter(key.substring(1), value, shape, this::stem)
 
 							: key.startsWith("#>") ? filter(key.substring(2), value, shape, this::minCount)
 							: key.startsWith("#<") ? filter(key.substring(2), value, shape, this::maxCount)
@@ -440,6 +441,12 @@ final class JSONLDParser {
 	private Shape like(final JsonValue value, final Shape shape) {
 		return value instanceof JsonString
 				? ((JsonString)value).getString().isEmpty() ? and() : Like.like(((JsonString)value).getString(), true)
+				: error("pattern is not a string");
+	}
+
+	private Shape stem(final JsonValue value, final Shape shape) {
+		return value instanceof JsonString
+				? ((JsonString)value).getString().isEmpty() ? and() : Stem.stem(((JsonString)value).getString())
 				: error("pattern is not a string");
 	}
 

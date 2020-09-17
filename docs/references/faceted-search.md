@@ -139,6 +139,7 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
     
     "* <path>": "pattern", // pattern (regular expression matching)
     "~ <path>": "keywords", // like (stemmed word search)
+    "' <path>": "stem", // stem (prefix search)
     
     "#> <path>": <integer>, // minCount
     "#< <path>": <integer>, // maxCount

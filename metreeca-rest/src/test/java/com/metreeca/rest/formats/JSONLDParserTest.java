@@ -52,6 +52,7 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.Range.range;
+import static com.metreeca.json.shapes.Stem.stem;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.*;
 
@@ -110,8 +111,10 @@ final class JSONLDParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new JSONLDParser(iri("http://example.com/"), shape, emptyMap())
-				.parse(query.replace('\'', '"'));
+		return new JSONLDParser(iri("http://example.com/"), shape, emptyMap()).parse(query
+				.replace('\'', '"')
+				.replace("\\\"", "'")
+		);
 	}
 
 
@@ -365,6 +368,11 @@ final class JSONLDParserTest {
 			items("{ '~': 'words' }", shape, items -> assertThat(items.shape())
 					.as("like")
 					.isEqualTo(filter(shape, like("words", true)))
+			);
+
+			items("{ '\\'': 'stem' }", shape, items -> assertThat(items.shape())
+					.as("like")
+					.isEqualTo(filter(shape, stem("stem")))
 			);
 
 

@@ -50,6 +50,7 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
+import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rest.EitherAssert.assertThat;
 import static java.util.Arrays.stream;
@@ -259,6 +260,34 @@ final class JSONLDValidatorTest {
 		}
 
 
+		@Test void testValidateMinLength() {
+
+			final Shape shape=minLength(3);
+
+			assertThat(validate(shape, "100")).hasRight();
+			assertThat(validate(shape, "99")).hasLeft();
+
+			assertThat(validate(shape, "'100'")).hasRight();
+			assertThat(validate(shape, "'99'")).hasLeft();
+
+			assertThat(validate(shape)).as("empty focus").hasRight();
+
+		}
+
+		@Test void testValidateMaxLength() {
+
+			final Shape shape=maxLength(2);
+
+			assertThat(validate(shape, "99")).hasRight();
+			assertThat(validate(shape, "100")).hasLeft();
+
+			assertThat(validate(shape, "'99'")).hasRight();
+			assertThat(validate(shape, "'100'")).hasLeft();
+
+			assertThat(validate(shape)).as("empty focus").hasRight();
+
+		}
+
 		@Test void testValidatePattern() {
 
 			final Shape shape=pattern(".*\\.org");
@@ -287,29 +316,18 @@ final class JSONLDValidatorTest {
 
 		}
 
-		@Test void testValidateMinLength() {
+		@Test void testValidateStem() {
 
-			final Shape shape=minLength(3);
+			final Shape shape=stem("http://example.com/");
 
-			assertThat(validate(shape, "100")).hasRight();
-			assertThat(validate(shape, "99")).hasLeft();
+			assertThat(validate(shape, "<http://example.com/>")).hasRight();
+			assertThat(validate(shape, "<http://example.net/>")).hasLeft();
 
-			assertThat(validate(shape, "'100'")).hasRight();
-			assertThat(validate(shape, "'99'")).hasLeft();
+			assertThat(validate(shape, "<http://example.com/resource>")).hasRight();
+			assertThat(validate(shape, "<http://example.net/resource>")).hasLeft();
 
-			assertThat(validate(shape)).as("empty focus").hasRight();
-
-		}
-
-		@Test void testValidateMaxLength() {
-
-			final Shape shape=maxLength(2);
-
-			assertThat(validate(shape, "99")).hasRight();
-			assertThat(validate(shape, "100")).hasLeft();
-
-			assertThat(validate(shape, "'99'")).hasRight();
-			assertThat(validate(shape, "'100'")).hasLeft();
+			assertThat(validate(shape, "'http://example.com/resource'")).hasRight();
+			assertThat(validate(shape, "'http://example.net/resource'")).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 

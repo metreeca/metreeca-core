@@ -251,6 +251,18 @@ final class JSONLDValidator {
 			);
 		}
 
+		@Override public Trace probe(final Stem stem) {
+
+			final String prefix=stem.prefix();
+
+			final Predicate<String> predicate=lexical -> lexical.startsWith(prefix);
+
+			return trace(focus.stream()
+					.filter(negate(value -> predicate.test(text(value))))
+					.collect(toMap(v -> issue(stem), Collections::singleton))
+			);
+		}
+
 
 		@Override public Trace probe(final MinCount minCount) {
 

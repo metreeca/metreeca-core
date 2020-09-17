@@ -175,6 +175,8 @@ public abstract class Shape {
 
 		public V probe(final Like like) { return probe((Shape)like); }
 
+		public V probe(final Stem stem) { return probe((Shape)stem); }
+
 
 		//// Set Constraints ///////////////////////////////////////////////////////////////////////////////////////////
 
