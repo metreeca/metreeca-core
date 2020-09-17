@@ -144,7 +144,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final String value=actual.header(name).orElse(null);
 
-
 		if ( value == null ) {
 			failWithMessage("expected message to have <%s> headers but has none", name);
 		}

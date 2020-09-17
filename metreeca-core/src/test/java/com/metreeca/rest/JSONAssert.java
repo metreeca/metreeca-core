@@ -21,6 +21,7 @@ import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Condition;
 
 import javax.json.*;
+import java.util.function.Consumer;
 
 
 public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
@@ -96,11 +97,23 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 			throw new NullPointerException("null name");
 		}
 
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return isObject().satisfies(new Condition<>(
-				json -> json.asJsonObject().getString(name).equals(value),
+				json -> value.equals(json.asJsonObject().getString(name, null)),
 				"expected <%s> to have field <%s> with value <%s>",
 				actual, name, value
 		));
+	}
+
+	public JSONAssert hasField(final String name, final JsonObjectBuilder builder) {
+		return hasField(name, builder.build());
+	}
+
+	public JSONAssert hasField(final String name, final JsonArrayBuilder builder) {
+		return hasField(name, builder.build());
 	}
 
 	public JSONAssert hasField(final String name, final JsonValue value) {
@@ -114,10 +127,33 @@ public final class JSONAssert extends AbstractAssert<JSONAssert, JsonValue> {
 		}
 
 		return isObject().satisfies(new Condition<>(
-				json -> value.equals(json.asJsonObject().getValue("/"+name)),
+				json -> value.equals(json.asJsonObject().getOrDefault(name, null)),
 				"expected <%s> to have field <%s> with value <%s>",
 				actual, name, value
 		));
+	}
+
+	public JSONAssert hasField(final String name, final Consumer<JsonValue> assertions) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( assertions == null ) {
+			throw new NullPointerException("null assertions");
+		}
+
+		isObject();
+
+		final JsonValue value=actual.asJsonObject().getOrDefault(name, null);
+
+		if ( value == null ) {
+			failWithMessage("expected object to have field <%s> but has none", name);
+		}
+
+		assertions.accept(value);
+
+		return myself;
 	}
 
 
