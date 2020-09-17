@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Copyright © 2013-2020 Metreeca srl. All rights reserved.
 
@@ -432,7 +433,7 @@
 
 					<notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
 
-					<!-- !!! replace with shared assets (https://stackoverflow.com/questions/30507476/maven-javadoc-how-to-include-centralized-resources/30668813#30668813) -->
+					<!-- !!! replace with shared assets (see https://stackoverflow.com/questions/30507476#30668813) -->
 					<!--<stylesheetfile>${maven.multiModuleProjectDirectory}/docs/assets/javadocs.css</stylesheetfile>-->
 
 					<links>

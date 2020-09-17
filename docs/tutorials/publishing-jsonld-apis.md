@@ -377,7 +377,8 @@ Standard resource action handlers can be defined using high-level declarative
  models that drive automatic fine‑grained role‑based read/write access
   control, faceted search,  incoming data validation and bidirectional
    conversion between RDF and idiomatic [compacted/framed](../references/jsonld
-   -format) JSON-LD payloads, as demonstrated in the [REST APIs interaction tutorial](interacting-with-ldp-apis).
+   -format) JSON-LD payloads, as demonstrated in the [REST APIs interaction
+    tutorial](consuming-jsonld-apis).
 
 Actors provide default shape-driven implementations for CRUD actions on resources and containers identified by the request [focus item](../javadocs/?com/metreeca/rest/Request.html#item--).
 
