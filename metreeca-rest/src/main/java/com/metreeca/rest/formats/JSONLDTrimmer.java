@@ -69,7 +69,7 @@ final class JSONLDTrimmer {
 		final JsonObjectBuilder builder=createObjectBuilder();
 
 		object.forEach((label, value) -> {
-			if ( (label.startsWith("@") || keywords.containsValue(label)) && value instanceof JsonString ) {
+			if ( label.startsWith("@") || keywords.containsValue(label) ) {
 
 				builder.add(label, value);
 
