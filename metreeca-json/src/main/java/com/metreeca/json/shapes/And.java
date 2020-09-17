@@ -71,7 +71,7 @@ public final class And extends Shape {
 
 				// group by shape type preserving order
 
-				.collect(groupingBy(Shape::getClass, toCollection(LinkedHashSet::new)))
+				.collect(groupingBy(Shape::getClass, LinkedHashMap::new, toCollection(LinkedHashSet::new)))
 
 				.entrySet()
 				.stream()
