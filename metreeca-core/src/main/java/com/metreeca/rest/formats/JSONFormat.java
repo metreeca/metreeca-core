@@ -47,7 +47,8 @@ public final class JSONFormat extends Format<JsonObject> {
 	/**
 	 * A pattern matching JSON-based MIME types, for instance {@code application/ld+json}.
 	 */
-	public static final Pattern MIMEPattern=Pattern.compile("(?i)^(text/json|application/(.*\\+)?json)(?:\\s*;.*)?$");
+	public static final Pattern MIMEPattern=Pattern.compile("(?i:^(text/json|application/(?:.*\\+)?json)(?:\\s*;.*)"
+			+ "?$)");
 
 
 	private static final JsonWriterFactory JsonWriters=Json

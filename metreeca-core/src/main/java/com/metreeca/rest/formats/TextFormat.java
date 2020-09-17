@@ -41,7 +41,7 @@ public final class TextFormat extends Format<String> {
 	/**
 	 * A pattern matching textual MIME types, for instance {@code text/csv}.
 	 */
-	public static final Pattern MIMEPattern=Pattern.compile("(?i)^text/.+$");
+	public static final Pattern MIMEPattern=Pattern.compile("(?i:^text/.+$)");
 
 
 	/**

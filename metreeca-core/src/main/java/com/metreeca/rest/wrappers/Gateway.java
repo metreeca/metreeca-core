@@ -19,6 +19,7 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.formats.JSONFormat;
 import com.metreeca.rest.formats.TextFormat;
 
 import java.util.regex.Pattern;
@@ -40,7 +41,7 @@ import static java.util.function.Function.identity;
  */
 public final class Gateway implements Wrapper {
 
-	private static final Pattern TextualPattern=Pattern.compile("text/[-\\w]+|application/json");
+	private static final Pattern TextualPattern=Pattern.compile(TextFormat.MIMEPattern+"|"+JSONFormat.MIMEPattern);
 	private static final Pattern URLEncodedPattern=Pattern.compile("application/x-www-form-urlencoded\\b");
 
 
