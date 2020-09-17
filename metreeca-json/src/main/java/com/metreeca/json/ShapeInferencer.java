@@ -33,6 +33,7 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -50,7 +51,7 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Datatype datatype) {
 		return datatype.id().equals(XSD.BOOLEAN) ? and(datatype,
-				Range.range(literal(false), literal(true)), maxCount(1)
+				range(literal(false), literal(true)), maxCount(1)
 		) : datatype;
 	}
 

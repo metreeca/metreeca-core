@@ -210,9 +210,29 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * {@linkplain JSONLDFormat#shape() shape attribute} are currently not embedded.</p>
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
+
+		final String mime=message
+
+				// content-type explicitly defined by the handler
+
+				.header("Content-Type")
+
+				.orElseGet(() -> types(message.request().header("Accept").orElse("")).stream()
+
+						// application/ld+json or application/json accepted?
+
+						.filter(type -> type.equals(MIME) || type.equals(JSONFormat.MIME))
+						.findFirst()
+
+						// default to application/json
+
+						.orElse(JSONFormat.MIME)
+
+				);
+
 		return message
 
-				.header("~Content-Type", MIME)
+				.header("~Content-Type", mime)
 
 				.body(json(), new JSONLDEncoder( // make json available for trimming
 
