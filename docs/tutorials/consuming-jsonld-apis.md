@@ -77,8 +77,29 @@ To include context information, specify the `application/ld+json` MIME type in t
 % curl --include \
 	--header "Accept: application/ld+json" \
 	"http://localhost:8080/products/S18_3140"
+	
+HTTP/1.1 200 
+Content-Type: application/ld+json;charset=UTF-8
 
 
+{
+    "id": "/products/S18_3140",
+   
+   ⋮
+   
+    "@context": {
+        "id": "@id",
+        "code": "https://demo.metreeca.com/terms#code",
+        "stock": "https://demo.metreeca.com/terms#stock",
+        "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        "label": "http://www.w3.org/2000/01/rdf-schema#label",
+        "comment": "http://www.w3.org/2000/01/rdf-schema#comment",
+        "line": "https://demo.metreeca.com/terms#line",
+        "scale": "https://demo.metreeca.com/terms#scale",
+        "vendor": "https://demo.metreeca.com/terms#vendor",
+        "price": "https://demo.metreeca.com/terms#sell"
+    }
+}
 ```
 
 Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Reserved properties are included only if the request is properly authenticated.
@@ -107,7 +128,8 @@ Content-Type: application/json;charset=UTF-8
 To retrieve the description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
 
 ```sh
-% curl --include "http://localhost:8080/products/"
+% curl --include \
+	"http://localhost:8080/products/"
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -263,8 +285,9 @@ Note that  server-managed properties like `demo:code` and `demo:stock` are omitt
 
 ```sh
 % curl --include --request PUT \
-    --header 'Authorization: Bearer secret' \
-    "http://localhost:8080/products/S18_3140" \
+	--header 'Authorization: Bearer secret' \
+	--header 'Content-Type: application/json' \
+	"http://localhost:8080/products/S18_3140" \
     --data @- <<EOF
 {
    	"type": "/terms#Product",
@@ -274,7 +297,7 @@ Note that  server-managed properties like `demo:code` and `demo:stock` are omitt
     "scale": "1:18",
     "vendor": "Unimax Art Galleries",
     "buy": 50.00,
-    "price": 120.00
+    "price": 130.00
 }
 EOF
 
@@ -297,7 +320,7 @@ Existing writable RDF resources are deleted using the `DELETE` HTTP method on th
 HTTP/2 204 No Content
 ```
 
-The deleted resource is immediately no longer available for retrieval at the previous URL.
+The deleted resource is immediately no longer available for retrieval.
 
 # Faceted Search
 
