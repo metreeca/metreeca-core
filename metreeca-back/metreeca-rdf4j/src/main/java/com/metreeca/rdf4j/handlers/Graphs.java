@@ -1,0 +1,367 @@
+/*
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ *
+ * This file is part of Metreeca/Link.
+ *
+ * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU Affero General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or(at your option) any later version.
+ *
+ * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package com.metreeca.rdf4j.handlers;
+
+import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
+import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rest.Response;
+import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.handlers.Router;
+
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.VOID;
+import org.eclipse.rdf4j.repository.*;
+import org.eclipse.rdf4j.rio.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.function.Supplier;
+
+import static com.metreeca.json.Shape.exactly;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.InternalServerError;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static java.lang.String.format;
+
+
+/**
+ * SPARQL 1.1 Graph Store endpoint handler.
+ *
+ * <p>Provides a standard SPARQL 1.1 Graph Store endpoint exposing the contents of the shared {@linkplain Graph
+ * graph}.</p>
+ *
+ * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are disabled,
+ * unless otherwise specified.</p>
+ *
+ * @see <a href="http://www.w3.org/TR/sparql11-http-rdf-update">SPARQL 1.1 Graph Store HTTP Protocol</a>
+ */
+public final class Graphs extends Endpoint<Graphs> {
+
+	private static final Shape GraphsShape=field(RDF.VALUE, and(
+			field(RDF.TYPE, exactly(VOID.DATASET))
+	));
+
+
+	/**
+	 * Creates a graph store endpoint
+	 *
+	 * @return a new graph store endpoint
+	 */
+	public static Graphs graphs() {
+		return new Graphs();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Graphs() {
+		delegate(Router.router()
+				.get(this::get)
+				.put(this::put)
+				.delete(this::delete)
+				.post(this::post)
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
+	 */
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> get(final com.metreeca.rest.Request request) {
+		return consumer -> {
+
+			final boolean catalog=request.parameters().isEmpty();
+
+			final String target=graph(request);
+			final String accept=request.header("Accept").orElse("");
+
+			if ( target == null && !catalog ) {
+
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
+
+			} else if ( !queryable(request.roles()) ) {
+
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
+
+			} else if ( catalog ) { // graph catalog
+
+				final IRI focus=iri(request.item());
+				final Collection<Statement> model=new ArrayList<>();
+
+				graph().exec(connection -> {
+					try ( final RepositoryResult<Resource> contexts=connection.getContextIDs() ) {
+						while ( contexts.hasNext() ) {
+
+							final Resource context=contexts.next();
+
+							model.add(statement(focus, RDF.VALUE, context));
+							model.add(statement(context, RDF.TYPE, VOID.DATASET));
+
+						}
+					}
+				});
+
+				request.reply(response -> response.status(com.metreeca.rest.Response.OK)
+						.attribute(JSONLDFormat.shape(), GraphsShape)
+						.body(rdf(), model)
+				).accept(consumer);
+
+			} else {
+
+				final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, types(accept));
+
+				final RDFFormat format=factory.getRDFFormat();
+
+				final Resource context=target.isEmpty() ? null : iri(target);
+
+				graph().exec(connection -> {
+					request.reply(response -> response.status(com.metreeca.rest.Response.OK)
+
+							.header("Content-Type", format.getDefaultMIMEType())
+							.header("Content-Disposition", format("attachment; filename=\"%s.%s\"",
+									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
+							))
+
+							.body(output(), output -> connection.export(factory.getWriter(output), context))
+
+					).accept(consumer);
+				});
+			}
+		};
+	}
+
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
+	 */
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> put(final com.metreeca.rest.Request request) {
+		return consumer -> {
+
+			final String target=graph(request);
+
+			if ( target == null ) {
+
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
+
+			} else if ( !updatable(request.roles()) ) {
+
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
+
+			} else {
+
+				final Resource context=target.isEmpty() ? null : iri(target);
+				final String content=request.header("Content-Type").orElse("");
+
+				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
+				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
+
+				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content) // !!! review fallback
+						// handling
+				);
+
+				graph().exec(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> com.metreeca.rest.Xtream.input(), Supplier::get) ) {
+
+						final boolean exists=exists(connection, context);
+
+						connection.clear(context);
+						connection.add(input, request.base(), factory.getRDFFormat(), context);
+
+						request.reply(response ->
+								response.status(exists ? com.metreeca.rest.Response.NoContent : com.metreeca.rest.Response.Created)
+						).accept(consumer);
+
+					} catch ( final IOException e ) {
+
+						logger().warning(this, "unable to read RDF payload", e);
+
+						request.reply(status(InternalServerError, e)).accept(consumer);
+
+					} catch ( final RDFParseException e ) {
+
+						logger().warning(this, "malformed RDF payload", e);
+
+						request.reply(status(BadRequest, e)).accept(consumer);
+
+					} catch ( final RepositoryException e ) {
+
+						logger().warning(this, "unable to update graph "+context, e);
+
+						request.reply(status(InternalServerError, e)).accept(consumer);
+
+					}
+				});
+			}
+
+		};
+	}
+
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
+	 */
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> delete(final com.metreeca.rest.Request request) {
+		return consumer -> {
+
+			final String target=graph(request);
+
+			if ( target == null ) {
+
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
+
+			} else if ( !updatable(request.roles()) ) {
+
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
+
+			} else {
+
+				final Resource context=target.isEmpty() ? null : iri(target);
+
+				graph().exec(connection -> {
+					try {
+
+						final boolean exists=exists(connection, context);
+
+						connection.clear(context);
+
+						request.reply(response ->
+								response.status(exists ? com.metreeca.rest.Response.NoContent : com.metreeca.rest.Response.NotFound)
+						).accept(consumer);
+
+					} catch ( final RepositoryException e ) {
+
+						logger().warning(this, "unable to update graph "+context, e);
+
+						request.reply(status(InternalServerError, e)).accept(consumer);
+
+					}
+				});
+			}
+
+		};
+	}
+
+	/*
+	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
+	 */
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> post(final com.metreeca.rest.Request request) {
+		return consumer -> {
+
+			// !!! support  "multipart/form-data"
+			// !!! support graph creation with IRI identifying the underlying Graph Store
+
+			final String target=graph(request);
+
+			if ( target == null ) {
+
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
+
+			} else if ( !updatable(request.roles()) ) {
+
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
+
+			} else {
+
+				final Resource context=target.isEmpty() ? null : iri(target);
+				final String content=request.header("Content-Type").orElse("");
+
+				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
+				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
+
+				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service( // !!! review fallback
+						// handling
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content));
+
+				graph().exec(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> com.metreeca.rest.Xtream.input(), Supplier::get) ) {
+
+						final boolean exists=exists(connection, context);
+
+						connection.add(input, request.base(), factory.getRDFFormat(), context);
+
+						request.reply(response ->
+								response.status(exists ? com.metreeca.rest.Response.NoContent : Response.Created)
+						).accept(consumer);
+
+					} catch ( final IOException e ) {
+
+						logger().warning(this, "unable to read RDF payload", e);
+
+						request.reply(status(InternalServerError, e)).accept(consumer);
+
+					} catch ( final RDFParseException e ) {
+
+						logger().warning(this, "malformed RDF payload", e);
+
+						request.reply(status(BadRequest, e)).accept(consumer);
+
+					} catch ( final RepositoryException e ) {
+
+						logger().warning(this, "unable to update graph "+context, e);
+
+						request.reply(status(InternalServerError, e)).accept(consumer);
+
+					}
+				});
+
+			}
+
+		};
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private String graph(final com.metreeca.rest.Request request) {
+
+		final List<String> defaults=request.parameters("default");
+		final List<String> nameds=request.parameters("graph");
+
+		final boolean dflt=defaults.size() == 1 && defaults.get(0).isEmpty();
+		final boolean named=nameds.size() == 1 && Values.AbsoluteIRIPattern.matcher(nameds.get(0)).matches();
+
+		return dflt && named ? null : dflt ? "" : named ? nameds.get(0) : null;
+	}
+
+	private boolean exists(final RepositoryConnection connection, final Resource context) {
+
+		try ( final RepositoryResult<Resource> contexts=connection.getContextIDs() ) {
+
+			while ( contexts.hasNext() ) {
+				if ( contexts.next().equals(context) ) { return true; }
+			}
+
+		}
+
+		return connection.hasStatement(null, null, null, true, context);
+	}
+
+}

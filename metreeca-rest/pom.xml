@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2019 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl. All rights reserved.
 
   This file is part of Metreeca/Link.
 
@@ -18,7 +18,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -31,21 +31,34 @@
 	<artifactId>metreeca-rest</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca REST API Framework</name>
-	<description>A concise framework for linked data REST APIs.</description>
+	<name>Metreeca JSON-LD Publishing</name>
+	<description>A model-driven REST/JSON-LD publishing framework.</description>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-tree</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
+			<artifactId>metreeca-core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.1.4</version>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-json</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-core</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-json</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

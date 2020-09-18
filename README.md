@@ -1,18 +1,22 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/metreeca-link.svg)](https://search.maven.org/artifact/com.metreeca/metreeca-link/)
+[![javadoc](https://javadoc.io/badge2/com.metreeca/metreeca-link/javadoc.svg)](https://javadoc.io/doc/com.metreeca/metreeca-link)
 
-# metreeca/link - a model-driven linked data framework
+# metreeca/link
 
-Metreeca/Link is an open source Java framework enabling rapid model-driven development of RESTful linked data services.
+Metreeca/Link is an open source, lightweight and server-agnostic Java framework
+ enabling rapid development of RESTful linked data services.
 
-Its engine automatically converts declarative high-level domain models defined with [SHACL](https://www.w3.org/TR/shacl/) and [SPARQL](https://www.w3.org/TR/sparql11-overview/) into extended linked data APIs supporting faceted search, data validation and fine‑grained role‑based read/write access control rules.
+Its engine automatically converts high-level declarative data models into extended REST/JSON-LD APIs supporting faceted search, data validation and fine‑grained role‑based access control rules, completely shielding front‑end developers from linked data technicalities.
 
-Published linked data resources are made available both through [LDP](https://www.w3.org/TR/ldp-primer/) and idiomatic REST/JSON APIs, supporting standardized access from third-party clients and completely shielding front‑end developers from linked data technicalities.
-
-To get started with Metreeca/Link, open the [docs](https://metreeca.github.io/link/) and walk through the model‑driven linked data [publishing](https://metreeca.github.io/link/tutorials/publishing-ldp-apis) and [interaction](https://metreeca.github.io/link/tutorials/interacting-with-ldp-apis) tutorials.
+To get started, open the [docs](https://metreeca.github.io/link/) and walk
+ through the model‑driven linked data [publishing](https://metreeca.github.io
+ /link/tutorials/publishing-jsonld-apis) and [interaction](https://metreeca
+ .github.io/link/tutorials/consuming-jsonld-apis) tutorials.
 
 ---
 
 home / [www.metreeca.com](https://www.metreeca.com/)  
 docs / [metreeca.github.io/link](https://metreeca.github.io/link/)  
 forum / [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca)
+    

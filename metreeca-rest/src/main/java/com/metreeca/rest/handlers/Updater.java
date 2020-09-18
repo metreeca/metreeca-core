@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,12 +17,21 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Message;
+import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.services.Engine;
-import com.metreeca.tree.Shape;
+import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.formats.JSONLDFormat;
 
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.Collection;
+
+import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.rest.assets.Engine.engine;
 
 
 /**
@@ -31,26 +40,47 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * <p>Performs:</p>
  *
  * <ul>
- * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based {@linkplain Actor#throttler(Object, Object...)
- * authorization}, considering shapes enabled by the {@linkplain Shape#Update} task and the {@linkplain Shape#Holder} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
- * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ *
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
+ * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Guard#Update} task and the {@linkplain Guard#Target} area, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
+ * resources;</li>
+ *
+ * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(IRI, Shape, Collection) validation};</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Updater extends Actor {
+public final class Updater extends Delegator {
 
-	public Updater() {
-		delegate(updater()
+	/**
+	 * Creates a resource updater.
+	 *
+	 * @return a new resource updater
+	 */
+	public static Updater updater() {
+		return new Updater();
+	}
 
-				.with(connector())
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Updater() {
+
+		final Engine engine=asset(engine());
+
+		delegate(((Handler)engine::update)
+
+				.with(engine.connector())
 				.with(wrapper(Request::collection,
-						throttler(Shape.Update, Shape.Holder),
-						throttler(Shape.Update, Shape.Detail)
+						engine.throttler(Update, Target),
+						engine.throttler(Update, Detail)
 				))
-				.with(validator())
+				.with(engine.validator())
 
 		);
 

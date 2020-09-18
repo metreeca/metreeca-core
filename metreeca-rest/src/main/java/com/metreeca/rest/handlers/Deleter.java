@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,11 +17,15 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.json.shapes.Guard;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.services.Engine;
-import com.metreeca.tree.Shape;
+import com.metreeca.rest.assets.Engine;
 
+import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
+import static com.metreeca.rest.assets.Engine.engine;
 
 
 /**
@@ -30,23 +34,42 @@ import static com.metreeca.rest.Wrapper.wrapper;
  * <p>Performs:</p>
  *
  * <ul>
- * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Shape#Delete} task and the {@linkplain Shape#Holder} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
+ *
+ * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Guard#Delete} task and the {@linkplain Guard#Target} area, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
+ * resources;</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#delete(Request) deletion}.</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Deleter extends Actor {
+public final class Deleter extends Delegator {
 
-	public Deleter() {
-		delegate(deleter()
+	/**
+	 * Creates a resource deleter.
+	 *
+	 * @return a new resource deleter
+	 */
+	public static Deleter deleter() {
+		return new Deleter();
+	}
 
-				.with(connector())
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Deleter() {
+
+		final Engine engine=asset(engine());
+
+		delegate(((Handler)engine::delete)
+
+				.with(engine.connector())
 				.with(wrapper(Request::collection,
-						throttler(Shape.Delete, Shape.Holder),
-						throttler(Shape.Delete, Shape.Detail)
+						engine.throttler(Delete, Target),
+						engine.throttler(Delete, Detail)
 				))
 
 		);

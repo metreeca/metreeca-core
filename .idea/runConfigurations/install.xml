@@ -10,6 +10,7 @@
           </option>
           <option name="goals">
             <list>
+              <option value="clean" />
               <option value="validate" />
               <option value="install" />
             </list>

@@ -5,8 +5,6 @@ excerpt:    REST faceted API search support and query serializations
 
 REST APIs publishing model-driven [LDP Containers](https://www.w3.org/TR/ldp/#ldpc) support engine-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
 
-<!-- document support for other query serializations -->
-
 Faceted searches return an RDF description of the query-specific result set. Standard content negotiation is supported for the RDF payload through the `Accept` HTTP request header. In the following sections, RDF structures for query responses are outlined using the [idiomatic JSON](idiomatic-json) format (`application/json`  MIME type).
 
 # Queries
@@ -128,7 +126,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 
     "^ <path>": "<datatype>", // datatype
     "@ <path>": "<class>", // class
-    
+    "% <path>": <term> | [<term>(, <term>)*], // range
+
+
     "> <path>": <term>, // minExclusive
     "< <path>: <term>, // maxExclusive
     ">= <path>": <term>, // minInclusive
@@ -139,11 +139,11 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
     
     "* <path>": "pattern", // pattern (regular expression matching)
     "~ <path>": "keywords", // like (stemmed word search)
+    "' <path>": "stem", // stem (prefix search)
     
     "#> <path>": <integer>, // minCount
     "#< <path>": <integer>, // maxCount
     
-    "% <path>": <term> | [<term>(, <term>)*], // in
     "! <path>": <term> | [<term>(, <term>)*], // all
     "? <path>": <term> | [<term>(, <term>)*], // any
         
@@ -156,8 +156,5 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 ## Property Paths
 
 ```
-<path> ::= (<step> ('/' <step>)*)?
-         | (<step> ('.' <step>)*)?
-         
-<step> ::= <<iri>> | ^<<iri>> | "<alias>" # whitespace around steps ignored
+<path> ::= (<alias> ('.' <alias>)*)?
 ```

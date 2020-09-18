@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -18,14 +18,21 @@
 package com.metreeca.rest.handlers;
 
 
+import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
-import com.metreeca.rest.services.Engine;
-import com.metreeca.tree.Shape;
+import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.formats.JSONLDFormat;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.json.shapes.Guard.Create;
+import static com.metreeca.json.shapes.Guard.Detail;
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.assets.Engine.engine;
 import static java.util.UUID.randomUUID;
 
 
@@ -35,22 +42,33 @@ import static java.util.UUID.randomUUID;
  * <p>Performs:</p>
  *
  * <ul>
- * <li>{@linkplain Shape#Role role}-based request shape redaction and shape-based {@linkplain Actor#throttler(Object, Object...)
- * authorization}, considering shapes enabled by the {@linkplain Shape#Create} task and the {@linkplain Shape#Detail} area;</li>
- * <li>engine-assisted request payload {@linkplain Engine#validate(Message) validation};</li>
+ *
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
+ * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} area;</li>
+ *
+ * <li>engine-assisted request payload
+ * {@linkplain JSONLDFormat#validate(org.eclipse.rdf4j.model.IRI, Shape, Collection) validation};</li>
+ *
  * <li>resource {@linkplain #Creator(Function) slug} generation;</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#create(Request) creation}.</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Creator extends Actor {
+public final class Creator extends Delegator {
+
+	private static final Object monitor=new Object();
 
 	/**
 	 * Creates a resource creator with a UUID-based slug generator.
+	 *
+	 * @return a new resource creator
 	 */
-	public Creator() {
-		this(request -> randomUUID().toString());
+	public static Creator creator() {
+		return creator(request -> randomUUID().toString());
 	}
 
 	/**
@@ -59,21 +77,17 @@ public final class Creator extends Actor {
 	 * @param slug a function mapping from the creation request to the identifier to be assigned to the newly created
 	 *             resource; must return a non-null non-clashing value
 	 *
+	 * @return a new resource creator
+	 *
 	 * @throws NullPointerException if {@code slug} is null
 	 */
-	public Creator(final Function<Request, String> slug) {
+	public static Creator creator(final Function<Request, String> slug) {
 
 		if ( slug == null ) {
 			throw new NullPointerException("null slug");
 		}
 
-		delegate(wrapper(slug).wrap(creator()) // chain slug immediately before handler after custom wrappers
-
-				.with(connector())
-				.with(throttler(Shape.Create, Shape.Detail))
-				.with(validator())
-
-		);
+		return new Creator(slug);
 	}
 
 	/**
@@ -84,16 +98,39 @@ public final class Creator extends Actor {
 	 * @param slug   a function mapping from the creation request and its payload to the identifier to be assigned to
 	 *               the newly created resource; must return a non-null non-clashing value
 	 *
+	 * @return a new resource creator
+	 *
 	 * @throws NullPointerException if either {@code format} or {@code slug} is null
 	 */
-	public <T> Creator(final Format<T> format, final BiFunction<Request, T, String> slug) {
-		this(request -> request.body(format).fold(value -> slug.apply(request, value), failure -> ""));
+	public static <T> Creator creator(
+			final Format<T> format, final BiFunction<? super Request, ? super T, String> slug
+	) {
+		return new Creator(request -> request.body(format).fold(error -> "", value -> slug.apply(request, value)));
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+	private Creator(final Function<Request, String> slug) {
+
+		final Engine engine=asset(engine());
+
+		delegate(wrapper(slug).wrap(engine::create) // chain slug immediately before handler after custom wrappers
+
+				.with(engine.connector())
+				.with(engine.throttler(Create, Detail))
+				.with(engine.validator())
+
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private Wrapper wrapper(final Function<Request, String> slug) {
 		return handler -> request -> consumer -> {
-			synchronized ( delegate() ) { // attempt to serialize slug operations from multiple snapshot txns
+			synchronized ( monitor ) { // attempt to serialize slug operations from multiple snapshot txns
 				handler.handle(request.header("Slug",
 
 						Objects.requireNonNull(slug.apply(request), "null resource name")

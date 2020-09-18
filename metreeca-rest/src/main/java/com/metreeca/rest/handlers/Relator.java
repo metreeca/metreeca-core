@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,13 +17,19 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Message;
+import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.services.Engine;
-import com.metreeca.tree.Shape;
+import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.formats.JSONLDFormat;
 
+import javax.json.JsonObject;
+
+import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.tree.Shape.*;
+import static com.metreeca.rest.assets.Engine.engine;
 
 
 /**
@@ -32,25 +38,46 @@ import static com.metreeca.tree.Shape.*;
  * <p>Performs:</p>
  *
  * <ul>
- * <li>shape-based {@linkplain Actor#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Shape#Relate} task and {@linkplain Shape#Holder}/{@linkplain Shape#Digest} areas, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Shape#Detail} area, when operating on other resources;</li>
+ *
+ * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Guard#Relate} task and {@linkplain Guard#Target}/{@linkplain Guard#Digest} areas, when operating on
+ * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
+ * resources;</li>
+ *
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
- * <li>engine-assisted response shape/payload {@linkplain Engine#trim(Message) trimming}, considering shapes as above.</li>
+ *
+ * <li>engine-assisted response payload {@linkplain JSONLDFormat#trim(org.eclipse.rdf4j.model.IRI, Shape, JsonObject)
+ * trimming}, considering shapes
+ * as above.</li>
+ *
  * </ul>
  *
  * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
  */
-public final class Relator extends Actor {
+public final class Relator extends Delegator {
 
-	public Relator() {
-		delegate(relator()
+	/**
+	 * Creates a resource relator.
+	 *
+	 * @return a new resource relator
+	 */
+	public static Relator relator() {
+		return new Relator();
+	}
 
-				.with(connector())
-				.with(trimmer())
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Relator() {
+		final Engine engine=asset(engine());
+
+		delegate(((Handler)engine::relate)
+
+				.with(engine.connector())
+				.with(engine.trimmer())
 				.with(wrapper(Request::collection,
-						throttler(Relate, Holder, Digest),
-						throttler(Relate, Detail)
+						engine.throttler(Relate, Target, Digest),
+						engine.throttler(Relate, Detail)
 				))
 
 		);

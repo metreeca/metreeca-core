@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,16 +17,11 @@
 
 package com.metreeca.rest.wrappers;
 
+import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.probes.Optimizer;
-import com.metreeca.tree.probes.Redactor;
+import com.metreeca.rest.formats.JSONLDFormat;
 
-import java.util.Optional;
-
-import static com.metreeca.rest.formats.TextFormat.text;
-
-import static java.lang.String.format;
+import static com.metreeca.json.shapes.And.and;
 
 
 /**
@@ -37,15 +32,7 @@ import static java.lang.String.format;
  *
  * <ul>
  *
- * <li>{@linkplain Message#shape() associates} the driving shape model to incoming requests;</li>
- *
- * <li>advertises the association between response focus {@linkplain Response#item() items} and the driving shape model
- * through a "{@code Link: <resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy}" header;</li>
- *
- * <li>handles GET requests for the advertised shape model resource ({@code <resource>?specs}) with a response
- * containing a textual description of the {@link #Driver(Shape) shape} model {@linkplain Redactor redacted} taking into
- * account the {@linkplain Request#roles() roles} of the current request {@linkplain Request#user() user} and removing
- * filtering-only constraints.</li>
+ * <li>{@linkplain JSONLDFormat#shape() associates} the driving shape model to incoming requests;</li>
  *
  * </ul>
  *
@@ -53,9 +40,10 @@ import static java.lang.String.format;
  *
  * <ul>
  *
- * <li>redacting the shape {@linkplain Message#shape() associated} to incoming request according to the task to be performed;</li>
+ * <li>redacting the shape {@linkplain JSONLDFormat#shape() associated} to incoming request according to the task to be
+ * performed;</li>
  *
- * <li>{@linkplain Message#shape() associating} a shape to outgoing responses in order to drive further processing
+ * <li>{@linkplain JSONLDFormat#shape() associating} a shape to outgoing responses in order to drive further processing
  * (e.g. JSON body mapping).</li>
  *
  * </ul>
@@ -63,14 +51,21 @@ import static java.lang.String.format;
  * <p><strong>Warning</strong> / Both operations must be performed taking into account the {@linkplain Request#roles()
  * roles} of the current request {@linkplain Request#user() user}: no user-related shape redaction is performed by the
  * driver wrapper on behalf of nested handlers.</p>
- *
- * @see <a href="https://www.w3.org/TR/ldp/#ldpr-resource">Linked Data Platform 1.0 - § 4.2.1.6 Resource -
- * ldp:constrainedBy</a>
  */
 public final class Driver implements Wrapper {
 
-	private static final String SpecsQuery="specs";
-	private static final String SpecsLink="http://www.w3.org/ns/ldp#constrainedBy";
+	/**
+	 * Creates a content driver.
+	 *
+	 * @param shapes the shapes driving the lifecycle of the linked data resources managed by the wrapped handler
+	 *
+	 * @return a new shape-based content driver
+	 *
+	 * @throws NullPointerException if {@code shape} is null of ccntains null elements
+	 */
+	public static Driver driver(final Shape... shapes) {
+		return new Driver(and(shapes));
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -78,62 +73,20 @@ public final class Driver implements Wrapper {
 	private final Shape shape;
 
 
-	/**
-	 * Creates a content driver.
-	 *
-	 * @param shape the shape driving the lifecycle of the linked data resources managed by the wrapped handler
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public Driver(final Shape shape) {
+	private Driver(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		this.shape=shape.map(new Optimizer());
+		this.shape=shape;
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> specs(request).orElseGet(() ->
-				handler.handle(request.map(this::before)).map(this::after)
-		);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Optional<Future<Response>> specs(final Request request) {
-
-		// !!! handle HEAD requests on ?specs (delegate to Worker)
-
-		return request.method().equals(Request.GET) && request.query().equals(SpecsQuery)
-
-				? Optional.of(request.reply(response -> response
-				.status(Response.OK)
-				.header("Content-Type", "text/plain")
-				.body(text(), shape
-						.map(new Redactor(Shape.Role, request.roles()))
-						.map(new Redactor(Shape.Mode, Shape.Convey))
-						.toString()
-				)
-		))
-
-				: Optional.empty();
-	}
-
-
-	private Request before(final Request request) {
-		return request.shape(shape);
-	}
-
-	private Response after(final Response response) {
-		return response.request().safe() && response.success() ? response.header("+Link", format(
-				"<%s?%s>; rel=%s", response.request().item(), SpecsQuery, SpecsLink
-		)) : response;
+		return request -> handler.handle(request.attribute(JSONLDFormat.shape(), shape));
 	}
 
 }

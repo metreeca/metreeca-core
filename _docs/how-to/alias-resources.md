@@ -8,13 +8,12 @@ The following samples present typical setups built on the same data used in the 
 
 ```java
 private Optional<String> byname(final RepositoryConnection connection, final String name) {
-  return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
-    .map(Statement::getSubject)
-    .filter(resource -> connection.hasStatement(resource, RDF.TYPE, BIRT.Product, true))
-    .map(Value::stringValue)
-    .findFirst();
+    return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
+            .map(Statement::getSubject)
+            .filter(resource -> connection.hasStatement(resource, RDF.TYPE, BIRT.Product, true))
+            .map(Value::stringValue)
+            .findFirst();
 }
-
 ```
 
 # Alternate Identifiers
@@ -32,10 +31,17 @@ new Router()
  
   // alternate name-based endpoint
 
-  .path("/products/byname/{name}", new Aliaser(connect((connection, request) -> request
-      .parameter("name")
-      .flatMap(name -> byname(connection, name))
-  )))
+  .path("/products/byname/{name}", new Aliaser(request -> request
+        .parameter("name")
+        .flatMap(connect(this::byname))
+   ).wrap(response -> response.status(NotFound)))
+```
+
+```shell
+GET http://localhost:8080/products/byname/Pont+Yacht
+
+303 See Other
+Location: http://localhost:8080/products/S72_3212
 ```
 
 ## Shared Endpoints
@@ -43,80 +49,40 @@ new Router()
 ```java
 new Router()
 
-    .path("/products/{id}", new Worker()
+    .path("/products/{code}", new Worker()
         .get(new Relator()
-            .with(new Aliaser(connect((connection, request) -> request.parameter("id")
-               
-                // match provided id against expected code pattern
-               
-                .flatMap(code -> code.matches("S\\d+_\\d+")
-          
-                    // a product code: fall through to handler
-             
-                    ? Optional.of(request.item())
-             
-                     // a product name: resolve and redirect
-             
-                    : byname(connection, code)
-             
-                )
-            )))
+            .with(new Aliaser(request -> request
+                    .parameter("code")
+                    .filter(code -> !code.matches("S\\d+_\\d+")) // not a product code
+                    .flatMap(connect(this::byname)) // resolve and redirect
+            ))
         )
+```
+
+```shell
+GET http://localhost:8080/products/Pont+Yacht
+
+303 See Other
+Location: http://localhost:8080/products/S72_3212
 ```
 
 # Simplified Query Endpoints
 
 ```java
 new Router()
-
     .path("/products/", new Worker()
         .get(new Relator()
-            .with(new Aliaser(connect((connection, request) -> request.parameter("name")
-               
-                // product name provided as query parameter: resolve and redirect
-               
-                .map(name -> byname(connection, name))
-               
-                // no name: fall through to handler and full faceted search
-               
-                .orElseGet(() -> Optional.of(request.item()))
-               
-            )))
-        )
+            .with(new Aliaser(request -> request
+                .parameter("name") // product name keywords provided as query parameter
+                .map(name -> "?~label="+Codecs.encode(name)) // rewrite query
+        ))
+	)
+)
 ```
 
-```
-GET http://localhost:8080/products/
-
-200 OK
-
-{
-  "@id": "/products/",
-  "contains": [
-    {
-      "@d": "/products/S10_1678",
-      "type": "/terms#Product",
-      "label": "1969 Harley Davidson Ultimate Chopper",
-      
-      ⋮
-      
-    },
-            
-    ⋮
-    
-   ]  
-}
-```
-
-```
-GET http://localhost:8080/products/?name=Pont+Yacht
+```shell
+GET http://localhost:8080/products/?name=Model+A
 
 303 See Other
-Location: http://localhost:8080/products/S72_3212
-```
-
-```
-GET http://localhost:8080/products/?name=Something
-
-404 Not Found
+Location: http://localhost:8080/products/?~label=Model+A
 ```

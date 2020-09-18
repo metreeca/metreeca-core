@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2019 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl. All rights reserved.
  *
  * This file is part of Metreeca/Link.
  *
@@ -17,21 +17,19 @@
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.tree.Shape;
+import com.metreeca.json.Shape;
+import com.metreeca.rest.*;
+import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.rest.RequestAssert.assertThat;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Guard.filter;
+import static com.metreeca.json.shapes.Guard.role;
+import static com.metreeca.json.shapes.MinCount.minCount;
+import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.tree.Shape.*;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.MinCount.minCount;
-import static com.metreeca.tree.shapes.When.when;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -40,8 +38,8 @@ final class DriverTest {
 	private static final String Root="root";
 	private static final String None="none";
 
-	private static final Shape RootShape=optional();
-	private static final Shape NoneShape=required();
+	private static final Shape RootShape=Shape.optional();
+	private static final Shape NoneShape=Shape.required();
 
 	private static final Shape TestShape=and(
 			filter().then(minCount(1)),
@@ -63,44 +61,21 @@ final class DriverTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testConfigureExchangeShape() {
-		new Driver(TestShape)
+		Driver.driver(TestShape)
 
-				.wrap((Handler)request -> {
+				.wrap(request -> {
 
-					assertThat(request)
-							.hasShape(TestShape);
+					RequestAssert.assertThat(request)
+							.hasAttribute(JSONLDFormat.shape(), shape -> assertThat(shape).isEqualTo(TestShape));
 
-					return request.reply(response -> response
-							.status(OK)
-							.header("link", "processed")
-					);
+					return request.reply(status(OK));
 
 				})
 
 				.handle(request())
 
-				.accept(response -> assertThat(response).hasHeaders("Link",
-						"processed",
-						"<http://example.org/resource?specs>; rel=http://www.w3.org/ns/ldp#constrainedBy"
-				));
-	}
-
-	@Test void testHandleSpecsQuery() {
-		new Driver(TestShape)
-
-				.wrap((Handler)request -> request.reply(response -> response))
-
-				.handle(request()
-						.roles(None)
-						.query("specs")
-				)
-
-				.accept(response -> assertThat(response)
+				.accept(response -> ResponseAssert.assertThat(response)
 						.hasStatus(OK)
-						.hasBody(text(), text -> assertThat(text)
-								.as("redacted according to role/mode")
-								.isEqualTo(NoneShape.toString())
-						)
 				);
 	}
 
