@@ -47,7 +47,7 @@ To get started, set up a Maven Java 1.8 project, importing the BOM module for Me
             <dependency>
                 <groupId>com.metreeca</groupId>
                 <artifactId>metreeca-link</artifactId>
-                <version>{version}</version>
+                <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -702,7 +702,7 @@ public Demo() {
 }
 ```
 
-```shell
+```sh
 % curl --include 'http://localhost:8080/products/S18_4409'
 
 HTTP/1.1 200 
@@ -717,7 +717,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-```shell
+```sh
 % curl --include \
 	--header 'Authorization: Bearer secret' \
 	'http://localhost:8080/products/S18_4409'

@@ -45,7 +45,7 @@ User authorization and user-specific content generation are performed according 
 
 To retrieve the description of a published resource, as specified by the associated data model, just perform a `GET` operation on the URL identifying the resource.
 
-```sh
+```shell
 % curl --include \
 	"http://localhost:8080/products/S18_3140"
     
@@ -73,7 +73,7 @@ Metreeca/Link produces and accepts an idiomatic [compacted/framed](../references
 
 To include context information, specify the `application/ld+json` MIME type in the `Accept` HTTP request header.
 
-```sh
+```shell
 % curl --include \
 	--header "Accept: application/ld+json" \
 	"http://localhost:8080/products/S18_3140"
@@ -104,7 +104,7 @@ Content-Type: application/ld+json;charset=UTF-8
 
 Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Reserved properties are included only if the request is properly authenticated.
 
-```sh
+```shell
 % curl --include \
 	--header "Authorization: Bearer secret" \
 	"http://localhost:8080/products/S18_3140"
@@ -127,7 +127,7 @@ Content-Type: application/json;charset=UTF-8
 
 To retrieve the description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
 
-```sh
+```shell
 % curl --include \
 	"http://localhost:8080/products/"
     
@@ -161,7 +161,7 @@ Content-Type: application/json;charset=UTF-8
 
 By default, collections descriptions include a digest description of each collection item, but a concise description of the collection itself may be retrieved using the standard LDP `Prefer` HTTP request header.
 
-```sh
+```shell
 % curl --include \
     --header 'Prefer: return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"' \
     "http://localhost:8080/products/"
@@ -187,7 +187,7 @@ New resources are created by submitting an description to the REST API of a writ
 
 Note that property values that may be inferred from the associated linked data model, like `rdf:type`, may be safely omitted.
 
-```sh
+```shell
 % curl --include --request POST \
     --header 'Authorization: Bearer secret' \
     --header 'Content-Type: application/json' \
@@ -215,7 +215,7 @@ The newly created resource is immediately available for retrieval at the URL ret
 
 Submitted data is automatically validated against the constraints specified in the linked data model driving the target REST API. Submiting, for instance, out of range price data would return an error and a structured error report.
 
-```sh
+```shell
 % curl --include --request POST \
     --header 'Authorization: Bearer secret' \
     --header 'Content-Type: application/json' \
@@ -257,7 +257,7 @@ Content-Type: application/json;charset=UTF-8
 
 Submitted data is automatically matched against the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Submiting, for instance, buy price data without valid authorization headers would return an error.
 
-```sh
+```shell
 % curl --include --request POST \
     --header 'Content-Type: application/json' \
    "http://localhost:8080/products/" \
@@ -283,7 +283,7 @@ Existing writable RDF resources are updated by submitting an RDF description to 
 
 Note that  server-managed properties like `demo:code` and `demo:stock` are omitted, as they are inherited from the existing description.
 
-```sh
+```shell
 % curl --include --request PUT \
 	--header 'Authorization: Bearer secret' \
 	--header 'Content-Type: application/json' \
@@ -312,7 +312,7 @@ As in the case of resource creation, submitted data is automatically validated a
 
 Existing writable RDF resources are deleted using the `DELETE` HTTP method on their REST API.
 
-```sh
+```shell
 % curl --include --request DELETE \
 	--header 'Authorization: Bearer secret' \
 	"http://localhost:8080/products/S18_3140"
@@ -335,7 +335,7 @@ To retrieve a digest description of collection items matching a set of facet fil
 }
 ```
 
-```sh
+```shell
 % curl --include \
     'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations'
     
@@ -403,7 +403,7 @@ To retrieve datatype, count and range stats for a facet, taking into account app
 }
 ```
 
-```sh
+```shell
 % curl --include \
     'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_stats=price'
 
@@ -439,7 +439,7 @@ To list available options and counts for a facet, taking into account applied fi
 }
 ```
 
-```sh
+```shell
 % curl --include \
     'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_terms=line'
 

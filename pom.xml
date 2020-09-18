@@ -387,39 +387,18 @@
 
 			</plugin>
 
-			<plugin> <!-- https://maven.apache.org/plugins/maven-resources-plugin/ -->
+			<plugin> <!-- https://github.com/metreeca/mark -->
 
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.2.0</version>
+				<groupId>com.metreeca</groupId>
+				<artifactId>mark-maven-plugin</artifactId>
+				<version>0.0.0-SNAPSHOT</version>
 
-				<executions>
-					<execution>
+				<inherited>false</inherited>
 
-						<id>copy-jekyll-configuration</id>
-						<inherited>false</inherited>
-						<phase>site</phase>
-
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-
-						<configuration>
-
-							<outputDirectory>${basedir}/docs</outputDirectory>
-							<overwrite>true</overwrite>
-
-							<resources>
-								<resource>
-									<directory>${basedir}/docs/_resources</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-
-						</configuration>
-
-					</execution>
-				</executions>
+				<configuration>
+					<target>docs</target>
+					<assets>@/docs</assets>
+				</configuration>
 
 			</plugin>
 

@@ -1,5 +1,5 @@
 ---
-title: Metreeca Model-Driven Linked Data Framework
+
 ---
 
 Metreeca/Link is an open source Java framework enabling rapid model-driven development of RESTful linked data services.
@@ -15,12 +15,12 @@ To get started with Metreeca/Link, walk through the model‑driven linked data [
 
 Tutorials
 
-: - [Publishing Model‑Driven Linked Data REST APIs](tutorials/publishing-ldp-apis)
-- [Interacting with Model‑Driven Linked Data REST APIs](tutorials/interacting-with-ldp-apis)
+: - [Publishing Model‑Driven Linked Data REST APIs](tutorials/publishing-jsonld-apis.md)
+- [Interacting with Model‑Driven Linked Data REST APIs](tutorials/consuming-jsonld-apis.md)
 
 How To…
 
-: - [Alias Resources](how-to/alias-resources)
+: - [Alias Resources](how-to/alias-resources.md)
 
 References
 
