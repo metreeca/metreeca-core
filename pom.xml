@@ -400,6 +400,18 @@
 					<assets>@/docs</assets>
 				</configuration>
 
+				<executions>
+					<execution>
+
+						<goals>
+							<goal>clean</goal>
+							<goal>build</goal>
+							<goal>crawl</goal>
+						</goals>
+
+					</execution>
+				</executions>
+
 			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/plugins/maven-javadoc-plugin/ -->
@@ -477,36 +489,6 @@
 
 					</execution>
 
-				</executions>
-
-			</plugin>
-
-			<plugin> <!-- https://maven.apache.org/plugins/maven-clean-plugin/ -->
-
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>3.1.0</version>
-
-				<executions>
-					<execution>
-
-						<id>clean-docs-folder</id>
-						<phase>clean</phase>
-						<inherited>false</inherited>
-
-						<goals>
-							<goal>clean</goal>
-						</goals>
-
-						<configuration>
-							<filesets>
-								<fileset>
-									<directory>docs</directory>
-								</fileset>
-							</filesets>
-						</configuration>
-
-					</execution>
 				</executions>
 
 			</plugin>
