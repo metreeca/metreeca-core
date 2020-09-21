@@ -1,6 +1,6 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.metreeca/metreeca-link.svg)](https://search.maven.org/artifact/com.metreeca/metreeca-link/)
-[![javadoc](https://javadoc.io/badge2/com.metreeca/metreeca-link/javadoc.svg)](https://javadoc.io/doc/com.metreeca/metreeca-link)
+
 
 # metreeca/link
 

@@ -1,6 +1,6 @@
 ---
-title:	        Publishing Model‑Driven Linked Data REST APIs
-excerpt:        Hands-on guided tour of model-driven linked data REST APIs publishing
+title:	        Publishing Model‑Driven REST/JSON-LD APIs
+excerpt:        Hands-on guided tour of model-driven REST/JSON-LD APIs publishing
 redirect_from: /tutorials/linked-data-publishing
 ---
 
@@ -378,13 +378,13 @@ Standard resource action handlers can be defined using high-level declarative
   control, faceted search,  incoming data validation and bidirectional
    conversion between RDF and idiomatic [compacted/framed](../references/jsonld
    -format) JSON-LD payloads, as demonstrated in the [REST APIs interaction
-    tutorial](consuming-jsonld-apis).
+    tutorial](consuming-jsonld-apis.md).
 
 Actors provide default shape-driven implementations for CRUD actions on resources and containers identified by the request [focus item](../javadocs/?com/metreeca/rest/Request.html#item--).
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](interacting-with-ldp-apis#faceted-search), sorting and pagination |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](consuming-jsonld-apis.md#faceted-search), sorting and pagination |
 | [Creator](../javadocs/?com/metreeca/rest/handlers/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
 | [Updater](../javadocs/?com/metreeca/rest/handlers/Updater.html) | resource updating / updates the detailed RDF description of the target item |
 | [Deleter](../javadocs/?com/metreeca/rest/handlers/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
@@ -452,7 +452,7 @@ public final class Products extends Delegator {
 
 The [Driver](../javadocs/index.html?com/metreeca/rest/wrappers/Driver.html) wrapper associated a linked data model to incoming requests, driving the operations of nested actors and other model-aware handlers.
 
-Linked data models are defined with a shape-based [specification language](../references/spec-language), assembling shape [building blocks](../references/spec-language#shapes) using a simple Java DSL.
+Linked data models are defined with a shape-based [specification language](../references/spec-language.md), assembling shape [building blocks](../references/spec-language.md#shapes) using a simple Java DSL.
 
 As soon as the server is redeployed, the updated REST API exposes only the data specified in the driving model.
 
@@ -640,7 +640,7 @@ The constraints in the extended model are leveraged by the engine in a number of
 
 ## Parameterizing Models
 
-The `member()`, `filter()`, `convey()` and `server()` guards in the extended model also introduce the central concept of [parametric](../references/spec-language#parameters) model.
+The `member()`, `filter()`, `convey()` and `server()` guards in the extended model also introduce the central concept of [parametric](../references/spec-language.md#parameters) model.
 
 The `member` guard states that nested constraints define the shape of a container member resource.
 
@@ -650,7 +650,7 @@ The `convey` guard states that nested constraints are to be used only for extrac
 
 The `server` guard states that guarded properties are server-managed and will be considered only when retrieving or deleting resources, but won't be accepted as valid content on resource creation and updating.
 
-In the most general form, models may be parameterized on for different [axes](../references/spec-language#parameters). Constraints specified outside parametric sections are unconditionally enabled.
+In the most general form, models may be parameterized on for different [axes](../references/spec-language.md#parameters). Constraints specified outside parametric sections are unconditionally enabled.
 
 ## Controlling Access
 
@@ -827,5 +827,5 @@ Request and response RDF payloads may also be [pre](../javadocs/?com/metreeca/re
 
 To complete your tour of the framework:
 
-- walk through the [interaction tutorial](interacting-with-ldp-apis) to learn how to interact with model-driven REST APIs to power client apps like the demo [online product catalog](https://demo.metreeca.com/apps/shop/);
+- walk through the [interaction tutorial](consuming-jsonld-apis.md) to learn how to interact with model-driven REST APIs to power client apps like the demo [online product catalog](https://demo.metreeca.com/apps/shop/);
 - explore the [framework](../javadocs/?overview-summary.html) to learn how to develop your own custom wrappers and handlers and to extend your server with additional services.

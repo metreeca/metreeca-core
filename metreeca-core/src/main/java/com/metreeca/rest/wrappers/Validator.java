@@ -32,7 +32,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Validating preprocessor.
  *
- * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to incoming requests.</p>
+ * <p>Applies custom validation {@linkplain #validator(Function[]) rules} to incoming requests.</p>
  */
 public final class Validator implements Wrapper {
 
@@ -40,8 +40,8 @@ public final class Validator implements Wrapper {
 	 * Creates a validating preprocessor.
 	 *
 	 * <p>Validation rules handle a target request and must return a non-null but possibly empty collection of
-	 * validation issues; if the collection is not empty, the request fails with a
-	 * {@link Response#UnprocessableEntity} status code; otherwise, the request is routed to the wrapped handler.</p>
+	 * validation issues; if the collection is not empty, the request fails with a {@link Response#UnprocessableEntity}
+	 * status code; otherwise, the request is routed to the wrapped handler.</p>
 	 *
 	 * @param rules the custom validation rules to be applied to incoming requests
 	 *

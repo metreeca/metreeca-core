@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Resource aliaser.
  *
- * <p>Redirects request for alias resources to the canonical resource they {@linkplain #Aliaser(Function) resolve}
+ * <p>Redirects request for alias resources to the canonical resource they {@linkplain #aliaser(Function) resolve}
  * to.</p>
  *
  * <p>Empty or idempotent requests, that is requests whose {@link Request#item() focus item} is resolved to an empty

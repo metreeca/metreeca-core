@@ -50,7 +50,7 @@ import static java.util.UUID.randomUUID;
  * <li>engine-assisted request payload
  * {@linkplain JSONLDFormat#validate(org.eclipse.rdf4j.model.IRI, Shape, Collection) validation};</li>
  *
- * <li>resource {@linkplain #Creator(Function) slug} generation;</li>
+ * <li>resource {@linkplain #creator(Function) slug} generation;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#create(Request) creation}.</li>
  *

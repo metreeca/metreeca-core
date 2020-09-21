@@ -1,14 +1,13 @@
 ---
-title:	        Interacting  with Model‑Driven Linked Data REST APIs
-excerpt:        Hands-on guided tour of model-driven linked data REST APIs features
-redirect_from: /tutorials/linked-data-interaction
+title:	        Consuming Model‑Driven REST/JSON-LD APIs
+excerpt:        Hands-on guided tour of model-driven lREST/JSON-LD APIs features
 ---
 
 This example-driven tutorial introduces the main client-facing features of the Metreeca/Link model-driven linked data framework. Basic familiarity with [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
 In the following sections you will learn how to interact with REST APIs published with the framework, leveraging automatic model-driven fine-grained role‑based read/write access control,  faceted search and incoming data validation.
 
-In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publishing-ldp-apis), using a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
+In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publishing-jsonld-apis.md), using a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
 
 We will walk through the REST API interaction process focusing on the task of consuming the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog.
 
@@ -33,13 +32,13 @@ Even a simple application like this would usually require extensive back-end dev
 
 Metreeca/Link automates the whole process with a model-driven API engine that compiles high‑level declarative linked data models into read/write REST APIs immediately available for front-end app development, supporting all of the above-mentioned features without custom back-end coding.
 
-You may learn how to publish your own model-driven linked data APIs walking through the [linked data publishing tutorial](publishing-ldp-apis).
+You may learn how to publish your own model-driven linked data APIs walking through the [linked data publishing tutorial](publishing-jsonld-apis.md).
 
 # Read Operations
 
 Linked data REST APIs published by Metreeca/Link API engine support controlled read access to  RDF contents managed by the underlying graph storage layer.
 
-User authorization and user-specific content generation are performed according to [role‑based](../references/spec-language#parameters) rules integrated in the linked data model driving the API publishing process.
+User authorization and user-specific content generation are performed according to [role‑based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
 
 ## Resources
 
@@ -69,7 +68,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-Metreeca/Link produces and accepts an idiomatic [compacted/framed](../references/jsonld-format) JSON-LD format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
+Metreeca/Link produces and accepts an idiomatic [compacted/framed](../references/jsonld-format.md) JSON-LD format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
 
 To include context information, specify the `application/ld+json` MIME type in the `Accept` HTTP request header.
 
@@ -179,7 +178,7 @@ Content-Type: application/json;charset=UTF-8
 
 Linked data REST APIs published by Metreeca/Link API engine support controlled write access to contents managed by the underlying graph storage layer.
 
-User authorization and user-specific content validation are performed according to [role‑based](../references/spec-language#parameters) rules integrated in the linked data model driving the API publishing process.
+User authorization and user-specific content validation are performed according to [role‑based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
 
 ## Creating Resources
 
@@ -326,7 +325,7 @@ The deleted resource is immediately no longer available for retrieval.
 
 Metreeca/Link REST APIs engine supports model-driven faceted search and related facet-related queries without additional effort.
 
-To retrieve a digest description of collection items matching a set of facet filters, perform a `GET` operation on the URL identifying the collection, appending a URL-encoded JSON query object [describing the filters](../references/faceted-search) to be applied.
+To retrieve a digest description of collection items matching a set of facet filters, perform a `GET` operation on the URL identifying the collection, appending a URL-encoded JSON query object [describing the filters](../references/faceted-search.md) to be applied.
 
 ```json
 {	
@@ -371,7 +370,7 @@ Note that collection descriptions are omitted from faceted search results.
 
 ## Sorting and Pagination
 
-Faceted search results may be sorted and paginated including [sorting criteria](../references/faceted-search#edges-query) and [pagination limits](../references/faceted-search#edges-query) in the JSON query object.
+Faceted search results may be sorted and paginated including [sorting criteria](../references/faceted-search.md#items-query) and [pagination limits](../references/faceted-search.md#items-query) in the JSON query object.
 
 ```json
 {
@@ -388,7 +387,7 @@ Faceted search results may be sorted and paginated including [sorting criteria](
 
 ## Facet Stats and Options
 
-The faceted search engine supports also introspection queries for retrieving [facet stats](../references/faceted-search#stats-query)  and available [facet options](../references/faceted-search#items-query).
+The faceted search engine supports also introspection queries for retrieving [facet stats](../references/faceted-search.md#stats-query)  and available [facet options](../references/faceted-search.md#items-query).
 
 To retrieve datatype, count and range stats for a facet, taking into account applied filters, specify the target property path in the faceted search query object.
 

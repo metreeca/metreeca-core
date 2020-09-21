@@ -29,7 +29,7 @@ import static java.util.Arrays.asList;
  * Role-base access controller.
  *
  * <p>Authorizes request checking that their user {@linkplain Request#roles() roles} intersect a provided set of
- * {@linkplain #Controller(Collection) enabled roles}.</p>
+ * {@linkplain #controller(Object...) enabled roles}.</p>
  */
 public final class Controller implements Wrapper {
 

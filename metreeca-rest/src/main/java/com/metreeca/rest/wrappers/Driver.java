@@ -27,7 +27,7 @@ import static com.metreeca.json.shapes.And.and;
 /**
  * Shape-based content driver.
  *
- * <p>Drives the lifecycle of linked data resources managed by wrapped handlers with a {@linkplain #Driver(Shape)
+ * <p>Drives the lifecycle of linked data resources managed by wrapped handlers with a {@linkplain #driver(Shape...)
  * shape} model:
  *
  * <ul>

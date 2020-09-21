@@ -250,18 +250,18 @@
 
 			<!-- Conflict Resolution -->
 
-			<dependency>
+			<!--<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
 				<version>20.0</version>
-			</dependency>
+			</dependency>-->
 
 		</dependencies>
 	</dependencyManagement>
 
 	<dependencies>
 
-		<!-- shared testing dependencies -->
+		<!-- Shared Testing Dependencies -->
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -501,7 +501,7 @@
 						<configuration>
 							<filesets>
 								<fileset>
-									<directory>docs/_site</directory>
+									<directory>docs</directory>
 								</fileset>
 							</filesets>
 						</configuration>

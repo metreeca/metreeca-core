@@ -1,22 +1,19 @@
 ---
-
 ---
 
-Metreeca/Link is an open source Java framework enabling rapid model-driven development of RESTful linked data services.
 
+Metreeca/Link is an open source, lightweight and server-agnostic Java framework
+ enabling rapid development of RESTful linked data services.
 
-Its engine automatically converts declarative high-level domain models defined with [SHACL](https://www.w3.org/TR/shacl/) into extended linked data APIs supporting faceted search, data validation and fine‑grained role‑based read/write access control rules.
+Its engine automatically converts high-level declarative data models into extended REST/JSON-LD APIs supporting faceted search, data validation and fine‑grained role‑based access control rules, completely shielding front‑end developers from linked data technicalities.
 
-Published linked data resources are made available both through [LDP](https://www.w3.org/TR/ldp-primer/) and idiomatic REST/JSON APIs, supporting standardized access from third-party clients and completely shielding front‑end developers from linked data technicalities.
-
-To get started with Metreeca/Link, walk through the model‑driven linked data [publishing](tutorials/publishing-ldp-apis) and [interaction](tutorials/interacting-with-ldp-apis) tutorials.
 
 ---
 
 Tutorials
 
-: - [Publishing Model‑Driven Linked Data REST APIs](tutorials/publishing-jsonld-apis.md)
-- [Interacting with Model‑Driven Linked Data REST APIs](tutorials/consuming-jsonld-apis.md)
+: - [Publishing Model‑Driven REST/JSON-LD APIs](tutorials/publishing-jsonld-apis.md)
+- [Consuming Model‑Driven REST/JSON-LD APIs](tutorials/consuming-jsonld-apis.md)
 
 How To…
 
@@ -25,10 +22,10 @@ How To…
 References
 
 : - [Java API Reference](javadocs/index.html)
-- [Shape Specification Language](references/spec-language)
-- [REST Faceted Search API](references/faceted-search)
-- [Idiomatic RDF/JSON Serialization](references/idiomatic-json)
-<!-- - [Known Issues](references/known-issues) -->
+- [Shape Specification Language](references/spec-language.md)
+- [REST Faceted Search API](references/faceted-search.md)
+- [Idiomatic JSON-LD Serialization](references/jsonld-format.md)
+<!-- - [Known Issues](references/known-issues.md) -->
 
 ---
 

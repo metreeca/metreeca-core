@@ -4,7 +4,7 @@ title:      How To Alias Resources
 
 Sometimes you need to access resources using alternate identifiers or to set up simplified query endpoints: the [Aliaser](../javadocs/com/metreeca/rest/wrappers/Aliaser.html) wrapper/handler supports these use cases redirecting requests to canonical resources located by a custom alias resolver.
 
-The following samples present typical setups built on the same data used in the [tutorials](../tutorials/publishing-ldp-apis) and a custom name-based product resolver.
+The following samples present typical setups built on the same data used in the [tutorials](../tutorials/publishing-jsonld-apis.md) and a custom name-based product resolver.
 
 ```java
 private Optional<String> byname(final RepositoryConnection connection, final String name) {
