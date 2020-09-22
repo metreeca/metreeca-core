@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="crawl" type="MavenRunConfiguration" factoryName="Maven">
+  <configuration default="false" name="check" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
       <option name="myRunnerSettings" />
@@ -11,7 +11,7 @@
           <option name="goals">
             <list>
               <option value="-non-recursive" />
-              <option value="mark:crawl" />
+              <option value="mark:check" />
             </list>
           </option>
           <option name="pomFileName" />

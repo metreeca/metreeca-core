@@ -137,7 +137,7 @@ The stub configures the application to handle any resource using a barebone [han
 
 Compile and deploy the web app to your favorite servlet container and try your first request:
 
-```sh
+```shell
 % curl --include 'http://localhost:8080/'
 
 HTTP/1.1 200
@@ -276,7 +276,7 @@ get(() -> gateway()
 )
 ```
 
-```sh
+```shell
 % curl --include 'http://localhost:8080/products/S18_4409'
 
 HTTP/1.1 200 
@@ -456,7 +456,7 @@ Linked data models are defined with a shape-based [specification language](../re
 
 As soon as the server is redeployed, the updated REST API exposes only the data specified in the driving model.
 
-```sh
+```shell
 % curl --include 'http://localhost:8080/products/S18_4409'
 
 HTTP/1.1 200 
@@ -613,7 +613,7 @@ The extended resource model makes use of a number of additional blocks to precis
 - to be RDF literals of `xsd:string` datatype;
 - to possibly match a specific regular expression pattern.
 
-```sh
+```shell
 % curl --include 'http://localhost:8080/products/S18_4409'
 	
 HTTP/1.1 200 
@@ -702,7 +702,7 @@ public Demo() {
 }
 ```
 
-```sh
+```shell
 % curl --include 'http://localhost:8080/products/S18_4409'
 
 HTTP/1.1 200 
@@ -717,7 +717,7 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-```sh
+```shell
 % curl --include \
 	--header 'Authorization: Bearer secret' \
 	'http://localhost:8080/products/S18_4409'

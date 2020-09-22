@@ -391,13 +391,20 @@
 
 				<groupId>com.metreeca</groupId>
 				<artifactId>mark-maven-plugin</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
+				<version>0.3</version>
 
 				<inherited>false</inherited>
 
 				<configuration>
+
 					<target>docs</target>
 					<assets>@/docs</assets>
+
+					<options>
+						<markdown-smart-links>true</markdown-smart-links>
+						<markdown-external-links>true</markdown-external-links>
+					</options>
+
 				</configuration>
 
 				<executions>
@@ -406,7 +413,7 @@
 						<goals>
 							<goal>clean</goal>
 							<goal>build</goal>
-							<goal>crawl</goal>
+							<goal>check</goal>
 						</goals>
 
 					</execution>
