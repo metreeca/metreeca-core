@@ -19,7 +19,6 @@ package com.metreeca.rest.handlers;
 
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.OutputFormat;
 
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
@@ -30,6 +29,8 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 
 
@@ -373,8 +374,10 @@ public final class Router implements Handler {
 
 
 	private Future<Response> head(final Request request) {
-		return handle(request.method(Request.GET))
-				.map(response -> response.body(OutputFormat.output(), target -> {}));
+		return handle(request.method(Request.GET)).map(response -> response
+				.headers("Content-Lenght", emptyList())
+				.body(output(), target -> {})
+		);
 	}
 
 	private Future<Response> options(final Request request) {
