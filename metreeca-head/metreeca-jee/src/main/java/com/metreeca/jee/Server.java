@@ -64,7 +64,7 @@ public abstract class Server implements Filter {
 
 
 	/**
-	 * Configures the main factory.
+	 * Configures the handler.
 	 *
 	 * @param factory the handler factory; takes as argument a shared asset context (which may configured with
 	 *                additional application-specific assets as a side effect) and must return a non-null handler

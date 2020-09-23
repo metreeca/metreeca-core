@@ -28,7 +28,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
@@ -61,7 +60,10 @@ public final class Server {
 	private final int backlog=128;
 	private final int delay=0;
 
-	private Function<Context, Handler> factory=context -> request -> request.reply(identity());
+
+	private Function<Context, Handler> handler=context -> request -> request.reply(identity());
+
+	private InetSocketAddress address=new InetSocketAddress("localhost", 8080);
 
 	private final Context context=new Context();
 
@@ -69,7 +71,7 @@ public final class Server {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Configures the main handler.
+	 * Configures the handler.
 	 *
 	 * @param factory the handler factory; takes as argument a shared asset context (which may configured with
 	 *                additional application-specific assets as a side effect) and must return a non-null handler
@@ -85,7 +87,28 @@ public final class Server {
 			throw new NullPointerException("null handler factory");
 		}
 
-		this.factory=factory;
+		this.handler=factory;
+
+		return this;
+	}
+
+
+	/**
+	 * Configures the socket address.
+	 *
+	 * @param address the socket address to listen to
+	 *
+	 * @return this server
+	 *
+	 * @throws NullPointerException if {@code address} is null
+	 */
+	public Server address(final InetSocketAddress address) {
+
+		if ( address == null ) {
+			throw new NullPointerException("null address");
+		}
+
+		this.address=address;
 
 		return this;
 	}
@@ -94,24 +117,17 @@ public final class Server {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void start() {
-		start(new InetSocketAddress("localhost", 8080));
-	}
-
-	public void start(final InetSocketAddress address) {
-
-		if ( address == null ) {
-			throw new NullPointerException("null address");
-		}
-
 		try {
 
-			final Executor executor=Executors.newCachedThreadPool();
-			final Handler handler=Objects.requireNonNull(factory.apply(context), "null handler");
+			final Handler handler=Objects.requireNonNull(this.handler.apply(context), "null handler");
+
 			final Logger logger=context.get(logger());
 
 			final HttpServer server=HttpServer.create(address, backlog);
 
-			server.createContext(root, exchange -> executor.execute(() -> {
+			server.setExecutor(Executors.newCachedThreadPool());
+
+			server.createContext(root, exchange -> {
 				try {
 
 					context.exec(() -> handler.handle(request(exchange))
@@ -122,7 +138,7 @@ public final class Server {
 				} catch ( final RuntimeException e ) {
 					logger.error(this, "unhandled exception", e);
 				}
-			}));
+			});
 
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 
