@@ -216,7 +216,7 @@ public final class Publisher implements Handler {
 
 
 	@Override public Future<Response> handle(final Request request) {
-		return variants(request.item())
+		return variants(request.path())
 
 				.map(Paths::get)
 				.map(Paths.get("/")::relativize)
