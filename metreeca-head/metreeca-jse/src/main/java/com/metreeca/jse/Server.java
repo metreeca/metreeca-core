@@ -28,8 +28,11 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
+import static com.metreeca.rest.Request.HEAD;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -91,7 +94,7 @@ public final class Server {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void start() {
-		start(new InetSocketAddress(8080));
+		start(new InetSocketAddress("localhost", 8080));
 	}
 
 	public void start(final InetSocketAddress address) {
@@ -102,12 +105,13 @@ public final class Server {
 
 		try {
 
+			final Executor executor=Executors.newCachedThreadPool();
 			final Handler handler=Objects.requireNonNull(factory.apply(context), "null handler");
 			final Logger logger=context.get(logger());
 
 			final HttpServer server=HttpServer.create(address, backlog);
 
-			server.createContext(root, exchange -> {
+			server.createContext(root, exchange -> executor.execute(() -> {
 				try {
 
 					context.exec(() -> handler.handle(request(exchange))
@@ -118,7 +122,7 @@ public final class Server {
 				} catch ( final RuntimeException e ) {
 					logger.error(this, "unhandled exception", e);
 				}
-			});
+			}));
 
 			Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 
@@ -172,7 +176,7 @@ public final class Server {
 
 			exchange.getResponseHeaders().putAll(response.headers());
 
-			exchange.sendResponseHeaders(response.status(), response
+			exchange.sendResponseHeaders(response.status(), exchange.getRequestMethod().equals(HEAD) ? -1L : response
 					.header("Content-Length")
 					.map(s -> {
 						try {
