@@ -88,10 +88,10 @@ final class MultipartFormatTest {
 
 							error -> Assertions.fail("unexpected failure {"+error+"}"), parts -> {
 
-								Assertions.assertThat(parts.size())
+								assertThat(parts.size())
 										.isEqualTo(2);
 
-								Assertions.assertThat(parts.keySet())
+								assertThat(parts.keySet())
 										.containsExactly("main", "file");
 
 								MessageAssert.assertThat(parts.get("file"))
@@ -123,7 +123,7 @@ final class MultipartFormatTest {
 					.body(multipart())
 					.fold(e -> Assertions.fail("missing multipart body"), identity());
 
-			assertThat(one)
+			Assertions.assertThat(one)
 					.as("idempotent")
 					.isSameAs(two);
 		}

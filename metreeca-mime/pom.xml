@@ -33,7 +33,7 @@
 	<packaging>pom</packaging>
 
 	<name>Metreeca Format Adapters</name>
-	<description>File format adapter kits.</description>
+	<description>data formats adapter kits.</description>
 
 	<modules>
 

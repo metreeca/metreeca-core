@@ -32,13 +32,13 @@
 	<version>0.0.0-SNAPSHOT</version>
 
 	<name>Metreeca Java SE Adapter</name>
-	<description>Adapter for deploying Metreeca/Link apps to the Jave SE internal HTTP server.</description>
+	<description>Adapter kit for Jave SE internal HTTP server.</description>
 
 	<dependencies>
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-core</artifactId>
+			<artifactId>metreeca-rest</artifactId>
 		</dependency>
 
 	</dependencies>

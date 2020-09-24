@@ -15,7 +15,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.metreeca.rest.handlers;
+package com.metreeca.rest.operators;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
@@ -23,6 +23,7 @@ import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.handlers.Delegator;
 
 import javax.json.JsonObject;
 

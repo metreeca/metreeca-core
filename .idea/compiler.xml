@@ -12,7 +12,6 @@
         <module name="metreeca-rest" />
         <module name="metreeca-json" />
         <module name="metreeca-xml" />
-        <module name="metreeca-core" />
         <module name="metreeca-gcp" />
         <module name="metreeca-rdf" />
       </profile>

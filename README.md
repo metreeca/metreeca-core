@@ -4,13 +4,11 @@
 
 # metreeca/link
 
-Metreeca/Link is an open source, lightweight and server-agnostic Java framework
- enabling rapid development of RESTful linked data services.
+Metreeca/Link is an open source, lightweight and server-agnostic Java framework enabling rapid development of RESTful linked data services.
 
 Its engine automatically converts high-level declarative data models into extended REST/JSON-LD APIs supporting faceted search, data validation and fine‑grained role‑based access control rules, completely shielding front‑end developers from linked data technicalities.
 
-To get started, open the [docs](https://metreeca.github.io/link/) and walk
- through the model‑driven linked data [publishing](https://metreeca.github.io
+To get started, open the [docs](https://metreeca.github.io/link/) and walk through the model‑driven linked data [publishing](https://metreeca.github.io
  /link/tutorials/publishing-jsonld-apis) and [interaction](https://metreeca
  .github.io/link/tutorials/consuming-jsonld-apis) tutorials.
 

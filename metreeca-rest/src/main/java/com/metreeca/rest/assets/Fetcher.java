@@ -62,7 +62,7 @@ import static java.util.stream.Collectors.toMap;
 	 */
 	public static class URLFetcher implements Fetcher {
 
-		private final Logger logger=Context.asset(logger());
+		private final Logger logger=asset(logger());
 
 
 		@Override public Response apply(final Request request) {
@@ -194,7 +194,7 @@ import static java.util.stream.Collectors.toMap;
 	public static final class CacheFetcher implements Fetcher { // !!! check caching headers
 
 		private Fetcher delegate=asset(fetcher(), fetcher());
-		private Cache cache=Context.asset(Cache.cache());
+		private Cache cache=asset(Cache.cache());
 
 
 		/**
