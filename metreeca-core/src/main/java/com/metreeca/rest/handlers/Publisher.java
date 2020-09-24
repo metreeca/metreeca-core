@@ -128,6 +128,8 @@ public final class Publisher implements Handler {
 	/**
 	 * Computes HTML variants of a URL.
 	 *
+	 * <p>Generate alternative paths appending {@code .html}/{index.html} suffixes as suggested by the path, e.g.:</p>
+	 *
 	 * <ul>
 	 *
 	 *     <li>{@code …/path/} ›› {@code …/path/}, {@code …/path/index.html}</li>
@@ -139,7 +141,7 @@ public final class Publisher implements Handler {
 	 *
 	 * @param url the url whose variants are to be computed
 	 *
-	 * @return a stream of url variants, e.g {@linkplain /url/file}, {@linkplain /url/file.html}; URL anchors a
+	 * @return a stream of url variants
 	 *
 	 * @throws NullPointerException if {@code url} is null
 	 */
