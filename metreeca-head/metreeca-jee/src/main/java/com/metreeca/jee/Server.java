@@ -25,8 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -156,13 +155,23 @@ public abstract class Server implements Filter {
 			final ServletRequest request, final ServletResponse response, final FilterChain chain
 	) throws ServletException, IOException {
 
-		context.exec(() -> context.get(handler)
-				.handle(request((HttpServletRequest)request))
-				.accept(_response -> response((HttpServletResponse)response, _response))
-		);
+		try {
 
-		if ( !response.isCommitted() ) {
-			chain.doFilter(request, response);
+			context.exec(() -> context.get(handler)
+					.handle(request((HttpServletRequest)request))
+					.accept(_response -> response((HttpServletResponse)response, _response))
+			);
+
+			if ( !response.isCommitted() ) {
+				chain.doFilter(request, response);
+			}
+
+		} catch ( final RuntimeException e ) {
+
+			if ( !e.toString().toLowerCase(Locale.ROOT).contains("broken pipe") ) {
+				context.get(logger()).error(this, "unhandled exception", e);
+			}
+
 		}
 
 	}

@@ -26,8 +26,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
@@ -136,7 +135,11 @@ public final class Server {
 					);
 
 				} catch ( final RuntimeException e ) {
-					logger.error(this, "unhandled exception", e);
+
+					if ( !e.toString().toLowerCase(Locale.ROOT).contains("broken pipe") ) {
+						logger.error(this, "unhandled exception", e);
+					}
+
 				}
 			});
 
@@ -214,10 +217,14 @@ public final class Server {
 				}
 			});
 
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		} finally {
+
 			exchange.close();
 
-		} catch ( final IOException e ) {
-			throw new UncheckedIOException(e);
 		}
 
 	}
