@@ -16,5 +16,6 @@ target/
 /.idea/libraries/
 /.idea/dictionaries/
 /.idea/shelf/
+/.idea/httpRequests/
 
 *.iml

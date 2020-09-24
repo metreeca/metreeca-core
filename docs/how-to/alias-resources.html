@@ -1,0 +1,118 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  Copyright © 2013-2020 Metreeca srl. All rights reserved.
+
+  This file is part of Metreeca/Link.
+
+  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
+  of the GNU Affero General Public License as published by the Free Software Foundation,
+  either version 3 of the License, or(at your option) any later version.
+
+  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
+  If not, see <http://www.gnu.org/licenses/>.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head><title>How To Alias Resources | Metreeca Linked Data Framework</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="shortcut icon" href="../index.svg">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.21.0/themes/prism.min.css">
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.21.0/components/prism-core.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.21.0/plugins/autoloader/prism-autoloader.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../index.css">
+	</head>
+	<body><input id="toggle" type="checkbox">
+		<nav>
+			<header>
+				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.53.0</span></a></span><label for="toggle"></label>
+			</header>
+			<section><a class="title" onclick="document.querySelector('main').scrollTo(0, 0)">How To Alias Resources</a>
+				<h1><a href="#alternate-identifiers">Alternate Identifiers</a></h1><h2><a href="#independent-endpoints">Independent
+					Endpoints</a></h2><h2><a href="#shared-endpoints">Shared Endpoints</a></h2><h1>
+					<a href="#simplified-query-endpoints">Simplified Query Endpoints</a></h1></section>
+		</nav>
+		<main>
+			<header>How To Alias Resources</header>
+			<section><p>Sometimes you need to access resources using alternate identifiers or to set up simplified query
+				endpoints: the <a href="../javadocs/com/metreeca/rest/wrappers/Aliaser.html">Aliaser</a> wrapper/handler
+				supports these use cases redirecting requests to canonical resources located by a custom alias resolver.
+			</p>
+				<p>The following samples present typical setups built on the same data used in the
+					<a href="../tutorials/publishing-ldp-apis">tutorials</a> and a custom name-based product resolver.
+				</p>
+				<pre><code class="language-java">private Optional&lt;String&gt; byname(final RepositoryConnection connection, final String name) {
+    return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
+            .map(Statement::getSubject)
+            .filter(resource -&gt; connection.hasStatement(resource, RDF.TYPE, BIRT.Product, true))
+            .map(Value::stringValue)
+            .findFirst();
+}
+</code></pre>
+				<h1 id="alternate-identifiers">Alternate Identifiers</h1>
+				<h2 id="independent-endpoints">Independent Endpoints</h2>
+				<pre><code class="language-java">new Router()
+ 
+  // primary code-based endpoint
+
+  .path(&quot;/products/{code}&quot;, new Worker()
+    .get(new Relator())
+  )
+ 
+  // alternate name-based endpoint
+
+  .path(&quot;/products/byname/{name}&quot;, new Aliaser(request -&gt; request
+        .parameter(&quot;name&quot;)
+        .flatMap(connect(this::byname))
+))
+</code></pre>
+				<pre><code class="language-shell">GET http://localhost:8080/products/byname/Pont+Yacht
+
+303 See Other
+Location: http://localhost:8080/products/S72_3212
+</code></pre>
+				<h2 id="shared-endpoints">Shared Endpoints</h2>
+				<pre><code class="language-java">new Router()
+
+    .path(&quot;/products/{code}&quot;, new Worker()
+        .get(new Relator()
+            .with(new Aliaser(request -&gt; request
+                    .parameter(&quot;code&quot;)
+                    .filter(code -&gt; !code.matches(&quot;S\\d+_\\d+&quot;)) // not a product code
+                    .flatMap(connect(this::byname)) // resolve and redirect
+            ))
+        )
+</code></pre>
+				<pre><code class="language-shell">GET http://localhost:8080/products/Pont+Yacht
+
+303 See Other
+Location: http://localhost:8080/products/S72_3212
+</code></pre>
+				<h1 id="simplified-query-endpoints">Simplified Query Endpoints</h1>
+				<pre><code class="language-java">new Router()
+    .path(&quot;/products/&quot;, new Worker()
+        .get(new Relator()
+            .with(new Aliaser(request -&gt; request
+                .parameter(&quot;name&quot;) // product name keywords provided as query parameter
+                .map(name -&gt; &quot;?~label=&quot;+Codecs.encode(name)) // rewrite query
+        ))
+	)
+)
+</code></pre>
+				<pre><code class="language-shell">GET http://localhost:8080/products/?name=Model+A
+
+303 See Other
+Location: http://localhost:8080/products/?~label=Model+A
+</code></pre>
+			</section>
+			<footer>© 2020 Metreeca srl. This work is licensed under the
+				<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA 4.0 License</a>
+			</footer>
+		</main>
+		<script type="text/javascript" src="../index.js"></script>
+	</body>
+</html>
