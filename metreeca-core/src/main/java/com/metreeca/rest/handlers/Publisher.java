@@ -20,12 +20,13 @@ package com.metreeca.rest.handlers;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.DataFormat;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.*;
-import java.util.*;
+import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -60,10 +61,8 @@ public final class Publisher implements Handler {
 
 			.of(Publisher.class.getSimpleName()+".tsv")
 
-			.map(Publisher.class::getResource)
-			.map(function(URL::toURI))
-			.map(Paths::get)
-			.flatMap(function(path -> Files.readAllLines(path, UTF_8).stream()))
+			.map(Publisher.class::getResourceAsStream)
+			.flatMap(stream -> new BufferedReader(new InputStreamReader(stream, UTF_8)).lines())
 
 			.filter(line -> !line.isEmpty())
 
@@ -71,7 +70,7 @@ public final class Publisher implements Handler {
 
 				final int tab=line.indexOf('\t');
 
-				return new AbstractMap.SimpleImmutableEntry<>(line.substring(0, tab), line.substring(tab+1));
+				return new SimpleImmutableEntry<>(line.substring(0, tab), line.substring(tab+1));
 
 			})
 
