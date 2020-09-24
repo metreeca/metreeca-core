@@ -18,8 +18,7 @@
 package com.metreeca.rest;
 
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
@@ -111,6 +110,35 @@ import static java.util.function.Function.identity;
 			}
 
 		};
+	}
+
+
+	/**
+	 * Creates an alternative value pair.
+	 *
+	 * @param supplier the supplier of the right alternative value
+	 * @param <V>      the type of the right alternative value
+	 *
+	 * @return a right alternative value, if a value was successfully provided by {@code supplier}; a left alternative
+	 * value with an exception thrown in the process, otherwise
+	 *
+	 * @throws NullPointerException if {@code supplier} is null or returns a null value
+	 */
+	public static <V> Either<RuntimeException, V> from(final Supplier<V> supplier) {
+
+		if ( supplier == null ) {
+			throw new NullPointerException("null supplier");
+		}
+
+		try {
+
+			return Right(requireNonNull(supplier.get(), "null supplier return value"));
+
+		} catch ( final RuntimeException e ) {
+
+			return Left(e);
+
+		}
 	}
 
 
@@ -232,4 +260,5 @@ import static java.util.function.Function.identity;
 				}
 		);
 	}
+
 }
