@@ -70,10 +70,9 @@ public final class Gateway implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return request -> consumer -> {
-			try {
+		return request -> consumer -> Either
 
-				request
+				.from(() -> request
 
 						.map(this::query)
 						.map(this::form)
@@ -83,20 +82,17 @@ public final class Gateway implements Wrapper {
 						.map(this::logging)
 						.map(this::charset)
 
-						.accept(consumer);
+				)
 
-			} catch ( final RuntimeException e ) {
-
-				request
+				.fold(e -> request
 
 						.reply(status(InternalServerError, e))
 
 						.map(this::logging)
 
-						.accept(consumer);
+				)
 
-			}
-		};
+				.accept(consumer);
 	}
 
 
@@ -112,7 +108,8 @@ public final class Gateway implements Wrapper {
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
-				? request.parameters(search(request.body(TextFormat.text()).fold(e -> "", identity()))) // !!! error handling?
+				? request.parameters(search(request.body(TextFormat.text()).fold(e -> "", identity()))) // !!! error
+				// handling?
 				: request;
 	}
 
