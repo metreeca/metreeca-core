@@ -23,17 +23,17 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.*;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toCollection;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -49,7 +49,7 @@ final class FrameTest {
 
 		@Test void testReportLiteralValuesForInverseFields() {
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					frame(x).set(inverse(RDF.VALUE), literal(1))
+					frame(x).set(Frame.inv(RDF.VALUE), literal(1))
 			);
 		}
 
@@ -129,7 +129,7 @@ final class FrameTest {
 		@Test void testExportInverseStatements() {
 			assertThat(frame(x)
 
-					.set(inverse(RDF.VALUE), y)
+					.set(Frame.inv(RDF.VALUE), y)
 
 					.model()
 
@@ -162,7 +162,7 @@ final class FrameTest {
 
 	@Nested final class Traversing {
 
-		private Set<Value> get(final Function<Frame, Group> path) {
+		private Set<Value> get(final Function<Frame, Stream<Value>> path) {
 			return frame(x, asList(
 
 					statement(x, RDF.FIRST, y),
@@ -173,7 +173,7 @@ final class FrameTest {
 					statement(z, RDF.FIRST, literal(3)),
 					statement(z, RDF.REST, literal(4))
 
-			)).get(path).values().collect(toCollection(LinkedHashSet::new));
+			)).get(path).collect(toCollection(LinkedHashSet::new));
 		}
 
 
@@ -183,96 +183,6 @@ final class FrameTest {
 
 		@Test void testAlt() {
 			assertThat(get(alt(RDF.FIRST, RDF.REST))).containsExactly(y, z);
-		}
-
-	}
-
-	@Nested final class Converting {
-
-		private Frame.Group group(final Value... values) {
-			return frame(
-
-					RDF.NIL,
-					Arrays.stream(values).map(value -> statement(RDF.NIL, RDF.VALUE, value)).collect(toList())
-
-			).get(RDF.VALUE);
-		}
-
-
-		@Test void testBoolean() {
-			assertThat(
-
-					group(True, False).bool()
-
-			).contains(true);
-		}
-
-
-		@Test void testInteger() {
-			assertThat(
-
-					group(literal(BigInteger.ONE), literal(BigInteger.TEN)).integer()
-
-			).contains(BigInteger.ONE);
-		}
-
-		@Test void testIntegers() {
-			assertThat(
-
-					group(literal(BigInteger.ONE), literal(BigInteger.TEN)).integers()
-
-			).contains(BigInteger.ONE, BigInteger.TEN);
-		}
-
-
-		@Test void testDecimal() {
-			assertThat(
-
-					group(literal(BigDecimal.ONE), literal(BigDecimal.TEN)).decimal()
-
-			).contains(BigDecimal.ONE);
-		}
-
-		@Test void testDecimals() {
-			assertThat(
-
-					group(literal(BigDecimal.ONE), literal(BigDecimal.TEN)).decimals()
-
-			).contains(BigDecimal.ONE, BigDecimal.TEN);
-		}
-
-
-		@Test void testString() {
-			assertThat(
-
-					group(literal("one", "two")).string()
-
-			).contains("one");
-		}
-
-		@Test void testStrings() {
-			assertThat(
-
-					group(literal("one"), literal("two")).strings()
-
-			).contains("one", "two");
-		}
-
-
-		@Test void testValue() {
-			assertThat(
-
-					group(True, False).value()
-
-			).contains(True);
-		}
-
-		@Test void testValues() {
-			assertThat(
-
-					group(True, False).values().collect(toSet())
-
-			).contains(True, False);
 		}
 
 	}

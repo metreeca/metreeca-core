@@ -18,19 +18,18 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.*;
-import static java.util.Arrays.asList;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.statement;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
@@ -46,8 +45,8 @@ public final class Frame implements Resource {
 	private static final IRI SchemaName=iri("http://schema.org/", "name");
 	private static final IRI SchemaDescription=iri("http://schema.org/", "description");
 
-	private static final Function<Frame, Group> Labels=alt(RDFS.LABEL, DC.TITLE, SchemaName);
-	private static final Function<Frame, Group> Notes=alt(RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription);
+	private static final Function<Frame, Stream<Value>> Labels=alt(RDFS.LABEL, DC.TITLE, SchemaName);
+	private static final Function<Frame, Stream<Value>> Notes=alt(RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription);
 
 
 	public static Frame frame(final Resource focus) {
@@ -90,7 +89,7 @@ public final class Frame implements Resource {
 
 					} else if ( object.equals(focus) ) {
 
-						return new SimpleImmutableEntry<>(inverse(predicate), value(subject, model, trail));
+						return new SimpleImmutableEntry<>(inv(predicate), value(subject, model, trail));
 
 					} else {
 
@@ -112,45 +111,44 @@ public final class Frame implements Resource {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Function<Frame, Group> seq(final IRI path) {
-		return frame -> frame.get(path);
+	public static IRI inv(final IRI iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return new Inverse(iri);
 	}
 
-	public static Function<Frame, Group> seq(final IRI... path) {
+
+	public static Function<Frame, Stream<Value>> seq(final IRI path) {
+		return frame -> frame.fields.getOrDefault(path, emptySet()).stream();
+	}
+
+	public static Function<Frame, Stream<Value>> seq(final IRI... path) {
 		return seq(Arrays.stream(path).map(Frame::seq).collect(toList()));
 	}
 
-	public static Function<Frame, Group> seq(final Iterable<Function<Frame, Group>> paths) {
+	public static Function<Frame, Stream<Value>> seq(final Iterable<Function<Frame, Stream<Value>>> paths) {
 		return frame -> {
 
-			Set<Value> values=singleton(frame);
+			Stream<Value> values=Stream.of(frame);
 
-			for (final Function<Frame, Group> path : paths) {
-
-				values=values.stream()
-
-						.filter(Frame.class::isInstance)
-						.map(Frame.class::cast)
-
-						.flatMap(value -> path.apply(value).values.stream())
-
-						.collect(toCollection(LinkedHashSet::new));
+			for (final Function<Frame, Stream<Value>> path : paths) {
+				values=values.filter(Frame.class::isInstance).map(Frame.class::cast).flatMap(path);
 			}
 
-			return new Group(values);
+			return values;
 		};
 	}
 
 
-	public static Function<Frame, Group> alt(final IRI... paths) {
+	public static Function<Frame, Stream<Value>> alt(final IRI... paths) {
 		return alt(Arrays.stream(paths).map(Frame::seq).collect(toList()));
 	}
 
-	public static Function<Frame, Group> alt(final Collection<Function<Frame, Group>> paths) {
-		return frame -> new Group(paths.stream()
-				.flatMap(step -> step.apply(frame).values())
-				.collect(toCollection(LinkedHashSet::new))
-		);
+	public static Function<Frame, Stream<Value>> alt(final Collection<Function<Frame, Stream<Value>>> paths) {
+		return frame -> paths.stream().flatMap(step -> step.apply(frame));
 	}
 
 
@@ -170,12 +168,13 @@ public final class Frame implements Resource {
 		return focus;
 	}
 
+
 	public String label() {
-		return get(Labels).string().orElse("");
+		return get(Labels).findFirst().flatMap(Values::string).orElse("");
 	}
 
 	public String notes() {
-		return get(Notes).string().orElse("");
+		return get(Notes).findFirst().flatMap(Values::string).orElse("");
 	}
 
 
@@ -186,18 +185,18 @@ public final class Frame implements Resource {
 	public Stream<Statement> stream() {
 		return fields.entrySet().stream().flatMap(entry -> {
 
-			final IRI predicate=entry.getKey();
-			final IRI inverse=inverse(predicate);
+			final IRI key=entry.getKey();
+			final IRI predicate=iri(key.getNamespace(), key.getLocalName());
 
-			final boolean direct=direct(predicate);
+			final boolean inverse=key instanceof Inverse;
 
 			return entry.getValue().stream().flatMap(value -> {
 
 				final boolean frame=value instanceof Frame;
 
-				final Statement statement=direct
-						? statement(focus, predicate, frame ? ((Frame)value).focus : value)
-						: statement(frame ? ((Frame)value).focus : (Resource)value, inverse, focus);
+				final Statement statement=inverse
+						? statement(frame ? ((Frame)value).focus : (Resource)value, predicate, focus)
+						: statement(focus, predicate, frame ? ((Frame)value).focus : value);
 
 				return Stream.concat(Stream.of(statement), frame ? ((Frame)value).stream() : Stream.empty());
 
@@ -209,56 +208,68 @@ public final class Frame implements Resource {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Group get(final IRI field) {
+	public Stream<Value> get(final IRI field) {
 
 		if ( field == null ) {
 			throw new NullPointerException("null field IRI");
 		}
 
-		return new Group(fields.getOrDefault(field, emptySet()));
+		return get(seq(field));
 	}
 
-	public Group get(final Function<Frame, Group> getter) {
+	public Stream<Value> get(final Function<Frame, Stream<Value>> getter) {
 
 		if ( getter == null ) {
 			throw new NullPointerException("null getter");
 		}
 
-		return Objects.requireNonNull(getter.apply(this), "null getter return value");
+		return Objects.requireNonNull(getter.apply(this), "null getter return value")
+				.map(value -> value instanceof Frame ? ((Frame)value).focus : value);
 	}
 
 
 	public Frame set(final IRI field, final Value... values) {
-		return set(field, asList(values));
+		return set(field, Arrays.stream(values));
 	}
 
 	public Frame set(final IRI field, final Optional<? extends Value> value) {
-		return set(field, value.map(Collections::singleton).orElse(emptySet()));
-	}
-
-	public Frame set(final IRI field, final Stream<? extends Value> values) {
-		return set(field, values.collect(toList()));
+		return set(field, value.map(Stream::of).orElseGet(Stream::empty));
 	}
 
 	public Frame set(final IRI field, final Collection<? extends Value> values) {
+		return set(field, values.stream());
+	}
+
+	public Frame set(final IRI field, final Stream<? extends Value> values) {
 
 		if ( field == null ) {
 			throw new NullPointerException("null field");
 		}
 
-		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
+		if ( values == null ) {
 			throw new NullPointerException("null values");
 		}
 
-		if ( !direct(field) && values.stream().anyMatch(v -> !(v instanceof Resource)) ) {
-			throw new IllegalArgumentException("literal values for inverse field");
-		}
+		final Map<IRI, Set<Value>> fields=new LinkedHashMap<>(this.fields);
+		final Set<Value> update=new LinkedHashSet<>();
 
-		final Map<IRI, Set<Value>> map=new LinkedHashMap<>(fields);
+		values.forEachOrdered(value -> {
 
-		map.put(field, new LinkedHashSet<>(values));
+			if ( value == null ) {
+				throw new NullPointerException("null values");
+			}
 
-		return new Frame(focus, map);
+			if ( field instanceof Inverse && !(value instanceof Resource) ) {
+				throw new IllegalArgumentException("literal values for inverse field");
+			}
+
+			update.add(value);
+
+		});
+
+		fields.put(field, update);
+
+		return new Frame(focus, fields);
 	}
 
 
@@ -279,56 +290,29 @@ public final class Frame implements Resource {
 
 	@Override public String toString() {
 		return focus
-				+get(Labels).value().map(l -> " : "+l).orElse("")
-				+get(Notes).value().map(l -> " / "+l).orElse("");
+				+get(Labels).findFirst().map(l -> " : "+l).orElse("")
+				+get(Notes).findFirst().map(l -> " / "+l).orElse("");
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class Group {
+	private static final class Inverse extends SimpleIRI {
 
-		private final Set<Value> values;
+		private static final long serialVersionUID=7576383707001017160L;
 
 
-		private Group(final Set<Value> values) {
-			this.values=values;
+		private Inverse(final IRI iri) { super(iri.stringValue()); }
+
+
+		@Override public boolean equals(final Object object) {
+			return object == this || object instanceof Inverse && super.equals(object);
 		}
 
+		@Override public int hashCode() { return -super.hashCode(); }
 
-		public Optional<Boolean> bool() { return value(Values::bool); }
-
-
-		public Optional<BigInteger> integer() { return value(Values::integer); }
-
-		public Stream<BigInteger> integers() { return values(Values::integer); }
-
-
-		public Optional<BigDecimal> decimal() { return value(Values::decimal); }
-
-		public Stream<BigDecimal> decimals() { return values(Values::decimal); }
-
-
-		public Optional<String> string() { return value(Values::string); }
-
-		public Stream<String> strings() { return values(Values::string); }
-
-
-		public <V> Optional<V> value(final Function<Value, Optional<V>> mapper) {
-			return value().flatMap(mapper);
-		}
-
-		public <V> Stream<V> values(final Function<Value, Optional<V>> mapper) {
-			return values().map(mapper).filter(Optional::isPresent).map(Optional::get);
-		}
-
-
-		public Optional<Value> value() {
-			return values().findFirst();
-		}
-
-		public Stream<Value> values() {
-			return values.stream().map(value -> value instanceof Frame ? ((Frame)value).focus : value);
+		@Override public String toString() {
+			return "^"+super.toString();
 		}
 
 	}
