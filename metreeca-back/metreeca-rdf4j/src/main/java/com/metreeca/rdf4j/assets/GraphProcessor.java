@@ -733,7 +733,7 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Datatype datatype) {
 
-				final IRI iri=datatype.id();
+				final IRI iri=datatype.iri();
 
 				return iri.equals(ValueType) ? nothing() : snippet(
 
@@ -751,7 +751,7 @@ abstract class GraphProcessor {
 			}
 
 			@Override public Snippet probe(final Clazz clazz) {
-				return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.id()), " .");
+				return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.iri()), " .");
 			}
 
 			@Override public Snippet probe(final Range range) {

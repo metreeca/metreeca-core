@@ -111,7 +111,7 @@ public final class Or extends Shape {
 
 		return space.stream().filter(lower -> space.stream()
 				.filter(upper -> !upper.equals(lower))
-				.noneMatch(upper -> derives(upper.id(), lower.id()))
+				.noneMatch(upper -> derives(upper.iri(), lower.iri()))
 		);
 	}
 

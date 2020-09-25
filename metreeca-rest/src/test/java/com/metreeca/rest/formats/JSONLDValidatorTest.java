@@ -17,22 +17,20 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.Trace;
 import com.metreeca.json.shapes.Range;
 import com.metreeca.rest.Either;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.ValuesTest.decode;
-import static com.metreeca.json.ValuesTest.item;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
@@ -53,32 +51,31 @@ import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rest.EitherAssert.assertThat;
-import static java.util.Arrays.stream;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.joining;
+import static javax.json.Json.*;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 final class JSONLDValidatorTest {
 
-	private static final IRI x=item("x");
-	private static final IRI y=item("y");
-	private static final IRI z=item("z");
+	private static final Literal x=literal("x");
+	private static final Literal y=literal("y");
+	private static final Literal z=literal("z");
 
 
-	private Collection<Statement> model(final String... model) {
-		return model.length == 0 ? emptySet() : decode("<app:/> rdf:value "
-				+stream(model).collect(joining(" . ", "", " . "))
-		);
+	private Either<Trace, JsonObject> validate(final Shape shape, final JsonValue... values) {
+
+		final JsonArrayBuilder array=createArrayBuilder();
+
+		for (final JsonValue value : values) {
+			array.add(value);
+		}
+
+		return validate(field(RDF.VALUE, shape), createObjectBuilder().add("value", array));
 	}
 
-
-	private Either<Trace, Collection<Statement>> validate(final Shape shape, final String... model) {
-		return validate(shape, model(model));
-	}
-
-	private Either<Trace, Collection<Statement>> validate(final Shape shape, final Collection<Statement> model) {
-		return new JSONLDValidator(iri("app:/"), field(RDF.VALUE, shape), emptyMap()).validate(model);
+	private Either<Trace, JsonObject> validate(final Shape shape, final JsonObjectBuilder builder) {
+		return new JSONLDValidator(iri("app:/"), shape, emptyMap()).validate(builder.build());
 	}
 
 
@@ -86,21 +83,27 @@ final class JSONLDValidatorTest {
 
 		@Test void testValidateShapeEnvelope() {
 
-			final Shape shape=all(x);
+			final Shape shape=field(RDF.VALUE, all(x));
 
-			assertThat(validate(shape, "<x>")).hasRight();
-			assertThat(validate(shape, "<x>; rdf:rest rdf:nil")).hasLeft();
+			assertThat(validate(shape, createObjectBuilder()
+					.add("value", "x")
+			)).hasRight();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("value", "x")
+					.add("unknown", "x")
+			)).hasLeft();
 
 		}
 
 
 		@Test void testValidateField() {
 
-			final Shape shape=minCount(1);
+			final Shape shape=field(RDF.VALUE, minCount(1));
 
-			assertThat(validate(shape, "<x>, <z>")).hasRight();
+			assertThat(validate(shape, createObjectBuilder().add("value", createArrayBuilder(asList("x", "y"))))).hasRight();
 
-			assertThat(validate(shape)).as("empty focus").hasLeft();
+			assertThat(validate(shape, createObjectBuilder())).as("empty focus").hasLeft();
 
 		}
 
@@ -108,17 +111,18 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=field(RDF.VALUE, all(y));
 
-			assertThat(validate(shape, "<x>", "<x> rdf:value <y>")).hasRight();
-			assertThat(validate(shape, "<x>")).hasLeft();
+			assertThat(validate(shape, createObjectBuilder().add("value", createArrayBuilder(asList("x", "y"))))).hasRight();
+
+			assertThat(validate(shape, createObjectBuilder().add("value", "x"))).hasLeft();
 
 		}
 
 		@Test void testValidateInverseFields() {
 
-			final Shape shape=field(inverse(RDF.VALUE), all(y));
+			final Shape shape=field(inverse(RDF.VALUE), all(iri("http://example.com/")));
 
-			assertThat(validate(shape, "<x>", "<y> rdf:value <x>")).hasRight();
-			assertThat(validate(shape, "<x>")).hasLeft();
+			assertThat(validate(shape, createObjectBuilder().add("valueOf", "http://example.com/"))).hasRight();
+			assertThat(validate(shape, createValue("x"))).hasLeft();
 
 		}
 
@@ -127,8 +131,8 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=and(any(x), any(y));
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
-			assertThat(validate(shape, "<x>, <z>")).hasLeft();
+			assertThat(validate(shape, createValue("x"), createValue("y"), createValue("z"))).hasRight();
+			assertThat(validate(shape, createValue("x"), createValue("z"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasLeft();
 
@@ -138,8 +142,8 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=or(all(x, y), all(x, z));
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
-			assertThat(validate(shape, "<y>, <z>")).hasLeft();
+			assertThat(validate(shape, createValue("x"), createValue("y"), createValue("z"))).hasRight();
+			assertThat(validate(shape, createValue("y"), createValue("z"))).hasLeft();
 
 		}
 
@@ -148,11 +152,11 @@ final class JSONLDValidatorTest {
 			final Shape shape=when(
 					datatype(XSD.INTEGER),
 					maxInclusive(literal(100)),
-					maxInclusive(literal(10))
+					maxInclusive(literal("10"))
 			);
 
-			assertThat(validate(shape, "100")).hasRight();
-			assertThat(validate(shape, "100.0")).hasLeft();
+			assertThat(validate(shape, createValue(100))).hasRight();
+			assertThat(validate(shape, createValue("100.0"))).hasLeft();
 		}
 
 
@@ -168,34 +172,54 @@ final class JSONLDValidatorTest {
 
 		@Test void testValidateDatatype() {
 
-			assertThat(validate(datatype(Values.ValueType), "<x>")).hasRight();
-			assertThat(validate(datatype(Values.ValueType), "_:x")).hasRight();
-			assertThat(validate(datatype(Values.ValueType), "1")).hasRight();
+			final JsonValue iri=createObjectBuilder().add("@id", "http://example.com/").build();
+			final JsonValue bnode=createObjectBuilder().build();
 
-			assertThat(validate(datatype(Values.ResourceType), "<x>")).hasRight();
-			assertThat(validate(datatype(Values.ResourceType), "_:x")).hasRight();
-			assertThat(validate(datatype(Values.ResourceType), "1")).hasLeft();
+			final JsonValue number=createValue(1);
+			final JsonString string=createValue("text");
 
-			assertThat(validate(datatype(Values.BNodeType), "_:x")).hasRight();
-			assertThat(validate(datatype(Values.BNodeType), "1")).hasLeft();
+			final JsonObject typed=createObjectBuilder()
+					.add("@value", "2020-09-25")
+					.add("@type", XSD.DATE.stringValue())
+					.build();
 
-			assertThat(validate(datatype(Values.IRIType), "<x>")).hasRight();
-			assertThat(validate(datatype(Values.IRIType), "_:x")).hasLeft();
+			final JsonObject tagged=createObjectBuilder()
+					.add("@value", "text")
+					.add("@language", "en")
+					.build();
 
-			assertThat(validate(datatype(Values.LiteralType), "'x'")).hasRight();
-			assertThat(validate(datatype(Values.LiteralType), "1")).hasRight();
-			assertThat(validate(datatype(Values.LiteralType), "_:x")).hasLeft();
 
-			assertThat(validate(datatype(XSD.STRING), "'text'")).hasRight();
-			assertThat(validate(datatype(XSD.STRING), "_:x")).hasLeft();
+			assertThat(validate(datatype(ValueType), iri)).hasRight();
+			assertThat(validate(datatype(ValueType), bnode)).hasRight();
+			assertThat(validate(datatype(ValueType), number)).hasRight();
 
-			assertThat(validate(datatype(RDF.LANGSTRING), "'text'@en")).hasRight();
-			assertThat(validate(datatype(RDF.LANGSTRING), "_:x")).hasLeft();
+			assertThat(validate(datatype(ResourceType), iri)).hasRight();
+			assertThat(validate(datatype(ResourceType), bnode)).hasRight();
+			assertThat(validate(datatype(ResourceType), number)).hasLeft();
 
-			assertThat(validate(datatype(XSD.BOOLEAN), "true")).hasRight();
-			assertThat(validate(datatype(XSD.BOOLEAN), "_:x")).hasLeft();
+			assertThat(validate(datatype(BNodeType), bnode)).hasRight();
+			assertThat(validate(datatype(BNodeType), number)).hasLeft();
 
-			assertThat(validate(datatype(Values.IRIType))).as("empty focus").hasRight();
+			assertThat(validate(datatype(IRIType), iri)).hasRight();
+			assertThat(validate(datatype(IRIType), bnode)).hasLeft();
+
+			assertThat(validate(datatype(LiteralType), string)).hasRight();
+			assertThat(validate(datatype(LiteralType), number)).hasRight();
+			assertThat(validate(datatype(LiteralType), bnode)).hasLeft();
+
+			assertThat(validate(datatype(XSD.STRING), string)).hasRight();
+			assertThat(validate(datatype(XSD.STRING), bnode)).hasLeft();
+
+			assertThat(validate(datatype(XSD.DATE), typed)).hasRight();
+			assertThat(validate(datatype(XSD.DATE), bnode)).hasLeft();
+
+			assertThat(validate(datatype(RDF.LANGSTRING), tagged)).hasRight();
+			assertThat(validate(datatype(RDF.LANGSTRING), bnode)).hasLeft();
+
+			assertThat(validate(datatype(XSD.BOOLEAN), JsonValue.TRUE)).hasRight();
+			assertThat(validate(datatype(XSD.BOOLEAN), bnode)).hasLeft();
+
+			assertThat(validate(datatype(IRIType))).as("empty focus").hasRight();
 
 		}
 
@@ -203,8 +227,8 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=Range.range(x, y);
 
-			assertThat(validate(shape, "<x>, <y>")).hasRight();
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasLeft();
+			assertThat(validate(shape, createValue("x"), createValue("y"))).hasRight();
+			assertThat(validate(shape, createValue("x"), createValue("y"), createValue("z"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -215,9 +239,9 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=minExclusive(literal(1));
 
-			assertThat(validate(shape, "2")).hasRight();
-			assertThat(validate(shape, "1")).hasLeft();
-			assertThat(validate(shape, "0")).hasLeft();
+			assertThat(validate(shape, createValue(2))).hasRight();
+			assertThat(validate(shape, createValue(1))).hasLeft();
+			assertThat(validate(shape, createValue(0))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -227,9 +251,9 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=maxExclusive(literal(10));
 
-			assertThat(validate(shape, "2")).hasRight();
-			assertThat(validate(shape, "10")).hasLeft();
-			assertThat(validate(shape, "100")).hasLeft();
+			assertThat(validate(shape, createValue(2))).hasRight();
+			assertThat(validate(shape, createValue(10))).hasLeft();
+			assertThat(validate(shape, createValue(100))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -239,9 +263,9 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=minInclusive(literal(1));
 
-			assertThat(validate(shape, "2")).hasRight();
-			assertThat(validate(shape, "1")).hasRight();
-			assertThat(validate(shape, "0")).hasLeft();
+			assertThat(validate(shape, createValue(2))).hasRight();
+			assertThat(validate(shape, createValue(1))).hasRight();
+			assertThat(validate(shape, createValue(0))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -251,9 +275,9 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=maxInclusive(literal(10));
 
-			assertThat(validate(shape, "2")).hasRight();
-			assertThat(validate(shape, "10")).hasRight();
-			assertThat(validate(shape, "100")).hasLeft();
+			assertThat(validate(shape, createValue(2))).hasRight();
+			assertThat(validate(shape, createValue(10))).hasRight();
+			assertThat(validate(shape, createValue(100))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -264,11 +288,11 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=minLength(3);
 
-			assertThat(validate(shape, "100")).hasRight();
-			assertThat(validate(shape, "99")).hasLeft();
+			assertThat(validate(shape, createValue(100))).hasRight();
+			assertThat(validate(shape, createValue(99))).hasLeft();
 
-			assertThat(validate(shape, "'100'")).hasRight();
-			assertThat(validate(shape, "'99'")).hasLeft();
+			assertThat(validate(shape, createValue("100"))).hasRight();
+			assertThat(validate(shape, createValue("99"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -278,11 +302,11 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=maxLength(2);
 
-			assertThat(validate(shape, "99")).hasRight();
-			assertThat(validate(shape, "100")).hasLeft();
+			assertThat(validate(shape, createValue(99))).hasRight();
+			assertThat(validate(shape, createValue(100))).hasLeft();
 
-			assertThat(validate(shape, "'99'")).hasRight();
-			assertThat(validate(shape, "'100'")).hasLeft();
+			assertThat(validate(shape, createValue("99"))).hasRight();
+			assertThat(validate(shape, createValue("100"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -292,11 +316,11 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=pattern(".*\\.org");
 
-			assertThat(validate(shape, "<http://exampe.org>")).hasRight();
-			assertThat(validate(shape, "<http://exampe.com>")).hasLeft();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.org"))).hasRight();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.com"))).hasLeft();
 
-			assertThat(validate(shape, "'example.org'")).hasRight();
-			assertThat(validate(shape, "'example.com'")).hasLeft();
+			assertThat(validate(shape, createValue("example.org"))).hasRight();
+			assertThat(validate(shape, createValue("example.com"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -306,11 +330,11 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=like("ex.org", true);
 
-			assertThat(validate(shape, "<http://exampe.org/>")).hasRight();
-			assertThat(validate(shape, "<http://exampe.com/>")).hasLeft();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://exampe.org/"))).hasRight();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://exampe.com/"))).hasLeft();
 
-			assertThat(validate(shape, "'example.org'")).hasRight();
-			assertThat(validate(shape, "'example.com'")).hasLeft();
+			assertThat(validate(shape, createValue("example.org"))).hasRight();
+			assertThat(validate(shape, createValue("example.com"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -320,14 +344,14 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=stem("http://example.com/");
 
-			assertThat(validate(shape, "<http://example.com/>")).hasRight();
-			assertThat(validate(shape, "<http://example.net/>")).hasLeft();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.com/"))).hasRight();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.net/"))).hasLeft();
 
-			assertThat(validate(shape, "<http://example.com/resource>")).hasRight();
-			assertThat(validate(shape, "<http://example.net/resource>")).hasLeft();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.com/resource"))).hasRight();
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.net/resource"))).hasLeft();
 
-			assertThat(validate(shape, "'http://example.com/resource'")).hasRight();
-			assertThat(validate(shape, "'http://example.net/resource'")).hasLeft();
+			assertThat(validate(shape, createValue("http://example.com/resource"))).hasRight();
+			assertThat(validate(shape, createValue("http://example.net/resource"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
@@ -338,8 +362,8 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=minCount(2);
 
-			assertThat(validate(shape, "1, 2, 3")).hasRight();
-			assertThat(validate(shape, "1")).hasLeft();
+			assertThat(validate(shape, createValue(1), createValue(2), createValue(3))).hasRight();
+			assertThat(validate(shape, createValue(1))).hasLeft();
 
 		}
 
@@ -347,8 +371,8 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=maxCount(2);
 
-			assertThat(validate(shape, "1, 2")).hasRight();
-			assertThat(validate(shape, "1, 2, 3")).hasLeft();
+			assertThat(validate(shape, createValue(1), createValue(2))).hasRight();
+			assertThat(validate(shape, createValue(1), createValue(2), createValue(3))).hasLeft();
 
 		}
 
@@ -356,8 +380,8 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=all(x, y);
 
-			assertThat(validate(shape, "<x>, <y>, <z>")).hasRight();
-			assertThat(validate(shape, "<x>")).hasLeft();
+			assertThat(validate(shape, createValue("x"), createValue("y"), createValue("z"))).hasRight();
+			assertThat(validate(shape, createValue("x"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasLeft();
 
@@ -367,8 +391,8 @@ final class JSONLDValidatorTest {
 
 			final Shape shape=any(x, y);
 
-			assertThat(validate(shape, "<x>")).hasRight();
-			assertThat(validate(shape, "<z>")).hasLeft();
+			assertThat(validate(shape, createValue("x"))).hasRight();
+			assertThat(validate(shape, createValue("z"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasLeft();
 

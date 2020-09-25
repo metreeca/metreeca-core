@@ -17,9 +17,9 @@
 
 package com.metreeca.json;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
-
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -55,32 +55,32 @@ public final class Trace {
 		);
 	}
 
-	public static Trace trace(final String issue, final Value... values) {
+	public static Trace trace(final String issue, final JsonValue... values) {
 		return trace(issue, asList(values));
 	}
 
-	public static Trace trace(final String issue, final Collection<Value> values) {
+	public static Trace trace(final String issue, final Collection<JsonValue> values) {
 		return new Trace(singletonMap(issue, values).entrySet().stream(), Stream.empty());
 	}
 
-	public static Trace trace(final Map<String, Collection<Value>> issues) {
+	public static Trace trace(final Map<String, Collection<JsonValue>> issues) {
 		return new Trace(issues.entrySet().stream(), Stream.empty());
 	}
 
-	public static Trace trace(final Map<String, Collection<Value>> issues, final Map<IRI, Trace> fields) {
+	public static Trace trace(final Map<String, Collection<JsonValue>> issues, final Map<String, Trace> fields) {
 		return new Trace(issues.entrySet().stream(), fields.entrySet().stream());
 	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Map<String, Collection<Value>> issues;
-	private final Map<IRI, Trace> fields;
+	private final Map<String, Collection<JsonValue>> issues;
+	private final Map<String, Trace> fields;
 
 
 	private Trace(
-			final Stream<Map.Entry<String, Collection<Value>>> issues,
-			final Stream<Map.Entry<IRI, Trace>> fields
+			final Stream<Map.Entry<String, Collection<JsonValue>>> issues,
+			final Stream<Map.Entry<String, Trace>> fields
 	) {
 
 		this.issues=issues
@@ -108,19 +108,71 @@ public final class Trace {
 	}
 
 
-	public Map<String, Collection<Value>> issues() {
+	public Map<String, Collection<JsonValue>> issues() {
 		return unmodifiableMap(issues);
 	}
 
-	public Map<IRI, Trace> fields() {
+	public Map<String, Trace> fields() {
 		return unmodifiableMap(fields);
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public JsonObject toJSON() {
+
+		final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+		if ( !issues().isEmpty() ) {
+
+			final JsonObjectBuilder errors=Json.createObjectBuilder();
+
+			issues().forEach((detail, values) -> {
+
+				final JsonArrayBuilder objects=Json.createArrayBuilder();
+
+				values.forEach(value -> {
+
+					if ( value != null ) { objects.add(value); }
+
+				});
+
+				errors.add(detail, objects.build());
+
+			});
+
+			builder.add("", errors);
+		}
+
+		fields().forEach((name, nested) -> {
+
+			if ( !nested.empty() ) {
+				builder.add(name, nested.toJSON());
+			}
+
+		});
+
+		return builder.build();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public String toString() {
-		return String.format("{\n\tissue: %s\n\tfields: %s\n}", issues, fields);
+		try ( final StringWriter writer=new StringWriter() ) {
+
+			Json
+					.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true))
+					.createWriter(writer)
+					.write(toJSON());
+
+			return writer.toString();
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		}
 	}
 
 }

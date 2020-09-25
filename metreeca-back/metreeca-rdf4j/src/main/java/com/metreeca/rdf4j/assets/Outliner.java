@@ -68,7 +68,7 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return sources.stream()
 				.filter(Resource.class::isInstance)
-				.map(source -> statement((Resource)source, RDF.TYPE, clazz.id()));
+				.map(source -> statement((Resource)source, RDF.TYPE, clazz.iri()));
 	}
 
 	@Override public Stream<Statement> probe(final Field field) {

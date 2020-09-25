@@ -50,7 +50,7 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 
 	@Override public Shape probe(final Datatype datatype) {
-		return datatype.id().equals(XSD.BOOLEAN) ? and(datatype,
+		return datatype.iri().equals(XSD.BOOLEAN) ? and(datatype,
 				range(literal(false), literal(true)), maxCount(1)
 		) : datatype;
 	}

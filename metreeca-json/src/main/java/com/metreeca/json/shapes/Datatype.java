@@ -32,34 +32,34 @@ public final class Datatype extends Shape {
 	/**
 	 * Creates a datatype constraint.
 	 *
-	 * @param name the expected datatype name
+	 * @param iri the expected datatype IRI
 	 *
-	 * @return a new datatype constraint for the provided {@code name}
+	 * @return a new datatype constraint for the provided {@code iri}
 	 *
-	 * @throws NullPointerException if {@code name} is null
+	 * @throws NullPointerException if {@code iri} is null
 	 */
-	public static Shape datatype(final IRI name) {
-		return new Datatype(name);
+	public static Shape datatype(final IRI iri) {
+		return new Datatype(iri);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final IRI id;
+	private final IRI iri;
 
 
-	private Datatype(final IRI id) {
+	private Datatype(final IRI iri) {
 
-		if ( id == null ) {
-			throw new NullPointerException("null id");
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
 		}
 
-		this.id=id;
+		this.iri=iri;
 	}
 
 
-	public IRI id() {
-		return id;
+	public IRI iri() {
+		return iri;
 	}
 
 
@@ -79,15 +79,15 @@ public final class Datatype extends Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Datatype
-				&& id.equals(((Datatype)object).id);
+				&& iri.equals(((Datatype)object).iri);
 	}
 
 	@Override public int hashCode() {
-		return id.hashCode();
+		return iri.hashCode();
 	}
 
 	@Override public String toString() {
-		return "datatype("+id+")";
+		return "datatype("+iri+")";
 	}
 
 }

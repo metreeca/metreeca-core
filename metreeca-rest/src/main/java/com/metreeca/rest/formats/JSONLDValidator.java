@@ -21,8 +21,10 @@ import com.metreeca.json.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Either;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 
+import javax.json.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -32,11 +34,20 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.formats.JSONLDCodec.driver;
+import static com.metreeca.rest.formats.JSONLDCodec.fields;
+import static java.lang.String.format;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
 
 final class JSONLDValidator {
+
+	private static <T> Predicate<T> negate(final Predicate<T> predicate) {
+		return predicate.negate();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final IRI focus;
 	private final Shape shape;
@@ -53,83 +64,87 @@ final class JSONLDValidator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Either<Trace, Collection<Statement>> validate(final Collection<Statement> model) {
+	Either<Trace, JsonObject> validate(final JsonObject object) {
 
-		final Collection<Statement> envelope=new HashSet<>();
+		final Trace trace=validate(shape, singleton(object));
 
-		final Trace trace=shape.map(new ValidatorProbe(
-				focus, singleton(focus), model, envelope
-		));
-
-		final Map<String, Collection<Value>> issues=model.stream()
-
-				.filter(statement -> !envelope.contains(statement))
-
-				.collect(toMap(
-
-						statement -> statement.getSubject().equals(focus) ?
-								"unexpected property {"+format(statement.getPredicate())+"}"
-								: statement.getObject().equals(focus) ?
-								"unexpected property {^"+format(statement.getPredicate())+"}"
-								: "statement outside shape envelope",
-
-						statement -> singleton(statement.getObject()),
-
-						(x, y) -> Stream.of(x, y).flatMap(Collection::stream).collect(toSet())
-
-				));
-
-
-		final Trace merged=trace(trace(issues), trace);
-
-		return merged.empty() ? Right(model) : Left(merged);
+		return trace.empty() ? Right(object) : Left(trace);
 
 	}
 
 
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class ValidatorProbe extends Shape.Probe<Trace> {
+	private Trace validate(final Shape shape, final Collection<JsonValue> values) {
 
-		private final IRI resource;
-		private final Collection<Value> focus;
+		final Map<String, Field> fields=fields(shape);
 
-		private final Collection<Statement> source;
-		private final Collection<Statement> target;
+		return Stream.concat(
+
+				Stream.of(shape.map(new ValidatorProbe(focus, shape, fields, values))),
+
+				values.stream() // validate shape envelope
+
+						.filter(JsonObject.class::isInstance)
+						.map(JsonValue::asJsonObject)
+
+						.map(Map::keySet)
+						.flatMap(Collection::stream)
+
+						.filter(negate(alias
+								-> alias.startsWith("@")
+								|| keywords.containsValue(alias)
+								|| fields.containsKey(alias)
+						))
+
+						.map(alias -> trace(emptyMap(), singletonMap(alias, trace("unexpected field"))))
+
+		).reduce(trace(), Trace::trace);
+	}
 
 
-		private ValidatorProbe(
-				final IRI resource, final Collection<Value> focus,
-				final Collection<Statement> source, final Collection<Statement> target
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final class ValidatorProbe extends Shape.Probe<Trace> {
+
+		private final IRI focus;
+		private final Shape shape;
+
+		private Map<String, Field> fields;
+		private final Collection<JsonValue> values;
+
+		private final JSONLDDecoder decoder;
+
+
+		private ValidatorProbe(final IRI focus, final Shape shape,
+				final Map<String, Field> fields, final Collection<JsonValue> values
 		) {
 
-			this.resource=resource;
 			this.focus=focus;
+			this.shape=shape;
 
-			this.source=source;
-			this.target=target;
+			this.fields=fields;
+			this.values=values;
 
+			this.decoder=new JSONLDDecoder(focus, shape, keywords);
 		}
 
 
-		private Value value(final Value value) {
-			return value instanceof Focus
-					? ((Focus)value).resolve(resource)
-					: value;
-		}
-
-		private Set<Value> values(final Collection<Value> values) {
-			return values.stream()
-					.map(this::value)
-					.collect(toSet());
+		private Value value(final JsonValue value) {
+			return decoder.value(value, shape).getKey();
 		}
 
 
-		private <T> Predicate<T> negate(final Predicate<T> predicate) {
-			return predicate.negate();
+		private Value resolve(final Value value) {
+			return value instanceof Focus ? ((Focus)value).resolve(focus) : value;
 		}
 
-		private String issue(final Shape shape) {
+		private Set<Value> resolve(final Collection<Value> values) {
+			return values.stream().map(this::resolve).collect(toSet());
+		}
+
+
+		private String issue(final Shape shape) { // !!! remove
 			return shape.toString().replaceAll("\\s+", " ");
 		}
 
@@ -138,24 +153,22 @@ final class JSONLDValidator {
 			throw new UnsupportedOperationException(guard.toString());
 		}
 
-
 		@Override public Trace probe(final Datatype datatype) {
 
-			final IRI iri=datatype.id();
+			final IRI iri=datatype.iri();
 
-			return trace(focus.stream()
-					.filter(negate(value -> is(value, iri)))
-					.collect(toMap(v -> issue(datatype), Collections::singleton))
+			return trace(values.stream()
+					.filter(negate(value -> is(value(value), iri)))
+					.collect(toMap(value -> issue(datatype), Collections::singleton))
 			);
 		}
 
 		@Override public Trace probe(final Range range) {
 
-			final Set<Value> values=values(range.values());
+			final Set<Value> set=resolve(range.values());
 
-			final Collection<Value> unexpected=focus
-					.stream()
-					.filter(negate(values::contains))
+			final Collection<JsonValue> unexpected=values.stream()
+					.filter(value -> !set.contains(value(value)))
 					.collect(toList());
 
 			return unexpected.isEmpty() ? trace() : trace(issue(range), unexpected);
@@ -164,40 +177,40 @@ final class JSONLDValidator {
 
 		@Override public Trace probe(final MinExclusive minExclusive) {
 
-			final Value limit=value(minExclusive.limit());
+			final Value limit=resolve(minExclusive.limit());
 
-			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) > 0))
-					.collect(toMap(v -> issue(minExclusive), Collections::singleton))
+			return trace(values.stream()
+					.filter(negate(value -> compare(value(value), limit) > 0))
+					.collect(toMap(value -> issue(minExclusive), Collections::singleton))
 			);
 		}
 
 		@Override public Trace probe(final MaxExclusive maxExclusive) {
 
-			final Value limit=value(maxExclusive.limit());
+			final Value limit=resolve(maxExclusive.limit());
 
-			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) < 0))
+			return trace(values.stream()
+					.filter(negate(value -> compare(value(value), limit) < 0))
 					.collect(toMap(v -> issue(maxExclusive), Collections::singleton))
 			);
 		}
 
 		@Override public Trace probe(final MinInclusive minInclusive) {
 
-			final Value limit=value(minInclusive.limit());
+			final Value limit=resolve(minInclusive.limit());
 
-			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) >= 0))
+			return trace(values.stream()
+					.filter(negate(value -> compare(value(value), limit) >= 0))
 					.collect(toMap(v -> issue(minInclusive), Collections::singleton))
 			);
 		}
 
 		@Override public Trace probe(final MaxInclusive maxInclusive) {
 
-			final Value limit=value(maxInclusive.value());
+			final Value limit=resolve(maxInclusive.value());
 
-			return trace(focus.stream()
-					.filter(negate(value -> compare(value, limit) <= 0))
+			return trace(values.stream()
+					.filter(negate(value -> compare(value(value), limit) <= 0))
 					.collect(toMap(v -> issue(maxInclusive), Collections::singleton))
 			);
 		}
@@ -207,8 +220,8 @@ final class JSONLDValidator {
 
 			final int limit=minLength.limit();
 
-			return trace(focus.stream()
-					.filter(negate(value -> text(value).length() >= limit))
+			return trace(values.stream()
+					.filter(negate(value -> text(value(value)).length() >= limit))
 					.collect(toMap(value -> issue(minLength), Collections::singleton))
 			);
 		}
@@ -217,8 +230,8 @@ final class JSONLDValidator {
 
 			final int limit=maxLength.limit();
 
-			return trace(focus.stream()
-					.filter(negate(value -> text(value).length() <= limit))
+			return trace(values.stream()
+					.filter(negate(value -> text(value(value)).length() <= limit))
 					.collect(toMap(value -> issue(maxLength), Collections::singleton))
 			);
 		}
@@ -233,8 +246,8 @@ final class JSONLDValidator {
 
 			// match the whole string: don't use compiled.asPredicate() (implemented using .find())
 
-			return trace(focus.stream()
-					.filter(negate(value -> compiled.matcher(text(value)).matches()))
+			return trace(values.stream()
+					.filter(negate(value -> compiled.matcher(text(value(value))).matches()))
 					.collect(toMap(value -> issue(pattern), Collections::singleton))
 			);
 		}
@@ -245,8 +258,8 @@ final class JSONLDValidator {
 
 			final Predicate<String> predicate=java.util.regex.Pattern.compile(expression).asPredicate();
 
-			return trace(focus.stream()
-					.filter(negate(value -> predicate.test(text(value))))
+			return trace(values.stream()
+					.filter(negate(value -> predicate.test(text(value(value)))))
 					.collect(toMap(v -> issue(like), Collections::singleton))
 			);
 		}
@@ -257,8 +270,8 @@ final class JSONLDValidator {
 
 			final Predicate<String> predicate=lexical -> lexical.startsWith(prefix);
 
-			return trace(focus.stream()
-					.filter(negate(value -> predicate.test(text(value))))
+			return trace(values.stream()
+					.filter(negate(value -> predicate.test(text(value(value)))))
 					.collect(toMap(v -> issue(stem), Collections::singleton))
 			);
 		}
@@ -266,72 +279,62 @@ final class JSONLDValidator {
 
 		@Override public Trace probe(final MinCount minCount) {
 
-			final int count=focus.size();
+			final int count=values.size();
 			final int limit=minCount.limit();
 
-			return count >= limit ? trace() : trace(issue(minCount), literal(count));
+			return count >= limit ? trace() : trace(issue(minCount), Json.createValue(count));
 		}
 
 		@Override public Trace probe(final MaxCount maxCount) {
 
-			final int count=focus.size();
+			final int count=values.size();
 			final int limit=maxCount.limit();
 
-			return count <= limit ? trace() : trace(issue(maxCount), literal(count));
+			return count <= limit ? trace() : trace(issue(maxCount), Json.createValue(count));
 		}
 
 		@Override public Trace probe(final All all) {
 
-			final Set<Value> range=values(all.values());
+			final Set<Value> expected=resolve(all.values());
+			final Set<Value> actual=values.stream().map(this::value).collect(toSet());
 
-			final List<Value> missing=range
-					.stream()
-					.filter(negate(focus::contains))
-					.collect(toList());
-
-			return missing.isEmpty() ? trace() : trace(issue(all), missing);
+			return actual.containsAll(expected) ? trace() : trace(issue(all));
 		}
 
 		@Override public Trace probe(final Any any) {
-			return !disjoint(focus, values(any.values()))
-					? trace() : trace(issue(any));
+
+			final Set<Value> expected=resolve(any.values());
+			final Set<Value> actual=values.stream().map(this::value).collect(toSet());
+
+			return expected.stream().anyMatch(actual::contains) ? trace() : trace(issue(any));
 		}
 
 
 		@Override public Trace probe(final Field field) {
 
-			final IRI iri=field.label();
-			final Shape shape=field.value();
+			final String alias=fields.entrySet().stream()
+					.filter(entry -> entry.getValue().equals(field))
+					.map(Map.Entry::getKey)
+					.findFirst()
+					.orElseThrow(() -> new RuntimeException(format("undefined alias for field <%s>", field.label())));
 
-			return focus.stream().map(value -> { // for each focus value
+			return values.stream().map(value -> {
 
-				// compute the new focus set
+				if ( value instanceof JsonObject ) { // validate the field shape on the new field values
 
-				final boolean direct=direct(iri);
+					return trace(emptyMap(), singletonMap(alias, validate(field.value(), Optional
+									.ofNullable(((JsonObject)value).get(alias))
+									.map(v -> v instanceof JsonArray ? (List<JsonValue>)v : singleton(v))
+									.orElseGet(Collections::emptySet)
+							)
 
-				final Set<Statement> edges=(direct
+					));
 
-						? source.stream().filter(pattern(value, iri, null))
-						: source.stream().filter(pattern(null, inverse(iri), value))
+				} else {
 
-				).collect(toSet());
+					return trace("unexpected literal", value);
 
-				final Set<Value> focus=(direct
-
-						? edges.stream().map(Statement::getObject)
-						: edges.stream().map(Statement::getSubject)
-
-				).collect(toSet());
-
-				// trace visited statements
-
-				target.addAll(edges);
-
-				// validate the field shape on the new focus set
-
-				return trace(emptyMap(), singletonMap(iri,
-						shape.map(new ValidatorProbe(resource, focus, source, target))
-				));
+				}
 
 			}).reduce(trace(), Trace::trace);
 		}

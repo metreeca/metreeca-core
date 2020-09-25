@@ -29,28 +29,37 @@ import org.eclipse.rdf4j.model.IRI;
  */
 public final class Clazz extends Shape {
 
-	public static Shape clazz(final IRI name) {
-		return new Clazz(name);
+	/**
+	 * Creates a class constraint.
+	 *
+	 * @param iri the expected class IRI
+	 *
+	 * @return a new datatype constraint for the provided {@code iri}
+	 *
+	 * @throws NullPointerException if {@code iri} is null
+	 */
+	public static Shape clazz(final IRI iri) {
+		return new Clazz(iri);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final IRI id;
+	private final IRI iri;
 
 
-	private Clazz(final IRI id) {
+	private Clazz(final IRI iri) {
 
-		if ( id == null ) {
-			throw new NullPointerException("null id");
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
 		}
 
-		this.id=id;
+		this.iri=iri;
 	}
 
 
-	public IRI id() {
-		return id;
+	public IRI iri() {
+		return iri;
 	}
 
 
@@ -70,15 +79,15 @@ public final class Clazz extends Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Clazz
-				&& id.equals(((Clazz)object).id);
+				&& iri.equals(((Clazz)object).iri);
 	}
 
 	@Override public int hashCode() {
-		return id.hashCode();
+		return iri.hashCode();
 	}
 
 	@Override public String toString() {
-		return "clazz("+id+")";
+		return "clazz("+iri+")";
 	}
 
 }

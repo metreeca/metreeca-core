@@ -18,18 +18,16 @@
 package com.metreeca.rest.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Trace;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import javax.json.*;
-import java.util.Collection;
-import java.util.function.*;
+import javax.json.JsonObject;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
-import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Either.Left;
@@ -245,59 +243,22 @@ public interface Engine {
 	/**
 	 * Creates a validator wrapper.
 	 *
-	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#validate(IRI, Shape, Collection)
+	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#validate(IRI, Shape, JsonObject)
 	 * validation} of request JSON-LD bodies
 	 */
 	public default Wrapper validator() {
 
-		final class Formatter implements Function<Trace, JsonObject> { // ;(java8) no private interface methods
-			@Override public JsonObject apply(final Trace trace) {
 
-				final JsonObjectBuilder builder=Json.createObjectBuilder();
-
-				if ( !trace.issues().isEmpty() ) {
-
-					final JsonObjectBuilder errors=Json.createObjectBuilder();
-
-					trace.issues().forEach((detail, values) -> {
-
-						final JsonArrayBuilder objects=Json.createArrayBuilder();
-
-						values.forEach(value -> {
-
-							if ( value != null ) { objects.add(format(value)); }
-
-						});
-
-						errors.add(detail, objects.build());
-
-					});
-
-					builder.add("", errors);
-				}
-
-				trace.fields().forEach((name, nested) -> {
-
-					if ( !nested.empty() ) {
-						builder.add(name.toString(), apply(nested));
-					}
-
-				});
-
-				return builder.build();
-			}
-		}
-
-
-		return handler -> request -> request.body(jsonld())
+		return handler -> request -> request.body(json())
 
 				.flatMap(object -> validate(iri(request.item()), request.attribute(shape()), object).fold(
-						trace -> Left(status(UnprocessableEntity, new Formatter().apply(trace))),
+						trace -> Left(status(UnprocessableEntity, trace.toJSON())),
 						model -> Right(handler.handle(request))
 				))
 
 				.fold(request::reply);
 	}
+
 
 	/**
 	 * Creates a trimmer wrapper.

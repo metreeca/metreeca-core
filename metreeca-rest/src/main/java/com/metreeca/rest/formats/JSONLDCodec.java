@@ -63,7 +63,7 @@ final class JSONLDCodec {
 	private static final class DatatypeProbe extends Probe<IRI> {
 
 		@Override public IRI probe(final Datatype datatype) {
-			return datatype.id();
+			return datatype.iri();
 		}
 
 		@Override public IRI probe(final And and) {
@@ -94,7 +94,7 @@ final class JSONLDCodec {
 	private static final class ClazzProbe extends Probe<IRI> {
 
 		@Override public IRI probe(final Clazz clazz) {
-			return clazz.id();
+			return clazz.iri();
 		}
 
 		@Override public IRI probe(final And and) {

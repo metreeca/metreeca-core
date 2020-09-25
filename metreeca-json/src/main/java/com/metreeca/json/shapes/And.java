@@ -111,7 +111,7 @@ public final class And extends Shape {
 
 		return space.stream().filter(upper -> space.stream()
 				.filter(lower -> !upper.equals(lower))
-				.noneMatch(lower -> derives(upper.id(), lower.id()))
+				.noneMatch(lower -> derives(upper.iri(), lower.iri()))
 		);
 	}
 

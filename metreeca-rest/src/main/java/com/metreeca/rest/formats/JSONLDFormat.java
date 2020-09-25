@@ -123,8 +123,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	}
 
 
-	public static Either<Trace, Collection<Statement>> validate(
-			final IRI focus, final Shape shape, final Collection<Statement> model) {
+	public static Either<Trace, JsonObject> validate(final IRI focus, final Shape shape, final JsonObject object) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -134,11 +133,11 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( model == null ) {
-			throw new NullPointerException("null model");
+		if ( object == null ) {
+			throw new NullPointerException("null object");
 		}
 
-		return new JSONLDValidator(focus, shape, asset(keywords())).validate(model);
+		return new JSONLDValidator(focus, shape, asset(keywords())).validate(object);
 	}
 
 	public static JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
