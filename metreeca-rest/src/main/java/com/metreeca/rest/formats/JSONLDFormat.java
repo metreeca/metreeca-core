@@ -85,15 +85,15 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	/**
 	 * Decodes a shape-based query.
 	 *
-	 * @param query the query to be decoded
 	 * @param focus the target IRI fr the decoding process; relative IRIs will be resolved against it
 	 * @param shape the base shape for the decoded query
+	 * @param query the query to be decoded
 	 *
 	 * @return either a message exception reporting a decoding issue or the decoded query
 	 *
 	 * @throws NullPointerException if any parameter is null
 	 */
-	public static Either<MessageException, Query> query(final String query, final IRI focus, final Shape shape) {
+	public static Either<MessageException, Query> query(final IRI focus, final Shape shape, final String query) {
 
 		if ( query == null ) {
 			throw new NullPointerException("null query");

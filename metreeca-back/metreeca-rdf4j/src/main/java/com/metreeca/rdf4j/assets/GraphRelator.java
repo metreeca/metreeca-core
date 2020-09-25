@@ -69,7 +69,7 @@ final class GraphRelator extends GraphProcessor {
 
 						? response.map(status(NotImplemented, "resource filtered retrieval not supported"))
 
-						: query(request.query(), iri(request.item()), and(All.all(item), shape)).fold(
+						: query(iri(request.item()), and(All.all(item), shape), request.query()).fold(
 
 						response::map, query -> graph.exec(connection -> {
 
@@ -123,17 +123,17 @@ final class GraphRelator extends GraphProcessor {
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
 
-				return query(request.query(), iri(request.item()), digest)
+				return query(iri(request.item()), digest, request.query())
 
 						.fold(response::map, query -> graph.exec(connection -> {
 
-									final Collection<Statement> matches=fetch(connection, item, query);
+							final Collection<Statement> matches=fetch(connection, item, query);
 
-									if ( filtered ) { // matches only
+							if ( filtered ) { // matches only
 
-										return response
-												.status(OK)
-												.attribute(shape(), query.map(new Query.Probe<Shape>() {
+								return response
+										.status(OK)
+										.attribute(shape(), query.map(new Query.Probe<Shape>() {
 
 													@Override public Shape probe(final Items items) {
 														return field(LDP.CONTAINS, items.shape());

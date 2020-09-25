@@ -225,5 +225,4 @@ public interface Engine extends Wrapper {
 	 */
 	public Future<Response> delete(final Request request);
 
-
 }
