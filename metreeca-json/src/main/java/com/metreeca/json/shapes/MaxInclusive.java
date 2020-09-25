@@ -50,7 +50,7 @@ public final class MaxInclusive extends Shape {
 	}
 
 
-	public Value value() {
+	public Value limit() {
 		return limit;
 	}
 

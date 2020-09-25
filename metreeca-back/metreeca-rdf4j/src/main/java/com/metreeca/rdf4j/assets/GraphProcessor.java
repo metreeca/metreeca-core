@@ -772,7 +772,7 @@ abstract class GraphProcessor {
 			}
 
 			@Override public Snippet probe(final MaxInclusive maxInclusive) {
-				return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.value())));
+				return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.limit())));
 			}
 
 			@Override public Snippet probe(final MinLength minLength) {
