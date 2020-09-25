@@ -19,6 +19,7 @@ package com.metreeca.rest.operators;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -72,15 +73,16 @@ public final class Relator extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(engine::relate)
+		delegate(engine.wrap(((Handler)engine::relate)
 
 				.with(trimmer())
+
 				.with(wrapper(Request::collection,
 						throttler(Relate, Target, Digest),
 						throttler(Relate, Detail)
 				))
 
-		);
+		));
 	}
 
 }

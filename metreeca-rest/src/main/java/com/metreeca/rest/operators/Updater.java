@@ -19,6 +19,7 @@ package com.metreeca.rest.operators;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -72,16 +73,16 @@ public final class Updater extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(engine::delete)
+		delegate(engine.wrap(((Handler)engine::update)
 
 				.with(wrapper(Request::collection,
 						throttler(Update, Target),
 						throttler(Update, Detail)
 				))
+
 				.with(validator())
 
-		);
-
+		));
 	}
 
 }

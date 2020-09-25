@@ -18,6 +18,7 @@
 package com.metreeca.rest.operators;
 
 import com.metreeca.json.shapes.Guard;
+import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.handlers.Delegator;
@@ -65,14 +66,14 @@ public final class Deleter extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(engine::delete)
+		delegate(engine.wrap(((Handler)engine::delete)
 
 				.with(wrapper(Request::collection,
 						throttler(Delete, Target),
 						throttler(Delete, Detail)
 				))
 
-		);
+		));
 	}
 
 }
