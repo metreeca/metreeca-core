@@ -42,6 +42,7 @@ import java.util.stream.StreamSupport;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
 import static java.time.format.DateTimeFormatter.*;
+import static java.util.Locale.ROOT;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
@@ -74,13 +75,76 @@ public final class Values {
 	);
 
 
+	private static final String Internal="app:/terms#";
+
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
+	private static final Comparator<Value> comparator=new ValueComparator();
+
+	private static final ThreadLocal<DecimalFormat> exponential=ThreadLocal.withInitial(() ->
+			new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(ROOT)) // ;( not thread-safe
+	);
 
 
-	private static DecimalFormat exponential() { // ;( DecimalFormat is not thread-safe
-		return new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(Locale.ROOT));
+	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String uuid() {
+		return randomUUID().toString();
 	}
 
+	public static String uuid(final String text) {
+		return text == null ? null : nameUUIDFromBytes(text.getBytes(UTF_8)).toString();
+	}
+
+
+	public static String md5() {
+
+		final byte[] bytes=new byte[16];
+
+		ThreadLocalRandom.current().nextBytes(bytes);
+
+		return DatatypeConverter
+				.printHexBinary(bytes)
+				.toLowerCase(ROOT);
+	}
+
+	public static String md5(final String text) {
+		try {
+
+			return text == null ? null : DatatypeConverter
+					.printHexBinary(MessageDigest.getInstance("MD5").digest(text.getBytes(UTF_8)))
+					.toLowerCase(ROOT);
+
+		} catch ( final NoSuchAlgorithmException unexpected ) {
+			throw new InternalError(unexpected);
+		}
+	}
+
+
+	public static BigInteger integer(final long value) {
+		return BigInteger.valueOf(value);
+	}
+
+	public static BigInteger integer(final Number value) {
+		return value == null ? null
+				: value instanceof BigInteger ? (BigInteger)value
+				: value instanceof BigDecimal ? ((BigDecimal)value).toBigInteger()
+				: BigInteger.valueOf(value.longValue());
+	}
+
+
+	public static BigDecimal decimal(final double value) {
+		return BigDecimal.valueOf(value);
+	}
+
+	public static BigDecimal decimal(final Number value) {
+		return value == null ? null
+				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
+				: value instanceof BigDecimal ? (BigDecimal)value
+				: BigDecimal.valueOf(value.doubleValue());
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static final class Inverse extends SimpleIRI {
 
@@ -111,8 +175,6 @@ public final class Values {
 
 	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final String Internal="app:/terms#";
-
 	public static final IRI IRIType=iri(Internal, "iri"); // datatype IRI for IRI references
 	public static final IRI BNodeType=iri(Internal, "bnode"); // datatype IRI for blank nodes
 	public static final IRI LiteralType=iri(Internal, "literal"); // abstract datatype IRI for literals
@@ -128,6 +190,7 @@ public final class Values {
 		);
 	}
 
+
 	private static boolean resource(final IRI type) {
 		return type.equals(ResourceType) || type.equals(BNodeType) || type.equals(IRIType);
 	}
@@ -138,9 +201,6 @@ public final class Values {
 
 
 	//// Comparator ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final Comparator<Value> comparator=new ValueComparator();
-
 
 	public static int compare(final Value x, final Value y) {
 		return comparator.compare(x, y);
@@ -206,39 +266,6 @@ public final class Values {
 
 	public static ValueFactory factory() {
 		return factory;
-	}
-
-
-	public static String uuid() {
-		return randomUUID().toString();
-	}
-
-	public static String uuid(final String text) {
-		return text == null ? null : nameUUIDFromBytes(text.getBytes(UTF_8)).toString();
-	}
-
-
-	public static String md5() {
-
-		final byte[] bytes=new byte[16];
-
-		ThreadLocalRandom.current().nextBytes(bytes);
-
-		return DatatypeConverter
-				.printHexBinary(bytes)
-				.toLowerCase(Locale.ROOT);
-	}
-
-	public static String md5(final String text) {
-		try {
-
-			return text == null ? null : DatatypeConverter
-					.printHexBinary(MessageDigest.getInstance("MD5").digest(text.getBytes(UTF_8)))
-					.toLowerCase(Locale.ROOT);
-
-		} catch ( final NoSuchAlgorithmException unexpected ) {
-			throw new InternalError(unexpected);
-		}
 	}
 
 
@@ -317,29 +344,6 @@ public final class Values {
 		return iri == null ? null
 				: iri instanceof Inverse ? factory.createIRI(iri.stringValue())
 				: new Inverse(iri.stringValue());
-	}
-
-
-	public static BigInteger integer(final long value) {
-		return BigInteger.valueOf(value);
-	}
-
-	public static BigInteger integer(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? (BigInteger)value
-				: value instanceof BigDecimal ? ((BigDecimal)value).toBigInteger()
-				: BigInteger.valueOf(value.longValue());
-	}
-
-	public static BigDecimal decimal(final double value) {
-		return BigDecimal.valueOf(value);
-	}
-
-	public static BigDecimal decimal(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
-				: value instanceof BigDecimal ? (BigDecimal)value
-				: BigDecimal.valueOf(value.doubleValue());
 	}
 
 
@@ -572,14 +576,10 @@ public final class Values {
 
 
 	public static String format(final Value value) {
-		return value == null ? null : format(value, null);
-	}
-
-	public static String format(final Value value, final Map<String, String> namespaces) {
 		return value == null ? null
 				: value instanceof BNode ? format((BNode)value)
-				: value instanceof IRI ? format((IRI)value, namespaces)
-				: format((Literal)value, namespaces);
+				: value instanceof IRI ? format((IRI)value)
+				: format((Literal)value);
 	}
 
 	public static String format(final BNode bnode) {
@@ -587,51 +587,16 @@ public final class Values {
 	}
 
 	public static String format(final IRI iri) {
-		return format(iri, null);
-	}
-
-	public static String format(final IRI iri, final Map<String, String> namespaces) {
-		if ( iri == null ) {
-			return null;
-		} else {
+		if ( iri == null ) { return null; } else {
 
 			final String role=direct(iri) ? "" : "^";
 			final String text=iri.stringValue();
-
-			if ( namespaces != null ) {
-				for (final Map.Entry<String, String> entry : namespaces.entrySet()) {
-
-					final String prefix=entry.getKey();
-					final String namespace=entry.getValue();
-
-					if ( prefix == null ) {
-						throw new NullPointerException("null prefix");
-					}
-
-					if ( namespace == null ) {
-						throw new NullPointerException("null namespace");
-					}
-
-					if ( text.startsWith(namespace) ) {
-
-						final String name=text.substring(namespace.length());
-
-						if ( name.isEmpty() ) { // !!! || namespaces.name(name)
-							return role+prefix+':'+name;
-						}
-					}
-				}
-			}
 
 			return role+'<'+text+'>'; // !!! relativize wrt to base
 		}
 	}
 
 	public static String format(final Literal literal) {
-		return format(literal, (Map<String, String>)null);
-	}
-
-	public static String format(final Literal literal, final Map<String, String> namespaces) { // !!! refactor
 		if ( literal == null ) { return null; } else {
 
 			final IRI type=literal.getDatatype();
@@ -641,14 +606,17 @@ public final class Values {
 				return type.equals(XSD.BOOLEAN) ? String.valueOf(literal.booleanValue())
 						: type.equals(XSD.INTEGER) ? String.valueOf(literal.integerValue())
 						: type.equals(XSD.DECIMAL) ? literal.decimalValue().toPlainString()
-						: type.equals(XSD.DOUBLE) ? exponential().format(literal.doubleValue())
+						: type.equals(XSD.DOUBLE) ? exponential.get().format(literal.doubleValue())
 						: type.equals(XSD.STRING) ? quote(literal.getLabel())
+
 						: literal.getLanguage()
 						.map(lang -> format(literal, lang))
-						.orElseGet(() -> format(literal, type, namespaces));
+						.orElseGet(() -> format(literal, type));
 
 			} catch ( final IllegalArgumentException ignored ) {
-				return format(literal, type, namespaces);
+
+				return format(literal, type);
+
 			}
 		}
 	}
@@ -658,8 +626,8 @@ public final class Values {
 		return quote(literal.getLabel())+'@'+lang;
 	}
 
-	private static String format(final Literal literal, final IRI type, final Map<String, String> namespaces) {
-		return quote(literal.getLabel())+"^^"+format(type, namespaces);
+	private static String format(final Literal literal, final IRI type) {
+		return quote(literal.getLabel())+"^^"+format(type);
 	}
 
 
