@@ -21,9 +21,9 @@ import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import java.io.*;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toMap;
@@ -41,63 +41,41 @@ public final class Trace {
 		return EmptyTrace;
 	}
 
-	public static Trace trace(final Trace... traces) {return trace(asList(traces));}
-
-	public static Trace trace(final Collection<Trace> traces) {
-
-		if ( traces == null || traces.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null traces");
-		}
-
+	public static Trace trace(final Trace... traces) {
 		return new Trace(
-				traces.stream().flatMap(trace -> trace.issues.entrySet().stream()),
-				traces.stream().flatMap(trace -> trace.fields.entrySet().stream())
+				Arrays.stream(traces).flatMap(trace -> trace.issues().stream()),
+				Arrays.stream(traces).flatMap(trace -> trace.fields().entrySet().stream())
 		);
 	}
 
-	public static Trace trace(final String issue, final JsonValue... values) {
-		return trace(issue, asList(values));
+	public static Trace trace(final String issue) {
+		return new Trace(Stream.of(issue), Stream.empty());
 	}
 
-	public static Trace trace(final String issue, final Collection<JsonValue> values) {
-		return new Trace(singletonMap(issue, values).entrySet().stream(), Stream.empty());
+	public static Trace trace(final Stream<String> issues) {
+		return new Trace(issues, Stream.empty());
 	}
 
-	public static Trace trace(final Map<String, Collection<JsonValue>> issues) {
-		return new Trace(issues.entrySet().stream(), Stream.empty());
-	}
-
-	public static Trace trace(final Map<String, Collection<JsonValue>> issues, final Map<String, Trace> fields) {
-		return new Trace(issues.entrySet().stream(), fields.entrySet().stream());
+	public static Trace trace(final String field, final Trace trace) {
+		return new Trace(Stream.empty(), Stream.of(new AbstractMap.SimpleImmutableEntry<>(field, trace)));
 	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Map<String, Collection<JsonValue>> issues;
+	private final Collection<String> issues;
 	private final Map<String, Trace> fields;
 
 
-	private Trace(
-			final Stream<Map.Entry<String, Collection<JsonValue>>> issues,
-			final Stream<Map.Entry<String, Trace>> fields
-	) {
+	private Trace(final Stream<String> issues, final Stream<Entry<String, Trace>> fields) {
 
 		this.issues=issues
-				.filter(issue -> !issue.getKey().isEmpty())
-				.collect(toMap(
-						Map.Entry::getKey, entry -> unmodifiableSet(new LinkedHashSet<>(entry.getValue())),
-						(x, y) -> Stream.of(x, y).flatMap(Collection::stream).collect(toCollection(LinkedHashSet::new)),
-						LinkedHashMap::new
-				));
+				.filter(issue -> !issue.isEmpty())
+				.collect(toCollection(LinkedHashSet::new));
 
 		this.fields=fields
 				.filter(field -> !field.getValue().empty())
-				.collect(toMap(
-						Map.Entry::getKey, Map.Entry::getValue,
-						Trace::trace,
-						LinkedHashMap::new
-				));
+				.collect(toMap(Entry::getKey, Entry::getValue, Trace::trace, LinkedHashMap::new));
 	}
 
 
@@ -108,8 +86,8 @@ public final class Trace {
 	}
 
 
-	public Map<String, Collection<JsonValue>> issues() {
-		return unmodifiableMap(issues);
+	public Collection<String> issues() {
+		return unmodifiableCollection(issues);
 	}
 
 	public Map<String, Trace> fields() {
@@ -124,30 +102,13 @@ public final class Trace {
 		final JsonObjectBuilder builder=Json.createObjectBuilder();
 
 		if ( !issues().isEmpty() ) {
-
-			final JsonObjectBuilder errors=Json.createObjectBuilder();
-
-			issues().forEach((detail, values) -> {
-
-				final JsonArrayBuilder objects=Json.createArrayBuilder();
-
-				values.forEach(value -> {
-
-					if ( value != null ) { objects.add(value); }
-
-				});
-
-				errors.add(detail, objects.build());
-
-			});
-
-			builder.add("", errors);
+			builder.add("", Json.createArrayBuilder(issues));
 		}
 
-		fields().forEach((name, nested) -> {
+		fields().forEach((label, nested) -> {
 
 			if ( !nested.empty() ) {
-				builder.add(name, nested.toJSON());
+				builder.add(label, nested.toJSON());
 			}
 
 		});

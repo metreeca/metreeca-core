@@ -247,8 +247,6 @@ public interface Engine {
 	 * validation} of request JSON-LD bodies
 	 */
 	public default Wrapper validator() {
-
-
 		return handler -> request -> request.body(json())
 
 				.flatMap(object -> validate(iri(request.item()), request.attribute(shape()), object).fold(

@@ -36,8 +36,9 @@ import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.formats.JSONLDCodec.driver;
 import static com.metreeca.rest.formats.JSONLDCodec.fields;
 import static java.lang.String.format;
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 
 final class JSONLDValidator {
@@ -81,7 +82,7 @@ final class JSONLDValidator {
 
 		return Stream.concat(
 
-				Stream.of(shape.map(new ValidatorProbe(focus, shape, fields, values))),
+				Stream.of(shape.map(new ValidatingProbe(focus, shape, fields, values))),
 
 				values.stream() // validate shape envelope
 
@@ -97,7 +98,7 @@ final class JSONLDValidator {
 								|| fields.containsKey(alias)
 						))
 
-						.map(alias -> trace(emptyMap(), singletonMap(alias, trace("unexpected field"))))
+						.map(alias -> trace(alias, trace("unexpected field")))
 
 		).reduce(trace(), Trace::trace);
 	}
@@ -105,19 +106,18 @@ final class JSONLDValidator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class ValidatorProbe extends Shape.Probe<Trace> {
+	private final class ValidatingProbe extends Shape.Probe<Trace> {
 
 		private final IRI focus;
 		private final Shape shape;
-
-		private Map<String, Field> fields;
 		private final Collection<JsonValue> values;
+
+		private final Map<String, Field> fields;
 
 		private final JSONLDDecoder decoder;
 
-
-		private ValidatorProbe(final IRI focus, final Shape shape,
-				final Map<String, Field> fields, final Collection<JsonValue> values
+		private ValidatingProbe(
+				final IRI focus, final Shape shape, final Map<String, Field> fields, final Collection<JsonValue> values
 		) {
 
 			this.focus=focus;
@@ -134,6 +134,10 @@ final class JSONLDValidator {
 			return decoder.value(value, shape).getKey();
 		}
 
+		private String values(final Collection<Value> values) {
+			return values.stream().map(Values::format).collect(joining(", "));
+		}
+
 
 		private Value resolve(final Value value) {
 			return value instanceof Focus ? ((Focus)value).resolve(focus) : value;
@@ -144,14 +148,10 @@ final class JSONLDValidator {
 		}
 
 
-		private String issue(final Shape shape) { // !!! remove
-			return shape.toString().replaceAll("\\s+", " ");
-		}
-
-
 		@Override public Trace probe(final Guard guard) {
 			throw new UnsupportedOperationException(guard.toString());
 		}
+
 
 		@Override public Trace probe(final Datatype datatype) {
 
@@ -159,7 +159,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> is(value(value), iri)))
-					.collect(toMap(value -> issue(datatype), Collections::singleton))
+					.map(value -> format("<%s> is not of datatype <%s>", value, iri))
 			);
 		}
 
@@ -167,11 +167,10 @@ final class JSONLDValidator {
 
 			final Set<Value> set=resolve(range.values());
 
-			final Collection<JsonValue> unexpected=values.stream()
+			return trace(values.stream()
 					.filter(value -> !set.contains(value(value)))
-					.collect(toList());
-
-			return unexpected.isEmpty() ? trace() : trace(issue(range), unexpected);
+					.map(value -> format("<%s> is not in the expected value range %s", value, values(set)))
+			);
 		}
 
 
@@ -181,7 +180,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) > 0))
-					.collect(toMap(value -> issue(minExclusive), Collections::singleton))
+					.map(value -> format("<%s> is not strictly greater than <%s>", value, limit))
 			);
 		}
 
@@ -191,7 +190,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) < 0))
-					.collect(toMap(v -> issue(maxExclusive), Collections::singleton))
+					.map(value -> format("<%s> is not strictly less than <%s>", value, limit))
 			);
 		}
 
@@ -201,17 +200,17 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) >= 0))
-					.collect(toMap(v -> issue(minInclusive), Collections::singleton))
+					.map(value -> format("<%s> is not greater than or equal to <%s>", value, limit))
 			);
 		}
 
 		@Override public Trace probe(final MaxInclusive maxInclusive) {
 
-			final Value limit=resolve(maxInclusive.value());
+			final Value limit=resolve(maxInclusive.limit());
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) <= 0))
-					.collect(toMap(v -> issue(maxInclusive), Collections::singleton))
+					.map(value -> format("<%s> is not less than or equal to <%s>", value, limit))
 			);
 		}
 
@@ -222,7 +221,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> text(value(value)).length() >= limit))
-					.collect(toMap(value -> issue(minLength), Collections::singleton))
+					.map(value -> format("<%s> length is not greater than or equal to <%s>", value, limit))
 			);
 		}
 
@@ -232,7 +231,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> text(value(value)).length() <= limit))
-					.collect(toMap(value -> issue(maxLength), Collections::singleton))
+					.map(value -> format("<%s> length is not less than or equal to <%s>", value, limit))
 			);
 		}
 
@@ -248,7 +247,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> compiled.matcher(text(value(value))).matches()))
-					.collect(toMap(value -> issue(pattern), Collections::singleton))
+					.map(value -> format("<%s> textual value doesn't match <%s>", value, compiled.pattern()))
 			);
 		}
 
@@ -260,7 +259,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> predicate.test(text(value(value)))))
-					.collect(toMap(v -> issue(like), Collections::singleton))
+					.map(value -> format("<%s> textual value is not like <%s>", value, like.text()))
 			);
 		}
 
@@ -272,7 +271,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> predicate.test(text(value(value)))))
-					.collect(toMap(v -> issue(stem), Collections::singleton))
+					.map(value -> format("<%s> textual value has not stem <%s>", value, prefix))
 			);
 		}
 
@@ -282,7 +281,8 @@ final class JSONLDValidator {
 			final int count=values.size();
 			final int limit=minCount.limit();
 
-			return count >= limit ? trace() : trace(issue(minCount), Json.createValue(count));
+			return count >= limit ? trace()
+					: trace(format("value count is not greater than or equal to <%s>", limit));
 		}
 
 		@Override public Trace probe(final MaxCount maxCount) {
@@ -290,7 +290,8 @@ final class JSONLDValidator {
 			final int count=values.size();
 			final int limit=maxCount.limit();
 
-			return count <= limit ? trace() : trace(issue(maxCount), Json.createValue(count));
+			return count <= limit ? trace()
+					: trace(format("value count is not less than or equal to <%s>", limit));
 		}
 
 		@Override public Trace probe(final All all) {
@@ -298,7 +299,8 @@ final class JSONLDValidator {
 			final Set<Value> expected=resolve(all.values());
 			final Set<Value> actual=values.stream().map(this::value).collect(toSet());
 
-			return actual.containsAll(expected) ? trace() : trace(issue(all));
+			return actual.containsAll(expected) ? trace()
+					: trace(format("values don't include all expected values %s", values(expected)));
 		}
 
 		@Override public Trace probe(final Any any) {
@@ -306,7 +308,8 @@ final class JSONLDValidator {
 			final Set<Value> expected=resolve(any.values());
 			final Set<Value> actual=values.stream().map(this::value).collect(toSet());
 
-			return expected.stream().anyMatch(actual::contains) ? trace() : trace(issue(any));
+			return expected.stream().anyMatch(actual::contains) ? trace()
+					: trace(format("values don't include at least one of the expected values %s", values(expected)));
 		}
 
 
@@ -322,17 +325,15 @@ final class JSONLDValidator {
 
 				if ( value instanceof JsonObject ) { // validate the field shape on the new field values
 
-					return trace(emptyMap(), singletonMap(alias, validate(field.value(), Optional
-									.ofNullable(((JsonObject)value).get(alias))
-									.map(v -> v instanceof JsonArray ? (List<JsonValue>)v : singleton(v))
-									.orElseGet(Collections::emptySet)
-							)
-
+					return trace(alias, validate(field.value(), Optional
+							.ofNullable(((JsonObject)value).get(alias))
+							.map(v -> v instanceof JsonArray ? (List<JsonValue>)v : singleton(v))
+							.orElseGet(Collections::emptySet)
 					));
 
 				} else {
 
-					return trace("unexpected literal", value);
+					return trace(format("<%s> is not as a structured object", value));
 
 				}
 
@@ -347,7 +348,8 @@ final class JSONLDValidator {
 		}
 
 		@Override public Trace probe(final Or or) {
-			return or.shapes().stream().anyMatch(s -> s.map(this).empty()) ? trace() : trace(issue(or));
+			return or.shapes().stream().anyMatch(s -> s.map(this).empty()) ? trace()
+					: trace("values don't match any alternative");
 		}
 
 		@Override public Trace probe(final When when) {

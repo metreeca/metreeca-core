@@ -35,6 +35,7 @@ import java.util.regex.Matcher;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toCollection;
 
 
@@ -83,6 +84,10 @@ final class JSONLDEncoder {
 		}
 
 		return resource(focus, shape, model, resource -> false).asJsonObject();
+	}
+
+	JsonValue encode(final Value value) {
+		return value(value, shape, emptySet(), resource -> true);
 	}
 
 

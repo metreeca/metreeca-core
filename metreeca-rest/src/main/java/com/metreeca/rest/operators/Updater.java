@@ -27,8 +27,6 @@ import com.metreeca.rest.handlers.Delegator;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.Collection;
-
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
@@ -48,7 +46,8 @@ import static com.metreeca.rest.assets.Engine.engine;
  * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
  * resources;</li>
  *
- * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(IRI, Shape, Collection) validation};</li>
+ * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(IRI, Shape, javax.json.JsonObject) validation
+ * };</li>
  *
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
  *
