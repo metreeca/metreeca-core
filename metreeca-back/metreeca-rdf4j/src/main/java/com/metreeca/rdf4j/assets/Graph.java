@@ -28,6 +28,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.base.RepositoryWrapper;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.function.*;
 
@@ -308,7 +309,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null customizer");
 		}
 
-		operation.setBinding("time", time(true));
+		operation.setBinding("time", literal(Instant.now(), true));
 
 		final IRI item=iri(message.item());
 
