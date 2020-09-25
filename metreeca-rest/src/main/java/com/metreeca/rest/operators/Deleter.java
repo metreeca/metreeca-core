@@ -18,7 +18,6 @@
 package com.metreeca.rest.operators;
 
 import com.metreeca.json.shapes.Guard;
-import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.handlers.Delegator;
@@ -27,6 +26,7 @@ import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.throttler;
 
 
 /**
@@ -45,7 +45,7 @@ import static com.metreeca.rest.assets.Engine.engine;
  *
  * </ul>
  *
- * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
+ * <p>All operations are executed inside a single {@linkplain Engine engine transaction}.</p>
  */
 public final class Deleter extends Delegator {
 
@@ -65,12 +65,11 @@ public final class Deleter extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(((Handler)engine::delete)
+		delegate(engine.wrap(engine::delete)
 
-				.with(engine.connector())
 				.with(wrapper(Request::collection,
-						engine.throttler(Delete, Target),
-						engine.throttler(Delete, Detail)
+						throttler(Delete, Target),
+						throttler(Delete, Detail)
 				))
 
 		);

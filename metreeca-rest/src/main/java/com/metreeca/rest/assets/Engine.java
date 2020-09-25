@@ -41,10 +41,24 @@ import static com.metreeca.rest.formats.JSONLDFormat.*;
 /**
  * Model-driven storage engine.
  *
- * <p>Manages storage transactions, performs storage-specific shape/payload tasks and handles model-driven CRUD actions
- * on resources and containers.</p>
+ * <p>Handles model-driven CRUD operations on resource managed by a specific storage backend.</p>
+ *
+ * <p>When acting as a wrapper, ensures that requests are handled within a storage transaction:</p>
+ *
+ * <ul>
+ *
+ *      <li>if a transaction is not already active on the underlying storage, begins one and commits it on successful
+ *     handler completion;</li>
+ *
+ *      <li>if the handler throws an exception, rolls back the transaction and rethrows the exception;</li>
+ *
+ *      <li>in either case, no action is taken if the transaction was already terminated inside the handler.</li>
+ *
+ * </ul>
+ *
+ * <p>Falls back to plain handler execution if transactions are not supported by this engine.</p>
  */
-public interface Engine {
+public interface Engine extends Wrapper {
 
 	/**
 	 * Retrieves the default engine factory.
@@ -56,56 +70,98 @@ public interface Engine {
 	}
 
 
-	//// Transaction Management ////////////////////////////////////////////////////////////////////////////////////////
+	//// Wrappers //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Executes a task within a storage transaction.
+	 * Creates a throttler wrapper.
 	 *
-	 * <p>If a transaction is not already active on the underlying storage, begins one and commits it on successful
-	 * task completion; if the task throws an exception, the transaction is rolled back and the exception rethrown; in
-	 * either case, no action is taken if the transaction was already terminated inside the task.</p>
+	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
+	 * @param area the accepted values for the {@linkplain Guard#Area task} parametric axis
 	 *
-	 * <p>Falls back to plain task execution if transactions are not supported by this engine.</p>
-	 *
-	 * @param task the task to be executed
-	 *
-	 * @throws NullPointerException if {@code task} is null
+	 * @return returns a wrapper performing role-based shape redaction and shape-based authorization
 	 */
-	public default void exec(final Runnable task) {
+	public static Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
+		return handler -> request -> {
 
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
+			final Shape shape=request.attribute(shape());
 
-		exec(() -> {
+			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
+					retain(Role, true),
+					retain(Task, task),
+					retain(Area, area),
+					retain(Mode, Convey)
+			);
 
-			task.run();
+			final Shape authorized=shape.redact( // visible to user taking into account task/area
+					retain(Role, request.roles()),
+					retain(Task, task),
+					retain(Area, area),
+					retain(Mode, Convey)
 
-			return this;
+			);
 
-		});
+			// request shape redactor
+
+			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape()).redact(
+
+					retain(Role, request.roles()),
+					retain(Task, task),
+					retain(Area, area)
+
+			));
+
+			// response shape redactor
+
+			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape()).redact(
+					retain(Role, request.roles()),
+					retain(Task, task),
+					retain(Area, area),
+					retain(Mode, Convey)
+			));
+
+			return baseline.validates(false) ? request.reply(status(Forbidden))
+					: authorized.validates(false) ? request.reply(status(Unauthorized))
+					: handler.handle(request.map(pre)).map(post);
+
+		};
 	}
 
 	/**
-	 * Executes a task within a storage transaction.
+	 * Creates a validator wrapper.
 	 *
-	 * <p>If a transaction is not already active on the underlying storage, begins one and commits it on successful
-	 * task completion; if the task throws an exception, the transaction is rolled back and the exception rethrown; in
-	 * either case, no action is taken if the transaction was already terminated inside the task.</p>
-	 *
-	 * <p>Falls back to plain task execution if transactions are not supported by this engine.</p>
-	 *
-	 * @param task the task to be executed
-	 * @param <R>  the type of the value returned by the task
-	 *
-	 * @return the value returned by {@code task}
-	 *
-	 * @throws NullPointerException if {@code task} is null or returns a null value
+	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#validate(IRI, Shape, JsonObject)
+	 * validation} of request JSON-LD bodies
 	 */
-	public <R> R exec(final Supplier<R> task);
+	public static Wrapper validator() {
+		return handler -> request -> request.body(json())
+
+				.flatMap(object -> validate(iri(request.item()), request.attribute(shape()), object).fold(
+						trace -> Left(status(UnprocessableEntity, trace.toJSON())),
+						model -> Right(handler.handle(request))
+				))
+
+				.fold(request::reply);
+	}
+
+	/**
+	 * Creates a trimmer wrapper.
+	 *
+	 * @return returns a wrapper performing engine-assisted {@linkplain JSONLDFormat#trim(IRI, Shape, JsonObject)
+	 * trimming} of {@linkplain Response#success() successful} response JSON-LD bodies
+	 */
+	public static Wrapper trimmer() {
+		return handler -> request -> handler.handle(request).map(response -> response.success()
+
+				? response.body(json())
+				.map(json -> response.body(json(), trim(iri(response.item()), response.attribute(shape()), json)))
+				.fold(response::map)
+
+				: response
+		);
+	}
 
 
-	//// CRUD Actions //////////////////////////////////////////////////////////////////////////////////////////////////
+	//// CRUD Operations ///////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Handles creation requests.
@@ -169,110 +225,5 @@ public interface Engine {
 	 */
 	public Future<Response> delete(final Request request);
 
-
-	//// Wrappers //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a connector wrapper.
-	 *
-	 * @return returns a wrapper processing request inside a single {@linkplain Engine#exec(Runnable) engine
-	 * transaction}
-	 */
-	public default Wrapper connector() {
-		return handler -> request -> consumer -> exec(() ->
-				handler.handle(request).accept(consumer)
-		);
-	}
-
-
-	/**
-	 * Creates a throttler wrapper.
-	 *
-	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
-	 * @param area the accepted values for the {@linkplain Guard#Area task} parametric axis
-	 *
-	 * @return returns a wrapper performing role-based shape redaction and shape-based authorization
-	 */
-	public default Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
-		return handler -> request -> {
-
-			final Shape shape=request.attribute(shape());
-
-			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
-					retain(Role, true),
-					retain(Task, task),
-					retain(Area, area),
-					retain(Mode, Convey)
-			);
-
-			final Shape authorized=shape.redact( // visible to user taking into account task/area
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(Area, area),
-					retain(Mode, Convey)
-
-			);
-
-			// request shape redactor
-
-			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape()).redact(
-
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(Area, area)
-
-			));
-
-			// response shape redactor
-
-			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape()).redact(
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(Area, area),
-					retain(Mode, Convey)
-			));
-
-			return baseline.validates(false) ? request.reply(status(Forbidden))
-					: authorized.validates(false) ? request.reply(status(Unauthorized))
-					: handler.handle(request.map(pre)).map(post);
-
-		};
-	}
-
-
-	/**
-	 * Creates a validator wrapper.
-	 *
-	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#validate(IRI, Shape, JsonObject)
-	 * validation} of request JSON-LD bodies
-	 */
-	public default Wrapper validator() {
-		return handler -> request -> request.body(json())
-
-				.flatMap(object -> validate(iri(request.item()), request.attribute(shape()), object).fold(
-						trace -> Left(status(UnprocessableEntity, trace.toJSON())),
-						model -> Right(handler.handle(request))
-				))
-
-				.fold(request::reply);
-	}
-
-
-	/**
-	 * Creates a trimmer wrapper.
-	 *
-	 * @return returns a wrapper performing engine-assisted {@linkplain JSONLDFormat#trim(IRI, Shape, JsonObject)
-	 * trimming} of {@linkplain Response#success() successful} response JSON-LD bodies
-	 */
-	public default Wrapper trimmer() {
-		return handler -> request -> handler.handle(request).map(response -> response.success()
-
-				? response.body(json())
-				.map(json -> response.body(json(), trim(iri(response.item()), response.attribute(shape()), json)))
-				.fold(response::map)
-
-				: response
-		);
-	}
 
 }

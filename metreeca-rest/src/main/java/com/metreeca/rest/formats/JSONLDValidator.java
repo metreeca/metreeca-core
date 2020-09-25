@@ -313,7 +313,7 @@ final class JSONLDValidator {
 		}
 
 
-		@Override public Trace probe(final Field field) {
+		@SuppressWarnings("unchecked") @Override public Trace probe(final Field field) {
 
 			final String alias=fields.entrySet().stream()
 					.filter(entry -> entry.getValue().equals(field))

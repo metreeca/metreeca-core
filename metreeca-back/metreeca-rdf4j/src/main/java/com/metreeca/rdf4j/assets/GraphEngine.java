@@ -28,8 +28,6 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import java.util.function.Supplier;
-
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
@@ -99,13 +97,15 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public <R> R exec(final Supplier<R> task) {
+	@Override public Handler wrap(final Handler handler) {
 
-		if ( task == null ) {
+		if ( handler == null ) {
 			throw new NullPointerException("null task");
 		}
 
-		return graph.exec(connection -> { return task.get(); });
+		return request -> consumer -> graph.exec(connection -> {
+			handler.handle(request).accept(consumer);
+		});
 	}
 
 

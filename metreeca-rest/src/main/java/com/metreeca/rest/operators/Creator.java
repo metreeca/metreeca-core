@@ -25,7 +25,9 @@ import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.handlers.Delegator;
 
-import java.util.Collection;
+import org.eclipse.rdf4j.model.IRI;
+
+import javax.json.JsonObject;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -33,7 +35,7 @@ import java.util.function.Function;
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.*;
 import static java.util.UUID.randomUUID;
 
 
@@ -48,8 +50,7 @@ import static java.util.UUID.randomUUID;
  * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} area;</li>
  *
- * <li>engine-assisted request payload
- * {@linkplain JSONLDFormat#validate(org.eclipse.rdf4j.model.IRI, Shape, Collection) validation};</li>
+ * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(IRI, Shape, JsonObject) validation};</li>
  *
  * <li>resource {@linkplain #creator(Function) slug} generation;</li>
  *
@@ -57,7 +58,7 @@ import static java.util.UUID.randomUUID;
  *
  * </ul>
  *
- * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
+ * <p>All operations are executed inside a single {@linkplain Engine engine transaction}.</p>
  */
 public final class Creator extends Delegator {
 
@@ -117,13 +118,14 @@ public final class Creator extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(wrapper(slug).wrap(engine::create) // chain slug immediately before handler after custom wrappers
+		delegate(engine.wrap(wrapper(slug) // chain slug immediately before handler after custom wrappers
 
-				.with(engine.connector())
-				.with(engine.throttler(Create, Detail))
-				.with(engine.validator())
+				.wrap(engine::create)
 
-		);
+				.with(throttler(Create, Detail))
+				.with(validator())
+
+		));
 	}
 
 

@@ -19,7 +19,6 @@ package com.metreeca.rest.operators;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
-import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -30,7 +29,7 @@ import org.eclipse.rdf4j.model.IRI;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.*;
 
 
 /**
@@ -53,7 +52,7 @@ import static com.metreeca.rest.assets.Engine.engine;
  *
  * </ul>
  *
- * <p>All operations are executed inside a single {@linkplain Engine#exec(Runnable) engine transaction}.</p>
+ * <p>All operations are executed inside a single {@linkplain Engine engine transaction}.</p>
  */
 public final class Updater extends Delegator {
 
@@ -73,14 +72,13 @@ public final class Updater extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(((Handler)engine::update)
+		delegate(engine.wrap(engine::delete)
 
-				.with(engine.connector())
 				.with(wrapper(Request::collection,
-						engine.throttler(Update, Target),
-						engine.throttler(Update, Detail)
+						throttler(Update, Target),
+						throttler(Update, Detail)
 				))
-				.with(engine.validator())
+				.with(validator())
 
 		);
 
