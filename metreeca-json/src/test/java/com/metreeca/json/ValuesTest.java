@@ -33,8 +33,8 @@ import java.util.logging.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Shape.optional;
-import static com.metreeca.json.Values.direct;
-import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.Shape.required;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -84,58 +84,49 @@ public final class ValuesTest {
 	public static final IRI Manager=term("roles/manager");
 	public static final IRI Salesman=term("roles/salesman");
 
-	public static final Shape Textual=and(Shape.required(), datatype(XSD.STRING));
-
 	public static final Shape Employee=role(Manager, Salesman).then(
 
 			convey().then(
 
 					server().then(
-							field(RDF.TYPE, and(Shape.required(), datatype(Values.IRIType))),
-							field(RDFS.LABEL, Textual),
-							field(term("code"), and(Shape.required(), datatype(XSD.STRING), pattern("\\d+")))
+							field(RDF.TYPE, required(), datatype(IRIType)),
+							field(RDFS.LABEL, required(), datatype(XSD.STRING)),
+							field(term("code"), required(), datatype(XSD.STRING), pattern("\\d+"))
 					),
 
 					and(
 
-							field(term("forename"), and(Shape.required(), datatype(XSD.STRING), maxLength(80))),
-							field(term("surname"), and(Shape.required(), datatype(XSD.STRING), maxLength(80))),
-							field(term("email"), and(Shape.required(), datatype(XSD.STRING), maxLength(80))),
-							field(term("title"), and(Shape.required(), datatype(XSD.STRING), maxLength(80)))
+							field(term("forename"), required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("surname"), required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("email"), required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("title"), required(), datatype(XSD.STRING), maxLength(80))
 					),
 
 					role(Manager).then(
 
-							field(term("seniority"), and(Shape.required(), datatype(XSD.INTEGER),
-									minInclusive(Values.literal(Values.integer(1))),
-									maxInclusive(Values.literal(Values.integer(5))))),
+							field(term("seniority"), required(), datatype(XSD.INTEGER),
+									minInclusive(literal(integer(1))),
+									maxInclusive(literal(integer(5)))
+							),
 
-							field(term("supervisor"), and(
-									optional(), datatype(Values.IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, Textual))
-							)),
+							field(term("supervisor"), optional(),
+									datatype(IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
+							),
 
-							field(term("subordinate"), and(
-									optional(), datatype(Values.IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, Textual))
-							))
+							field(term("subordinate"), optional(),
+									datatype(IRIType), clazz(term("Employee")),
+									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
+							)
 
 					)
 
 			),
 
 			delete().then(
-					field(term("office"), and())
+					field(term("office"))
 			)
 
-	);
-
-	public static final Shape Employees=role(Manager, Salesman).then(
-			convey().then(
-					field(RDFS.LABEL, Textual),
-					field(RDFS.COMMENT, Textual),
-					field(LDP.CONTAINS, and(Shape.multiple(), Employee))
-			)
 	);
 
 
@@ -166,7 +157,7 @@ public final class ValuesTest {
 			throw new NullPointerException("null name");
 		}
 
-		return Values.iri(Namespace, name);
+		return iri(Namespace, name);
 	}
 
 	public static IRI item(final String name) {
@@ -175,7 +166,7 @@ public final class ValuesTest {
 			throw new NullPointerException("null name");
 		}
 
-		return Values.iri(Base, name);
+		return iri(Base, name);
 	}
 
 
