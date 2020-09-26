@@ -17,7 +17,6 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.*;
 import com.metreeca.rest.formats.DataFormat;
 
 import java.io.*;
@@ -37,6 +36,7 @@ import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.handlers.Router.router;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.unmodifiableMap;
@@ -46,7 +46,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * Static content publisher.
  */
-public final class Publisher implements Handler {
+public final class Publisher extends Delegator {
 
 	private static final Pattern URLPattern=Pattern.compile("(.*/)?(\\.|[^/#]*)?(#[^/#]*)?$");
 
@@ -183,6 +183,11 @@ public final class Publisher implements Handler {
 	 * @throws IllegalArgumentException if {@code root} is malformed
 	 */
 	public static Publisher publisher(final URL root) {
+
+		if ( root == null ) {
+			throw new NullPointerException("null root");
+		}
+
 		try {
 
 			return new Publisher(Paths.get(root.toURI()));
@@ -204,20 +209,20 @@ public final class Publisher implements Handler {
 	 * @throws NullPointerException if {@code root} is null
 	 */
 	public static Publisher publisher(final Path root) {
+
+		if ( root == null ) {
+			throw new NullPointerException("null root");
+		}
+
 		return new Publisher(root);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Path root;
 
-
-	private Publisher(final Path root) {this.root=root;}
-
-
-	@Override public Future<Response> handle(final Request request) {
-		return variants(request.path())
+	private Publisher(final Path root) {
+		delegate(router().get(request -> variants(request.path())
 
 				.map(Paths::get)
 				.map(Paths.get("/")::relativize)
@@ -239,7 +244,9 @@ public final class Publisher implements Handler {
 
 				)))
 
-				.orElseGet(() -> request.reply(status(NotFound)));
+				.orElseGet(() -> request.reply(status(NotFound)))
+
+		));
 	}
 
 

@@ -17,8 +17,14 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.rest.Request;
+
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.rest.Request.POST;
+import static com.metreeca.rest.Response.MethodNotAllowed;
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.handlers.Publisher.publisher;
 import static com.metreeca.rest.handlers.Publisher.variants;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,4 +48,15 @@ final class PublisherTest {
 		assertThat(variants("reindex")).containsExactly("reindex", "reindex.html");
 
 	}
+
+	@Test void testAcceptOnlyGETRequests() {
+		publisher(getClass().getResource("/"))
+
+				.handle(new Request().method(POST))
+
+				.accept(response -> assertThat(response)
+						.hasStatus(MethodNotAllowed)
+				);
+	}
+
 }
