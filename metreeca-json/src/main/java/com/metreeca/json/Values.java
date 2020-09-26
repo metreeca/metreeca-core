@@ -37,7 +37,6 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.time.ZoneOffset.UTC;
@@ -45,7 +44,6 @@ import static java.time.format.DateTimeFormatter.*;
 import static java.util.Locale.ROOT;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.joining;
 
 
 /**
@@ -561,20 +559,6 @@ public final class Values {
 
 	//// Formatters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static String format(final Iterable<Statement> statements) {
-		return statements == null ? null : StreamSupport
-				.stream(statements.spliterator(), false)
-				.map(Values::format)
-				.collect(joining("\n"));
-	}
-
-	public static String format(final Statement statement) {
-		return statement == null ? null : String.format("%s %s %s .",
-				format(statement.getSubject()), format(statement.getPredicate()), format(statement.getObject())
-		);
-	}
-
-
 	public static String format(final Value value) {
 		return value == null ? null
 				: value instanceof BNode ? format((BNode)value)
@@ -631,7 +615,7 @@ public final class Values {
 	}
 
 
-	public static String quote(final CharSequence text) {
+	private static String quote(final CharSequence text) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");

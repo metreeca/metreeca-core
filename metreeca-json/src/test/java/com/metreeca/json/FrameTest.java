@@ -36,6 +36,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toCollection;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.fail;
 
 final class FrameTest {
 
@@ -47,9 +48,19 @@ final class FrameTest {
 
 	@Nested final class Assembling {
 
+		@Test void testHandleDirectAndInverseFIelds() {
+
+			final Frame frame=frame(x)
+					.set(RDF.VALUE, y)
+					.set(inv(RDF.VALUE), z);
+
+			assertThat(frame.get(RDF.VALUE).findFirst().orElse(RDF.NIL)).isEqualTo(y);
+			assertThat(frame.get(inv(RDF.VALUE)).findFirst().orElse(RDF.NIL)).isEqualTo(z);
+		}
+
 		@Test void testReportLiteralValuesForInverseFields() {
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					frame(x).set(Frame.inv(RDF.VALUE), literal(1))
+					frame(x).set(inv(RDF.VALUE), literal(1))
 			);
 		}
 
@@ -108,6 +119,20 @@ final class FrameTest {
 			);
 		}
 
+		@Test void testImportRecursiveModels() {
+			assertThat(frame(x, asList(
+
+					statement(x, RDF.VALUE, y),
+					statement(y, RDF.VALUE, x)
+
+					))
+
+							.get(seq(RDF.VALUE, RDF.VALUE, RDF.VALUE))
+							.findFirst()
+							.orElseGet(() -> fail("missing transitive value"))
+
+			).isEqualTo(y);
+		}
 	}
 
 	@Nested final class Exporting {
@@ -129,7 +154,7 @@ final class FrameTest {
 		@Test void testExportInverseStatements() {
 			assertThat(frame(x)
 
-					.set(Frame.inv(RDF.VALUE), y)
+					.set(inv(RDF.VALUE), y)
 
 					.model()
 

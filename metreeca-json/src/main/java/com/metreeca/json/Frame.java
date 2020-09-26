@@ -22,7 +22,6 @@ import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -30,8 +29,10 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
-import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.newSetFromMap;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Graph frame.
@@ -55,7 +56,7 @@ public final class Frame implements Resource {
 			throw new NullPointerException("null focus");
 		}
 
-		return new Frame(focus, emptyMap());
+		return new Frame(focus);
 	}
 
 	public static Frame frame(final Resource focus, final Collection<Statement> model) {
@@ -68,61 +69,72 @@ public final class Frame implements Resource {
 			throw new NullPointerException("null model");
 		}
 
-		return (Frame)value(focus, model, newSetFromMap(new ConcurrentHashMap<>()));
+		return frame(focus, model, new ConcurrentHashMap<>());
 	}
 
 
-	private static Value value(final Value focus, final Collection<Statement> model, final Collection<Value> trail) {
-		return focus instanceof Resource && trail.add(focus) ? new Frame((Resource)focus, model.stream()
+	private static Frame frame(
+			final Resource focus, final Collection<Statement> model, final Map<Resource, Frame> trail
+	) {
+		return Optional.ofNullable(trail.get(focus)).orElseGet(() -> {
 
-				.filter(Objects::nonNull)
+			final Frame frame=new Frame(focus);
 
-				.map(statement -> {
+			trail.put(focus, frame); // insert empty placeholder before scanning statements
 
-					final Resource subject=statement.getSubject();
-					final IRI predicate=statement.getPredicate();
-					final Value object=statement.getObject();
+			model.stream().filter(Objects::nonNull).forEachOrdered(statement -> {
 
-					if ( subject.equals(focus) ) {
+				final Resource subject=statement.getSubject();
+				final IRI predicate=statement.getPredicate();
+				final Value object=statement.getObject();
 
-						return new SimpleImmutableEntry<>(predicate, value(object, model, trail));
+				if ( subject.equals(focus) ) {
 
-					} else if ( object.equals(focus) ) {
+					frame.recto.compute(predicate, (iri, values) -> {
 
-						return new SimpleImmutableEntry<>(inv(predicate), value(subject, model, trail));
+						final Set<Value> set=(values != null) ? values : new LinkedHashSet<>();
 
-					} else {
+						set.add(object instanceof Resource ? frame((Resource)object, model, trail) : object);
 
-						return null;
+						return set;
 
-					}
+					});
 
-				})
+				} else if ( object.equals(focus) ) {
 
-				.filter(Objects::nonNull)
+					frame.verso.compute(inv(predicate), (iri, values) -> {
 
-				.collect(groupingBy(Map.Entry::getKey, LinkedHashMap::new,
-						mapping(Map.Entry::getValue, toCollection(LinkedHashSet::new))
-				))
+						final Set<Value> set=(values != null) ? values : new LinkedHashSet<>();
 
-		) : focus;
+						set.add(frame(subject, model, trail));
+
+						return set;
+
+					});
+
+				}
+
+			});
+
+			return frame;
+
+		});
 	}
 
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static IRI inv(final IRI iri) {
+		return iri == null ? null : new Inverse(iri.stringValue());
+	}
 
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		return new Inverse(iri);
+	public static boolean direct(final IRI field) {
+		return !(field instanceof Inverse);
 	}
 
 
 	public static Function<Frame, Stream<Value>> seq(final IRI path) {
-		return frame -> frame.fields.getOrDefault(path, emptySet()).stream();
+		return frame -> (direct(path) ? frame.recto : frame.verso).getOrDefault(path, emptySet()).stream();
 	}
 
 	public static Function<Frame, Stream<Value>> seq(final IRI... path) {
@@ -155,12 +167,13 @@ public final class Frame implements Resource {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Resource focus;
-	private final Map<IRI, Set<Value>> fields;
+
+	private final Map<IRI, Set<Value>> recto=new LinkedHashMap<>();
+	private final Map<IRI, Set<Value>> verso=new LinkedHashMap<>();
 
 
-	private Frame(final Resource focus, final Map<IRI, Set<Value>> fields) {
+	private Frame(final Resource focus) {
 		this.focus=focus;
-		this.fields=fields;
 	}
 
 
@@ -183,26 +196,29 @@ public final class Frame implements Resource {
 	}
 
 	public Stream<Statement> stream() {
-		return fields.entrySet().stream().flatMap(entry -> {
+		return stream(newSetFromMap(new ConcurrentHashMap<>()));
+	}
 
-			final IRI key=entry.getKey();
-			final IRI predicate=iri(key.getNamespace(), key.getLocalName());
 
-			final boolean inverse=key instanceof Inverse;
+	private Stream<Statement> stream(final Set<Value> trail) {
+		return trail.add(focus) ? Stream.of(recto, verso).flatMap(map -> map.entrySet().stream()).flatMap(entry -> {
+
+			final IRI predicate=entry.getKey();
+			final boolean direct=direct(predicate);
 
 			return entry.getValue().stream().flatMap(value -> {
 
 				final boolean frame=value instanceof Frame;
 
-				final Statement statement=inverse
-						? statement(frame ? ((Frame)value).focus : (Resource)value, predicate, focus)
-						: statement(focus, predicate, frame ? ((Frame)value).focus : value);
+				final Statement statement=direct
+						? statement(focus, predicate, frame ? ((Frame)value).focus : value)
+						: statement(frame ? ((Frame)value).focus : (Resource)value, predicate, focus);
 
-				return Stream.concat(Stream.of(statement), frame ? ((Frame)value).stream() : Stream.empty());
+				return Stream.concat(Stream.of(statement), frame ? ((Frame)value).stream(trail) : Stream.empty());
 
 			});
 
-		});
+		}) : Stream.empty();
 	}
 
 
@@ -250,26 +266,26 @@ public final class Frame implements Resource {
 			throw new NullPointerException("null values");
 		}
 
-		final Map<IRI, Set<Value>> fields=new LinkedHashMap<>(this.fields);
-		final Set<Value> update=new LinkedHashSet<>();
+		final boolean direct=direct(field);
 
-		values.forEachOrdered(value -> {
+		final Frame frame=new Frame(focus);
+
+		frame.recto.putAll(recto);
+		frame.verso.putAll(verso);
+
+		(direct ? frame.recto : frame.verso).put(field, values.peek(value -> {
 
 			if ( value == null ) {
 				throw new NullPointerException("null values");
 			}
 
-			if ( field instanceof Inverse && !(value instanceof Resource) ) {
+			if ( !(direct || value instanceof Resource) ) {
 				throw new IllegalArgumentException("literal values for inverse field");
 			}
 
-			update.add(value);
+		}).collect(toCollection(LinkedHashSet::new)));
 
-		});
-
-		fields.put(field, update);
-
-		return new Frame(focus, fields);
+		return frame;
 	}
 
 
@@ -301,19 +317,7 @@ public final class Frame implements Resource {
 
 		private static final long serialVersionUID=7576383707001017160L;
 
-
-		private Inverse(final IRI iri) { super(iri.stringValue()); }
-
-
-		@Override public boolean equals(final Object object) {
-			return object == this || object instanceof Inverse && super.equals(object);
-		}
-
-		@Override public int hashCode() { return -super.hashCode(); }
-
-		@Override public String toString() {
-			return "^"+super.toString();
-		}
+		private Inverse(final String iri) { super(iri); }
 
 	}
 
