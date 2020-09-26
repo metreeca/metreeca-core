@@ -28,6 +28,11 @@ import com.metreeca.json.Shape;
 public final class MaxCount extends Shape {
 
 	public static Shape maxCount(final int limit) {
+
+		if ( limit < 1 ) {
+			throw new IllegalArgumentException("illegal limit <"+limit+">");
+		}
+
 		return new MaxCount(limit);
 	}
 
@@ -38,11 +43,6 @@ public final class MaxCount extends Shape {
 
 
 	private MaxCount(final int limit) {
-
-		if ( limit < 1 ) {
-			throw new IllegalArgumentException("illegal limit <"+limit+">");
-		}
-
 		this.limit=limit;
 	}
 

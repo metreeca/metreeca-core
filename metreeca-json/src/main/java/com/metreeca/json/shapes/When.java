@@ -37,10 +37,32 @@ import static com.metreeca.json.shapes.Or.or;
 public final class When extends Shape {
 
 	public static Shape when(final Shape test, final Shape pass) {
+
+		if ( test == null ) {
+			throw new NullPointerException("null test shape");
+		}
+
+		if ( pass == null ) {
+			throw new NullPointerException("null pass shape");
+		}
+
 		return when(test, pass, and());
 	}
 
 	public static Shape when(final Shape test, final Shape pass, final Shape fail) {
+
+		if ( test == null ) {
+			throw new NullPointerException("null test shape");
+		}
+
+		if ( pass == null ) {
+			throw new NullPointerException("null pass shape");
+		}
+
+		if ( fail == null ) {
+			throw new NullPointerException("null fail shape");
+		}
+
 		return test.equals(and()) ? pass
 				: test.equals(or()) ? fail
 				: pass.equals(fail) ? pass
@@ -56,19 +78,6 @@ public final class When extends Shape {
 
 
 	private When(final Shape test, final Shape pass, final Shape fail) {
-
-		if ( test == null ) {
-			throw new NullPointerException("null test shape");
-		}
-
-		if ( pass == null ) {
-			throw new NullPointerException("null pass shape");
-		}
-
-		if ( fail == null ) {
-			throw new NullPointerException("null fail shape");
-		}
-
 		this.test=test;
 		this.pass=pass;
 		this.fail=fail;
@@ -135,7 +144,7 @@ public final class When extends Shape {
 
 
 		@Override public Boolean probe(final Field field) {
-			return field.value().map(this);
+			return field.shape().map(this);
 		}
 
 		@Override public Boolean probe(final And and) {

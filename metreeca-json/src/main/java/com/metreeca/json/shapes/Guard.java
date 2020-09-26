@@ -109,25 +109,25 @@ public final class Guard extends Shape {
 
 	//// Guard Evaluators //////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Function<Guard, Boolean> retain(final Object axis, final boolean status) {
+	public static Function<Guard, Boolean> retain(final String axis, final boolean status) {
 		return guard -> guard.axis.equals(axis)
 				? status
 				: null;
 	}
 
-	public static Function<Guard, Boolean> retain(final Object axis, final Object value) {
+	public static Function<Guard, Boolean> retain(final String axis, final Object value) {
 		return guard -> guard.axis.equals(axis)
 				? guard.values.contains(value)
 				: null;
 	}
 
-	public static Function<Guard, Boolean> retain(final Object axis, final Object... values) {
+	public static Function<Guard, Boolean> retain(final String axis, final Object... values) {
 		return guard -> guard.axis.equals(axis)
 				? Arrays.stream(values).anyMatch(guard.values::contains)
 				: null;
 	}
 
-	public static Function<Guard, Boolean> retain(final Object axis, final Collection<?> values) {
+	public static Function<Guard, Boolean> retain(final String axis, final Collection<?> values) {
 		return guard -> guard.axis.equals(axis)
 				? values.stream().anyMatch(guard.values::contains)
 				: null;
@@ -136,22 +136,11 @@ public final class Guard extends Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Shape guard(final Object axis, final Object... values) {
+	public static Shape guard(final String axis, final Object... values) {
 		return guard(axis, asList(values));
 	}
 
-	public static Shape guard(final Object axis, final Collection<Object> values) {
-		return new Guard(axis, values);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final Object axis;
-	private final Set<Object> values;
-
-
-	private Guard(final Object axis, final Collection<Object> values) {
+	public static Shape guard(final String axis, final Collection<Object> values) {
 
 		if ( axis == null ) {
 			throw new NullPointerException("null axis");
@@ -161,16 +150,23 @@ public final class Guard extends Shape {
 			throw new NullPointerException("null values");
 		}
 
-		if ( values.contains(null) ) {
-			throw new NullPointerException("null value");
-		}
+		return new Guard(axis, values);
+	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final String axis;
+	private final Set<Object> values;
+
+
+	private Guard(final String axis, final Collection<Object> values) {
 		this.axis=axis;
 		this.values=new HashSet<>(values);
 	}
 
 
-	public Object axis() {
+	public String axis() {
 		return axis;
 	}
 

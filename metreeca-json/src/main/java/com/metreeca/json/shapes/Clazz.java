@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.internal;
 
 
 /**
@@ -34,6 +35,24 @@ public final class Clazz extends Shape {
 	/**
 	 * Creates a class constraint.
 	 *
+	 * @param name the expected class name
+	 *
+	 * @return a new datatype constraint for the provided {@code name}
+	 *
+	 * @throws NullPointerException if {@code name} is null
+	 */
+	public static Shape clazz(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return clazz(internal(name));
+	}
+
+	/**
+	 * Creates a class constraint.
+	 *
 	 * @param iri the expected class IRI
 	 *
 	 * @return a new datatype constraint for the provided {@code iri}
@@ -41,6 +60,11 @@ public final class Clazz extends Shape {
 	 * @throws NullPointerException if {@code iri} is null
 	 */
 	public static Shape clazz(final IRI iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
 		return new Clazz(iri);
 	}
 
@@ -51,11 +75,6 @@ public final class Clazz extends Shape {
 
 
 	private Clazz(final IRI iri) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
 		this.iri=iri;
 	}
 

@@ -39,15 +39,15 @@ public final class Like extends Shape {
 	private static final Pattern MarkPattern=Pattern.compile("\\p{M}");
 
 
-	public static String keywords(final CharSequence text, final boolean stemming) {
+	public static String keywords(final CharSequence keywords, final boolean stemming) {
 
-		if ( text == null ) {
-			throw new NullPointerException("null text");
+		if ( keywords == null ) {
+			throw new NullPointerException("null keywords");
 		}
 
-		final StringBuilder builder=new StringBuilder(text.length()).append("(?i:.*");
+		final StringBuilder builder=new StringBuilder(keywords.length()).append("(?i:.*");
 
-		final String normal=MarkPattern.matcher(Normalizer.normalize(text, Form.NFD)).replaceAll("");
+		final String normal=MarkPattern.matcher(Normalizer.normalize(keywords, Form.NFD)).replaceAll("");
 
 		for (final Matcher matcher=WordPattern.matcher(normal); matcher.find(); ) {
 			builder.append("\\b").append(matcher.group()).append(stemming ? "" : "\\b").append(".*");
@@ -56,31 +56,32 @@ public final class Like extends Shape {
 		return builder.append(")").toString();
 	}
 
+
 	public static Shape like(final String keywords, final boolean stemming) {
+
+		if ( keywords == null ) {
+			throw new NullPointerException("null keywords");
+		}
+
 		return new Like(keywords, stemming);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String text;
+	private final String keywords;
 
 	private final boolean stemming;
 
 
-	private Like(final String text, final boolean stemming) {
-
-		if ( text == null ) {
-			throw new NullPointerException("null text");
-		}
-
-		this.text=text;
+	private Like(final String keywords, final boolean stemming) {
+		this.keywords=keywords;
 		this.stemming=stemming;
 	}
 
 
-	public String text() {
-		return text;
+	public String keywords() {
+		return keywords;
 	}
 
 
@@ -92,7 +93,7 @@ public final class Like extends Shape {
 	 * @return a regular expression matching strings matched by this like constraint
 	 */
 	public String toExpression() {
-		return keywords(text, stemming);
+		return keywords(keywords, stemming);
 	}
 
 
@@ -112,15 +113,15 @@ public final class Like extends Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Like
-				&& text.equals(((Like)object).text);
+				&& keywords.equals(((Like)object).keywords);
 	}
 
 	@Override public int hashCode() {
-		return text.hashCode();
+		return keywords.hashCode();
 	}
 
 	@Override public String toString() {
-		return "like("+text+(stemming ? ", stemming" : "")+")";
+		return "like("+keywords+(stemming ? ", stemming" : "")+")";
 	}
 
 }

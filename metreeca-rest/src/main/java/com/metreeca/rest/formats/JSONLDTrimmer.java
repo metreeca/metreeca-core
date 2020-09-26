@@ -76,7 +76,7 @@ final class JSONLDTrimmer {
 			} else {
 
 				Optional.of(label).map(fields::get).ifPresent(field ->
-						builder.add(label, trim(focus, field.value(), value))
+						builder.add(label, trim(focus, field.shape(), value))
 				);
 
 			}

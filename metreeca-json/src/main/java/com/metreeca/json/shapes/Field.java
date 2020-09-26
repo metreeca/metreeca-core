@@ -22,7 +22,11 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.internal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
@@ -36,48 +40,122 @@ import static com.metreeca.json.shapes.Or.or;
  */
 public final class Field extends Shape {
 
+	public static Shape field(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return field(name, all());
+	}
+
+	public static Shape field(final String name, final Object... values) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
+		return field(name, all(values));
+	}
+
+	public static Shape field(final String name, final Shape... shapes) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null shapes");
+		}
+
+		return field(name, and(shapes));
+	}
+
+	public static Shape field(final String name, final Shape shape) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return field(internal(name), shape);
+	}
+
+
 	public static Shape field(final IRI name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
 		return field(name, all());
 	}
 
 	public static Shape field(final IRI name, final Value... values) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
 		return field(name, all(values));
 	}
 
-	public static Shape field(final IRI name, final Shape... shapes) {return field(name, and(shapes));}
+	public static Shape field(final IRI name, final Shape... shapes) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null shapes");
+		}
+
+		return field(name, and(shapes));
+	}
 
 	public static Shape field(final IRI name, final Shape shape) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
 		return shape.equals(or()) ? and() : new Field(name, shape);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final IRI label;
-	private final Shape value;
+	private final IRI name;
+	private final Shape shape;
 
 
-	private Field(final IRI label, final Shape value) {
-
-		if ( label == null ) {
-			throw new NullPointerException("null label");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		this.label=label;
-		this.value=value;
+	private Field(final IRI name, final Shape shape) {
+		this.name=name;
+		this.shape=shape;
 	}
 
 
-	public IRI label() {
-		return label;
+	public IRI name() {
+		return name;
 	}
 
-	public Shape value() {
-		return value;
+	public Shape shape() {
+		return shape;
 	}
 
 
@@ -97,16 +175,16 @@ public final class Field extends Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Field
-				&& label.equals(((Field)object).label)
-				&& value.equals(((Field)object).value);
+				&& name.equals(((Field)object).name)
+				&& shape.equals(((Field)object).shape);
 	}
 
 	@Override public int hashCode() {
-		return label.hashCode()^value.hashCode();
+		return name.hashCode()^shape.hashCode();
 	}
 
 	@Override public String toString() {
-		return "field("+format(label)+(value.equals(and()) ? "" : ", "+value)+")";
+		return "field("+format(name)+(shape.equals(and()) ? "" : ", "+shape)+")";
 	}
 
 }

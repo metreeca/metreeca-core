@@ -18,6 +18,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.Value;
 
@@ -28,6 +29,7 @@ import static com.metreeca.json.shapes.And.and;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -37,11 +39,30 @@ import static java.util.stream.Collectors.joining;
  */
 public final class All extends Shape {
 
+	public static Shape all(final Object... values) {
+
+		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
+		return all(Arrays.stream(values).map(Values::value).collect(toList()));
+	}
+
 	public static Shape all(final Value... values) {
+
+		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
 		return all(asList(values));
 	}
 
 	public static Shape all(final Collection<? extends Value> values) {
+
+		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
 		return values.isEmpty() ? and() : new All(values);
 	}
 
@@ -52,11 +73,6 @@ public final class All extends Shape {
 
 
 	private All(final Collection<? extends Value> values) {
-
-		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
 		this.values=new LinkedHashSet<>(values);
 	}
 

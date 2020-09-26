@@ -28,6 +28,11 @@ import com.metreeca.json.Shape;
 public final class MinCount extends Shape {
 
 	public static Shape minCount(final int limit) {
+
+		if ( limit < 1 ) {
+			throw new IllegalArgumentException("illegal limit ["+limit+"]");
+		}
+
 		return new MinCount(limit);
 	}
 
@@ -38,11 +43,6 @@ public final class MinCount extends Shape {
 
 
 	private MinCount(final int limit) {
-
-		if ( limit < 1 ) {
-			throw new IllegalArgumentException("illegal limit ["+limit+"]");
-		}
-
 		this.limit=limit;
 	}
 

@@ -237,7 +237,7 @@ final class JSONLDValidator {
 
 		@Override public Trace probe(final Pattern pattern) {
 
-			final String expression=pattern.text();
+			final String expression=pattern.expression();
 			final String flags=pattern.flags();
 
 			final java.util.regex.Pattern compiled=java.util.regex.Pattern
@@ -259,7 +259,7 @@ final class JSONLDValidator {
 
 			return trace(values.stream()
 					.filter(negate(value -> predicate.test(text(value(value)))))
-					.map(value -> format("<%s> textual value is not like <%s>", value, like.text()))
+					.map(value -> format("<%s> textual value is not like <%s>", value, like.keywords()))
 			);
 		}
 
@@ -319,13 +319,13 @@ final class JSONLDValidator {
 					.filter(entry -> entry.getValue().equals(field))
 					.map(Map.Entry::getKey)
 					.findFirst()
-					.orElseThrow(() -> new RuntimeException(format("undefined alias for field <%s>", field.label())));
+					.orElseThrow(() -> new RuntimeException(format("undefined alias for field <%s>", field.name())));
 
 			return values.stream().map(value -> {
 
 				if ( value instanceof JsonObject ) { // validate the field shape on the new field values
 
-					return trace(alias, validate(field.value(), Optional
+					return trace(alias, validate(field.shape(), Optional
 							.ofNullable(((JsonObject)value).get(alias))
 							.map(v -> v instanceof JsonArray ? (List<JsonValue>)v : singleton(v))
 							.orElseGet(Collections::emptySet)

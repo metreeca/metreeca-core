@@ -176,8 +176,8 @@ final class JSONLDEncoder {
 				final String alias=entry.getKey();
 				final Field field=entry.getValue();
 
-				final IRI predicate=field.label();
-				final Shape nestedShape=field.value();
+				final IRI predicate=field.name();
+				final Shape nestedShape=field.shape();
 
 				final boolean direct=direct(predicate);
 
@@ -222,7 +222,7 @@ final class JSONLDEncoder {
 
 			fields.forEach((alias, field) -> {
 
-				final IRI iri=field.label();
+				final IRI iri=field.name();
 				final String value=iri.stringValue();
 
 				context.add(alias, direct(iri)

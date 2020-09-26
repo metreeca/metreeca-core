@@ -60,7 +60,7 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 	}
 
 	@Override public Shape probe(final Field field) {
-		return field(field.label(), field.value().map(this));
+		return field(field.name(), field.shape().map(this));
 	}
 
 

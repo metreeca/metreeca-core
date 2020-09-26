@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.internal;
 
 
 /**
@@ -34,6 +35,24 @@ public final class Datatype extends Shape {
 	/**
 	 * Creates a datatype constraint.
 	 *
+	 * @param name the expected datatype name
+	 *
+	 * @return a new datatype constraint for the provided {@code name}
+	 *
+	 * @throws NullPointerException if {@code name} is null
+	 */
+	public static Shape datatype(final String name) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		return datatype(internal(name));
+	}
+
+	/**
+	 * Creates a datatype constraint.
+	 *
 	 * @param iri the expected datatype IRI
 	 *
 	 * @return a new datatype constraint for the provided {@code iri}
@@ -41,6 +60,11 @@ public final class Datatype extends Shape {
 	 * @throws NullPointerException if {@code iri} is null
 	 */
 	public static Shape datatype(final IRI iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
 		return new Datatype(iri);
 	}
 
@@ -51,11 +75,6 @@ public final class Datatype extends Shape {
 
 
 	private Datatype(final IRI iri) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
 		this.iri=iri;
 	}
 

@@ -412,7 +412,7 @@ final class GraphProcessorTest {
 
 		@Test void testGuard() {
 			exec(() -> assertThatThrownBy(() ->
-					query(Root, items(guard(RDF.VALUE, RDF.NIL)))
+					query(Root, items(guard("axis", RDF.NIL)))
 
 			).as("reject partially redacted shapes")
 					.isInstanceOf(UnsupportedOperationException.class));
@@ -955,7 +955,7 @@ final class GraphProcessorTest {
 		@Test void testWhen() {
 			exec(() -> assertThatThrownBy(() -> query(
 
-					Root, items(when(guard(RDF.VALUE, RDF.NIL), clazz(RDFS.LITERAL)))
+					Root, items(when(guard("axis", RDF.NIL), clazz(RDFS.LITERAL)))
 
 			)).isInstanceOf(UnsupportedOperationException.class));
 		}

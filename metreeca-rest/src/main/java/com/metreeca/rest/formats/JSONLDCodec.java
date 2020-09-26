@@ -220,7 +220,7 @@ final class JSONLDCodec {
 					if ( !AliasPattern.matcher(entry.getKey()).matches() ) {
 
 						throw new IllegalArgumentException(format(
-								"malformed alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().label()
+								"malformed alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().name()
 						));
 
 					}
@@ -230,7 +230,7 @@ final class JSONLDCodec {
 					if ( entry.getKey().startsWith("@") || keywords.containsValue(entry.getKey()) ) {
 
 						throw new IllegalArgumentException(format(
-								"reserved alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().label()
+								"reserved alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().name()
 						));
 
 					}
@@ -239,7 +239,7 @@ final class JSONLDCodec {
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
 
 					throw new IllegalArgumentException(format(
-							"clashing aliases for <field(%s)> / <field(%s)>", x.label(), y.label()
+							"clashing aliases for <field(%s)> / <field(%s)>", x.name(), y.name()
 					));
 
 				}, LinkedHashMap::new));
@@ -248,12 +248,12 @@ final class JSONLDCodec {
 
 	private static String alias(final Field field) {
 
-		final Set<String> aliases=field.value().map(new AliasesProbe()).collect(toSet());
+		final Set<String> aliases=field.shape().map(new AliasesProbe()).collect(toSet());
 
 		if ( aliases.size() > 1 ) { // clashing aliases
 
 			throw new IllegalArgumentException(format(
-					"multiple aliases for <field(%s)> / <%s>", field.label(), aliases
+					"multiple aliases for <field(%s)> / <%s>", field.name(), aliases
 			));
 
 		} else if ( aliases.size() == 1 ) { // user-defined alias
@@ -264,13 +264,13 @@ final class JSONLDCodec {
 
 			return Optional
 
-					.of(NamedIRIPattern.matcher(field.label().stringValue()))
+					.of(NamedIRIPattern.matcher(field.name().stringValue()))
 					.filter(Matcher::find)
 					.map(matcher -> matcher.group("name"))
-					.map(alias -> direct(field.label()) ? alias : alias+"Of") // !!! inverse?
+					.map(alias -> direct(field.name()) ? alias : alias+"Of") // !!! inverse?
 
 					.orElseThrow(() -> new IllegalArgumentException(format(
-							"undefined alias for <field(%s)>", field.label()
+							"undefined alias for <field(%s)>", field.name()
 					)));
 
 		}

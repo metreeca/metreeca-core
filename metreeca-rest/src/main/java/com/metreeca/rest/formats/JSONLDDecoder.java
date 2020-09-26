@@ -195,9 +195,9 @@ final class JSONLDDecoder {
 					return error("unknown property label <%s>", label);
 				}
 
-				return values(value, field.value()).flatMap(pair -> {
+				return values(value, field.shape()).flatMap(pair -> {
 
-					final IRI iri=field.label();
+					final IRI iri=field.name();
 					final Value target=pair.getKey();
 					final Stream<Statement> model=pair.getValue();
 

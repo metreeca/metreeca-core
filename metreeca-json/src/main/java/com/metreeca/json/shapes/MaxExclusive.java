@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.Value;
 
 import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.value;
 
 
 /**
@@ -32,8 +33,22 @@ import static com.metreeca.json.Values.format;
  */
 public final class MaxExclusive extends Shape {
 
-	public static Shape maxExclusive(final Value value) {
-		return new MaxExclusive(value);
+	public static Shape maxExclusive(final Object limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return new MaxExclusive(value(limit));
+	}
+
+	public static Shape maxExclusive(final Value limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return new MaxExclusive(limit);
 	}
 
 
@@ -43,11 +58,6 @@ public final class MaxExclusive extends Shape {
 
 
 	private MaxExclusive(final Value limit) {
-
-		if ( limit == null ) {
-			throw new NullPointerException("null limit");
-		}
-
 		this.limit=limit;
 	}
 

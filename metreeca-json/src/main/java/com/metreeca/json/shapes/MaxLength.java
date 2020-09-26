@@ -29,6 +29,11 @@ import com.metreeca.json.Shape;
 public final class MaxLength extends Shape {
 
 	public static Shape maxLength(final int limit) {
+
+		if ( limit < 1 ) {
+			throw new IllegalArgumentException("illegal limit ["+limit+"]");
+		}
+
 		return new MaxLength(limit);
 	}
 
@@ -39,11 +44,6 @@ public final class MaxLength extends Shape {
 
 
 	private MaxLength(final int limit) {
-
-		if ( limit < 1 ) {
-			throw new IllegalArgumentException("illegal limit ["+limit+"]");
-		}
-
 		this.limit=limit;
 	}
 

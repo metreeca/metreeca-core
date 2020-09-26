@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.Value;
 
 import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.value;
 
 
 /**
@@ -32,8 +33,22 @@ import static com.metreeca.json.Values.format;
  */
 public final class MinInclusive extends Shape {
 
-	public static Shape minInclusive(final Value value) {
-		return new MinInclusive(value);
+	public static Shape minInclusive(final Object limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return new MinInclusive(value(limit));
+	}
+
+	public static Shape minInclusive(final Value limit) {
+
+		if ( limit == null ) {
+			throw new NullPointerException("null limit");
+		}
+
+		return new MinInclusive(limit);
 	}
 
 
@@ -43,11 +58,6 @@ public final class MinInclusive extends Shape {
 
 
 	private MinInclusive(final Value limit) {
-
-		if ( limit == null ) {
-			throw new NullPointerException("null value");
-		}
-
 		this.limit=limit;
 	}
 

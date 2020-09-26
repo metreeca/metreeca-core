@@ -33,6 +33,7 @@ import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
 
 
@@ -49,15 +50,25 @@ public final class And extends Shape {
 	public static Shape and() { return empty; }
 
 	public static Shape and(final Shape... shapes) {
+
+		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null shapes");
+		}
+
 		return and(asList(shapes));
 	}
 
 	public static Shape and(final Collection<? extends Shape> shapes) {
+
+		if ( shapes == null || shapes.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null shapes");
+		}
+
 		return and(shapes.stream());
 	}
 
 	public static Shape and(final Stream<? extends Shape> shapes) {
-		return pack(shapes
+		return pack(shapes.peek(shape -> requireNonNull(shape, "null shapes"))
 
 				// flatten nested shaped shapes of the same type
 
@@ -146,7 +157,7 @@ public final class And extends Shape {
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
 		return fields // group by name preserving order
 
-				.collect(toMap(Field::label, f -> Stream.of(f.value()), Stream::concat, LinkedHashMap::new))
+				.collect(toMap(Field::name, f -> Stream.of(f.shape()), Stream::concat, LinkedHashMap::new))
 
 				.entrySet()
 				.stream()
@@ -161,15 +172,6 @@ public final class And extends Shape {
 
 
 	private And(final Collection<? extends Shape> shapes) {
-
-		if ( shapes == null ) {
-			throw new NullPointerException("null shapes");
-		}
-
-		if ( shapes.contains(null) ) {
-			throw new NullPointerException("null shape");
-		}
-
 		this.shapes=new LinkedHashSet<>(shapes);
 	}
 

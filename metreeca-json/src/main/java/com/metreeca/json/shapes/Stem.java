@@ -28,6 +28,11 @@ import com.metreeca.json.Shape;
 public final class Stem extends Shape {
 
 	public static Shape stem(final String prefix) {
+
+		if ( prefix == null ) {
+			throw new NullPointerException("null prefix");
+		}
+
 		return new Stem(prefix);
 	}
 
@@ -38,11 +43,6 @@ public final class Stem extends Shape {
 
 
 	private Stem(final String prefix) {
-
-		if ( prefix == null ) {
-			throw new NullPointerException("null prefix");
-		}
-
 		this.prefix=prefix;
 	}
 

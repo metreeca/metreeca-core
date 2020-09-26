@@ -28,44 +28,47 @@ import com.metreeca.json.Shape;
  */
 public final class Pattern extends Shape {
 
-	public static Shape pattern(final String pattern) {
-		return pattern(pattern, "");
-	}
+	public static Shape pattern(final String expression) {
 
-	public static Shape pattern(final String pattern, final String flags) {
-		return new Pattern(pattern, flags);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final String text;
-	private final String flags;
-
-
-	private Pattern(final String text, final String flags) {
-
-		if ( text == null ) {
-			throw new NullPointerException("null text");
+		if ( expression == null ) {
+			throw new NullPointerException("null expression");
 		}
 
-		if ( text.isEmpty() ) {
-			throw new IllegalArgumentException("empty text");
+		return pattern(expression, "");
+	}
+
+	public static Shape pattern(final String expression, final String flags) {
+
+		if ( expression == null ) {
+			throw new NullPointerException("null expression");
+		}
+
+		if ( expression.isEmpty() ) {
+			throw new IllegalArgumentException("empty expression");
 		}
 
 		if ( flags == null ) {
 			throw new NullPointerException("null flags");
 		}
 
-		// !!! test expression/flags syntax
+		return new Pattern(expression, flags);
+	}
 
-		this.text=text;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final String expression;
+	private final String flags;
+
+
+	private Pattern(final String expression, final String flags) {
+		this.expression=expression;
 		this.flags=flags;
 	}
 
 
-	public String text() {
-		return text;
+	public String expression() {
+		return expression;
 	}
 
 	public String flags() {
@@ -89,16 +92,16 @@ public final class Pattern extends Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Pattern
-				&& text.equals(((Pattern)object).text)
+				&& expression.equals(((Pattern)object).expression)
 				&& flags.equals(((Pattern)object).flags);
 	}
 
 	@Override public int hashCode() {
-		return text.hashCode()^flags.hashCode();
+		return expression.hashCode()^flags.hashCode();
 	}
 
 	@Override public String toString() {
-		return "pattern("+text+(flags.isEmpty() ? "" : ", "+flags)+")";
+		return "pattern("+expression+(flags.isEmpty() ? "" : ", "+flags)+")";
 	}
 
 }

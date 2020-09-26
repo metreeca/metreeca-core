@@ -73,8 +73,8 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 
 	@Override public Stream<Statement> probe(final Field field) {
 
-		final IRI iri=field.label();
-		final Shape shape=field.value();
+		final IRI iri=field.name();
+		final Shape shape=field.shape();
 
 		return Stream.concat(
 

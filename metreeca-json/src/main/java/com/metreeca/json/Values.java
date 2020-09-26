@@ -73,8 +73,6 @@ public final class Values {
 	);
 
 
-	private static final String Internal="app:/terms#";
-
 	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
 	private static final Comparator<Value> comparator=new ValueComparator();
 
@@ -150,11 +148,11 @@ public final class Values {
 
 	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final IRI IRIType=iri(Internal, "iri"); // datatype IRI for IRI references
-	public static final IRI BNodeType=iri(Internal, "bnode"); // datatype IRI for blank nodes
-	public static final IRI LiteralType=iri(Internal, "literal"); // abstract datatype IRI for literals
-	public static final IRI ResourceType=iri(Internal, "resource"); // abstract datatype IRI for resources
-	public static final IRI ValueType=iri(Internal, "value"); // abstract datatype IRI for values
+	public static final IRI ValueType=iri("type:value"); // abstract datatype IRI for values
+	public static final IRI ResourceType=iri("type:resource"); // abstract datatype IRI for resources
+	public static final IRI BNodeType=iri("type:bnode"); // datatype IRI for blank nodes
+	public static final IRI IRIType=iri("type:iri"); // datatype IRI for IRI references
+	public static final IRI LiteralType=iri("type:literal"); // abstract datatype IRI for literals
 
 
 	public static boolean derives(final IRI upper, final IRI lower) {
@@ -247,6 +245,11 @@ public final class Values {
 	}
 
 
+	public static Value value(final Object value) {
+		return value instanceof URI || value instanceof URL ? iri(value.toString()) : literal(value);
+	}
+
+
 	public static BNode bnode() {
 		return factory.createBNode();
 	}
@@ -287,6 +290,11 @@ public final class Values {
 	}
 
 
+	public static IRI internal(final String name) {
+		return name == null ? null : factory.createIRI("app:/terms#", name);
+	}
+
+
 	public static Literal literal(final Object value) {
 		return value == null ? null
 
@@ -308,7 +316,7 @@ public final class Values {
 
 				: value instanceof byte[] ? literal((byte[])value)
 
-				: literal(value.toString());
+				: literal(value.getClass());
 	}
 
 
@@ -407,6 +415,11 @@ public final class Values {
 
 	public static Literal literal(final String value, final IRI datatype) {
 		return value == null || datatype == null ? null : factory.createLiteral(value, datatype);
+	}
+
+
+	private static Literal literal(final Class<?> type) {
+		throw new IllegalArgumentException(String.format("unsupported object type <%s>", type.getName()));
 	}
 
 

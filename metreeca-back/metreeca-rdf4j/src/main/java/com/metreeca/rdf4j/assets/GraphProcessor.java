@@ -676,8 +676,8 @@ abstract class GraphProcessor {
 
 			@Override public Stream<Integer> probe(final Field field) {
 
-				final IRI iri=field.label();
-				final Shape shape=field.value();
+				final IRI iri=field.name();
+				final Shape shape=field.shape();
 
 				final Integer source=identifier.apply(focus);
 				final Integer target=identifier.apply(shape);
@@ -794,7 +794,7 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Pattern pattern) {
 				return snippet("filter regex({source}, '{pattern}', '{flags}')",
-						var(source), pattern.text().replace("\\", "\\\\"), pattern.flags()
+						var(source), pattern.expression().replace("\\", "\\\\"), pattern.flags()
 				);
 			}
 
@@ -827,8 +827,8 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=field.label();
-				final Shape shape=field.value();
+				final IRI iri=field.name();
+				final Shape shape=field.shape();
 
 				final Optional<Set<Value>> all=all(shape).map(FetcherProbe.this::values);
 				final Optional<Set<Value>> any=_any(shape).map(FetcherProbe.this::values);
@@ -894,8 +894,8 @@ abstract class GraphProcessor {
 
 			@Override public Snippet probe(final Field field) {
 
-				final IRI iri=field.label();
-				final Shape shape=field.value();
+				final IRI iri=field.name();
+				final Shape shape=field.shape();
 
 				return snippet( // (€) optional unless universal constraints are present
 

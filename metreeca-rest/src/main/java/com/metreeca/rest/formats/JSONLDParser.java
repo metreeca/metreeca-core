@@ -227,7 +227,7 @@ final class JSONLDParser {
 			final Field head=path.get(0);
 			final List<Field> tail=path.subList(1, path.size());
 
-			return Field.field(head.label(), filter(tail, value, head.value(), mapper));
+			return Field.field(head.name(), filter(tail, value, head.shape(), mapper));
 
 		}
 	}
@@ -324,7 +324,7 @@ final class JSONLDParser {
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private List<IRI> path(final String path, final Shape shape) {
-		return steps(path, shape).stream().map(Field::label).collect(toList());
+		return steps(path, shape).stream().map(Field::name).collect(toList());
 	}
 
 	private List<Field> steps(final String path, final Shape shape) {
@@ -348,7 +348,7 @@ final class JSONLDParser {
 					.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
 
 			steps.add(field);
-			reference=field.value();
+			reference=field.shape();
 
 			matcher.region(last=matcher.end(), trimmed.length());
 		}

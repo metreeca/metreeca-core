@@ -44,6 +44,11 @@ public final class Meta extends Shape {
 	 * @throws NullPointerException if {@code value} is null
 	 */
 	public static Shape alias(final String value) {
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return meta("alias", value);
 	}
 
@@ -57,6 +62,11 @@ public final class Meta extends Shape {
 	 * @throws NullPointerException if {@code value} is null
 	 */
 	public static Shape label(final String value) {
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return new Meta("label", value);
 	}
 
@@ -70,6 +80,11 @@ public final class Meta extends Shape {
 	 * @throws NullPointerException if {@code value} is null
 	 */
 	public static Shape notes(final String value) {
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return new Meta("notes", value);
 	}
 
@@ -88,6 +103,15 @@ public final class Meta extends Shape {
 
 
 	public static Meta meta(final String label, final String value) {
+
+		if ( label == null ) {
+			throw new NullPointerException("null label");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return new Meta(label, value);
 	}
 
@@ -121,15 +145,6 @@ public final class Meta extends Shape {
 
 
 	private Meta(final String label, final String value) {
-
-		if ( label == null ) {
-			throw new NullPointerException("null label");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
 		this.label=label;
 		this.value=value;
 	}
