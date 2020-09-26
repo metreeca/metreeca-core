@@ -22,6 +22,7 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
@@ -105,7 +106,7 @@ public final class Field extends Shape {
 	}
 
 	@Override public String toString() {
-		return "field("+label+(value.equals(and()) ? "" : ", "+value)+")";
+		return "field("+format(label)+(value.equals(and()) ? "" : ", "+value)+")";
 	}
 
 }

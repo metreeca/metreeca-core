@@ -21,6 +21,8 @@ import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import static com.metreeca.json.Values.format;
+
 
 /**
  * Class value constraint.
@@ -87,7 +89,7 @@ public final class Clazz extends Shape {
 	}
 
 	@Override public String toString() {
-		return "clazz("+iri+")";
+		return "clazz("+format(iri)+")";
 	}
 
 }

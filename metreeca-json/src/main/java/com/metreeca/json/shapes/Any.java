@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.Or.or;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -94,7 +95,7 @@ public final class Any extends Shape {
 
 	@Override public String toString() {
 		return "any("+(values.isEmpty() ? "" : values.stream()
-				.map(v -> v.toString().replace("\n", "\n\t"))
+				.map(v -> format(v).replace("\n", "\n\t"))
 				.collect(joining(",\n\t", "\n\t", "\n"))
 		)+")";
 	}

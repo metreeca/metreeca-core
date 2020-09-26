@@ -21,6 +21,8 @@ import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.Value;
 
+import static com.metreeca.json.Values.format;
+
 
 /**
  * Inclusive minimum value constraint.
@@ -79,7 +81,7 @@ public final class MinInclusive extends Shape {
 	}
 
 	@Override public String toString() {
-		return "minInclusive("+limit+")";
+		return "minInclusive("+format(limit)+")";
 	}
 
 }

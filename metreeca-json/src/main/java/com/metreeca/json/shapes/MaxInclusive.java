@@ -21,6 +21,8 @@ import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.Value;
 
+import static com.metreeca.json.Values.format;
+
 
 /**
  * Inclusive maximum value constraint.
@@ -79,7 +81,7 @@ public final class MaxInclusive extends Shape {
 	}
 
 	@Override public String toString() {
-		return "maxInclusive("+limit+")";
+		return "maxInclusive("+format(limit)+")";
 	}
 
 }
