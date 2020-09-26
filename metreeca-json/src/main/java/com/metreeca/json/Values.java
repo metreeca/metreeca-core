@@ -20,7 +20,6 @@ package com.metreeca.json;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.*;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
-import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 
 import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
