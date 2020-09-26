@@ -20,18 +20,18 @@ package com.metreeca.rest.handlers;
 import com.metreeca.rest.formats.DataFormat;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
+import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
@@ -39,6 +39,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.handlers.Router.router;
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Locale.ROOT;
 import static java.util.stream.Collectors.toMap;
@@ -175,6 +176,8 @@ public final class Publisher extends Delegator {
 	/**
 	 * Creates a static content publisher.
 	 *
+	 * <p><strong>Warning</strong> / Only {@code file:} and {@code jar:} URLs are currently supported.</p>
+	 *
 	 * @param root the root URL of the content to be published (e.g. as returned by {@link Class#getResource(String)})
 	 *
 	 * @return a new static content publisher for the content under {@code root}
@@ -188,13 +191,40 @@ public final class Publisher extends Delegator {
 			throw new NullPointerException("null root");
 		}
 
-		try {
+		final String scheme=root.getProtocol();
 
-			return new Publisher(Paths.get(root.toURI()));
+		if ( scheme.equals("file") ) {
 
-		} catch ( final URISyntaxException e ) {
+			try {
 
-			throw new IllegalArgumentException(e);
+				return new Publisher(Paths.get(root.toURI()));
+
+			} catch ( final URISyntaxException e ) {
+
+				throw new IllegalArgumentException(e);
+
+			}
+
+		} else if ( scheme.equals("jar") ) {
+
+			final String path=root.toString();
+			final int separator=path.indexOf("!/");
+
+			final String jar=path.substring(0, separator);
+			final String entry=path.substring(separator+1);
+
+			// load the filesystem from the asset manager to have it automatically closed
+			// !!! won't handle multiple publishers from the same filesystem
+
+			final FileSystem filesystem=asset(supplier(() ->
+					FileSystems.newFileSystem(URI.create(jar), emptyMap())
+			));
+
+			return new Publisher(filesystem.getPath(entry));
+
+		} else {
+
+			throw new UnsupportedOperationException(format("unsupported URL scheme <%s>", root));
 
 		}
 	}
@@ -224,8 +254,7 @@ public final class Publisher extends Delegator {
 	private Publisher(final Path root) {
 		delegate(router().get(request -> variants(request.path())
 
-				.map(Paths::get)
-				.map(Paths.get("/")::relativize)
+				.map(path -> root.getRoot().relativize(root.getFileSystem().getPath(path)))
 				.map(root::resolve)
 				.map(Path::normalize) // prevent tree walking attacks
 
@@ -251,6 +280,23 @@ public final class Publisher extends Delegator {
 
 
 	//// Unchecked Lambdas /////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static <V> Supplier<V> supplier(final CheckedSupplier<? extends V> supplier) {
+		return () -> {
+			try {
+
+				return supplier.get();
+
+			} catch ( final IOException e ) {
+
+				throw new UncheckedIOException(e);
+
+			} catch ( final Exception e ) {
+
+				throw new RuntimeException(e);
+			}
+		};
+	}
 
 	private static <V> Consumer<V> consumer(final CheckedConsumer<? super V> consumer) {
 		return v -> {
@@ -286,6 +332,12 @@ public final class Publisher extends Delegator {
 		};
 	}
 
+
+	@FunctionalInterface private static interface CheckedSupplier<V> {
+
+		public V get() throws Exception;
+
+	}
 
 	@FunctionalInterface private static interface CheckedConsumer<V> {
 
