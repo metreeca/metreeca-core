@@ -429,8 +429,25 @@ public final class Values {
 	}
 
 
-	public static Optional<Boolean> bool(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::bool);
+	public static Optional<Boolean> _boolean(final Value value) {
+		return literal(value).map(Literal::stringValue).flatMap(Values::_boolean);
+	}
+
+
+	public static Optional<Integer> _int(final Value value) {
+		return literal(value).map(Literal::stringValue).flatMap(Values::_int);
+	}
+
+	public static Optional<Long> _long(final Value value) {
+		return literal(value).map(Literal::stringValue).flatMap(Values::_long);
+	}
+
+	public static Optional<Float> __float(final Value value) {
+		return literal(value).map(Literal::stringValue).flatMap(Values::_float);
+	}
+
+	public static Optional<Double> _double(final Value value) {
+		return literal(value).map(Literal::stringValue).flatMap(Values::_double);
 	}
 
 	public static Optional<BigInteger> integer(final Value value) {
@@ -474,8 +491,41 @@ public final class Values {
 
 	//// Parsers ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Optional<Boolean> bool(final String string) {
+	public static Optional<Boolean> _boolean(final String string) {
 		return Optional.ofNullable(string).map(Boolean::parseBoolean);
+	}
+
+
+	public static Optional<Integer> _int(final String string) {
+		try {
+			return Optional.ofNullable(string).map(Integer::parseInt);
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
+	}
+
+	public static Optional<Long> _long(final String string) {
+		try {
+			return Optional.ofNullable(string).map(Long::parseLong);
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
+	}
+
+	public static Optional<Float> _float(final String string) {
+		try {
+			return Optional.ofNullable(string).map(Float::parseFloat);
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
+	}
+
+	public static Optional<Double> _double(final String string) {
+		try {
+			return Optional.ofNullable(string).map(Double::parseDouble);
+		} catch ( final NumberFormatException e ) {
+			return Optional.empty();
+		}
 	}
 
 	public static Optional<BigInteger> integer(final String string) {
