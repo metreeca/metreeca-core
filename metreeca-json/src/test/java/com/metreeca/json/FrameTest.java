@@ -52,15 +52,14 @@ final class FrameTest {
 
 			final Frame frame=frame(x)
 					.set(RDF.VALUE, y)
-					.set(inv(RDF.VALUE), z);
+					.set(inverse(RDF.VALUE), z);
 
 			assertThat(frame.get(RDF.VALUE).findFirst().orElse(RDF.NIL)).isEqualTo(y);
-			assertThat(frame.get(inv(RDF.VALUE)).findFirst().orElse(RDF.NIL)).isEqualTo(z);
+			assertThat(frame.get(inverse(RDF.VALUE)).findFirst().orElse(RDF.NIL)).isEqualTo(z);
 		}
 
 		@Test void testReportLiteralValuesForInverseFields() {
-			assertThatIllegalArgumentException().isThrownBy(() ->
-					frame(x).set(inv(RDF.VALUE), literal(1))
+			assertThatIllegalArgumentException().isThrownBy(() -> frame(x).set(inverse(RDF.VALUE), literal(1))
 			);
 		}
 
@@ -154,7 +153,7 @@ final class FrameTest {
 		@Test void testExportInverseStatements() {
 			assertThat(frame(x)
 
-					.set(inv(RDF.VALUE), y)
+					.set(inverse(RDF.VALUE), y)
 
 					.model()
 

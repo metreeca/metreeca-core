@@ -27,8 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.*;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.newSetFromMap;
 import static java.util.stream.Collectors.toCollection;
@@ -90,7 +89,7 @@ public final class Frame implements Resource {
 
 				if ( subject.equals(focus) ) {
 
-					frame.recto.compute(predicate, (iri, values) -> {
+					frame.fields.compute(predicate, (iri, values) -> {
 
 						final Set<Value> set=(values != null) ? values : new LinkedHashSet<>();
 
@@ -102,7 +101,7 @@ public final class Frame implements Resource {
 
 				} else if ( object.equals(focus) ) {
 
-					frame.verso.compute(inv(predicate), (iri, values) -> {
+					frame.fields.compute(inverse(predicate), (iri, values) -> {
 
 						final Set<Value> set=(values != null) ? values : new LinkedHashSet<>();
 
@@ -124,17 +123,9 @@ public final class Frame implements Resource {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static IRI inv(final IRI iri) {
-		return iri == null ? null : new Inverse(iri.stringValue());
-	}
-
-	public static boolean direct(final IRI field) {
-		return !(field instanceof Inverse);
-	}
-
 
 	public static Function<Frame, Stream<Value>> seq(final IRI path) {
-		return frame -> (direct(path) ? frame.recto : frame.verso).getOrDefault(path, emptySet()).stream();
+		return frame -> frame.fields.getOrDefault(path, emptySet()).stream();
 	}
 
 	public static Function<Frame, Stream<Value>> seq(final IRI... path) {
@@ -168,8 +159,7 @@ public final class Frame implements Resource {
 
 	private final Resource focus;
 
-	private final Map<IRI, Set<Value>> recto=new LinkedHashMap<>();
-	private final Map<IRI, Set<Value>> verso=new LinkedHashMap<>();
+	private final Map<IRI, Set<Value>> fields=new LinkedHashMap<>();
 
 
 	private Frame(final Resource focus) {
@@ -201,22 +191,36 @@ public final class Frame implements Resource {
 
 
 	private Stream<Statement> stream(final Set<Value> trail) {
-		return trail.add(focus) ? Stream.of(recto, verso).flatMap(map -> map.entrySet().stream()).flatMap(entry -> {
+		return trail.add(focus) ? fields.entrySet().stream().flatMap(entry -> {
 
-			final IRI predicate=entry.getKey();
-			final boolean direct=direct(predicate);
+			if ( direct(entry.getKey()) ) {
 
-			return entry.getValue().stream().flatMap(value -> {
+				final IRI predicate=entry.getKey();
 
-				final boolean frame=value instanceof Frame;
+				return entry.getValue().stream().flatMap(value -> {
 
-				final Statement statement=direct
-						? statement(focus, predicate, frame ? ((Frame)value).focus : value)
-						: statement(frame ? ((Frame)value).focus : (Resource)value, predicate, focus);
+					final boolean frame=value instanceof Frame;
 
-				return Stream.concat(Stream.of(statement), frame ? ((Frame)value).stream(trail) : Stream.empty());
+					return Stream.concat(
+							Stream.of(statement(focus, predicate, frame ? ((Frame)value).focus : value)),
+							frame ? ((Frame)value).stream(trail) : Stream.empty()
+					);
+				});
 
-			});
+			} else {
+
+				final IRI predicate=inverse(entry.getKey());
+
+				return entry.getValue().stream().flatMap(value -> {
+
+					final boolean frame=value instanceof Frame;
+
+					return Stream.concat(
+							Stream.of(statement(frame ? ((Frame)value).focus : (Resource)value, predicate, focus)),
+							frame ? ((Frame)value).stream(trail) : Stream.empty());
+				});
+
+			}
 
 		}) : Stream.empty();
 	}
@@ -270,10 +274,9 @@ public final class Frame implements Resource {
 
 		final Frame frame=new Frame(focus);
 
-		frame.recto.putAll(recto);
-		frame.verso.putAll(verso);
+		frame.fields.putAll(fields);
 
-		(direct ? frame.recto : frame.verso).put(field, values.peek(value -> {
+		frame.fields.put(field, values.peek(value -> {
 
 			if ( value == null ) {
 				throw new NullPointerException("null values");

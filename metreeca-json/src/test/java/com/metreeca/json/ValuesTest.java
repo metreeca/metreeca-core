@@ -268,7 +268,7 @@ public final class ValuesTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Test void testAnnotatedIRIs() {
+	@Test void testInverseIRIs() {
 
 		assertThat(direct(RDF.NIL)).isTrue();
 		assertThat(direct(inverse(RDF.NIL))).isFalse();

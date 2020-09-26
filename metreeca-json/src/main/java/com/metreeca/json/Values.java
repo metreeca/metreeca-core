@@ -142,29 +142,6 @@ public final class Values {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class Inverse extends SimpleIRI {
-
-		private static final long serialVersionUID=7576383707001017160L;
-
-
-		private Inverse(final String value) { super(value); }
-
-
-		@Override public boolean equals(final Object object) {
-			return object == this || object instanceof Inverse && super.equals(object);
-		}
-
-		@Override public int hashCode() { return -super.hashCode(); }
-
-		@Override public String toString() {
-			return "^"+super.toString();
-		}
-
-	}
-
-
 	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final Literal True=literal(true);
@@ -215,33 +192,6 @@ public final class Values {
 		);
 	}
 
-	/**
-	 * Checks predicate direction.
-	 *
-	 * @param iri the IRI identifying the predicate
-	 *
-	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
-	 * #inverse(IRI)} predicate
-	 *
-	 * @throws NullPointerException if {@code iri } is null
-	 */
-	public static boolean direct(final IRI iri) { // !!! remove
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		return !(iri instanceof Inverse);
-	}
-
-
-	public static Predicate<Statement> pattern(final Value subject, final Value predicate, final Value object) {
-		return statement
-				-> (subject == null || subject.equals(statement.getSubject()))
-				&& (predicate == null || predicate.equals(statement.getPredicate()))
-				&& (object == null || object.equals(statement.getObject()));
-	}
-
 
 	public static String text(final Value value) {
 		return value == null ? null : value.stringValue();
@@ -269,6 +219,16 @@ public final class Values {
 
 	public static Namespace namespace(final String prefix, final String name) {
 		return prefix == null || name == null ? null : new SimpleNamespace(prefix, name);
+	}
+
+
+	public static Predicate<Statement> pattern(
+			final Value subject, final Value predicate, final Value object
+	) {
+		return statement
+				-> (subject == null || subject.equals(statement.getSubject()))
+				&& (predicate == null || predicate.equals(statement.getPredicate()))
+				&& (object == null || object.equals(statement.getObject()));
 	}
 
 
@@ -324,24 +284,6 @@ public final class Values {
 	public static IRI iri(final String space, final String name) {
 		return space == null || name == null ? null
 				: factory.createIRI(space, space.endsWith("/") && name.startsWith("/") ? name.substring(1) : name);
-	}
-
-
-	/**
-	 * Inverts the direction of a predicate.
-	 *
-	 * @param iri the IRI identifying the predicate
-	 *
-	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri}
-	 * , if
-	 * {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
-	 * value of
-	 * {@code iri}, otherwise
-	 */
-	public static IRI inverse(final IRI iri) { // !!! remove
-		return iri == null ? null
-				: iri instanceof Inverse ? factory.createIRI(iri.stringValue())
-				: new Inverse(iri.stringValue());
 	}
 
 
@@ -651,6 +593,57 @@ public final class Values {
 		builder.append('\'');
 
 		return builder.toString();
+	}
+
+
+	//// Inverse IRIs //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Checks predicate direction.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
+	 * #inverse(IRI)} predicate
+	 */
+	public static boolean direct(final IRI iri) {
+		return !(iri instanceof Inverse);
+	}
+
+	/**
+	 * Inverts the direction of a predicate.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri} ,
+	 * if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
+	 * value of {@code iri}, otherwise
+	 */
+	public static IRI inverse(final IRI iri) {
+		return iri == null ? null
+				: iri instanceof Inverse ? factory.createIRI(iri.stringValue())
+				: new Inverse(iri.stringValue());
+	}
+
+
+	private static final class Inverse extends SimpleIRI {
+
+		private static final long serialVersionUID=7576383707001017160L;
+
+
+		private Inverse(final String value) { super(value); }
+
+
+		@Override public boolean equals(final Object object) {
+			return object == this || object instanceof Inverse && super.equals(object);
+		}
+
+		@Override public int hashCode() { return -super.hashCode(); }
+
+		@Override public String toString() {
+			return "^"+super.toString();
+		}
+
 	}
 
 
