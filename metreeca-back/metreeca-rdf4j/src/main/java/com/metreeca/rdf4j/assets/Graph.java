@@ -17,8 +17,7 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.rest.Message;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -78,7 +77,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null supplier");
 		}
 
-		final Graph graph=com.metreeca.rest.Context.asset(graph());
+		final Graph graph=Context.asset(graph());
 
 		return () -> graph.exec(supplier);
 	}
@@ -101,7 +100,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null function");
 		}
 
-		final Graph graph=com.metreeca.rest.Context.asset(graph());
+		final Graph graph=Context.asset(graph());
 
 		return v -> graph.exec(connection -> { return function.apply(connection, v); });
 	}
@@ -122,8 +121,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
-	@SafeVarargs public static <M extends com.metreeca.rest.Message<M>> BiFunction<M, Collection<Statement>,
-			Collection<Statement>> query(
+	@SafeVarargs public static <M extends Message<M>> BiFunction<M, Collection<Statement>, Collection<Statement>> query(
 			final String query, final BiConsumer<M, GraphQuery>... customizers
 	) {
 
@@ -135,7 +133,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null customizers");
 		}
 
-		final Graph graph=com.metreeca.rest.Context.asset(graph());
+		final Graph graph=Context.asset(graph());
 
 		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.exec(connection -> {
 
@@ -166,7 +164,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
-	@SafeVarargs public static <M extends com.metreeca.rest.Message<M>> Function<M, M> update(
+	@SafeVarargs public static <M extends Message<M>> Function<M, M> update(
 			final String update, final BiConsumer<M, Update>... customizers
 	) {
 
@@ -178,7 +176,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null customizers");
 		}
 
-		final Graph graph=com.metreeca.rest.Context.asset(graph());
+		final Graph graph=Context.asset(graph());
 
 		return update.isEmpty() ? message -> message : message -> graph.exec(connection -> {
 
@@ -229,12 +227,12 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * <tr>
 	 * <td>{@code ?task}</td>
-	 * <td>the HTTP {@linkplain com.metreeca.rest.Request#method() method} of the original request</td>
+	 * <td>the HTTP {@linkplain Request#method() method} of the original request</td>
 	 * </tr>
 	 *
 	 * <tr>
 	 * <td>{@code ?base}</td>
-	 * <td>the {@linkplain com.metreeca.rest.Request#base() base} IRI of the original request</td>
+	 * <td>the {@linkplain Request#base() base} IRI of the original request</td>
 	 * </tr>
 	 *
 	 * <tr>
@@ -244,7 +242,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * <tr>
 	 * <td>{@code ?user}</td>
-	 * <td>the IRI identifying the {@linkplain com.metreeca.rest.Request#user() user} submitting the original
+	 * <td>the IRI identifying the {@linkplain Request#user() user} submitting the original
 	 * request or
 	 * {@linkplain RDF#NIL} if no user is authenticated</td>
 	 * </tr>
@@ -253,7 +251,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * </table>
 	 *
-	 * <p>If the target message is a {@linkplain com.metreeca.rest.Response response}, the following additional
+	 * <p>If the target message is a {@linkplain Response response}, the following additional
 	 * bindings are
 	 * configured:</p>
 	 *
@@ -272,7 +270,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * <tr>
 	 * <td>{@code ?code}</td>
-	 * <td>the HTTP {@linkplain com.metreeca.rest.Response#status() status code} of the filtered response</td>
+	 * <td>the HTTP {@linkplain Response#status() status code} of the filtered response</td>
 	 * </tr>
 	 *
 	 * </tbody>
@@ -289,7 +287,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
-	@SafeVarargs public static <M extends com.metreeca.rest.Message<M>, O extends Operation> O configure(
+	@SafeVarargs public static <M extends Message<M>, O extends Operation> O configure(
 			final M message, final O operation, final BiConsumer<M, O>... customizers
 	) {
 
@@ -317,7 +315,7 @@ public final class Graph implements AutoCloseable {
 		operation.setBinding("stem", iri(item.getNamespace()));
 		operation.setBinding("name", literal(item.getLocalName()));
 
-		final com.metreeca.rest.Request request=message.request();
+		final Request request=message.request();
 
 		operation.setBinding("task", literal(request.method()));
 		operation.setBinding("base", iri(request.base()));
@@ -346,12 +344,12 @@ public final class Graph implements AutoCloseable {
 	 * calls are partly serialized in the system {@linkplain Graph#graph() graph} database using an internal lock
 	 * object;
 	 * this strategy may fail for distributed containers or external concurrent updates on the SPARQL endpoint, causing
-	 * requests to fail with an {@link com.metreeca.rest.Response#InternalServerError} or {@link Response#Conflict}
+	 * requests to fail with an {@link Response#InternalServerError} or {@link Response#Conflict}
 	 * status code.</p>
 	 *
 	 * @return a slug generator returning an auto-incrementing numeric id unique to the focus item of the request
 	 */
-	public static Function<com.metreeca.rest.Request, String> auto() {
+	public static Function<Request, String> auto() {
 		return new AutoGenerator();
 	}
 
@@ -448,7 +446,7 @@ public final class Graph implements AutoCloseable {
 		}
 
 		if ( repository == null ) {
-			throw new IllegalStateException("undefined repository");
+			throw new IllegalStateException("closed graph store");
 		}
 
 		final RepositoryConnection shared=context.get();
@@ -496,15 +494,15 @@ public final class Graph implements AutoCloseable {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class AutoGenerator implements Function<com.metreeca.rest.Request, String> {
+	private static final class AutoGenerator implements Function<Request, String> {
 
 		private static final IRI Auto=iri("app://rest.metreeca.com/terms#", "auto");
 
 
-		private final Graph graph=com.metreeca.rest.Context.asset(graph());
+		private final Graph graph=Context.asset(graph());
 
 
-		@Override public String apply(final com.metreeca.rest.Request request) {
+		@Override public String apply(final Request request) {
 			return graph.exec(connection -> {
 
 				// !!! custom name pattern
