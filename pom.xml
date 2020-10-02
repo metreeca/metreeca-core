@@ -195,6 +195,14 @@
 				<version>1.1.4</version>
 			</dependency>
 
+			<dependency> <!-- https://search.maven.org/artifact/org.slf4j/slf4j-parent -->
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-parent</artifactId>
+				<version>1.7.30</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
 			<dependency> <!-- https://search.maven.org/artifact/org.eclipse.rdf4j/rdf4j-bom -->
 				<groupId>org.eclipse.rdf4j</groupId>
 				<artifactId>rdf4j-bom</artifactId>
@@ -228,22 +236,6 @@
 				<scope>test</scope>
 			</dependency>
 
-			<dependency> <!-- https://search.maven.org/artifact/org.slf4j/slf4j-simple -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-simple</artifactId>
-				<version>1.7.30</version>
-				<scope>test</scope>
-			</dependency>
-
-
-			<!-- Conflict Resolution -->
-
-			<!--<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>20.0</version>
-			</dependency>-->
-
 		</dependencies>
 	</dependencyManagement>
 
@@ -265,7 +257,7 @@
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
+			<artifactId>slf4j-jdk14</artifactId>
 			<scope>test</scope>
 		</dependency>
 
