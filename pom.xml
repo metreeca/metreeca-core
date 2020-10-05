@@ -344,19 +344,6 @@
 
 				</configuration>
 
-				<executions>
-					<execution>
-
-						<id>package-test-jar</id>
-						<phase>package</phase>
-
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-
-					</execution>
-				</executions>
-
 			</plugin>
 
 			<plugin> <!-- https://maven.apache.org/surefire/maven-surefire-plugin/ -->
