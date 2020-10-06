@@ -18,7 +18,6 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.SimpleIRI;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
@@ -323,7 +322,8 @@ public final class Frame implements Resource {
 
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Resource && focus.equals(object);
+		return this == object || object instanceof Resource
+				&& focus.stringValue().equals(((Resource)object).stringValue());
 	}
 
 	@Override public int hashCode() {
@@ -334,17 +334,6 @@ public final class Frame implements Resource {
 		return focus
 				+get(Labels).findFirst().map(l -> " : "+l).orElse("")
 				+get(Notes).findFirst().map(l -> " / "+l).orElse("");
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class Inverse extends SimpleIRI {
-
-		private static final long serialVersionUID=7576383707001017160L;
-
-		private Inverse(final String iri) { super(iri); }
-
 	}
 
 }

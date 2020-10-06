@@ -225,16 +225,17 @@ public final class Regex {
 
     }
 
-    /**
-     * Replaces all occurences of a pattern in the target string.
-     *
-     * @param pattern     the pattern to be matched against the target string
-     * @param replacement the replacement string for the matches of {@code pattern}
-     *
-     * @return a string with all the occurences of {@code pattern} replaced according to the {@code replacement} string
-     *
-     * @throws NullPointerException if either {@code pattern} or {@code replacement} is null
-     */
+
+	/**
+	 * Replaces all occurrences of a pattern in the target string.
+	 *
+	 * @param pattern     the pattern to be matched against the target string
+	 * @param replacement the replacement string for the matches of {@code pattern}
+	 *
+	 * @return a string with all the occurences of {@code pattern} replaced according to the {@code replacement} string
+	 *
+	 * @throws NullPointerException if either {@code pattern} or {@code replacement} is null
+	 */
     public String replace(final String pattern, final String replacement) {
 
         if ( pattern == null ) {
