@@ -30,6 +30,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.*;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.newSetFromMap;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
@@ -155,6 +156,28 @@ public final class Frame implements Resource {
 	}
 
 
+	//// Stream Utilities //////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Converts an optional to a stream.
+	 *
+	 * @param optional the optional to be converted
+	 * @param <V>      the type of the optional value
+	 *
+	 * @return a singleton stream containing the {@code optional} value, if present; an empty stream, otherwise
+	 *
+	 * @throws NullPointerException if {@code optional} is {@code null}
+	 */
+	public static <V> Stream<V> stream(final Optional<V> optional) {
+
+		if ( optional == null ) {
+			throw new NullPointerException("null optional");
+		}
+
+		return optional.map(Stream::of).orElseGet(Stream::empty);
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Resource focus;
@@ -243,7 +266,7 @@ public final class Frame implements Resource {
 			throw new NullPointerException("null getter");
 		}
 
-		return Objects.requireNonNull(getter.apply(this), "null getter return value")
+		return requireNonNull(getter.apply(this), "null getter return value")
 				.map(value -> value instanceof Frame ? ((Frame)value).focus : value);
 	}
 
