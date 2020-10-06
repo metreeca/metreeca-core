@@ -619,7 +619,7 @@ public final class Values {
 	}
 
 
-	private static String quote(final CharSequence text) {
+	public static String quote(final CharSequence text) {
 
 		if ( text == null ) {
 			throw new NullPointerException("null text");
