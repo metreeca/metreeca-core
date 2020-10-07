@@ -250,6 +250,27 @@ public final class Frame implements Resource {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public Stream<Frame> frames(final IRI field) {
+
+		if ( field == null ) {
+			throw new NullPointerException("null field IRI");
+		}
+
+		return frames(seq(field));
+	}
+
+	public Stream<Frame> frames(final Function<Frame, Stream<Value>> getter) {
+
+		if ( getter == null ) {
+			throw new NullPointerException("null getter");
+		}
+
+		return requireNonNull(getter.apply(this), "null getter return value")
+				.filter(Resource.class::isInstance)
+				.map(value -> value instanceof Frame ? (Frame)value : frame((Resource)value));
+	}
+
+
 	public Stream<Value> get(final IRI field) {
 
 		if ( field == null ) {
@@ -323,11 +344,11 @@ public final class Frame implements Resource {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Resource
-				&& focus.stringValue().equals(((Resource)object).stringValue());
+				&& focus.stringValue().equals(((Value)object).stringValue());
 	}
 
 	@Override public int hashCode() {
-		return focus.hashCode();
+		return focus.stringValue().hashCode();
 	}
 
 	@Override public String toString() {
