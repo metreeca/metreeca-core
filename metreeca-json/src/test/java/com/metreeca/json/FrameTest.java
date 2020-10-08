@@ -17,15 +17,13 @@
 
 package com.metreeca.json;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.function.Function;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.*;
@@ -48,19 +46,27 @@ final class FrameTest {
 
 	@Nested final class Assembling {
 
-		@Test void testHandleDirectAndInverseFIelds() {
+		@Test void testHandleDirectAndInverseFields() {
 
-			final Frame frame=frame(x)
-					.set(RDF.VALUE, y)
-					.set(inverse(RDF.VALUE), z);
+			final Frame frame=frame(x).set(RDF.VALUE).value(y).set(inverse(RDF.VALUE)).value(z);
 
-			assertThat(frame.get(RDF.VALUE).findFirst().orElse(RDF.NIL)).isEqualTo(y);
-			assertThat(frame.get(inverse(RDF.VALUE)).findFirst().orElse(RDF.NIL)).isEqualTo(z);
+			assertThat(frame.get(RDF.VALUE).value().orElse(RDF.NIL)).isEqualTo(y);
+			assertThat(frame.get(inverse(RDF.VALUE)).value().orElse(RDF.NIL)).isEqualTo(z);
 		}
 
-		@Test void testReportLiteralValuesForInverseFields() {
-			assertThatIllegalArgumentException().isThrownBy(() -> frame(x).set(inverse(RDF.VALUE), literal(1))
-			);
+
+		@Test void testReportLiteralSubjectsForDirectFields() {
+			assertThatIllegalArgumentException()
+					.isThrownBy(() -> {
+						frame(literal(1)).set(RDF.VALUE).value(x);
+					});
+		}
+
+		@Test void testReportLiteralObjectsForInverseFields() {
+			assertThatIllegalArgumentException()
+					.isThrownBy(() -> {
+						frame(x).set(inverse(RDF.VALUE)).value(literal(1));
+					});
 		}
 
 	}
@@ -124,10 +130,8 @@ final class FrameTest {
 					statement(x, RDF.VALUE, y),
 					statement(y, RDF.VALUE, x)
 
-					))
-
-							.get(seq(RDF.VALUE, RDF.VALUE, RDF.VALUE))
-							.findFirst()
+					)).get(seq(RDF.VALUE, RDF.VALUE, RDF.VALUE))
+							.value()
 							.orElseGet(() -> fail("missing transitive value"))
 
 			).isEqualTo(y);
@@ -137,9 +141,7 @@ final class FrameTest {
 	@Nested final class Exporting {
 
 		@Test void testExportDirectStatements() {
-			assertThat(frame(x)
-
-					.set(RDF.VALUE, y)
+			assertThat(frame(x).set(RDF.VALUE).value(y)
 
 					.model()
 
@@ -151,9 +153,7 @@ final class FrameTest {
 		}
 
 		@Test void testExportInverseStatements() {
-			assertThat(frame(x)
-
-					.set(inverse(RDF.VALUE), y)
+			assertThat(frame(x).set(inverse(RDF.VALUE)).value(y)
 
 					.model()
 
@@ -167,9 +167,8 @@ final class FrameTest {
 		@Test void testExportTransitiveStatements() {
 			assertThat(frame(x)
 
-					.set(RDF.FIRST, frame(y)
-
-							.set(RDF.REST, z)
+					.set(RDF.FIRST).frame(frame(y)
+							.set(RDF.REST).value(z)
 					)
 
 					.model()
@@ -186,7 +185,7 @@ final class FrameTest {
 
 	@Nested final class Traversing {
 
-		private Set<Value> get(final Function<Frame, Stream<Value>> path) {
+		private Set<Value> get(final BiFunction<? super Value, ? super Collection<Statement>, Stream<Value>> path) {
 			return frame(x, asList(
 
 					statement(x, RDF.FIRST, y),
@@ -197,7 +196,7 @@ final class FrameTest {
 					statement(z, RDF.FIRST, literal(3)),
 					statement(z, RDF.REST, literal(4))
 
-			)).get(path).collect(toCollection(LinkedHashSet::new));
+			)).get(path).values().collect(toCollection(LinkedHashSet::new));
 		}
 
 

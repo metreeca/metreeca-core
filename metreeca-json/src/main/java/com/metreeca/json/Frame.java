@@ -22,123 +22,123 @@ import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.newSetFromMap;
-import static java.util.Objects.requireNonNull;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 /**
  * Graph frame.
  *
- * <p>Describes a graph frame centered on a focus IRI.</p>
+ * <p>Describes a subgraph centered on a set of focus values.</p>
  */
-public final class Frame implements Resource {
-
-	private static final long serialVersionUID=-498626125890617199L;
+public final class Frame {
 
 	private static final IRI SchemaName=iri("http://schema.org/", "name");
 	private static final IRI SchemaDescription=iri("http://schema.org/", "description");
 
-	private static final Function<Frame, Stream<Value>> Labels=alt(RDFS.LABEL, DC.TITLE, SchemaName);
-	private static final Function<Frame, Stream<Value>> Notes=alt(RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription);
+	private static final BiFunction<Value, Collection<Statement>, Stream<Value>> Labels=alt(
+			RDFS.LABEL, DC.TITLE, SchemaName
+	);
+
+	private static final BiFunction<Value, Collection<Statement>, Stream<Value>> Notes=alt(
+			RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription
+	);
 
 
-	public static Frame frame(final Resource focus) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		return new Frame(focus);
-	}
-
-	public static Frame frame(final Resource focus, final Collection<Statement> model) {
+	public static Frame frame(final Value focus) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
 		}
 
-		if ( model == null ) {
-			throw new NullPointerException("null model");
-		}
-
-		return frame(focus, model, new ConcurrentHashMap<>());
+		return new Frame(focus, emptySet());
 	}
 
+	public static Frame frame(final Value focus, final Collection<Statement> model) {
 
-	private static Frame frame(
-			final Resource focus, final Collection<Statement> model, final Map<Resource, Frame> trail
-	) {
-		return Optional.ofNullable(trail.get(focus)).orElseGet(() -> {
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
 
-			final Frame frame=new Frame(focus);
+		if ( model == null || model.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null model or model statement");
+		}
 
-			trail.put(focus, frame); // insert empty placeholder before scanning statements
+		final Set<Statement> statements=new LinkedHashSet<>();
 
-			model.stream().filter(Objects::nonNull).forEachOrdered(statement -> {
+		final Collection<Value> visited=new HashSet<>();
+		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
 
-				final Resource subject=statement.getSubject();
-				final IRI predicate=statement.getPredicate();
-				final Value object=statement.getObject();
+		while ( !pending.isEmpty() ) {
 
-				if ( subject.equals(focus) ) {
+			final Value value=pending.poll();
 
-					frame.fields.compute(predicate, (iri, values) -> {
+			if ( visited.add(value) ) {
+				model.forEach(s -> {
+					if ( value.equals(s.getSubject()) || value.equals(s.getObject()) ) {
 
-						final Set<Value> set=(values != null) ? values : new LinkedHashSet<>();
+						pending.add(s.getSubject());
+						pending.add(s.getPredicate());
+						pending.add(s.getObject());
 
-						set.add(object instanceof Resource ? frame((Resource)object, model, trail) : object);
+						statements.add(s);
+					}
+				});
+			}
+		}
 
-						return set;
-
-					});
-
-				} else if ( object.equals(focus) ) {
-
-					frame.fields.compute(inverse(predicate), (iri, values) -> {
-
-						final Set<Value> set=(values != null) ? values : new LinkedHashSet<>();
-
-						set.add(frame(subject, model, trail));
-
-						return set;
-
-					});
-
-				}
-
-			});
-
-			return frame;
-
-		});
+		return new Frame(focus, statements);
 	}
 
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static BiFunction<Value, Collection<Statement>, Stream<Value>> seq(final IRI path) {
 
-	public static Function<Frame, Stream<Value>> seq(final IRI path) {
-		return frame -> frame.fields.getOrDefault(path, emptySet()).stream();
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		return test(path,
+
+				direct -> (focus, model) -> model.stream()
+						.filter(s -> focus.equals(s.getSubject()) && direct.equals(s.getPredicate()))
+						.map(Statement::getObject),
+
+				inverse -> (focus, model) -> model.stream()
+						.filter(s -> inverse.equals(s.getPredicate()) && focus.equals(s.getObject()))
+						.map(Statement::getSubject)
+
+		);
 	}
 
-	public static Function<Frame, Stream<Value>> seq(final IRI... path) {
+	public static BiFunction<Value, Collection<Statement>, Stream<Value>> seq(final IRI... path) {
+
+		if ( path == null || Arrays.stream(path).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null path");
+		}
+
 		return seq(Arrays.stream(path).map(Frame::seq).collect(toList()));
 	}
 
-	public static Function<Frame, Stream<Value>> seq(final Iterable<Function<Frame, Stream<Value>>> paths) {
-		return frame -> {
+	public static BiFunction<Value, Collection<Statement>, Stream<Value>> seq(
+			final Collection<BiFunction<Value, Collection<Statement>, Stream<Value>>> paths) {
 
-			Stream<Value> values=Stream.of(frame);
+		if ( paths == null || paths.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null paths");
+		}
 
-			for (final Function<Frame, Stream<Value>> path : paths) {
-				values=values.filter(Frame.class::isInstance).map(Frame.class::cast).flatMap(path);
+		return (focus, model) -> {
+
+			Stream<Value> values=Stream.of(focus);
+
+			for (final BiFunction<Value, Collection<Statement>, Stream<Value>> path : paths) {
+				values=values.flatMap(value -> path.apply(value, model));
 			}
 
 			return values;
@@ -146,215 +146,382 @@ public final class Frame implements Resource {
 	}
 
 
-	public static Function<Frame, Stream<Value>> alt(final IRI... paths) {
+	public static BiFunction<Value, Collection<Statement>, Stream<Value>> alt(final IRI... paths) {
+
+		if ( paths == null || Arrays.stream(paths).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null paths");
+		}
+
 		return alt(Arrays.stream(paths).map(Frame::seq).collect(toList()));
 	}
 
-	public static Function<Frame, Stream<Value>> alt(final Collection<Function<Frame, Stream<Value>>> paths) {
-		return frame -> paths.stream().flatMap(step -> step.apply(frame));
+	public static BiFunction<Value, Collection<Statement>, Stream<Value>> alt(
+			final Collection<BiFunction<Value, Collection<Statement>, Stream<Value>>> paths) {
+
+		if ( paths == null || paths.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null paths");
+		}
+
+		return (focus, model) -> paths.stream().flatMap(path -> path.apply(focus, model));
 	}
 
 
-	//// Stream Utilities //////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Converts an optional to a stream.
-	 *
-	 * @param optional the optional to be converted
-	 * @param <V>      the type of the optional value
-	 *
-	 * @return a singleton stream containing the {@code optional} value, if present; an empty stream, otherwise
-	 *
-	 * @throws NullPointerException if {@code optional} is {@code null}
-	 */
-	public static <V> Stream<V> stream(final Optional<V> optional) {
-
-		if ( optional == null ) {
-			throw new NullPointerException("null optional");
-		}
-
-		return optional.map(Stream::of).orElseGet(Stream::empty);
+	private static <V> V test(final IRI predicate, final Function<IRI, V> direct, final Function<IRI, V> inverse) {
+		return direct(predicate) ? direct.apply(predicate) : inverse.apply(inverse(predicate));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Resource focus;
+	private final Value focus;
+	private final Set<Statement> model;
 
-	private final Map<IRI, Set<Value>> fields=new LinkedHashMap<>();
 
-
-	private Frame(final Resource focus) {
+	private Frame(final Value focus, final Set<Statement> model) {
 		this.focus=focus;
+		this.model=model;
 	}
 
 
-	public Resource focus() {
+	public Optional<String> label() {
+		return get(Labels).value(Values::string);
+	}
+
+	public Optional<String> notes() {
+		return get(Notes).value(Values::string);
+	}
+
+
+	public Value focus() {
 		return focus;
 	}
 
-
-	public String label() {
-		return get(Labels).findFirst().flatMap(Values::string).orElse("");
+	public Set<Statement> model() {
+		return unmodifiableSet(model);
 	}
 
-	public String notes() {
-		return get(Notes).findFirst().flatMap(Values::string).orElse("");
-	}
-
-
-	public Collection<Statement> model() {
-		return stream().collect(toCollection(LinkedHashSet::new));
-	}
 
 	public Stream<Statement> stream() {
-		return stream(newSetFromMap(new ConcurrentHashMap<>()));
-	}
-
-
-	private Stream<Statement> stream(final Set<Value> trail) {
-		return trail.add(focus) ? fields.entrySet().stream().flatMap(entry -> {
-
-			if ( direct(entry.getKey()) ) {
-
-				final IRI predicate=entry.getKey();
-
-				return entry.getValue().stream().flatMap(value -> {
-
-					final boolean frame=value instanceof Frame;
-
-					return Stream.concat(
-							Stream.of(statement(focus, predicate, frame ? ((Frame)value).focus : value)),
-							frame ? ((Frame)value).stream(trail) : Stream.empty()
-					);
-				});
-
-			} else {
-
-				final IRI predicate=inverse(entry.getKey());
-
-				return entry.getValue().stream().flatMap(value -> {
-
-					final boolean frame=value instanceof Frame;
-
-					return Stream.concat(
-							Stream.of(statement(frame ? ((Frame)value).focus : (Resource)value, predicate, focus)),
-							frame ? ((Frame)value).stream(trail) : Stream.empty());
-				});
-
-			}
-
-		}) : Stream.empty();
+		return model.stream();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Stream<Frame> frames(final IRI field) {
+	public Getter get(final IRI path) {
 
-		if ( field == null ) {
-			throw new NullPointerException("null field IRI");
+		if ( path == null ) {
+			throw new NullPointerException("null path");
 		}
 
-		return frames(seq(field));
+		return get(seq(path));
 	}
 
-	public Stream<Frame> frames(final Function<Frame, Stream<Value>> getter) {
+	public Getter get(final BiFunction<? super Value, ? super Collection<Statement>, Stream<Value>> path) {
 
-		if ( getter == null ) {
-			throw new NullPointerException("null getter");
+		if ( path == null ) {
+			throw new NullPointerException("null path");
 		}
 
-		return requireNonNull(getter.apply(this), "null getter return value")
-				.filter(Resource.class::isInstance)
-				.map(value -> value instanceof Frame ? (Frame)value : frame((Resource)value));
+		return new Getter(path.apply(focus, model).collect(toCollection(LinkedHashSet::new)), model);
 	}
 
+	public Setter set(final IRI path) {
 
-	public Stream<Value> get(final IRI field) {
-
-		if ( field == null ) {
-			throw new NullPointerException("null field IRI");
+		if ( path == null ) {
+			throw new NullPointerException("null path");
 		}
 
-		return get(seq(field));
+		return new Setter(this, path);
 	}
 
-	public Stream<Value> get(final Function<Frame, Stream<Value>> getter) {
 
-		if ( getter == null ) {
-			throw new NullPointerException("null getter");
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public String toString() {
+		return format(focus)
+				+label().map(l -> " : "+l).orElse("")
+				+notes().map(l -> " / "+l).orElse("");
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final class Getter {
+
+		private final Set<Value> values;
+		private final Set<Statement> model;
+
+
+		private Getter(final Set<Value> values, final Set<Statement> model) {
+			this.values=values;
+			this.model=model;
 		}
 
-		return requireNonNull(getter.apply(this), "null getter return value")
-				.map(value -> value instanceof Frame ? ((Frame)value).focus : value);
-	}
 
-
-	public Frame set(final IRI field, final Value... values) {
-		return set(field, Arrays.stream(values));
-	}
-
-	public Frame set(final IRI field, final Optional<? extends Value> value) {
-		return set(field, value.map(Stream::of).orElseGet(Stream::empty));
-	}
-
-	public Frame set(final IRI field, final Collection<? extends Value> values) {
-		return set(field, values.stream());
-	}
-
-	public Frame set(final IRI field, final Stream<? extends Value> values) {
-
-		if ( field == null ) {
-			throw new NullPointerException("null field");
+		public Optional<Value> value() {
+			return values().findFirst();
 		}
 
-		if ( values == null ) {
-			throw new NullPointerException("null values");
+		public <V> Optional<V> value(final Function<Value, Optional<V>> mapper) {
+
+			if ( mapper == null ) {
+				throw new NullPointerException("null mapper");
+			}
+
+			return values(mapper).findFirst();
 		}
 
-		final boolean direct=direct(field);
 
-		final Frame frame=new Frame(focus);
+		public Stream<Value> values() {
+			return values.stream();
+		}
 
-		frame.fields.putAll(fields);
+		public <V> Stream<V> values(final Function<Value, Optional<V>> mapper) {
 
-		frame.fields.put(field, values.peek(value -> {
+			if ( mapper == null ) {
+				throw new NullPointerException("null mapper");
+			}
+
+			return values.stream()
+					.map(mapper)
+					.map(Objects::requireNonNull)
+					.filter(Optional::isPresent)
+					.map(Optional::get);
+		}
+
+
+		public Optional<Frame> frame() {
+			return frames().findFirst();
+		}
+
+		public Stream<Frame> frames() {
+			return values.stream().map(value -> new Frame(value, model));
+		}
+
+	}
+
+	public static final class Setter {
+
+		private final Frame frame;
+		private final IRI path;
+
+
+		private Setter(final Frame frame, final IRI path) {
+			this.frame=frame;
+			this.path=path;
+		}
+
+
+		public Frame value(final Value value) {
 
 			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+
+					direct -> {
+
+						if ( !(frame.focus instanceof Resource) ) {
+							throw new IllegalArgumentException("literal focus value for direct predicate");
+						}
+
+						return Stream.of(statement((Resource)frame.focus, direct, value));
+
+					},
+
+					inverse -> {
+
+						if ( !(value instanceof Resource) ) {
+							throw new IllegalArgumentException("literal value for inverse predicate");
+						}
+
+						return Stream.of(statement((Resource)value, inverse, frame.focus));
+
+					}
+
+			)).collect(toCollection(LinkedHashSet::new)));
+		}
+
+		public Frame value(final Optional<? extends Value> value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value.map(this::value).orElse(frame);
+		}
+
+
+		public Frame values(final Value... values) {
+
+			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
 				throw new NullPointerException("null values");
 			}
 
-			if ( !(direct || value instanceof Resource) ) {
-				throw new IllegalArgumentException("literal values for inverse field");
+			return values.length == 0 ? frame : values(Arrays.stream(values));
+		}
+
+		public Frame values(final Collection<? extends Value> values) {
+
+			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
 			}
 
-		}).collect(toCollection(LinkedHashSet::new)));
+			return values.isEmpty() ? frame : values(values.stream());
+		}
 
-		return frame;
-	}
+		public Frame values(final Stream<? extends Value> values) {
+
+			if ( values == null ) {
+				throw new NullPointerException("null values");
+			}
+
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+
+					direct -> values.map(value -> {
+
+						if ( value == null ) {
+							throw new NullPointerException("null values");
+						}
+
+						if ( !(frame.focus instanceof Resource) ) {
+							throw new IllegalArgumentException("literal focus value for direct field");
+						}
+
+						return statement((Resource)frame.focus, path, value);
+
+					}),
+
+					inverse -> values.map(value -> {
+
+						if ( value == null ) {
+							throw new NullPointerException("null values");
+						}
+
+						if ( !(value instanceof Resource) ) {
+							throw new IllegalArgumentException("literal value for inverse field");
+						}
+
+						return statement((Resource)value, inverse, frame.focus);
+
+					})
+
+			)).collect(toCollection(LinkedHashSet::new)));
+		}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		public Frame frame(final Frame frame) {
 
-	@Override public String stringValue() {
-		return focus.stringValue();
-	}
+			if ( frame == null ) {
+				throw new NullPointerException("null frame");
+			}
+
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+
+					direct -> {
+
+						if ( !(this.frame.focus instanceof Resource) ) {
+							throw new IllegalArgumentException("literal focus value for direct predicate");
+						}
+
+						return Stream.concat(
+								Stream.of(statement((Resource)this.frame.focus, direct, frame.focus)),
+								frame.model.stream()
+						);
+
+					},
+
+					inverse -> {
+
+						if ( !(frame.focus instanceof Resource) ) {
+							throw new IllegalArgumentException("literal focus value for inverse predicate");
+						}
+
+						return Stream.concat(
+								Stream.of(statement((Resource)frame.focus, inverse, this.frame.focus)),
+								frame.model.stream()
+						);
+
+					}
+
+			)).collect(toCollection(LinkedHashSet::new)));
+		}
+
+		public Frame frame(final Optional<Frame> frame) {
+
+			if ( frame == null ) {
+				throw new NullPointerException("null frame");
+			}
+
+			return frame.map(this::frame).orElse(this.frame);
+		}
 
 
-	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Resource
-				&& focus.stringValue().equals(((Value)object).stringValue());
-	}
+		public Frame frames(final Frame... frames) {
 
-	@Override public int hashCode() {
-		return focus.stringValue().hashCode();
-	}
+			if ( frames == null || Arrays.stream(frames).anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
 
-	@Override public String toString() {
-		return focus
-				+get(Labels).findFirst().map(l -> " : "+l).orElse("")
-				+get(Notes).findFirst().map(l -> " / "+l).orElse("");
+			return frames.length == 0 ? frame : frames(Arrays.stream(frames));
+		}
+
+		public Frame frames(final Collection<Frame> frames) {
+
+			if ( frames == null || frames.stream().anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
+
+			return frames.isEmpty() ? frame : frames(frames.stream());
+		}
+
+		public Frame frames(final Stream<Frame> frames) {
+
+			if ( frames == null ) {
+				throw new NullPointerException("null frames");
+			}
+
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+
+					direct -> frames.flatMap(frame -> {
+
+						if ( frame == null ) {
+							throw new NullPointerException("null frames");
+						}
+
+						if ( !(this.frame.focus instanceof Resource) ) {
+							throw new IllegalArgumentException("literal focus value for direct field");
+						}
+
+						return Stream.concat(
+								Stream.of(statement((Resource)this.frame.focus, direct, frame.focus)),
+								frame.model.stream()
+						);
+
+					}),
+
+					inverse -> frames.flatMap(frame -> {
+
+						if ( frame == null ) {
+							throw new NullPointerException("null frames");
+						}
+
+						if ( !(frame.focus instanceof Resource) ) {
+							throw new IllegalArgumentException("literal focus value for inverse field");
+						}
+
+						return Stream.concat(
+								Stream.of(statement((Resource)frame.focus, inverse, this.frame.focus)),
+								frame.model.stream()
+						);
+
+					})
+
+			)).collect(toCollection(LinkedHashSet::new)));
+		}
+
 	}
 
 }
