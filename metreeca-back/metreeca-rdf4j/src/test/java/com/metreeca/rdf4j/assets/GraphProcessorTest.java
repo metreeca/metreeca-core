@@ -1025,17 +1025,17 @@ final class GraphProcessorTest {
 		private final Value c=literal(3);
 
 		@Test void testInspectAny() {
-			assertThat(GraphProcessor._any(any(a, b, c)))
+			assertThat(GraphProcessor.any(any(a, b, c)))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOr() {
-			assertThat(GraphProcessor._any(or(any(a, b), any(b, c))))
+			assertThat(GraphProcessor.any(or(any(a, b), any(b, c))))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOtherShape() {
-			assertThat(GraphProcessor._any(and()))
+			assertThat(GraphProcessor.any(and()))
 					.isEmpty();
 		}
 	}

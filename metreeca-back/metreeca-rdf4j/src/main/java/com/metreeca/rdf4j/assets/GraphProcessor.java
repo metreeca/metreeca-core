@@ -92,12 +92,10 @@ abstract class GraphProcessor {
 
 	static Shape anchor(final IRI resource, final Shape shape) {
 
-		final boolean empty=shape.validates(true);
-
 		return resource.stringValue().endsWith("/")
 
-				? empty ? field(inverse(LDP.CONTAINS), focus()) : shape // holders default to ldp:BasicContainer
-				: empty ? All.all(focus()) : and(All.all(focus()), shape); // members default to self
+				? shape.empty() ? field(inverse(LDP.CONTAINS), focus()) : shape // holders default to ldp:BasicContainer
+				: shape.empty() ? All.all(focus()) : and(All.all(focus()), shape); // members default to self
 
 	}
 
@@ -112,7 +110,7 @@ abstract class GraphProcessor {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AllProbe()));
 	}
 
-	static Optional<Set<Value>> _any(final Shape shape) {
+	static Optional<Set<Value>> any(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AnyProbe()));
 	}
 
@@ -831,7 +829,7 @@ abstract class GraphProcessor {
 				final Shape shape=field.shape();
 
 				final Optional<Set<Value>> all=all(shape).map(FetcherProbe.this::values);
-				final Optional<Set<Value>> any=_any(shape).map(FetcherProbe.this::values);
+				final Optional<Set<Value>> any=any(shape).map(FetcherProbe.this::values);
 
 				final Optional<Value> singleton=any
 						.filter(values -> values.size() == 1)

@@ -75,15 +75,13 @@ public abstract class Shape {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Checks the validation outcome of this shape.
+	 * Checks if this shape is empty.
 	 *
-	 * @param outcome the expected validation outcome; {@code true} if this shape is always validated, {@code false}
-	 *                if this shape is never validated, {@code null} otherwise
-	 *
-	 * @return {@code true} if the validation {@code outcome} of this shape is proved to equal the expected value
+	 * @return {@code true} if this shape is equivalent to either {@link And#and()} or {@link Or#or()}; {@code false}
+	 * otherwise
 	 */
-	public boolean validates(final Boolean outcome) {
-		return outcome.equals(map(new ShapeEvaluator()));
+	public boolean empty() {
+		return map(new ShapeEvaluator()) != null;
 	}
 
 	/**

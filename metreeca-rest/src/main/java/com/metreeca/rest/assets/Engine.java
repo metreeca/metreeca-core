@@ -119,8 +119,8 @@ public interface Engine extends Wrapper {
 					retain(Mode, Convey)
 			));
 
-			return baseline.validates(false) ? request.reply(status(Forbidden))
-					: authorized.validates(false) ? request.reply(status(Unauthorized))
+			return baseline.empty() ? request.reply(status(Forbidden))
+					: authorized.empty() ? request.reply(status(Unauthorized))
 					: handler.handle(request.map(pre)).map(post);
 
 		};
