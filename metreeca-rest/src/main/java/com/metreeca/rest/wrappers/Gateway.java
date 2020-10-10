@@ -29,6 +29,7 @@ import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.formats.TextFormat.text;
 import static java.lang.String.format;
 import static java.util.function.Function.identity;
 
@@ -70,9 +71,10 @@ public final class Gateway implements Wrapper {
 			throw new NullPointerException("null handler");
 		}
 
-		return request -> consumer -> Either
+		return request -> consumer -> {
+			try {
 
-				.from(() -> request
+				request
 
 						.map(this::query)
 						.map(this::form)
@@ -82,17 +84,33 @@ public final class Gateway implements Wrapper {
 						.map(this::logging)
 						.map(this::charset)
 
-				)
+						.accept(response -> {
+							try {
 
-				.fold(e -> request
+								consumer.accept(response);
+
+							} catch ( final RuntimeException e ) { // after prolog is possibly sent >> logging only
+
+								logger.error(this,
+										format("%s %s > %d", request.method(), request.item(), InternalServerError),
+										e
+								);
+
+							}
+						});
+
+			} catch ( final RuntimeException e ) { // before prolog is possibly sent >> new response
+
+				request
 
 						.reply(status(InternalServerError, e))
 
 						.map(this::logging)
 
-				)
+						.accept(consumer);
 
-				.accept(consumer);
+			}
+		};
 	}
 
 
@@ -108,8 +126,7 @@ public final class Gateway implements Wrapper {
 		return request.parameters().isEmpty()
 				&& request.method().equals(POST)
 				&& URLEncodedPattern.matcher(request.header("Content-Type").orElse("")).lookingAt()
-				? request.parameters(search(request.body(TextFormat.text()).fold(e -> "", identity()))) // !!! error
-				// handling?
+				? request.parameters(search(request.body(text()).fold(e -> "", identity()))) // !!! error handling?
 				: request;
 	}
 
