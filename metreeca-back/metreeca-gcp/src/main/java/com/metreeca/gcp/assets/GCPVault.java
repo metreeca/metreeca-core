@@ -20,7 +20,7 @@ package com.metreeca.gcp.assets;
 import com.metreeca.rest.assets.Vault;
 
 import com.google.api.gax.rpc.NotFoundException;
-import com.google.cloud.secretmanager.v1beta1.*;
+import com.google.cloud.secretmanager.v1.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

@@ -195,18 +195,10 @@
 				<version>1.1.4</version>
 			</dependency>
 
-			<dependency> <!-- https://search.maven.org/artifact/org.slf4j/slf4j-parent -->
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-parent</artifactId>
-				<version>1.7.30</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-
 			<dependency> <!-- https://search.maven.org/artifact/org.eclipse.rdf4j/rdf4j-bom -->
 				<groupId>org.eclipse.rdf4j</groupId>
 				<artifactId>rdf4j-bom</artifactId>
-				<version>3.3.1</version>
+				<version>3.4.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -214,7 +206,15 @@
 			<dependency> <!-- https://search.maven.org/artifact/com.google.cloud/libraries-bom -->
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>9.1.0</version>
+				<version>12.0.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<dependency> <!-- https://search.maven.org/artifact/org.slf4j/slf4j-parent -->
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-parent</artifactId>
+				<version>1.7.30</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -225,14 +225,14 @@
 			<dependency> <!-- https://search.maven.org/artifact/org.junit.jupiter/junit-jupiter-engine -->
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.6.2</version>
+				<version>5.7.0</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency> <!-- https://search.maven.org/artifact/org.assertj/assertj-core -->
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.16.1</version>
+				<version>3.17.2</version>
 				<scope>test</scope>
 			</dependency>
 

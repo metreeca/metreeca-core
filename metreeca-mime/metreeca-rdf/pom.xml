@@ -77,6 +77,11 @@
 			<artifactId>rdf4j-rio-trix</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-binary</artifactId>
+		</dependency>
+
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
