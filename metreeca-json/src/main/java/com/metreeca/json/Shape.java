@@ -40,11 +40,6 @@ public abstract class Shape {
 
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Shape expanded(final Shape shape) {
-		return shape.map(new ShapeInferencer());
-	}
-
-
 	public static Shape required() { return and(minCount(1), maxCount(1)); }
 
 	public static Shape optional() { return maxCount(1); }
@@ -92,7 +87,7 @@ public abstract class Shape {
 	}
 
 	/**
-	 * Redact {@linkplain Guard guard} annotations of this shape.
+	 * Redacts {@linkplain Guard guard} annotations of this shape.
 	 *
 	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
 	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be
@@ -109,6 +104,15 @@ public abstract class Shape {
 		}
 
 		return map(new ShapeRedactor(evaluators));
+	}
+
+	/**
+	 * Extends this shape with inferred constraints.
+	 *
+	 * @return a copy of this shape extended with inferred constraints
+	 */
+	public Shape expand() {
+		return map(new ShapeInferencer());
 	}
 
 

@@ -28,7 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Shape.expanded;
 import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Xtream.entry;
@@ -40,12 +39,14 @@ import static java.util.stream.Collectors.toSet;
 final class JSONLDCodec {
 
 	static Shape driver(final Shape shape) { // !!! caching
-		return expanded(shape.redact( // add inferred constraints to drive json shorthands
+		return shape.redact(
+
 				retain(Role, true),
 				retain(Task, true),
 				retain(Area, true),
 				retain(Mode, Convey) // remove internal filtering shapes
-		));
+				
+		).expand(); // add inferred constraints to drive json shorthands
 	}
 
 
