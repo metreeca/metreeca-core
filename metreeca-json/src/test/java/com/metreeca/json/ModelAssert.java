@@ -113,7 +113,7 @@ public final class ModelAssert extends AbstractAssert<ModelAssert, Model> {
 	}
 
 	public ModelAssert isSubsetOf(final Collection<Statement> model) {
-		return hasSubset(model == null ? null : new LinkedHashModel(model));
+		return isSubsetOf(model == null ? null : new LinkedHashModel(model));
 	}
 
 	/**
