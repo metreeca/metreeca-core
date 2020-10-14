@@ -16,7 +16,7 @@
  */
 
 /**
- * XML processing action.
+ * X/HTML processing action.
  */
 
 package com.metreeca.xml.actions;
