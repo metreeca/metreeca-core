@@ -32,6 +32,8 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
@@ -105,6 +107,10 @@ final class AndTest {
 			assertThat(and(range(a, b), range(b, c))).isEqualTo(range(b));
 		}
 
+		@Test void testOptimizeLang() {
+			assertThat(and(lang("en", "it"), lang("en", "fr"))).isEqualTo(lang("en"));
+		}
+
 
 		@Test void testOptimizeMinCount() {
 			assertThat(and(minCount(10), minCount(100))).isEqualTo(minCount(100));
@@ -114,9 +120,12 @@ final class AndTest {
 			assertThat(and(maxCount(10), maxCount(100))).isEqualTo(maxCount(10));
 		}
 
-
 		@Test void testOptimizeAll() {
 			assertThat(and(all(a, b), all(b, c))).isEqualTo(all(a, b, c));
+		}
+
+		@Test void testOptimizeLocalized() {
+			assertThat(and(localized(), localized())).isEqualTo(localized());
 		}
 
 

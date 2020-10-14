@@ -64,9 +64,13 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		final Set<IRI> types=values.stream().map(Values::type).collect(toSet());
 
 		final Shape count=maxCount(values.size());
-		final Shape type=types.size() == 1 ? datatype(types.iterator().next()) : and();
+		final Shape datatype=types.size() == 1 ? datatype(types.iterator().next()) : and();
 
-		return and(range, count, type);
+		return and(range, count, datatype);
+	}
+
+	@Override public Shape probe(final Lang lang) {
+		return and(lang, datatype(RDF.LANGSTRING));
 	}
 
 
@@ -76,6 +80,10 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Any any) {
 		return and(any, minCount(1));
+	}
+
+	@Override public Shape probe(final Localized localized) {
+		return and(localized, datatype(RDF.LANGSTRING));
 	}
 
 
@@ -91,7 +99,42 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 
 	@Override public Shape probe(final And and) {
-		return and(and.shapes().stream().map(s -> s.map(this)).collect(toList()));
+
+		final Shape shape=and(and.shapes().stream().map(s -> s.map(this)).collect(toList()));
+
+		final Boolean localized=shape.map(new Shape.Probe<Boolean>() {
+
+			@Override public Boolean probe(final Localized localized) {
+				return true;
+			}
+
+			@Override public Boolean probe(final And and) {
+				return and.shapes().stream().map(this).anyMatch(b -> b);
+			}
+
+			@Override public Boolean probe(final Shape shape) {
+				return false;
+			}
+
+		});
+
+		final int langs=shape.map(new Shape.Probe<Integer>() {
+
+			@Override public Integer probe(final Lang lang) {
+				return lang.tags().size();
+			}
+
+			@Override public Integer probe(final And and) {
+				return and.shapes().stream().map(this).max(Integer::compare).orElse(0);
+			}
+
+			@Override public Integer probe(final Shape shape) {
+				return 0;
+			}
+
+		});
+
+		return localized && langs > 0 ? and(shape, maxCount(langs)) : shape;
 	}
 
 	@Override public Shape probe(final Or or) {

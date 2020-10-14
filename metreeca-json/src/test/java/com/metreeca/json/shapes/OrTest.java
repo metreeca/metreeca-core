@@ -32,6 +32,8 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
@@ -63,7 +65,8 @@ final class OrTest {
 		}
 
 		@Test void testCollapseDuplicates() {
-			assertThat(or(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(or(datatype(RDF.NIL), minCount(1)));
+			assertThat(or(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(or(datatype(RDF.NIL),
+					minCount(1)));
 		}
 
 		@Test void testPreserveOrder() {
@@ -105,6 +108,10 @@ final class OrTest {
 			assertThat(or(range(a, b), range(b, c))).isEqualTo(range(a, b, c));
 		}
 
+		@Test void testOptimizeLang() {
+			assertThat(or(lang("en", "it"), lang("en", "fr"))).isEqualTo(lang("en", "it", "fr"));
+		}
+
 
 		@Test void testOptimizeMinCount() {
 			assertThat(or(minCount(10), minCount(100))).isEqualTo(minCount(10));
@@ -114,9 +121,12 @@ final class OrTest {
 			assertThat(or(maxCount(10), maxCount(100))).isEqualTo(maxCount(100));
 		}
 
-
 		@Test void testOptimizeAny() {
 			assertThat(or(any(a, b), any(b, c))).isEqualTo(any(a, b, c));
+		}
+
+		@Test void testOptimizeLocalized() {
+			assertThat(or(localized(), localized())).isEqualTo(localized());
 		}
 
 

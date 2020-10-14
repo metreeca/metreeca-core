@@ -25,6 +25,7 @@ import static com.metreeca.json.Values.derives;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.metas;
 import static com.metreeca.json.shapes.MinCount.minCount;
@@ -107,9 +108,11 @@ public final class Or extends Shape {
 		return clazz.equals(Meta.class) ? metas(shapes.map(Meta.class::cast))
 				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
 				: clazz.equals(Range.class) ? ranges(shapes.map(Range.class::cast))
+				: clazz.equals(Lang.class) ? langs(shapes.map(Lang.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))
 				: clazz.equals(MaxCount.class) ? maxCounts(shapes.map(MaxCount.class::cast))
 				: clazz.equals(Any.class) ? anys(shapes.map(Any.class::cast))
+				: clazz.equals(Localized.class) ? localizeds(shapes.map(Localized.class::cast))
 				: clazz.equals(Field.class) ? fields(shapes.map(Field.class::cast))
 				: shapes;
 	}
@@ -133,6 +136,13 @@ public final class Or extends Shape {
 		));
 	}
 
+	private static Stream<? extends Shape> langs(final Stream<Lang> langs) {
+		return Stream.of(lang(langs
+				.map(Lang::tags)
+				.reduce((x, y) -> Stream.of(x, y).flatMap(Collection::stream).collect(toCollection(LinkedHashSet::new)))
+				.orElseGet(Collections::emptySet)));
+	}
+
 	private static Stream<? extends Shape> minCounts(final Stream<MinCount> minCounts) {
 		return Stream.of(minCount(minCounts.mapToInt(MinCount::limit).min().orElse(Integer.MIN_VALUE)));
 	}
@@ -147,6 +157,10 @@ public final class Or extends Shape {
 				.flatMap(Collection::stream)
 				.collect(toSet())
 		));
+	}
+
+	private static Stream<? extends Shape> localizeds(final Stream<Localized> localizeds) {
+		return localizeds.distinct();
 	}
 
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
