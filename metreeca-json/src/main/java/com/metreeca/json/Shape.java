@@ -159,6 +159,8 @@ public abstract class Shape {
 
 		public V probe(final Range range) { return probe((Shape)range); }
 
+		public V probe(final Lang lang) { return probe((Shape)lang); }
+
 
 		public V probe(final MinExclusive minExclusive) { return probe((Shape)minExclusive); }
 
@@ -190,6 +192,9 @@ public abstract class Shape {
 		public V probe(final All all) { return probe((Shape)all); }
 
 		public V probe(final Any any) { return probe((Shape)any); }
+
+
+		public V probe(final Localized localized) { return probe((Shape)localized); }
 
 
 		//// Structural Constraints ////////////////////////////////////////////////////////////////////////////////////

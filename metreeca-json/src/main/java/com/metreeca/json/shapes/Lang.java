@@ -18,67 +18,61 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
-
-import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
-import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.Or.or;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 
 /**
- * Range value constraint.
+ * Language value constraint.
  *
- * <p>States that each term in the focus set is a member of the given set of target values.</p>
+ * <p>States that each term in the focus set is a localized string with a language tag in the given set of target
+ * values.</p>
  */
-public final class Range extends Shape {
+public final class Lang extends Shape {
 
-	public static Shape range(final Object... values) {
+	public static Shape lang(final String... tags) {
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
+		if ( tags == null || Arrays.stream(tags).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
 		}
 
-		return range(Arrays.stream(values).map(Values::value).collect(toList()));
+		if ( Arrays.stream(tags).anyMatch(String::isEmpty) ) {
+			throw new IllegalArgumentException("empty tags");
+		}
+
+		return lang(asList(tags));
 	}
 
-	public static Shape range(final Value... values) {
+	public static Shape lang(final Collection<String> tags) {
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
+		if ( tags == null || tags.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
 		}
 
-		return range(asList(values));
-	}
-
-	public static Shape range(final Collection<? extends Value> values) {
-
-		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
+		if ( tags.stream().anyMatch(String::isEmpty) ) {
+			throw new IllegalArgumentException("empty tags");
 		}
 
-		return values.isEmpty() ? or() : new Range(values);
+		return tags.isEmpty() ? or() : new Lang(tags);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Set<Value> values;
+	private final Set<String> tags;
 
 
-	private Range(final Collection<? extends Value> values) {
-		this.values=new LinkedHashSet<>(values);
+	private Lang(final Collection<String> tags) {
+		this.tags=new LinkedHashSet<>(tags);
 	}
 
 
-	public Set<Value> values() {
-		return unmodifiableSet(values);
+	public Set<String> tags() {
+		return unmodifiableSet(tags);
 	}
 
 
@@ -97,19 +91,16 @@ public final class Range extends Shape {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Range
-				&& values.equals(((Range)object).values);
+		return this == object || object instanceof Lang
+				&& tags.equals(((Lang)object).tags);
 	}
 
 	@Override public int hashCode() {
-		return values.hashCode();
+		return tags.hashCode();
 	}
 
 	@Override public String toString() {
-		return "range("+values.stream()
-				.map(v -> format(v).replace("\n", "\n\t"))
-				.collect(joining(",\n\t", "\n\t", "\n"))
-				+")";
+		return "lang("+String.join(", ", tags)+")";
 	}
 
 }

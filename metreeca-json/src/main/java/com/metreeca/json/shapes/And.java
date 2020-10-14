@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.derives;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
@@ -108,9 +109,11 @@ public final class And extends Shape {
 		return clazz.equals(Meta.class) ? Meta.metas(shapes.map(Meta.class::cast))
 				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
 				: clazz.equals(Range.class) ? ranges(shapes.map(Range.class::cast))
+				: clazz.equals(Lang.class) ? langs(shapes.map(Lang.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))
 				: clazz.equals(MaxCount.class) ? maxCounts(shapes.map(MaxCount.class::cast))
 				: clazz.equals(All.class) ? alls(shapes.map(All.class::cast))
+				: clazz.equals(Localized.class) ? localizeds(shapes.map(Localized.class::cast))
 				: clazz.equals(Field.class) ? fields(shapes.map(Field.class::cast))
 				: shapes;
 	}
@@ -138,6 +141,13 @@ public final class And extends Shape {
 		));
 	}
 
+	private static Stream<? extends Shape> langs(final Stream<Lang> langs) {
+		return Stream.of(lang(langs
+				.map(Lang::tags)
+				.reduce((x, y) -> x.stream().filter(y::contains).collect(toCollection(LinkedHashSet::new)))
+				.orElseGet(Collections::emptySet)));
+	}
+
 	private static Stream<? extends Shape> minCounts(final Stream<MinCount> minCounts) {
 		return Stream.of(minCount(minCounts.mapToInt(MinCount::limit).max().orElse(Integer.MIN_VALUE)));
 	}
@@ -152,6 +162,10 @@ public final class And extends Shape {
 				.flatMap(Collection::stream)
 				.collect(toSet())
 		));
+	}
+
+	private static Stream<? extends Shape> localizeds(final Stream<Localized> localizeds) {
+		return localizeds.distinct();
 	}
 
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {

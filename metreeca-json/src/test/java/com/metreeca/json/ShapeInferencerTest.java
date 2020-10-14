@@ -17,8 +17,6 @@
 
 package com.metreeca.json;
 
-import com.metreeca.json.shapes.Range;
-
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
@@ -30,9 +28,12 @@ import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,6 +42,59 @@ final class ShapeInferencerTest {
 
 	private Shape expand(final Shape shape) {
 		return shape.map(new ShapeInferencer());
+	}
+
+
+	@Test void testDatatype() {
+
+		final Shape datatype=datatype(XSD.BOOLEAN);
+
+		assertThat(expand(datatype))
+				.as("xsd:boolean has exclusive values and closed range")
+				.isEqualTo(and(datatype, and(maxCount(1), range(literal(false), literal(true)))));
+	}
+
+	@Test void testClazz() {
+
+		final Shape clazz=clazz(RDF.NIL);
+
+		assertThat(expand(clazz))
+				.as("classed values are resources")
+				.isEqualTo(and(clazz, datatype(ResourceType)));
+	}
+
+	@Test void testRange() {
+
+		final Shape heterogeneous=range(literal(1), literal(2.0));
+
+		assertThat(expand(heterogeneous))
+				.as("maximum focus size is equal to the size of the allowed value set")
+				.isEqualTo(and(heterogeneous, maxCount(2)));
+
+		final Shape inUniform=range(literal(1), literal(2));
+
+		assertThat(expand(inUniform))
+				.as("if unique, focus values share the datatype of the allowed value set")
+				.isEqualTo(and(inUniform, and(maxCount(2), datatype(XSD.INT))));
+
+	}
+
+	@Test void testLang() {
+
+		final Shape lang=lang("en", "it");
+
+		assertThat(expand(lang))
+				.as("tagged literals have fixed datatype")
+				.isEqualTo(and(lang, datatype(RDF.LANGSTRING)));
+	}
+
+	@Test void testLangLocalized() {
+
+		final Shape localized=and(localized(), lang("en", "it"));
+
+		assertThat(expand(localized))
+				.as("maximum focus size is equal to the size of the allowed tag set")
+				.isEqualTo(and(localized, datatype(RDF.LANGSTRING), maxCount(2)));
 	}
 
 
@@ -62,39 +116,15 @@ final class ShapeInferencerTest {
 				.isEqualTo(and(any, minCount(1)));
 	}
 
-	@Test void testDatatype() {
+	@Test void testLocalized() {
 
-		final Shape datatype=datatype(XSD.BOOLEAN);
+		final Shape localized=localized();
 
-		assertThat(expand(datatype))
-				.as("xsd:boolean has exclusive values and closed range")
-				.isEqualTo(and(datatype, and(maxCount(1), Range.range(literal(false), literal(true)))));
+		assertThat(expand(localized))
+				.as("localized literals have fixed datatype")
+				.isEqualTo(and(localized, datatype(RDF.LANGSTRING)));
 	}
 
-	@Test void testClazz() {
-
-		final Shape clazz=clazz(RDF.NIL);
-
-		assertThat(expand(clazz))
-				.as("classed values are resources")
-				.isEqualTo(and(clazz, datatype(ResourceType)));
-	}
-
-	@Test void testIn() {
-
-		final Shape Eterogeneous=Range.range(literal(1), literal(2.0));
-
-		assertThat(expand(Eterogeneous))
-				.as("maximum focus size is equal to the size of the allowed value set")
-				.isEqualTo(and(Eterogeneous, maxCount(2)));
-
-		final Shape inUniform=Range.range(literal(1), literal(2));
-
-		assertThat(expand(inUniform))
-				.as("if unique, focus values share the datatype of the allowed value set")
-				.isEqualTo(and(inUniform, and(maxCount(2), datatype(XSD.INT))));
-
-	}
 
 	@Test void testField() {
 
@@ -147,6 +177,7 @@ final class ShapeInferencerTest {
 				.isEqualTo(field(inverse(RDF.VALUE), datatype(IRIType)));
 
 	}
+
 
 	@Test void testAnd() {
 
