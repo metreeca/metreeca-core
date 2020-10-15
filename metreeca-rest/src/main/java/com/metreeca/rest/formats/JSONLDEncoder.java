@@ -34,15 +34,19 @@ import java.util.regex.Matcher;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createValue;
+import static javax.json.Json.*;
 
 
 final class JSONLDEncoder {
 
+	private static final Collection<IRI> InternalTypes=new HashSet<>(asList(ValueType, ResourceType, LiteralType));
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final IRI focus;
 	private final Shape shape;
@@ -153,7 +157,7 @@ final class JSONLDEncoder {
 
 			return inlineable
 					? Json.createValue(id)
-					: Json.createObjectBuilder().add(aliaser.apply("@id"), id).build();
+					: createObjectBuilder().add(aliaser.apply("@id"), id).build();
 
 		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
 
@@ -161,7 +165,7 @@ final class JSONLDEncoder {
 
 		} else {
 
-			final JsonObjectBuilder object=Json.createObjectBuilder().add(aliaser.apply("@id"), id);
+			final JsonObjectBuilder object=createObjectBuilder().add(aliaser.apply("@id"), id);
 
 			final Collection<Resource> references=new ArrayList<>();
 
@@ -217,7 +221,7 @@ final class JSONLDEncoder {
 	private Optional<JsonObject> context(final Map<String, String> keywords, final Map<String, Field> fields) {
 		if ( keywords.isEmpty() && fields.isEmpty() ) { return Optional.empty(); } else {
 
-			final JsonObjectBuilder context=Json.createObjectBuilder();
+			final JsonObjectBuilder context=createObjectBuilder();
 
 			keywords.forEach((keyword, alias) ->
 
@@ -227,13 +231,54 @@ final class JSONLDEncoder {
 
 			fields.forEach((alias, field) -> {
 
-				final IRI iri=field.name();
-				final String value=iri.stringValue();
+				final IRI name=field.name();
+				final Shape shape=field.shape();
 
-				context.add(alias, direct(iri)
-						? Json.createValue(value)
-						: Json.createObjectBuilder().add("@reverse", value).build()
-				);
+				final boolean direct=direct(name);
+				final String iri=name.stringValue();
+
+				final Optional<IRI> datatype=datatype(shape);
+
+				if ( datatype.filter(IRIType::equals).isPresent() ) {
+
+					context.add(alias, createObjectBuilder()
+							.add(direct ? "@id" : "@reverse", iri)
+							.add("@type", "@id")
+					);
+
+				} else if ( datatype.filter(RDF.LANGSTRING::equals).isPresent() ) {
+
+					final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
+
+					context.add(alias, langs.size() == 1
+
+							? createObjectBuilder()
+							.add(direct ? "@id" : "@reverse", iri)
+							.add("@language", langs.iterator().next())
+
+							: createObjectBuilder()
+							.add(direct ? "@id" : "@reverse", iri)
+							.add("@container", "@language")
+					);
+
+				} else if ( datatype.filter(type -> !InternalTypes.contains(type)).isPresent() ) {
+
+					context.add(alias, createObjectBuilder()
+							.add(direct ? "@id" : "@reverse", iri)
+							.add("@type", datatype.get().stringValue())
+					);
+
+				} else if ( direct ) {
+
+					context.add(alias, iri);
+
+				} else {
+
+					context.add(alias, createObjectBuilder()
+							.add("@reverse", iri)
+					);
+
+				}
 
 			});
 
@@ -283,14 +328,14 @@ final class JSONLDEncoder {
 
 
 	private JsonValue literal(final Value literal, final String lang) {
-		return Json.createObjectBuilder()
+		return createObjectBuilder()
 				.add(aliaser.apply("@value"), literal.stringValue())
 				.add(aliaser.apply("@language"), lang)
 				.build();
 	}
 
 	private JsonValue literal(final Value literal, final IRI datatype) {
-		return Json.createObjectBuilder()
+		return createObjectBuilder()
 				.add(aliaser.apply("@value"), literal.stringValue())
 				.add(aliaser.apply("@type"), datatype.stringValue())
 				.build();
@@ -337,7 +382,7 @@ final class JSONLDEncoder {
 
 		} else { // multiple languages
 
-			final JsonObjectBuilder builder=Json.createObjectBuilder();
+			final JsonObjectBuilder builder=createObjectBuilder();
 
 			langToStrings.forEach((lang, strings) -> {
 
