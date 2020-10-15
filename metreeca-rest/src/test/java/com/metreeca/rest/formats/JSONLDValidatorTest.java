@@ -18,7 +18,6 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Trace;
-import com.metreeca.json.shapes.Range;
 import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.Literal;
@@ -36,7 +35,9 @@ import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.guard;
+import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Like.like;
+import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
@@ -47,6 +48,7 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
+import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rest.EitherAssert.assertThat;
@@ -74,7 +76,7 @@ final class JSONLDValidatorTest {
 	}
 
 	private Either<Trace, JsonObject> validate(final Shape shape, final JsonObjectBuilder builder) {
-		return new JSONLDValidator(iri("app:/"), shape, emptyMap()).validate(builder.build());
+		return new JSONLDValidator(iri("app:/"), shape.expand(), emptyMap()).validate(builder.build());
 	}
 
 
@@ -213,7 +215,7 @@ final class JSONLDValidatorTest {
 			assertThat(validate(datatype(XSD.DATE), bnode)).hasLeft();
 
 			assertThat(validate(datatype(RDF.LANGSTRING), tagged)).hasRight();
-			assertThat(validate(datatype(RDF.LANGSTRING), bnode)).hasLeft();
+			assertThat(validate(datatype(RDF.LANGSTRING), iri)).hasLeft();
 
 			assertThat(validate(datatype(XSD.BOOLEAN), JsonValue.TRUE)).hasRight();
 			assertThat(validate(datatype(XSD.BOOLEAN), bnode)).hasLeft();
@@ -224,11 +226,45 @@ final class JSONLDValidatorTest {
 
 		@Test void testValidateRange() {
 
-			final Shape shape=Range.range(x, y);
+			final Shape shape=range(x, y);
 
 			assertThat(validate(shape, createValue("x"), createValue("y"))).hasRight();
 			assertThat(validate(shape, createValue("x"), createValue("y"), createValue("z"))).hasLeft();
 
+			assertThat(validate(shape)).as("empty focus").hasRight();
+
+		}
+
+		@Test void testValidateLang() {
+
+			final Shape shape=lang("en", "fr");
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("@value", "one")
+					.add("@language", "en")
+			)).hasRight();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("@value", "uno")
+					.add("@language", "it")
+			)).hasLeft();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("en", "one")
+			)).hasRight();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("en", "one")
+					.add("it", "one")
+			)).hasLeft();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("it", "one")
+			)).hasLeft();
+
+			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.com/"))).hasLeft();
+
+			assertThat(validate(lang("en"), createValue("one"))).as("known language").hasRight();
 			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		}
@@ -394,6 +430,34 @@ final class JSONLDValidatorTest {
 			assertThat(validate(shape, createValue("z"))).hasLeft();
 
 			assertThat(validate(shape)).as("empty focus").hasLeft();
+
+		}
+
+		@Test void testValidateLocalized() {
+
+			final Shape shape=localized();
+
+			assertThat(validate(shape,
+					createObjectBuilder().add("@value", "one").add("@language", "en").build(),
+					createObjectBuilder().add("@value", "uno").add("@language", "it").build()
+			)).hasRight();
+
+			assertThat(validate(shape,
+					createObjectBuilder().add("@value", "one").add("@language", "en").build(),
+					createObjectBuilder().add("@value", "two").add("@language", "en").build()
+			)).hasLeft();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("en", "one")
+					.add("it", "uno")
+			)).hasRight();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("en", createArrayBuilder().add("one").add("two"))
+					.add("it", "uno")
+			)).hasLeft();
+
+			assertThat(validate(shape)).as("empty focus").hasRight();
 
 		}
 
