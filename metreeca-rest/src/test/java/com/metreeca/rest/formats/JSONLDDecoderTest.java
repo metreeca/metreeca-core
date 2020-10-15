@@ -39,6 +39,8 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Meta.meta;
 import static java.util.Collections.emptyMap;
@@ -552,6 +554,84 @@ final class JSONLDDecoderTest {
 			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal(1.0))
+
+			);
+		}
+
+
+		@Test void testDecodeProvedTaggedValues() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, datatype(RDF.LANGSTRING)),
+
+					createObjectBuilder()
+							.add("@id", "/x")
+							.add("value", createObjectBuilder()
+									.add("en", createArrayBuilder().add("one").add("two"))
+									.add("it", createArrayBuilder().add("uno"))
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal("one", "en")),
+					statement(x, RDF.VALUE, literal("two", "en")),
+					statement(x, RDF.VALUE, literal("uno", "it"))
+
+			);
+		}
+
+		@Test void testDecodeProvedLocalizedValues() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, localized()),
+
+					createObjectBuilder()
+							.add("@id", "/x")
+							.add("value", createObjectBuilder()
+									.add("en", createValue("one"))
+									.add("it", createValue("uno"))
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal("one", "en")),
+					statement(x, RDF.VALUE, literal("uno", "it"))
+
+			);
+		}
+
+		@Test void testDecodeProvedTaggedValuesWithKnownLanguage() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, lang("en")),
+
+					createObjectBuilder()
+							.add("@id", "/x")
+							.add("value", createArrayBuilder()
+									.add("one")
+									.add("two")
+							)
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal("one", "en")),
+					statement(x, RDF.VALUE, literal("two", "en"))
+
+			);
+		}
+
+		@Test void testDecodeProvedLocalizedValuesWithKnownLanguage() {
+			assertThat(decode(x,
+
+					field(RDF.VALUE, localized(), lang("en")),
+
+					createObjectBuilder()
+							.add("@id", "/x")
+							.add("value", createValue("one"))
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.VALUE, literal("one", "en"))
 
 			);
 		}
