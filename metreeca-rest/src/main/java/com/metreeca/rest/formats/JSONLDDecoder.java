@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
 import static java.lang.String.format;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 
@@ -68,7 +69,7 @@ final class JSONLDDecoder {
 	}
 
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	Collection<Statement> decode(final JsonObject json) throws JsonException {
 
@@ -97,11 +98,36 @@ final class JSONLDDecoder {
 
 
 	Stream<Entry<Value, Stream<Statement>>> values(final JsonValue value, final Shape shape) {
-		return (value instanceof JsonArray ? value.asJsonArray().stream() : Stream.of(value))
-				.map(v -> value(v, shape))
-				.collect(toMap(Entry::getKey, Entry::getValue, Stream::concat))
-				.entrySet()
-				.stream();
+
+		final boolean tagged=tagged(shape);
+
+		final Set<String> langs=tagged ? langs(shape).orElseGet(Collections::emptySet) : emptySet();
+		final String lang=langs.size() == 1 ? langs.iterator().next() : "";
+
+		if ( tagged && value instanceof JsonArray && !lang.isEmpty() ) {
+
+			return value.asJsonArray().stream().map(v -> v instanceof JsonString
+					? literal((JsonString)v, lang)
+					: value(v, shape)
+			);
+
+		} else if ( tagged && value instanceof JsonString && !lang.isEmpty() ) {
+
+			return Stream.of(literal((JsonString)value, lang));
+
+		} else if ( tagged && value instanceof JsonObject && !value.asJsonObject().containsKey("@value") ) {
+
+			return literals(value.asJsonObject());
+
+		} else {
+
+			return (value instanceof JsonArray ? value.asJsonArray().stream() : Stream.of(value))
+					.map(v -> value(v, shape))
+					.collect(toMap(Entry::getKey, Entry::getValue, Stream::concat))
+					.entrySet()
+					.stream();
+
+		}
 	}
 
 	Entry<Value, Stream<Statement>> value(final JsonValue value, final Shape shape) {
@@ -115,7 +141,7 @@ final class JSONLDDecoder {
 	}
 
 
-	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Values ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Entry<Value, Stream<Statement>> value(final JsonObject object, final Shape shape) {
 
@@ -218,7 +244,31 @@ final class JSONLDDecoder {
 	}
 
 
-	//// Factories ////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Tagged Literals ///////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Stream<Entry<Value, Stream<Statement>>> literals(final JsonObject json) {
+		return json.entrySet().stream().flatMap(entry -> {
+
+			final String lang=entry.getKey();
+			final JsonValue value=entry.getValue();
+
+			if ( lang.isEmpty() ) {
+				error("empty language tag");
+			}
+
+			return (value instanceof JsonArray ? value.asJsonArray().stream() : Stream.of(value))
+					.map(v -> v instanceof JsonString ? v : error("<%s> is not a string", v))
+					.map(v -> literal((JsonString)v, lang));
+
+		});
+	}
+
+	private Entry<Value, Stream<Statement>> literal(final JsonString json, final String lang) {
+		return entry(literal(json.getString(), lang), Stream.empty());
+	}
+
+
+	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Resource resource(final String id) {
 		return id.isEmpty() ? factory().createBNode()
