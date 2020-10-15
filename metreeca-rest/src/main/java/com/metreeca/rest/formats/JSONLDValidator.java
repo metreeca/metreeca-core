@@ -23,6 +23,7 @@ import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import javax.json.*;
 import java.util.*;
@@ -33,12 +34,11 @@ import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
-import static com.metreeca.rest.formats.JSONLDCodec.driver;
-import static com.metreeca.rest.formats.JSONLDCodec.fields;
+import static com.metreeca.rest.formats.JSONLDCodec.*;
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 
 final class JSONLDValidator {
@@ -78,6 +78,8 @@ final class JSONLDValidator {
 
 	private Trace validate(final Shape shape, final Collection<JsonValue> values) {
 
+		final boolean tagged=tagged(shape);
+
 		final Map<String, Field> fields=fields(shape);
 
 		return Stream.concat(
@@ -96,6 +98,7 @@ final class JSONLDValidator {
 								-> alias.startsWith("@")
 								|| keywords.containsValue(alias)
 								|| fields.containsKey(alias)
+								|| tagged
 						))
 
 						.map(alias -> trace(alias, trace("unexpected field")))
@@ -134,6 +137,11 @@ final class JSONLDValidator {
 			return decoder.value(value, shape).getKey();
 		}
 
+		private Stream<Value> values(final JsonValue value) {
+			return decoder.values(value, shape).map(Map.Entry::getKey);
+		}
+
+
 		private String values(final Collection<Value> values) {
 			return values.stream().map(Values::format).collect(joining(", "));
 		}
@@ -158,7 +166,13 @@ final class JSONLDValidator {
 			final IRI iri=datatype.iri();
 
 			return trace(values.stream()
-					.filter(negate(value -> is(value(value), iri)))
+					.filter(negate(value
+
+							-> iri.equals(RDF.LANGSTRING)
+							&& values(value).map(Values::type).allMatch(RDF.LANGSTRING::equals)
+
+							|| is(value(value), iri)
+					))
 					.map(value -> format("<%s> is not of datatype <%s>", value, iri))
 			);
 		}
@@ -170,6 +184,19 @@ final class JSONLDValidator {
 			return trace(values.stream()
 					.filter(value -> !set.contains(value(value)))
 					.map(value -> format("<%s> is not in the expected value range %s", value, values(set)))
+			);
+		}
+
+		@Override public Trace probe(final Lang lang) {
+
+			final Set<String> tags=lang.tags();
+
+			return trace(values.stream()
+					.flatMap(this::values)
+					.filter(negate(value -> tags.contains(lang(value))))
+					.map(value -> format(
+							"<%s> is not in the expected language set {%s}", value, join(", ", tags)
+					))
 			);
 		}
 
@@ -312,6 +339,20 @@ final class JSONLDValidator {
 					: trace(format("values don't include at least one of the expected values %s", values(expected)));
 		}
 
+		@Override public Trace probe(final Localized localized) {
+			return trace(values.stream()
+					.flatMap(this::values)
+
+					.collect(groupingBy(Values::lang, toList()))
+
+					.entrySet().stream()
+
+					.filter(negate(entry -> entry.getValue().size() <= 1))
+
+					.map(entry -> format("multiple values for <%s> language tag", entry.getKey()))
+			);
+		}
+
 
 		@SuppressWarnings("unchecked") @Override public Trace probe(final Field field) {
 
@@ -326,8 +367,8 @@ final class JSONLDValidator {
 				if ( value instanceof JsonObject ) { // validate the field shape on the new field values
 
 					return trace(alias, validate(field.shape(), Optional
-							.ofNullable(((JsonObject)value).get(alias))
-							.map(v -> v instanceof JsonArray ? (List<JsonValue>)v : singleton(v))
+							.ofNullable(value.asJsonObject().get(alias))
+							.map(v -> v instanceof JsonArray ? v.asJsonArray() : singleton(v))
 							.orElseGet(Collections::emptySet)
 					));
 

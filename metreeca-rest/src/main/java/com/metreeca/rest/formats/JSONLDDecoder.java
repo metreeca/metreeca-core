@@ -116,7 +116,9 @@ final class JSONLDDecoder {
 
 			return Stream.of(literal((JsonString)value, lang));
 
-		} else if ( tagged && value instanceof JsonObject && !value.asJsonObject().containsKey("@value") ) {
+		} else if ( tagged && value instanceof JsonObject
+				&& value.asJsonObject().keySet().stream().noneMatch(field -> field.startsWith("@"))
+		) {
 
 			return literals(value.asJsonObject());
 
