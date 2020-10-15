@@ -1,5 +1,5 @@
 <component name="CopyrightManager">
-  <settings default="Metreeca/AGPL">
+  <settings default="Metreeca/Apache">
     <LanguageOptions name="HTML">
       <option name="fileTypeOverride" value="3" />
       <option name="separateBefore" value="true" />
