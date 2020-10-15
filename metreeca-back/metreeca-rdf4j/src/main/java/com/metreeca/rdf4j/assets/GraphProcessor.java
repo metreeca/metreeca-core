@@ -755,6 +755,10 @@ abstract class GraphProcessor {
 				throw new UnsupportedOperationException("focus range constraint");
 			}
 
+			@Override public Snippet probe(final Lang lang) {
+				throw new UnsupportedOperationException("focus lang constraint");
+			}
+
 
 			@Override public Snippet probe(final MinExclusive minExclusive) {
 				return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.limit())));
@@ -819,6 +823,10 @@ abstract class GraphProcessor {
 
 				return any.values().size() > 1 ? values(source, values(any.values())) : nothing();
 
+			}
+
+			@Override public Snippet probe(final Localized localized) {
+				throw new UnsupportedOperationException("focus localized constraint");
 			}
 
 
