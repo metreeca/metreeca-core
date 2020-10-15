@@ -31,6 +31,7 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rest.JSONAssert.assertThat;
@@ -72,15 +73,33 @@ final class JSONLDTrimmerTest {
 		);
 	}
 
+
 	@Test void testPruneField() {
 		assertThat(trim(field(RDF.VALUE), createObjectBuilder()
 
 				.add("value", 1)
-				.add("other", 2))
+				.add("other", 2)
 
-		).isEqualTo(createObjectBuilder()
+		)).isEqualTo(createObjectBuilder()
 
 				.add("value", 1)
+
+		);
+	}
+
+	@Test void testPruneLanguageContainers() {
+		assertThat(trim(field(RDF.VALUE, lang("en")), createObjectBuilder()
+
+				.add("value", createObjectBuilder()
+						.add("en", "one")
+						.add("it", "uno")
+				)
+
+		)).isEqualTo(createObjectBuilder()
+
+				.add("value", createObjectBuilder()
+						.add("en", "one")
+				)
 
 		);
 	}
