@@ -22,11 +22,11 @@ import com.metreeca.json.shapes.Field;
 import org.eclipse.rdf4j.model.IRI;
 
 import javax.json.*;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static com.metreeca.rest.formats.JSONLDCodec.driver;
-import static com.metreeca.rest.formats.JSONLDCodec.fields;
+import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static java.util.stream.Collectors.toList;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 
 
@@ -55,7 +55,7 @@ final class JSONLDTrimmer {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	JsonValue trim(final IRI focus, final Shape shape, final JsonValue value) {
+	private JsonValue trim(final IRI focus, final Shape shape, final JsonValue value) {
 		return value instanceof JsonObject ? trim(focus, shape, value.asJsonObject())
 				: value instanceof JsonArray ? trim(focus, shape, value.asJsonArray())
 				: value;
@@ -63,25 +63,55 @@ final class JSONLDTrimmer {
 
 	private JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
 
-		final Map<String, Field> fields=fields(shape, keywords);
-
 		final JsonObjectBuilder builder=createObjectBuilder();
 
-		object.forEach((label, value) -> {
-			if ( label.startsWith("@") || keywords.containsValue(label) ) {
+		if ( tagged(shape) ) {
 
-				builder.add(label, value);
+			final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
 
-			} else {
+			object.forEach((label, value) -> {
+				if ( label.startsWith("@") || keywords.containsValue(label) ) {
 
-				Optional.of(label).map(fields::get).ifPresent(field ->
-						builder.add(label, trim(focus, field.shape(), value))
-				);
+					builder.add(label, value);
 
-			}
-		});
+				} else if ( langs.contains(label) && value instanceof JsonString ) {
+
+					builder.add(label, value);
+
+				} else if ( langs.contains(label) && value instanceof JsonArray ) {
+
+					builder.add(label, createArrayBuilder(value.asJsonArray().stream()
+							.filter(JsonString.class::isInstance)
+							.map(JsonString.class::cast)
+							.map(JsonString::getString)
+							.collect(toList())
+					));
+
+				}
+			});
+
+		} else {
+
+			final Map<String, Field> fields=fields(shape, keywords);
+
+			object.forEach((label, value) -> {
+				if ( label.startsWith("@") || keywords.containsValue(label) ) {
+
+					builder.add(label, value);
+
+				} else {
+
+					Optional.of(label).map(fields::get).ifPresent(field ->
+							builder.add(label, trim(focus, field.shape(), value))
+					);
+
+				}
+			});
+
+		}
 
 		return builder.build();
+
 	}
 
 	private JsonArray trim(final IRI focus, final Shape shape, final JsonArray array) {
