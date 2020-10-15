@@ -18,7 +18,6 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
-import com.metreeca.json.shapes.Range;
 import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.*;
@@ -47,7 +46,9 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Like.like;
+import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
@@ -59,12 +60,14 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Pattern.pattern;
+import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
@@ -406,16 +409,18 @@ final class GraphProcessorTest {
 
 					Root, items(meta("value", "nil"))
 
-			)).as("ignore annotations")
-					.isEmpty());
+					)).as("ignore annotations")
+							.isEmpty()
+			);
 		}
 
 		@Test void testGuard() {
 			exec(() -> assertThatThrownBy(() ->
-					query(Root, items(guard("axis", RDF.NIL)))
+							query(Root, items(guard("axis", RDF.NIL)))
 
-			).as("reject partially redacted shapes")
-					.isInstanceOf(UnsupportedOperationException.class));
+					).as("reject partially redacted shapes")
+							.isInstanceOf(UnsupportedOperationException.class)
+			);
 		}
 
 	}
@@ -472,6 +477,22 @@ final class GraphProcessorTest {
 							+"\t?employee a ?type\n"
 							+"\n"
 							+"}"
+
+			)));
+		}
+
+		@Test void testRange() {
+			exec(() -> assertThatThrownBy(() -> query(
+
+					Root, items(field(term("office"), range(item("employees/1621"), item("employees/1625"))))
+
+			)).isInstanceOf(UnsupportedOperationException.class));
+		}
+
+		@Test void testLocalized() {
+			exec(() -> assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> query(
+
+					Root, items(field(term("employee"), lang("en", "it")))
 
 			)));
 		}
@@ -688,15 +709,6 @@ final class GraphProcessorTest {
 		}
 
 
-		@Test void testIn() {
-			exec(() -> assertThatThrownBy(() -> query(
-
-					Root, items(field(term("office"), Range.range(item("employees/1621"), item("employees/1625"))))
-
-			)).isInstanceOf(UnsupportedOperationException.class));
-		}
-
-
 		@Test void testAllDirect() {
 			exec(() -> assertThat(query(
 
@@ -863,6 +875,15 @@ final class GraphProcessorTest {
 							+"\t?employee rdfs:label ?label\n"
 							+"\n"
 							+"}"
+
+			)));
+		}
+
+
+		@Test void testLocalized() {
+			exec(() -> assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> query(
+
+					Root, items(field(term("employee"), localized()))
 
 			)));
 		}
