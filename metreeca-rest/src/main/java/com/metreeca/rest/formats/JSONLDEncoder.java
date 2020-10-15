@@ -17,6 +17,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 import com.metreeca.json.shapes.Field;
 
 import org.eclipse.rdf4j.model.*;
@@ -35,10 +36,13 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.*;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createValue;
 
 
 final class JSONLDEncoder {
+
 
 	private final IRI focus;
 	private final Shape shape;
@@ -97,15 +101,17 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) {
 
-		if ( maxCount(shape).map(limit -> limit == 1).orElse(false) ) { // single subject
+		if ( tagged(shape) && values.stream().map(Values::lang).allMatch(Objects::nonNull) ) { // tagged literals
 
-			return values.isEmpty()
-					? JsonValue.EMPTY_JSON_OBJECT
-					: value(values.iterator().next(), shape, model, trail);
+			return taggeds(values, shape);
+
+		} else if ( scalar(shape) && values.size() == 1 ) { // single subject
+
+			return value(values.iterator().next(), shape, model, trail);
 
 		} else { // multiple subjects
 
-			final JsonArrayBuilder array=Json.createArrayBuilder();
+			final JsonArrayBuilder array=createArrayBuilder();
 
 			values.stream().map(value -> value(value, shape, model, trail)).forEach(array::add);
 
@@ -288,6 +294,70 @@ final class JSONLDEncoder {
 				.add(aliaser.apply("@value"), literal.stringValue())
 				.add(aliaser.apply("@type"), datatype.stringValue())
 				.build();
+	}
+
+
+	//// Tagged Literals //////////////////////////////////////////////////////////////////////////////////////////////
+
+	private JsonValue taggeds(final Collection<? extends Value> values, final Shape shape) {
+
+		final boolean unique=localized(shape) || scalar(shape);
+
+		final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
+
+		final Map<String, List<String>> langToStrings=values.stream()
+
+				.filter(Literal.class::isInstance)
+				.map(Literal.class::cast)
+
+				.collect(groupingBy(
+						literal -> literal.getLanguage().orElse(""),
+						LinkedHashMap::new,
+						mapping(Value::stringValue, toList())
+				));
+
+		if ( langs.size() == 1 && langToStrings.keySet().equals(langs) ) { // known language
+
+			final List<String> strings=langToStrings
+					.entrySet()
+					.stream()
+					.findFirst()
+					.map(Map.Entry::getValue)
+					.orElseGet(Collections::emptyList);
+
+			if ( unique && strings.size() == 1 ) { // single value
+
+				return createValue(strings.get(0));
+
+			} else { // multiple values
+
+				return createArrayBuilder(strings).build();
+
+			}
+
+		} else { // multiple languages
+
+			final JsonObjectBuilder builder=Json.createObjectBuilder();
+
+			langToStrings.forEach((lang, strings) -> {
+
+				if ( unique && strings.size() == 1 ) { // single value
+
+					builder.add(lang, createValue(strings.get(0)));
+
+
+				} else { // multiple values
+
+					builder.add(lang, createArrayBuilder(strings));
+
+				}
+
+			});
+
+			return builder.build();
+
+		}
+
 	}
 
 

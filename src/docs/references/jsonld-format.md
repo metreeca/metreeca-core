@@ -125,6 +125,8 @@ If  the property value may be proved to be non-repeatable, it may be included as
 
 In the more general form, literals are serialized as JSON objects including the literal lexical representation and either the literal datatype IRI or the literal language tag.
 
+## Typed Literals
+
 ```
 "<text>"             ::= "<text>"
 "<text>"^^xsd:string ::= "<text>
@@ -150,3 +152,37 @@ Typed `xsd:boolean` literals are serialized as JSON boolean values.
 	"<text>"^^<type> ::= "<text>"
 
 If the datatype of the literal may be proved to be a constant known value, the literal may be serialized as a JSON string value including its lexical representation, omitting datatype info.
+
+## Tagged Literals
+
+```
+"<text0>"@"<lang1>", "<text1>"@"<lang1>", "<text2>"@"<lang2>", … ::= { 
+	"<lang1>" : ["<text0>", "<text1>"],
+	"<lang2>" : ["<text2>"],
+	…
+} 
+```
+
+If collection of literals may be proved to be `rdf:langString`, the collections may be serialized as a JSON object mapping  language tags to lists of string values.
+
+```
+"<text1>"@"<lang1>", "<text2>"@"<lang2>", … ::= { 
+	"<lang1>" : "<text1>",
+	"<lang2>" : "<text2>",
+	…
+} 
+```
+
+If language tags may be proved to be unique in the collection, string values may be included without wraping them in a list.
+
+```
+"<text1>"@"<lang>", "<text2>"@"<lang>", … ::= ["<text1>","<text2>", …]
+```
+
+If the language tag may be proved to be a constant, string values may be serialized as a JSON list, omitting language tags.
+
+```
+"<text>"@"<lang>" ::= "<text"
+```
+
+If the tagged literal may be proved to be non-repeatable and with a known language tag, its string value may be included directly.

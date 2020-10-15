@@ -20,6 +20,7 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
 import java.util.function.BinaryOperator;
@@ -44,75 +45,73 @@ final class JSONLDCodec {
 				retain(Task, true),
 				retain(Area, true),
 				retain(Mode, Convey) // remove internal filtering shapes
-				
+
 		).expand(); // add inferred constraints to drive json shorthands
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	static boolean scalar(final Shape shape) {
+		return maxCount(shape).filter(limit -> limit == 1).isPresent();
+	}
+
+	static boolean tagged(final Shape shape) {
+		return datatype(shape).filter(RDF.LANGSTRING::equals).isPresent();
+	}
+
+	static boolean localized(final Shape shape) {
+		return (shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ValueProbe<Object>() {
+
+			@Override public Object probe(final Localized localized) { return localized; }
+
+		}))).isPresent();
+	}
+
+
 	static Optional<IRI> datatype(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new DatatypeProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ValueProbe<IRI>() {
+
+			@Override public IRI probe(final Datatype datatype) { return datatype.iri(); }
+
+		}));
 	}
 
 	static Optional<IRI> _clazz(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ClazzProbe()));
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ValueProbe<IRI>() {
+
+			@Override public IRI probe(final Clazz clazz) { return clazz.iri(); }
+
+		}));
+	}
+
+	static Optional<Set<String>> langs(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ValueProbe<Set<String>>() {
+
+			@Override public Set<String> probe(final Lang lang) { return lang.tags(); }
+
+		}));
 	}
 
 
-	private static final class DatatypeProbe extends Probe<IRI> {
+	private abstract static class ValueProbe<V> extends Probe<V> {
 
-		@Override public IRI probe(final Datatype datatype) {
-			return datatype.iri();
+		@Override public V probe(final And and) {
+			return value(and.shapes().stream());
 		}
 
-		@Override public IRI probe(final And and) {
-			return type(and.shapes().stream());
+		@Override public V probe(final Or or) {
+			return value(or.shapes().stream());
 		}
 
-		@Override public IRI probe(final Or or) {
-			return type(or.shapes().stream());
-		}
-
-		@Override public IRI probe(final When when) {
-			return type(Stream.of(when.pass(), when.fail()));
-		}
-
-		private IRI type(final Stream<Shape> shapes) {
-
-			final Set<IRI> names=shapes
-					.map(shape -> shape.map(this))
-					.filter(Objects::nonNull)
-					.collect(toSet());
-
-			return names.size() == 1 ? names.iterator().next() : null;
-
-		}
-
-	}
-
-	private static final class ClazzProbe extends Probe<IRI> {
-
-		@Override public IRI probe(final Clazz clazz) {
-			return clazz.iri();
-		}
-
-		@Override public IRI probe(final And and) {
-			return clazz(and.shapes().stream());
-		}
-
-		@Override public IRI probe(final Or or) {
-			return clazz(or.shapes().stream());
-		}
-
-		@Override public IRI probe(final When when) {
-			return clazz(Stream.of(when.pass(), when.fail()));
+		@Override public V probe(final When when) {
+			return value(Stream.of(when.pass(), when.fail()));
 		}
 
 
-		private IRI clazz(final Stream<Shape> shapes) {
+		private V value(final Stream<Shape> shapes) {
 
-			final Set<IRI> names=shapes
+			final Set<V> names=shapes
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());
