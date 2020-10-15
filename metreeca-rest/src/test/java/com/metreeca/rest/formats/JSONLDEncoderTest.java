@@ -42,8 +42,7 @@ import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rest.JSONAssert.assertThat;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 import static javax.json.Json.*;
 import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -605,6 +604,65 @@ final class JSONLDEncoderTest {
 							)
 					)
 			);
+		}
+
+	}
+
+	@Nested final class Context {
+
+		private JsonObject encode(final Shape shape) {
+			final JsonObject context=new JSONLDEncoder(x, shape, emptyMap(), true)
+					.encode(emptyList())
+					.getJsonObject("@context");
+
+			System.out.println(context);
+			return context;
+		}
+
+		@Test void testDirectFields() {
+			assertThat(encode(field(RDF.VALUE)))
+					.hasField("value", RDF.VALUE.stringValue());
+
+		}
+
+		@Test void testInverseFields() {
+			assertThat(encode(field(inverse(RDF.VALUE))))
+					.hasField("valueOf", createObjectBuilder()
+							.add("@reverse", RDF.VALUE.stringValue())
+					);
+
+		}
+
+		@Test void testProvedIRIs() {
+			assertThat(encode(field(RDF.VALUE, datatype(IRIType))))
+					.hasField("value", createObjectBuilder()
+							.add("@id", RDF.VALUE.stringValue())
+							.add("@type", "@id")
+					);
+		}
+
+		@Test void testKnownDatatype() {
+			assertThat(encode(field(RDF.VALUE, datatype(RDF.NIL))))
+					.hasField("value", createObjectBuilder()
+							.add("@id", RDF.VALUE.stringValue())
+							.add("@type", RDF.NIL.stringValue())
+					);
+		}
+
+		@Test void testProvedTagged() {
+			assertThat(encode(field(RDF.VALUE, localized())))
+					.hasField("value", createObjectBuilder()
+							.add("@id", RDF.VALUE.stringValue())
+							.add("@container", "@language")
+					);
+		}
+
+		@Test void testKnownLanguage() {
+			assertThat(encode(field(RDF.VALUE, lang("en"))))
+					.hasField("value", createObjectBuilder()
+							.add("@id", RDF.VALUE.stringValue())
+							.add("@language", "en")
+					);
 		}
 
 	}
