@@ -570,7 +570,7 @@ abstract class GraphProcessor {
 				final int limit) {
 			return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : snippet(
 
-					"{ select {root} {\n"
+					"{ select distinct {root} {\n"
 							+"\n"
 							+"\t{roots}\n"
 							+"\n"
