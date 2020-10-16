@@ -140,7 +140,7 @@ final class ShapeInferencerTest {
 				.as("rdf:type field have resource subjects and IRI objects")
 				.isEqualTo(and(
 						datatype(ResourceType),
-						and(field(RDF.TYPE, datatype(ResourceType)), datatype(IRIType))
+						field(RDF.TYPE, datatype(IRIType))
 				));
 
 	}
