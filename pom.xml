@@ -171,7 +171,7 @@
 			</dependency>
 
 
-			<!-- Backend Adapters -->
+			<!-- Storage Adapters -->
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
@@ -427,11 +427,11 @@
 
 							<groups> <!-- colon-separated patterns / single line -->
 								<group>
-									<title>REST/JSON Modelling</title>
+									<title>JSON Modelling</title>
 									<packages>com.metreeca.json*</packages>
 								</group>
 								<group>
-									<title>REST/JSON Publishing</title>
+									<title>REST Publishing</title>
 									<packages>com.metreeca.rest*</packages>
 								</group>
 								<group>
@@ -443,11 +443,11 @@
 								<group>
 									<title>Server Adapters</title>
 									<packages>
-										com.metreeca.jee*:com.metreeca.jse*
+										com.metreeca.jse*:com.metreeca.jee*
 									</packages>
 								</group>
 								<group>
-									<title>Backend Adapters</title>
+									<title>Storage Adapters</title>
 									<packages>
 										com.metreeca.rdf4j*
 									</packages>

@@ -15,7 +15,7 @@
  */
 
 /**
- * X/HTML message formats.
+ * XML/HTML message formats.
  */
 
 package com.metreeca.xml.formats;

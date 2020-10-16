@@ -30,8 +30,8 @@
 	<artifactId>metreeca-json</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca REST/JSON Modelling</name>
-	<description>A shape-based REST/JSON modelling framework.</description>
+	<name>Metreeca JSON Modelling</name>
+	<description>A shape-based JSON modelling framework.</description>
 
 	<dependencies>
 
