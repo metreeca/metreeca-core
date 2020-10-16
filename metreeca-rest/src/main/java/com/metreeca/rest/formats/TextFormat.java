@@ -23,8 +23,10 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static java.lang.String.valueOf;
 
 
 /**
@@ -63,9 +65,7 @@ public final class TextFormat extends Format<String> {
 
 		try ( final StringWriter writer=new StringWriter() ) {
 
-			Xtream.copy(writer, reader);
-
-			return writer.toString();
+			return copy(writer, reader).toString();
 
 		} catch ( final IOException e ) {
 
@@ -138,21 +138,34 @@ public final class TextFormat extends Format<String> {
 	 * taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final String value) {
-		return message
+		try {
 
-				.header("~Content-Type", MIME)
+			final String charset=message.charset();
+			final byte[] bytes=value.getBytes(charset);
 
-				.body(output(), output -> {
-					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
+			return message
 
-						text(writer, value);
+					.header("~Content-Type", MIME)
+					.header("~Content-Length", valueOf(bytes.length))
 
-					} catch ( final IOException e ) {
+					.body(output(), output -> {
+						try {
 
-						throw new UncheckedIOException(e);
+							output.write(bytes);
+							output.flush();
 
-					}
-				});
+						} catch ( final IOException e ) {
+
+							throw new UncheckedIOException(e);
+
+						}
+					});
+
+		} catch ( final UnsupportedEncodingException e ) {
+
+			throw new UncheckedIOException(e); // !!! report to client as 4/5xx? how?
+
+		}
 	}
 
 }
