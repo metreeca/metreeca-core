@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static java.lang.String.valueOf;
 
 
 /**
@@ -127,6 +128,7 @@ public final class DataFormat extends Format<byte[]> {
 		return message
 
 				.header("~Content-Type", MIME)
+				.header("~Content-Length", valueOf(value.length))
 
 				.body(output(), output -> data(output, value));
 	}
