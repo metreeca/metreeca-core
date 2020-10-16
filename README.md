@@ -13,33 +13,33 @@ Its engine automatically converts high-level declarative JSON-LD models into ext
 ```xml
 <project>
 
-	<dependencyManagement>
-		<dependencies>
+    <dependencyManagement>
+        <dependencies>
 
-			<dependency>
-				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-link</artifactId>
-				<version>${link.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
+            <dependency>
+                <groupId>com.metreeca</groupId>
+                <artifactId>metreeca-link</artifactId>
+                <version>${link.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
-		</dependencies>
-	</dependencyManagement>
+        </dependencies>
+    </dependencyManagement>
 
-	<dependencies>
+    <dependencies>
 
-		<dependency> <!-- server adapter -->
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-jse</artifactId>
-		</dependency>
+        <dependency> <!-- server adapter -->
+            <groupId>com.metreeca</groupId>
+            <artifactId>metreeca-jse</artifactId>
+        </dependency>
 
-		<dependency> <!-- backend adapter -->
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rdf4j</artifactId>
-		</dependency>
+        <dependency> <!-- backend adapter -->
+            <groupId>com.metreeca</groupId>
+            <artifactId>metreeca-rdf4j</artifactId>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 </project>
 ```
@@ -75,26 +75,25 @@ public final class Hello {
 % curl -i http://localhost:8080/
 
 HTTP/1.1 200 OK
-Date: Fri, 16 Oct 2020 09:10:11 GMT
 Content-Type: text/plain
 Content-Length: 12
 
 Hello world!
 ```
 
-4. Delve into the the [docs](https://metreeca.github.io/link/) to learn more how to [publish](http://metreeca.github.io/link/tutorials/publishing-jsonld-apis) and [consume](https://metreeca.github.io/link/tutorials/consuming-jsonld-apis)  your data as model-driven REST/JSON‑LD APIs…
+4. Delve into the the [docs](https://metreeca.github.io/link/) to learn how to [publish](http://metreeca.github.io/link/tutorials/publishing-jsonld-apis) and [consume](https://metreeca.github.io/link/tutorials/consuming-jsonld-apis) your data as model-driven REST/JSON‑LD APIs…
 
 # Modules
 
-|                  |                                                              |                                        |
-| ---------------- | ------------------------------------------------------------ | -------------------------------------- |
-| core             | [metreeca‑json](https://javadoc.io/doc/com.metreeca/metreeca-json) | shape-based JSON modelling framework   |
-|                  | [metreeca‑rest](https://javadoc.io/doc/com.metreeca/metreeca-rest) | model-driven REST publishing framework |
-| format adapters  | [metreeca‑xml](https://javadoc.io/doc/com.metreeca/metreeca-xml) | XML/HTML codecs and processing actions |
-|                  | [metreeca‑rdf](https://javadoc.io/doc/com.metreeca/metreeca-rdf) | RDF codecs and processing actions      |
-| server adapters  | [metreeca‑jse](https://javadoc.io/doc/com.metreeca/metreeca-jse) | Jave SE  HTTP server                   |
-|                  | [metreeca‑jee](https://javadoc.io/doc/com.metreeca/metreeca-jee) | Servlet 3.1 containers                 |
-| storage adapters | [metreeca‑rdf4j](https://javadoc.io/doc/com.metreeca/metreeca-rdf4j) | RDF4J-based SPARQL repositories        |
+|         |                                                              |                                        |
+| ------: | ------------------------------------------------------------ | -------------------------------------- |
+|    core | [metreeca‑json](https://javadoc.io/doc/com.metreeca/metreeca-json) | shape-based JSON modelling framework   |
+|         | [metreeca‑rest](https://javadoc.io/doc/com.metreeca/metreeca-rest) | model-driven REST publishing framework |
+|    data | [metreeca‑xml](https://javadoc.io/doc/com.metreeca/metreeca-xml) | XML/HTML codecs and utilities          |
+|         | [metreeca‑rdf](https://javadoc.io/doc/com.metreeca/metreeca-rdf) | RDF codecs and utilities               |
+|  server | [metreeca‑jse](https://javadoc.io/doc/com.metreeca/metreeca-jse) | Jave SE  HTTP server                   |
+|         | [metreeca‑jee](https://javadoc.io/doc/com.metreeca/metreeca-jee) | Servlet 3.1 containers                 |
+| storage | [metreeca‑rdf4j](https://javadoc.io/doc/com.metreeca/metreeca-rdf4j) | RDF4J-based SPARQL repositories        |
 
 # Support
 

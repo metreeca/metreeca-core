@@ -20,19 +20,19 @@ Its engine automatically converts high-level declarative JSON-LD models into ext
 - [Shape Specification Language](references/spec-language.md)
 - [REST Faceted Search API](references/faceted-search.md)
 - [Idiomatic JSON-LD Serialization](references/jsonld-format.md)
-<!-- - [Known Issues](references/known-issues.md) -->
 
 # Modules
 
-|                  |                                                              |                                        |
-| ---------------- | ------------------------------------------------------------ | -------------------------------------- |
-| core             | [metreeca‑json](https://javadoc.io/doc/com.metreeca/metreeca-json) | shape-based JSON modelling framework   |
-|                  | [metreeca‑rest](https://javadoc.io/doc/com.metreeca/metreeca-rest) | model-driven REST publishing framework |
-| format adapters  | [metreeca‑xml](https://javadoc.io/doc/com.metreeca/metreeca-xml) | XML/HTML codecs and processing actions |
-|                  | [metreeca‑rdf](https://javadoc.io/doc/com.metreeca/metreeca-rdf) | RDF codecs and processing actions      |
-| server adapters  | [metreeca‑jse](https://javadoc.io/doc/com.metreeca/metreeca-jse) | Jave SE  HTTP server                   |
-|                  | [metreeca‑jee](https://javadoc.io/doc/com.metreeca/metreeca-jee) | Servlet 3.1 containers                 |
-| storage adapters | [metreeca‑rdf4j](https://javadoc.io/doc/com.metreeca/metreeca-rdf4j) | RDF4J-based SPARQL repositories        |
+|         |                                                              |                                        |
+| ------: | ------------------------------------------------------------ | -------------------------------------- |
+|    core | [metreeca‑json](https://javadoc.io/doc/com.metreeca/metreeca-json) | shape-based JSON modelling framework   |
+|         | [metreeca‑rest](https://javadoc.io/doc/com.metreeca/metreeca-rest) | model-driven REST publishing framework |
+|    data | [metreeca‑xml](https://javadoc.io/doc/com.metreeca/metreeca-xml) | XML/HTML codecs and utilities          |
+|         | [metreeca‑rdf](https://javadoc.io/doc/com.metreeca/metreeca-rdf) | RDF codecs and utilities               |
+|  server | [metreeca‑jse](https://javadoc.io/doc/com.metreeca/metreeca-jse) | Jave SE  HTTP server                   |
+|         | [metreeca‑jee](https://javadoc.io/doc/com.metreeca/metreeca-jee) | Servlet 3.1 containers                 |
+| storage | [metreeca‑rdf4j](https://javadoc.io/doc/com.metreeca/metreeca-rdf4j) | RDF4J-based SPARQL repositories        |
+
 
 # Support
 

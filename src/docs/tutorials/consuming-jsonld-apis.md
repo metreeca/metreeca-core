@@ -3,13 +3,13 @@ title:	        Consuming Model‑Driven REST/JSON-LD APIs
 excerpt:        Hands-on guided tour of model-driven lREST/JSON-LD APIs features
 ---
 
-This example-driven tutorial introduces the main client-facing features of the Metreeca/Link model-driven linked data framework. Basic familiarity with [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
+This example-driven tutorial introduces the main client-facing features of the Metreeca/Link model-driven REST/JSON framework. Basic familiarity with [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
-In the following sections you will learn how to interact with REST APIs published with the framework, leveraging automatic model-driven fine-grained role‑based read/write access control,  faceted search and incoming data validation.
+In the following sections you will learn how to consume REST APIs published with the framework, leveraging automatic model-driven faceted search, data validation and fine‑grained role‑based access control.
 
-In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publishing-jsonld-apis.md), using a semantic version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models. Before moving on you may want to familiarize yourself with it walking through the [search and analysis tutorial](https://metreeca.github.io/self/tutorials/search-and-analysis/) of the [Metreeca/Self](https://github.com/metreeca/self) self-service linked data search and analysis tool, which works on the same data.
+In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publishing-jsonld-apis.md), using a linked data version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. 
 
-We will walk through the REST API interaction process focusing on the task of consuming the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog.
+The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models: we will walk through the REST API interaction process focusing on the task of consuming the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog.
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
 
@@ -88,15 +88,21 @@ Content-Type: application/ld+json;charset=UTF-8
    
     "@context": {
         "id": "@id",
-        "code": "https://demo.metreeca.com/terms#code",
-        "stock": "https://demo.metreeca.com/terms#stock",
-        "type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-        "label": "http://www.w3.org/2000/01/rdf-schema#label",
-        "comment": "http://www.w3.org/2000/01/rdf-schema#comment",
-        "line": "https://demo.metreeca.com/terms#line",
-        "scale": "https://demo.metreeca.com/terms#scale",
-        "vendor": "https://demo.metreeca.com/terms#vendor",
-        "price": "https://demo.metreeca.com/terms#sell"
+        "type": {
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "@type": "@id"
+        },
+        "label": {
+            "@id": "http://www.w3.org/2000/01/rdf-schema#label",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        },
+
+		⋮
+		
+		"stock": {
+            "@id": "https://demo.metreeca.com/terms#stock",
+            "@type": "http://www.w3.org/2001/XMLSchema#integer"
+        }
     }
 }
 ```
@@ -237,21 +243,17 @@ Location: http://localhost:8080/products/
 Content-Type: application/json;charset=UTF-8
 
 {
-    "https://demo.metreeca.com/terms#buy": {
-        "": {
-            "minInclusive(\"0.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
-                "-101.0"
-            ]
-        }
+    "price": {
+        "": [
+            "<9999.0> is not strictly less than <\"1000.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>>"
+        ]
     },
-    "https://demo.metreeca.com/terms#sell": {
-        "": {
-            "maxExclusive(\"1000.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>)": [
-                "9999.0"
-            ]
-        }
+    "buy": {
+        "": [
+            "<-101.0> is not greater than or equal to <\"0.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>>"
+        ]
     }
-}
+}       
 ```
 
 Submitted data is automatically matched against the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Submiting, for instance, buy price data without valid authorization headers would return an error.
@@ -467,3 +469,4 @@ Content-Type: application/json
 ```
 
 Labels and comments for the selected options are also retrieved to support facet visualization.
+
