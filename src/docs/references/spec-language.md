@@ -1,6 +1,6 @@
 ---
 title:      Shape Specification Language Reference
-excerpt:    Linked data shape specification language semantics and components
+excerpt:    Shape-based data modelling language semantics and components
 ---
 
 Most framework services are driven by declarative linked data models defined using a [shape](#shapes)-based specification language.
@@ -15,13 +15,14 @@ Models are [programmaticaly](../tutorials/publishing-jsonld-apis.md) built using
 | API documentation | Human and machine readable docs for linked data REST APIs may be dynamically derived from associated linked data models and published as hypertexts and [OpenAPI](https://www.openapis.org)/[Swagger](https://swagger.io/specification/) specs |
 | data ingestion    | Data ingested from external data sources may be dynamically mapped to and validated against the linked data models associated with target graphs |
 
-<p class="warning">Some of the described features aren't (yet ;-) supported by the framework.</p>
+!!! note
+	Some of the described features aren't (yet ;-) supported by the framework.
 
 # Shapes
 
 Linked data [shapes](../javadocs/com/metreeca/json/Shape.html) define the expected structure of RDF resource descriptions in terms of **constraints** imposed on members of a **focus set** of JSON-LD values and on the  values of their properties.
 
-**Primitive** shapes specify declarative constraints to be meet by the focus set and its member terms. **Composite** shapes recursively assemble other shapes into tree-structured complex constraints.
+**Primitive** shapes specify declarative constraints to be meet by the focus set and its member values. **Composite** shapes recursively assemble other shapes into tree-structured complex constraints.
 
 Linked data selection tasks identify the set of nodes in a graph whose descriptions are consistent with a possibly composite shape. Selection results are reported either as a graph or a structured report according to the choosen [query](faceted-search.md#queries) type.
 
@@ -29,7 +30,7 @@ Linked data validation tasks verify that the description of an initial focus set
 
 ## Annotations
 
-Non-validating shapes documenting shape metadata, to be used for purposes such as shape redaction, form building or predictable encoding of RDF files.
+Non-validating shapes documenting shape metadata, to be used for purposes such as shape redaction, form building or predictable data encoding.
 
 | shape                                                        | value                                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -54,7 +55,7 @@ Primitive shapes specifying constraints to be individually met by each value in 
 | [datatype](../javadocs/com/metreeca/json/shapes/Datatype.html)(IRI) | each value in the focus set has a given extended RDF datatype IRI; IRI references and blank nodes are considered to be respectively of [Values.IRI](../javadocs/com/metreeca/json/Values.html#IRIType) and [Values.BNode](../javadocs/com/metreeca/json/Values.html#BNodeType) datatype |
 | [class](../javadocs/com/metreeca/json/shapes/Clazz.html)(IRI) | each value in the focus set is an instance of a given RDF class or one of its superclasses |
 | [range](../javadocs/com/metreeca/json/shapes/Range.html)(value, …) | each value in the focus set is included in a given set of target values |
-| [lang]()(tag, …)                                             | each value in the focus set is a tagged literal in a given set of target languages |
+| [lang](../javadocs/com/metreeca/json/shapes/Lang.html)(tag, …)                                             | each value in the focus set is a tagged literal in a given set of target languages |
 | [minExclusive](../javadocs/com/metreeca/json/shapes/MinExclusive.html)(value) | each value in the focus set is strictly greater than a given minum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
 | [maxExclusive](../javadocs/com/metreeca/json/shapes/MaxExclusive.html)(value) | each value in the focus set is strictly less than a given maximum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
 | [minInclusive](../javadocs/com/metreeca/json/shapes/MinInclusive.html)(value) | each value in the focus set is greater than or equal to a given minimum value, according to <a href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules |
@@ -75,7 +76,7 @@ Primitive shapes specifying constraints to be collectively met by the RDF terms 
 | [maxCount](../javadocs/com/metreeca/json/shapes/MaxCount.html)(count) | the size of the focus set is less than or equal to the given maximum value |
 | [all](../javadocs/com/metreeca/json/shapes/All.html)(value, …) | the focus set includes all values from a given set of target values |
 | [any](../javadocs/com/metreeca/json/shapes/Any.html)(value, …) | the focus set includes at least one value from a given set of target values |
-| [localized]()()                                              | the focus set contains only tagged literals with at most one value for each language tag |
+| [localized](../javadocs/com/metreeca/json/shapes/Localized.html)()                                              | the focus set contains only tagged literals with at most one value for each language tag |
 
 Common combinations of set constraints are directly available as shorthand shapes.
 
@@ -107,7 +108,8 @@ Composite shapes specifying logical combinations of shapes.
 | [or](../javadocs/com/metreeca/json/shapes/Or.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
 | [when](../javadocs/com/metreeca/json/shapes/When.html)([test](../javadocs/com/metreeca/json/Shape.html),[pass](../javadocs/com/metreeca/json/Shape.html) [, [fail](../javadocs/com/metreeca/json/Shape.html)]) | the focus set is consistent either with a *pass* shape, if consistent also with a *test* shape, or with a *fail* shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
 
-<p class="warning">Test shapes for conditional constraints are currently limited to combinations of parametric <code>guards</code> and logical operators.</p>
+!!! warning
+    Test shapes for conditional constraints are currently limited to combinations of parametric <code>guards</code> and logical operators.
 
 # Parameters
 

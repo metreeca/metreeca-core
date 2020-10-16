@@ -18,7 +18,7 @@ Its engine automatically converts high-level declarative JSON-LD models into ext
 
 - [Java API Reference](javadocs/index.html)
 - [Shape Specification Language](references/spec-language.md)
-- [REST Faceted Search API](references/faceted-search.md)
+- [REST Faceted Search](references/faceted-search.md)
 - [Idiomatic JSON-LD Serialization](references/jsonld-format.md)
 
 # Modules
@@ -42,4 +42,4 @@ Its engine automatically converts high-level declarative JSON-LD models into ext
 
 # License
 
-This project is licensed under the Apache 2.0 License – see [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache 2.0 License – see [LICENSE](http://www.apache.org/licenses/LICENSE-2.0.txt) file for details.
