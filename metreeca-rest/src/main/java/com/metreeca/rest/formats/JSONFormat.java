@@ -1,18 +1,17 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.formats;
@@ -22,39 +21,33 @@ import com.metreeca.rest.*;
 import javax.json.*;
 import javax.json.stream.JsonGenerator;
 import javax.json.stream.JsonParsingException;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.io.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.formats.InputFormat.input;
 import static java.util.Collections.singletonMap;
 
 
 /**
- * JSON body format.
+ * JSON message format.
  *
- * @see "https://javaee.github.io/jsonp/"
+ * @see <a href="https://javaee.github.io/jsonp/">JSR 374 - Java API for JSON Processing</a>
  */
 public final class JSONFormat extends Format<JsonObject> {
 
 	/**
-	 * The default MIME type for JSON message bodies ({@value}).
+	 * The default MIME type for JSON messages ({@value}).
 	 */
 	public static final String MIME="application/json";
 
 	/**
 	 * A pattern matching JSON-based MIME types, for instance {@code application/ld+json}.
 	 */
-	public static final Pattern MIMEPattern=Pattern.compile("(?i)^application/(.*\\+)?json(?:\\s*;.*)?$");
+	public static final Pattern MIMEPattern=Pattern.compile("(?i:^(text/json|application/(?:.*\\+)?json)(?:\\s*;.*)"
+			+ "?$)");
 
 
 	private static final JsonWriterFactory JsonWriters=Json
@@ -62,26 +55,27 @@ public final class JSONFormat extends Format<JsonObject> {
 
 
 	/**
-	 * Creates a JSON body format.
+	 * Creates a JSON message format.
 	 *
-	 * @return the new JSON body format
+	 * @return a new JSON message format
 	 */
 	public static JSONFormat json() {
 		return new JSONFormat();
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Parses a JSON object.
 	 *
 	 * @param reader the reader the JSON object is to be parsed from
 	 *
-	 * @return a value result containing the parsed JSON object, if {@code reader} was successfully parsed; an error
-	 * 		result containing the parse exception, otherwise
+	 * @return either a parsing exception or the JSON object parsed from {@code reader}
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if {@code reader} is null
 	 */
-	public static Result<JsonObject, Exception> json(final Reader reader) {
+	public static Either<JsonParsingException, JsonObject> json(final Reader reader) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -89,11 +83,11 @@ public final class JSONFormat extends Format<JsonObject> {
 
 		try ( final JsonReader jsonReader=Json.createReader(reader) ) {
 
-			return Value(jsonReader.readObject());
+			return Either.Right(jsonReader.readObject());
 
 		} catch ( final JsonParsingException e ) {
 
-			return Error(e);
+			return Either.Left(e);
 
 		}
 	}
@@ -101,13 +95,13 @@ public final class JSONFormat extends Format<JsonObject> {
 	/**
 	 * Writes a JSON object.
 	 *
-	 * @param <W>    the type of the {@code writer} the JSON document is to be written to
-	 * @param writer the writer the JSON document is to be written to
+	 * @param <W>    the type of the {@code writer} the JSON object is to be written to
+	 * @param writer the writer the JSON object is to be written to
 	 * @param object the JSON object to be written
 	 *
 	 * @return the target {@code writer}
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if either {@code writer} or {@code object} is null
 	 */
 	public static <W extends Writer> W json(final W writer, final JsonObject object) {
 
@@ -121,7 +115,7 @@ public final class JSONFormat extends Format<JsonObject> {
 
 		try ( final JsonWriter jsonWriter=JsonWriters.createWriter(writer) ) {
 
-			jsonWriter.write(object);
+			jsonWriter.writeObject(object);
 
 			return writer;
 
@@ -131,147 +125,62 @@ public final class JSONFormat extends Format<JsonObject> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String id="@id";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String value="@value";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String type="@type";
-
-	/**
-	 * The JSON-LD {@value} keyword.
-	 */
-	public static final String language="@language";
-
-
-	/**
-	 * Retrieves the default JSON-LD context factory.
-	 *
-	 * @return the default JSON-LD context factory, which returns an amepty context
-	 */
-	public static Supplier<JsonObject> context() {
-		return () -> JsonValue.EMPTY_JSON_OBJECT;
-	}
-
-
-	/**
-	 * Aliases JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be aliased against
-	 *
-	 * @return a function mapping from a property name to its alias as defined in {@code context}, defaulting to the
-	 * 		property name if no alias is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	public static Function<String, String> aliaser(final JsonObject context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		final Map<String, String> aliases=new HashMap<>();
-
-		context.forEach((alias, name) -> {
-			if ( !alias.startsWith("@") && name instanceof JsonString ) {
-				aliases.put(((JsonString)name).getString(), alias);
-			}
-		});
-
-		return name -> aliases.getOrDefault(name, name);
-	}
-
-	/**
-	 * Resolves JSON-LD property names.
-	 *
-	 * @param context the JSON-LD context property names are to be resolved against
-	 *
-	 * @return a function mapping from an alias to the aliased property name as defined in {@code context}m
-	 * defaulting to
-	 * 		the alias if no property name is found
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	public static Function<String, String> resolver(final JsonObject context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		return alias -> context.getString(alias, alias);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private final ReaderFormat reader=reader();
-	private final WriterFormat writer=writer();
-
-
 	private JSONFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional JSON body representation of {@code message}, as retrieved from the reader supplied by its
-	 *        {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header
-	 *        is equal
-	 * 		to {@value #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * Decodes the JSON {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available and the {@code message} {@code Content-Type} header is either missing or  matched by
+	 * {@link #MIMEPattern}
 	 */
-	@Override public Result<JsonObject, Failure> get(final Message<?> message) {
+	@Override public Either<MessageException, JsonObject> decode(final Message<?> message) {
+		return message.header("Content-Type").filter(MIMEPattern.asPredicate().or(String::isEmpty))
 
-		return message
-				.headers("Content-Type").stream()
-				.anyMatch(type -> MIMEPattern.matcher(type).matches())
+				.map(type -> message.body(input()).flatMap(source -> {
 
-				? message
-				.body(reader)
-				.process(source -> {
+					try (
+							final InputStream input=source.get();
+							final Reader reader=new InputStreamReader(input, message.charset())
+					) {
 
-					try ( final Reader reader=source.get() ) {
+						return json(reader).fold(e -> Either.Left(status(BadRequest, e)), Either::Right);
 
-						return json(reader).error(Failure::malformed);
+					} catch ( final UnsupportedEncodingException e ) {
+
+						return Either.Left(status(BadRequest, e));
 
 					} catch ( final IOException e ) {
+
 						throw new UncheckedIOException(e);
+
 					}
 
-				})
+				}))
 
-				: Error(new Failure()
-				.status(Response.UnsupportedMediaType)
-				.notes("missing JSON body")
-		);
-
+				.orElseGet(() -> Either.Left(status(UnsupportedMediaType, "no JSON body")));
 	}
 
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the JSON {@code value} to the
-	 * writer supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
-	 * defined.
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the JSON {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final JsonObject value) {
+	@Override public <M extends Message<M>> M encode(final M message, final JsonObject value) {
 		return message
-				.header("~Content-Type", MIME)
-				.body(writer, target -> {
 
-					try ( final Writer writer=target.get() ) {
+				.header("~Content-Type", MIME)
+
+				.body(OutputFormat.output(), output -> {
+					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
 						json(writer, value);
 
 					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
 
+						throw new UncheckedIOException(e);
+
+					}
 				});
 	}
 

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl
 
-  This file is part of Metreeca/Link.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
-  of the GNU Affero General Public License as published by the Free Software Foundation,
-  either version 3 of the License, or(at your option) any later version.
+      http://www.apache.org/licenses/LICENSE-2.0
 
-  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
-  If not, see <http://www.gnu.org/licenses/>.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -23,11 +23,11 @@
 
 	<groupId>com.metreeca</groupId>
 	<artifactId>metreeca-link</artifactId>
-	<version>0.53.0</version>
+	<version>0.54.0</version>
 	<packaging>pom</packaging>
 
-	<name>Metreeca Linked Data Framework</name>
-	<description>A declarative model-driven framework for rapid linked data service development.</description>
+	<name>Metreeca REST/JSON Framework</name>
+	<description>A declarative model-driven framework for rapid REST/JSON development.</description>
 	<url>https://github.com/metreeca/link</url>
 	<inceptionYear>2013</inceptionYear>
 
@@ -86,7 +86,7 @@
 	<properties>
 
 		<java.version>1.8</java.version>
-		<maven.version>3.3</maven.version>
+		<maven.version>3.6</maven.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -99,9 +99,8 @@
 
 	<modules>
 
-		<module>metreeca-tree</module>
+		<module>metreeca-json</module>
 		<module>metreeca-rest</module>
-		<module>metreeca-gate</module>
 
 		<module>metreeca-mime</module>
 		<module>metreeca-head</module>
@@ -116,20 +115,29 @@
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-tree</artifactId>
-				<version>0.53.0</version>
+				<artifactId>metreeca-json</artifactId>
+				<version>0.54.0</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.metreeca</groupId>
+				<artifactId>metreeca-json</artifactId>
+				<version>0.54.0</version>
+				<type>test-jar</type>
+			</dependency>
+
+
+			<dependency>
+				<groupId>com.metreeca</groupId>
+				<artifactId>metreeca-rest</artifactId>
+				<version>0.54.0</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
 				<artifactId>metreeca-rest</artifactId>
-				<version>0.53.0</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-gate</artifactId>
-				<version>0.53.0</version>
+				<version>0.54.0</version>
+				<type>test-jar</type>
 			</dependency>
 
 
@@ -138,13 +146,13 @@
 			<dependency>
 				<groupId>com.metreeca</groupId>
 				<artifactId>metreeca-xml</artifactId>
-				<version>0.53.0</version>
+				<version>0.54.0</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
 				<artifactId>metreeca-rdf</artifactId>
-				<version>0.53.0</version>
+				<version>0.54.0</version>
 			</dependency>
 
 
@@ -152,31 +160,44 @@
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
-				<artifactId>metreeca-servlet</artifactId>
-				<version>0.53.0</version>
+				<artifactId>metreeca-jee</artifactId>
+				<version>0.54.0</version>
 			</dependency>
 
-			<!-- Backend Adapters -->
+			<dependency>
+				<groupId>com.metreeca</groupId>
+				<artifactId>metreeca-jse</artifactId>
+				<version>0.54.0</version>
+			</dependency>
+
+
+			<!-- Storage Adapters -->
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
 				<artifactId>metreeca-rdf4j</artifactId>
-				<version>0.53.0</version>
+				<version>0.54.0</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
 				<artifactId>metreeca-gcp</artifactId>
-				<version>0.53.0</version>
+				<version>0.54.0</version>
 			</dependency>
 
 
-			<!-- Exported BOMs -->
+			<!-- Exported dependencies -->
+
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>1.1.4</version>
+			</dependency>
 
 			<dependency> <!-- https://search.maven.org/artifact/org.eclipse.rdf4j/rdf4j-bom -->
 				<groupId>org.eclipse.rdf4j</groupId>
 				<artifactId>rdf4j-bom</artifactId>
-				<version>3.1.2</version>
+				<version>3.4.3</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -184,42 +205,58 @@
 			<dependency> <!-- https://search.maven.org/artifact/com.google.cloud/libraries-bom -->
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>4.1.1</version>
+				<version>12.0.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
 
-			<!-- Conflict Resolution -->
+			<dependency> <!-- https://search.maven.org/artifact/org.slf4j/slf4j-parent -->
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-parent</artifactId>
+				<version>1.7.30</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>20.0</version>
+
+			<!-- Test Harness -->
+
+			<dependency> <!-- https://search.maven.org/artifact/org.junit.jupiter/junit-jupiter-engine -->
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>5.7.0</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency> <!-- https://search.maven.org/artifact/org.assertj/assertj-core -->
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>3.17.2</version>
+				<scope>test</scope>
 			</dependency>
 
 		</dependencies>
 	</dependencyManagement>
 
-	<dependencies> <!-- shared testing dependencies -->
+	<dependencies>
+
+		<!-- Shared Testing Dependencies -->
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.5.2</version>
 			<scope>test</scope>
 		</dependency>
 
-		<dependency> <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.13.2</version>
 			<scope>test</scope>
 		</dependency>
 
-		<dependency> <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+		<dependency>
 			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.26</version>
+			<artifactId>slf4j-jdk14</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -285,7 +322,7 @@
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.2.0</version>
 
 				<configuration>
 
@@ -305,19 +342,6 @@
 					</archive>
 
 				</configuration>
-
-				<executions>
-					<execution>
-
-						<id>package-test-jar</id>
-						<phase>package</phase>
-
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-
-					</execution>
-				</executions>
 
 			</plugin>
 
@@ -367,13 +391,13 @@
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.2.0</version>
 
 				<configuration>
 
 					<notimestamp>true</notimestamp> <!-- avoid immaterial VCS visible changes -->
 
-					<!-- !!! replace with shared assets (https://stackoverflow.com/questions/30507476/maven-javadoc-how-to-include-centralized-resources/30668813#30668813) -->
+					<!-- !!! replace with shared assets (see https://stackoverflow.com/questions/30507476#30668813) -->
 					<!--<stylesheetfile>${maven.multiModuleProjectDirectory}/docs/assets/javadocs.css</stylesheetfile>-->
 
 					<links>
@@ -403,17 +427,13 @@
 
 							<groups> <!-- colon-separated patterns / single line -->
 								<group>
-									<title>Modelling Framework</title>
-									<packages>com.metreeca.tree*</packages>
+									<title>JSON Modelling</title>
+									<packages>com.metreeca.json*</packages>
 								</group>
 								<group>
-									<title>REST API Framework</title>
+									<title>REST Publishing</title>
 									<packages>com.metreeca.rest*</packages>
 								</group>
-								<!--<group>
-									<title>REST IAM Framework</title>
-									<packages>com.metreeca.gate*</packages>
-								</group>-->
 								<group>
 									<title>Format Adapters</title>
 									<packages>
@@ -423,19 +443,18 @@
 								<group>
 									<title>Server Adapters</title>
 									<packages>
-										com.metreeca.servlet*
+										com.metreeca.jse*:com.metreeca.jee*
 									</packages>
 								</group>
 								<group>
-									<title>Backend Adapters</title>
+									<title>Storage Adapters</title>
 									<packages>
-										com.metreeca.rdf4j*<!--:com.metreeca.gcp*-->
+										com.metreeca.rdf4j*
 									</packages>
 								</group>
 							</groups>
 
 							<excludePackageNames> <!-- colon-separated patterns / multi line -->
-								com.metreeca.gate:com.metreeca.gate.*
 								:com.metreeca.gcp:com.metreeca.gcp.*
 							</excludePackageNames>
 
@@ -451,7 +470,7 @@
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
-				<version>3.8.2</version>
+				<version>3.9.1</version>
 
 				<configuration>
 
@@ -474,7 +493,7 @@
 
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-project-info-reports-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
 
 				<reportSets>
 

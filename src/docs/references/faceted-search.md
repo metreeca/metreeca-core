@@ -1,21 +1,19 @@
 ---
-title:      REST Faceted API Search Reference
-excerpt:    REST faceted API search support and query serializations
+title:      REST Faceted Search Reference
+excerpt:    REST faceted search queries and serialization
 ---
 
-REST APIs publishing model-driven [LDP Containers](https://www.w3.org/TR/ldp/#ldpc) support engine-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
-
-<!-- document support for other query serializations -->
-
-Faceted searches return an RDF description of the query-specific result set. Standard content negotiation is supported for the RDF payload through the `Accept` HTTP request header. In the following sections, RDF structures for query responses are outlined using the [idiomatic JSON](idiomatic-json) format (`application/json`  MIME type).
+REST/JSON-LD APIs published with the Metreeca/Link framework support engine-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
 
 # Queries
 
-Linked data [queries](../javadocs/com/metreeca/tree/Query.html) define what kind of results is expected from faceted searches on [readable](../tutorials/interacting-with-ldp-apis#read-operations) linked data REST APIs.
+[Queries](../javadocs/com/metreeca/json/Query.html) define what kind of results is expected from faceted searches on [readable](../tutorials/consuming-jsonld-apis.md#read-operations) linked data REST/JSON-LD APIs.
 
-JSON query serialization extends the [idiomatic JSON](idiomatic-json) format with  query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all RDF terms appearing in filters, including [shorthands](idiomatic-json#literals) for numeric values and literals with provable datatypes.
+JSON query serialization extends the idiomatic [JSON-LD](jsonld-format.md) format with query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all values appearing in filters, including [shorthands](jsonld-format.md#literals) for numeric values and literals with provable datatypes.
 
-<p class="warning">Work in progress… specs to be improved and detailed.</p>
+!!! warning
+	Work in progress… specs to be improved and detailed.
+
 JSON-based queries are appended to container IRIs using one of the following encodings:
 
 - [URLEncoded](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURI) (e.g. `"http://example.com/container/?"+encodeURI({ <query> })`)
@@ -28,11 +26,11 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 
 ## Items Query
 
-[Items](../javadocs/com/metreeca/tree/queries/Items.html) queries return the RDF description of container items matching a set of facet filters.
+[Items](../javadocs/com/metreeca/json/queries/Items.html) queries return the description of collection items matching a set of facet filters.
 
     <items query> ::= { // all fields are optional and nullable
     
-        "<filter>": <term> | [<term>, …],
+        "<filter>": <value> | [<value>, …],
         
         ⋮
         
@@ -47,17 +45,17 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 ```
 <items response> ::= {
     "@id": "<target-iri>"
-    "contains": [<term>(, <term>)*]
+    "contains": [<value>(, <value>)*]
 }
 ```
 
 ## Terms Query
 
-[Terms](../javadocs/com/metreeca/tree/queries/Terms.html) queries return an RDF report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
+[Terms](../javadocs/com/metreeca/json/queries/Terms.html) queries return a report detailing option values and counts for a facet specified by a target property path, taking into account applied filters.
 
     <terms query> ::= {
             
-        "<filter>": <term> | [<term>, …],  // optional and nullable
+        "<filter>": <value> | [<value>, …],  // optional and nullable
         
         ⋮
     
@@ -81,12 +79,12 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 
 ## Stats Query
 
-[Stats](../javadocs/com/metreeca/tree/queries/Stats.html) queries return an RDF report detailing datatype, count and range stats for a facet specified by a target property path, taking into account applied filters.
+[Stats](../javadocs/com/metreeca/json/queries/Stats.html) queries return a report detailing datatype, count and range stats for a facet specified by a target property path, taking into account applied filters.
 
 ```
 <stats query> ::= {
     
-    "<filter>": <term> | [<term>, …],  // optional and nullable
+    "<filter>": <value> | [<value>, …],  // optional and nullable
     
     ⋮
 
@@ -103,8 +101,8 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
     // global stats 
     
     "count": <number>,
-    "min": <term>,
-    "max": <term>,
+    "min": <value>,
+    "max": <value>,
     
     // datatype-specific stats sorted by descending count
     
@@ -112,8 +110,8 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
         {
             "@id": "<datatype-iri>",
             "count": <number>,
-            "min": <term>,
-            "max": <term>
+            "min": <value>,
+            "max": <value>
         }
     ]
 }
@@ -128,27 +126,29 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 
     "^ <path>": "<datatype>", // datatype
     "@ <path>": "<class>", // class
+    "% <path>": <value> | [<value>(, <value>)*], // range
+
+
+    "> <path>": <value>, // minExclusive
+    "< <path>: <value>, // maxExclusive
+    ">= <path>": <value>, // minInclusive
+    "<= <path>": <value>, // maxInclusive
     
-    "> <path>": <term>, // minExclusive
-    "< <path>: <term>, // maxExclusive
-    ">= <path>": <term>, // minInclusive
-    "<= <path>": <term>, // maxInclusive
-    
-    "$> <path>": <term>, // minLength
-    "$< <path>": <term>, // maxLength
+    "$> <path>": <value>, // minLength
+    "$< <path>": <value>, // maxLength
     
     "* <path>": "pattern", // pattern (regular expression matching)
     "~ <path>": "keywords", // like (stemmed word search)
+    "' <path>": "stem", // stem (prefix search)
     
     "#> <path>": <integer>, // minCount
     "#< <path>": <integer>, // maxCount
     
-    "% <path>": <term> | [<term>(, <term>)*], // in
-    "! <path>": <term> | [<term>(, <term>)*], // all
-    "? <path>": <term> | [<term>(, <term>)*], // any
+    "! <path>": <value> | [<value>(, <value>)*], // all
+    "? <path>": <value> | [<value>(, <value>)*], // any
         
-    "<path>": <term>, //  shorthand for "? <path": <term>
-    "<path>": [<term>(, <term>)*] // shorthand for "? <path>": [<term>(, <term>)*]
+    "<path>": <value>, //  shorthand for "? <path": <value>
+    "<path>": [<value>(, <value>)*] // shorthand for "? <path>": [<value>(, <value>)*]
     
 }
 ```
@@ -156,8 +156,5 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 ## Property Paths
 
 ```
-<path> ::= (<step> ('/' <step>)*)?
-         | (<step> ('.' <step>)*)?
-         
-<step> ::= <<iri>> | ^<<iri>> | "<alias>" # whitespace around steps ignored
+<path> ::= (<alias> ('.' <alias>)*)?
 ```

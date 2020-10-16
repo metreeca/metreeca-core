@@ -1,29 +1,29 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import javax.json.Json;
+import java.util.*;
 import java.util.function.Function;
 
-import static com.metreeca.tree.Trace.trace;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.UnprocessableEntity;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
@@ -31,29 +31,41 @@ import static java.util.stream.Collectors.toList;
 /**
  * Validating preprocessor.
  *
- * <p>Applies custom validation {@linkplain #Validator(Collection) rules} to incoming requests.</p>
+ * <p>Applies custom validation {@linkplain #validator(Function[]) rules} to incoming requests.</p>
  */
 public final class Validator implements Wrapper {
 
-	private final Collection<Function<Request, Collection<String>>> rules;
-
-
-	@SafeVarargs public Validator(final Function<Request, Collection<String>>... rules) {
-		this(asList(rules));
+	/**
+	 * Creates a validating preprocessor.
+	 *
+	 * <p>Validation rules handle a target request and must return a non-null but possibly empty collection of
+	 * validation issues; if the collection is not empty, the request fails with a {@link Response#UnprocessableEntity}
+	 * status code; otherwise, the request is routed to the wrapped handler.</p>
+	 *
+	 * @param rules the custom validation rules to be applied to incoming requests
+	 *
+	 * @return a new validator
+	 *
+	 * @throws NullPointerException if {@code rules} is null or contains null values
+	 */
+	@SafeVarargs public static Validator validator(final Function<Request, Collection<String>>... rules) {
+		return new Validator(asList(rules));
 	}
 
 	/**
 	 * Creates a validating preprocessor.
 	 *
-	 * <p>Validation rules are handled a target request and must return a non-null but possibly
-	 * empty collection of validation issues; if the collection is not empty, the request fails with a {@link
-	 * Response#UnprocessableEntity} status code; otherwise, the request is routed to the wrapped handler.</p>
+	 * <p>Validation rules handle a target request and must return a non-null but possibly empty collection of
+	 * validation issues; if the collection is not empty, the request fails with a
+	 * {@link Response#UnprocessableEntity} status code; otherwise, the request is routed to the wrapped handler.</p>
 	 *
 	 * @param rules the custom validation rules to be applied to incoming requests
 	 *
+	 * @return a new validator
+	 *
 	 * @throws NullPointerException if {@code rules} is null or contains null values
 	 */
-	public Validator(final Collection<Function<Request, Collection<String>>> rules) {
+	public static Validator validator(final Collection<Function<Request, Collection<String>>> rules) {
 
 		if ( rules == null ) {
 			throw new NullPointerException("null rules");
@@ -63,6 +75,16 @@ public final class Validator implements Wrapper {
 			throw new NullPointerException("null rule");
 		}
 
+		return new Validator(rules);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Collection<Function<Request, Collection<String>>> rules;
+
+
+	private Validator(final Collection<Function<Request, Collection<String>>> rules) {
 		this.rules=new LinkedHashSet<>(rules);
 	}
 
@@ -70,24 +92,23 @@ public final class Validator implements Wrapper {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> {
+		return request -> Optional
 
-			final Collection<String> issues=rules.stream()
-					.flatMap(rule -> rule.apply(request).stream())
-					.collect(toList());
+				.of(rules.stream()
+						.flatMap(rule -> rule.apply(request).stream())
+						.collect(toList())
+				)
 
-			return issues.isEmpty() ? handler.handle(request) : request.reply(new Failure()
+				.filter(issues -> !issues.isEmpty())
 
-					.status(Response.UnprocessableEntity)
-					.error(Failure.DataInvalid)
-					.trace(trace(issues.stream()
-							.map(issue -> trace(issue))
-							.collect(toList())
-					))
+				.map(issues -> Json.createObjectBuilder()
+						.add("", Json.createArrayBuilder(issues)) // !!! align with JSON validator format
+						.build()
+				)
 
-			);
+				.map(details -> request.reply(status(UnprocessableEntity, details)))
 
-		};
+				.orElseGet(() -> handler.handle(request));
 	}
 
 }

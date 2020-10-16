@@ -1,44 +1,35 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.rest.Message;
-import com.metreeca.rest.MessageAssert;
-import com.metreeca.rest.MessageMock;
+import com.metreeca.rest.*;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.Map.Entry;
 
-import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.TextFormat.text;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
 final class MultipartParserTest {
@@ -47,7 +38,7 @@ final class MultipartParserTest {
 		return new ByteArrayInputStream(content.replace("\n", "\r\n").getBytes(UTF_8));
 	}
 
-	private Collection<Message<?>> parts(final String content) throws IOException, ParseException {
+	private Collection<Message<?>> parts(final String content) throws IOException {
 
 		final Map<String, Message<?>> parts=new LinkedHashMap<>();
 
@@ -59,9 +50,9 @@ final class MultipartParserTest {
 					mapping(Entry::getValue, toList())
 			));
 
-			parts.put("part"+parts.size(), new MessageMock()
+			parts.put("part"+parts.size(), new Request()
 					.headers(map)
-					.body(input(), () -> body)
+					.body(InputFormat.input(), () -> body)
 			);
 
 		}).parse();
@@ -72,60 +63,60 @@ final class MultipartParserTest {
 
 	@Nested final class Splitting {
 
-		private List<String> parts(final String content) throws IOException, ParseException {
+		private List<String> parts(final String content) throws IOException {
 			return MultipartParserTest.this.parts(content).stream()
-					.map(message -> message.body(text()).value().orElse(""))
+					.map(message -> message.body(TextFormat.text()).fold(e -> "", identity()))
 					.collect(toList());
 		}
 
-		@Test void testIgnoreFrame() throws IOException, ParseException {
+		@Test void testIgnoreFrame() throws IOException {
 
-			assertThat(parts("")).isEmpty();
+			Assertions.assertThat(parts("")).isEmpty();
 
-			assertThat(parts("preamble\n--boundary--")).isEmpty();
-			assertThat(parts("--boundary--\nepilogue")).isEmpty();
+			Assertions.assertThat(parts("preamble\n--boundary--")).isEmpty();
+			Assertions.assertThat(parts("--boundary--\nepilogue")).isEmpty();
 
 		}
 
-		@Test void testSplitParts() throws IOException, ParseException {
+		@Test void testSplitParts() throws IOException {
 
-			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
+			Assertions.assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("canonical")
 					.containsExactly("content");
 
-			assertThat(parts("--boundary\n\ncontent\n\n\n--boundary--"))
+			Assertions.assertThat(parts("--boundary\n\ncontent\n\n\n--boundary--"))
 					.as("trailing newlines")
 					.containsExactly("content\r\n\r\n");
 
-			assertThat(parts("--boundary\n\ncontent"))
+			Assertions.assertThat(parts("--boundary\n\ncontent"))
 					.as("lenient missing closing boundary")
 					.containsExactly("content");
 
-			assertThat(parts("--boundary\n\none\n--boundary\n\ntwo\n--boundary--"))
+			Assertions.assertThat(parts("--boundary\n\none\n--boundary\n\ntwo\n--boundary--"))
 					.as("multiple parts")
 					.containsExactly("one", "two");
 
 		}
 
-		@Test void testIgnorePreamble() throws IOException, ParseException {
+		@Test void testIgnorePreamble() throws IOException {
 
-			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
+			Assertions.assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
 					.containsExactly("content");
 
-			assertThat(parts("preamble\n--boundary\n\ncontent\n--boundary--"))
+			Assertions.assertThat(parts("preamble\n--boundary\n\ncontent\n--boundary--"))
 					.as("ignored")
 					.containsExactly("content");
 
 		}
 
-		@Test void testIgnoreEpilogue() throws IOException, ParseException {
+		@Test void testIgnoreEpilogue() throws IOException {
 
-			assertThat(parts("--boundary\n\ncontent\n--boundary--"))
+			Assertions.assertThat(parts("--boundary\n\ncontent\n--boundary--"))
 					.as("missing")
 					.containsExactly("content");
 
-			assertThat(parts("--boundary\n\ncontent\n--boundary--\n trailing\ngarbage"))
+			Assertions.assertThat(parts("--boundary\n\ncontent\n--boundary--\n trailing\ngarbage"))
 					.as("ignored")
 					.containsExactly("content");
 
@@ -135,27 +126,27 @@ final class MultipartParserTest {
 
 	@Nested final class Headers {
 
-		@Test void testParseHeaders() throws IOException, ParseException {
-			assertThat(parts("--boundary\nsingle: value\nmultiple: one\nmultiple: two\n\ncontent"))
+		@Test void testParseHeaders() throws IOException {
+			Assertions.assertThat(parts("--boundary\nsingle: value\nmultiple: one\nmultiple: two\n\ncontent"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> MessageAssert.assertThat(message)
 							.hasHeaders("single", "value")
 							.hasHeaders("multiple", "one", "two")
-							.hasBody(text(), text -> assertThat(text).isEqualTo("content"))
+							.hasBody(TextFormat.text(), text -> assertThat(text).isEqualTo("content"))
 					);
 		}
 
-		@Test void testHandleEmptyHeaders() throws IOException, ParseException {
-			assertThat(parts("--boundary\nempty:\n\ncontent"))
+		@Test void testHandleEmptyHeaders() throws IOException {
+			Assertions.assertThat(parts("--boundary\nempty:\n\ncontent"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> MessageAssert.assertThat(message)
 							.hasHeaders("empty")
-							.hasBody(text(), text -> assertThat(text).isEqualTo("content"))
+							.hasBody(TextFormat.text(), text -> assertThat(text).isEqualTo("content"))
 					);
 		}
 
-		@Test void testHandleEOFInHeaders() throws IOException, ParseException {
-			assertThat(parts("--boundary\nsingle: value"))
+		@Test void testHandleEOFInHeaders() throws IOException {
+			Assertions.assertThat(parts("--boundary\nsingle: value"))
 					.isNotEmpty()
 					.hasOnlyOneElementSatisfying(message -> MessageAssert.assertThat(message)
 							.hasHeaders("single", "value")
@@ -164,15 +155,15 @@ final class MultipartParserTest {
 
 		@Test void testRejectMalformedHeaders() {
 
-			assertThatExceptionOfType(ParseException.class)
+			Assertions.assertThatExceptionOfType(MessageException.class)
 					.as("spaces before colon")
 					.isThrownBy(() -> parts("--boundary\nheader : value\n\ncontent"));
 
-			assertThatExceptionOfType(ParseException.class)
+			Assertions.assertThatExceptionOfType(MessageException.class)
 					.as("malformed name")
 					.isThrownBy(() -> parts("--boundary\nhea der: value\n\ncontent"));
 
-			assertThatExceptionOfType(ParseException.class)
+			Assertions.assertThatExceptionOfType(MessageException.class)
 					.as("malformed value")
 					.isThrownBy(() -> parts("--boundary\nhea der: val\rue\n\ncontent"));
 
@@ -189,7 +180,7 @@ final class MultipartParserTest {
 
 		@Test void testEnforceBodySizeLimits() {
 
-			assertThatExceptionOfType(ParseException.class)
+			Assertions.assertThatExceptionOfType(MessageException.class)
 					.as("body size exceeded")
 					.isThrownBy(() -> parser(5, 25,
 							"--boundary\n\none\n--boundary\n\ntwo\n--boundary--"
@@ -199,7 +190,7 @@ final class MultipartParserTest {
 
 		@Test void testEnforcePartSizeLimits() {
 
-			assertThatExceptionOfType(ParseException.class)
+			Assertions.assertThatExceptionOfType(MessageException.class)
 					.as("parts size exceeded")
 					.isThrownBy(() -> parser(10, 1000,
 							"--boundary\n\nshort\n--boundary\n\nlong content\n--boundary--"

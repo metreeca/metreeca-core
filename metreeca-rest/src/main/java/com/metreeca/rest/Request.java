@@ -1,33 +1,28 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest;
 
-import com.metreeca.tree.Query;
-import com.metreeca.tree.Shape;
-
-import javax.json.JsonException;
-import javax.json.JsonValue;
-import java.net.URI;
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 
@@ -52,10 +47,55 @@ public final class Request extends Message<Request> {
 			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
+	private static final Pattern SchemePattern=Pattern.compile("[a-zA-Z][-+.a-zA-Z0-9]*:");
+	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+
+
+	public static Map<String, List<String>> search(final String query) {
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
+
+		final Map<String, List<String>> parameters=new LinkedHashMap<>();
+
+		final int length=query.length();
+
+		for (int head=0, tail; head < length; head=tail+1) {
+			try {
+
+				final int equal=query.indexOf('=', head);
+				final int ampersand=query.indexOf('&', head);
+
+				tail=(ampersand >= 0) ? ampersand : length;
+
+				final boolean split=equal >= 0 && equal < tail;
+
+				final String label=URLDecoder.decode(query.substring(head, split ? equal : tail), "UTF-8");
+				final String value=URLDecoder.decode(query.substring(split ? equal+1 : tail, tail), "UTF-8");
+
+				parameters.compute(label, (name, values) -> {
+
+					final List<String> strings=(values != null) ? values : new ArrayList<>();
+
+					strings.add(value);
+
+					return strings;
+
+				});
+
+			} catch ( final UnsupportedEncodingException unexpected ) {
+				throw new UncheckedIOException(unexpected);
+			}
+		}
+
+		return parameters;
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Optional<Object> user=Optional.empty();
+	private Object user=null;
 	private Set<Object> roles=emptySet();
 
 	private String method="";
@@ -72,7 +112,7 @@ public final class Request extends Message<Request> {
 	 * Retrieves the focus item IRI of this request.
 	 *
 	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
-	 * 		this request
+	 * this request
 	 */
 	@Override public String item() {
 		return base+path.substring(1);
@@ -93,27 +133,9 @@ public final class Request extends Message<Request> {
 	/**
 	 * Creates a response for this request.
 	 *
-	 * @param status the status code for the response
-	 *
-	 * @return a new lazy response {@linkplain Response#request() associated} to this request
-	 *
-	 * @throws IllegalArgumentException if {@code response } is less than 100 or greater than 599
-	 */
-	public Future<Response> reply(final int status) {
-
-		if ( status < 100 || status > 599 ) { // 0 used internally
-			throw new IllegalArgumentException("illegal status code ["+status+"]");
-		}
-
-		return reply(response -> response.status(status));
-	}
-
-	/**
-	 * Creates a response for this request.
-	 *
 	 * @param mapper the mapping function  used to initialize the new response; must return a non-null value
 	 *
-	 * @return a new lazy response {@linkplain Response#request() associated} to this request
+	 * @return a new lazy response for this request
 	 *
 	 * @throws NullPointerException if {@code mapper} is null or return a null value
 	 */
@@ -133,7 +155,7 @@ public final class Request extends Message<Request> {
 	 * Checks if this request is safe.
 	 *
 	 * @return {@code true} if this request is <a href="https://tools.ietf.org/html/rfc7231#section-4.2.1">safe</a> ,
-	 * 		that is if it's not expected to cause any state change on the origin server ; {@code false} otherwise
+	 * that is if it's not expected to cause any state change on the origin server ; {@code false} otherwise
 	 */
 	public boolean safe() {
 		return Safe.contains(method);
@@ -144,11 +166,25 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return {@code true} if the {@link #path()} of this request includes a trailing slash; {@code false} otherwise
 	 *
-	 * @see <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
-	 * 		Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
+	 * @see
+	 * <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
+	 * Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
 	 */
 	public boolean collection() {
 		return path.endsWith("/");
+	}
+
+	/**
+	 * Checks if request is interactive.
+	 *
+	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #GET} and the {@code Accept}
+	 * header includes a MIME type usually associated with an interactive browser-managed HTTP request
+	 * (e.g. {@code text /html}
+	 */
+	public boolean interactive() {
+		return method.equals(GET) && headers("content-type")
+				.stream()
+				.anyMatch(value -> HTMLPattern.matcher(value).find());
 	}
 
 
@@ -158,7 +194,7 @@ public final class Request extends Message<Request> {
 	 * @param roles the target set if roles to be checked
 	 *
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
-	 * 		roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
+	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
 	public boolean role(final Object... roles) {
 		return role(asList(roles));
@@ -170,7 +206,7 @@ public final class Request extends Message<Request> {
 	 * @param roles the target set if roles to be checked
 	 *
 	 * @return {@code true} if this request is performed by a {@linkplain #user() user} in one of the given {@code
-	 * 		roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
+	 * roles}, that is if {@code roles} and  {@linkplain #roles() request roles} are not disjoint
 	 */
 	public boolean role(final Collection<Object> roles) {
 
@@ -182,15 +218,15 @@ public final class Request extends Message<Request> {
 	}
 
 
-	//// Actor /////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Actor ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the identifier of the request user.
 	 *
 	 * @return an optional identifier for the user performing this request or the empty optional if no user is
-	 * 		authenticated
+	 * authenticated
 	 */
-	public Optional<Object> user() { return user; }
+	public Optional<Object> user() { return Optional.ofNullable(user); }
 
 	/**
 	 * Configures the identifier of the request user.
@@ -201,7 +237,7 @@ public final class Request extends Message<Request> {
 	 */
 	public Request user(final Object user) {
 
-		this.user=Optional.ofNullable(user);
+		this.user=user;
 
 		return this;
 	}
@@ -217,8 +253,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of values uniquely identifying the roles {@linkplain #roles(Object...) assigned} to the
-	 *              request {@linkplain #user() user}
+	 * @param roles a collection of values uniquely identifying the roles assigned to the request {@linkplain #user()
+	 *              user}
 	 *
 	 * @return this request
 	 *
@@ -231,8 +267,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the roles attributed to the request user.
 	 *
-	 * @param roles a collection of IRIs uniquely identifying the roles {@linkplain #roles(Collection) assigned} to the
-	 *              request {@linkplain #user() user}
+	 * @param roles a collection of IRIs uniquely identifying the roles assigned to the request {@linkplain #user()
+	 *              user}
 	 *
 	 * @return this request
 	 *
@@ -250,7 +286,7 @@ public final class Request extends Message<Request> {
 	}
 
 
-	//// Action ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Action ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the HTTP method of this request.
@@ -286,7 +322,7 @@ public final class Request extends Message<Request> {
 	 * Retrieves the base IRI of this request.
 	 *
 	 * @return the base IRI of this request, that is the base IRI if the linked data server handling the request;
-	 * 		includes a trailing slash
+	 * includes a trailing slash
 	 */
 	public String base() {
 		return base;
@@ -300,7 +336,8 @@ public final class Request extends Message<Request> {
 	 * @return this request
 	 *
 	 * @throws NullPointerException     if {@code base} is null
-	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing slash
+	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing
+	 *                                  slash
 	 */
 	public Request base(final String base) {
 
@@ -308,7 +345,7 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null base");
 		}
 
-		if ( !URI.create(base).isAbsolute() ) {
+		if ( !SchemePattern.matcher(base).lookingAt() ) {
 			throw new IllegalArgumentException("not an absolute base IRI");
 		}
 
@@ -326,7 +363,7 @@ public final class Request extends Message<Request> {
 	 * Retrieves the resource path of this request.
 	 *
 	 * @return the resource path of this request, that is the absolute server path of the linked data resources this
-	 * 		request refers to; includes a leading slash
+	 * request refers to; includes a leading slash
 	 */
 	public String path() {
 		return path;
@@ -335,8 +372,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the resource path of this request.
 	 *
-	 * @param path the resource path of this request, that is the absolute server path of the linked data resources this
-	 *             request refers to
+	 * @param path the resource path of this request, that is the absolute server path of the linked data resources
+	 *             this request refers to
 	 *
 	 * @return this request
 	 *
@@ -360,66 +397,18 @@ public final class Request extends Message<Request> {
 
 
 	/**
-	 * Retrieves the query component of this request.
+	 * Retrieves the query of this request.
 	 *
-	 * @return the query component this request
+	 * @return the query this request
 	 */
 	public String query() {
 		return query;
 	}
 
 	/**
-	 * Retrieves the shape-based query of this request.
+	 * Configures the query of this request.
 	 *
-	 * @param format the format supporting {@linkplain Format#path(String, Shape, String) path}/{@linkplain
-	 *               Format#value(String, Shape, JsonValue)  value} parsing
-	 * @param shape  the base shape for the query
-	 *
-	 * @return a value providing access to the combined query merging constraints from {@code shape} and the request
-	 *        {@linkplain #query() query} string, if successfully parsed using {@code format} parsing methods; an error
-	 * 		providing access to the parsing failure, otherwise
-	 *
-	 * @throws NullPointerException if any argument is null
-	 */
-	public Result<Query, Failure> query(final Format<?> format, final Shape shape) {
-
-		if ( format == null ) {
-			throw new NullPointerException("null format");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		try {
-
-			return Value(new QueryParser(base, shape, format).parse(query()));
-
-		} catch ( final JsonException e ) {
-
-			return Error(new Failure()
-					.status(Response.BadRequest)
-					.error("query-malformed")
-					.notes(e.getMessage())
-					.cause(e)
-			);
-
-		} catch ( final NoSuchElementException e ) {
-
-			return Error(new Failure()
-					.status(Response.UnprocessableEntity)
-					.error("query-illegal")
-					.notes(e.getMessage())
-					.cause(e)
-			);
-
-		}
-	}
-
-	/**
-	 * Configures the query component of this request.
-	 *
-	 * @param query the query component of this request
+	 * @param query the query of this request
 	 *
 	 * @return this request
 	 *
@@ -437,14 +426,14 @@ public final class Request extends Message<Request> {
 	}
 
 
-	//// Parameters ////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Parameters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves request query parameters.
 	 *
 	 * @return an immutable and possibly empty map from query parameters names to collections of values
 	 */
-	public Map<String, Collection<String>> parameters() {
+	public Map<String, List<String>> parameters() {
 		return unmodifiableMap(parameters);
 	}
 
@@ -491,7 +480,7 @@ public final class Request extends Message<Request> {
 	 * @param name the name of the query parameter whose value is to be retrieved
 	 *
 	 * @return an optional value containing the first value among those returned by {@link #parameters(String)}, if one
-	 * 		is present; an empty optional otherwise
+	 * is present; an empty optional otherwise
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */

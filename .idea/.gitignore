@@ -1,0 +1,11 @@
+# IntelliJ IDEA (see https://intellij-support.jetbrains.com/hc/en-us/articles/206544839)
+
+/workspace.xml
+/modules.xml
+/tasks.xml
+/misc.xml
+
+/libraries/
+/dictionaries/
+/shelf/
+/httpRequests/

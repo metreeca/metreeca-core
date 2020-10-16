@@ -1,50 +1,44 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
+
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.AbstractMap;
-import java.util.Arrays;
+import java.io.*;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.MessageAssert.assertThat;
-import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.Xtream.entry;
+import static com.metreeca.rest.Xtream.map;
 import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
 import static com.metreeca.rest.formats.TextFormat.text;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.toMap;
+import static java.util.function.Function.identity;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 final class MultipartFormatTest {
+
 
 	@Nested final class Input {
 
@@ -85,13 +79,13 @@ final class MultipartFormatTest {
 
 					.header("Content-Type", type)
 
-					.body(input(), content())
+					.body(InputFormat.input(), content())
 
 					.body(multipart(250, 1000))
 
 					.fold(
 
-							parts -> {
+							error -> Assertions.fail("unexpected failure {"+error+"}"), parts -> {
 
 								assertThat(parts.size())
 										.isEqualTo(2);
@@ -99,19 +93,17 @@ final class MultipartFormatTest {
 								assertThat(parts.keySet())
 										.containsExactly("main", "file");
 
-								assertThat(parts.get("file"))
+								MessageAssert.assertThat(parts.get("file"))
 										.as("part available by name")
 										.hasItem("file:example.txt")
 										.hasHeader("Content-Disposition")
-										.hasBody(reader(), source -> assertThat(Codecs.text(source.get()))
+										.hasBody(text(), text -> assertThat(text)
 												.isEqualTo("text")
 										);
 
 								return this;
 
-							},
-
-							error -> fail("unexpected failure {"+error+"}")
+							}
 
 					);
 		}
@@ -120,19 +112,17 @@ final class MultipartFormatTest {
 
 			final Request request=new Request()
 					.header("Content-Type", type)
-					.body(input(), content());
+					.body(InputFormat.input(), content());
 
 			final Map<String, Message<?>> one=request
 					.body(multipart(250, 1000))
-					.value()
-					.orElseGet(() -> fail("missing multipart body"));
+					.fold(e -> Assertions.fail("missing multipart body"), identity());
 
 			final Map<String, Message<?>> two=request
 					.body(multipart())
-					.value()
-					.orElseGet(() -> fail("missing multipart body"));
+					.fold(e -> Assertions.fail("missing multipart body"), identity());
 
-			assertThat(one)
+			Assertions.assertThat(one)
 					.as("idempotent")
 					.isSameAs(two);
 		}
@@ -142,13 +132,12 @@ final class MultipartFormatTest {
 			new Request()
 
 					.header("Content-Type", "plain/test")
-					.body(input(), content())
+					.body(InputFormat.input(), content())
 
 					.body(multipart())
 
 					.fold(
-							parts -> fail("unexpected multipart body"),
-							Assertions::assertThat
+							Assertions::assertThat, parts -> Assertions.fail("unexpected multipart body")
 					);
 		}
 
@@ -156,30 +145,29 @@ final class MultipartFormatTest {
 			new Request()
 
 					.header("Content-Type", "multipart/data")
-					.body(input(), content())
+					.body(InputFormat.input(), content())
 
 					.body(multipart())
 
 					.fold(
 
-							parts -> {
-								fail("unexpected multipart body");
-
-
-								return this;
-
-							},
-
 							error -> {
 
-								new Request().reply(error).accept(response -> assertThat(response)
+								new Request().reply(error).accept(response -> ResponseAssert.assertThat(response)
 										.as("missing boundary parameter")
 										.hasStatus(Response.BadRequest)
 								);
 
 
 								return this;
+							}, parts -> {
+								Assertions.fail("unexpected multipart body");
+
+
+								return this;
+
 							}
+
 					);
 		}
 
@@ -187,22 +175,13 @@ final class MultipartFormatTest {
 
 	@Nested final class Output {
 
-		@SafeVarargs private final Map<String, Message<?>> map(final Map.Entry<String, Message<?>>... entries) {
-			return Arrays.stream(entries).collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-		}
-
-		private Map.Entry<String, Message<?>> entry(final String item, final Message<?> part) {
-			return new AbstractMap.SimpleImmutableEntry<>(item, part);
-		}
-
-
 		@Test void testGenerateRandomBoundary() {
 			new Request().reply(response -> response
 
 					.status(Response.OK)
 					.body(multipart(), map(
-							entry("one", response.link("one").body(text(), "one")),
-							entry("two", response.link("two").body(text(), "two"))
+							entry("one", response.part("one").body(text(), "one")),
+							entry("two", response.part("two").body(text(), "two"))
 					))
 
 			).accept(response -> MessageAssert.assertThat(response)
@@ -211,7 +190,6 @@ final class MultipartFormatTest {
 							r -> r.header("Content-Type").filter(s -> s.contains("; boundary=")).isPresent(),
 							"multipart boundary set"
 					))
-
 
 			);
 		}
@@ -233,11 +211,11 @@ final class MultipartFormatTest {
 
 							.hasBody(output(), target -> {
 
-								final StringWriter writer=new StringWriter();
+								final ByteArrayOutputStream output=new ByteArrayOutputStream();
 
-								target.accept(() -> Codecs.output(writer));
+								target.accept(output);
 
-								assertThat(writer.toString())
+								assertThat(new String(output.toByteArray(), UTF_8))
 										.contains("--1234567890--");
 
 							})

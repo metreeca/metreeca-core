@@ -1,115 +1,116 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.actions;
 
+import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.services.Logger;
+import com.metreeca.rest.assets.Logger;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Logger.logger;
 import static java.lang.String.format;
 
 
 /**
  * Request generation.
  *
- * <p>Maps textual resource URLs to optional resource requests.</p>
+ * <p>Maps textual resource URIs to optional resource requests.</p>
  */
 public final class Query implements Function<String, Optional<Request>> {
 
-    private static final Pattern ItemPattern=Pattern.compile("(?<base>https?+://[^/]*)/?(?<path>.*)");
+	private final Function<Request, Request> customizer;
+
+	private final Logger logger=Context.asset(Logger.logger());
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Creates a new default request generator.
+	 */
+	public Query() {
+		this(request -> request);
+	}
 
-    private final Function<Request, Request> customizer;
+	/**
+	 * Creates a new customized request generator.
+	 *
+	 * @param customizer the request customizer
+	 *
+	 * @throws NullPointerException if {@code customizer} is null
+	 */
+	public Query(final Function<Request, Request> customizer) {
 
+		if ( customizer == null ) {
+			throw new NullPointerException("null customizer");
+		}
 
-    private final Logger logger=service(logger());
-
-
-    /**
-     * Creates a new default request generator.
-     */
-    public Query() {
-        this(request -> request);
-    }
-
-    /**
-     * Creates a new customized request generator.
-     *
-     * @param customizer the request customizer
-     *
-     * @throws NullPointerException if {@code customizer} is null
-     */
-    public Query(final Function<Request, Request> customizer) {
-
-        if ( customizer == null ) {
-            throw new NullPointerException("null customizer");
-        }
-
-        this.customizer=customizer;
-    }
+		this.customizer=customizer;
+	}
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Generates a resource request
-     *
-     * @param url the textual URL of the target resource
-     *
-     * @return a optional GET or possibly customized request for the given resource {@code url}, if it was not null
-     * and successfully parsed into a {@linkplain Request#base() base} and a {@linkplain Request#path() path}; an
-     * empty optional, otherwise, logging an error to the {@linkplain Logger#logger() shared event logger}
-     */
-    @Override public Optional<Request> apply(final String url) {
-        return Optional.ofNullable(url)
+	/**
+	 * Generates a resource request
+	 *
+	 * @param resource the textual URI of the target resource
+	 *
+	 * @return a optional GET or possibly customized request for the given resource {@code resource}, if it was not
+	 * null and successfully parsed into absolute {@linkplain Request#base() base}, {@linkplain Request#path() path}
+	 * and {@linkplain Request#query() query} components; an empty optional, otherwise, logging an error to the
+	 * {@linkplain Logger#logger() shared event logger}
+	 */
+	@Override public Optional<Request> apply(final String resource) {
+		return Optional.ofNullable(resource)
 
-                .map(ItemPattern::matcher)
+				.map(uri -> {
+					try {
 
-                .filter(matcher -> {
+						return new URI(uri).normalize();
 
-                    final boolean matches=matcher.matches();
+					} catch ( final URISyntaxException e ) {
 
-                    if ( !matches ) {
+						logger.error(this, format("unable to parse resource URI <%s>", uri));
 
-                        logger.error(this, format("unable to parse resource URL <%s>", url));
+						return null;
 
-                    }
+					}
+				})
 
-                    return matches;
-                })
+				.filter(URI::isAbsolute)
 
-                .map(matcher -> new Request()
+				.map(uri -> new Request()
 
-                        .method(Request.GET)
+						.method(Request.GET)
 
-                        .base(matcher.group("base")+'/')
-                        .path('/'+matcher.group("path"))
+						.base(uri.getScheme()+":"+Optional
+								.ofNullable(uri.getRawAuthority())
+								.map(s -> "//"+s+"/")
+								.orElse("/")
+						)
 
-                )
+						.path(Optional.ofNullable(uri.getRawPath()).orElse("/"))
+						.query(Optional.ofNullable(uri.getRawQuery()).orElse(""))
 
-                .map(customizer);
-    }
+				)
+
+				.map(customizer);
+	}
 
 }

@@ -1,23 +1,24 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.*;
+
+import static java.util.function.Function.identity;
 
 
 /**
@@ -28,24 +29,8 @@ import com.metreeca.rest.*;
  */
 public abstract class Delegator implements Handler {
 
-	private Handler delegate;
+	private Handler delegate=request -> request.reply(identity());
 
-
-	/**
-	 * Retrieves the delegate handler.
-	 *
-	 * @return the handler request processing is delegated to
-	 *
-	 * @throws IllegalStateException if the delegate handler wasn't {@linkplain #delegate(Handler) configured}
-	 */
-	protected Handler delegate() {
-
-		if ( delegate == null ) {
-			throw new IllegalStateException("undefined delegate");
-		}
-
-		return delegate;
-	}
 
 	/**
 	 * Configures the delegate handler.
@@ -55,16 +40,11 @@ public abstract class Delegator implements Handler {
 	 * @return this delegator
 	 *
 	 * @throws NullPointerException     if {@code delegate} is null
-	 * @throws IllegalArgumentException if {@code delegate} is equal to this handler
 	 */
 	protected Delegator delegate(final Handler delegate) {
 
 		if ( delegate == null ) {
 			throw new NullPointerException("null delegate");
-		}
-
-		if ( delegate.equals(this) ) {
-			throw new IllegalArgumentException("self delegate");
 		}
 
 		this.delegate=delegate;
@@ -75,12 +55,8 @@ public abstract class Delegator implements Handler {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Handler with(final Wrapper wrapper) {
-		return delegate().with(wrapper);
-	}
-
 	@Override public Future<Response> handle(final Request request) {
-		return delegate().handle(request);
+		return delegate.handle(request);
 	}
 
 }

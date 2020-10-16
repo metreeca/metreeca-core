@@ -1,37 +1,35 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest;
 
 import com.metreeca.rest.formats.MultipartFormat;
-import com.metreeca.tree.Shape;
-import com.metreeca.tree.shapes.And;
 
 import java.net.URI;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Result.Value;
-import static com.metreeca.tree.shapes.And.and;
+import static java.lang.Float.parseFloat;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -42,23 +40,62 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>Handles shared state/behaviour for HTTP messages and message parts.</p>
  *
- * <p>Messages are associated with possibly multiple {@linkplain #body(Format) body} representations managed by message
- * body {@linkplain Format formats}.</p>
- *
  * @param <T> the self-bounded message type supporting fluent setters
  */
 @SuppressWarnings("unchecked")
 public abstract class Message<T extends Message<T>> {
 
-	private static final Pattern CharsetPattern=Pattern.compile(";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b");
-	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+	private static final Pattern CharsetPattern=Pattern.compile(
+			";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b"
+	);
+
+	private static final Pattern MimePattern=Pattern.compile(
+			"((?:[-+\\w]+|\\*)/(?:[-+\\w]+|\\*))(?:\\s*;\\s*q\\s*=\\s*(\\d*(?:\\.\\d+)?))?"
+	);
+
+
+	/**
+	 * Parses a MIME type list.
+	 *
+	 * @param types the MIME type list to be parsed
+	 *
+	 * @return a list of MIME types parsed from {@code types}, sorted by descending
+	 * <a href="https://developer.mozilla.org/en-US/docs/Glossary/quality_values">quality value</a>
+	 *
+	 * @throws NullPointerException if {@code types} is null
+	 */
+	public static List<String> types(final String types) {
+
+		if ( types == null ) {
+			throw new NullPointerException("null mime types");
+		}
+
+		final List<Map.Entry<String, Float>> entries=new ArrayList<>();
+
+		final Matcher matcher=MimePattern.matcher(types);
+
+		while ( matcher.find() ) {
+
+			final String media=matcher.group(1).toLowerCase(Locale.ROOT);
+			final String quality=matcher.group(2);
+
+			try {
+				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
+			} catch ( final NumberFormatException ignored ) {
+				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, 0f));
+			}
+		}
+
+		entries.sort((x, y) -> -Float.compare(x.getValue(), y.getValue()));
+
+		return entries.stream().map(Map.Entry::getKey).collect(toList());
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Shape shape=and();
-
-	private final Map<String, Collection<String>> headers=new LinkedHashMap<>();
+	private final Map<Supplier<?>, Object> attributes=new LinkedHashMap<>();
+	private final Map<String, List<String>> headers=new LinkedHashMap<>();
 	private final Map<Format<?>, Object> bodies=new HashMap<>();
 
 
@@ -104,8 +141,51 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
-	 * Lift a message into this message.
+	 * Retrieves the charset of this message.
+	 *
+	 * <p><strong>Warning</strong> / The {@code Accept-Charset} header or the originating request is
+	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset">ignored</a>.</p>
+	 *
+	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to {@code UTF-8} if
+	 * no charset is explicitly defined
+	 */
+	public String charset() {
+		return header("Content-Type")
+
+				.map(CharsetPattern::matcher)
+				.filter(Matcher::find)
+				.map(matcher -> matcher.group("charset"))
+
+				.orElse(UTF_8.name());
+	}
+
+
+	/**
+	 * Creates a message part.
+	 *
+	 * @param item the (possibly relative)) IRI identifying the {@linkplain #item() focus item} of the new message
+	 *             part; will be resolved against the message {@linkplain #item() item} IRI
+	 *
+	 * @return a new message part with a focus item identified by {@code item} and the same {@linkplain #request()
+	 * originating request} as this message
+	 *
+	 * @throws NullPointerException     if {@code item} is null
+	 * @throws IllegalArgumentException if {@code item} is not a legal (possibly relative) IRI
+	 */
+	public Message<?> part(final String item) {
+
+		if ( item == null ) {
+			throw new NullPointerException("null item");
+		}
+
+		return new Part(URI.create(item()).resolve(item).toString(), this);
+	}
+
+	/**
+	 * Lift a message part into this message.
 	 *
 	 * <p>Mainly intended to be used inside wrappers to lift the main message part in {@linkplain MultipartFormat
 	 * multipart} requests for further downstream processing, as for instance in:</p>
@@ -118,7 +198,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 *           ... // process ancillary body parts
 	 *
-	 *           return handler.handle(request.merge(main));
+	 *           return handler.handle(request.lift(main));
 	 *
 	 *         })
 	 *
@@ -131,13 +211,13 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * )}</pre>
 	 *
-	 * @param message the source message to be merged into this message
+	 * @param message the message part to be lifted into this message
 	 *
 	 * @return this message modified as follows:
-	 * 		<ul>
-	 * 		<li>source message headers are copied to this message overriding existing values;</li>
-	 * 		<li>source message body representations are copied to this message replacing all existing values.</li>
-	 * 		</ul>
+	 * <ul>
+	 * <li>source {@code message} headers are copied to this message overriding existing matching values;</li>
+	 * <li>source {@code message} body representations are copied to this message replacing all existing values.</li>
+	 * </ul>
 	 *
 	 * @throws NullPointerException if {@code message} is null
 	 */
@@ -155,96 +235,63 @@ public abstract class Message<T extends Message<T>> {
 		return self();
 	}
 
-	/**
-	 * Creates a linked message.
-	 *
-	 * @param item the (possibly relative)) IRI identifying the {@linkplain #item() focus item} of the new linked
-	 *             message; will be resolved against the message {@linkplain #item() item} IRI
-	 *
-	 * @return a new linked message with a focus item identified by {@code item} and the same {@linkplain #request()
-	 * 		originating request} as this message
-	 *
-	 * @throws NullPointerException     if {@code item} is null
-	 * @throws IllegalArgumentException if {@code item} is not a legal (possibly relative) IRI
-	 */
-	public Message<?> link(final String item) {
 
-		if ( item == null ) {
-			throw new NullPointerException("null item");
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves a message attribute.
+	 *
+	 * @param key the key for the attribute to be retrieved; must return a non-null default value for the attribute
+	 * @param <V> the type of the attribute to be retrieved
+	 *
+	 * @return the value of message attribute associated with {@code key}
+	 *
+	 * @throws NullPointerException if {@code key} is null
+	 */
+	public <V> V attribute(final Supplier<V> key) {
+
+		if ( key == null ) {
+			throw new NullPointerException("null key");
 		}
 
-		return new Part(URI.create(item()).resolve(item).toString(), this);
+		return (V)attributes.computeIfAbsent(key, _key -> requireNonNull(_key.get(), "null key value"));
+	}
+
+	/**
+	 * Configures a message attribute.
+	 *
+	 * @param key   the key for the attribute to be retrieved; must return a non-null default value for the attribute
+	 * @param value the attribute value to be associated with {@code key}
+	 * @param <V>   the type of the attribute to be configured
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code key} or {@code value} is null
+	 */
+	public <V> T attribute(final Supplier<V> key, final V value) {
+
+		if ( key == null ) {
+			throw new NullPointerException("null key");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		attributes.put(key, value);
+
+		return self();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Tests if this message is interactive.
-	 *
-	 * @return {@code true} if an {@code Accept} or {@code Content-Type} header of this message include a MIME type
-	 * 		usually associated with an interactive browser-managed HTTP exchanges (e.g. {@code text/html}
-	 */
-	public boolean interactive() {
-		return Stream.of(headers("accept"), headers("content-type"))
-				.flatMap(Collection::stream)
-				.anyMatch(value -> HTMLPattern.matcher(value).find());
-	}
-
-	/**
-	 * Retrieves the character encoding of this message.
-	 *
-	 * @return the character encoding set in the {@code Content-Type} header of this message; empty if this message
-	 * 		doesn't include a  {@code Content-Type} header or if no character encoding is explicitly set
-	 */
-	public Optional<String> charset() {
-		return header("Content-Type")
-				.map(CharsetPattern::matcher)
-				.filter(Matcher::find)
-				.map(matcher -> matcher.group("charset"));
-	}
-
-
-	//// Shape /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves the linked data shape.
-	 *
-	 * @return the linked data shape associated to this message; defaults to an {@linkplain And#and() empty conjunction}
-	 */
-	public Shape shape() {
-		return shape;
-	}
-
-	/**
-	 * Configures the linked data shape.
-	 *
-	 * @param shape the linked data shape to be associated to this message
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if {@code shape} is null
-	 */
-	public T shape(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		this.shape=shape;
-
-		return self();
-	}
-
-
-	//// Headers ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
 	 * Retrieves message headers.
 	 *
 	 * @return an immutable and possibly empty map from header names to collections of headers values
 	 */
-	public Map<String, Collection<String>> headers() {
+	public Map<String, List<String>> headers() {
 		return unmodifiableMap(headers);
 	}
 
@@ -291,7 +338,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @param name the name of the header whose value is to be retrieved
 	 *
 	 * @return an optional value containing the first value among those returned by {@link #headers(String)}, if one is
-	 * 		present; an empty optional otherwise
+	 * present; an empty optional otherwise
 	 *
 	 * @throws NullPointerException if {@code name} is null
 	 */
@@ -308,8 +355,8 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures message header value.
 	 *
 	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
-	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
-	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header
+	 * {@code values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name  the name of the header whose value is to be configured
 	 * @param value the new value for {@code name}; empty values are ignored
@@ -318,7 +365,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @throws NullPointerException if either {@code name} or {@code value} is null
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">
-	 * 		RFC 7230 Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing - § 3.2.2. Field Order</a>
+	 * RFC 7230 Hypertext Transfer Protocol (HTTP/1.1): Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T header(final String name, final String value) {
 
@@ -341,7 +388,7 @@ public abstract class Message<T extends Message<T>> {
 	 *
 	 * @return an immutable and possibly empty collection of values
 	 */
-	public Collection<String> headers(final String name) {
+	public List<String> headers(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
@@ -349,11 +396,11 @@ public abstract class Message<T extends Message<T>> {
 
 		final String _name=normalize(name);
 
-		return unmodifiableCollection(headers.entrySet().stream()
+		return unmodifiableList(headers.entrySet().stream()
 				.filter(entry -> entry.getKey().equalsIgnoreCase(_name))
 				.map(Map.Entry::getValue)
 				.findFirst()
-				.orElseGet(Collections::emptySet)
+				.orElseGet(Collections::emptyList)
 		);
 	}
 
@@ -371,7 +418,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
 	 *                              {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * 		Message Syntax and Routing - § 3.2.2. Field Order</a>
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final String... values) {
 		return headers(name, asList(values));
@@ -381,8 +428,8 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures message header values.
 	 *
 	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
-	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
-	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header
+	 * {@code values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
@@ -392,7 +439,7 @@ public abstract class Message<T extends Message<T>> {
 	 * @throws NullPointerException if either {@code name} or {@code values} is null or if {@code values} contains a
 	 *                              {@code null} value
 	 * @see <a href="https://tools.ietf.org/html/rfc7230#section-3.2.2">RFC 7230 Hypertext Transfer Protocol (HTTP/1.1):
-	 * 		Message Syntax and Routing - § 3.2.2. Field Order</a>
+	 * Message Syntax and Routing - § 3.2.2. Field Order</a>
 	 */
 	public T headers(final String name, final Collection<String> values) {
 
@@ -409,7 +456,7 @@ public abstract class Message<T extends Message<T>> {
 		}
 
 		final String _name=normalize(name);
-		final Collection<String> _values=normalize(values);
+		final List<String> _values=normalize(values);
 
 		if ( name.startsWith("~") ) {
 
@@ -427,7 +474,7 @@ public abstract class Message<T extends Message<T>> {
 
 		} else {
 
-			headers.put(_name, unmodifiableCollection(_values));
+			headers.put(_name, unmodifiableList(_values));
 
 		}
 
@@ -435,20 +482,20 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 
-	//// Bodies ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves a body representation.
+	 * Decodes message body.
 	 *
-	 * @param format the body format managing the body representation to be retrieved
-	 * @param <V>    the type of the body representation managed by {@code body}
+	 * @param format the expected body format
+	 * @param <V>    the type of the body to be decoded
 	 *
-	 * @return a result providing access to the body representation managed by {@code body}, if one was successfully
-	 * 		retrieved from this message; a result providing access to the body processing failure, otherwise
+	 * @return either a message exception reporting a decoding issue or the message body
+	 * {@linkplain Format#decode(Message) decoded} by {@code format}
 	 *
-	 * @throws NullPointerException if {@code body} is null
+	 * @throws NullPointerException if {@code format} is null
 	 */
-	public <V> Result<V, Failure> body(final Format<V> format) {
+	public <V> Either<MessageException, V> body(final Format<V> format) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null body");
@@ -456,7 +503,7 @@ public abstract class Message<T extends Message<T>> {
 
 		final V cached=(V)bodies.get(format);
 
-		return cached != null ? Value(cached) : format.get(self()).value(value -> {
+		return cached != null ? Either.Right(cached) : format.decode(this).map(value -> {
 
 			bodies.put(format, value);
 
@@ -467,21 +514,20 @@ public abstract class Message<T extends Message<T>> {
 	}
 
 	/**
-	 * Configures a body representation.
+	 * Encodes message body.
 	 *
-	 * <p>Future calls to {@link #body(Format)} with the same body format will return the specified value, rather than
-	 * the value {@linkplain Format#get(Message) retrieved} from this message by the body format.</p>
+	 * <p>Subsequent calls to {@link #body(Format)} with the same body format will return the specified value.</p>
 	 *
-	 * @param format the body format managing the body representation to be configured
-	 * @param value  the body representation to be associated with {@code body}
-	 * @param <V>    the type of the body representation managed by {@code body}
+	 * @param format the body format
+	 * @param value  the body to be encoded
+	 * @param <V>    the type of the body to be encoded
 	 *
-	 * @return this message
+	 * @return this message with the {@code value} {@linkplain Format#encode(Message, Object) encoded} by {@code
+	 * format} as body
 	 *
-	 * @throws NullPointerException  if either {@code body} or {@code value} is null
-	 * @throws IllegalStateException if a body value was already {@linkplain #body(Format) retrieved} from this message
+	 * @throws NullPointerException if either {@code format} or {@code value} is null
 	 */
-	public <V> T body(final Format<V> format, final V value) {
+	public <V> T body(final Format<? super V> format, final V value) {
 
 		if ( format == null ) {
 			throw new NullPointerException("null body");
@@ -493,7 +539,7 @@ public abstract class Message<T extends Message<T>> {
 
 		bodies.put(format, value);
 
-		return format.set(self(), value);
+		return format.encode(self(), value);
 	}
 
 
@@ -503,7 +549,7 @@ public abstract class Message<T extends Message<T>> {
 		return (name.startsWith("~") || name.startsWith("+") ? name.substring(1) : name).toLowerCase(Locale.ROOT);
 	}
 
-	private Collection<String> normalize(final Collection<String> values) {
+	private List<String> normalize(final Collection<String> values) {
 		return values
 				.stream()
 				.filter(value -> !value.isEmpty())

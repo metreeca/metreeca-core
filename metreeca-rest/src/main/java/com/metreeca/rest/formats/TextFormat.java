@@ -1,18 +1,17 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.formats;
@@ -20,23 +19,36 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static com.metreeca.rest.formats.OutputFormat.output;
+import static java.lang.String.valueOf;
 
 
 /**
- * Textual body format.
+ * Textual message format.
  */
 public final class TextFormat extends Format<String> {
 
 	/**
-	 * Creates a textual format.
+	 * The default MIME type for textual messages ({@value}).
+	 */
+	public static final String MIME="text/plain";
+
+	/**
+	 * A pattern matching textual MIME types, for instance {@code text/csv}.
+	 */
+	public static final Pattern MIMEPattern=Pattern.compile("(?i:^text/.+$)");
+
+
+	/**
+	 * Creates a textual message format.
 	 *
-	 * @return the new textual format
+	 * @return a new textual message format
 	 */
 	public static TextFormat text() {
 		return new TextFormat();
@@ -45,10 +57,49 @@ public final class TextFormat extends Format<String> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final InputFormat input=input();
-	private final ReaderFormat reader=reader();
-	private final WriterFormat writer=writer();
+	public static String text(final Reader reader) {
 
+		if ( reader == null ) {
+			throw new NullPointerException("null reader");
+		}
+
+		try ( final StringWriter writer=new StringWriter() ) {
+
+			return copy(writer, reader).toString();
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		}
+	}
+
+	public static <W extends Writer> W text(final W writer, final String value) {
+
+		if ( writer == null ) {
+			throw new NullPointerException("null writer");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		try {
+
+			writer.write(value);
+			writer.flush();
+
+			return writer;
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private TextFormat() {}
 
@@ -56,65 +107,65 @@ public final class TextFormat extends Format<String> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return a result providing access to the textual representation of {@code message}, as retrieved from the reader
-	 * 		supplied by its {@link ReaderFormat} body, if one is present; a failure describing the processing error,
-	 * 		otherwise
+	 * Decodes the textual {@code message} body from the input stream supplied by the {@code message}
+	 * {@link InputFormat} body, if one is available, taking into account the {@code message}
+	 * {@linkplain Message#charset() charset}
 	 */
-	@Override public Result<String, Failure> get(final Message<?> message) {
-		return message.body(reader).value(source -> {
-			try ( final Reader reader=source.get() ) {
+	@Override public Either<MessageException, String> decode(final Message<?> message) {
+		return message.body(input()).flatMap(source -> {
+			try (
+					final InputStream input=source.get();
+					final Reader reader=new InputStreamReader(input, message.charset())
+			) {
 
-				return Codecs.text(reader);
+				return Either.Right(text(reader));
+
+			} catch ( final UnsupportedEncodingException e ) {
+
+				return Either.Left(status(BadRequest, e));
 
 			} catch ( final IOException e ) {
+
 				throw new UncheckedIOException(e);
+
 			}
 		});
 	}
 
 	/**
-	 * Configures a message to hold a textual body representation.
-	 *
-	 * <ul>
-	 *
-	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the
-	 * textual {@code value} using the character encoding specified in the {@code Content-Type} header of
-	 * {@code message} or the {@linkplain StandardCharsets#UTF_8 default charset} if none is specified;</li>
-	 *
-	 * <li>the {@link ReaderFormat} body of {@code message} is configured to generate a reader reading the
-	 * textual {@code value};</li>
-	 *
-	 * <li>the {@link WriterFormat} body of {@code message} is configured to write the textual {@code value} to the
-	 * writer supplied by the accepted writer supplier.</li>
-	 *
-	 * </ul>
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the textual {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
+	 * taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final String value) {
-		return message
+	@Override public <M extends Message<M>> M encode(final M message, final String value) {
+		try {
 
-				.body(input, () -> {
-					try {
+			final String charset=message.charset();
+			final byte[] bytes=value.getBytes(charset);
 
-						return new ByteArrayInputStream(value.getBytes(message.charset().orElseGet(UTF_8::name)));
+			return message
 
-					} catch ( final UnsupportedEncodingException e ) {
+					.header("~Content-Type", MIME)
+					.header("~Content-Length", valueOf(bytes.length))
 
-						throw new UncheckedIOException(e);
+					.body(output(), output -> {
+						try {
 
-					}
-				})
+							output.write(bytes);
+							output.flush();
 
-				.body(reader, () -> new StringReader(value))
+						} catch ( final IOException e ) {
 
-				.body(writer, target -> {
-					try ( final Writer output=target.get() ) {
+							throw new UncheckedIOException(e);
 
-						output.write(value);
+						}
+					});
 
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				});
+		} catch ( final UnsupportedEncodingException e ) {
+
+			throw new UncheckedIOException(e); // !!! report to client as 4/5xx? how?
+
+		}
 	}
 
 }

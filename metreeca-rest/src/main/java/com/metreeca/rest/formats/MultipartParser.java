@@ -1,32 +1,31 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.formats;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.ParseException;
+import com.metreeca.rest.MessageException;
+
+import java.io.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.PayloadTooLarge;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.binarySearch;
 
@@ -43,7 +42,7 @@ final class MultipartParser {
 
 	@FunctionalInterface private static interface State {
 
-		public State next(final Type type) throws ParseException;
+		public State next(final Type type) throws MessageException;
 
 	}
 
@@ -99,14 +98,14 @@ final class MultipartParser {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	void parse() throws IOException, ParseException {
+	void parse() throws IOException, MessageException {
 
 		if ( opening.length == 2 ) {
-			throw new ParseException("empty boundary", body);
+			error(BadRequest, "empty boundary");
 		}
 
 		if ( opening.length > 70+2 ) {
-			throw new ParseException("illegal boundary", body);
+			error(BadRequest, "illegal boundary");
 		}
 
 		for (Type type=Type.Empty; type != Type.EOF; state=state.next(type=read())) {}
@@ -114,33 +113,34 @@ final class MultipartParser {
 	}
 
 
-	//// States ////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// States
+	// //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private State preamble(final Type type) throws ParseException {
+	private State preamble(final Type type) throws MessageException {
 		return type == Type.Empty ? skip(this::preamble)
 				: type == Type.Data ? skip(this::preamble)
 				: type == Type.Open ? skip(this::part)
 				: type == Type.Close ? skip(this::epilogue)
 				: type == Type.EOF ? skip(this::epilogue)
-				: error("unexpected chunk type {"+type+"}");
+				: error(BadRequest, "unexpected chunk type {"+type+"}");
 	}
 
-	private State part(final Type type) throws ParseException {
+	private State part(final Type type) throws MessageException {
 		return type == Type.Empty ? skip(this::body)
 				: type == Type.Data ? header(this::part)
 				: type == Type.Open ? report(this::part)
 				: type == Type.Close ? report(this::epilogue)
 				: type == Type.EOF ? report(this::epilogue)
-				: error("unexpected chunk type {"+type+"}");
+				: error(BadRequest, "unexpected chunk type {"+type+"}");
 	}
 
-	private State body(final Type type) throws ParseException {
+	private State body(final Type type) throws MessageException {
 		return type == Type.Empty ? this::body
 				: type == Type.Data ? this::body
 				: type == Type.Open ? report(this::part)
 				: type == Type.Close ? report(this::epilogue)
 				: type == Type.EOF ? report(this::epilogue)
-				: error("unexpected chunk type {"+type+"}");
+				: error(BadRequest, "unexpected chunk type {"+type+"}");
 	}
 
 	private State epilogue(final Type type) {
@@ -148,9 +148,10 @@ final class MultipartParser {
 	}
 
 
-	//// Actions ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Actions
+	// /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private State header(final State next) throws ParseException {
+	private State header(final State next) throws MessageException {
 		try {
 
 			final int eol=last > 2 && buffer[last-2] == '\r' && buffer[last-1] == '\n' ? last-2 : last;
@@ -164,18 +165,18 @@ final class MultipartParser {
 			while ( value < eol && space(buffer[value]) ) { ++value; }
 
 			if ( colon == 0 ) {
-				return error("empty header name {"+new String(buffer, 0, eol, UTF_8)+"}");
+				return error(BadRequest, "empty header name {"+new String(buffer, 0, eol, UTF_8)+"}");
 			}
 
 			for (int i=0; i < colon; ++i) {
 				if ( !token(buffer[i]) ) {
-					return error("malformed header name {"+new String(buffer, 0, eol, UTF_8)+"}");
+					return error(BadRequest, "malformed header name {"+new String(buffer, 0, eol, UTF_8)+"}");
 				}
 			}
 
 			for (int i=value; i < eol; ++i) {
 				if ( !printable(buffer[i]) ) {
-					return error("malformed header value {"+new String(buffer, 0, eol, UTF_8)+"}");
+					return error(BadRequest, "malformed header value {"+new String(buffer, 0, eol, UTF_8)+"}");
 				}
 			}
 
@@ -224,10 +225,10 @@ final class MultipartParser {
 		}
 	}
 
-	private State error(final String message) throws ParseException {
+	private State error(final int status, final String message) throws MessageException {
 		try {
 
-			throw new ParseException(message, body);
+			throw status(status, String.format("%s (%d)", message, body));
 
 		} finally {
 
@@ -247,7 +248,7 @@ final class MultipartParser {
 	/**
 	 * @return the next CRLF-terminated input chunk
 	 */
-	private Type read() throws IOException, ParseException {
+	private Type read() throws IOException, MessageException {
 
 		final int head=last;
 
@@ -257,11 +258,11 @@ final class MultipartParser {
 		for (int c; !(cr == '\r' && lf == '\n') && (c=input.read()) >= 0; cr=lf, lf=c, ++part, ++body, ++last) {
 
 			if ( part >= partLimit ) {
-				throw new ParseException("part size limit exceeded {"+partLimit+"}", body);
+				error(PayloadTooLarge, String.format("part size limit <%,d> exceeded", partLimit));
 			}
 
 			if ( body >= bodyLimit ) {
-				throw new ParseException("body size limit exceeded {"+bodyLimit+"}", body);
+				error(PayloadTooLarge, String.format("body size limit <%,d> exceeded", bodyLimit));
 			}
 
 			if ( last == buffer.length ) { // extend the buffer

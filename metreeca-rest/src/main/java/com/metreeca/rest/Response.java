@@ -1,30 +1,28 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 
 
 /**
  * HTTP response.
- *
- * <p>Handles state/behaviour for HTTP responses.</p>
  */
 public final class Response extends Message<Response> {
 
@@ -89,14 +87,24 @@ public final class Response extends Message<Response> {
 	 * Retrieves the focus item IRI of this response.
 	 *
 	 * @return the absolute IRI included in the {@code Location} header of this response, if defined; the {@linkplain
-	 *        Request#item() focus item} IRI of the originating request otherwise
+	 * Request#item() focus item} IRI of the originating request otherwise
 	 */
 	@Override public String item() {
 
 		final String base=request().item();
 
 		return header("Location")
-				.map(location -> URI.create(base).resolve(location).toString())
+				.map(location -> {
+					try {
+
+						return new URI(base).resolve(location).toString();
+
+					} catch ( final URISyntaxException e ) {
+
+						return null;
+
+					}
+				})
 				.orElse(base);
 	}
 
@@ -116,7 +124,7 @@ public final class Response extends Message<Response> {
 	 * Checks if this response is successful.
 	 *
 	 * @return {@code true} if the {@linkplain #status() status} code is in the {@code 2XX} range; {@code false}
-	 * 		otherwise
+	 * otherwise
 	 */
 	public boolean success() {
 		return status/100 == 2;
@@ -126,14 +134,14 @@ public final class Response extends Message<Response> {
 	 * Checks if this response is an error.
 	 *
 	 * @return {@code true} if the {@linkplain #status() status} code is in beyond the {@code 3XX} range; {@code false}
-	 * 		otherwise
+	 * otherwise
 	 */
 	public boolean error() {
 		return status/100 > 3;
 	}
 
 
-	//// Outcome ///////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Outcome //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the status code of this response.

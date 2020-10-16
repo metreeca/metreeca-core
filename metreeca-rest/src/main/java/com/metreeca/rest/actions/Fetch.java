@@ -1,35 +1,28 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.actions;
 
 
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.services.Fetcher;
-import com.metreeca.rest.services.Logger;
+import com.metreeca.rest.*;
+import com.metreeca.rest.assets.Fetcher;
+import com.metreeca.rest.assets.Logger;
 
 import java.util.Optional;
 import java.util.function.Function;
-
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.rest.services.Logger.logger;
-import static java.lang.String.format;
 
 
 /**
@@ -41,10 +34,10 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
     private Function<Request, Request> limit=new Limit<>(0);
 
-    private Fetcher fetcher=service(Fetcher.fetcher());
+    private Fetcher fetcher=Context.asset(Fetcher.fetcher());
 
 
-    private final Logger logger=service(logger());
+    private final Logger logger=Context.asset(Logger.logger());
 
 
     /**
@@ -112,9 +105,7 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
                     if ( !success ) {
 
-                        logger.error(this, format("unable to retrieve data from <%s> : status %d (%s)",
-                                response.item(), response.status(), response.body(text()).value().orElse("")
-                        ));
+                        logger.warning(this, String.format("%d %s", response.status(), response.item()));
 
                     }
 

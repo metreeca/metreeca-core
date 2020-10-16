@@ -1,46 +1,38 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.rdf.Formats;
-import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
+import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.OutputFormat;
-import com.metreeca.rest.handlers.Worker;
+import com.metreeca.rest.handlers.Router;
+
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
 import org.eclipse.rdf4j.query.resultio.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.RDFFormat;
-import org.eclipse.rdf4j.rio.RDFWriter;
-import org.eclipse.rdf4j.rio.RDFWriterFactory;
-import org.eclipse.rdf4j.rio.RDFWriterRegistry;
+import org.eclipse.rdf4j.rio.*;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
+import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.formats.OutputFormat.output;
 
 
 /**
@@ -56,8 +48,20 @@ import java.util.Optional;
  */
 public final class SPARQL extends Endpoint<SPARQL> {
 
-	public SPARQL() {
-		delegate(new Worker()
+	/**
+	 * Creates a SPARQL endpoint
+	 *
+	 * @return a new SPARQL endpoint
+	 */
+	public static SPARQL sparql() {
+		return new SPARQL();
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private SPARQL() {
+		delegate(Router.router()
 				.get(this::process)
 				.post(this::process)
 		);
@@ -66,7 +70,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> process(final Request request) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request) {
 		return consumer -> graph().exec(connection -> {
 			try {
 
@@ -74,17 +78,13 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 				if ( operation == null ) { // !!! return void description for GET
 
-					request.reply(new Failure()
-							.status(Response.BadRequest)
-							.error("parameter-missing")
-							.notes("missing query/update parameter")
-					).accept(consumer);
+					request.reply(status(BadRequest, "missing query/update parameter")).accept(consumer);
 
 				} else if ( operation instanceof Query && !queryable(request.roles())
 						|| operation instanceof Update && !updatable(request.roles())
 				) {
 
-					request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
+					request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
 
 				} else if ( operation instanceof BooleanQuery ) {
 
@@ -100,88 +100,33 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 				} else if ( operation instanceof Update ) {
 
-					process(request, (Update)operation, connection).accept(consumer);
+					process(request, (Update)operation).accept(consumer);
 
 				} else {
 
-					request.reply(new Failure()
-							.status(Response.NotImplemented)
-							.error("operation-unsupported")
-							.notes(operation.getClass().getName())
-					).accept(consumer);
+					request.reply(status(NotImplemented, operation.getClass().getName())).accept(consumer);
 
 				}
 
-			} catch ( final MalformedQueryException e ) {
+			} catch ( final MalformedQueryException|IllegalArgumentException e ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("query-malformed")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final IllegalArgumentException e ) {
-
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("request-malformed")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
+				request.reply(status(BadRequest, e)).accept(consumer);
 
 			} catch ( final UnsupportedOperationException e ) {
 
-				request.reply(new Failure()
-						.status(Response.NotImplemented)
-						.error("operation-unsupported")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final QueryEvaluationException e ) {
-
-				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
-
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("query-evaluation")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final UpdateExecutionException e ) {
-
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("update-evaluation")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
-
-			} catch ( final TupleQueryResultHandlerException e ) {
-
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("response-error")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
+				request.reply(status(NotImplemented, e)).accept(consumer);
 
 			} catch ( final RuntimeException e ) {
 
-				request.reply(new Failure()
-						.status(Response.InternalServerError)
-						.error("repository-error")
-						.notes(e.getMessage())
-						.cause(e)
-				).accept(consumer);
+				// !!! fails for QueryInterruptedException (timeout) ≫ response is already committed
+
+				request.reply(status(InternalServerError, e)).accept(consumer);
 
 			}
 		});
 	}
 
-	private Operation operation(final Request request, final RepositoryConnection connection) {
+	private Operation operation(final com.metreeca.rest.Request request, final RepositoryConnection connection) {
 
 		final Optional<String> query=request.parameter("query");
 		final Optional<String> update=request.parameter("update");
@@ -214,42 +159,34 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Future<Response> process(final Request request, final BooleanQuery query) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final BooleanQuery query) {
 
 		final boolean result=query.evaluate();
 
 		final String accept=request.header("Accept").orElse("");
 
-		final BooleanQueryResultWriterFactory factory=Formats.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
 
-		return request.reply(response -> response.status(Response.OK)
+		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
-
-						factory.getWriter(output).handleBoolean(result);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				})
+				.body(output(), output -> factory.getWriter(output).handleBoolean(result))
 		);
 	}
 
-	private Future<Response> process(final Request request, final TupleQuery query) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final TupleQuery query) {
 
 		final TupleQueryResult result=query.evaluate();
 
 		final String accept=request.header("Accept").orElse("");
 
-		final TupleQueryResultWriterFactory factory=Formats.service(
-				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, accept);
+		final TupleQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, types(accept));
 
-		return request.reply(response -> response.status(Response.OK)
+		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
+				.body(output(), output -> {
+					try {
 
 						final TupleQueryResultWriter writer=factory.getWriter(output);
 
@@ -260,69 +197,56 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 						writer.endQueryResult();
 
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
 					} finally {
 						result.close();
 					}
 				}));
 	}
 
-	private Future<Response> process(final Request request, final GraphQuery query) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final GraphQuery query) {
 
 		final GraphQueryResult result=query.evaluate();
 
 		final String accept=request.header("Accept").orElse("");
 
-		final RDFWriterFactory factory=Formats.service(
-				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, accept);
+		final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, types(accept));
 
-		return request.reply(response -> response.status(Response.OK)
+		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
+				.body(output(), output -> {
 
-						final RDFWriter writer=factory.getWriter(output);
+					final RDFWriter writer=factory.getWriter(output);
 
-						writer.startRDF();
+					writer.startRDF();
 
-						for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
-							writer.handleNamespace(entry.getKey(), entry.getValue());
-						}
-
-						try {
-							while ( result.hasNext() ) { writer.handleStatement(result.next());}
-						} finally {
-							result.close();
-						}
-
-						writer.endRDF();
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
+					for (final Map.Entry<String, String> entry : result.getNamespaces().entrySet()) {
+						writer.handleNamespace(entry.getKey(), entry.getValue());
 					}
+
+					try {
+						while ( result.hasNext() ) { writer.handleStatement(result.next());}
+					} finally {
+						result.close();
+					}
+
+					writer.endRDF();
+
 				}));
 	}
 
-	private Future<Response> process(final Request request, final Update update,
-			final RepositoryConnection connection) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final Update update) {
 
 		update.execute();
 
 		final String accept=request.header("Accept").orElse("");
 
-		final BooleanQueryResultWriterFactory factory=Formats.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, accept);
+		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
 
 		return request.reply(response -> response.status(Response.OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(OutputFormat.output(), target -> {
-					try ( final OutputStream output=target.get() ) {
-						factory.getWriter(output).handleBoolean(true);
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				})
+				.body(output(), output -> factory.getWriter(output).handleBoolean(true))
 		);
 	}
 

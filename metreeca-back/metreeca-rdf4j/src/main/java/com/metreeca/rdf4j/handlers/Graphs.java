@@ -1,58 +1,51 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.rdf.Formats;
-import com.metreeca.rdf.Values;
-import com.metreeca.rdf4j.services.Graph;
-import com.metreeca.rest.Failure;
-import com.metreeca.rest.Future;
-import com.metreeca.rest.Request;
+import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
+import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.InputFormat;
-import com.metreeca.rest.handlers.Worker;
-import com.metreeca.tree.Shape;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
+import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.handlers.Router;
+
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.VOID;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.RepositoryResult;
+import org.eclipse.rdf4j.repository.*;
 import org.eclipse.rdf4j.rio.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.function.Supplier;
 
-import static com.metreeca.rdf.Values.iri;
-import static com.metreeca.rdf.Values.statement;
+import static com.metreeca.json.Shape.exactly;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.tree.Shape.only;
-import static com.metreeca.tree.shapes.And.and;
-import static com.metreeca.tree.shapes.Field.field;
 import static java.lang.String.format;
 
 
@@ -70,17 +63,24 @@ import static java.lang.String.format;
 public final class Graphs extends Endpoint<Graphs> {
 
 	private static final Shape GraphsShape=field(RDF.VALUE, and(
-			field(RDF.TYPE, only(VOID.DATASET))
+			field(RDF.TYPE, exactly(VOID.DATASET))
 	));
+
+
+	/**
+	 * Creates a graph store endpoint
+	 *
+	 * @return a new graph store endpoint
+	 */
+	public static Graphs graphs() {
+		return new Graphs();
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final InputFormat input=input();
-
-
-	public Graphs() {
-		delegate(new Worker()
+	private Graphs() {
+		delegate(Router.router()
 				.get(this::get)
 				.put(this::put)
 				.delete(this::delete)
@@ -94,25 +94,21 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
 	 */
-	private Future<Response> get(final Request request) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> get(final com.metreeca.rest.Request request) {
 		return consumer -> {
 
 			final boolean catalog=request.parameters().isEmpty();
 
 			final String target=graph(request);
-			final Iterable<String> accept=request.headers("Accept");
+			final String accept=request.header("Accept").orElse("");
 
 			if ( target == null && !catalog ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !queryable(request.roles()) ) {
 
-				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
 
 			} else if ( catalog ) { // graph catalog
 
@@ -132,35 +128,29 @@ public final class Graphs extends Endpoint<Graphs> {
 					}
 				});
 
-				request.reply(response -> response.status(Response.OK)
-						.shape(GraphsShape)
+				request.reply(response -> response.status(com.metreeca.rest.Response.OK)
+						.attribute(JSONLDFormat.shape(), GraphsShape)
 						.body(rdf(), model)
 				).accept(consumer);
 
 			} else {
 
-				final RDFWriterFactory factory=Formats.service(
-						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, accept);
+				final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, types(accept));
 
 				final RDFFormat format=factory.getRDFFormat();
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
 				graph().exec(connection -> {
-					request.reply(response -> response.status(Response.OK)
+					request.reply(response -> response.status(com.metreeca.rest.Response.OK)
 
 							.header("Content-Type", format.getDefaultMIMEType())
 							.header("Content-Disposition", format("attachment; filename=\"%s.%s\"",
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(output(), _target -> {
-								try ( final OutputStream output=_target.get() ) {
-									connection.export(factory.getWriter(output), context);
-								} catch ( final IOException e ) {
-									throw new UncheckedIOException(e);
-								}
-							})
+							.body(output(), output -> connection.export(factory.getWriter(output), context))
 
 					).accept(consumer);
 				});
@@ -171,39 +161,34 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
 	 */
-	private Future<Response> put(final Request request) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> put(final com.metreeca.rest.Request request) {
 		return consumer -> {
 
 			final String target=graph(request);
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
 
-				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
 
 			} else {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
-				final Iterable<String> content=request.headers("Content-Type");
+				final String content=request.header("Content-Type").orElse("");
 
 				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
-				final RDFParserFactory factory=Formats.service(
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content // !!! review fallback handling
+				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content) // !!! review fallback
+						// handling
 				);
 
-				graph().exec(connection -> {
-					try ( final InputStream input=request.body(this.input).value() // binary format >> no rewriting
-							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-							.get() ) {
+				graph().exec(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> com.metreeca.rest.Xtream.input(), Supplier::get) ) {
 
 						final boolean exists=exists(connection, context);
 
@@ -211,41 +196,26 @@ public final class Graphs extends Endpoint<Graphs> {
 						connection.add(input, request.base(), factory.getRDFFormat(), context);
 
 						request.reply(response ->
-								response.status(exists ? Response.NoContent : Response.Created)
+								response.status(exists ? com.metreeca.rest.Response.NoContent : com.metreeca.rest.Response.Created)
 						).accept(consumer);
 
 					} catch ( final IOException e ) {
 
 						logger().warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("payload-unreadable")
-								.notes("I/O while reading RDF payload: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					} catch ( final RDFParseException e ) {
 
 						logger().warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.BadRequest)
-								.error("payload-malformed")
-								.notes("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(BadRequest, e)).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						logger().warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("update-aborted")
-								.notes("unable to update graph: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
 				});
@@ -257,22 +227,18 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
 	 */
-	private Future<Response> delete(final Request request) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> delete(final com.metreeca.rest.Request request) {
 		return consumer -> {
 
 			final String target=graph(request);
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
 
-				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
 
 			} else {
 
@@ -286,18 +252,14 @@ public final class Graphs extends Endpoint<Graphs> {
 						connection.clear(context);
 
 						request.reply(response ->
-								response.status(exists ? Response.NoContent : Response.NotFound)
+								response.status(exists ? com.metreeca.rest.Response.NoContent : com.metreeca.rest.Response.NotFound)
 						).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						logger().warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("update-aborted")
-								.notes("unable to delete graph: see server logs for details")
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
 				});
@@ -309,7 +271,7 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
 	 */
-	private Future<Response> post(final Request request) {
+	private com.metreeca.rest.Future<com.metreeca.rest.Response> post(final com.metreeca.rest.Request request) {
 		return consumer -> {
 
 			// !!! support  "multipart/form-data"
@@ -319,72 +281,52 @@ public final class Graphs extends Endpoint<Graphs> {
 
 			if ( target == null ) {
 
-				request.reply(new Failure()
-						.status(Response.BadRequest)
-						.error("parameter-missing")
-						.notes("missing target graph parameter")
-				).accept(consumer);
+				request.reply(status(BadRequest, "missing target graph parameter")).accept(consumer);
 
 			} else if ( !updatable(request.roles()) ) {
 
-				request.reply(response -> response.status(Response.Unauthorized)).accept(consumer);
+				request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
 
 			} else {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
-				final Iterable<String> content=request.headers("Content-Type");
+				final String content=request.header("Content-Type").orElse("");
 
 				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
-				final RDFParserFactory factory=Formats.service( // !!! review fallback handling
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, content);
+				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service( // !!! review fallback
+						// handling
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content));
 
-				graph().exec(connection -> {
-					try ( final InputStream input=request.body(this.input).value() // binary format >> no rewriting
-							.orElseThrow(() -> new IllegalStateException("missing raw body")) // internal error
-							.get() ) {
+				graph().exec(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> com.metreeca.rest.Xtream.input(), Supplier::get) ) {
 
 						final boolean exists=exists(connection, context);
 
 						connection.add(input, request.base(), factory.getRDFFormat(), context);
 
 						request.reply(response ->
-								response.status(exists ? Response.NoContent : Response.Created)
+								response.status(exists ? com.metreeca.rest.Response.NoContent : Response.Created)
 						).accept(consumer);
 
 					} catch ( final IOException e ) {
 
 						logger().warning(this, "unable to read RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("payload-unreadable")
-								.notes("I/O while reading RDF payload: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					} catch ( final RDFParseException e ) {
 
 						logger().warning(this, "malformed RDF payload", e);
 
-						request.reply(new Failure()
-								.status(Response.BadRequest)
-								.error("payload-malformed")
-								.notes("malformed RDF payload: "+e.getLineNumber()+","+e.getColumnNumber()+") "+e.getMessage())
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(BadRequest, e)).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
 
 						logger().warning(this, "unable to update graph "+context, e);
 
-						request.reply(new Failure()
-								.status(Response.InternalServerError)
-								.error("update-aborted")
-								.notes("unable to update graph: see server logs for details")
-								.cause(e)
-						).accept(consumer);
+						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
 				});
@@ -397,7 +339,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private String graph(final Request request) {
+	private String graph(final com.metreeca.rest.Request request) {
 
 		final List<String> defaults=request.parameters("default");
 		final List<String> nameds=request.parameters("graph");

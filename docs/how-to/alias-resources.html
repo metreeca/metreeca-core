@@ -1,23 +1,22 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl
 
-  This file is part of Metreeca/Link.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
-  of the GNU Affero General Public License as published by the Free Software Foundation,
-  either version 3 of the License, or(at your option) any later version.
+      http://www.apache.org/licenses/LICENSE-2.0
 
-  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
-  If not, see <http://www.gnu.org/licenses/>.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <!DOCTYPE html>
 <html lang="en">
-	<head><title>How To Alias Resources | Metreeca Linked Data Framework</title>
+	<head><title>How To Alias Resources | Metreeca REST/JSON Framework</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1">
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<link rel="shortcut icon" href="../index.svg">
@@ -29,7 +28,7 @@
 	<body><input id="toggle" type="checkbox">
 		<nav>
 			<header>
-				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.53.0</span></a></span><label for="toggle"></label>
+				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.54.0</span></a></span><label for="toggle"></label>
 			</header>
 			<section><a class="title" onclick="document.querySelector('main').scrollTo(0, 0)">How To Alias Resources</a>
 				<h1><a href="#alternate-identifiers">Alternate Identifiers</a></h1><h2><a href="#independent-endpoints">Independent
@@ -43,7 +42,7 @@
 				supports these use cases redirecting requests to canonical resources located by a custom alias resolver.
 			</p>
 				<p>The following samples present typical setups built on the same data used in the
-					<a href="../tutorials/publishing-ldp-apis">tutorials</a> and a custom name-based product resolver.
+					<a href="../tutorials/publishing-jsonld-apis">tutorials</a> and a custom name-based product resolver.
 				</p>
 				<pre><code class="language-java">private Optional&lt;String&gt; byname(final RepositoryConnection connection, final String name) {
     return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
@@ -55,20 +54,20 @@
 </code></pre>
 				<h1 id="alternate-identifiers">Alternate Identifiers</h1>
 				<h2 id="independent-endpoints">Independent Endpoints</h2>
-				<pre><code class="language-java">new Router()
- 
-  // primary code-based endpoint
+				<pre><code class="language-java">router()
 
-  .path(&quot;/products/{code}&quot;, new Worker()
-    .get(new Relator())
-  )
- 
-  // alternate name-based endpoint
+	// primary code-based endpoint
 
-  .path(&quot;/products/byname/{name}&quot;, new Aliaser(request -&gt; request
-        .parameter(&quot;name&quot;)
-        .flatMap(connect(this::byname))
-))
+	.path(&quot;/products/{code}&quot;, router()
+			.get(relator())
+	)
+
+	// alternate name-based endpoint
+
+	.path(&quot;/products/byname/{name}&quot;, aliaser(request -&gt; request
+			.parameter(&quot;name&quot;)
+			.flatMap(connect(this::byname))
+	).wrap(request -&gt; request.reply(status(NotFound))))
 </code></pre>
 				<pre><code class="language-shell">GET http://localhost:8080/products/byname/Pont+Yacht
 
@@ -76,16 +75,17 @@
 Location: http://localhost:8080/products/S72_3212
 </code></pre>
 				<h2 id="shared-endpoints">Shared Endpoints</h2>
-				<pre><code class="language-java">new Router()
+				<pre><code class="language-java">router()
 
-    .path(&quot;/products/{code}&quot;, new Worker()
-        .get(new Relator()
-            .with(new Aliaser(request -&gt; request
-                    .parameter(&quot;code&quot;)
-                    .filter(code -&gt; !code.matches(&quot;S\\d+_\\d+&quot;)) // not a product code
-                    .flatMap(connect(this::byname)) // resolve and redirect
-            ))
-        )
+		.path(&quot;/products/{code}&quot;, router()
+				.get(relator()
+						.with(aliaser(request -&gt; request
+								.parameter(&quot;code&quot;)
+								.filter(code -&gt; !code.matches(&quot;S\\d+_\\d+&quot;)) // not a product code
+								.flatMap(connect(this::byname)) // resolve and redirect
+						))
+				)
+         )
 </code></pre>
 				<pre><code class="language-shell">GET http://localhost:8080/products/Pont+Yacht
 
@@ -93,15 +93,15 @@ Location: http://localhost:8080/products/S72_3212
 Location: http://localhost:8080/products/S72_3212
 </code></pre>
 				<h1 id="simplified-query-endpoints">Simplified Query Endpoints</h1>
-				<pre><code class="language-java">new Router()
-    .path(&quot;/products/&quot;, new Worker()
-        .get(new Relator()
-            .with(new Aliaser(request -&gt; request
-                .parameter(&quot;name&quot;) // product name keywords provided as query parameter
-                .map(name -&gt; &quot;?~label=&quot;+Codecs.encode(name)) // rewrite query
-        ))
-	)
-)
+				<pre><code class="language-java">router()
+		.path(&quot;/products/&quot;, router()
+				.get(relator()
+						.with(aliaser(request -&gt; request
+								.parameter(&quot;name&quot;) // product name keywords provided as query parameter
+								.map(name -&gt; &quot;?~label=&quot;+ encode(name)) // rewrite query
+						))
+				)
+		)
 </code></pre>
 				<pre><code class="language-shell">GET http://localhost:8080/products/?name=Model+A
 

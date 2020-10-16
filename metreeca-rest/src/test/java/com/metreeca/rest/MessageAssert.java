@@ -1,34 +1,33 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest;
 
-import com.metreeca.tree.Shape;
+import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.formats.DataFormat;
+import com.metreeca.rest.formats.TextFormat;
+
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
 
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-import static com.metreeca.rest.formats.DataFormat.data;
-import static com.metreeca.rest.formats.TextFormat.text;
-import static com.metreeca.rest.services.Logger.clip;
-import static com.metreeca.tree.shapes.And.and;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -62,6 +61,26 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		if ( !Objects.equals(actual.item(), item) ) {
 			failWithMessage("expected message to have <%s> item but has <%s>", item, actual.item());
 		}
+
+		return myself;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public <V> A hasAttribute(final Supplier<V> factory, final Consumer<V> assertions) {
+
+		if ( factory == null ) {
+			throw new NullPointerException("null factory");
+		}
+
+		if ( assertions == null ) {
+			throw new NullPointerException("null assertions");
+		}
+
+		isNotNull();
+
+		assertions.accept(actual.attribute(factory));
 
 		return myself;
 	}
@@ -124,7 +143,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		final String value=actual.header(name).orElse(null);
 
-
 		if ( value == null ) {
 			failWithMessage("expected message to have <%s> headers but has none", name);
 		}
@@ -174,50 +192,6 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public A hasShape() {
-
-		isNotNull();
-
-		final Shape shape=actual.shape();
-
-		if ( and().equals(shape) ) {
-			failWithMessage("expected message to have a shape but has none", shape);
-		}
-
-		return myself;
-	}
-
-	public A hasShape(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		isNotNull();
-
-		if ( !actual.shape().equals(shape) ) {
-			failWithMessage("shape message to have shape <%s> but has <%s>", shape, actual.shape());
-		}
-
-		return myself;
-	}
-
-	public A doesNotHaveShape() {
-
-		isNotNull();
-
-		final Shape shape=actual.shape();
-
-		if ( !and().equals(shape) ) {
-			failWithMessage("expected message to have no shape but has <%s>", shape);
-		}
-
-		return myself;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public A hasBody(final Format<?> format) {
 
 		if ( format == null ) {
@@ -241,18 +215,19 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		return actual.body(body).fold(
 
+				error -> fail(
+						"expected message to have a <%s> body but was unable to retrieve one (%s)",
+						body.getClass().getSimpleName(), error
+				),
+
 				value -> {
 
 					assertions.accept(value);
 
 					return myself;
 
-				},
+				}
 
-				error -> fail(
-						"expected message to have a <%s> body but was unable to retrieve one (%s)",
-						body.getClass().getSimpleName(), error
-				)
 		);
 	}
 
@@ -261,19 +236,23 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		actual.body(data()).value().ifPresent(data -> {
+		actual.body(DataFormat.data()).accept(e -> {}, data -> {
+
 			if ( data.length > 0 ) {
 				failWithMessage("expected empty body but had binary body of length <%d>", data.length);
 			}
+
 		});
 
-		actual.body(text()).value().ifPresent(text -> {
+		actual.body(TextFormat.text()).accept(e -> {}, text -> {
+
 			if ( !text.isEmpty() ) {
 				failWithMessage(
 						"expected empty body but had textual body of length <%d> (%s)",
-						text.length(), clip(text)
+						text.length(), Logger.clip(text)
 				);
 			}
+
 		});
 
 		return myself;
@@ -288,8 +267,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 		isNotNull();
 
 		return actual.body(body).fold(
-				value -> fail("expected message to have no <%s> body but has one"),
-				error -> myself
+				error -> myself, value -> fail("expected message to have no <%s> body but has one")
 		);
 	}
 

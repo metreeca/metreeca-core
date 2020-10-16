@@ -1,30 +1,26 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.actions;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.services.Logger;
+import com.metreeca.rest.assets.Logger;
 
 import java.util.Optional;
 import java.util.function.Function;
-
-import static com.metreeca.rest.Context.service;
-import static com.metreeca.rest.services.Logger.logger;
 
 
 /**
@@ -36,56 +32,67 @@ import static com.metreeca.rest.services.Logger.logger;
  */
 public final class Parse<R> implements Function<Message<?>, Optional<R>> {
 
-    private final Format<R> format;
+	private final Format<R> format;
 
-    private final Logger logger=service(logger());
-
-
-    /**
-     * Creates a new message body parser.
-     *
-     * @param format the format of the message body to be extracted
-     *
-     * @throws NullPointerException if {@code format} is null
-     */
-    public Parse(final Format<R> format) {
-
-        if ( format == null ) {
-            throw new NullPointerException("null format");
-        }
-
-        this.format=format;
-    }
+	private final Logger logger=Context.asset(Logger.logger());
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Creates a new message body parser.
+	 *
+	 * @param format the format of the message body to be extracted
+	 *
+	 * @throws NullPointerException if {@code format} is null
+	 */
+	public Parse(final Format<R> format) {
 
-    /**
-     * Parses a message body representation.
-     *
-     * @param message the message whose body representation is to be parsed
-     *
-     * @return an optional body representation of the required format, if {@code message} was not null and its body
-     * representation successfully pased; an empty optional, otherwise, logging an error to the
-     * {@linkplain Logger#logger() shared event logger}
-     */
-    @Override public Optional<R> apply(final Message<?> message) {
-        return message == null ? Optional.empty() : message.body(format).fold(Optional::of, error -> {
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
 
-            // !!! get cause directly from failure
+		this.format=format;
+	}
 
-            final Response parse=new Response(message.request()).map(error);
 
-            // !!! review formatting >> avoid newlines in log
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            logger.error(this,
-                    String.format("unable to parse message body as <%s>", format.getClass().getName()),
-                    new RuntimeException(error.toString(), parse.cause().orElse(null))
-            );
+	/**
+	 * Parses a message body representation.
+	 *
+	 * @param message the message whose body representation is to be parsed
+	 *
+	 * @return an optional body representation of the required format, if {@code message} was not null and its body
+	 * representation successfully pased; an empty optional, otherwise, logging an error to the
+	 * {@linkplain Logger#logger() shared event logger}
+	 */
+	@Override public Optional<R> apply(final Message<?> message) {
+		return message == null ? Optional.empty() : message.body(format).fold(error -> {
 
-            return Optional.empty();
+			// !!! get cause directly from failure
 
-        });
-    }
+			final Response parse=new Response(message.request()).map(error);
+			final String media=format.getClass().getSimpleName();
+
+			if ( parse.status() == Response.UnsupportedMediaType ) {
+
+				logger.warning(this,
+						String.format("no <%s> message body", media)
+				);
+
+			} else {
+
+				// !!! review formatting >> avoid newlines in log
+
+				logger.error(this,
+						String.format("unable to parse message body as <%s>", media),
+						new RuntimeException(error.toString(), parse.cause().orElse(null))
+				);
+
+			}
+
+			return Optional.empty();
+
+		}, Optional::of);
+	}
 
 }

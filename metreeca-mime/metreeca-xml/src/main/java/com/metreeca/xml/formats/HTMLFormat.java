@@ -1,55 +1,51 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.xml.formats;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.formats.ReaderFormat;
-import com.metreeca.rest.formats.WriterFormat;
+import com.metreeca.rest.formats.InputFormat;
+import com.metreeca.rest.formats.OutputFormat;
+
 import org.ccil.cowan.tagsoup.Parser;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
-import java.io.Writer;
+import java.io.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Result.Error;
-import static com.metreeca.rest.Result.Value;
-import static com.metreeca.rest.formats.ReaderFormat.reader;
-import static com.metreeca.rest.formats.WriterFormat.writer;
+import static com.metreeca.rest.Either.Left;
+import static com.metreeca.rest.Either.Right;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.BadRequest;
+import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.regex.Pattern.compile;
 
 
 /**
- * HTML body format.
+ * HTML message format.
  */
 public final class HTMLFormat extends Format<Document> {
 
@@ -65,25 +61,26 @@ public final class HTMLFormat extends Format<Document> {
 
 
 	/**
-	 * Creates an HTML body format.
+	 * Creates an HTML message format.
 	 *
-	 * @return the new HTML body format
+	 * @return a new HTML message format
 	 */
 	public static HTMLFormat html() { return new HTMLFormat(); }
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Parses an HTML document.
 	 *
 	 * @param reader the reader the HTML document is to be parsed from
-	 * @param base   the base URL for the HTML document to be parsed
+	 * @param base   the possibly null base URL for the HTML document to be parsed
 	 *
-	 * @return a value result containing the parsed HTML document, if {@code reader} was successfully parsed; an error
-	 * 		result containg the parse exception, otherwise
+	 * @return either a parsing exception or the HTML document parsed from {@code reader}
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if {@code reader} is null
 	 */
-	public static Result<Document, Exception> html(final Reader reader, final String base) {
+	public static Either<TransformerException, Document> html(final Reader reader, final String base) {
 
 		if ( reader == null ) {
 			throw new NullPointerException("null reader");
@@ -111,70 +108,58 @@ public final class HTMLFormat extends Format<Document> {
 
 			);
 
-			return Value(document);
+			return Right(document);
 
 		} catch ( final TransformerException e ) {
 
-			return Error(e);
+			return Left(e);
 
 		}
 	}
 
 	/**
-	 * Writes an HTML document.
+	 * Writes an HTML node.
 	 *
-	 * @param <W>      the type of the {@code writer} the HTML document is to be written to
-	 * @param writer   the writer the HTML document is to be written to
-	 * @param base     the base URL for the HTML document to be written
-	 * @param document the HTML document to be written
+	 * @param <W>    the type of the {@code writer} the HTML node is to be written to
+	 * @param writer the writer the HTML node is to be written to
+	 * @param base   the possibly null base URL for the HTML node to be written
+	 * @param node   the HTML node to be written
 	 *
-	 * @return a value result containing the target {@code writer}, if {@code document} was successfully written; an
-	 * 		error result containg the write exception, otherwise
+	 * @return the target {@code writer}
 	 *
-	 * @throws NullPointerException if any argument is null
+	 * @throws NullPointerException if either {@code writer} or {@code node} is null
 	 */
-	public static <W extends Writer> Result<W, Exception> html(final W writer, final String base,
-			final Document document) {
+	public static <W extends Writer> W html(final W writer, final String base, final Node node) {
 
 		if ( writer == null ) {
 			throw new NullPointerException("null writer");
 		}
 
-		if ( base == null ) {
-			throw new NullPointerException("null base");
-		}
-
-		if ( document == null ) {
-			throw new NullPointerException("null document");
+		if ( node == null ) {
+			throw new NullPointerException("null node");
 		}
 
 		try {
 
-			transformer().transform( // !!! format as HTML
-					new DOMSource(document, base),
+			transformer().transform(
+					new DOMSource(node, base),
 					new StreamResult(writer)
 			);
 
-			return Value(writer);
+			return writer;
 
-		} catch ( final TransformerException e ) {
-
-			return Error(e);
-
+		} catch ( final TransformerException unexpected ) {
+			throw new RuntimeException(unexpected);
 		}
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final DocumentBuilderFactory builders=DocumentBuilderFactory.newInstance();
-	private static final TransformerFactory transformers=TransformerFactory.newInstance();
-
-
 	private static DocumentBuilder builder() {
 		try {
 
-			return builders.newDocumentBuilder();
+			return DocumentBuilderFactory.newInstance().newDocumentBuilder();
 
 		} catch ( final ParserConfigurationException e ) {
 
@@ -186,7 +171,18 @@ public final class HTMLFormat extends Format<Document> {
 	private static Transformer transformer() {
 		try {
 
-			return transformers.newTransformer();
+			final TransformerFactory factory=TransformerFactory.newInstance();
+
+			factory.setAttribute("indent-number", 4);
+
+			final Transformer transformer=factory.newTransformer();
+
+			transformer.setOutputProperty(OutputKeys.METHOD, "html");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
+			return transformer;
 
 		} catch ( final TransformerConfigurationException e ) {
 
@@ -204,23 +200,25 @@ public final class HTMLFormat extends Format<Document> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return the optional HTML body representation of {@code message}, as retrieved from the reader supplied by its
-	 *        {@link ReaderFormat} representation, if one is present and the value of the {@code Content-Type} header is
-	 *        {@link #MIME}; a failure reporting the {@link Response#UnsupportedMediaType} status, otherwise
+	 * Decodes the HTML {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available and the {@code message} {@code Content-Type} header is matched by
+	 * {@link #MIMEPattern}, taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
-	@Override public Result<Document, Failure> get(final Message<?> message) {
+	@Override public Either<MessageException, Document> decode(final Message<?> message) {
+		return message.header("Content-Type").filter(MIMEPattern.asPredicate())
 
-		return message
-				.headers("Content-Type").stream()
-				.anyMatch(mime -> MIMEPattern.matcher(mime).matches())
+				.map(type -> message.body(input()).flatMap(source -> {
 
-				? message
-				.body(reader())
-				.process(source -> {
+					try (
+							final InputStream input=source.get();
+							final Reader reader=new InputStreamReader(input, message.charset())
+					) {
 
-					try ( final Reader reader=source.get() ) {
+						return html(reader, message.item()).fold(e -> Left(status(BadRequest, e)), Either::Right);
 
-						return html(reader, message.item()).error(Failure::malformed);
+					} catch ( final UnsupportedEncodingException e ) {
+
+						return Left(status(BadRequest, e));
 
 					} catch ( final IOException e ) {
 
@@ -228,35 +226,26 @@ public final class HTMLFormat extends Format<Document> {
 
 					}
 
-				})
+				}))
 
-				: Error(new Failure()
-				.status(Response.UnsupportedMediaType)
-				.notes("missing HTML body")
-
-		);
-
+				.orElseGet(() -> Left(status(UnsupportedMediaType, "no HTML body")));
 	}
 
-
 	/**
-	 * Configures the {@link WriterFormat} representation of {@code message} to write the HML {@code value} to the 
-	 * writer
-	 * supplied by the accepted writer and sets the {@code Content-Type} header to {@value #MIME}, unless already
-	 * defined.
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the HTML {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body,
+	 * taking into account the {@code message} {@linkplain Message#charset() charset}
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final Document value) {
+	@Override public <M extends Message<M>> M encode(final M message, final Document value) {
 		return message
+
 				.header("~Content-Type", MIME)
-				.body(writer(), target -> {
 
-					try ( final Writer writer=target.get() ) {
+				.body(output(), output -> {
 
-						html(writer, message.item(), value).error().ifPresent(e -> {
+					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
-							throw new RuntimeException("unable to format HTML body", e);
-
-						});
+						html(writer, message.item(), value);
 
 					} catch ( final IOException e ) {
 

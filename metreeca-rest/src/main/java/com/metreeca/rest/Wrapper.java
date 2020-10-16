@@ -1,26 +1,23 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest;
 
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 import static com.metreeca.rest.Handler.handler;
 import static java.util.Objects.requireNonNull;
@@ -37,15 +34,6 @@ import static java.util.Objects.requireNonNull;
 @FunctionalInterface public interface Wrapper {
 
 	/**
-	 * Creates a dummy wrapper.
-	 *
-	 * @return a dummy wrapper that performs no action on requests and responses
-	 */
-	public static Wrapper wrapper() {
-		return handler -> handler;
-	}
-
-	/**
 	 * Creates a conditional wrapper.
 	 *
 	 * @param test the request predicate used to decide if requests and responses are to be routed through the wrapper
@@ -53,8 +41,8 @@ import static java.util.Objects.requireNonNull;
 	 *             true} on the request
 	 *
 	 * @return a conditional wrapper that routes requests and responses through the {@code pass} handler if the {@code
-	 * 		test} predicate evaluates to {@code true} on the request or to a {@linkplain #wrapper() dummy wrapper}
-	 * 		otherwise
+	 * test} predicate evaluates to {@code true} on the request or to a dummy wrapper
+	 * otherwise
 	 *
 	 * @throws NullPointerException if either {@code test} or {@code pass} is null
 	 */
@@ -68,7 +56,7 @@ import static java.util.Objects.requireNonNull;
 			throw new NullPointerException("null pass wrapper");
 		}
 
-		return wrapper(test, pass, wrapper());
+		return wrapper(test, pass, handler -> handler);
 	}
 
 	/**
@@ -81,7 +69,7 @@ import static java.util.Objects.requireNonNull;
 	 *             false} on the request
 	 *
 	 * @return a conditional wrapper that routes requests and responses either through the {@code pass} or the {@code
-	 * 		fail} wrapper according to the results of the {@code test} predicate
+	 * fail} wrapper according to the results of the {@code test} predicate
 	 *
 	 * @throws NullPointerException if any of the arguments is null
 	 */
@@ -103,10 +91,8 @@ import static java.util.Objects.requireNonNull;
 	}
 
 
-	//// Pre-Processing ////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
-	 * Creates a request wrapper.
+	 * Creates a pre-processing wrapper.
 	 *
 	 * @param mapper a request mapping function; must return a non-null value
 	 *
@@ -126,99 +112,42 @@ import static java.util.Objects.requireNonNull;
 	}
 
 	/**
-	 * Creates a request body wrapper.
+	 * Creates a pre-processing body wrapper.
 	 *
-	 * @param <V>    the type of the body representation to be pre-processed
-	 * @param format the format of the request body representation to be pre-processed
-	 * @param mapper the request body representation mapper; takes as argument a request and its body representation for
-	 *               {@code format} and must return a non-null updated value
+	 * @param <V>    the type of the request body to be pre-processed
+	 * @param format the format of the request body to be pre-processed
+	 * @param mapper the request body mapper; takes as argument a request and its {@code format} body and must return
+	 *               a non-null updated value
 	 *
-	 * @return a wrapper that pre-process the {@code format} body representation of requests using {@code mapper}
+	 * @return a wrapper that pre-process request {@code format} bodies using {@code mapper}
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
-	public static <V> Wrapper preprocessor(final Format<V> format, final BiFunction<Request, V, V> mapper) {
+	public static <V> Wrapper preprocessor(
+			final Format<V> format, final BiFunction<? super Request, ? super V, V> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
 		}
 
-		return handler -> request -> request.body(format).fold(
-
-				value -> handler.handle(request.body(format,
-						requireNonNull(mapper.apply(request, value), "null mapper return value")
-				)),
-
-				request::reply
-
-		);
+		return handler -> request ->
+				request.body(format).fold(request::reply, value -> handler.handle(
+						request.body(format, requireNonNull(mapper.apply(request, value), "null mapper return value"))
+						)
+				);
 	}
 
 
-	//// Post-Processing ///////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
-	 * Creates a response wrapper.
+	 * Creates a  {@linkplain Response#success() successful} post-processing wrapper.
 	 *
 	 * @param mapper a response mapping function; must return a non-null value
 	 *
-	 * @return a wrapper that post-process responses using {@code mapper}
+	 * @return a wrapper that post-process successful responses using {@code mapper}
 	 *
 	 * @throws NullPointerException if {@code mapper} is null or returns a null value
 	 */
 	public static Wrapper postprocessor(final Function<Response, Response> mapper) {
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return handler -> request -> handler.handle(request).map(response ->
-				requireNonNull(mapper.apply(response), "null mapper return values")
-		);
-	}
-
-	/**
-	 * Creates a {@linkplain Response#success() successful} response body wrapper.
-	 *
-	 * @param <V>    the type of the body representation to be post-processed
-	 * @param format the format of the response body representation to be post-processed
-	 * @param mapper the response body representation mapper; takes as argument a response and its body representation
-	 *               for {@code format} and must return a non-null updated value
-	 *
-	 * @return a conditional wrapper that post-process the {@code format} body representation of successful responses
-	 * 		using {@code mapper}
-	 *
-	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
-	 */
-	public static <V> Wrapper postprocessor(final Format<V> format, final BiFunction<Response, V, V> mapper) {
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return handler -> request -> handler.handle(request).map(response -> response.success() ?
-				response.body(format).fold(
-
-						value -> response.body(format,
-								requireNonNull(mapper.apply(response, value), "null mapper return value")
-						),
-
-						error -> new Response(request).map(error)
-
-				) : response);
-	}
-
-
-	/**
-	 * Creates a {@linkplain Response#success() successful} response wrapper.
-	 *
-	 * @param mapper a successful response mapping function; must return a non-null value
-	 *
-	 * @return a conditional wrapper that post-process successful responses using {@code mapper}
-	 *
-	 * @throws NullPointerException if {@code mapper} is null or returns a null value
-	 */
-	public static Wrapper success(final Function<Response, Response> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -231,46 +160,34 @@ import static java.util.Objects.requireNonNull;
 	}
 
 	/**
-	 * Creates an {@linkplain Response#error() error} response wrapper.
+	 * Creates a {@linkplain Response#success() successful} post-processing body wrapper.
 	 *
-	 * @param mapper an error response mapping function; must return a non-null value
+	 * @param <V>    the type of the response body to be post-processed
+	 * @param format the format of the response body to be post-processed
+	 * @param mapper the response body mapper; takes as argument a response and its {@code format} body and must
+	 *               return a non-null updated value
 	 *
-	 * @return a conditional wrapper that post-process error responses using {@code mapper}
+	 * @return a wrapper that post-process successful response {@code format} bodies using {@code mapper}
 	 *
-	 * @throws NullPointerException if {@code mapper} is null or returns a null value
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
-	public static Wrapper error(final Function<Response, Response> mapper) {
+	public static <V> Wrapper postprocessor(
+			final Format<V> format, final BiFunction<? super Response, ? super V, V> mapper) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
 		}
 
-		return handler -> request -> handler.handle(request).map(response -> response.error()
-				? requireNonNull(mapper.apply(response), "null mapper return values")
-				: response
+		return handler -> request -> handler.handle(request).map(response ->
+				response.success() ? response.body(format).fold(error -> { throw error; },
+						value -> response.body(format,
+								requireNonNull(mapper.apply(response, value), "null mapper return value")
+				)) : response
 		);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Wraps a wrapper.
-	 *
-	 * @param wrapper the handler to be wrapped
-	 *
-	 * @return the combined wrapper generated by wrapping this wrapper around {@code wrapper}
-	 *
-	 * @throws NullPointerException if {@code wrapper} is null
-	 */
-	public default Wrapper wrap(final Wrapper wrapper) {
-
-		if ( wrapper == null ) {
-			throw new NullPointerException("null wrapper");
-		}
-
-		return handler -> wrap(wrapper.wrap(handler));
-	}
 
 	/**
 	 * Wraps a handler.
@@ -280,5 +197,24 @@ import static java.util.Objects.requireNonNull;
 	 * @return the combined handler generated by wrapping this wrapper around {@code handler}
 	 */
 	public Handler wrap(final Handler handler);
+
+
+	/**
+	 * Chains a wrapper.
+	 *
+	 * @param wrapper the handler to be chained
+	 *
+	 * @return the combined wrapper generated by wrapping this wrapper around {@code wrapper}
+	 *
+	 * @throws NullPointerException if {@code wrapper} is null
+	 */
+	public default Wrapper with(final Wrapper wrapper) {
+
+		if ( wrapper == null ) {
+			throw new NullPointerException("null wrapper");
+		}
+
+		return handler -> wrap(wrapper.wrap(handler));
+	}
 
 }

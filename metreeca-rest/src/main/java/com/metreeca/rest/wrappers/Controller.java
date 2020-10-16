@@ -1,32 +1,26 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.wrappers;
 
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.Wrapper;
+import com.metreeca.rest.*;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
+import static com.metreeca.rest.Response.Unauthorized;
 import static java.util.Arrays.asList;
 
 
@@ -34,41 +28,50 @@ import static java.util.Arrays.asList;
  * Role-base access controller.
  *
  * <p>Authorizes request checking that their user {@linkplain Request#roles() roles} intersect a provided set of
- * {@linkplain #Controller(Collection) enabled roles}.</p>
+ * {@linkplain #controller(Object...) enabled roles}.</p>
  */
 public final class Controller implements Wrapper {
-
-	private final Set<Object> roles;
-
 
 	/**
 	 * Creates a controller.
 	 *
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
-	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
-	 *              {@linkplain Request#shape() request shape}, if one is present
+	 *              wrapped handler; empty for public access
+	 *
+	 * @return a new controller
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final Object... roles) {
-		this(asList(roles));
+	public static Controller controller(final Object... roles) {
+		return new Controller(asList(roles));
 	}
 
 	/**
 	 * Creates a controller.
 	 *
-	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
-	 *              wrapped handler; empty for public access; may be further restricted by role-based annotations in the
-	 *              {@linkplain Request#shape() request shape}, if one is present
+	 * @param roles the user {@linkplain Request#roles(Collection) roles} enabled to perform the action managed by the
+	 *              wrapped handler; empty for public access
+	 *
+	 * @return a new controller
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
-	public Controller(final Collection<Object> roles) {
+	public static Controller controller(final Collection<Object> roles) {
 
 		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null roles");
 		}
 
+		return new Controller(roles);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Set<Object> roles;
+
+
+	private Controller(final Collection<Object> roles) {
 		this.roles=new HashSet<>(roles);
 	}
 
@@ -87,7 +90,7 @@ public final class Controller implements Wrapper {
 
 				roles.retainAll(request.roles());
 
-				return roles.isEmpty() ? request.reply(Response.Unauthorized) // !!! 404 under strict security
+				return roles.isEmpty() ? request.reply(MessageException.status(Unauthorized)) // !!! 404 under strict security
 						: handler.handle(request.roles(roles));
 
 			}

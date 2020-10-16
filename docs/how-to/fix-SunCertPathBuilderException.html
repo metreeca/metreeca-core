@@ -1,23 +1,22 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl
 
-  This file is part of Metreeca/Link.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
-  of the GNU Affero General Public License as published by the Free Software Foundation,
-  either version 3 of the License, or(at your option) any later version.
+      http://www.apache.org/licenses/LICENSE-2.0
 
-  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
-  If not, see <http://www.gnu.org/licenses/>.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
 <!DOCTYPE html>
 <html lang="en">
-	<head><title>How to Fix sun.security.provider.certpath.SunCertPathBuilderException | Metreeca Linked Data
+	<head><title>How to Fix sun.security.provider.certpath.SunCertPathBuilderException | Metreeca REST/JSON
 		Framework</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1">
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -30,7 +29,7 @@
 	<body><input id="toggle" type="checkbox">
 		<nav>
 			<header>
-				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.53.0</span></a></span><label for="toggle"></label>
+				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.54.0</span></a></span><label for="toggle"></label>
 			</header>
 			<section><a class="title" onclick="document.querySelector('main').scrollTo(0, 0)">How to Fix
 				sun.security.provider.certpath.SunCertPathBuilderException</a><h1><a href="#test">Test</a></h1><h1>
@@ -96,7 +95,7 @@
 						</ul>
 					</li>
 				</ul>
-				<pre><code class="language-sh">JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home/ sudo $JAVA_HOME/bin/keytool \
+				<pre><code class="language-shell">JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home/ sudo $JAVA_HOME/bin/keytool \
     -import -alias &quot;Thawte RSA CA 2018&quot; -file public.crt \
     -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit
 </code></pre>

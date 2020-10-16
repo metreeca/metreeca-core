@@ -1,50 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl. All rights reserved.
+  Copyright © 2013-2020 Metreeca srl
 
-  This file is part of Metreeca/Link.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
 
-  Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
-  of the GNU Affero General Public License as published by the Free Software Foundation,
-  either version 3 of the License, or(at your option) any later version.
+      http://www.apache.org/licenses/LICENSE-2.0
 
-  Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-  See the GNU Affero General Public License for more details.
-
-  You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
-  If not, see <http://www.gnu.org/licenses/>.
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.metreeca</groupId>
-        <artifactId>metreeca-back</artifactId>
-        <version>0.53.0</version>
-    </parent>
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>metreeca-back</artifactId>
+		<version>0.54.0</version>
+	</parent>
 
-    <artifactId>metreeca-rdf4j</artifactId>
-    <version>0.53.0</version>
+	<artifactId>metreeca-rdf4j</artifactId>
+	<version>0.54.0</version>
 
-    <name>Metreeca RDF4J Adapter</name>
-    <description>Adapter kit for RDF4J-based SPARQL repositories.</description>
+	<name>Metreeca RDF4J Adapter</name>
+	<description>Adapter kit for RDF4J-based SPARQL repositories.</description>
 
-    <dependencies>
+	<dependencies>
 
-        <dependency>
-            <groupId>com.metreeca</groupId>
-            <artifactId>metreeca-rdf</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rdf</artifactId>
+		</dependency>
+
 
 		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-repository-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-queryresultio-binary</artifactId>
 		</dependency>
 
 		<dependency> <!-- required to support metreeca/self -->
@@ -55,8 +59,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-tree</artifactId>
-			<version>${project.version}</version>
+			<artifactId>metreeca-json</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -64,15 +67,6 @@
 		<dependency>
 			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-rest</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rdf</artifactId>
-			<version>${project.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>

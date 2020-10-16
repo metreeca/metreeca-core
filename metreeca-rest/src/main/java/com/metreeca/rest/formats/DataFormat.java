@@ -1,18 +1,17 @@
 /*
- * Copyright © 2013-2020 Metreeca srl. All rights reserved.
+ * Copyright © 2013-2020 Metreeca srl
  *
- * This file is part of Metreeca/Link.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Metreeca/Link is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Affero General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or(at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Metreeca/Link is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License along with Metreeca/Link.
- * If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.metreeca.rest.formats;
@@ -20,20 +19,34 @@ package com.metreeca.rest.formats;
 import com.metreeca.rest.*;
 
 import java.io.*;
+import java.util.regex.Pattern;
 
+import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static java.lang.String.valueOf;
 
 
 /**
- * Binary body format.
+ * Binary message format.
  */
 public final class DataFormat extends Format<byte[]> {
 
 	/**
-	 * Creates a binary body format.
+	 * The default MIME type for binary messages ({@value}).
+	 */
+	public static final String MIME="application/octet-stream";
+
+	/**
+	 * A pattern matching binary MIME types, for instance {@code application/zip or image/png}.
+	 */
+	public static final Pattern MIMEPattern=Pattern.compile("(?i)^(application|image)/.+$");
+
+
+	/**
+	 * Creates a binary message format.
 	 *
-	 * @return a new binary body format
+	 * @return a new binary message format
 	 */
 	public static DataFormat data() {
 		return new DataFormat();
@@ -42,9 +55,49 @@ public final class DataFormat extends Format<byte[]> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final InputFormat input=input();
-	private final OutputFormat output=output();
+	public static byte[] data(final InputStream input) {
 
+		if ( input == null ) {
+			throw new NullPointerException("null input");
+		}
+
+		try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
+
+			return copy(output, input).toByteArray();
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		}
+	}
+
+	public static <O extends OutputStream> O data(final O output, final byte[] value) {
+
+		if ( output == null ) {
+			throw new NullPointerException("null output");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		try {
+
+			output.write(value);
+			output.flush();
+
+			return output;
+
+		} catch ( final IOException e ) {
+
+			throw new UncheckedIOException(e);
+
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private DataFormat() {}
 
@@ -52,56 +105,32 @@ public final class DataFormat extends Format<byte[]> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * @return a result providing access to the binary representation of {@code message}, as retrieved from the input
-	 * 		stream supplied by its {@link InputFormat} body, if one is available; a failure describing the processing
-	 * 		error,
-	 * 		otherwise
+	 * Decodes the binary {@code message} body from the input stream supplied by the {@code message}
+	 * {@link InputFormat} body, if one is available
 	 */
-	@Override public Result<byte[], Failure> get(final Message<?> message) {
-		return message.body(input).value(
+	@Override public Either<MessageException, byte[]> decode(final Message<?> message) {
+		return message.body(input()).map(source -> {
+			try ( final InputStream input=source.get() ) {
 
-				source -> {
-					try ( final InputStream input=source.get() ) {
+				return data(input);
 
-						return Codecs.data(input);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				}
-
-		);
+			} catch ( final IOException e ) {
+				throw new UncheckedIOException(e);
+			}
+		});
 	}
 
 	/**
-	 * Configures a message to hold a binary body representation.
-	 *
-	 * <ul>
-	 *
-	 * <li>the {@link InputFormat} body of {@code message} is configured to generate an input stream reading the binary
-	 * {@code value};</li>
-	 *
-	 * <li>the {@link OutputFormat} body of {@code message} is configured to write the binary {@code value} to the
-	 * output stream supplied by the accepted output stream supplier.</li>
-	 *
-	 * </ul>
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
+	 * the binary {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
 	 */
-	@Override public <M extends Message<M>> M set(final M message, final byte... value) {
+	@Override public <M extends Message<M>> M encode(final M message, final byte... value) {
 		return message
 
-				.body(input, () ->
-						new ByteArrayInputStream(value)
-				)
+				.header("~Content-Type", MIME)
+				.header("~Content-Length", valueOf(value.length))
 
-				.body(output, target -> {
-					try ( final OutputStream output=target.get() ) {
-
-						output.write(value);
-
-					} catch ( final IOException e ) {
-						throw new UncheckedIOException(e);
-					}
-				});
+				.body(output(), output -> data(output, value));
 	}
 
 }

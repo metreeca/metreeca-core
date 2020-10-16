@@ -56,7 +56,7 @@ static { System.setProperty("com.sun.security.enableAIAcaIssuers", "true"); }
   - identifiy cert alias
   - copy missing certificates from chain to `public.crt`
 
-```sh
+```shell
 JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_231.jdk/Contents/Home/ sudo $JAVA_HOME/bin/keytool \
     -import -alias "Thawte RSA CA 2018" -file public.crt \
     -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit
