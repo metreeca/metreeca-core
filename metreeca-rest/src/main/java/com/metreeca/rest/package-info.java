@@ -15,7 +15,7 @@
  */
 
 /**
- * Web API framework.
+ * Web framework API.
  */
 
 package com.metreeca.rest;

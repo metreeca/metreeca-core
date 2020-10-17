@@ -33,7 +33,7 @@ import static java.util.Comparator.comparingDouble;
 /**
  * Main X/HTMl content extraction.
  *
- * <p>Identifies the X/HTMl node containing the main textual content of a complex page.</p>
+ * <p>Identifies the X/HTML node containing the main textual content of a complex page.</p>
  */
 public final class Extract implements Function<Node, Optional<Node>> {
 
