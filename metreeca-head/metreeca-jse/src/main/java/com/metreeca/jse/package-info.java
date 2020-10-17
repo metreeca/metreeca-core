@@ -15,9 +15,9 @@
  */
 
 /**
- * Java SE HTTP server adapter.
+ * Java SE HTTP server connector.
  *
- * <p>Provides an adapter for deploying apps based on Metreeca/link as web applications managed by the internal Java SE
+ * <p>Provides a connector for deploying apps based on Metreeca/link as web applications managed by the internal Java SE
  * HTTP server.</p>
  */
 

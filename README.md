@@ -31,12 +31,12 @@ Metreeca/Link is server and storage-agnostic and may be easily connected to your
 
     <dependencies>
 
-        <dependency> <!-- server adapter -->
+        <dependency> <!-- server connector -->
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-jse</artifactId>
         </dependency>
 
-        <dependency> <!-- backend adapter -->
+        <dependency> <!-- storage connector -->
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-rdf4j</artifactId>
         </dependency>

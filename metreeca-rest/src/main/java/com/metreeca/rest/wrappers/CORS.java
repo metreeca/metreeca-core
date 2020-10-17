@@ -27,7 +27,7 @@ import static java.lang.String.join;
  *
  * <p>Manages CORS HTTP requests.</p>
  *
- * <strong>Warning</strong> don't use in production / Provisional implementation with unsafe shortcuts/
+ * <p><strong>Warning</strong> Don't use in production / Provisional implementation with unsafe shortcuts.</p>
  *
  * @see <a href="https://fetch.spec.whatwg.org/#cors-protocol">Fetch - § 3.2 CORS protocol</a>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>

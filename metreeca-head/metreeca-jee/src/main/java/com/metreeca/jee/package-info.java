@@ -15,9 +15,9 @@
  */
 
 /**
- * Java EE Servlet adapter.
+ * Java EE Servlet connector.
  *
- * <p>Provides an adapter for deploying apps based on Metreeca/Link as web applications managed by a Servlet 3.1
+ * <p>Provides a connector for deploying apps based on Metreeca/Link as web applications managed by a Servlet 3.1
  * container.</p>
  */
 

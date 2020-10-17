@@ -38,9 +38,9 @@ import static java.util.function.Function.identity;
 
 
 /**
- * Java EE Servlet adapter.
+ * Java EE Servlet connector.
  *
- * <p>Adapts web applications managed by Servlet 3.1 container and resource handlers based on the Metreeca/Link
+ * <p>Connects web applications managed by Servlet 3.1 container with resource handlers based on the Metreeca/Link
  * framework:</p>
  *
  * <ul>

@@ -38,9 +38,9 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.function.Function.identity;
 
 /**
- * Java SE HTTP server adapter.
+ * Java SE HTTP server connector.
  *
- * <p>Adapts web applications managed by a native Java SE {@linkplain HttpServer HTTP server} and
+ * <p>Connects web applications managed by a native Java SE {@linkplain HttpServer HTTP server} with
  * resource handlers based on the Metreeca/Link framework:</p>
  *
  * <ul>

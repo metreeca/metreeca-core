@@ -58,7 +58,7 @@ To get started, set up a Maven Java 1.8 project, importing the BOM module for Me
 </project>
 ```
 
-Then, add the required dependencies for the Metreeca/Link [adapters](../javadocs/) for the target deployment server and the target graph storage option; in this tutorial we will deploy to a Servlet 3.1 container with an RDF4J Memory store, so we add:
+Then, add the required dependencies for the Metreeca/Link [connectors](../javadocs/) for the target deployment server and the target graph storage option; in this tutorial we will deploy to a Servlet 3.1 container with an RDF4J Memory store, so we add:
 
 ```xml
 <dependencies>
