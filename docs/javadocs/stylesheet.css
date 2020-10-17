@@ -316,7 +316,6 @@ ul.blockList ul.blockList li.blockList h3 {
 ul.blockList li.blockList h2 {
     padding:0px 0 20px 0;
 }
-
 /*
 Page layout container styles
 */
@@ -618,7 +617,7 @@ Content styles
     margin-top:0;
 }
 .deprecatedContent {
-	margin:0;
+    margin:0;
     padding: 10px 0;
 }
 
@@ -631,7 +630,7 @@ ul.blockList ul.blockList ul.blockList li.blockList h3 {
 }
 
 div.block {
-	font-size:14px;
+    font-size:14px;
     font-family: 'DejaVu Serif', Georgia, "Times New Roman", Times, serif;
 }
 
