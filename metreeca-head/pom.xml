@@ -21,24 +21,24 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.metreeca</groupId>
-        <artifactId>metreeca-link</artifactId>
-        <version>0.0.0-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>com.metreeca</groupId>
+		<artifactId>metreeca-link</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
 
-    <artifactId>metreeca-head</artifactId>
-    <version>0.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+	<artifactId>metreeca-head</artifactId>
+	<version>0.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-    <name>Metreeca Server Adapters</name>
-    <description>Server adapter kits.</description>
+	<name>Metreeca Server Connectors</name>
+	<description>Server connector kits.</description>
 
-    <modules>
+	<modules>
 
-        <module>metreeca-jee</module>
-        <module>metreeca-jse</module>
+		<module>metreeca-jee</module>
+		<module>metreeca-jse</module>
 
-    </modules>
+	</modules>
 
 </project>

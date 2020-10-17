@@ -30,8 +30,8 @@
 	<artifactId>metreeca-rdf</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca RDF Format Adapter</name>
-	<description>Adapter kit for RDF data.</description>
+	<name>Metreeca RDF Data Connector</name>
+	<description>Connector kit for RDF data.</description>
 
 	<dependencies>
 

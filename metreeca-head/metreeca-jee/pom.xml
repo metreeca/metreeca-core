@@ -30,8 +30,8 @@
 	<artifactId>metreeca-jee</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca Jave EE Adapter</name>
-	<description>Adapter kit for Servlet 3.1 containers.</description>
+	<name>Metreeca Jave EE Server Connector</name>
+	<description>Connector kit for Servlet 3.1 containers.</description>
 
 	<dependencies>
 

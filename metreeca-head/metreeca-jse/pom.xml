@@ -30,8 +30,8 @@
 	<artifactId>metreeca-jse</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 
-	<name>Metreeca Java SE Adapter</name>
-	<description>Adapter kit for Jave SE internal HTTP server.</description>
+	<name>Metreeca Java SE Server Connector</name>
+	<description>Connector kit for Jave SE internal HTTP server.</description>
 
 	<dependencies>
 

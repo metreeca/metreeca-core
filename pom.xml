@@ -27,7 +27,7 @@
 	<packaging>pom</packaging>
 
 	<name>Metreeca REST/JSON Framework</name>
-	<description>A declarative model-driven framework for rapid REST/JSON development.</description>
+	<description>A lightweight Java framework enabling rapid development of model-driven REST/JSON APIs.</description>
 	<url>https://github.com/metreeca/link</url>
 	<inceptionYear>2013</inceptionYear>
 
@@ -141,7 +141,7 @@
 			</dependency>
 
 
-			<!-- Format Adapters -->
+			<!-- Data Connectors -->
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
@@ -156,7 +156,7 @@
 			</dependency>
 
 
-			<!-- Server Adapters -->
+			<!-- Server Connectors -->
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
@@ -171,7 +171,7 @@
 			</dependency>
 
 
-			<!-- Storage Adapters -->
+			<!-- Storage Connectors -->
 
 			<dependency>
 				<groupId>com.metreeca</groupId>
@@ -435,19 +435,19 @@
 									<packages>com.metreeca.rest*</packages>
 								</group>
 								<group>
-									<title>Format Adapters</title>
+									<title>Data Connectors</title>
 									<packages>
 										com.metreeca.xml*:com.metreeca.rdf*
 									</packages>
 								</group>
 								<group>
-									<title>Server Adapters</title>
+									<title>Server Connectors</title>
 									<packages>
 										com.metreeca.jse*:com.metreeca.jee*
 									</packages>
 								</group>
 								<group>
-									<title>Storage Adapters</title>
+									<title>Storage Connectors</title>
 									<packages>
 										com.metreeca.rdf4j*
 									</packages>
