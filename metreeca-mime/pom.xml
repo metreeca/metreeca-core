@@ -24,11 +24,11 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>metreeca-link</artifactId>
-		<version>0.54.0</version>
+		<version>0.54.1</version>
 	</parent>
 
 	<artifactId>metreeca-mime</artifactId>
-	<version>0.54.0</version>
+	<version>0.54.1</version>
 	<packaging>pom</packaging>
 
 	<name>Metreeca Format Adapters</name>

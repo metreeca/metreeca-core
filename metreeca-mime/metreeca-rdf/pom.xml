@@ -24,11 +24,11 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>metreeca-mime</artifactId>
-		<version>0.54.0</version>
+		<version>0.54.1</version>
 	</parent>
 
 	<artifactId>metreeca-rdf</artifactId>
-	<version>0.54.0</version>
+	<version>0.54.1</version>
 
 	<name>Metreeca RDF Format Adapter</name>
 	<description>Adapter kit for RDF data.</description>

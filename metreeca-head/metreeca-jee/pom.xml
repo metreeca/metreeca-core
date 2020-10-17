@@ -24,11 +24,11 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>metreeca-head</artifactId>
-		<version>0.54.0</version>
+		<version>0.54.1</version>
 	</parent>
 
 	<artifactId>metreeca-jee</artifactId>
-	<version>0.54.0</version>
+	<version>0.54.1</version>
 
 	<name>Metreeca Jave EE Adapter</name>
 	<description>Adapter kit for Servlet 3.1 containers.</description>
