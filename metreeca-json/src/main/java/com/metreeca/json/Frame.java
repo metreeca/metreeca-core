@@ -417,7 +417,7 @@ public final class Frame {
 				throw new NullPointerException("null frame");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(this.frame.focus, Stream.concat(this.frame.model.stream(), test(path,
 
 					direct -> {
 
