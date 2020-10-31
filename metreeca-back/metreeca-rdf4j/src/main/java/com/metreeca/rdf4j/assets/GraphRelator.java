@@ -74,24 +74,18 @@ final class GraphRelator extends GraphProcessor {
 
 							final Collection<Statement> model=fetch(connection, item, query);
 
-							// containers are currently virtual and respond always with 200 OK even if not described in
-							// the graph
+							return response
 
-							final Message<Response> message=response
-
+									// containers are  virtual and respond with 200 OK even if not in the graph
 									// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
-									.status(OK)
+									.status(resource && model.isEmpty() ? NotFound : OK)
 
 									.header("+Preference-Applied",
 											minimal ? include(LDP.PREFER_MINIMAL_CONTAINER) : ""
-									);
+									)
 
-							// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
-							// !!! add ldp:contains if items.path is not empty
-
-							return resource && model.isEmpty() ? response.status(NotFound) :
-									message.attribute(shape(), query.map(new Query.Probe<Shape>() {
+									.attribute(shape(), query.map(new Query.Probe<Shape>() {
 
 										@Override public Shape probe(final Items items) {
 											return items.shape(); // !!! add ldp:contains if items.path is not empty
@@ -107,7 +101,7 @@ final class GraphRelator extends GraphProcessor {
 
 									}))
 
-											.body(jsonld(), model);
+									.body(jsonld(), model);
 
 						})
 
@@ -134,14 +128,14 @@ final class GraphRelator extends GraphProcessor {
 										.status(OK)
 										.attribute(shape(), query.map(new Query.Probe<Shape>() {
 
-													@Override public Shape probe(final Items items) {
-														return field(LDP.CONTAINS, items.shape());
-													}
+											@Override public Shape probe(final Items items) {
+												return field(LDP.CONTAINS, items.shape());
+											}
 
-													@Override public Shape probe(final Stats stats) {
+											@Override public Shape probe(final Stats stats) {
 
-														return GraphEngine.StatsShape;
-													}
+												return GraphEngine.StatsShape;
+											}
 
 													@Override public Shape probe(final Terms terms) {
 														return GraphEngine.TermsShape;
