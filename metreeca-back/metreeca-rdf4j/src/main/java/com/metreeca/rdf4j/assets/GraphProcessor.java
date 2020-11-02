@@ -393,6 +393,8 @@ abstract class GraphProcessor {
 
 			final Shape shape=stats.shape();
 			final List<IRI> path=stats.path();
+			final int offset=stats.offset();
+			final int limit=stats.limit();
 
 			final Model model=new LinkedHashModel();
 
@@ -418,7 +420,8 @@ abstract class GraphProcessor {
 							+"\t(min({target}) as ?min)\n"
 							+"\t(max({target}) as ?max) \n"
 							+"\n"
-							+"\bwhere {\n"
+							+
+							"where {\n"
 							+"\n"
 							+"\t{roots}\n"
 							+"\n"
@@ -429,8 +432,15 @@ abstract class GraphProcessor {
 							+"\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as "
 							+"?type)\n"
 							+"\n"
-							+"} group by ?type having ( count({target}) > 0 ) order by desc(?count) ?type",
+							+"}\n"
+							+"\n"
+							+"group by ?type\n"
+							+"having ( count({target}) > 0 )\n"
+							+"order by desc(?count) ?type\n"
+							+"{offset}\n"
+							+"{limit}",
 
+					// !!! support slicing?
 
 					GraphEngine.Base,
 					target,
@@ -438,9 +448,10 @@ abstract class GraphProcessor {
 					roots(selector),
 					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					path(source, path, target)
+					path(source, path, target),
 
-					// !!! support ordering/slicing?
+					offset > 0 ? snippet("offset {offset}", offset) : null,
+					limit > 0 ? snippet("limit {limit}", limit) : null
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -491,6 +502,8 @@ abstract class GraphProcessor {
 
 			final Shape shape=terms.shape();
 			final List<IRI> path=terms.path();
+			final int offset=terms.offset();
+			final int limit=terms.limit();
 
 			final Model model=new LinkedHashModel();
 
@@ -510,8 +523,9 @@ abstract class GraphProcessor {
 							+"\t(sample(?l) as ?label)\n"
 							+"\t(sample(?n) as ?notes)\n"
 							+"\t(count(distinct {source}) as ?count)\n"
-							+"\n"
-							+"\bwhere {\n"
+							+
+							"\n"
+							+"where {\n"
 							+"\n"
 							+"\t{roots}\n"
 							+"\t\n"
@@ -522,17 +536,23 @@ abstract class GraphProcessor {
 							+"\toptional { {target} rdfs:label ?l }\n"
 							+"\toptional { {target} rdfs:comment ?n }\n"
 							+"\t\t\n"
-							+"} group by {target} having ( count({source}) > 0 ) order by desc(?count) ?value",
+							+"}\n"
+							+"\n"
+							+"group by {target} \n"
+							+"having ( count({source}) > 0 ) \n"
+							+"order by desc(?count) ?value\n"
+							+"{offset}\n"
+							+"{limit}",
 
 					target, source,
 
 					roots(selector),
 					filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					path(source, path, target)
+					path(source, path, target),
 
-					// !!! handle label/comment language
-					// !!! support ordering/slicing?
+					offset > 0 ? snippet("offset {offset}", offset) : null,
+					limit > 0 ? snippet("limit {limit}", limit) : null
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 				@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {

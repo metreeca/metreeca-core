@@ -16,57 +16,26 @@
 
 package com.metreeca.json.queries;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.*;
+import java.util.List;
 
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.emptyList;
 
 
 public final class Stats extends Query {
 
-	public static Stats stats(final Shape shape, final IRI... path) {
-		return new Stats(shape, asList(path));
-	}
-
-	public static Stats stats(final Shape shape, final List<IRI> path) {
-		return new Stats(shape, path);
+	public static Stats stats(final Shape shape, final List<IRI> path, int offset, int limit) {
+		return new Stats(shape, path, emptyList(), offset, limit);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Shape shape;
-
-	private final List<IRI> path;
-
-
-	private Stats(final Shape shape, final List<IRI> path) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null path or path step");
-		}
-
-		this.shape=shape;
-		this.path=new ArrayList<>(path);
-	}
-
-
-	public Shape shape() {
-		return shape;
-	}
-
-	public List<IRI> path() {
-		return unmodifiableList(path);
+	public Stats(final Shape shape, final List<IRI> path, final List<Order> orders, final int offset, final int limit) {
+		super(shape, path, orders, offset, limit);
 	}
 
 
@@ -79,26 +48,6 @@ public final class Stats extends Query {
 		}
 
 		return probe.probe(this);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Stats
-				&& shape.equals(((Stats)object).shape)
-				&& path.equals(((Stats)object).path);
-	}
-
-	@Override public int hashCode() {
-		return shape.hashCode()^path.hashCode();
-	}
-
-	@Override public String toString() {
-		return format(
-				"stats {\n\tshape: %s\n\tpath: %s\n}",
-				shape.toString().replace("\n", "\n\t"), path
-		);
 	}
 
 }

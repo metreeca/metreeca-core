@@ -59,8 +59,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
         
         ⋮
     
-        "_terms": "<path>"
-    
+        "_terms": "<path>",
+        "_offset": <integer>,
+        "_limit": <integer>
     }
 
 ```
@@ -88,8 +89,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
     
     ⋮
 
-    "_stats": "<path>"
-    
+    "_stats": "<path>",
+    "_offset": <integer>,
+    "_limit": <integer>
 }
 ```
 
