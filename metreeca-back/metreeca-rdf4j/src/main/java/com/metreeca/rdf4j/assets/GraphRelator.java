@@ -35,6 +35,8 @@ import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rdf4j.assets.GraphEngine.StatsShape;
+import static com.metreeca.rdf4j.assets.GraphEngine.TermsShape;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
@@ -92,11 +94,11 @@ final class GraphRelator extends GraphProcessor {
 										}
 
 										@Override public Shape probe(final Stats stats) {
-											return GraphEngine.StatsShape;
+											return StatsShape(stats);
 										}
 
 										@Override public Shape probe(final Terms terms) {
-											return GraphEngine.TermsShape;
+											return TermsShape(terms);
 										}
 
 									}))
@@ -111,7 +113,7 @@ final class GraphRelator extends GraphProcessor {
 
 				final IRI item=iri(request.item());
 
-				final Shape holder=target(request.attribute(shape()));
+				final Shape target=target(request.attribute(shape()));
 				final Shape digest=digest(request.attribute(shape()));
 
 				// containers are currently virtual and respond always with 200 OK even if not described in the graph
@@ -133,29 +135,28 @@ final class GraphRelator extends GraphProcessor {
 											}
 
 											@Override public Shape probe(final Stats stats) {
-
-												return GraphEngine.StatsShape;
+												return StatsShape(stats);
 											}
 
-													@Override public Shape probe(final Terms terms) {
-														return GraphEngine.TermsShape;
-													}
+											@Override public Shape probe(final Terms terms) {
+												return TermsShape(terms);
+											}
 
-												}))
+										}))
 												.body(jsonld(), matches);
 
 									} else { // include container description
 
-										// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
+								// !!! 404 NotFound or 410 Gone if previously known for non-virtual containers
 
-										matches.addAll(fetch(connection, item, items(holder)));
+								matches.addAll(fetch(connection, item, items(target)));
 
-										return response
-												.status(OK)
-												.attribute(shape(), and(holder, field(LDP.CONTAINS, digest)))
-												.body(jsonld(), matches);
+								return response
+										.status(OK)
+										.attribute(shape(), and(target, field(LDP.CONTAINS, digest)))
+										.body(jsonld(), matches);
 
-									}
+							}
 
 								})
 

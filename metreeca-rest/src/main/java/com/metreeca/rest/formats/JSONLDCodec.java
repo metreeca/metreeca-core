@@ -209,9 +209,7 @@ final class JSONLDCodec {
 	}
 
 	static Map<String, Field> fields(final Shape shape, final Map<String, String> keywords) {
-		return shape == null ? emptyMap() : shape
-
-				.map(new FieldsProbe())
+		return shape == null ? emptyMap() : Field.fields(shape)
 
 				.map(field -> entry(alias(field), field))
 
@@ -275,30 +273,6 @@ final class JSONLDCodec {
 		}
 	}
 
-
-	private static final class FieldsProbe extends Probe<Stream<Field>> {
-
-		@Override public Stream<Field> probe(final Field field) {
-			return Stream.of(field);
-		}
-
-		@Override public Stream<Field> probe(final And and) {
-			return and.shapes().stream().flatMap(shape -> shape.map(this));
-		}
-
-		@Override public Stream<Field> probe(final Or or) {
-			return or.shapes().stream().flatMap(shape -> shape.map(this));
-		}
-
-		@Override public Stream<Field> probe(final When when) {
-			return Stream.of(when.pass(), when.fail()).flatMap(this);
-		}
-
-		@Override public Stream<Field> probe(final Shape shape) {
-			return Stream.empty();
-		}
-
-	}
 
 	private static final class AliasesProbe extends Probe<Stream<String>> {
 

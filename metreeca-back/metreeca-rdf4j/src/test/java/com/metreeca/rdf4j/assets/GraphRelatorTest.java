@@ -111,7 +111,7 @@ final class GraphRelatorTest {
 									))
 
 									.as("only resources matching filter included")
-									.doesNotHaveStatement(null, ValuesTest.term("title"), literal("President"))
+									.doesNotHaveStatement(null, term("title"), literal("President"))
 							)
 					)
 			);
