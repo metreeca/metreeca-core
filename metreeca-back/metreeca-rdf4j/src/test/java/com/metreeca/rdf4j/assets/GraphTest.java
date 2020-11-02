@@ -33,14 +33,13 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.ValuesTest.*;
-import static com.metreeca.rdf4j.assets.Graph.auto;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
 import static java.util.Collections.singleton;
@@ -185,29 +184,6 @@ public final class GraphTest {
 						.hasSubset(data)
 
 		);
-	}
-
-
-	@Test void testGenerateAutoIncrementingIds() {
-		exec(() -> {
-
-			final Function<com.metreeca.rest.Request, String> auto=auto();
-
-			final com.metreeca.rest.Request request=new com.metreeca.rest.Request().base(Base).path("/target/");
-
-			final String one=auto.apply(request);
-			final String two=auto.apply(request);
-
-			assertThat(one).isNotEqualTo(two);
-
-			final String item=request.item();
-			final String stem=item.substring(0, item.lastIndexOf('/')+1);
-
-			assertThat(model())
-					.doesNotHaveStatement(iri(stem, one), null, null)
-					.doesNotHaveStatement(iri(stem, two), null, null);
-
-		});
 	}
 
 

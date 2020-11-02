@@ -42,20 +42,7 @@ import static com.metreeca.rest.formats.JSONLDFormat.*;
  *
  * <p>Handles model-driven CRUD operations on resource managed by a specific storage backend.</p>
  *
- * <p>When acting as a wrapper, ensures that requests are handled within a storage transaction:</p>
- *
- * <ul>
- *
- *      <li>if a transaction is not already active on the underlying storage, begins one and commits it on successful
- *     handler completion;</li>
- *
- *      <li>if the handler throws an exception, rolls back the transaction and rethrows the exception;</li>
- *
- *      <li>in either case, no action is taken if the transaction was already terminated inside the handler.</li>
- *
- * </ul>
- *
- * <p>Falls back to plain handler execution if transactions are not supported by this engine.</p>
+ * <p>When acting as a wrapper, ensures that requests are handled on a single connection to the storage backend.</p>
  */
 public interface Engine extends Wrapper {
 

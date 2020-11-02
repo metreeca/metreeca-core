@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.query.Operation;
 
 import java.util.function.Consumer;
 
+import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.assets.Logger.time;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
@@ -45,17 +46,17 @@ public final class Update extends Action<Update> implements Consumer<String> {
      */
     @Override public void accept(final String update) {
         if ( update != null && !update.isEmpty() ) {
-            graph().exec(connection -> {
-                time(() ->
+	        graph().exec(txn(connection -> {
+		        time(() ->
 
-                        configure(connection.prepareUpdate(SPARQL, update, base())).execute()
+				        configure(connection.prepareUpdate(SPARQL, update, base())).execute()
 
-                ).apply(t ->
+		        ).apply(t ->
 
-                        logger.info(this, String.format("executed in <%,d> ms", t))
+				        logger.info(this, String.format("executed in <%,d> ms", t))
 
-                );
-            });
+		        );
+	        }));
         }
     }
 
