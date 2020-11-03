@@ -30,6 +30,9 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 
 
+/**
+ * JSON-LD trimmer.
+ */
 final class JSONLDTrimmer {
 
 	private final IRI focus;
@@ -74,11 +77,11 @@ final class JSONLDTrimmer {
 
 					builder.add(label, value);
 
-				} else if ( langs.contains(label) && value instanceof JsonString ) {
+				} else if ( (langs.isEmpty() || langs.contains(label)) && value instanceof JsonString ) {
 
 					builder.add(label, value);
 
-				} else if ( langs.contains(label) && value instanceof JsonArray ) {
+				} else if ( (langs.isEmpty() || langs.contains(label)) && value instanceof JsonArray ) {
 
 					builder.add(label, createArrayBuilder(value.asJsonArray().stream()
 							.filter(JsonString.class::isInstance)

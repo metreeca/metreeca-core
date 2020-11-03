@@ -39,7 +39,9 @@ import static java.lang.String.join;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
 
-
+/**
+ * JSON-LD validator.
+ */
 final class JSONLDValidator {
 
 	private static <T> Predicate<T> negate(final Predicate<T> predicate) {

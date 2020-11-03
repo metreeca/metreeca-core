@@ -41,6 +41,9 @@ import static java.util.stream.Collectors.*;
 import static javax.json.Json.*;
 
 
+/**
+ * RDF to JSON-LD encoder.
+ */
 final class JSONLDEncoder {
 
 	private static final Collection<IRI> InternalTypes=new HashSet<>(asList(ValueType, ResourceType, LiteralType));

@@ -43,6 +43,9 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+/**
+ * JSON-LD query parser.
+ */
 final class JSONLDParser {
 
 	private static final java.util.regex.Pattern StepPattern=java.util.regex.Pattern.compile("(?:^|\\.)(\\w+\\b)");

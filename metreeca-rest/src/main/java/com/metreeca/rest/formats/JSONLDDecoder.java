@@ -41,6 +41,9 @@ import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 
 
+/**
+ * JSON-LD to RDF decoder.
+ */
 final class JSONLDDecoder {
 
 	private final IRI focus;
