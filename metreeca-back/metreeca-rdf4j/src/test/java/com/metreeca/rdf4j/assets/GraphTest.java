@@ -24,6 +24,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -34,14 +35,17 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.rdf4j.assets.Graph.auto;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rest.Context.asset;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -208,20 +212,41 @@ public final class GraphTest {
 
 
 	public static Model model(final Resource... contexts) {
-		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return export(connection, contexts); });
+		return asset(graph()).exec(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return construct(connection, sparql); });
+		return asset(graph()).exec(connection -> { return construct(connection, sparql); });
 	}
 
 	public static List<Map<String, Value>> tuples(final String sparql) {
-		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return select(connection, sparql); });
+		return asset(graph()).exec(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> com.metreeca.rest.Context.asset(graph()).exec(connection -> { connection.add(model, contexts); });
+		return () -> asset(graph()).exec(connection -> { connection.add(model, contexts); });
+	}
+
+	public static List<Statement> localized(final Collection<Statement> model, final String... tags) {
+		return model.stream()
+
+				.flatMap(s -> Optional
+
+						.of(s.getObject())
+						.filter(Literal.class::isInstance)
+						.map(Literal.class::cast)
+						.filter(l -> l.getDatatype().equals(XSD.STRING))
+						.map(Literal::getLabel)
+
+						.map(l -> Arrays.stream(tags).map(lang -> statement(s.getSubject(), s.getPredicate(),
+								lang.isEmpty() ? literal(l) : literal(l, lang))
+						))
+
+						.orElseGet(() -> Stream.of(s))
+				)
+
+				.collect(toList());
 	}
 
 

@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.Value;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.internal;
@@ -137,6 +138,16 @@ public final class Field extends Shape {
 	}
 
 
+	public static Stream<Field> fields(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shape.map(new FieldsProbe());
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final IRI name;
@@ -184,6 +195,33 @@ public final class Field extends Shape {
 
 	@Override public String toString() {
 		return "field("+format(name)+(shape.equals(and()) ? "" : ", "+shape)+")";
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class FieldsProbe extends Probe<Stream<Field>> {
+
+		@Override public Stream<Field> probe(final Field field) {
+			return Stream.of(field);
+		}
+
+		@Override public Stream<Field> probe(final And and) {
+			return and.shapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<Field> probe(final Or or) {
+			return or.shapes().stream().flatMap(shape -> shape.map(this));
+		}
+
+		@Override public Stream<Field> probe(final When when) {
+			return Stream.of(when.pass(), when.fail()).flatMap(this);
+		}
+
+		@Override public Stream<Field> probe(final Shape shape) {
+			return Stream.empty();
+		}
+
 	}
 
 }

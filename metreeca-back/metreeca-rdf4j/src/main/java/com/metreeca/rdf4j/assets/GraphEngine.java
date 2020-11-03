@@ -17,6 +17,9 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.queries.Stats;
+import com.metreeca.json.queries.Terms;
+import com.metreeca.json.shapes.Field;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
@@ -24,7 +27,6 @@ import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import static com.metreeca.json.Shape.*;
@@ -32,7 +34,9 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rdf4j.assets.GraphProcessor.convey;
 import static com.metreeca.rest.Context.asset;
 
 
@@ -57,31 +61,52 @@ public final class GraphEngine implements Engine {
 	static final IRI max=iri(Base, "max");
 	static final IRI min=iri(Base, "min");
 
+	static Shape StatsShape(final Stats query) {
 
-	private static final Shape TermShape=and(
-			field(RDFS.LABEL, optional(), datatype(XSD.STRING))
-	);
+		final Shape term=nested(query.shape(), query.path());
 
-	static final Shape TermsShape=and(
-			field(terms, multiple(),
-					field(value, required(), TermShape),
-					field(count, required(), datatype(XSD.INTEGER))
-			)
-	);
+		return and(
 
-	static final Shape StatsShape=and(
+				field(count, required(), datatype(XSD.INTEGER)),
+				field(min, optional(), term),
+				field(max, optional(), term),
 
-			field(count, required(), datatype(XSD.INTEGER)),
-			field(min, optional(), TermShape),
-			field(max, optional(), TermShape),
+				field(stats, multiple(),
+						field(count, required(), datatype(XSD.INTEGER)),
+						field(min, required(), term),
+						field(max, required(), term)
+				)
 
-			field(stats, multiple(),
-					field(count, required(), datatype(XSD.INTEGER)),
-					field(min, required(), TermShape),
-					field(max, required(), TermShape)
-			)
+		);
+	}
 
-	);
+	static Shape TermsShape(final Terms query) {
+		return and(
+				field(terms, multiple(),
+						field(value, required(), nested(query.shape(), query.path())),
+						field(count, required(), datatype(XSD.INTEGER))
+				)
+		);
+	}
+
+
+	private static Shape nested(final Shape shape, final Iterable<IRI> path) {
+
+		Shape nested=convey(shape);
+
+		for (final IRI step : path) {
+			nested=fields(nested)
+
+					.filter(field -> field.name().equals(step))
+					.findFirst()
+					.map(Field::shape)
+
+					.orElseThrow(() -> new IllegalArgumentException(String.format("unknown path step <%s>", step)));
+		}
+
+		return nested;
+
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

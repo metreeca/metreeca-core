@@ -517,7 +517,7 @@ final class JSONLDParserTest {
 
 		@Test void testParseTermsQuery() {
 
-			terms("{ '_terms': 'first.rest' }", shape, terms -> {
+			terms("{ '_terms': 'first.rest', '_offset': 1, '_limit': 2 }", shape, terms -> {
 
 				assertThat(filter(shape, and()))
 						.as("shape")
@@ -527,13 +527,21 @@ final class JSONLDParserTest {
 						.as("path")
 						.containsExactly(RDF.FIRST, RDF.REST);
 
+				assertThat(terms.offset())
+						.as("offset")
+						.isEqualTo(1);
+
+				assertThat(terms.limit())
+						.as("limit")
+						.isEqualTo(2);
+
 			});
 
 		}
 
 		@Test void testParseStatsQuery() {
 
-			stats("{ '_stats': 'first.rest' }", shape, stats -> {
+			stats("{ '_stats': 'first.rest', '_offset': 1, '_limit': 2 }", shape, stats -> {
 
 				assertThat(filter(shape, and()))
 						.as("shape")
@@ -542,6 +550,14 @@ final class JSONLDParserTest {
 				assertThat(stats.path())
 						.as("path")
 						.containsExactly(RDF.FIRST, RDF.REST);
+
+				assertThat(stats.offset())
+						.as("offset")
+						.isEqualTo(1);
+
+				assertThat(stats.limit())
+						.as("limit")
+						.isEqualTo(2);
 
 			});
 

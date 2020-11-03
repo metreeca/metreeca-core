@@ -111,7 +111,40 @@ final class GraphRelatorTest {
 									))
 
 									.as("only resources matching filter included")
-									.doesNotHaveStatement(null, ValuesTest.term("title"), literal("President"))
+									.doesNotHaveStatement(null, term("title"), literal("President"))
+							)
+					)
+			);
+		}
+
+		@Test void testSliceTermsQueries() {
+			exec(model(small()), () -> new GraphRelator()
+
+					.handle(request()
+							.query("_terms=office&_offset=1&_limit=3")
+					)
+
+					.accept(response -> assertThat(response)
+
+							.hasStatus(Response.OK)
+							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
+
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
+
+									.isIsomorphicTo(model(""
+											+"construct { \n"
+											+"\n"
+											+"\t<employees/> app:terms [app:value ?o; app:count ?c]. \n"
+											+"\t?o rdfs:label ?l\n"
+											+"\n"
+											+"} where { { select ?o ?l (count(?e) as ?c) {\n"
+											+"\n"
+											+"\t?e a :Employee; :office ?o.\n"
+											+"\t?o rdfs:label ?l.\n"
+											+"\n"
+											+"} group by ?o ?l order by desc(?c) offset 1 limit 3 } }"
+									))
+
 							)
 					)
 			);

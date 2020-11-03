@@ -64,6 +64,7 @@ import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -213,19 +214,19 @@ final class GraphProcessorTest {
 						.as("default (on value)")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?employee"));
 
-				assertThat(actual.apply(items(shape, increasing(RDFS.LABEL))))
+				assertThat(actual.apply(items(shape, asList(increasing(RDFS.LABEL)))))
 						.as("custom increasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?label"));
 
-				assertThat(actual.apply(items(shape, decreasing(RDFS.LABEL))))
+				assertThat(actual.apply(items(shape, asList(decreasing(RDFS.LABEL)))))
 						.as("custom decreasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?label)"));
 
-				assertThat(actual.apply(items(shape, increasing(term("office")), increasing(RDFS.LABEL))))
+				assertThat(actual.apply(items(shape, asList(increasing(term("office")), increasing(RDFS.LABEL)))))
 						.as("custom combined")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?office ?label"));
 
-				assertThat(actual.apply(items(shape, decreasing())))
+				assertThat(actual.apply(items(shape, asList(decreasing()))))
 						.as("custom on root")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?employee)"));
 
@@ -239,7 +240,7 @@ final class GraphProcessorTest {
 		@Test void testEmptyResultSet() {
 			exec(() -> assertThat(query(
 
-					Root, stats(field(RDF.TYPE, all(RDF.NIL)))
+					Root, stats(field(RDF.TYPE, all(RDF.NIL)), asList(), 0, 0)
 
 			)).isIsomorphicTo(decode(
 
@@ -251,7 +252,7 @@ final class GraphProcessorTest {
 		@Test void testEmptyProjection() {
 			exec(() -> assertThat(query(
 
-					Root, stats(clazz(term("Employee")))
+					Root, stats(clazz(term("Employee")), asList(), 0, 0)
 
 			)).isIsomorphicTo(graph(
 
@@ -279,7 +280,7 @@ final class GraphProcessorTest {
 		@Test void testRootConstraints() {
 			exec(() -> assertThat(query(
 
-					Root, stats(all(item("employees/1370")), term("account"))
+					Root, stats(all(item("employees/1370")), asList(term("account")), 0, 0)
 
 			)).isIsomorphicTo(graph(
 
@@ -308,7 +309,7 @@ final class GraphProcessorTest {
 		@Test void testEmptyResultSet() {
 			exec(() -> assertThat(query(
 
-					Root, terms(field(RDF.TYPE, all(RDF.NIL)))
+					Root, terms(field(RDF.TYPE, all(RDF.NIL)), asList(), 0, 0)
 
 			)).isEmpty());
 		}
@@ -316,7 +317,7 @@ final class GraphProcessorTest {
 		@Test void testEmptyProjection() {
 			exec(() -> assertThat(query(
 
-					Root, terms(clazz(term("Employee")))
+					Root, terms(clazz(term("Employee")), asList(), 0, 0)
 
 			)).isIsomorphicTo(graph(
 
@@ -342,7 +343,7 @@ final class GraphProcessorTest {
 		@Test void testRootConstraints() {
 			exec(() -> assertThat(query(
 
-					Root, terms(all(item("employees/1370")), term("account"))
+					Root, terms(all(item("employees/1370")), asList(term("account")), 0, 0)
 
 			)).isIsomorphicTo(graph(
 

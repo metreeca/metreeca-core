@@ -108,8 +108,8 @@ final class JSONLDParser {
 
 		final Shape filtered=and(baseline, Guard.filter().then(filter)); // filtering only >> don't include in results
 
-		return terms != null ? Terms.terms(filtered, terms)
-				: stats != null ? Stats.stats(filtered, stats)
+		return terms != null ? Terms.terms(filtered, terms, offset, limit)
+				: stats != null ? Stats.stats(filtered, stats, offset, limit)
 				: items(filtered, order, offset, limit);
 	}
 
