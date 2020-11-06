@@ -57,7 +57,7 @@ import static java.util.Collections.emptyMap;
 import static javax.json.Json.*;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-final class JSONLDValidatorTest {
+final class JSONLDScannerTest {
 
 	private static final Literal x=literal("x");
 	private static final Literal y=literal("y");
@@ -76,7 +76,7 @@ final class JSONLDValidatorTest {
 	}
 
 	private Either<Trace, JsonObject> validate(final Shape shape, final JsonObjectBuilder builder) {
-		return new JSONLDValidator(iri("app:/"), shape.expand(), emptyMap()).validate(builder.build());
+		return new JSONLDScanner(iri("app:/"), shape.expand(), emptyMap()).validate(builder.build());
 	}
 
 

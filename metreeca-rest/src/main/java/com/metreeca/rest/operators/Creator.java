@@ -49,7 +49,7 @@ import static java.util.UUID.randomUUID;
  * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} area;</li>
  *
- * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(IRI, Shape, JsonObject) validation};</li>
+ * <li>engine-assisted request payload {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject) scanning};</li>
  *
  * <li>resource {@linkplain #creator(Function) slug} generation;</li>
  *
@@ -123,7 +123,7 @@ public final class Creator extends Delegator {
 
 				.with(throttler(Create, Detail))
 
-				.with(validator())
+				.with(scanner())
 
 		));
 	}

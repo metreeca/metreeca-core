@@ -42,7 +42,9 @@ import static javax.json.Json.*;
 
 
 /**
- * RDF to JSON-LD encoder.
+ * Shape-driven RDF to JSON-LD encoder.
+ *
+ * <p>Converts RDF models to strictly compacted/framed JSON-LD descriptions.</p>
  */
 final class JSONLDEncoder {
 

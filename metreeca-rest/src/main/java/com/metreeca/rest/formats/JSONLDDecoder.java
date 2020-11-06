@@ -42,7 +42,9 @@ import static javax.json.Json.createObjectBuilder;
 
 
 /**
- * JSON-LD to RDF decoder.
+ * Shape-driven JSON-LD to RDF decoder.
+ *
+ * <p>Converts leniently compacted/framed JSON-LD descriptions to RDF models.</p>
  */
 final class JSONLDDecoder {
 

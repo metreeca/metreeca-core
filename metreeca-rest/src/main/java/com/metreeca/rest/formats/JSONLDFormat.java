@@ -122,7 +122,19 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	}
 
 
-	public static Either<Trace, JsonObject> validate(final IRI focus, final Shape shape, final JsonObject object) {
+	/**
+	 * Verifies the well-formedness of a leniently compacted/framed JSON-LD description.
+	 *
+	 * @param focus the IRI of the resource described by {@code json}
+	 * @param shape the expected description shape
+	 * @param json  the JSON-LD description to be scanned
+	 *
+	 * @return either a shape validation trace reporting well-formedness issues or the well-formed {@code json}
+	 * description
+	 *
+	 * @throws NullPointerException if any parameter is {@code null}
+	 */
+	public static Either<Trace, JsonObject> scan(final IRI focus, final Shape shape, final JsonObject json) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -132,14 +144,25 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( object == null ) {
-			throw new NullPointerException("null object");
+		if ( json == null ) {
+			throw new NullPointerException("null json");
 		}
 
-		return new JSONLDValidator(focus, shape, asset(keywords())).validate(object);
+		return new JSONLDScanner(focus, shape, asset(keywords())).validate(json);
 	}
 
-	public static JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
+	/**
+	 * Removes out of envelope fields from a strictly compacted/framed JSON-LD description.
+	 *
+	 * @param focus the IRI of the resource described by {@code json}
+	 * @param shape the expected description shape
+	 * @param json  the JSON-LD description to be trimmed
+	 *
+	 * @return a subset of the {@code json} description trimmed according to {@code shape}
+	 *
+	 * @throws NullPointerException if any parameter is {@code null}
+	 */
+	public static JsonObject trim(final IRI focus, final Shape shape, final JsonObject json) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -149,11 +172,11 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null shape");
 		}
 
-		if ( object == null ) {
-			throw new NullPointerException("null object");
+		if ( json == null ) {
+			throw new NullPointerException("null json");
 		}
 
-		return new JSONLDTrimmer(focus, shape, asset(keywords())).trim(object).asJsonObject();
+		return new JSONLDTrimmer(focus, shape, asset(keywords())).trim(json).asJsonObject();
 	}
 
 

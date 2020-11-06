@@ -40,9 +40,11 @@ import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
 
 /**
- * JSON-LD validator.
+ * Shape-driven JSON-LD scanner.
+ *
+ * <p>Verifies the well-formedness of leniently compacted/framed JSON-LD descriptions.</p>
  */
-final class JSONLDValidator {
+final class JSONLDScanner {
 
 	private static <T> Predicate<T> negate(final Predicate<T> predicate) {
 		return predicate.negate();
@@ -55,7 +57,7 @@ final class JSONLDValidator {
 	private final Shape shape;
 	private final Map<String, String> keywords;
 
-	JSONLDValidator(final IRI focus, final Shape shape, final Map<String, String> keywords) {
+	JSONLDScanner(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
 		this.shape=driver(shape);

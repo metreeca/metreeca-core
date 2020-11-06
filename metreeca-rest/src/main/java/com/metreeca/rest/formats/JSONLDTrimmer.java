@@ -31,7 +31,9 @@ import static javax.json.Json.createObjectBuilder;
 
 
 /**
- * JSON-LD trimmer.
+ * Shape-driven JSON-LD trimmer.
+ *
+ * <p>Removes out of envelope fields from strictly compacted/framed JSON-LD descriptions.</p>
  */
 final class JSONLDTrimmer {
 

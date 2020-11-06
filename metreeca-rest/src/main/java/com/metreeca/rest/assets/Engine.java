@@ -126,15 +126,15 @@ public interface Engine extends Wrapper {
 	}
 
 	/**
-	 * Creates a validator wrapper.
+	 * Creates a scanner wrapper.
 	 *
-	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#validate(IRI, Shape, JsonObject)
-	 * validation} of request JSON-LD bodies
+	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject)
+	 * scanning} of request JSON-LD bodies
 	 */
-	public static Wrapper validator() {
+	public static Wrapper scanner() {
 		return handler -> request -> request.body(json())
 
-				.flatMap(object -> validate(iri(request.item()), request.attribute(shape()), object).fold(
+				.flatMap(object -> scan(iri(request.item()), request.attribute(shape()), object).fold(
 						trace -> Left(status(UnprocessableEntity, trace.toJSON())),
 						model -> Right(handler.handle(request))
 				))
