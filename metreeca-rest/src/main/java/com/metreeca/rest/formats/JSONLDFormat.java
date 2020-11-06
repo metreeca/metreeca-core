@@ -148,7 +148,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			throw new NullPointerException("null json");
 		}
 
-		return new JSONLDScanner(focus, shape, asset(keywords())).validate(json);
+		return new JSONLDScanner(focus, shape, asset(keywords())).scan(json);
 	}
 
 	/**

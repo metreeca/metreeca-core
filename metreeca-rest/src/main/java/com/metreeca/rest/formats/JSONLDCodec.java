@@ -20,10 +20,12 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
 import java.util.function.BinaryOperator;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -33,8 +35,7 @@ import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Xtream.entry;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 final class JSONLDCodec {
 
@@ -49,12 +50,12 @@ final class JSONLDCodec {
 		).expand(); // add inferred constraints to drive json shorthands
 	}
 
+	static <V> V error(final String message, final Object... args) {
+		throw new IllegalArgumentException(format(message, args));
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static boolean scalar(final Shape shape) {
-		return maxCount(shape).filter(limit -> limit == 1).isPresent();
-	}
 
 	static boolean tagged(final Shape shape) {
 		return datatype(shape).filter(RDF.LANGSTRING::equals).isPresent();
@@ -85,6 +86,14 @@ final class JSONLDCodec {
 		}));
 	}
 
+	static Optional<Collection<Value>> range(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ValueProbe<Collection<Value>>() {
+
+			@Override public Collection<Value> probe(final Range range) { return range.values(); }
+
+		}));
+	}
+
 	static Optional<Set<String>> langs(final Shape shape) {
 		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new ValueProbe<Set<String>>() {
 
@@ -111,12 +120,18 @@ final class JSONLDCodec {
 
 		private V value(final Stream<Shape> shapes) {
 
-			final Set<V> names=shapes
+			final Set<V> values=shapes
 					.map(shape -> shape.map(this))
 					.filter(Objects::nonNull)
 					.collect(toSet());
 
-			return names.size() == 1 ? names.iterator().next() : null;
+			if ( values.size() > 1 ) {
+				error("conflicting values {%s}",
+						values.stream().map(Object::toString).collect(joining(", "))
+				);
+			}
+
+			return values.isEmpty() ? null : values.iterator().next();
 
 		}
 
@@ -131,7 +146,7 @@ final class JSONLDCodec {
 	private static final BinaryOperator<Integer> max=(x, y) ->
 			x == null ? y : y == null ? x : x.compareTo(y) >= 0 ? x : y;
 
-	// ;(jdk) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
+	// ;(jdk-1.8) replacing compareTo() with Math.min/max() causes a NullPointerException during Integer unboxing
 
 
 	static Optional<Integer> minCount(final Shape shape) {
@@ -200,6 +215,53 @@ final class JSONLDCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	static Predicate<Collection<? extends Value>> all(final Shape shape) {
+		return values -> !Boolean.FALSE.equals(shape.map(new SetProbe() {
+
+			@Override public Boolean probe(final All all) { return values.containsAll(all.values()); }
+
+		}));
+	}
+
+	static Predicate<Collection<? extends Value>> any(final Shape shape) {
+		return values -> !Boolean.FALSE.equals(shape.map(new SetProbe() {
+
+			@Override public Boolean probe(final Any any) { return any.values().stream().anyMatch(values::contains); }
+
+		}));
+	}
+
+
+	private abstract static class SetProbe extends Probe<Boolean> {
+
+		private static boolean or(final Boolean x, final Boolean y) {
+			return x == null ? y : y == null ? x : x || y;
+		}
+
+		private static boolean and(final Boolean x, final Boolean y) {
+			return x == null ? y : y == null ? x : x && y;
+		}
+
+
+		@Override public Boolean probe(final And and) {
+			return and.shapes().stream().map(this).reduce(true, SetProbe::and);
+		}
+
+		@Override public Boolean probe(final Or or) {
+			return or.shapes().stream().map(this).reduce(false, SetProbe::or);
+		}
+
+		@Override public Boolean probe(final When when) {
+			return Stream.of(
+					when.pass().map(this), when.fail().map(this)
+			).reduce(false, SetProbe::or);
+		}
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private static final Pattern AliasPattern=Pattern.compile("\\w+");
 	private static final Pattern NamedIRIPattern=Pattern.compile("([/#:])(?<name>[^/#:]+)(/|#|#_|#id|#this)?$");
 
@@ -224,32 +286,22 @@ final class JSONLDCodec {
 						return entry;
 
 					} else if ( !AliasPattern.matcher(alias).matches() ) {
-
-						throw new IllegalArgumentException(format(
-								"malformed alias <%s> for <field(%s)>", alias, field.name()
-						));
-
+						error("malformed alias <%s> for <field(%s)>",
+								alias, field.name()
+						);
 					} else if ( alias.startsWith("@") || keywords.containsValue(alias) ) {
-
-						throw new IllegalArgumentException(format(
-								"reserved alias <%s> for <field(%s)>", alias, field.name()
-						));
-
-					} else {
+						error("reserved alias <%s> for <field(%s)>",
+								alias, field.name()
+						);} else {
 
 						return entry;
-
 					}
 
 				})
 
-				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
-
-					throw new IllegalArgumentException(format(
-							"clashing aliases for <field(%s)> / <field(%s)>", x.name(), y.name()
-					));
-
-				}, LinkedHashMap::new));
+				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> error(
+						"clashing aliases for <field(%s)> / <field(%s)>", x.name(), y.name()
+				), LinkedHashMap::new));
 	}
 
 
@@ -259,9 +311,8 @@ final class JSONLDCodec {
 
 		if ( aliases.size() > 1 ) { // clashing aliases
 
-			throw new IllegalArgumentException(format(
-					"multiple aliases <%s> for <field(%s)>", aliases, field.name()
-			));
+			return error("multiple aliases <%s> for <field(%s)>", aliases, field.name()
+			);
 
 		} else if ( aliases.size() == 1 ) { // user-defined alias
 
@@ -276,7 +327,7 @@ final class JSONLDCodec {
 					.map(matcher -> matcher.group("name"))
 					.map(alias -> direct(field.name()) ? alias : alias+"Of") // !!! inverse?
 
-					.orElseThrow(() -> new IllegalArgumentException(format(
+					.orElseThrow(() -> new IllegalArgumentException(String.format(
 							"undefined alias for <field(%s)>", field.name()
 					)));
 

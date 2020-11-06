@@ -42,6 +42,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Locale.ROOT;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.joining;
 
 
 /**
@@ -465,6 +466,11 @@ public final class Values {
 
 
 	//// Formatters ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String format(final Collection<? extends Value> values) {
+		return values == null ? null : values.stream().map(Values::format).collect(joining(", "));
+	}
+
 
 	public static String format(final Value value) {
 		return value == null ? null

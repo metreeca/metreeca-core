@@ -52,7 +52,7 @@ final class JSONLDCodecTest {
 			assertThat(minCount(and(minCount(10), minCount(100)))).contains(100);
 		}
 
-		@Test void testInspectDisjunction() {
+		@Test void testInspectOr() {
 			assertThat(minCount(or(minCount(10), minCount(100)))).contains(10);
 		}
 

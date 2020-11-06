@@ -30,10 +30,15 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Trace.trace;
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.compare;
+import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.is;
+import static com.metreeca.json.Values.lang;
+import static com.metreeca.json.Values.text;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.*;
@@ -67,9 +72,9 @@ final class JSONLDScanner {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Either<Trace, JsonObject> validate(final JsonObject object) {
+	Either<Trace, JsonObject> scan(final JsonObject object) {
 
-		final Trace trace=validate(shape, singleton(object));
+		final Trace trace=scan(shape, singleton(object));
 
 		return trace.empty() ? Right(object) : Left(trace);
 
@@ -78,7 +83,7 @@ final class JSONLDScanner {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Trace validate(final Shape shape, final Collection<JsonValue> values) {
+	private Trace scan(final Shape shape, final Collection<JsonValue> values) {
 
 		final boolean tagged=tagged(shape);
 
@@ -86,7 +91,7 @@ final class JSONLDScanner {
 
 		return Stream.concat(
 
-				Stream.of(shape.map(new ValidatingProbe(focus, shape, fields, values))),
+				Stream.of(shape.map(new ScanningProbe(focus, shape, fields, values))),
 
 				values.stream() // validate shape envelope
 
@@ -110,7 +115,7 @@ final class JSONLDScanner {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class ValidatingProbe extends Shape.Probe<Trace> {
+	private final class ScanningProbe extends Shape.Probe<Trace> {
 
 		private final IRI focus;
 		private final Shape shape;
@@ -120,7 +125,7 @@ final class JSONLDScanner {
 
 		private final JSONLDDecoder decoder;
 
-		private ValidatingProbe(
+		private ScanningProbe(
 				final IRI focus, final Shape shape, final Map<String, Field> fields, final Collection<JsonValue> values
 		) {
 
@@ -140,15 +145,6 @@ final class JSONLDScanner {
 
 		private Stream<Value> values(final JsonValue value) {
 			return decoder.values(value, shape).map(Map.Entry::getKey);
-		}
-
-
-		private String format(final Value value) {
-			return Values.format(value);
-		}
-
-		private String format(final Collection<Value> values) {
-			return values.stream().map(Values::format).collect(joining(", "));
 		}
 
 
@@ -178,7 +174,7 @@ final class JSONLDScanner {
 
 							|| is(value(value), iri)
 					))
-					.map(value -> String.format("<%s> is not of datatype <%s>", value, iri))
+					.map(value -> format("<%s> is not of datatype <%s>", value, iri))
 			);
 		}
 
@@ -188,7 +184,7 @@ final class JSONLDScanner {
 
 			return trace(this.values.stream()
 					.filter(value -> !values.contains(value(value)))
-					.map(value -> String.format("<%s> is not in the expected value range <%s>", value, format(values)))
+					.map(value -> format("<%s> is not in the expected value range <%s>", value, format(values)))
 			);
 		}
 
@@ -205,7 +201,7 @@ final class JSONLDScanner {
 						return tags.isEmpty() && tag != null || tags.contains(tag);
 
 					}))
-					.map(value -> String.format(
+					.map(value -> format(
 							"<%s> is not in the expected language set {%s}", format(value), join(", ", tags)
 					))
 			);
@@ -218,7 +214,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) > 0))
-					.map(value -> String.format("<%s> is not strictly greater than <%s>", value, format(limit)))
+					.map(value -> format("<%s> is not strictly greater than <%s>", value, format(limit)))
 			);
 		}
 
@@ -228,7 +224,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) < 0))
-					.map(value -> String.format("<%s> is not strictly less than <%s>", value, format(limit)))
+					.map(value -> format("<%s> is not strictly less than <%s>", value, format(limit)))
 			);
 		}
 
@@ -238,7 +234,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) >= 0))
-					.map(value -> String.format("<%s> is not greater than or equal to <%s>", value, format(limit)))
+					.map(value -> format("<%s> is not greater than or equal to <%s>", value, format(limit)))
 			);
 		}
 
@@ -248,7 +244,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> compare(value(value), limit) <= 0))
-					.map(value -> String.format("<%s> is not less than or equal to <%s>", value, format(limit)))
+					.map(value -> format("<%s> is not less than or equal to <%s>", value, format(limit)))
 			);
 		}
 
@@ -259,7 +255,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> text(value(value)).length() >= limit))
-					.map(value -> String.format("<%s> length is not greater than or equal to <%s>", value, limit))
+					.map(value -> format("<%s> length is not greater than or equal to <%s>", value, limit))
 			);
 		}
 
@@ -269,7 +265,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> text(value(value)).length() <= limit))
-					.map(value -> String.format("<%s> length is not less than or equal to <%s>", value, limit))
+					.map(value -> format("<%s> length is not less than or equal to <%s>", value, limit))
 			);
 		}
 
@@ -285,7 +281,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> compiled.matcher(text(value(value))).matches()))
-					.map(value -> String.format("<%s> textual value doesn't match <%s>", value, compiled.pattern()))
+					.map(value -> format("<%s> textual value doesn't match <%s>", value, compiled.pattern()))
 			);
 		}
 
@@ -297,7 +293,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> predicate.test(text(value(value)))))
-					.map(value -> String.format("<%s> textual value is not like <%s>", value, like.keywords()))
+					.map(value -> format("<%s> textual value is not like <%s>", value, like.keywords()))
 			);
 		}
 
@@ -309,7 +305,7 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.filter(negate(value -> predicate.test(text(value(value)))))
-					.map(value -> String.format("<%s> textual value has not stem <%s>", value, prefix))
+					.map(value -> format("<%s> textual value has not stem <%s>", value, prefix))
 			);
 		}
 
@@ -320,7 +316,7 @@ final class JSONLDScanner {
 			final int limit=minCount.limit();
 
 			return count >= limit ? trace()
-					: trace(String.format("value count is not greater than or equal to <%s>", limit));
+					: trace(format("value count is not greater than or equal to <%s>", limit));
 		}
 
 		@Override public Trace probe(final MaxCount maxCount) {
@@ -329,7 +325,7 @@ final class JSONLDScanner {
 			final int limit=maxCount.limit();
 
 			return count <= limit ? trace()
-					: trace(String.format("value count is not less than or equal to <%s>", limit));
+					: trace(format("value count is not less than or equal to <%s>", limit));
 		}
 
 		@Override public Trace probe(final All all) {
@@ -338,7 +334,7 @@ final class JSONLDScanner {
 			final Set<Value> actual=this.values.stream().map(this::value).collect(toSet());
 
 			return actual.containsAll(values) ? trace()
-					: trace(String.format("values don't include all the expected set {%s}", format(values)));
+					: trace(format("values don't include all the expected set {%s}", format(values)));
 		}
 
 		@Override public Trace probe(final Any any) {
@@ -347,8 +343,7 @@ final class JSONLDScanner {
 			final Set<Value> actual=this.values.stream().map(this::value).collect(toSet());
 
 			return values.stream().anyMatch(actual::contains) ? trace()
-					: trace(String.format("values don't include at least one of the expected set {%s}",
-					format(values)));
+					: trace(format("values don't include at least one of the expected set {%s}", format(values)));
 		}
 
 		@Override public Trace probe(final Localized localized) {
@@ -361,7 +356,7 @@ final class JSONLDScanner {
 
 					.filter(negate(entry -> entry.getValue().size() <= 1))
 
-					.map(entry -> String.format("multiple values for <%s> language tag", entry.getKey()))
+					.map(entry -> format("multiple values for <%s> language tag", entry.getKey()))
 			);
 		}
 
@@ -372,14 +367,13 @@ final class JSONLDScanner {
 					.filter(entry -> entry.getValue().equals(field))
 					.map(Map.Entry::getKey)
 					.findFirst()
-					.orElseThrow(() -> new RuntimeException(String.format("undefined alias for field <%s>",
-							field.name())));
+					.orElseThrow(() -> new RuntimeException(format("undefined alias for field <%s>", field.name())));
 
 			return values.stream().map(value -> {
 
 				if ( value instanceof JsonObject ) { // validate the field shape on the new field values
 
-					return trace(alias, validate(field.shape(), Optional
+					return trace(alias, scan(field.shape(), Optional
 							.ofNullable(value.asJsonObject().get(alias))
 							.map(v -> v instanceof JsonArray ? v.asJsonArray() : singleton(v))
 							.orElseGet(Collections::emptySet)
@@ -387,7 +381,7 @@ final class JSONLDScanner {
 
 				} else {
 
-					return trace(String.format("<%s> is not as a structured object", value));
+					return trace(format("<%s> is not as a structured object", value));
 
 				}
 

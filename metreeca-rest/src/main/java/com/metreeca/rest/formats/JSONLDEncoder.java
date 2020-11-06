@@ -17,7 +17,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
 import com.metreeca.json.shapes.Field;
 
 import org.eclipse.rdf4j.model.*;
@@ -36,7 +35,6 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
 import static javax.json.Json.*;
 
@@ -96,10 +94,6 @@ final class JSONLDEncoder {
 		return resource(focus, shape, model, resource -> false).asJsonObject();
 	}
 
-	JsonValue encode(final Value value) {
-		return value(value, shape, emptySet(), resource -> true);
-	}
-
 
 	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -108,15 +102,42 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) {
 
-		if ( tagged(shape) && values.stream().map(Values::lang).allMatch(Objects::nonNull) ) { // tagged literals
+		final int minCount=minCount(shape).orElse(0);
+		final int maxCount=maxCount(shape).orElse(Integer.MAX_VALUE);
 
-			return taggeds(values, shape);
+		if ( values.size() < minCount ) {
+			error("minCount(%d) constraint violation / count = <%d>", minCount, values.size());
+		}
 
-		} else if ( scalar(shape) && values.size() == 1 ) { // single subject
+		if ( values.size() > maxCount ) {
+			error("maxCount(%d) constraint violation / count = <%d>", maxCount, values.size());
+		}
 
-			return value(values.iterator().next(), shape, model, trail);
+		if ( !all(shape).test(values) ) {
+			error("all(*) constraint violation"); // !!! improve and/or reporting
+		}
 
-		} else { // multiple subjects
+		if ( !any(shape).test(values) ) {
+			error("any(*) constraint violation"); // !!! improve and/or reporting
+		}
+
+		datatype(shape).ifPresent(datatype -> values.stream().filter(value -> !is(value, datatype)).forEach(value ->
+				error("datatype(%s) constraint violation / count = <%s>", datatype, type(value))
+		));
+
+		range(shape).ifPresent(range -> values.stream().filter(value -> !range.contains(value)).forEach(value ->
+				error("range(%s) constraint violation / value = ", format(range), format(value))
+		));
+
+		if ( tagged(shape) ) { // tagged literals
+
+			return taggeds(values, shape, maxCount == 1);
+
+		} else if ( maxCount == 1 ) { // single value
+
+			return value(values.iterator().next(), shape, model, trail); // values required to be not empty
+
+		} else { // multiple values
 
 			final JsonArrayBuilder array=createArrayBuilder();
 
@@ -135,7 +156,7 @@ final class JSONLDEncoder {
 
 		return value instanceof Resource ? resource((Resource)value, shape, model, trail)
 				: value instanceof Literal ? literal((Literal)value, shape)
-				: null;
+				: null; // unexpected
 
 	}
 
@@ -347,33 +368,43 @@ final class JSONLDEncoder {
 
 	//// Tagged Literals //////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue taggeds(final Collection<? extends Value> values, final Shape shape) {
+	private JsonValue taggeds(final Collection<? extends Value> values, final Shape shape, final boolean scalar) { //
+		// !!! refactor
 
-		final boolean unique=localized(shape) || scalar(shape);
-
+		final boolean localized=localized(shape);
 		final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
 
 		final Map<String, List<String>> langToStrings=values.stream()
-
-				.filter(Literal.class::isInstance)
-				.map(Literal.class::cast)
-
+				.map(Literal.class::cast) // datatype already checked by values()
 				.collect(groupingBy(
-						literal -> literal.getLanguage().orElse(""),
+						literal -> literal.getLanguage().orElse(""), // datatype already checked by values()
 						LinkedHashMap::new,
 						mapping(Value::stringValue, toList())
 				));
 
-		if ( langs.size() == 1 && langToStrings.keySet().equals(langs) ) { // known language
+		if ( localized && langToStrings.values().stream().anyMatch(strings -> strings.size() > 1) ) {
+			throw new IllegalArgumentException(String.format(
+					"localized() constraint violation / multiple values for {%s} tags", langToStrings.entrySet()
+							.stream()
+							.filter(entry -> entry.getValue().size() > 1)
+							.map(Map.Entry::getKey)
+							.collect(joining(", "))
+			));
+		}
 
-			final List<String> strings=langToStrings
-					.entrySet()
-					.stream()
-					.findFirst()
-					.map(Map.Entry::getValue)
-					.orElseGet(Collections::emptyList);
+		if ( !langs.isEmpty() && !langs.containsAll(langToStrings.keySet()) ) {
+			throw new IllegalArgumentException(String.format(
+					"lang(%s) constraint violation / unexpected values for {%s} tags",
+					String.join(", ", langs),
+					langToStrings.keySet().stream().filter(tag -> !langs.contains(tag)).collect(joining(", "))
+			));
+		}
 
-			if ( unique && strings.size() == 1 ) { // single value
+		if ( langs.size() == 1 ) { // known language
+
+			final List<String> strings=langToStrings.values().iterator().next(); // values required to be non empty
+
+			if ( localized || scalar ) { // single value
 
 				return createValue(strings.get(0));
 
@@ -389,10 +420,9 @@ final class JSONLDEncoder {
 
 			langToStrings.forEach((lang, strings) -> {
 
-				if ( unique && strings.size() == 1 ) { // single value
+				if ( localized || scalar ) { // single value
 
 					builder.add(lang, createValue(strings.get(0)));
-
 
 				} else { // multiple values
 
