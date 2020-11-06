@@ -244,13 +244,13 @@ Content-Type: application/json;charset=UTF-8
 
 {
     "price": {
-        "": [
-            "<9999.0> is not strictly less than <\"1000.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>>"
+        "@errors": [
+            "<9999.0> is not strictly less than or equal to <1000.0>"
         ]
     },
     "buy": {
-        "": [
-            "<-101.0> is not greater than or equal to <\"0.0\"^^<http://www.w3.org/2001/XMLSchema#decimal>>"
+        "@errors": [
+            "<-101.0> is not greater than <0.0>"
         ]
     }
 }       

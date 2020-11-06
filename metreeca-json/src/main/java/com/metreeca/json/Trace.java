@@ -101,7 +101,7 @@ public final class Trace {
 		final JsonObjectBuilder builder=Json.createObjectBuilder();
 
 		if ( !issues().isEmpty() ) {
-			builder.add("", Json.createArrayBuilder(issues));
+			builder.add("@errors", Json.createArrayBuilder(issues));
 		}
 
 		fields().forEach((label, nested) -> {
