@@ -27,7 +27,7 @@ import static com.metreeca.json.Values.value;
 /**
  * Inclusive maximum value constraint.
  *
- * <p>States that each term in the focus set is less than or equal to a given maximum value, according to <a
+ * <p>States that each value in the focus set is less than or equal to a given maximum value, according to <a
  * href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules.</p>
  */
 public final class MaxInclusive extends Shape {

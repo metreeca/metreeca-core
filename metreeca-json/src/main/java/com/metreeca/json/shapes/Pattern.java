@@ -22,7 +22,7 @@ import com.metreeca.json.Shape;
 /**
  * Lexical pattern constraint.
  *
- * <p>States that the lexical representation of each term in the focus set matches a given {@linkplain
+ * <p>States that the lexical representation of each value in the focus set matches a given {@linkplain
  * java.util.regex.Pattern regular expression}.</p>
  */
 public final class Pattern extends Shape {

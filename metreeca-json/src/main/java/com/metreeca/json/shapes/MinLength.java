@@ -22,7 +22,7 @@ import com.metreeca.json.Shape;
 /**
  * Lexical minimum length constraint.
  *
- * <p>States that the length of the lexical representation of each term in the focus set is greater than or equal to
+ * <p>States that the length of the lexical representation of each value in the focus set is greater than or equal to
  * the given minimum value.</p>
  */
 public final class MinLength extends Shape {

@@ -199,9 +199,15 @@ final class JSONLDScanner {
 
 			return trace(values.stream()
 					.flatMap(this::values)
-					.filter(negate(value -> tags.contains(lang(value))))
+					.filter(negate(value -> {
+
+						final String tag=lang(value);
+
+						return tags.isEmpty() && tag != null || tags.contains(tag);
+
+					}))
 					.map(value -> String.format(
-							"<%s> is not in the expected language set {<%s}", value, join(", ", tags)
+							"<%s> is not in the expected language set {%s}", format(value), join(", ", tags)
 					))
 			);
 		}

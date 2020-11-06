@@ -235,7 +235,30 @@ final class JSONLDScannerTest {
 
 		}
 
-		@Test void testValidateLang() {
+		@Test void testValidateGenericLang() {
+
+			final Shape shape=lang();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("@value", "one")
+					.add("@language", "en")
+			)).hasRight();
+
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("en", "one")
+					.add("it", "one")
+			)).hasRight();
+
+			assertThat(validate(shape, createObjectBuilder()
+					.add("@id", "http://example.com/")
+			)).hasLeft();
+
+			assertThat(validate(shape)).as("empty focus").hasRight();
+
+		}
+
+		@Test void testValidateRestrictedLang() {
 
 			final Shape shape=lang("en", "fr");
 
@@ -262,7 +285,9 @@ final class JSONLDScannerTest {
 					.add("it", "one")
 			)).hasLeft();
 
-			assertThat(validate(shape, createObjectBuilder().add("@id", "http://example.com/"))).hasLeft();
+			assertThat(validate(shape, createObjectBuilder()
+					.add("@id", "http://example.com/")
+			)).hasLeft();
 
 			assertThat(validate(lang("en"), createValue("one"))).as("known language").hasRight();
 			assertThat(validate(shape)).as("empty focus").hasRight();

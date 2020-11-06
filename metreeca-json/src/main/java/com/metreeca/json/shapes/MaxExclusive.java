@@ -27,7 +27,7 @@ import static com.metreeca.json.Values.value;
 /**
  * Exclusive maximum value constraint.
  *
- * <p>States that each term in the focus set is strictly less than a given maximum value, according to <a
+ * <p>States that each value in the focus set is strictly less than a given maximum value, according to <a
  * href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules.</p>
  */
 public final class MaxExclusive extends Shape {

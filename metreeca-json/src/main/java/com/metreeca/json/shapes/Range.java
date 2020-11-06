@@ -34,7 +34,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Range value constraint.
  *
- * <p>States that each term in the focus set is a member of the given set of target values.</p>
+ * <p>States that each value in the focus set is a member of the given set of target values.</p>
  */
 public final class Range extends Shape {
 

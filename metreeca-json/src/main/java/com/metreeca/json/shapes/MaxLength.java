@@ -22,7 +22,7 @@ import com.metreeca.json.Shape;
 /**
  * Lexical maximum length constraint.
  *
- * <p>States that the length of the lexical representation of each term in the focus set is less than or equal to the
+ * <p>States that the length of the lexical representation of each value in the focus set is less than or equal to the
  * given maximum value.</p>
  */
 public final class MaxLength extends Shape {
