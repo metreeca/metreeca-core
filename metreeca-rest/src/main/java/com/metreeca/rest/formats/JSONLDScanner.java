@@ -206,7 +206,7 @@ final class JSONLDScanner {
 
 					}))
 					.map(value -> String.format(
-							"<%s> is not in the expected language set {%s}", format(value), join(", ", tags)
+							"<%s> is not in the expected language set {<%s}", format(value), join(", ", tags)
 					))
 			);
 		}
