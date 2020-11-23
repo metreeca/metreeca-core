@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 
 
 /**
- * Text generation.
+ * Template filling.
  *
  * <p>Maps input values to streams of strings generated from a textual {@linkplain #model(String) model} containing
  * the following variable placeholders and a set of {@linkplain #values(String, Function) expressions}, that is

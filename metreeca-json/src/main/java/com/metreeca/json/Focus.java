@@ -53,8 +53,7 @@ public abstract class Focus implements Value {
 	 * @param relative the relative IRI of the focus value
 	 *
 	 * @return a focus value resolving {@code relative} against the target IRI of a shape-driven operation; trailing
-	 * slashes
-	 * in the resolved IRI are removed unless {@code relative} includes one
+	 * slashes in the resolved IRI are removed unless {@code relative} includes one
 	 *
 	 * @throws NullPointerException if {@code relative} is null
 	 */

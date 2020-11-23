@@ -45,7 +45,7 @@ import static java.util.UUID.randomUUID;
 
 
 /**
- * RDF utilities.
+ * Value utilities.
  */
 public final class Values {
 
@@ -422,6 +422,10 @@ public final class Values {
 
 
 	///// Converters //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Optional<IRI> iri(final Value value) {
+		return Optional.ofNullable(value).filter(IRI.class::isInstance).map(IRI.class::cast);
+	}
 
 	public static Optional<Literal> literal(final Value value) {
 		return Optional.ofNullable(value).filter(Literal.class::isInstance).map(Literal.class::cast);
