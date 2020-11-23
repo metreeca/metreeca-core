@@ -27,6 +27,7 @@ import java.util.Optional;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
@@ -49,7 +50,7 @@ final class GraphDeleter extends GraphProcessor {
 	}
 
 	private Future<Response> member(final Request request) {
-		return request.reply(response -> graph.exec(connection -> {
+		return request.reply(response -> graph.exec(txn(connection -> {
 
 			final IRI item=iri(request.item());
 			final Shape shape=request.attribute(shape());
@@ -75,7 +76,7 @@ final class GraphDeleter extends GraphProcessor {
 
 					);
 
-		}));
+		})));
 	}
 
 }

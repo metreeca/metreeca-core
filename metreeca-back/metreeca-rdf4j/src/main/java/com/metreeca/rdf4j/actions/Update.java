@@ -17,14 +17,16 @@
 package com.metreeca.rdf4j.actions;
 
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Context;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.query.Operation;
 
 import java.util.function.Consumer;
 
+import static com.metreeca.rdf4j.assets.Graph.txn;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.time;
+import static java.lang.String.format;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 /**
@@ -34,7 +36,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  */
 public final class Update extends Action<Update> implements Consumer<String> {
 
-    private final Logger logger=Context.asset(Logger.logger());
+	private final Logger logger=asset(Logger.logger());
 
 
     /**
@@ -45,17 +47,17 @@ public final class Update extends Action<Update> implements Consumer<String> {
      */
     @Override public void accept(final String update) {
         if ( update != null && !update.isEmpty() ) {
-            graph().exec(connection -> {
-                time(() ->
+	        graph().exec(txn(connection -> {
+		        time(() ->
 
-                        configure(connection.prepareUpdate(SPARQL, update, base())).execute()
+				        configure(connection.prepareUpdate(SPARQL, update, base())).execute()
 
-                ).apply(t ->
+		        ).apply(t ->
 
-                        logger.info(this, String.format("executed in <%,d> ms", t))
+				        logger.info(this, format("executed in <%,d> ms", t))
 
-                );
-            });
+		        );
+	        }));
         }
     }
 

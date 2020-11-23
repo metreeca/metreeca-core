@@ -17,7 +17,6 @@
 package com.metreeca.rdf4j.actions;
 
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Context;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
@@ -27,6 +26,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+import static com.metreeca.rdf4j.assets.Graph.txn;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
@@ -45,14 +46,14 @@ public final class Upload implements Consumer<Collection<Statement>> {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private Graph graph=Context.asset(Graph.graph());
+	private Graph graph=asset(Graph.graph());
 
     private Resource[] contexts=DefaultContexts;
 
     private final AtomicBoolean clear=new AtomicBoolean();
     private final AtomicLong count=new AtomicLong();
 
-    private final Logger logger=Context.asset(logger());
+	private final Logger logger=asset(logger());
 
 
     /**
@@ -126,27 +127,27 @@ public final class Upload implements Consumer<Collection<Statement>> {
                     .map(Value::stringValue)
                     .collect(joining(", "));
 
-            graph.exec(connection -> {
-                time(() -> {
+	        graph.exec(txn(connection -> {
+		        time(() -> {
 
-                    if ( clear.getAndSet(false) ) {
+			        if ( clear.getAndSet(false) ) {
 
-                        connection.clear(this.contexts);
+				        connection.clear(this.contexts);
 
-                        logger.info(this, format(
-                                "cleared <%s>", contexts
-                        ));
-                    }
+				        logger.info(this, format(
+						        "cleared <%s>", contexts
+				        ));
+			        }
 
-                    if ( !statements.isEmpty() ) {
-                        connection.add(statements, this.contexts);
-                    }
+			        if ( !statements.isEmpty() ) {
+				        connection.add(statements, this.contexts);
+			        }
 
-                }).apply(t -> logger.info(this, format(
-                        "uploaded <%,d / %,d> statements to <%s> in <%,d> ms",
-                        statements.size(), count.addAndGet(statements.size()), contexts, t
-                )));
-            });
+		        }).apply(t -> logger.info(this, format(
+				        "uploaded <%,d / %,d> statements to <%s> in <%,d> ms",
+				        statements.size(), count.addAndGet(statements.size()), contexts, t
+		        )));
+	        }));
 
         }
     }

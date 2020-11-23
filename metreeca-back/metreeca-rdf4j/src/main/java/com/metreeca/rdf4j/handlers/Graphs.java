@@ -19,7 +19,7 @@ package com.metreeca.rdf4j.handlers;
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.handlers.Router;
 
@@ -40,6 +40,7 @@ import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
+import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.Message.types;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
@@ -94,7 +95,7 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-get
 	 */
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> get(final com.metreeca.rest.Request request) {
+	private Future<Response> get(final Request request) {
 		return consumer -> {
 
 			final boolean catalog=request.parameters().isEmpty();
@@ -161,7 +162,7 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-put
 	 */
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> put(final com.metreeca.rest.Request request) {
+	private Future<com.metreeca.rest.Response> put(final com.metreeca.rest.Request request) {
 		return consumer -> {
 
 			final String target=graph(request);
@@ -187,8 +188,8 @@ public final class Graphs extends Endpoint<Graphs> {
 						// handling
 				);
 
-				graph().exec(connection -> { // binary format >> no rewriting
-					try ( final InputStream input=request.body(input()).fold(e -> com.metreeca.rest.Xtream.input(), Supplier::get) ) {
+				graph().exec(txn(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> Xtream.input(), Supplier::get) ) {
 
 						final boolean exists=exists(connection, context);
 
@@ -196,7 +197,8 @@ public final class Graphs extends Endpoint<Graphs> {
 						connection.add(input, request.base(), factory.getRDFFormat(), context);
 
 						request.reply(response ->
-								response.status(exists ? com.metreeca.rest.Response.NoContent : com.metreeca.rest.Response.Created)
+								response.status(exists ? com.metreeca.rest.Response.NoContent :
+										com.metreeca.rest.Response.Created)
 						).accept(consumer);
 
 					} catch ( final IOException e ) {
@@ -218,7 +220,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
-				});
+				}));
 			}
 
 		};
@@ -227,7 +229,7 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-delete
 	 */
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> delete(final com.metreeca.rest.Request request) {
+	private Future<com.metreeca.rest.Response> delete(final com.metreeca.rest.Request request) {
 		return consumer -> {
 
 			final String target=graph(request);
@@ -244,7 +246,7 @@ public final class Graphs extends Endpoint<Graphs> {
 
 				final Resource context=target.isEmpty() ? null : iri(target);
 
-				graph().exec(connection -> {
+				graph().exec(txn(connection -> {
 					try {
 
 						final boolean exists=exists(connection, context);
@@ -252,7 +254,8 @@ public final class Graphs extends Endpoint<Graphs> {
 						connection.clear(context);
 
 						request.reply(response ->
-								response.status(exists ? com.metreeca.rest.Response.NoContent : com.metreeca.rest.Response.NotFound)
+								response.status(exists ? com.metreeca.rest.Response.NoContent :
+										com.metreeca.rest.Response.NotFound)
 						).accept(consumer);
 
 					} catch ( final RepositoryException e ) {
@@ -262,7 +265,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
-				});
+				}));
 			}
 
 		};
@@ -271,7 +274,7 @@ public final class Graphs extends Endpoint<Graphs> {
 	/*
 	 * https://www.w3.org/TR/sparql11-http-rdf-update/#http-post
 	 */
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> post(final com.metreeca.rest.Request request) {
+	private Future<com.metreeca.rest.Response> post(final com.metreeca.rest.Request request) {
 		return consumer -> {
 
 			// !!! support  "multipart/form-data"
@@ -295,12 +298,13 @@ public final class Graphs extends Endpoint<Graphs> {
 				// !!! If a clients issues a POST or PUT with a content type that is not understood by the
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
-				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service( // !!! review fallback
-						// handling
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content));
+				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content) // !!! review fallback
+				);
 
-				graph().exec(connection -> { // binary format >> no rewriting
-					try ( final InputStream input=request.body(input()).fold(e -> com.metreeca.rest.Xtream.input(), Supplier::get) ) {
+				graph().exec(txn(connection -> { // binary format >> no rewriting
+					try ( final InputStream input=request.body(input()).fold(e -> Xtream.input(),
+							Supplier::get) ) {
 
 						final boolean exists=exists(connection, context);
 
@@ -329,7 +333,7 @@ public final class Graphs extends Endpoint<Graphs> {
 						request.reply(status(InternalServerError, e)).accept(consumer);
 
 					}
-				});
+				}));
 
 			}
 

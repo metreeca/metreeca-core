@@ -17,7 +17,6 @@
 package com.metreeca.rdf4j.actions;
 
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Context;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.query.BindingSet;
@@ -26,7 +25,9 @@ import org.eclipse.rdf4j.query.Operation;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.time;
+import static java.lang.String.format;
 import static org.eclipse.rdf4j.common.iteration.Iterations.asList;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
@@ -37,9 +38,9 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  */
 public final class TupleQuery extends Action<TupleQuery> implements Function<String, Stream<BindingSet>> {
 
-	private final Logger logger=Context.asset(Logger.logger());
+	private final Logger logger=asset(Logger.logger());
 
-	
+
 	/**
 	 * Executes a SPARQL tuple query.
 	 *
@@ -56,7 +57,7 @@ public final class TupleQuery extends Action<TupleQuery> implements Function<Str
 
 			).apply((t, v) ->
 
-					logger.info(this, String.format("executed in <%,d> ms", t))
+					logger.info(this, format("executed in <%,d> ms", t))
 
 			);
 		});

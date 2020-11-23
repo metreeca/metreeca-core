@@ -26,6 +26,7 @@ import java.util.regex.Matcher;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
@@ -54,7 +55,7 @@ final class GraphCreator extends GraphProcessor {
 
 				.body(jsonld())
 
-				.flatMap(rdf -> graph.exec(connection -> {
+				.flatMap(rdf -> graph.exec(txn(connection -> {
 
 					final IRI holder=iri(request.item());
 					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
@@ -87,7 +88,7 @@ final class GraphCreator extends GraphProcessor {
 
 					}
 
-				}))
+				})))
 
 				.fold(request::reply, future -> future);
 	}

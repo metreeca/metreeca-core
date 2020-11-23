@@ -17,7 +17,6 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
-import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.*;
@@ -64,6 +63,7 @@ import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
+import static com.metreeca.rest.Context.asset;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -84,7 +84,7 @@ final class GraphProcessorTest {
 
 
 	private Collection<Statement> query(final IRI resource, final Query query) {
-		return Context.asset(Graph.graph()).exec(connection -> {
+		return asset(Graph.graph()).exec(connection -> {
 			return new GraphProcessor() {}.fetch(connection, resource, query)
 
 					.stream()
