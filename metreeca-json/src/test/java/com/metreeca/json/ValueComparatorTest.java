@@ -1,6 +1,6 @@
 
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,150 +17,212 @@
 
 package com.metreeca.json;
 
-import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.*;
+import java.util.Arrays;
+import java.util.Comparator;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static com.metreeca.json.Values.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class ValueComparatorTest {
 
-	private final ValueFactory factory=SimpleValueFactory.getInstance();
+	private final Comparator<Value> comparator=new ValueComparator();
 
-	private final BNode bnode1=factory.createBNode();
-	private final BNode bnode2=factory.createBNode();
-
-	private final IRI uri1=factory.createIRI("http://script.example/Latin");
-	private final IRI uri2=factory.createIRI("http://script.example/Кириллица");
-	private final IRI uri3=factory.createIRI("http://script.example/日本語");
-
-	private final Literal typed1=factory.createLiteral("http://script.example/Latin", XSD.STRING);
-
-	private final ValueComparator cmp=new ValueComparator();
-
-
-	@Test void testBothNull() {
-		assertTrue(cmp.compare(null, null) == 0);
-	}
-
-	@Test void testLeftNull() {
-		assertTrue(cmp.compare(null, typed1) < 0);
-	}
-
-	@Test void testRightNull() {
-		assertTrue(cmp.compare(typed1, null) > 0);
+	private int compare(final Value x, final Value y) {
+		return comparator.compare(x, y);
 	}
 
 
-	@Test void testBothBnode() {
-		assertTrue(cmp.compare(bnode1, bnode1) == 0);
-		assertTrue(cmp.compare(bnode2, bnode2) == 0);
-		assertTrue(cmp.compare(bnode1, bnode2) != cmp.compare(bnode2, bnode1));
-		assertTrue(cmp.compare(bnode1, bnode2) == -1*cmp.compare(bnode2, bnode1));
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testNull() {
+
+		assertThat(compare(null, null)).isEqualTo(0);
+
+		final Value lesser=null;
+		final Value greater=bnode();
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
-	@Test void testLeftBnode() {
-		assertTrue(cmp.compare(bnode1, typed1) < 0);
+	@Test void testBNode() {
+
+		assertThat(compare(bnode("x"), bnode("x"))).isEqualTo(0);
+		assertThat(compare(bnode("x"), bnode("y"))).isLessThan(0);
+		assertThat(compare(bnode("y"), bnode("x"))).isGreaterThan(0);
+
+		final Value lesser=bnode();
+		final Value greater=iri();
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
-	@Test void testRightBnode() {
-		assertTrue(cmp.compare(typed1, bnode1) > 0);
+	@Test void testIRI() {
+
+		assertThat(compare(iri("http://script.example/Latin"), iri("http://script.example/Latin"))).isEqualTo(0);
+		assertThat(compare(iri("http://script.example/Latin"), iri("http://script.example/Кириллица"))).isLessThan(0);
+		assertThat(compare(iri("http://script.example/日本語"), iri("http://script.example/Кириллица"))).isGreaterThan(0);
+
+		final Value lesser=iri();
+		final Value greater=literal(true);
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
+	@Test void testBoolean() {
 
-	@Test void testBothURI() {
-		assertTrue(cmp.compare(uri1, uri1) == 0);
-		assertTrue(cmp.compare(uri1, uri2) < 0);
-		assertTrue(cmp.compare(uri1, uri3) < 0);
-		assertTrue(cmp.compare(uri2, uri1) > 0);
-		assertTrue(cmp.compare(uri2, uri2) == 0);
-		assertTrue(cmp.compare(uri2, uri3) < 0);
-		assertTrue(cmp.compare(uri3, uri1) > 0);
-		assertTrue(cmp.compare(uri3, uri2) > 0);
-		assertTrue(cmp.compare(uri3, uri3) == 0);
+		assertThat(compare(literal(true), literal(true))).isEqualTo(0);
+		assertThat(compare(literal(false), literal(true))).isLessThan(0);
+		assertThat(compare(literal(true), literal(false))).isGreaterThan(0);
+
+		assertThat(compare(literal(true), literal("malformed", XSD.BOOLEAN))).isLessThan(0);
+		assertThat(compare(literal("malformed", XSD.BOOLEAN), literal(true))).isGreaterThan(0);
+		assertThat(compare(literal("x", XSD.BOOLEAN), literal("y", XSD.BOOLEAN))).isLessThan(0);
+
+		final Value lesser=literal(true);
+		final Value greater=literal(0);
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
-	@Test void testLeftURI() {
-		assertTrue(cmp.compare(uri1, typed1) < 0);
+	@Test void testNumeric() {
+
+		assertThat(compare(literal(0), literal(0))).isEqualTo(0);
+		assertThat(compare(literal(0), literal(1))).isLessThan(0);
+		assertThat(compare(literal(1), literal(0))).isGreaterThan(0);
+
+		final Literal[] numbers={
+				literal((byte)1),
+				literal((short)2),
+				literal(3),
+				literal(4L),
+				literal(5.0f),
+				literal(6.0d),
+				literal(BigInteger.valueOf(7)),
+				literal(BigDecimal.valueOf(8)),
+		};
+
+		final Literal[] clones=numbers.clone();
+
+		Arrays.sort(clones, this::compare);
+
+		assertThat(clones).isEqualTo(numbers);
+
+		assertThat(compare(literal(Float.NaN), literal(Float.NaN))).isEqualTo(0);
+		assertThat(compare(literal(0.0f), literal(Float.NaN))).isLessThan(0);
+		assertThat(compare(literal(Float.NaN), literal(0.0f))).isGreaterThan(0);
+		assertThat(compare(literal(Float.NEGATIVE_INFINITY), literal(0.0f))).isLessThan(0);
+		assertThat(compare(literal(0.0f), literal(Float.POSITIVE_INFINITY))).isLessThan(0);
+		assertThat(compare(literal(Float.NEGATIVE_INFINITY), literal(Float.POSITIVE_INFINITY))).isLessThan(0);
+
+		assertThat(compare(literal(Double.NaN), literal(Double.NaN))).isEqualTo(0);
+		assertThat(compare(literal(0.0d), literal(Double.NaN))).isLessThan(0);
+		assertThat(compare(literal(Double.NaN), literal(0.0d))).isGreaterThan(0);
+		assertThat(compare(literal(Double.NEGATIVE_INFINITY), literal(0.0d))).isLessThan(0);
+		assertThat(compare(literal(0.0d), literal(Double.POSITIVE_INFINITY))).isLessThan(0);
+		assertThat(compare(literal(Double.NEGATIVE_INFINITY), literal(Double.POSITIVE_INFINITY))).isLessThan(0);
+
+		assertThat(compare(literal(1), literal("malformed", XSD.INTEGER))).isLessThan(0);
+		assertThat(compare(literal("malformed", XSD.INTEGER), literal(1))).isGreaterThan(0);
+		assertThat(compare(literal("x", XSD.INTEGER), literal("y", XSD.INTEGER))).isLessThan(0);
+
+		final Value lesser=literal(1);
+		final Value greater=literal(Instant.now());
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, literal(1))).isGreaterThan(0);
+
 	}
 
-	@Test void testRightURI() {
-		assertTrue(cmp.compare(typed1, uri1) > 0);
+	@Test void testTemporal() {
+
+		final OffsetDateTime x=OffsetDateTime.now();
+		final OffsetDateTime y=x.plusSeconds(1);
+
+		assertThat(compare(literal(x), literal(x))).isEqualTo(0);
+		assertThat(compare(literal(x), literal(y))).isLessThan(0);
+		assertThat(compare(literal(y), literal(x))).isGreaterThan(0);
+
+		final Value lesser=literal(Instant.now());
+		final Value greater=literal(Duration.ZERO);
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
+	@Test void testDuration() {
 
-	/**
-	 * Tests whether xsd:int's are properly sorted in a list with mixed value types.
-	 */
-	@Test void testOrder1() {
-		final Literal en4=factory.createLiteral("4", "en");
-		final Literal int10=factory.createLiteral(10);
-		final Literal int9=factory.createLiteral(9);
+		final Duration x=Duration.ofDays(1);
+		final Duration y=x.plusSeconds(1);
 
-		final List<Literal> valueList=Arrays.asList(en4, int10, int9);
-		Collections.sort(valueList, cmp);
+		assertThat(compare(literal(x), literal(x))).isEqualTo(0);
+		assertThat(compare(literal(x), literal(y))).isLessThan(0);
+		assertThat(compare(literal(y), literal(x))).isGreaterThan(0);
 
-		assertTrue(valueList.indexOf(int9) < valueList.indexOf(int10));
+		final Value lesser=literal(Duration.ZERO);
+		final Value greater=literal("x");
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
-	/**
-	 * Tests whether various numerics are properly sorted in a list with mixed value types.
-	 */
-	@Test void testOrder2() {
-		final Literal en4=factory.createLiteral("4", "en");
-		final Literal int10=factory.createLiteral(10);
-		final Literal int9=factory.createLiteral(9);
-		final Literal plain9=factory.createLiteral("9");
-		final Literal integer5=factory.createLiteral("5", XSD.INTEGER);
-		final Literal float9=factory.createLiteral(9f);
-		final Literal plain4=factory.createLiteral("4");
-		final Literal plain10=factory.createLiteral("10");
+	@Test void testPlain() {
 
-		final List<Literal> valueList=Arrays.asList(en4, int10, int9, plain9, integer5, float9, plain4, plain10);
-		valueList.sort(cmp);
+		assertThat(compare(literal("x"), literal("x"))).isEqualTo(0);
+		assertThat(compare(literal("x"), literal("y"))).isLessThan(0);
+		assertThat(compare(literal("y"), literal("x"))).isGreaterThan(0);
 
-		assertTrue(valueList.indexOf(integer5) < valueList.indexOf(float9));
-		assertTrue(valueList.indexOf(integer5) < valueList.indexOf(int9));
-		assertTrue(valueList.indexOf(integer5) < valueList.indexOf(int10));
-		assertTrue(valueList.indexOf(float9) < valueList.indexOf(int10));
-		assertTrue(valueList.indexOf(int9) < valueList.indexOf(int10));
-		assertTrue(valueList.indexOf(int9) < valueList.indexOf(int10));
+		final Value lesser=literal("x");
+		final Value greater=literal("x", "en");
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
-	/**
-	 * Tests whether numerics of different types are properly sorted. The list also contains a datatype that would be
-	 * sorted between the numerics if the datatypes were to be sorted alphabetically.
-	 */
-	@Test void testOrder3() {
-		final Literal year1234=factory.createLiteral("1234", XSD.GYEAR);
-		final Literal float2000=factory.createLiteral(2000f);
-		final Literal int1000=factory.createLiteral(1000);
+	@Test void testTagged() {
 
-		final List<Literal> valueList=Arrays.asList(year1234, float2000, int1000);
-		Collections.sort(valueList, cmp);
-		assertTrue(valueList.indexOf(int1000) < valueList.indexOf(float2000));
+		assertThat(compare(literal("x", "en"), literal("x", "en"))).isEqualTo(0);
+		assertThat(compare(literal("x", "en"), literal("x", "it"))).isLessThan(0);
+		assertThat(compare(literal("x", "en"), literal("y", "en"))).isLessThan(0);
+		assertThat(compare(literal("x", "it"), literal("x", "en"))).isGreaterThan(0);
+		assertThat(compare(literal("y", "en"), literal("x", "en"))).isGreaterThan(0);
+
+		final Value lesser=literal("x", "en");
+		final Value greater=literal("x", RDF.FIRST);
+
+		assertThat(compare(lesser, greater)).isLessThan(0);
+		assertThat(compare(greater, lesser)).isGreaterThan(0);
+
 	}
 
+	@Test void testTyped() {
 
-	@Test void testNonStrictComparisons() {
-		cmp.setStrict(false);
-		assertFalse(cmp.isStrict());
-		final Literal date1=factory.createLiteral("2019-09-02", XSD.DATE);
-		final Literal date2=factory.createLiteral("2018", XSD.GYEAR);
-		assertTrue(cmp.compare(date1, date2) > 0);
-	}
+		assertThat(compare(literal("x", RDF.FIRST), literal("x", RDF.FIRST))).isEqualTo(0);
+		assertThat(compare(literal("x", RDF.FIRST), literal("x", RDF.REST))).isLessThan(0);
+		assertThat(compare(literal("x", RDF.FIRST), literal("y", RDF.FIRST))).isLessThan(0);
+		assertThat(compare(literal("x", RDF.REST), literal("x", RDF.FIRST))).isGreaterThan(0);
+		assertThat(compare(literal("y", RDF.FIRST), literal("x", RDF.FIRST))).isGreaterThan(0);
 
-	@Test void testStrictComparisons() {
-		cmp.setStrict(true);
-		assertTrue(cmp.isStrict());
-		final Literal date1=factory.createLiteral("2019-09-02", XSD.DATE);
-		final Literal date2=factory.createLiteral("2018", XSD.GYEAR);
-		assertTrue(cmp.compare(date1, date2) < 0);
 	}
 
 }

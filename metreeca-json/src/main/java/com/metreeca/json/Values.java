@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.*;
+import org.eclipse.rdf4j.model.base.AbstractNamespace;
+import org.eclipse.rdf4j.model.base.AbstractValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import javax.xml.bind.DatatypeConverter;
@@ -71,7 +72,7 @@ public final class Values {
 	);
 
 
-	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
+	private static final ValueFactory factory=new AbstractValueFactory() {}; // before constant initialization
 	private static final Comparator<Value> comparator=new ValueComparator();
 
 	private static final ThreadLocal<DecimalFormat> exponential=ThreadLocal.withInitial(() ->
@@ -214,7 +215,13 @@ public final class Values {
 
 
 	public static Namespace namespace(final String prefix, final String name) {
-		return prefix == null || name == null ? null : new SimpleNamespace(prefix, name);
+		return prefix == null || name == null ? null : new AbstractNamespace() {
+
+			@Override public String getPrefix() { return prefix; }
+
+			@Override public String getName() { return name; }
+
+		};
 	}
 
 
@@ -312,6 +319,8 @@ public final class Values {
 				: value instanceof LocalDateTime ? literal((LocalDateTime)value)
 				: value instanceof OffsetDateTime ? literal((OffsetDateTime)value)
 
+				: value instanceof TemporalAmount ? literal((TemporalAmount)value)
+
 				: value instanceof byte[] ? literal((byte[])value)
 
 				: literal(value.getClass());
@@ -364,9 +373,8 @@ public final class Values {
 	 *
 	 * @param instant the instant to be converted
 	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant
-	 * } is
-	 * not null; {@code null}, otherwise
+	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant}
+	 * is not null; {@code null}, otherwise
 	 */
 	public static Literal literal(final Instant instant) {
 		return literal(instant, false);
@@ -398,6 +406,11 @@ public final class Values {
 
 	public static Literal literal(final OffsetDateTime value) {
 		return value == null ? null : literal(ISO_OFFSET_DATE_TIME.format(value), XSD.DATETIME);
+	}
+
+
+	public static Literal literal(final TemporalAmount amount) {
+		return amount == null ? null : factory.createLiteral(amount);
 	}
 
 
@@ -686,17 +699,40 @@ public final class Values {
 	 */
 	public static IRI inverse(final IRI iri) {
 		return iri == null ? null
-				: iri instanceof Inverse ? factory.createIRI(iri.stringValue())
-				: new Inverse(iri.stringValue());
+				: iri instanceof Inverse ? factory.createIRI(iri.getNamespace(), iri.getLocalName())
+				: new Inverse(iri.getNamespace(), iri.getLocalName());
 	}
 
 
-	private static final class Inverse extends SimpleIRI {
+	private static final class Inverse extends org.eclipse.rdf4j.model.base.AbstractIRI {
 
 		private static final long serialVersionUID=7576383707001017160L;
 
 
-		private Inverse(final String value) { super(value); }
+		private final String string;
+
+		private final String namespace;
+		private final String localname;
+
+
+		private Inverse(final String namespace, final String localname) {
+			this.string=namespace+localname;
+			this.namespace=namespace;
+			this.localname=localname;
+		}
+
+
+		@Override public String stringValue() {
+			return string;
+		}
+
+		@Override public String getNamespace() {
+			return namespace;
+		}
+
+		@Override public String getLocalName() {
+			return localname;
+		}
 
 
 		@Override public boolean equals(final Object object) {
