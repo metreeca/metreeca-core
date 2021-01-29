@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import java.util.function.*;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.Context.asset;
+import static java.time.ZoneOffset.UTC;
+import static java.time.temporal.ChronoUnit.MILLIS;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 
@@ -257,7 +259,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null customizer");
 		}
 
-		operation.setBinding("time", literal(Instant.now(), true));
+		operation.setBinding("time", literal(Instant.now().truncatedTo(MILLIS).atZone(UTC)));
 
 		final IRI item=iri(message.item());
 

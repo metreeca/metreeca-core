@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import static com.metreeca.json.Values.*;
+import static java.time.ZoneOffset.UTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -144,7 +145,7 @@ final class ValueComparatorTest {
 		assertThat(compare(literal("x", XSD.INTEGER), literal("y", XSD.INTEGER))).isLessThan(0);
 
 		final Value lesser=literal(1);
-		final Value greater=literal(Instant.now());
+		final Value greater=literal(Instant.now().atZone(UTC));
 
 		assertThat(compare(lesser, greater)).isLessThan(0);
 		assertThat(compare(greater, literal(1))).isGreaterThan(0);
@@ -160,7 +161,7 @@ final class ValueComparatorTest {
 		assertThat(compare(literal(x), literal(y))).isLessThan(0);
 		assertThat(compare(literal(y), literal(x))).isGreaterThan(0);
 
-		final Value lesser=literal(Instant.now());
+		final Value lesser=literal(Instant.now().atZone(UTC));
 		final Value greater=literal(Duration.ZERO);
 
 		assertThat(compare(lesser, greater)).isLessThan(0);

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.metreeca.jse;
 
-import com.metreeca.json.Values;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Logger;
 
@@ -32,6 +31,7 @@ import java.util.function.Function;
 
 import static com.metreeca.rest.Request.HEAD;
 import static com.metreeca.rest.Response.NotFound;
+import static com.metreeca.rest.Xtream.guarded;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -199,7 +199,7 @@ public final class Server {
 
 			final long length=exchange.getRequestMethod().equals(HEAD) ? -1L : response
 					.header("Content-Length")
-					.flatMap(Values::_long)
+					.map(guarded(Long::parseUnsignedLong))
 					.orElse(0L); // chunked transfer
 
 			exchange.sendResponseHeaders(response.status(), length);

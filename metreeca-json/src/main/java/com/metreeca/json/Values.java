@@ -30,16 +30,15 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.*;
-import java.time.temporal.*;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.ZoneOffset.UTC;
-import static java.time.format.DateTimeFormatter.*;
 import static java.util.Locale.ROOT;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
@@ -314,11 +313,7 @@ public final class Values {
 				: value instanceof BigInteger ? literal((BigInteger)value)
 				: value instanceof BigDecimal ? literal((BigDecimal)value)
 
-				: value instanceof Instant ? literal((Instant)value)
-				: value instanceof LocalDate ? literal((LocalDate)value)
-				: value instanceof LocalDateTime ? literal((LocalDateTime)value)
-				: value instanceof OffsetDateTime ? literal((OffsetDateTime)value)
-
+				: value instanceof TemporalAccessor ? literal((TemporalAccessor)value)
 				: value instanceof TemporalAmount ? literal((TemporalAmount)value)
 
 				: value instanceof byte[] ? literal((byte[])value)
@@ -368,46 +363,9 @@ public final class Values {
 	}
 
 
-	/**
-	 * Creates a date-instant literal for a specific instant.
-	 *
-	 * @param instant the instant to be converted
-	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant}
-	 * is not null; {@code null}, otherwise
-	 */
-	public static Literal literal(final Instant instant) {
-		return literal(instant, false);
+	public static Literal literal(final TemporalAccessor accessor) {
+		return accessor == null ? null : factory.createLiteral(accessor);
 	}
-
-	/**
-	 * Creates a date-instant literal for a specific instant.
-	 *
-	 * @param instant the instant to be converted
-	 * @param millis  if {@code true}, includes milliseconds in the literal textual representation
-	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second or millisecond precision as
-	 * specified by {@code millis}, if {@code instant} is not null; {@code null}, otherwise
-	 */
-	public static Literal literal(final Instant instant, final boolean millis) {
-		return instant == null ? null : literal(
-				ISO_DATE_TIME.format(instant.truncatedTo(millis ? ChronoUnit.MILLIS : ChronoUnit.SECONDS).atZone(UTC)),
-				XSD.DATETIME
-		);
-	}
-
-	public static Literal literal(final LocalDate value) {
-		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value.atStartOfDay()), XSD.DATETIME);
-	}
-
-	public static Literal literal(final LocalDateTime value) {
-		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value), XSD.DATETIME);
-	}
-
-	public static Literal literal(final OffsetDateTime value) {
-		return value == null ? null : literal(ISO_OFFSET_DATE_TIME.format(value), XSD.DATETIME);
-	}
-
 
 	public static Literal literal(final TemporalAmount amount) {
 		return amount == null ? null : factory.createLiteral(amount);
@@ -415,8 +373,8 @@ public final class Values {
 
 
 	public static Literal literal(final byte[] value) {
-		return value == null ? null : factory.createLiteral("data:application/octet-stream;base64,"
-				+Base64.getEncoder().encodeToString(value), XSD.ANYURI);
+		return value == null ? null : factory.createLiteral(
+				"data:application/octet-stream;base64,"+Base64.getEncoder().encodeToString(value), XSD.ANYURI);
 	}
 
 
@@ -446,134 +404,55 @@ public final class Values {
 
 
 	public static Optional<Boolean> _boolean(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_boolean);
+		return literal(value).map(Literal::booleanValue);
 	}
 
 
 	public static Optional<Integer> _int(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_int);
+		return literal(value).map(guard(Literal::intValue));
 	}
 
 	public static Optional<Long> _long(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_long);
+		return literal(value).map(guard(Literal::longValue));
 	}
 
 	public static Optional<Float> __float(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_float);
+		return literal(value).map(guard(Literal::floatValue));
 	}
 
 	public static Optional<Double> _double(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_double);
+		return literal(value).map(guard(Literal::doubleValue));
 	}
 
 	public static Optional<BigInteger> integer(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::integer);
+		return literal(value).map(guard(Literal::integerValue));
 	}
 
 	public static Optional<BigDecimal> decimal(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::decimal);
+		return literal(value).map(guard(Literal::decimalValue));
 	}
+
+
+	public static Optional<TemporalAccessor> temporalAccessor(final Value value) {
+		return literal(value).map(guard(Literal::temporalAccessorValue));
+	}
+
+	public static Optional<TemporalAmount> temporalAmount(final Value value) {
+		return literal(value).map(guard(Literal::temporalAmountValue));
+	}
+
 
 	public static Optional<String> string(final Value value) {
 		return literal(value).map(Literal::stringValue);
 	}
 
 
-	public static Optional<Instant> instant(final Value value) {
-		return literal(value).flatMap(literal
+	private static <V, R> Function<V, R> guard(final Function<V, R> mapper) {
+		return v -> {
 
-				-> literal.getDatatype().equals(XSD.DATETIME) ? instant(literal.stringValue())
+			try { return mapper.apply(v); } catch ( final RuntimeException e ) { return null; }
 
-				// !!! support other temporal datatypes
-
-				: Optional.empty()
-
-		);
-	}
-
-	public static Optional<LocalDate> localDate(final Value value) {
-		return literal(value).flatMap(literal
-
-				-> literal.getDatatype().equals(XSD.DATETIME) ? localDate(literal.stringValue())
-
-				// !!! support other temporal datatypes
-
-				: Optional.empty()
-
-		);
-
-	}
-
-
-	//// Parsers ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Optional<Boolean> _boolean(final String string) {
-		return Optional.ofNullable(string).map(Boolean::parseBoolean);
-	}
-
-
-	public static Optional<Integer> _int(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Integer::parseInt);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<Long> _long(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Long::parseLong);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<Float> _float(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Float::parseFloat);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<Double> _double(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Double::parseDouble);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<BigInteger> integer(final String string) {
-		try {
-			return Optional.ofNullable(string).map(BigInteger::new);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<BigDecimal> decimal(final String string) {
-		try {
-			return Optional.ofNullable(string).map(BigDecimal::new);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-
-	public static Optional<Instant> instant(final String string) {
-		return Optional.ofNullable(string)
-				.map(ISO_DATE_TIME::parse)
-				.map(accessor -> Instant.from(accessor.isSupported(ChronoField.INSTANT_SECONDS)
-						? Instant.from(accessor)
-						: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault())
-				));
-	}
-
-	public static Optional<LocalDate> localDate(final String string) {
-		return Optional.ofNullable(string)
-				.map(ISO_LOCAL_DATE_TIME::parse)
-				.map(accessor -> accessor.query(TemporalQueries.localDate()));
+		};
 	}
 
 
@@ -614,24 +493,24 @@ public final class Values {
 						: type.equals(XSD.STRING) ? quote(literal.getLabel())
 
 						: literal.getLanguage()
-						.map(lang -> format(literal, lang))
-						.orElseGet(() -> format(literal, type));
+						.map(lang -> format(literal.getLabel(), lang))
+						.orElseGet(() -> format(literal.getLabel(), type));
 
 			} catch ( final IllegalArgumentException ignored ) {
 
-				return format(literal, type);
+				return format(literal.getLabel(), type);
 
 			}
 		}
 	}
 
 
-	private static String format(final Literal literal, final String lang) {
-		return quote(literal.getLabel())+'@'+lang;
+	private static String format(final CharSequence label, final String lang) {
+		return quote(label)+'@'+lang;
 	}
 
-	private static String format(final Literal literal, final IRI type) {
-		return quote(literal.getLabel())+"^^"+format(type);
+	private static String format(final CharSequence label, final IRI type) {
+		return quote(label)+"^^"+format(type);
 	}
 
 
