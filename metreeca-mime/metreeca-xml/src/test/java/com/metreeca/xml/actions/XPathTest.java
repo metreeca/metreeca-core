@@ -16,17 +16,40 @@
 
 package com.metreeca.xml.actions;
 
+import com.metreeca.rest.Either;
+import com.metreeca.rest.Xtream;
+import com.metreeca.xml.formats.XMLFormat;
+
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+
+import static com.metreeca.xml.actions.XPath.XPath;
 import static com.metreeca.xml.actions.XPath.decode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class XPathTest {
 
-	@Test void decodeNumericEntities() {
+	@Test void testDecodeNumericEntities() {
 		assertThat(decode("Italy&#x2019;s &#8220;most powerful&#8221; car"))
 				.isEqualTo("Italy’s “most powerful” car");
+	}
+
+	@Test void testUseEnclosingNamespaces() {
+		assertThat(Xtream
+
+				.of("<ns:x xmlns:ns='http://example.com/o'><ns:y><ns:z>text</ns:z></ns:y></ns:x>")
+
+				.map(x -> XMLFormat.xml(new ByteArrayInputStream(x.getBytes(UTF_8))))
+
+				.optMap(Either::get)
+
+				.flatMap(XPath(m -> m.nodes("//ns:y")))
+				.flatMap(XPath(m -> m.strings("//ns:z")))
+
+		).containsExactly("text");
 	}
 
 }

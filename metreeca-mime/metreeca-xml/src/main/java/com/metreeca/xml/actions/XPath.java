@@ -132,23 +132,30 @@ public final class XPath {
 
 		this.xpath=factory.newXPath();
 
-		final Node root=node instanceof Document ? ((Document)node).getDocumentElement() : node;
-		final NamedNodeMap attributes=root.getAttributes();
-
 		final Map<String, String> namespaces=new HashMap<>();
 
-		for (int i=0, n=attributes.getLength(); i < n; ++i) {
+		final Node root=node instanceof Document ? ((Document)node).getDocumentElement() : node;
 
-			final Node attribute=attributes.item(i);
+		for (Node scope=root; scope != null; scope=scope.getParentNode()) {
 
-			if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName()) ) { // default namespace
+			final NamedNodeMap attributes=scope.getAttributes();
 
-				namespaces.put(DefaultPrefix, attribute.getNodeValue());
+			if ( attributes != null ) {
+				for (int i=0, n=attributes.getLength(); i < n; ++i) {
 
-			} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) { // prefixed namespace
+					final Node attribute=attributes.item(i);
 
-				namespaces.put(attribute.getLocalName(), attribute.getNodeValue());
+					if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName()) ) { // default namespace
 
+						namespaces.putIfAbsent(DefaultPrefix, attribute.getNodeValue());
+
+					} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) { // prefixed namespace
+
+						namespaces.putIfAbsent(attribute.getLocalName(), attribute.getNodeValue());
+
+					}
+
+				}
 			}
 
 		}
@@ -173,7 +180,6 @@ public final class XPath {
 			}
 
 		});
-
 
 		this.node=node;
 		this.base=Optional
