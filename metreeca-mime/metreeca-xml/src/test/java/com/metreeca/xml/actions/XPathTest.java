@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 
-import static com.metreeca.xml.actions.XPath.XPath;
 import static com.metreeca.xml.actions.XPath.decode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,8 +45,8 @@ final class XPathTest {
 
 				.optMap(Either::get)
 
-				.flatMap(XPath(m -> m.nodes("//ns:y")))
-				.flatMap(XPath(m -> m.strings("//ns:z")))
+				.flatMap(new XPath<>(m -> m.nodes("//ns:y")))
+				.flatMap(new XPath<>(m1 -> m1.strings("//ns:z")))
 
 		).containsExactly("text");
 	}

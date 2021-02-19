@@ -25,7 +25,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -33,19 +32,19 @@ import java.util.stream.StreamSupport;
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static javax.xml.XMLConstants.XMLNS_ATTRIBUTE;
 
-
 /**
- * XPath expression matching.
+ * XPath-based XML node processing.
  *
- * <p>Applies XPath expression to XML nodes.</p>
+ * <p>Maps XML nodes to values produced by a function taking as argument a node-targeted XPath processor.</p>
+ *
+ * @param <R> the type of the value returned by the processing action
  */
-public final class XPath {
+public final class XPath<R> implements Function<Node, R> {
 
 	/**
 	 * The prefix mapped to the default namespace of the target document ({@value}).
 	 */
 	public static final String DefaultPrefix="_";
-
 
 	private static final String HTMLPrefix="html";
 	private static final String HTMLUri="http://www.w3.org/1999/xhtml";
@@ -53,27 +52,6 @@ public final class XPath {
 	private static final Pattern EntityPattern=Pattern.compile("&#(?<hex>x?)(?<code>\\d+);", CASE_INSENSITIVE);
 
 	private static final XPathFactory factory=XPathFactory.newInstance();
-
-
-	/**
-	 * Creates an xpath-based function.
-	 *
-	 * @param query a function taking as argument an xpath matching action and returning a value
-	 * @param <R>   the type of the value returned by {@code query}
-	 *
-	 * @return a function taking an XML node as argument and returning the value produced by applying {@code query}
-	 * to an xpath matching action targeting the argument
-	 *
-	 * @throws NullPointerException if {@code query} is null
-	 */
-	public static <R> Function<Node, R> XPath(final Function<XPath, R> query) {
-
-		if ( query == null ) {
-			throw new NullPointerException("null query");
-		}
-
-		return node -> query.apply(new XPath(node));
-	}
 
 
 	/**
@@ -93,7 +71,7 @@ public final class XPath {
 		}
 
 		final StringBuffer buffer=new StringBuffer(text.length());
-		final Matcher matcher=EntityPattern.matcher(text);
+		final java.util.regex.Matcher matcher=EntityPattern.matcher(text);
 
 		while ( matcher.find() ) {
 
@@ -112,382 +90,421 @@ public final class XPath {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Node node;
-	private final URI base;
 
-	private final javax.xml.xpath.XPath xpath;
+	private final Function<Processor, R> query;
+
 
 	/**
-	 * Creates an xpath matching action.
+	 * Creates an XPath-based node processing action.
 	 *
-	 * @param node the target XML node for the action
+	 * @param query a function taking as argument a processor and returning a value
 	 *
-	 * @throws NullPointerException if {@code node} is null
+	 * @throws NullPointerException if {@code query} is null
 	 */
-	public XPath(final Node node) {
+	public XPath(final Function<Processor, R> query) {
 
-		if ( node == null ) {
-			throw new NullPointerException("null node");
+		if ( query == null ) {
+			throw new NullPointerException("null query");
 		}
 
-		this.xpath=factory.newXPath();
+		this.query=query;
+	}
 
-		final Map<String, String> namespaces=new HashMap<>();
 
-		final Node root=node instanceof Document ? ((Document)node).getDocumentElement() : node;
+	@Override public R apply(final Node node) {
+		return query.apply(new Processor(node));
+	}
 
-		for (Node scope=root; scope != null; scope=scope.getParentNode()) {
 
-			final NamedNodeMap attributes=scope.getAttributes();
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			if ( attributes != null ) {
-				for (int i=0, n=attributes.getLength(); i < n; ++i) {
+	/**
+	 * XPath processor.
+	 *
+	 * <p>Applies XPath expression to a target XML node.</p>
+	 */
+	public static final class Processor {
 
-					final Node attribute=attributes.item(i);
+		private final Node node;
+		private final URI base;
 
-					if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName()) ) { // default namespace
+		private final javax.xml.xpath.XPath xpath;
 
-						namespaces.putIfAbsent(DefaultPrefix, attribute.getNodeValue());
+		/**
+		 * Creates an XPath processor.
+		 *
+		 * @param node the target XML node for the processor
+		 *
+		 * @throws NullPointerException if {@code node} is null
+		 */
+		public Processor(final Node node) {
 
-					} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) { // prefixed namespace
+			if ( node == null ) {
+				throw new NullPointerException("null node");
+			}
 
-						namespaces.putIfAbsent(attribute.getLocalName(), attribute.getNodeValue());
+			this.xpath=factory.newXPath();
+
+			final Map<String, String> namespaces=new HashMap<>();
+
+			final Node root=node instanceof Document ? ((Document)node).getDocumentElement() : node;
+
+			for (Node scope=root; scope != null; scope=scope.getParentNode()) {
+
+				final NamedNodeMap attributes=scope.getAttributes();
+
+				if ( attributes != null ) {
+					for (int i=0, n=attributes.getLength(); i < n; ++i) {
+
+						final Node attribute=attributes.item(i);
+
+						if ( XMLNS_ATTRIBUTE.equals(attribute.getNodeName()) ) { // default namespace
+
+							namespaces.putIfAbsent(DefaultPrefix, attribute.getNodeValue());
+
+						} else if ( XMLNS_ATTRIBUTE.equals(attribute.getPrefix()) ) { // prefixed namespace
+
+							namespaces.putIfAbsent(attribute.getLocalName(), attribute.getNodeValue());
+
+						}
 
 					}
-
 				}
+
 			}
+
+			final String namespace=root.getNamespaceURI();
+
+			namespaces.computeIfAbsent(DefaultPrefix, prefix -> namespace);
+			namespaces.computeIfAbsent(HTMLPrefix, prefix -> HTMLUri.equals(namespace) ? namespace : null);
+
+			xpath.setNamespaceContext(new NamespaceContext() {
+
+				@Override public String getNamespaceURI(final String prefix) {
+					return namespaces.get(prefix);
+				}
+
+				@Override public String getPrefix(final String namespaceURI) {
+					throw new UnsupportedOperationException("prefix lookup");
+				}
+
+				@Override public Iterator<String> getPrefixes(final String namespaceURI) {
+					throw new UnsupportedOperationException("prefixes lookup");
+				}
+
+			});
+
+			this.node=node;
+			this.base=Optional
+
+					.ofNullable(Optional.of(root)
+
+							.filter(r -> HTMLUri.equals(r.getNamespaceURI()))
+
+							.map(r -> {
+								try {
+
+									return (String)xpath
+											.compile("/html:html/html:head/html:base/@href")
+											.evaluate(r, XPathConstants.STRING);
+
+								} catch ( final XPathExpressionException e ) {
+									return null;
+								}
+							})
+
+							.filter(href -> !href.isEmpty())
+							.orElse(node.getBaseURI())
+					)
+
+					.map(url -> {
+
+						try {
+							return new URI(url);
+						} catch ( final URISyntaxException e ) {
+							return null;
+						}
+
+					})
+
+					.orElse(null);
 
 		}
 
-		final String namespace=root.getNamespaceURI();
 
-		namespaces.computeIfAbsent(DefaultPrefix, prefix -> namespace);
-		namespaces.computeIfAbsent(HTMLPrefix, prefix -> HTMLUri.equals(namespace) ? namespace : null);
+		/**
+		 * Retrieves the target node.
+		 *
+		 * @return the target node of this processor.
+		 */
+		public Node node() {
+			return node;
+		}
 
-		xpath.setNamespaceContext(new NamespaceContext() {
+		/**
+		 * Retrieves the target document.
+		 *
+		 * @return the target document of this processor.
+		 */
+		public Document document() {
+			return node instanceof Document ? (Document)node : node.getOwnerDocument();
+		}
 
-			@Override public String getNamespaceURI(final String prefix) {
-				return namespaces.get(prefix);
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		/**
+		 * Retrieves a boolean value from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return an optional boolean containing the value produced by evaluating {@code xpath} against the target node
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Optional<Boolean> bool(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
 			}
 
-			@Override public String getPrefix(final String namespaceURI) {
-				throw new UnsupportedOperationException("prefix lookup");
+			return Optional.of((Boolean)evaluate(xpath, XPathConstants.BOOLEAN));
+		}
+
+		/**
+		 * Retrieves a numeric value from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return an optional number containing the value produced by evaluating {@code xpath} against the target node,
+		 * if one was available; an empty optional, otherwise
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Optional<Double> number(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
 			}
 
-			@Override public Iterator<String> getPrefixes(final String namespaceURI) {
-				throw new UnsupportedOperationException("prefixes lookup");
+			return Optional.of((Double)evaluate(xpath, XPathConstants.NUMBER)).filter(x -> !Double.isNaN(x));
+		}
+
+
+		/**
+		 * Retrieves a textual value from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return an optional non-empty string containing the value produced by evaluating {@code xpath} against the
+		 * target node, if one was available and not empty; an empty optional, otherwise
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Optional<String> string(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
 			}
 
-		});
+			return Optional.of((String)evaluate(xpath, XPathConstants.STRING)).filter(s -> !s.isEmpty());
+		}
 
-		this.node=node;
-		this.base=Optional
+		/**
+		 * Retrieves textual values from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return a stream of non-empty strings containing the values produced by evaluating {@code xpath} against the
+		 * target node
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Stream<String> strings(final String xpath) {
 
-				.ofNullable(Optional.of(root)
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
+			}
 
-						.filter(r -> HTMLUri.equals(r.getNamespaceURI()))
+			return nodes(xpath).map(Node::getTextContent).filter(s -> !s.isEmpty());
+		}
 
-						.map(r -> {
-							try {
 
-								return (String)xpath
-										.compile("/html:html/html:head/html:base/@href")
-										.evaluate(r, XPathConstants.STRING);
+		/**
+		 * Retrieves a URI value from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return an optional string URIs containing the values produced by evaluating {@code xpath} against the target
+		 * node, if one was available, and resolving it against the {@linkplain Node#getBaseURI() base URI} of the
+		 * target node, if available; syntactically malformed URIs are returned verbatim
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Optional<String> link(final String xpath) {
 
-							} catch ( final XPathExpressionException e ) {
-								return null;
-							}
-						})
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
+			}
 
-						.filter(href -> !href.isEmpty())
-						.orElse(node.getBaseURI())
-				)
+			return node(xpath).map(Node::getTextContent).map(s -> {
+				try {
 
-				.map(url -> {
+					return base == null ? s : base.resolve(s).normalize().toString();
 
-					try {
-						return new URI(url);
-					} catch ( final URISyntaxException e ) {
-						return null;
+				} catch ( final IllegalArgumentException e ) {
+
+					return s;
+
+				}
+			});
+		}
+
+		/**
+		 * Retrieves URI values from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return a stream of URIs containing the values produced by evaluating {@code xpath} against the target node
+		 * and resolving them against the {@linkplain Node#getBaseURI() base URI} of the target node, if available;
+		 * syntactically malformed URIs are returned verbatim
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Stream<String> links(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
+			}
+
+			return nodes(xpath).map(Node::getTextContent).map(s -> {
+				try {
+
+					return base == null ? s : base.resolve(s).normalize().toString();
+
+				} catch ( final IllegalArgumentException e ) {
+
+					return s;
+
+				}
+			});
+		}
+
+
+		/**
+		 * Retrieves an element value from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return an optional element containing the value produced by evaluating {@code xpath} against the target
+		 * node,
+		 * if one was available; an empty optional, otherwise
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Optional<Element> element(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
+			}
+
+			return node(xpath)
+					.filter(Element.class::isInstance)
+					.map(Element.class::cast);
+		}
+
+		/**
+		 * Retrieves element values from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return a stream of elements containing the values produced by evaluating {@code xpath} against the target
+		 * node
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Stream<Element> elements(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
+			}
+
+			return nodes(xpath)
+					.filter(Element.class::isInstance)
+					.map(Element.class::cast);
+		}
+
+
+		/**
+		 * Retrieves a node value from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return an optional node containing the value produced by evaluating {@code xpath} against the target node,
+		 * if one was available; an empty optional, otherwise
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Optional<Node> node(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
+			}
+
+			return Optional.ofNullable((Node)evaluate(xpath, XPathConstants.NODE));
+		}
+
+		/**
+		 * Retrieves node values from the target node.
+		 *
+		 * @param xpath the XPath expression to be evaluated against the target node
+		 *
+		 * @return a stream of nodes containing the values produced by evaluating {@code xpath} against the target node
+		 *
+		 * @throws NullPointerException if {@code xpath} is null
+		 */
+		public Stream<Node> nodes(final String xpath) {
+
+			if ( xpath == null ) {
+				throw new NullPointerException("null XPath expression");
+			}
+
+			return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Node>() {
+
+				private final NodeList nodes=(NodeList)evaluate(xpath, XPathConstants.NODESET);
+
+				private int next;
+
+				@Override public boolean hasNext() {
+					return next < nodes.getLength();
+				}
+
+				@Override public Node next() throws NoSuchElementException {
+
+					if ( !hasNext() ) {
+						throw new NoSuchElementException("no more iterator elements");
 					}
 
-				})
+					return nodes.item(next++);
 
-				.orElse(null);
-
-	}
-
-
-	/**
-	 * Retrieves the target node.
-	 *
-	 * @return the target node of this xpath matching action.
-	 */
-	public Node node() {
-		return node;
-	}
-
-	/**
-	 * Retrieves the target document.
-	 *
-	 * @return the target document of this xpath matching action.
-	 */
-	public Document document() {
-		return node instanceof Document ? (Document)node : node.getOwnerDocument();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves a boolean value from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return an optional boolean containing the value produced by evaluating {@code xpath} against the target node
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Optional<Boolean> bool(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return Optional.of((Boolean)evaluate(xpath, XPathConstants.BOOLEAN));
-	}
-
-	/**
-	 * Retrieves a numeric value from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return an optional number containing the value produced by evaluating {@code xpath} against the target node,
-	 * if one was available; an empty optional, otherwise
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Optional<Double> number(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return Optional.of((Double)evaluate(xpath, XPathConstants.NUMBER)).filter(x -> !Double.isNaN(x));
-	}
-
-
-	/**
-	 * Retrieves a textual value from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return an optional non-empty string containing the value produced by evaluating {@code xpath} against the
-	 * target node, if one was available and not empty; an empty optional, otherwise
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Optional<String> string(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return Optional.of((String)evaluate(xpath, XPathConstants.STRING)).filter(s -> !s.isEmpty());
-	}
-
-	/**
-	 * Retrieves textual values from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return a stream of non-empty strings containing the values produced by evaluating {@code xpath} against the
-	 * target node
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Stream<String> strings(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return nodes(xpath).map(Node::getTextContent).filter(s -> !s.isEmpty());
-	}
-
-
-	/**
-	 * Retrieves a URI value from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return an optional string URIs containing the values produced by evaluating {@code xpath} against the target
-	 * node, if one was available, and resolving it against the {@linkplain Node#getBaseURI() base URI} of the target
-	 * node, if available; syntactically malformed URIs are returned verbatim
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Optional<String> link(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return node(xpath).map(Node::getTextContent).map(s -> {
-			try {
-
-				return base == null ? s : base.resolve(s).normalize().toString();
-
-			} catch ( final IllegalArgumentException e ) {
-
-				return s;
-
-			}
-		});
-	}
-
-	/**
-	 * Retrieves URI values from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return a stream of URIs containing the values produced by evaluating {@code xpath} against the target node
-	 * and resolving them against the {@linkplain Node#getBaseURI() base URI} of the target node, if available;
-	 * syntactically malformed URIs are returned verbatim
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Stream<String> links(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return nodes(xpath).map(Node::getTextContent).map(s -> {
-			try {
-
-				return base == null ? s : base.resolve(s).normalize().toString();
-
-			} catch ( final IllegalArgumentException e ) {
-
-				return s;
-
-			}
-		});
-	}
-
-
-	/**
-	 * Retrieves an element value from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return an optional element containing the value produced by evaluating {@code xpath} against the target node,
-	 * if one was available; an empty optional, otherwise
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Optional<Element> element(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return node(xpath)
-				.filter(Element.class::isInstance)
-				.map(Element.class::cast);
-	}
-
-	/**
-	 * Retrieves element values from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return a stream of elements containing the values produced by evaluating {@code xpath} against the target node
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Stream<Element> elements(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return nodes(xpath)
-				.filter(Element.class::isInstance)
-				.map(Element.class::cast);
-	}
-
-
-	/**
-	 * Retrieves a node value from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return an optional node containing the value produced by evaluating {@code xpath} against the target node,
-	 * if one was available; an empty optional, otherwise
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Optional<Node> node(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return Optional.ofNullable((Node)evaluate(xpath, XPathConstants.NODE));
-	}
-
-	/**
-	 * Retrieves node values from the target node.
-	 *
-	 * @param xpath the xpath expression to be evaluated against the target node
-	 *
-	 * @return a stream of nodes containing the values produced by evaluating {@code xpath} against the target node
-	 *
-	 * @throws NullPointerException if {@code xpath} is null
-	 */
-	public Stream<Node> nodes(final String xpath) {
-
-		if ( xpath == null ) {
-			throw new NullPointerException("null xpath");
-		}
-
-		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Node>() {
-
-			private final NodeList nodes=(NodeList)evaluate(xpath, XPathConstants.NODESET);
-
-			private int next;
-
-			@Override public boolean hasNext() {
-				return next < nodes.getLength();
-			}
-
-			@Override public Node next() throws NoSuchElementException {
-
-				if ( !hasNext() ) {
-					throw new NoSuchElementException("no more iterator elements");
 				}
 
-				return nodes.item(next++);
-
-			}
-
-		}, Spliterator.ORDERED), false);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Object evaluate(final String query, final QName type) {
-		try {
-
-			return xpath.compile(query).evaluate(node, type);
-
-		} catch ( final XPathExpressionException e ) {
-			throw new RuntimeException(String.format("unable to evaluate xpath expression {%s}", query), e);
+			}, Spliterator.ORDERED), false);
 		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		private Object evaluate(final String query, final QName type) {
+			try {
+
+				return xpath.compile(query).evaluate(node, type);
+
+			} catch ( final XPathExpressionException e ) {
+				throw new RuntimeException(String.format("unable to evaluate XPath expression {%s}", query), e);
+			}
+		}
+
 	}
 
 }
