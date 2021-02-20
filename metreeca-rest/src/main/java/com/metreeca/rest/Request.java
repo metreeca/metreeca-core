@@ -179,10 +179,10 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #GET} and the {@code Accept}
 	 * header includes a MIME type usually associated with an interactive browser-managed HTTP request
-	 * (e.g. {@code text /html}
+	 * (e.g. {@code text/html}
 	 */
 	public boolean interactive() {
-		return method.equals(GET) && headers("content-type")
+		return method.equals(GET) && headers("accept")
 				.stream()
 				.anyMatch(value -> HTMLPattern.matcher(value).find());
 	}
