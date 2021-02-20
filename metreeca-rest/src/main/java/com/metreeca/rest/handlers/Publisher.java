@@ -16,6 +16,8 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.assets.Loader;
 import com.metreeca.rest.formats.DataFormat;
 
 import java.io.*;
@@ -34,6 +36,8 @@ import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.assets.Loader.loader;
+import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.handlers.Router.router;
 import static java.lang.String.format;
@@ -79,45 +83,20 @@ public final class Publisher extends Delegator {
 	);
 
 
-	/**
-	 * Extracts the basename of a path.
-	 *
-	 * @param path the path whose basename is to be extracted
-	 *
-	 * @return the portion of the {@code path} filename before the last dot character or the whole {@code  path}
-	 * filename if it doesn't include a dot character
-	 *
-	 * @throws NullPointerException if {@code path} is null
-	 */
-	public static String basename(final Path path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		final String name=path.getFileName().toString();
-		final int dot=name.lastIndexOf('.');
-
-		return dot >= 0 ? name.substring(0, dot) : name;
+	private static String mime(final String extension) {
+		return MIMETypes.getOrDefault(extension, DataFormat.MIME);
 	}
 
-	/**
-	 * Extracts the extension of a path.
-	 *
-	 * @param path the path whose extension is to be extracted
-	 *
-	 * @return the portion of the {@code path} filename after the last dot character or an empty string if the filename
-	 * doesn't include a dot character
-	 *
-	 * @throws NullPointerException if {@code path} is null
-	 */
-	public static String extension(final Path path) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
+	private static String filename(final String path) {
 
-		final String name=path.getFileName().toString();
+		final int slash=path.lastIndexOf('/');
+
+		return slash >= 0 ? path.substring(slash+1) : path;
+	}
+
+	private static String extension(final String name) {
+
 		final int dot=name.lastIndexOf('.');
 
 		return dot >= 0 ? name.substring(dot).toLowerCase(ROOT) : "";
@@ -247,8 +226,40 @@ public final class Publisher extends Delegator {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Creates a static fallback content publisher.
+	 *
+	 * @param path the path of the {@linkplain Loader shared resource} to be published as fallback content
+	 *
+	 * @return a new static content publisher unconditionally serving the content of the shared read from {@code path}
+	 * using the default {@linkplain Loader loader}.
+	 *
+	 * @throws NullPointerException if {@code path} is null
+	 */
+	public static Handler publisher(final String path) {
 
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		final byte[] data=asset(loader())
+				.load(path)
+				.map(DataFormat::data)
+				.orElseThrow(() -> new RuntimeException(format("missing <%s> path", path)));
+
+		final String mime=mime(extension(filename(path)));
+		final String length=String.valueOf(data.length);
+
+		return request -> request.reply(response -> response
+				.status(OK)
+				.header("Content-Type", mime)
+				.header("Content-Length", length)
+				.body(data(), data)
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Publisher(final Path root) {
 		delegate(router().get(request -> variants(request.path())
@@ -264,7 +275,7 @@ public final class Publisher extends Delegator {
 
 				.map(file -> request.reply(function(response -> response.status(OK)
 
-						.header("Content-Type", MIMETypes.getOrDefault(extension(file), DataFormat.MIME))
+						.header("Content-Type", mime(extension(file.getFileName().toString())))
 						.header("Content-Length", String.valueOf(Files.size(file)))
 						.header("ETag", format("\"%s\"", Files.getLastModifiedTime(file).toMillis()))
 
