@@ -16,11 +16,12 @@
 
 package com.metreeca.rest.actions;
 
+import com.metreeca.rest.Xtream;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.regex.*;
-import java.util.stream.Stream;
 
 /**
  * Regular expression-based string processing.
@@ -177,7 +178,7 @@ public final class Regex<R> implements Function<String, R> {
 		 * @throws IllegalArgumentException if {@code group} is negative or {@code pattern} doesn't contain a
 		 *                                  corresponding group
 		 */
-		public Stream<String> groups(final String pattern, final int group) {
+		public Xtream<String> groups(final String pattern, final int group) {
 
 			if ( pattern == null ) {
 				throw new NullPointerException("null pattern");
@@ -222,7 +223,7 @@ public final class Regex<R> implements Function<String, R> {
 		 *
 		 * @throws NullPointerException if {@code pattern} is null
 		 */
-		public Stream<MatchResult> results(final String pattern) {
+		public Xtream<MatchResult> results(final String pattern) {
 
 			if ( pattern == null ) {
 				throw new NullPointerException("null pattern");
@@ -234,7 +235,7 @@ public final class Regex<R> implements Function<String, R> {
 				results.add(matcher.toMatchResult());
 			}
 
-			return results.stream();
+			return Xtream.from(results.stream());
 
 		}
 

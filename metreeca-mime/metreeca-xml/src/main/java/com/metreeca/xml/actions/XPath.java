@@ -16,6 +16,8 @@
 
 package com.metreeca.xml.actions;
 
+import com.metreeca.rest.Xtream;
+
 import org.w3c.dom.*;
 
 import javax.xml.namespace.NamespaceContext;
@@ -26,7 +28,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
@@ -320,7 +321,7 @@ public final class XPath<R> implements Function<Node, R> {
 		 *
 		 * @throws NullPointerException if {@code xpath} is null
 		 */
-		public Stream<String> strings(final String xpath) {
+		public Xtream<String> strings(final String xpath) {
 
 			if ( xpath == null ) {
 				throw new NullPointerException("null XPath expression");
@@ -371,7 +372,7 @@ public final class XPath<R> implements Function<Node, R> {
 		 *
 		 * @throws NullPointerException if {@code xpath} is null
 		 */
-		public Stream<String> links(final String xpath) {
+		public Xtream<String> links(final String xpath) {
 
 			if ( xpath == null ) {
 				throw new NullPointerException("null XPath expression");
@@ -423,7 +424,7 @@ public final class XPath<R> implements Function<Node, R> {
 		 *
 		 * @throws NullPointerException if {@code xpath} is null
 		 */
-		public Stream<Element> elements(final String xpath) {
+		public Xtream<Element> elements(final String xpath) {
 
 			if ( xpath == null ) {
 				throw new NullPointerException("null XPath expression");
@@ -463,13 +464,13 @@ public final class XPath<R> implements Function<Node, R> {
 		 *
 		 * @throws NullPointerException if {@code xpath} is null
 		 */
-		public Stream<Node> nodes(final String xpath) {
+		public Xtream<Node> nodes(final String xpath) {
 
 			if ( xpath == null ) {
 				throw new NullPointerException("null XPath expression");
 			}
 
-			return StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Node>() {
+			return Xtream.from(StreamSupport.stream(Spliterators.spliteratorUnknownSize(new Iterator<Node>() {
 
 				private final NodeList nodes=(NodeList)evaluate(xpath, XPathConstants.NODESET);
 
@@ -489,7 +490,7 @@ public final class XPath<R> implements Function<Node, R> {
 
 				}
 
-			}, Spliterator.ORDERED), false);
+			}, Spliterator.ORDERED), false));
 		}
 
 
