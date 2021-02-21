@@ -39,7 +39,7 @@ public abstract class Delegator implements Handler {
 	 *
 	 * @return this delegator
 	 *
-	 * @throws NullPointerException     if {@code delegate} is null
+	 * @throws NullPointerException if {@code delegate} is null
 	 */
 	protected Delegator delegate(final Handler delegate) {
 

@@ -59,11 +59,12 @@ public final class Hello {
   public static void main(final String... args) {
     new Server()
 
-        .handler(context -> request ->
+        .delegate(context -> request ->
             request.reply(response -> response
                 .status(OK)
                 .body(text(), "Hello world!")
-            ))
+            )
+        )
 
         .start();
   }

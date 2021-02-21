@@ -118,10 +118,10 @@ import static com.metreeca.rest.wrappers.Gateway.gateway;
 @WebFilter(urlPatterns = "/*")
 public final class Demo extends Server {
 
-  public Demo() {
-    handler(context -> context
+	public Demo() {
+		delegate(context -> context
 
-        .get(() -> gateway()
+				.get(() -> gateway()
 
             .wrap(request -> request.reply(status(OK)))
 

@@ -62,17 +62,17 @@ public abstract class Server implements Filter {
 
 
 	/**
-	 * Configures the handler.
+	 * Configures the delegate handler.
 	 *
-	 * @param factory the handler factory; takes as argument a shared asset context (which may configured with
+	 * @param factory a handler factory; takes as argument a shared asset context (which may configured with
 	 *                additional application-specific assets as a side effect) and must return a non-null handler
-	 *                to be used as main entry point for serving requests
+	 *                to be used as entry point for serving requests
 	 *
 	 * @return this server
 	 *
 	 * @throws NullPointerException if {@code factory} is null or returns null values
 	 */
-	protected Server handler(final Function<Context, Handler> factory) {
+	protected Server delegate(final Function<Context, Handler> factory) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null factory");
