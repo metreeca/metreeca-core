@@ -68,9 +68,8 @@ import static java.lang.String.format;
 	 * Creates a conditional handler.
 	 *
 	 * @param test the request predicate used to select the handler requests and responses are to be routed to
-	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true
-	 * } on
-	 *             the request
+	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true}
+	 *             on the request
 	 * @param fail the handler requests and responses are to be routed to when {@code test} evaluates to {@code false }
 	 *             on the request
 	 *
