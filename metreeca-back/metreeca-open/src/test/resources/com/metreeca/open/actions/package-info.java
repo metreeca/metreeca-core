@@ -15,7 +15,7 @@
  */
 
 /**
- * XML/HTML processing actions.
+ * Open data processing actions.
  */
 
-package com.metreeca.xml.actions;
+package com.metreeca.rdf.actions;

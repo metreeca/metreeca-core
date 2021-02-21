@@ -19,27 +19,38 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>com.metreeca</groupId>
-		<artifactId>metreeca-link</artifactId>
+		<artifactId>metreeca-back</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>metreeca-back</artifactId>
+	<artifactId>metreeca-open</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
 
-	<name>Metreeca Storage Connectors</name>
-	<description>Storage connector kits.</description>
+	<name>Metreeca Open Data Connector</name>
+	<description>Connector kit for open data sources.</description>
 
-	<modules>
+	<dependencies>
 
-		<module>metreeca-rdf4j</module>
-		<module>metreeca-open</module>
-		<module>metreeca-gcp</module>
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rdf</artifactId>
+		</dependency>
 
-	</modules>
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rdf4j</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-repository-sparql</artifactId>
+		</dependency>
+
+	</dependencies>
 
 </project>
