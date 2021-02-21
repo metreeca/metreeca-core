@@ -26,7 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static java.lang.Float.parseFloat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -48,48 +47,6 @@ public abstract class Message<T extends Message<T>> {
 	private static final Pattern CharsetPattern=Pattern.compile(
 			";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b"
 	);
-
-	private static final Pattern MimePattern=Pattern.compile(
-			"((?:[-+\\w]+|\\*)/(?:[-+\\w]+|\\*))(?:\\s*;\\s*q\\s*=\\s*(\\d*(?:\\.\\d+)?))?"
-	);
-
-
-	/**
-	 * Parses a MIME type list.
-	 *
-	 * @param types the MIME type list to be parsed
-	 *
-	 * @return a list of MIME types parsed from {@code types}, sorted by descending
-	 * <a href="https://developer.mozilla.org/en-US/docs/Glossary/quality_values">quality value</a>
-	 *
-	 * @throws NullPointerException if {@code types} is null
-	 */
-	public static List<String> types(final String types) {
-
-		if ( types == null ) {
-			throw new NullPointerException("null mime types");
-		}
-
-		final List<Map.Entry<String, Float>> entries=new ArrayList<>();
-
-		final Matcher matcher=MimePattern.matcher(types);
-
-		while ( matcher.find() ) {
-
-			final String media=matcher.group(1).toLowerCase(Locale.ROOT);
-			final String quality=matcher.group(2);
-
-			try {
-				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
-			} catch ( final NumberFormatException ignored ) {
-				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, 0f));
-			}
-		}
-
-		entries.sort((x, y) -> -Float.compare(x.getValue(), y.getValue()));
-
-		return entries.stream().map(Map.Entry::getKey).collect(toList());
-	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

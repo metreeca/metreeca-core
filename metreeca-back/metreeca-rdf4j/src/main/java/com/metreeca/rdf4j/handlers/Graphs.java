@@ -41,7 +41,7 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.Format.mimes;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.InternalServerError;
@@ -137,7 +137,7 @@ public final class Graphs extends Endpoint<Graphs> {
 			} else {
 
 				final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, types(accept));
+						RDFWriterRegistry.getInstance(), RDFFormat.TURTLE, mimes(accept));
 
 				final RDFFormat format=factory.getRDFFormat();
 
@@ -184,7 +184,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content) // !!! review fallback
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, mimes(content) // !!! review fallback
 						// handling
 				);
 
@@ -299,7 +299,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				// !!! graph store, the implementation MUST respond with 415 Unsupported Media Type.
 
 				final RDFParserFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, types(content) // !!! review fallback
+						RDFParserRegistry.getInstance(), RDFFormat.TURTLE, mimes(content) // !!! review fallback
 				);
 
 				graph().exec(txn(connection -> { // binary format >> no rewriting

@@ -19,6 +19,7 @@ package com.metreeca.rest;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.*;
@@ -170,7 +171,7 @@ public final class Xtream<T> implements Stream<T> {
 	}
 
 	public static <K, V> Entry<K, V> entry(final K key, final V value) {
-		return new AbstractMap.SimpleImmutableEntry<>(key, value);
+		return new SimpleImmutableEntry<>(key, value);
 	}
 
 

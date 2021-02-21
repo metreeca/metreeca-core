@@ -29,7 +29,7 @@ import org.eclipse.rdf4j.rio.*;
 
 import java.util.*;
 
-import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.Format.mimes;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.OutputFormat.output;
@@ -187,7 +187,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, mimes(accept));
 
 		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
@@ -202,7 +202,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final TupleQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, types(accept));
+				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, mimes(accept));
 
 		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
@@ -231,7 +231,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, types(accept));
+				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, mimes(accept));
 
 		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
@@ -263,7 +263,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		final String accept=request.header("Accept").orElse("");
 
 		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, mimes(accept));
 
 		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())

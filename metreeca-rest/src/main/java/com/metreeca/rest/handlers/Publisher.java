@@ -16,16 +16,15 @@
 
 package com.metreeca.rest.handlers;
 
+import com.metreeca.rest.Format;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.assets.Loader;
 import com.metreeca.rest.formats.DataFormat;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.*;
-import java.nio.file.FileSystem;
 import java.nio.file.*;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.*;
 import java.util.regex.Matcher;
@@ -41,11 +40,7 @@ import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.handlers.Router.router;
 import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.Locale.ROOT;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * Static content publisher.
@@ -53,54 +48,6 @@ import static java.util.stream.Collectors.toMap;
 public final class Publisher extends Delegator {
 
 	private static final Pattern URLPattern=Pattern.compile("(.*/)?(\\.|[^/#]*)?(#[^/#]*)?$");
-
-
-	/**
-	 * MIME types by file extension.
-	 *
-	 * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types">
-	 * Common MIME types @ MDN</a>
-	 */
-	private static final Map<String, String> MIMETypes=unmodifiableMap(Stream
-
-			.of(Publisher.class.getSimpleName()+".tsv")
-
-			.map(Publisher.class::getResourceAsStream)
-			.flatMap(stream -> new BufferedReader(new InputStreamReader(stream, UTF_8)).lines())
-
-			.filter(line -> !line.isEmpty())
-
-			.map(line -> {
-
-				final int tab=line.indexOf('\t');
-
-				return new SimpleImmutableEntry<>(line.substring(0, tab), line.substring(tab+1));
-
-			})
-
-			.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
-
-	);
-
-
-	private static String mime(final String extension) {
-		return MIMETypes.getOrDefault(extension, DataFormat.MIME);
-	}
-
-
-	private static String filename(final String path) {
-
-		final int slash=path.lastIndexOf('/');
-
-		return slash >= 0 ? path.substring(slash+1) : path;
-	}
-
-	private static String extension(final String name) {
-
-		final int dot=name.lastIndexOf('.');
-
-		return dot >= 0 ? name.substring(dot).toLowerCase(ROOT) : "";
-	}
 
 
 	/**
@@ -247,7 +194,7 @@ public final class Publisher extends Delegator {
 				.map(DataFormat::data)
 				.orElseThrow(() -> new RuntimeException(format("missing <%s> path", path)));
 
-		final String mime=mime(extension(filename(path)));
+		final String mime=Format.mime(path);
 		final String length=String.valueOf(data.length);
 
 		return request -> request.reply(response -> response
@@ -275,7 +222,7 @@ public final class Publisher extends Delegator {
 
 				.map(file -> request.reply(function(response -> response.status(OK)
 
-						.header("Content-Type", mime(extension(file.getFileName().toString())))
+						.header("Content-Type", Format.mime(file.getFileName().toString()))
 						.header("Content-Length", String.valueOf(Files.size(file)))
 						.header("ETag", format("\"%s\"", Files.getLastModifiedTime(file).toMillis()))
 

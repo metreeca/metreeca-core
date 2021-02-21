@@ -238,7 +238,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 				.header("Content-Type")
 
-				.orElseGet(() -> types(message.request().header("Accept").orElse("")).stream()
+				.orElseGet(() -> mimes(message.request().header("Accept").orElse("")).stream()
 
 						// application/ld+json or application/json accepted?
 

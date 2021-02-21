@@ -33,7 +33,7 @@ import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.Format.mimes;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -64,11 +64,11 @@ final class RDFFormatTest {
 
 			assertThat((Object)Binary)
 					.as("none matching")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("text/none")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("text/none")));
 
 			assertThat((Object)Turtle)
 					.as("single matching")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("text/turtle")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("text/turtle")));
 
 			assertThat((Object)Turtle)
 					.as("leading matching")
@@ -80,11 +80,11 @@ final class RDFFormatTest {
 
 			assertThat((Object)Binary)
 					.as("wildcard")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("*/*, text/plain;q=0.1")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("*/*, text/plain;q=0.1")));
 
 			assertThat((Object)Turtle)
 					.as("type pattern")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("text/*, text/plain;q=0.1")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("text/*, text/plain;q=0.1")));
 
 		}
 
@@ -95,7 +95,7 @@ final class RDFFormatTest {
 							StandardCharsets.UTF_8, "",
 							org.eclipse.rdf4j.rio.RDFFormat.NO_NAMESPACES, org.eclipse.rdf4j.rio.RDFFormat.NO_CONTEXTS,
 							org.eclipse.rdf4j.rio.RDFFormat.NO_RDF_STAR
-					), types("text/none"))
+					), mimes("text/none"))
 			);
 		}
 
