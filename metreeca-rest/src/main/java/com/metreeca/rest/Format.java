@@ -96,10 +96,10 @@ public abstract class Format<V> {
 			throw new NullPointerException("null path");
 		}
 
-		final int slash=path.lastIndexOf('/');
-		final int dot=path.lastIndexOf('.', max(slash, 0));
+		final int slash=max(0, path.lastIndexOf('/'));
+		final int dot=(slash >= 0 ? path.substring(slash) : path).lastIndexOf('.');
 
-		final String extension=dot >= 0 ? path.substring(dot).toLowerCase(ROOT) : "";
+		final String extension=dot >= 0 ? path.substring(slash+dot).toLowerCase(ROOT) : "";
 
 		return MIMETypes.getOrDefault(extension, MIMEDefault);
 	}

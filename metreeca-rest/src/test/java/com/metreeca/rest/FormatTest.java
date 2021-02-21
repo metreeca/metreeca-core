@@ -19,69 +19,88 @@ package com.metreeca.rest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.rest.Format.mime;
 import static com.metreeca.rest.Format.mimes;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 final class FormatTest {
 
+	@Nested final class MIMEType {
+
+		@Test void testGuessKnownType() {
+			assertThat(mime("/static/index.html"))
+					.isEqualTo("text/html");
+		}
+
+		@Test void testHandleUknownType() {
+			assertThat(mime("/static/index.unknown"))
+					.isEqualTo("application/octet-stream");
+		}
+
+		@Test void testHandleMissingType() {
+			assertThat(mime("/static/index"))
+					.isEqualTo("application/octet-stream");
+		}
+
+	}
+
 	@Nested final class MIMETypes {
 
 		@Test void testParseStrings() {
 
-			assertThat(emptyList())
+			assertThat(mimes(""))
 					.as("empty")
-					.isEqualTo(mimes(""));
+					.isEmpty();
 
-			assertThat(singletonList("text/turtle"))
+			assertThat(mimes("text/turtle"))
 					.as("single")
-					.isEqualTo(mimes("text/turtle"));
+					.isEqualTo(singletonList("text/turtle"));
 
-			assertThat(asList("text/turtle", "text/plain"))
+			assertThat(mimes("text/turtle, text/plain"))
 					.as("multiple")
-					.isEqualTo(mimes("text/turtle, text/plain"));
+					.isEqualTo(asList("text/turtle", "text/plain"));
 
-			assertThat(singletonList("*/*"))
+			assertThat(mimes("*/*"))
 					.as("wildcard")
-					.isEqualTo(mimes("*/*"));
+					.isEqualTo(singletonList("*/*"));
 
-			assertThat(singletonList("text/*"))
+			assertThat(mimes("text/*"))
 					.as("type wildcard")
-					.isEqualTo(mimes("text/*"));
+					.isEqualTo(singletonList("text/*"));
 
 		}
 
 		@Test void testParseLeniently() {
 
-			assertThat(singletonList("text/plain"))
+			assertThat(mimes("text/Plain"))
 					.as("normalize case")
-					.isEqualTo(mimes("text/Plain"));
+					.isEqualTo(singletonList("text/plain"));
 
-			assertThat(singletonList("text/plain"))
+			assertThat(mimes(" text/plain ; q = 0.3"))
 					.as("ignores spaces")
-					.isEqualTo(mimes(" text/plain ; q = 0.3"));
+					.isEqualTo(singletonList("text/plain"));
 
-			assertThat(asList("text/turtle", "text/plain", "text/csv"))
+			assertThat(mimes("text/turtle, text/plain\ttext/csv"))
 					.as("lenient separators")
-					.isEqualTo(mimes("text/turtle, text/plain\ttext/csv"));
+					.isEqualTo(asList("text/turtle", "text/plain", "text/csv"));
 
 		}
 
 		@Test void testSortOnQuality() {
 
-			assertThat(asList("text/plain", "text/turtle"))
+			assertThat(mimes("text/turtle;q=0.1, text/plain;q=0.2"))
 					.as("sorted")
-					.isEqualTo(mimes("text/turtle;q=0.1, text/plain;q=0.2"));
+					.isEqualTo(asList("text/plain", "text/turtle"));
 
-			assertThat(asList("text/plain", "text/turtle"))
+			assertThat(mimes("text/turtle;q=0.1, text/plain"))
 					.as("sorted with default values")
-					.isEqualTo(mimes("text/turtle;q=0.1, text/plain"));
+					.isEqualTo(asList("text/plain", "text/turtle"));
 
-			assertThat(asList("text/plain", "text/turtle"))
+			assertThat(mimes("text/turtle;q=x, text/plain"))
 					.as("sorted with corrupt values")
-					.isEqualTo(mimes("text/turtle;q=x, text/plain"));
+					.isEqualTo(asList("text/plain", "text/turtle"));
 
 		}
 

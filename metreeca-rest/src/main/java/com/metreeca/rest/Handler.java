@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 
 import static com.metreeca.json.Values.md5;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Format.mime;
 import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.assets.Loader.loader;
@@ -120,7 +121,7 @@ import static java.util.Arrays.asList;
 				.map(DataFormat::data)
 				.orElseThrow(() -> new RuntimeException(format("missing <%s> resource", path)));
 
-		final String mime=Format.mime(path);
+		final String mime=mime(path);
 		final String length=String.valueOf(data.length);
 		final String etag=format("\"%s\"", md5(data));
 
