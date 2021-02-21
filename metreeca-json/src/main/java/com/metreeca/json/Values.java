@@ -86,7 +86,11 @@ public final class Values {
 	}
 
 	public static String uuid(final String text) {
-		return text == null ? null : nameUUIDFromBytes(text.getBytes(UTF_8)).toString();
+		return text == null ? null : uuid(text.getBytes(UTF_8));
+	}
+
+	public static String uuid(final byte[] data) {
+		return data == null ? null : nameUUIDFromBytes(data).toString();
 	}
 
 
@@ -102,10 +106,14 @@ public final class Values {
 	}
 
 	public static String md5(final String text) {
+		return text == null ? null : md5(text.getBytes(UTF_8));
+	}
+
+	public static String md5(final byte[] data) {
 		try {
 
-			return text == null ? null : DatatypeConverter
-					.printHexBinary(MessageDigest.getInstance("MD5").digest(text.getBytes(UTF_8)))
+			return data == null ? null : DatatypeConverter
+					.printHexBinary(MessageDigest.getInstance("MD5").digest(data))
 					.toLowerCase(ROOT);
 
 		} catch ( final NoSuchAlgorithmException unexpected ) {

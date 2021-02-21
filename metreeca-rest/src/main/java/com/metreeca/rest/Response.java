@@ -36,6 +36,7 @@ public final class Response extends Message<Response> {
 	public static final int MovedPermanently=301; // https://tools.ietf.org/html/rfc7231#section-6.4.2
 	public static final int Found=302; // https://tools.ietf.org/html/rfc7231#section-6.4.3
 	public static final int SeeOther=303; // https://tools.ietf.org/html/rfc7231#section-6.4.4
+	public static final int NotModified=304; // https://tools.ietf.org/html/rfc7232#section-4.1
 	public static final int TemporaryRedirect=307; // https://tools.ietf.org/html/rfc7231#section-6.4.7
 	public static final int PermanentRedirect=308; // https://tools.ietf.org/html/rfc7538#section-3
 
