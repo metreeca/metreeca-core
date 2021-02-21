@@ -16,7 +16,16 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.rest.assets.Loader;
+import com.metreeca.rest.formats.DataFormat;
+
 import java.util.function.Predicate;
+
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.assets.Loader.loader;
+import static com.metreeca.rest.formats.DataFormat.data;
+import static java.lang.String.format;
 
 
 /**
@@ -85,6 +94,39 @@ import java.util.function.Predicate;
 		}
 
 		return request -> (test.test(request) ? pass : fail).handle(request);
+	}
+
+
+	/**
+	 * Creates a static fallback handler.
+	 *
+	 * @param path the path of the {@linkplain Loader shared resource} to be served as fallback content
+	 *
+	 * @return a new handler unconditionally serving the content of the shared resource retrieved from {@code path}
+	 * using the default {@linkplain Loader loader}.
+	 *
+	 * @throws NullPointerException if {@code path} is null
+	 */
+	public static Handler fallback(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		final byte[] data=asset(loader())
+				.load(path)
+				.map(DataFormat::data)
+				.orElseThrow(() -> new RuntimeException(format("missing <%s> resource", path)));
+
+		final String mime=Format.mime(path);
+		final String length=String.valueOf(data.length);
+
+		return request -> request.reply(response -> response
+				.status(OK)
+				.header("Content-Type", mime)
+				.header("Content-Length", length)
+				.body(data(), data)
+		);
 	}
 
 

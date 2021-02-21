@@ -17,9 +17,6 @@
 package com.metreeca.rest.handlers;
 
 import com.metreeca.rest.Format;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.assets.Loader;
-import com.metreeca.rest.formats.DataFormat;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -35,8 +32,6 @@ import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.assets.Loader.loader;
-import static com.metreeca.rest.formats.DataFormat.data;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.handlers.Router.router;
 import static java.lang.String.format;
@@ -170,39 +165,6 @@ public final class Publisher extends Delegator {
 		}
 
 		return new Publisher(root);
-	}
-
-
-	/**
-	 * Creates a static fallback content publisher.
-	 *
-	 * @param path the path of the {@linkplain Loader shared resource} to be published as fallback content
-	 *
-	 * @return a new static content publisher unconditionally serving the content of the shared read from {@code path}
-	 * using the default {@linkplain Loader loader}.
-	 *
-	 * @throws NullPointerException if {@code path} is null
-	 */
-	public static Handler publisher(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		final byte[] data=asset(loader())
-				.load(path)
-				.map(DataFormat::data)
-				.orElseThrow(() -> new RuntimeException(format("missing <%s> path", path)));
-
-		final String mime=Format.mime(path);
-		final String length=String.valueOf(data.length);
-
-		return request -> request.reply(response -> response
-				.status(OK)
-				.header("Content-Type", mime)
-				.header("Content-Length", length)
-				.body(data(), data)
-		);
 	}
 
 
