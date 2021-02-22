@@ -17,7 +17,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -40,6 +39,8 @@ import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rest.JSONAssert.assertThat;
+import static com.metreeca.rest.Xtream.entry;
+import static com.metreeca.rest.Xtream.map;
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static javax.json.Json.*;
@@ -360,7 +361,7 @@ final class JSONLDEncoderTest {
 			);
 		}
 
-		@Test void testHandleAliasClashes() {
+		@Test void testRejectAliasClashes() {
 			assertThatThrownBy(() -> encode(x,
 
 					and(
@@ -371,7 +372,7 @@ final class JSONLDEncoderTest {
 			)).isInstanceOf(IllegalArgumentException.class);
 		}
 
-		@Test void testIgnoreReservedAliases() {
+		@Test void testRejectReservedAliases() {
 			assertThatThrownBy(() -> encode(x,
 
 					field(RDF.VALUE, alias("@id"))
@@ -575,16 +576,43 @@ final class JSONLDEncoderTest {
 
 	@Nested final class Keywords {
 
+		@Test void testHandleType() {
+			assertThat(encode(x,
+
+					field(RDF.TYPE, required(), datatype(IRIType)),
+
+					statement(x, RDF.TYPE, y)
+
+			)).isEqualTo(createObjectBuilder()
+					.add("@id", "/x")
+					.add("@type", "/y")
+			);
+		}
+
+		@Test void testHandleAliasedType() {
+			assertThat(encode(x,
+
+					field(RDF.TYPE, required(), datatype(IRIType)),
+					map(entry("@id", "id"), entry("@type", "type")),
+
+					statement(x, RDF.TYPE, y)
+
+			)).isEqualTo(createObjectBuilder()
+					.add("id", "/x")
+					.add("type", "/y")
+			);
+		}
+
 		@Test void testHandleKeywordAliases() {
 			assertThat(encode(x,
 
 					field(RDF.NIL),
 
-					Xtream.map(
-							Xtream.entry("@id", "id"),
-							Xtream.entry("@value", "value"),
-							Xtream.entry("@type", "type"),
-							Xtream.entry("@language", "language")
+					map(
+							entry("@id", "id"),
+							entry("@value", "value"),
+							entry("@type", "type"),
+							entry("@language", "language")
 					),
 
 					statement(x, RDF.NIL, literal("string", "en")),

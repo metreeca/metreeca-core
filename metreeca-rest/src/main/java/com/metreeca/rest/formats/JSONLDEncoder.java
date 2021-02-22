@@ -81,9 +81,7 @@ final class JSONLDEncoder {
 				)
 				.orElse("/");
 
-		final Map<String, String> keywords2aliases=keywords;
-
-		this.aliaser=keyword -> keywords2aliases.getOrDefault(keyword, keyword);
+		this.aliaser=keyword -> keywords.getOrDefault(keyword, keyword);
 	}
 
 
@@ -161,12 +159,12 @@ final class JSONLDEncoder {
 		if ( trail.test(resource) ) { // a back-reference to an enclosing copy of self -> omit fields
 
 			return inlineable
-					? Json.createValue(id)
+					? createValue(id)
 					: createObjectBuilder().add(aliaser.apply("@id"), id).build();
 
 		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
 
-			return Json.createValue(id);
+			return createValue(id);
 
 		} else {
 
@@ -320,15 +318,15 @@ final class JSONLDEncoder {
 	}
 
 	private JsonValue literal(final String value) {
-		return Json.createValue(value);
+		return createValue(value);
 	}
 
 	private JsonValue literal(final BigInteger value) {
-		return Json.createValue(value);
+		return createValue(value);
 	}
 
 	private JsonValue literal(final BigDecimal value) {
-		return Json.createValue(value);
+		return createValue(value);
 	}
 
 

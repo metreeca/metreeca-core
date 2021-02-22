@@ -211,26 +211,36 @@ final class JSONLDCodec {
 	static Map<String, Field> fields(final Shape shape, final Map<String, String> keywords) {
 		return shape == null ? emptyMap() : Field.fields(shape)
 
-				.map(field -> entry(alias(field), field))
+				.map(field -> entry(alias(field, keywords), field))
 
-				.peek(entry -> {
-					if ( !AliasPattern.matcher(entry.getKey()).matches() ) {
+				.map(entry -> {
+
+					final String alias=entry.getKey();
+					final Field field=entry.getValue();
+
+					if ( field.name().equals(RDF.TYPE) // !!! factor with alias()
+							&& alias.equals(keywords.getOrDefault("@type", "@type")) ) {
+
+						return entry;
+
+					} else if ( !AliasPattern.matcher(alias).matches() ) {
 
 						throw new IllegalArgumentException(format(
-								"malformed alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().name()
+								"malformed alias <%s> for <field(%s)>", alias, field.name()
 						));
 
-					}
-				})
-
-				.peek(entry -> {
-					if ( entry.getKey().startsWith("@") || keywords.containsValue(entry.getKey()) ) {
+					} else if ( alias.startsWith("@") || keywords.containsValue(alias) ) {
 
 						throw new IllegalArgumentException(format(
-								"reserved alias <%s> for <field(%s)>", entry.getKey(), entry.getValue().name()
+								"reserved alias <%s> for <field(%s)>", alias, field.name()
 						));
 
+					} else {
+
+						return entry;
+
 					}
+
 				})
 
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> {
@@ -243,23 +253,23 @@ final class JSONLDCodec {
 	}
 
 
-	private static String alias(final Field field) {
+	private static String alias(final Field field, final Map<String, String> keywords) {
 
 		final Set<String> aliases=field.shape().map(new AliasesProbe()).collect(toSet());
 
 		if ( aliases.size() > 1 ) { // clashing aliases
 
 			throw new IllegalArgumentException(format(
-					"multiple aliases for <field(%s)> / <%s>", field.name(), aliases
+					"multiple aliases <%s> for <field(%s)>", aliases, field.name()
 			));
 
 		} else if ( aliases.size() == 1 ) { // user-defined alias
 
 			return aliases.iterator().next();
 
-		} else { // system-inferred alias
+		} else { // system-inferred alias  // !!! factor with fields()
 
-			return Optional
+			return field.name().equals(RDF.TYPE) ? keywords.getOrDefault("@type", "@type") : Optional
 
 					.of(NamedIRIPattern.matcher(field.name().stringValue()))
 					.filter(Matcher::find)

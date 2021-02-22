@@ -50,9 +50,7 @@ final class JSONLDFormatTest {
 
 
 		private Request request() {
-			return new Request()
-
-					.base(base);
+			return new Request().base(base);
 		}
 
 		private Response response(final Response response) {

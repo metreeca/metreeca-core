@@ -96,8 +96,7 @@ final class JSONLDScanner {
 						.map(Map::keySet)
 						.flatMap(Collection::stream)
 
-						.filter(negate(alias
-								-> alias.startsWith("@")
+						.filter(negate(alias -> alias.startsWith("@")
 								|| keywords.containsValue(alias)
 								|| fields.containsKey(alias)
 								|| tagged
