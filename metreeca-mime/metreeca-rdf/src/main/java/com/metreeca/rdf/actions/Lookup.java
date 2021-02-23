@@ -17,46 +17,30 @@
 package com.metreeca.rdf.actions;
 
 import com.metreeca.json.Frame;
-import com.metreeca.rest.actions.*;
-
-import org.eclipse.rdf4j.rio.helpers.BasicParserSettings;
 
 import java.util.Optional;
 import java.util.function.Function;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.rdf.formats.RDFFormat.rdf;
 
 
 /**
- * Linked data lookup.
+ * Linked data resource lookup.
  *
- * <p>Maps linked data resource IRIs to optional RDF descriptions retrieved by dereferencing them.</p>
+ * <p>Maps linked data resource IRIs to RDF descriptions retrieved by dereferencing them; unknown resources are mapped
+ * to empty descriptions.</p>
  */
-public final class Lookup implements Function<String, Optional<Frame>> {
+public final class Lookup implements Function<String, Frame> {
 
-	@Override public Optional<Frame> apply(final String iri) {
+	@Override public Frame apply(final String iri) {
 		return Optional.of(iri)
 
-				.flatMap(new Query(request -> request
+				.map(new Retrieve())
 
-						.header("Accept", "text/turtle, application/rdf+xml;q=0.9")
+				.map(model -> frame(iri(iri), model))
 
-				))
-
-				.flatMap(new Fetch())
-
-				.flatMap(new Parse<>(rdf(codec -> codec
-
-						.set(BasicParserSettings.VERIFY_URI_SYNTAX, false)
-						.set(BasicParserSettings.FAIL_ON_UNKNOWN_DATATYPES, false)
-						.set(BasicParserSettings.VERIFY_DATATYPE_VALUES, false)
-						.set(BasicParserSettings.NORMALIZE_DATATYPE_VALUES, false)
-
-				)))
-
-				.map(model -> frame(iri(iri), model));
+				.orElseGet(() -> frame(iri(iri)));
 	}
 
 }
