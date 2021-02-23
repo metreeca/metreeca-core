@@ -21,9 +21,9 @@ import com.metreeca.rest.*;
 import java.io.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.lang.String.valueOf;
 
 
@@ -55,50 +55,6 @@ public final class DataFormat extends Format<byte[]> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static byte[] data(final InputStream input) {
-
-		if ( input == null ) {
-			throw new NullPointerException("null input");
-		}
-
-		try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
-
-			return copy(output, input).toByteArray();
-
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
-		}
-	}
-
-	public static <O extends OutputStream> O data(final O output, final byte[] value) {
-
-		if ( output == null ) {
-			throw new NullPointerException("null output");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		try {
-
-			output.write(value);
-			output.flush();
-
-			return output;
-
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private DataFormat() {}
 
 
@@ -112,7 +68,7 @@ public final class DataFormat extends Format<byte[]> {
 		return message.body(input()).map(source -> {
 			try ( final InputStream input=source.get() ) {
 
-				return data(input);
+				return Xtream.data(input);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -130,7 +86,7 @@ public final class DataFormat extends Format<byte[]> {
 				.header("~Content-Type", MIME)
 				.header("~Content-Length", valueOf(value.length))
 
-				.body(output(), output -> data(output, value));
+				.body(output(), output -> Xtream.data(output, value));
 	}
 
 }

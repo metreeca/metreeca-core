@@ -30,6 +30,7 @@ import java.util.zip.GZIPInputStream;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
+
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 import static java.lang.String.format;
@@ -122,7 +123,7 @@ import static java.util.stream.Collectors.toMap;
 										final OutputStream output=connection.getOutputStream()
 								) {
 
-									return Xtream.copy(output, input);
+									return Xtream.data(output, input);
 
 								} catch ( final IOException e ) {
 

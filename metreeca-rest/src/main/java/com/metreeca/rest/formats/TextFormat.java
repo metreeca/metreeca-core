@@ -23,9 +23,9 @@ import java.util.regex.Pattern;
 
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
-import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.lang.String.valueOf;
 
 
@@ -57,50 +57,6 @@ public final class TextFormat extends Format<String> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static String text(final Reader reader) {
-
-		if ( reader == null ) {
-			throw new NullPointerException("null reader");
-		}
-
-		try ( final StringWriter writer=new StringWriter() ) {
-
-			return copy(writer, reader).toString();
-
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
-		}
-	}
-
-	public static <W extends Writer> W text(final W writer, final String value) {
-
-		if ( writer == null ) {
-			throw new NullPointerException("null writer");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		try {
-
-			writer.write(value);
-			writer.flush();
-
-			return writer;
-
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private TextFormat() {}
 
 
@@ -118,7 +74,7 @@ public final class TextFormat extends Format<String> {
 					final Reader reader=new InputStreamReader(input, message.charset())
 			) {
 
-				return Either.Right(text(reader));
+				return Either.Right(Xtream.text(reader));
 
 			} catch ( final UnsupportedEncodingException e ) {
 

@@ -17,7 +17,6 @@
 package com.metreeca.rest;
 
 import com.metreeca.rest.assets.Loader;
-import com.metreeca.rest.formats.DataFormat;
 
 import java.util.function.Predicate;
 
@@ -28,6 +27,7 @@ import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.assets.Loader.loader;
 import static com.metreeca.rest.formats.DataFormat.data;
+
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -118,7 +118,7 @@ import static java.util.Arrays.asList;
 
 		final byte[] data=asset(loader())
 				.load(path)
-				.map(DataFormat::data)
+				.map(Xtream::data)
 				.orElseThrow(() -> new RuntimeException(format("missing <%s> resource", path)));
 
 		final String mime=mime(path);

@@ -45,8 +45,9 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 					throw new UncheckedIOException(e);
 				}
 
-				response.body(OutputFormat.output(), output -> DataFormat.data(output, data)); // cache output
-				response.body(InputFormat.input(), () -> new ByteArrayInputStream(data)); // make output readable for testing
+				response.body(OutputFormat.output(), output -> Xtream.data(output, data)); // cache output
+				response.body(InputFormat.input(), () -> new ByteArrayInputStream(data)); // make output readable for
+				// testing
 
 			});
 

@@ -16,9 +16,9 @@
 
 package com.metreeca.rest;
 
-import javax.json.JsonObject;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
+import javax.json.JsonObject;
 
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.TextFormat.text;

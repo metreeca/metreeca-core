@@ -32,9 +32,11 @@ import static com.metreeca.rest.Xtream.map;
 import static com.metreeca.rest.formats.MultipartFormat.multipart;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.formats.TextFormat.text;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.function.Function.identity;
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class MultipartFormatTest {

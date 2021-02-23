@@ -39,11 +39,13 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 import static com.metreeca.rest.formats.TextFormat.text;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 
 final class RDFFormatTest {
