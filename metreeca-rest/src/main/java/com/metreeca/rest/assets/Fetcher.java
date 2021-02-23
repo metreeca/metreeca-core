@@ -18,7 +18,6 @@ package com.metreeca.rest.assets;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.DataFormat;
-import com.metreeca.rest.formats.InputFormat;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -30,6 +29,7 @@ import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.formats.InputFormat.input;
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 import static java.lang.String.format;
@@ -107,7 +107,7 @@ import static java.util.stream.Collectors.toMap;
 
 				if ( connection.getDoOutput() ) {
 
-					request.body(InputFormat.input()).fold(
+					request.body(input()).fold(
 
 							error -> {
 
@@ -149,7 +149,7 @@ import static java.util.stream.Collectors.toMap;
 								.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
 						)
 
-						.body(InputFormat.input(), () -> {
+						.body(input(), () -> {
 							try {
 
 								return Optional
@@ -267,7 +267,7 @@ import static java.util.stream.Collectors.toMap;
 							serialized.writeObject(value);
 							serialized.flush();
 
-							return response.body(InputFormat.input(), () -> new ByteArrayInputStream(value));
+							return response.body(input(), () -> new ByteArrayInputStream(value));
 
 						} catch ( final IOException e ) {
 
@@ -291,7 +291,7 @@ import static java.util.stream.Collectors.toMap;
 				return new Response(request)
 						.status(status)
 						.headers(headers)
-						.body(InputFormat.input(), () -> new ByteArrayInputStream(body));
+						.body(input(), () -> new ByteArrayInputStream(body));
 
 			} catch ( final ClassNotFoundException unexpected ) {
 

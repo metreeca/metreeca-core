@@ -91,7 +91,7 @@ public final class Fill<V> implements Function<V, Stream<String>> {
 	 *
 	 * @return this action
 	 *
-	 * @throws NullPointerException if either {@code name}
+	 * @throws NullPointerException if {@code name} is null
 	 */
 	public Fill<V> value(final String name) {
 
