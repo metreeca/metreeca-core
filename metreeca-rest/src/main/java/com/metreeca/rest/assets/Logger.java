@@ -413,9 +413,9 @@ public abstract class Logger {
                 final Object source, final Supplier<String> message, final Throwable cause) {
 
             final String logger=(source == null) ? ""
-                    : source instanceof String ? source.toString()
-                    : source instanceof Class ? ((Class<?>)source).getSimpleName()
-                    : source.getClass().getSimpleName();
+		            : source instanceof String ? source.toString()
+		            : source instanceof Class ? ((Class<?>)source).getName()
+		            : source.getClass().getName();
 
             final LogRecord record=new LogRecord(level.level(), message.get());
 
