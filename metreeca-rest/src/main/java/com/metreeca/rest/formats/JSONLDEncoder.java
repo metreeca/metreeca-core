@@ -23,16 +23,17 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import javax.json.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
+import javax.json.*;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rest.formats.JSONLDCodec.*;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.*;
@@ -122,7 +123,7 @@ final class JSONLDEncoder {
 		}
 
 		datatype(shape).ifPresent(datatype -> values.stream().filter(value -> !is(value, datatype)).forEach(value ->
-				error("datatype(%s) constraint violation / count = <%s>", datatype, type(value))
+				error("datatype(%s) constraint violation / datatype = <%s>", datatype, type(value))
 		));
 
 		range(shape).ifPresent(range -> values.stream().filter(value -> !range.contains(value)).forEach(value ->
