@@ -18,6 +18,11 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import java.util.Collection;
+
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Lang.lang;
+
 
 /**
  * Language localization constraint.
@@ -27,6 +32,14 @@ import com.metreeca.json.Shape;
 public final class Localized extends Shape {
 
 	public static Shape localized() { return new Localized(); }
+
+	public static Shape localized(final String... tags) {
+		return and(localized(), lang(tags));
+	}
+
+	public static Shape localized(final Collection<String> tags) {
+		return and(localized(), lang(tags));
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

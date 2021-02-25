@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Xtream.entry;
+
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.*;
@@ -286,13 +287,14 @@ final class JSONLDCodec {
 						return entry;
 
 					} else if ( !AliasPattern.matcher(alias).matches() ) {
-						error("malformed alias <%s> for <field(%s)>",
-								alias, field.name()
-						);
+
+						return error("malformed alias <%s> for <field(%s)>", alias, field.name());
+
 					} else if ( alias.startsWith("@") || keywords.containsValue(alias) ) {
-						error("reserved alias <%s> for <field(%s)>",
-								alias, field.name()
-						);} else {
+
+						return error("reserved alias <%s> for <field(%s)>", alias, field.name());
+
+					} else {
 
 						return entry;
 					}
