@@ -23,18 +23,22 @@ import com.metreeca.rest.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
-import javax.json.JsonException;
-import javax.json.JsonObject;
 import java.util.*;
 import java.util.function.Supplier;
+import javax.json.JsonException;
+import javax.json.JsonObject;
 
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.lang;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.JSONFormat.json;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Model-driven JSON-LD message format.
@@ -251,6 +255,11 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 				);
 
+		final List<String> langs=message.request()
+				.header("Accept-Language")
+				.map(Format::langs)
+				.orElse(emptyList());
+
 		return message
 
 				.header("~Content-Type", mime)
@@ -262,7 +271,13 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 						asset(keywords()),
 						mime.equals(MIME) // include context objects for application/ld+json
 
-				).encode(value));
+				).encode(langs.isEmpty() || langs.contains("*") ? value : value.stream().filter(statement -> {
+
+					final String lang=lang(statement.getObject());
+
+					return lang == null || langs.contains(lang);
+
+				}).collect(toList())));
 	}
 
 }

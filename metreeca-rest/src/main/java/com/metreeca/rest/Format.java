@@ -18,6 +18,7 @@ package com.metreeca.rest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import static com.metreeca.rest.Context.input;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Xtream.entry;
+
 import static java.lang.Float.parseFloat;
 import static java.lang.Math.max;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -49,9 +51,13 @@ public abstract class Format<V> {
 
 	private static final String MIMEDefault="application/octet-stream";
 
-	private static final Pattern MIMEPattern=Pattern.compile(
-			"((?:[-+\\w]+|\\*)/(?:[-+\\w]+|\\*))(?:\\s*;\\s*q\\s*=\\s*(\\d*(?:\\.\\d+)?))?"
-	);
+
+	private static final Pattern QualityPattern=Pattern.compile("(?:\\s*;\\s*q\\s*=\\s*(\\d*(?:\\.\\d+)?))?");
+
+	private static final Pattern MIMEPattern=Pattern.compile("((?:[-+\\w]+|\\*)/(?:[-+\\w]+|\\*))"+QualityPattern);
+	private static final Pattern LangPattern=
+			Pattern.compile("([a-zA-Z]{1,8}(?:-[a-zA-Z0-9]{1,8})*|\\*)"+QualityPattern);
+
 
 	/**
 	 * MIME types by file extension (including dot).
@@ -104,6 +110,7 @@ public abstract class Format<V> {
 		return MIMETypes.getOrDefault(extension, MIMEDefault);
 	}
 
+
 	/**
 	 * Parses a MIME type list.
 	 *
@@ -117,12 +124,41 @@ public abstract class Format<V> {
 	public static List<String> mimes(final CharSequence types) {
 
 		if ( types == null ) {
+			throw new NullPointerException("null types");
+		}
+
+		return values(types, MIMEPattern);
+	}
+
+	/**
+	 * Parses a language tag list.
+	 *
+	 * @param langs the language tag list to be parsed
+	 *
+	 * @return a list of language tags parsed from {@code langs}, sorted by descending
+	 * <a href="https://developer.mozilla.org/en-US/docs/Glossary/quality_values">quality value</a>
+	 *
+	 * @throws NullPointerException if {@code langs} is null
+	 */
+	public static List<String> langs(final CharSequence langs) {
+
+		if ( langs == null ) {
+			throw new NullPointerException("null langs");
+		}
+
+		return values(langs, LangPattern);
+	}
+
+
+	private static List<String> values(final CharSequence types, final Pattern pattern) {
+
+		if ( types == null ) {
 			throw new NullPointerException("null mime types");
 		}
 
 		final List<Map.Entry<String, Float>> entries=new ArrayList<>();
 
-		final Matcher matcher=MIMEPattern.matcher(types);
+		final Matcher matcher=pattern.matcher(types);
 
 		while ( matcher.find() ) {
 
@@ -130,9 +166,9 @@ public abstract class Format<V> {
 			final String quality=matcher.group(2);
 
 			try {
-				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
+				entries.add(new SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
 			} catch ( final NumberFormatException ignored ) {
-				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, 0f));
+				entries.add(new SimpleImmutableEntry<>(media, 0.0f));
 			}
 		}
 
