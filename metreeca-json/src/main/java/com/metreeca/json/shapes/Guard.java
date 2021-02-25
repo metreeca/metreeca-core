@@ -96,10 +96,10 @@ public final class Guard extends Shape {
 
 	public static Shape member() { return area(Digest, Detail); }
 
-
 	public static Shape digest() { return area(Digest); }
 
 	public static Shape detail() { return area(Detail); }
+
 
 	public static Shape convey() { return mode(Convey); }
 

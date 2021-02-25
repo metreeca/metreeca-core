@@ -26,7 +26,8 @@ import com.metreeca.rest.handlers.Delegator;
 
 import javax.json.JsonObject;
 
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.Detail;
+import static com.metreeca.json.shapes.Guard.Relate;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.assets.Engine.*;
@@ -77,7 +78,7 @@ public final class Relator extends Delegator {
 				.with(trimmer())
 
 				.with(wrapper(Request::collection,
-						throttler(Relate, Target, Digest),
+						throttler(Relate), // area will be redacted by engine relator
 						throttler(Relate, Detail)
 				))
 

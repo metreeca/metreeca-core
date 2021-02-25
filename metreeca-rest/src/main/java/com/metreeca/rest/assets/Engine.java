@@ -23,9 +23,9 @@ import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import javax.json.JsonObject;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import javax.json.JsonObject;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Guard.*;
@@ -74,16 +74,15 @@ public interface Engine extends Wrapper {
 			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
 					retain(Role, true),
 					retain(Task, task),
-					retain(Area, area),
+					area.length == 0 ? guard -> null : retain(Area, area),
 					retain(Mode, Convey)
 			);
 
 			final Shape authorized=shape.redact( // visible to user taking into account task/area
 					retain(Role, request.roles()),
 					retain(Task, task),
-					retain(Area, area),
+					area.length == 0 ? guard -> null : retain(Area, area),
 					retain(Mode, Convey)
-
 			);
 
 			// request shape redactor
@@ -92,7 +91,7 @@ public interface Engine extends Wrapper {
 
 					retain(Role, request.roles()),
 					retain(Task, task),
-					retain(Area, area)
+					area.length == 0 ? guard -> null : retain(Area, area)
 
 			));
 
@@ -101,7 +100,7 @@ public interface Engine extends Wrapper {
 			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape()).redact(
 					retain(Role, request.roles()),
 					retain(Task, task),
-					retain(Area, area),
+					area.length == 0 ? guard -> null : retain(Area, area),
 					retain(Mode, Convey)
 			));
 
