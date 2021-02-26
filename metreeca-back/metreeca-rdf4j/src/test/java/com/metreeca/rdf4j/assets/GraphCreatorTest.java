@@ -43,6 +43,7 @@ import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 final class GraphCreatorTest {
@@ -52,7 +53,7 @@ final class GraphCreatorTest {
 			ValuesTest.Employee.redact(
 					retain(Role, true),
 					retain(Task, true),
-					retain(Area, Detail)
+					retain(View, Detail)
 			));
 
 

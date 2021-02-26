@@ -40,15 +40,13 @@ public final class Guard extends Shape {
 
 	public static final String Role="role";
 	public static final String Task="task";
-	public static final String Area="area";
+	public static final String View="view";
 	public static final String Mode="mode";
 
 	public static final String Create="create";
 	public static final String Relate="relate";
 	public static final String Update="update";
 	public static final String Delete="delete";
-
-	public static final String Target="target";
 
 	public static final String Digest="digest";
 	public static final String Detail="detail";
@@ -63,7 +61,7 @@ public final class Guard extends Shape {
 
 	public static Shape task(final Object... tasks) { return guard(Task, tasks); }
 
-	public static Shape area(final Object... areas) { return guard(Area, areas); }
+	public static Shape view(final Object... views) { return guard(View, views); }
 
 	public static Shape mode(final Object... modes) { return guard(Mode, modes); }
 
@@ -92,13 +90,9 @@ public final class Guard extends Shape {
 	public static Shape client() { return task(Create, Relate, Delete); }
 
 
-	public static Shape target() { return area(Target); }
+	public static Shape digest() { return view(Digest); }
 
-	public static Shape member() { return area(Digest, Detail); }
-
-	public static Shape digest() { return area(Digest); }
-
-	public static Shape detail() { return area(Detail); }
+	public static Shape detail() { return view(Detail); }
 
 
 	public static Shape convey() { return mode(Convey); }

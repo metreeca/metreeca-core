@@ -65,16 +65,12 @@ import static java.util.stream.Collectors.toSet;
 
 abstract class GraphProcessor {
 
-	static Shape target(final Shape shape) { // !!! caching
-		return shape.redact(retain(Area, Target));
-	}
-
 	static Shape digest(final Shape shape) { // !!! caching
-		return shape.redact(retain(Area, Digest));
+		return shape.redact(retain(View, Digest));
 	}
 
 	static Shape detail(final Shape shape) { // !!! caching
-		return shape.redact(retain(Area, Detail));
+		return shape.redact(retain(View, Detail));
 	}
 
 

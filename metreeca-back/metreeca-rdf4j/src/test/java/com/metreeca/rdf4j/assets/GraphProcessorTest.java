@@ -80,7 +80,8 @@ final class GraphProcessorTest {
 	private static final IRI Root=iri("app:/");
 
 	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
-	static final Shape EmployeeShape=member().then(
+
+	static final Shape EmployeeShape=and(
 			filter().then(
 					field(RDF.TYPE, term("Employee"))
 			),

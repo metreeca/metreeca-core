@@ -115,19 +115,19 @@ import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.wrappers.Gateway.gateway;
 
-@WebFilter(urlPatterns = "/*")
+@WebFilter(urlPatterns="/*")
 public final class Demo extends Server {
 
 	public Demo() {
-		delegate(context -> context
+		delegate(context -> context.get(() ->
 
-				.get(() -> gateway()
+						gateway().wrap(request -> request.reply(response ->
+								response.status(OK)
+						))
 
-            .wrap(request -> request.reply(status(OK)))
-
-        )
-    );
-  }
+				)
+		);
+	}
 
 }
 ```
@@ -145,10 +145,10 @@ HTTP/1.1 200
 The [context](../javadocs/?com/metreeca/rest/Context.html) argument handled to the app loader lambda manages the shared system-provided assets and can be used to customize them and to run app initialization tasks. Copy [BIRT.ttl](assets/BIRT.ttl) to the `src/main/resources/` directory and extend the stub as follows:
 
 ```java
-public Demo() {
-  handler(context -> context
+public Demo(){
+		delegate(context->context
 
-      .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+		.set(graph(),()->new Graph(new SailRepository(new MemoryStore())))
 
       .exec(() -> asset(graph()).exec(connection -> {
         try {
@@ -210,10 +210,10 @@ public final class BIRT implements Runnable {
 ```
 
 ```java
-public Demo() {
-  handler(context -> context
+public Demo(){
+		delegate(context->context
 
-      .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+		.set(graph(),()->new Graph(new SailRepository(new MemoryStore())))
 
       .exec(new BIRT())
 
@@ -383,10 +383,11 @@ Actors provide default shape-driven implementations for CRUD actions on resource
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/Relator.html) | container/resource retrieval / retrieves the detailed RDF description of the target item and (optionally) the digest RDF description of the contained resources; on containers, supports extended [faceted search](consuming-jsonld-apis.md#faceted-search), sorting and pagination |
-| [Creator](../javadocs/?com/metreeca/rest/handlers/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into  the target item |
-| [Updater](../javadocs/?com/metreeca/rest/handlers/Updater.html) | resource updating / updates the detailed RDF description of the target item |
-| [Deleter](../javadocs/?com/metreeca/rest/handlers/Deleter.html) | resource deletion / deletes the detailed RDF description of the target item |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target resource |
+| [Browser](../javadocs/?com/metreeca/rest/handlers/Browser.html) | container browsing / retrieves the digest RDF description of the contained resources; supports extended [faceted search](consuming-jsonld-apis.md#faceted-search), sorting and pagination |
+| [Creator](../javadocs/?com/metreeca/rest/handlers/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into the target container |
+| [Updater](../javadocs/?com/metreeca/rest/handlers/Updater.html) | resource updating / updates the detailed RDF description of the target resource |
+| [Deleter](../javadocs/?com/metreeca/rest/handlers/Deleter.html) | resource deletion / deletes the detailed RDF description of the target resource |
 
 ```diff
 public Demo() {
@@ -412,9 +413,12 @@ public Demo() {
 }
 ```
 
-Actors delegate transaction management, data validation and trimming and CRUD operations to a customizable LDP engine.
+Actors delegate transaction management, data validation and trimming and CRUD operations to a customizable engine.
 
-CRUD perations are performed on the graph neighbourhood of the target target item(s)  matched by the  [shape](../javadocs/?com/metreeca/form/Shape.html) model [associated](../javadocs/?com/metreeca/rest/Message.html#shape--) to the request, after redaction according to the request user roles and to actor-specific task,  area and mode parameters.
+CRUD perations are performed on the graph neighbourhood of the target target item(s)  matched by
+the  [shape](../javadocs/?com/metreeca/form/Shape.html)
+model [associated](../javadocs/?com/metreeca/rest/Message.html#shape--) to the request, after redaction according to the
+request user roles and to actor-specific task, area and mode parameters.
 
 ## Defining Models
 
@@ -432,9 +436,9 @@ public final class Products extends Delegator {
 
     ).wrap(router()
 
-        .path("/", router()
-            .get(relator())
-            .post(creator())
+		    .path("/", router()
+				    .get(browser())
+				    .post(creator())
         )
 
         .path("/*", router()
@@ -540,67 +544,63 @@ public final class BIRT implements Runnable {
 ```java
 driver(
 
-    or(relate(), role(BIRT.staff)),
+		or(relate(),role(BIRT.staff)),
 
-    member().then(
+		filter().then(
+		field(RDF.TYPE,BIRT.Product)
+		),
 
-        filter().then(
-            field(RDF.TYPE, BIRT.Product)
-        ),
+		convey().then(
 
-        convey().then(
+		field(RDF.TYPE,exactly(BIRT.Product)),
 
-            field(RDF.TYPE, exactly(BIRT.Product)),
+		field(RDFS.LABEL,required(),datatype(XSD.STRING),maxLength(50)),
+		field(RDFS.COMMENT,required(),datatype(XSD.STRING),maxLength(500)),
 
-            field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
-            field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
+		and(
 
-            and(
+		server().then(field(BIRT.code,required())),
 
-                server().then(field(BIRT.code, required())),
+		field(BIRT.line,required(),clazz(BIRT.ProductLine),
 
-                field(BIRT.line, required(), clazz(BIRT.ProductLine),
+		relate().then(field(RDFS.LABEL,required()))
 
-                    relate().then(field(RDFS.LABEL, required()))
+		),
 
-                ),
+		field(BIRT.scale,required(),
+		datatype(XSD.STRING),
+		pattern("1:[1-9][0-9]{1,2}")
+		),
 
-                field(BIRT.scale, required(),
-                    datatype(XSD.STRING),
-                    pattern("1:[1-9][0-9]{1,2}")
-                ),
+		field(BIRT.vendor,required(),datatype(XSD.STRING),maxLength(50))
 
-                field(BIRT.vendor, required(), datatype(XSD.STRING), maxLength(50))
+		),
 
-            ),
+		and(
 
-            and(
+		server().then(field(BIRT.stock,required(),
+		datatype(XSD.INTEGER),
+		minInclusive(literal(integer(0))),
+		maxExclusive(literal(integer(10_000)))
+		)),
 
-                server().then(field(BIRT.stock, required(),
-                    datatype(XSD.INTEGER),
-                    minInclusive(literal(integer(0))),
-                    maxExclusive(literal(integer(10_000)))
-                )),
+		field(BIRT.sell,alias("price"),required(),
+		datatype(XSD.DECIMAL),
+		minExclusive(literal(decimal(0))),
+		maxExclusive(literal(decimal(1000)))
+		),
 
-                field(BIRT.sell, alias("price"), required(),
-                    datatype(XSD.DECIMAL),
-                    minExclusive(literal(decimal(0))),
-                    maxExclusive(literal(decimal(1000)))
-                ),
+		role(BIRT.staff).then(field(BIRT.buy,required(),
+		datatype(XSD.DECIMAL),
+		minInclusive(literal(decimal(0))),
+		maxInclusive(literal(decimal(1000)))
+		))
 
-                role(BIRT.staff).then(field(BIRT.buy, required(),
-                    datatype(XSD.DECIMAL),
-                    minInclusive(literal(decimal(0))),
-                    maxInclusive(literal(decimal(1000)))
-                ))
+		)
 
-            )
+		)
 
-        )
-
-    )
-
-)
+		)
 ```
 
 The `filter` section states that this model describes a container whose member are the instances of the `birt:Product` class.
@@ -638,11 +638,11 @@ The constraints in the extended model are leveraged by the engine in a number of
 
 ## Parameterizing Models
 
-The `member()`, `filter()`, `convey()` and `server()` guards in the extended model also introduce the concept of [parametric](../references/spec-language.md#parameters) model.
+The`filter()`, `convey()` and `server()` guards in the extended model also introduce the concept
+of [parametric](../references/spec-language.md#parameters) model.
 
-The `member` guard states that nested constraints define the shape of a container member resource.
-
-The `filter` guard states that nested constraints ae to be used only selecting existing resources to be exposed as container members and not for extracting outgoing data and validating incoming data.
+The `filter` guard states that nested constraints ae to be used only selecting existing resources to be exposed as
+container members and not for extracting outgoing data and validating incoming data.
 
 The `convey` guard states that nested constraints are to be used only for extracting outgoing data and validating incoming data and not for selecting existing resources to be exposed as container members. Constraints defined outside the `convey` block, will be used for both operations.
 
@@ -676,7 +676,7 @@ User roles are usually granted to requests by authentication/authorization wrapp
 
 ```diff
 public Demo() {
-  handler(context -> context
+  delegate(context -> context
 
       .set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
       .set(engine(), GraphEngine::new)

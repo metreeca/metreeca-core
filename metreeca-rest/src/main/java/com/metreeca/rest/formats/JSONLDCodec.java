@@ -45,7 +45,7 @@ final class JSONLDCodec {
 
 				retain(Role, true),
 				retain(Task, true),
-				retain(Area, true),
+				retain(View, true),
 				retain(Mode, Convey) // remove internal filtering shapes
 
 		).expand(); // add inferred constraints to drive json shorthands

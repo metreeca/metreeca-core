@@ -153,16 +153,15 @@ Parametric guards for the [task](../javadocs/com/metreeca/json/shapes/Guard.html
 | [client](../javadocs/com/metreeca/json/shapes/Guard.html#client--)() | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
 | [server](../javadocs/com/metreeca/json/shapes/Guard.html#server--)() | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
 
-## Area Axis
+## View Axis
 
-Parametric guards for the [area](../javadocs/com/metreeca/json/shapes/Guard.html#area-java.lang.Object...-) axis selectively enable target shapes according to the usage context.
+Parametric guards for the [view](../javadocs/com/metreeca/json/shapes/Guard.html#view-java.lang.Object...-) axis
+selectively enable target shapes according to the usage context.
 
-| shorthand                                                    | usage context                                               |
-| ------------------------------------------------------------ | ----------------------------------------------------------- |
-| [target](../javadocs/com/metreeca/json/shapes/Guard.html#target--)() | collection resource description                             |
-| [member](../javadocs/com/metreeca/json/shapes/Guard.html#member--)() | collection member description (shorthand for digest+detail) |
-| [digest](../javadocs/com/metreeca/json/shapes/Guard.html#digest--)() | short resource description, e.g. inside search result sets  |
-| [detail](../javadocs/com/metreeca/json/shapes/Guard.html#detail--)() | full resource description                                   |
+| shorthand                                                    | usage context                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [digest](../javadocs/com/metreeca/json/shapes/Guard.html#digest--)() | short resource description, e.g. inside search result sets   |
+| [detail](../javadocs/com/metreeca/json/shapes/Guard.html#detail--)() | detailed resource description, e.g. inside advanced resource utilities |
 
 ## Mode Axis
 

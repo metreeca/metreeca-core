@@ -62,7 +62,7 @@ public interface Engine extends Wrapper {
 	 * Creates a throttler wrapper.
 	 *
 	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
-	 * @param view the accepted values for the {@linkplain Guard#Area task} parametric axis
+	 * @param view the accepted values for the {@linkplain Guard#View task} parametric axis
 	 *
 	 * @return returns a wrapper performing role-based shape redaction and shape-based authorization
 	 */
@@ -74,14 +74,14 @@ public interface Engine extends Wrapper {
 			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
 					retain(Role, true),
 					retain(Task, task),
-					retain(Area, view),
+					retain(View, view),
 					retain(Mode, Convey)
 			);
 
 			final Shape authorized=shape.redact( // visible to user taking into account task/area
 					retain(Role, request.roles()),
 					retain(Task, task),
-					retain(Area, view),
+					retain(View, view),
 					retain(Mode, Convey)
 			);
 
@@ -91,7 +91,7 @@ public interface Engine extends Wrapper {
 
 					retain(Role, request.roles()),
 					retain(Task, task),
-					retain(Area, view)
+					retain(View, view)
 
 			));
 
@@ -100,7 +100,7 @@ public interface Engine extends Wrapper {
 			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape()).redact(
 					retain(Role, request.roles()),
 					retain(Task, task),
-					retain(Area, view),
+					retain(View, view),
 					retain(Mode, Convey)
 			));
 
