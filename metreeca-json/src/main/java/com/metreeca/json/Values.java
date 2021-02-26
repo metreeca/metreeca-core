@@ -21,7 +21,6 @@ import org.eclipse.rdf4j.model.base.AbstractNamespace;
 import org.eclipse.rdf4j.model.base.AbstractValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -79,6 +78,24 @@ public final class Values {
 			new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(ROOT)) // ;( not thread-safe
 	);
 
+	private static final char[] HexDigits="0123456789abcdef".toCharArray();
+
+
+	private static String hex(final byte[] bytes) {
+
+		final char[] hex=new char[bytes.length*2];
+
+		for (int i=0, l=bytes.length; i < l; ++i) {
+
+			final int b=bytes[i]&0xFF;
+
+			hex[2*i]=HexDigits[b >>> 4];
+			hex[2*i+1]=HexDigits[b&0x0F];
+		}
+
+		return new String(hex);
+	}
+
 
 	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -101,9 +118,7 @@ public final class Values {
 
 		ThreadLocalRandom.current().nextBytes(bytes);
 
-		return DatatypeConverter
-				.printHexBinary(bytes)
-				.toLowerCase(ROOT);
+		return hex(bytes);
 	}
 
 	public static String md5(final String text) {
@@ -113,9 +128,7 @@ public final class Values {
 	public static String md5(final byte[] data) {
 		try {
 
-			return data == null ? null : DatatypeConverter
-					.printHexBinary(MessageDigest.getInstance("MD5").digest(data))
-					.toLowerCase(ROOT);
+			return data == null ? null : hex(MessageDigest.getInstance("MD5").digest(data));
 
 		} catch ( final NoSuchAlgorithmException unexpected ) {
 			throw new InternalError(unexpected);
