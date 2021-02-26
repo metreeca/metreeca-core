@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 
+import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.rest.*;
 
@@ -61,6 +62,9 @@ final class GraphCreator {
 							.orElseGet(Values::md5)
 					);
 
+					final Shape shape=request.attribute(shape());
+
+
 					final boolean clashing=connection.hasStatement(member, null, null, true)
 							|| connection.hasStatement(null, null, member, true);
 
@@ -72,7 +76,7 @@ final class GraphCreator {
 
 					} else { // store model
 
-						connection.add(outline(member, filter(request.attribute(shape()))));
+						connection.add(outline(member, filter(shape)));
 						connection.add(rewrite(member, target, rdf));
 
 						final String location=member.stringValue();

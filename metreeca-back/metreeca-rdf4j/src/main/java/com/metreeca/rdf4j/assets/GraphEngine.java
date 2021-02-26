@@ -25,6 +25,7 @@ import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
@@ -152,8 +153,8 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <li>the request body is rewritten to the assigned IRI and stored into the shared {@linkplain Graph graph};</li>
 	 *
-	 * <li>the target container identified by the request item is connected to the newly created resource as required
-	 * by the filtering constraints in the request shape;</li>
+	 * <li>the target container identified by the request item is connected to the newly created resource as
+	 * {@linkplain Shape#outline(Value...) outlined} in the filtering constraints in the request shape;</li>
 	 *
 	 * <li>the operation is completed with a {@value Response#Created} status code;</li>
 	 *

@@ -30,7 +30,6 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.GraphEngine.StatsShape;
 import static com.metreeca.rdf4j.assets.GraphEngine.TermsShape;
-import static com.metreeca.rdf4j.assets.GraphFetcher.digest;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.JSONLDFormat.*;
@@ -44,7 +43,7 @@ final class GraphBrowser {
 		return request.reply(response -> {
 
 			final IRI item=iri(request.item());
-			final Shape shape=digest(request.attribute(shape()));
+			final Shape shape=request.attribute(shape());
 
 			return query(item, shape, request.query()).fold(response::map, query -> graph.exec(connection -> {
 

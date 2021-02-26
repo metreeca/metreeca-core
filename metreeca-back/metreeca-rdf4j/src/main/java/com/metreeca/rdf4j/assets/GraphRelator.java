@@ -31,7 +31,6 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.GraphEngine.StatsShape;
 import static com.metreeca.rdf4j.assets.GraphEngine.TermsShape;
-import static com.metreeca.rdf4j.assets.GraphFetcher.detail;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
@@ -47,7 +46,7 @@ final class GraphRelator {
 		return request.reply(response -> {
 
 			final IRI item=iri(request.item());
-			final Shape shape=and(all(item), detail(request.attribute(shape())));
+			final Shape shape=and(all(item), request.attribute(shape()));
 
 			return query(item, shape, request.query()).fold(response::map, query -> graph.exec(connection -> {
 

@@ -54,14 +54,6 @@ import static java.util.stream.Collectors.toSet;
 
 final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! refactor
 
-	static Shape digest(final Shape shape) { // !!! caching
-		return shape.redact(retain(View, Digest));
-	}
-
-	static Shape detail(final Shape shape) { // !!! caching
-		return shape.redact(retain(View, Detail));
-	}
-
 	static Shape convey(final Shape shape) { // !!! caching
 		return shape.redact(retain(Mode, Convey));
 	}
@@ -81,8 +73,13 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		return resource.stringValue().endsWith("/")
 
+				// container: connect to the focus using ldp:contains, unless otherwise specified in the filtering shape
+
 				? shape.empty() ? field(inverse(LDP.CONTAINS), focus()) : shape
-				: shape.empty() ? all(focus()) : and(all(focus()), shape);
+
+				// resource: constraint to the focus
+
+				: and(all(focus()), shape);
 
 	}
 
