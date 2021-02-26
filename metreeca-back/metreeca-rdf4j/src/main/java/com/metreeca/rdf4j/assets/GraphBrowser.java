@@ -40,20 +40,19 @@ final class GraphBrowser {
 
 
 	Future<Response> handle(final Request request) {
-		return request.reply(response -> {
 
-			final IRI item=iri(request.item());
-			final Shape shape=request.attribute(shape());
+		final IRI item=iri(request.item());
+		final Shape shape=request.attribute(shape());
 
-			return query(item, shape, request.query()).fold(response::map, query -> graph.exec(connection -> {
+		return query(item, shape, request.query()).fold(request::reply, query ->
+				request.reply(response -> graph.exec(connection -> {
 
-				return response.status(OK) // containers are virtual and respond always with 200 OK
-						.attribute(shape(), query.map(new ShapeProbe()))
-						.body(jsonld(), query.map(new GraphFetcher(connection, item)));
+					return response.status(OK) // containers are virtual and respond always with 200 OK
+							.attribute(shape(), query.map(new ShapeProbe()))
+							.body(jsonld(), query.map(new GraphFetcher(connection, item)));
 
-			}));
-
-		});
+				}))
+		);
 	}
 
 

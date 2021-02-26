@@ -33,8 +33,6 @@ import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rdf4j.assets.GraphFetcher.filter;
 import static com.metreeca.rdf4j.assets.GraphFetcher.outline;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Either.Left;
-import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.Created;
 import static com.metreeca.rest.Response.InternalServerError;
@@ -50,50 +48,47 @@ final class GraphCreator {
 
 
 	Future<Response> handle(final Request request) {
-		return request
 
-				.body(jsonld())
+		final IRI item=iri(request.item());
+		final Shape shape=request.attribute(shape());
 
-				.flatMap(rdf -> graph.exec(txn(connection -> {
+		final IRI member=iri(item, request.header("Slug") // assign entity a slug-based id
+				.map(Xtream::encode)  // encode slug as IRI path component
+				.orElseGet(Values::md5)
+		);
 
-					final IRI target=iri(request.item());
-					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
-							.map(Xtream::encode)  // encode slug as IRI path component
-							.orElseGet(Values::md5)
-					);
-
-					final Shape shape=request.attribute(shape());
-
+		return request.body(jsonld()).fold(request::reply, model ->
+				request.reply(response -> graph.exec(txn(connection -> {
 
 					final boolean clashing=connection.hasStatement(member, null, null, true)
 							|| connection.hasStatement(null, null, member, true);
 
 					if ( clashing ) { // report clashing slug
 
-						return Left(status(InternalServerError,
+						return response.map(status(InternalServerError,
 								new IllegalStateException("clashing entity slug {"+member+"}")
 						));
 
 					} else { // store model
 
 						connection.add(outline(member, filter(shape)));
-						connection.add(rewrite(member, target, rdf));
+						connection.add(rewrite(member, item, model));
 
 						final String location=member.stringValue();
 
-						return Right(request.reply(status(Created, Optional // root-relative to support relocation
-								.of(member.stringValue())
-								.map(IRIPattern::matcher)
-								.filter(Matcher::matches)
-								.map(matcher -> matcher.group("pathall"))
-								.orElse(location)
-						)));
+						return response.status(Created)
+								.header("Location", Optional // root-relative to support relocation
+										.of(member.stringValue())
+										.map(IRIPattern::matcher)
+										.filter(Matcher::matches)
+										.map(matcher -> matcher.group("pathall"))
+										.orElse(location)
+								);
 
 					}
 
 				})))
-
-				.fold(request::reply, future -> future);
+		);
 	}
 
 

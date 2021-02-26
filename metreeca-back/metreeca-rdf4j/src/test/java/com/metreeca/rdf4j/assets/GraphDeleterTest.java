@@ -80,7 +80,7 @@ final class GraphDeleterTest {
 				}));
 	}
 
-	@Test void testRejectUnknown() {
+	@Test void testReportUnknown() {
 		exec(() -> new GraphDeleter()
 
 				.handle(new Request()

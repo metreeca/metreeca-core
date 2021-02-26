@@ -43,30 +43,28 @@ final class GraphRelator {
 
 
 	Future<Response> handle(final Request request) {
-		return request.reply(response -> {
 
-			final IRI item=iri(request.item());
-			final Shape shape=and(all(item), request.attribute(shape()));
+		final IRI item=iri(request.item());
+		final Shape shape=and(all(item), request.attribute(shape()));
 
-			return query(item, shape, request.query()).fold(response::map, query -> graph.exec(connection -> {
+		return query(item, shape, request.query()).fold(request::reply, query ->
+				request.reply(response -> graph.exec(connection -> {
 
-				return Optional
+					return Optional
 
-						.of(query.map(new GraphFetcher(connection, item)))
+							.of(query.map(new GraphFetcher(connection, item)))
 
-						.filter(model -> !model.isEmpty())
+							.filter(model -> !model.isEmpty())
 
-						.map(model -> response
-								.status(OK)
-								.attribute(shape(), query.map(new ShapeProbe()))
-								.body(jsonld(), model)
-						)
+							.map(model -> response.status(OK)
+									.attribute(shape(), query.map(new ShapeProbe()))
+									.body(jsonld(), model)
+							)
 
-						.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
+							.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
 
-			}));
-
-		});
+				}))
+		);
 	}
 
 

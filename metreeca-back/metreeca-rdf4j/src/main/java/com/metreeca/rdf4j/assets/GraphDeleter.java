@@ -17,7 +17,6 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
 
@@ -43,14 +42,15 @@ final class GraphDeleter {
 
 
 	Future<Response> handle(final Request request) {
-		return request.reply(response -> graph.exec(txn(connection -> {
 
-			final IRI item=iri(request.item());
-			final Shape shape=request.attribute(shape());
+		final IRI item=iri(request.item());
+		final Shape shape=request.attribute(shape());
+
+		return request.reply(response -> graph.exec(txn(connection -> {
 
 			return Optional
 
-					.of(((Query)items(shape)).map(new GraphFetcher(connection, item)))
+					.of(items(shape).map(new GraphFetcher(connection, item)))
 
 					.filter(current -> !current.isEmpty())
 

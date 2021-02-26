@@ -84,7 +84,7 @@ final class GraphUpdaterTest {
 				}));
 	}
 
-	@Test void testRejectMissing() {
+	@Test void testReportMissing() {
 		exec(() -> new GraphUpdater()
 
 				.handle(new Request()
