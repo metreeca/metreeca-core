@@ -74,7 +74,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
-		return anchor(resource, shape).map(new Outliner(resource)).collect(toList());
+		return anchor(resource, shape).outline(resource).collect(toList());
 	}
 
 	private static Shape anchor(final Value resource, final Shape shape) {

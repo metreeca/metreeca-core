@@ -18,11 +18,13 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -84,6 +86,15 @@ public abstract class Shape {
 	}
 
 	/**
+	 * Extends this shape with inferred constraints.
+	 *
+	 * @return a copy of this shape extended with inferred constraints
+	 */
+	public Shape expand() {
+		return map(new ShapeInferencer());
+	}
+
+	/**
 	 * Redacts {@linkplain Guard guard} annotations of this shape.
 	 *
 	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
@@ -104,12 +115,22 @@ public abstract class Shape {
 	}
 
 	/**
-	 * Extends this shape with inferred constraints.
+	 * Identifies RDF statements implied by this shape.
 	 *
-	 * @return a copy of this shape extended with inferred constraints
+	 * @param focus the initial focus values for shape traversal
+	 *
+	 * @return a stream of RDF statements implied by this shape when recursively traversed starting from the intial
+	 * {@code focus}
+	 *
+	 * @throws NullPointerException if {@code focus} is null or contains null elements
 	 */
-	public Shape expand() {
-		return map(new ShapeInferencer());
+	public Stream<Statement> outline(final Value... focus) {
+
+		if ( focus == null || Arrays.stream(focus).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null focus");
+		}
+
+		return map(new ShapeOutliner(focus));
 	}
 
 

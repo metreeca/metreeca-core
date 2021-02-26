@@ -14,49 +14,26 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.json;
 
-import com.metreeca.json.Focus;
-import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toSet;
+
+final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
+
+	private final Value[] sources;
 
 
-/**
- * Shape outliner.
- *
- * <p>Recursively extracts implied RDF statements from a shape.</p>
- */
-final class Outliner extends Shape.Probe<Stream<Statement>> {
-
-	private final Collection<Value> sources;
-
-
-	public Outliner(final Value... sources) {
-		this(asList(sources));
-	}
-
-	public Outliner(final Collection<Value> sources) {
-
-		if ( sources == null ) {
-			throw new NullPointerException("null sources");
-		}
-
-		if ( sources.contains(null) ) {
-			throw new NullPointerException("null source");
-		}
-
+	ShapeOutliner(final Value... sources) {
 		this.sources=sources;
 	}
 
@@ -67,7 +44,7 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 
 
 	@Override public Stream<Statement> probe(final Clazz clazz) {
-		return sources.stream()
+		return Arrays.stream(sources)
 				.filter(Resource.class::isInstance)
 				.map(source -> statement((Resource)source, RDF.TYPE, clazz.iri()));
 	}
@@ -79,16 +56,21 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 
 		return Stream.concat(
 
-				all(shape).map(targets -> values(targets.stream()).flatMap(target -> sources.stream().flatMap(source -> direct(iri)
+				all(shape)
 
-						? source instanceof Resource ? Stream.of(statement((Resource)source, iri, target)) :
-						Stream.empty()
-						: target instanceof Resource ? Stream.of(statement((Resource)target, inverse(iri), source)) :
-						Stream.empty()
+						.map(targets -> values(targets.stream()).flatMap(target -> Arrays.stream(sources).flatMap(source -> direct(iri)
 
-				))).orElse(Stream.empty()),
+								? source instanceof Resource ?
+								Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
 
-				shape.map(new Outliner())
+								: target instanceof Resource ?
+								Stream.of(statement((Resource)target, inverse(iri), source)) : Stream.empty()
+
+						)))
+
+						.orElse(Stream.empty()),
+
+				shape.map(new ShapeOutliner())
 
 		);
 	}
@@ -100,10 +82,9 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 
 						.flatMap(shape -> shape.map(this)),
 
-
 				all(and).map(values -> and.shapes().stream()
 
-						.flatMap(shape -> shape.map(new Outliner(values(values.stream()).collect(toSet()))))
+						.flatMap(shape -> shape.map(new ShapeOutliner(values(values.stream()).toArray(Value[]::new))))
 
 				).orElseGet(Stream::empty)
 
@@ -113,7 +94,8 @@ final class Outliner extends Shape.Probe<Stream<Statement>> {
 
 	private Stream<Value> values(final Stream<Value> values) {
 		return values.flatMap(value -> value instanceof Focus
-				? sources.stream().filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
+				?
+				Arrays.stream(sources).filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
 				: Stream.of(value)
 		);
 	}

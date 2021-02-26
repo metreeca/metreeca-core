@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
-
-import com.metreeca.json.Shape;
+package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -34,13 +32,14 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
+
 import static java.util.stream.Collectors.toSet;
 
 
-final class OutlinerTest {
+final class ShapeOutlinerTest {
 
 	private Collection<Statement> outline(final Shape shape, final Value... sources) {
-		return shape.map(new Outliner(sources)).collect(toSet());
+		return shape.map(new ShapeOutliner(sources)).collect(toSet());
 	}
 
 
