@@ -65,14 +65,16 @@ public final class Deleter extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(((Handler)engine::delete)
+		delegate(((Handler)engine::delete)
+
+				.with(engine)
 
 				.with(wrapper(Request::collection,
 						throttler(Delete, Target),
 						throttler(Delete, Detail)
 				))
 
-		));
+		);
 	}
 
 }

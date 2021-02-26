@@ -48,8 +48,7 @@ import static com.metreeca.rest.assets.Engine.*;
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
  *
  * <li>engine-assisted response payload {@linkplain JSONLDFormat#trim(org.eclipse.rdf4j.model.IRI, Shape, JsonObject)
- * trimming}, considering shapes
- * as above.</li>
+ * trimming}, considering shapes as above.</li>
  *
  * </ul>
  *
@@ -73,7 +72,9 @@ public final class Relator extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(((Handler)engine::relate)
+		delegate(((Handler)engine::relate)
+
+				.with(engine)
 
 				.with(trimmer())
 
@@ -82,7 +83,7 @@ public final class Relator extends Delegator {
 						throttler(Relate, Detail)
 				))
 
-		));
+		);
 	}
 
 }

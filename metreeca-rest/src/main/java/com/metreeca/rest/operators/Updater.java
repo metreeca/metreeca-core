@@ -71,7 +71,9 @@ public final class Updater extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(((Handler)engine::update)
+		delegate(((Handler)engine::update)
+
+				.with(engine)
 
 				.with(wrapper(Request::collection,
 						throttler(Update, Target),
@@ -80,7 +82,7 @@ public final class Updater extends Delegator {
 
 				.with(scanner())
 
-		));
+		);
 	}
 
 }

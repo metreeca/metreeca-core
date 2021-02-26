@@ -26,15 +26,16 @@ import com.metreeca.rest.handlers.Delegator;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import javax.json.JsonObject;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import javax.json.JsonObject;
 
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Engine.*;
+
 import static java.util.UUID.randomUUID;
 
 
@@ -117,15 +118,15 @@ public final class Creator extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(wrapper(slug) // chain slug immediately before handler after custom wrappers
+		delegate(wrapper(slug).wrap(engine::create) // wrap slug immediately before handler after custom wrappers
 
-				.wrap(engine::create)
+				.with(engine)
 
 				.with(throttler(Create, Detail))
 
 				.with(scanner())
 
-		));
+		);
 	}
 
 
