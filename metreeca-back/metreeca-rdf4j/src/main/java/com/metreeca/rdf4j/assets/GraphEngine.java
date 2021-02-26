@@ -35,6 +35,7 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rdf4j.assets.GraphProcessor.convey;
 import static com.metreeca.rest.Context.asset;
 
@@ -125,9 +126,9 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null task");
 		}
 
-		return request -> consumer -> graph.exec(connection -> {
+		return request -> consumer -> graph.exec(txn(connection -> {
 			handler.handle(request).accept(consumer);
-		});
+		}));
 	}
 
 
