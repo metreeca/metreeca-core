@@ -29,6 +29,8 @@ import java.util.regex.Matcher;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
+import static com.metreeca.rdf4j.assets.GraphFetcher.filter;
+import static com.metreeca.rdf4j.assets.GraphFetcher.outline;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
@@ -41,26 +43,19 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphCreator extends GraphProcessor {
+final class GraphCreator {
 
 	private final Graph graph=asset(graph());
 
 
 	Future<Response> handle(final Request request) {
-		return request.collection() ? holder(request) : member(request);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Future<Response> holder(final Request request) {
 		return request
 
 				.body(jsonld())
 
 				.flatMap(rdf -> graph.exec(txn(connection -> {
 
-					final IRI holder=iri(request.item());
+					final IRI target=iri(request.item());
 					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
 							.map(Xtream::encode)  // encode slug as IRI path component
 							.orElseGet(Values::md5)
@@ -72,12 +67,13 @@ final class GraphCreator extends GraphProcessor {
 					if ( clashing ) { // report clashing slug
 
 						return Left(status(InternalServerError,
-								new IllegalStateException("clashing entity slug {"+member+"}")));
+								new IllegalStateException("clashing entity slug {"+member+"}")
+						));
 
 					} else { // store model
 
 						connection.add(outline(member, filter(request.attribute(shape()))));
-						connection.add(rewrite(member, holder, rdf));
+						connection.add(rewrite(member, target, rdf));
 
 						final String location=member.stringValue();
 
@@ -94,11 +90,6 @@ final class GraphCreator extends GraphProcessor {
 				})))
 
 				.fold(request::reply, future -> future);
-	}
-
-	private Future<Response> member(final Request request) {
-		return request.reply(status(InternalServerError,
-				new UnsupportedOperationException("member POST method")));
 	}
 
 

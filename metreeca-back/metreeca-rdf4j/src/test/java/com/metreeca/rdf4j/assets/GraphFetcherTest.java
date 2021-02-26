@@ -17,8 +17,6 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
-import com.metreeca.json.shapes.All;
-import com.metreeca.json.shapes.Any;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.*;
@@ -75,7 +73,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphProcessorTest {
+final class GraphFetcherTest {
 
 	private static final IRI Root=iri("app:/");
 
@@ -106,7 +104,7 @@ final class GraphProcessorTest {
 
 	private Collection<Statement> query(final IRI resource, final Query query) {
 		return asset(Graph.graph()).exec(connection -> {
-			return new GraphProcessor() {}.fetch(connection, resource, query)
+			return query.map(new GraphFetcher(connection, resource))
 
 					.stream()
 
@@ -1033,53 +1031,5 @@ final class GraphProcessorTest {
 		)));
 	}
 
-
-	//// Probes ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-	@Nested final class AllProbe {
-
-		private final Value a=literal(1);
-		private final Value b=literal(2);
-		private final Value c=literal(3);
-
-		@Test void testInspectAll() {
-			assertThat(All.all(all(a, b, c)))
-					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
-		}
-
-		@Test void testInspectAnd() {
-			assertThat(All.all(and(all(a, b), all(b, c))))
-					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
-		}
-
-		@Test void testInspectOtherShape() {
-			assertThat(All.all(and()))
-					.isEmpty();
-		}
-
-	}
-
-	@Nested final class AnyProbe {
-
-		private final Value a=literal(1);
-		private final Value b=literal(2);
-		private final Value c=literal(3);
-
-		@Test void testInspectAny() {
-			assertThat(Any.any(any(a, b, c)))
-					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
-		}
-
-		@Test void testInspectOr() {
-			assertThat(Any.any(or(any(a, b), any(b, c))))
-					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
-		}
-
-		@Test void testInspectOtherShape() {
-			assertThat(Any.any(and()))
-					.isEmpty();
-		}
-	}
 
 }

@@ -21,7 +21,6 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.JSONLDFormat;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
@@ -38,89 +37,67 @@ import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 
 final class GraphUpdaterTest {
 
-	@Nested final class Holder {
+	@Test void testUpdate() {
+		exec(model(small()), () -> new GraphUpdater()
 
-		@Test void testNotImplemented() {
-			exec(() -> new GraphUpdater()
+				.handle(new Request()
+						.base(Base)
+						.path("/employees/1370").attribute(JSONLDFormat.shape(), convey().then(
+								field(term("forename"), required()),
+								field(term("surname"), required()),
+								field(term("email"), required()),
+								field(term("title"), required()),
+								field(term("seniority"), required())
+						))
+						.body(jsonld(), decode("</employees/1370>"
+								+":forename 'Tino';"
+								+":surname 'Faussone';"
+								+":email 'tfaussone@example.com';"
+								+":title 'Sales Rep' ;"
+								+":seniority 5 ." // outside salesman envelope
+						))
+				)
 
-					.handle(new Request()
-							.path("/employees/")
-							.body(jsonld(), decode("</employees/> rdfs:label 'Updated!'."))
-					)
+				.accept(response -> {
 
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.InternalServerError)
-					)
-			);
-		}
+					assertThat(response)
+							.hasStatus(Response.NoContent)
+							.doesNotHaveBody();
 
-	}
+					assertThat(model())
 
-	@Nested final class Member {
-
-		@Test void testUpdate() {
-			exec(model(small()), () -> new GraphUpdater()
-
-					.handle(new Request()
-							.base(Base)
-							.path("/employees/1370").attribute(JSONLDFormat.shape(), convey().then(
-									field(term("forename"), required()),
-									field(term("surname"), required()),
-									field(term("email"), required()),
-									field(term("title"), required()),
-									field(term("seniority"), required())
-							))
-							.body(jsonld(), decode("</employees/1370>"
+							.as("updated values inserted")
+							.hasSubset(decode("</employees/1370>"
 									+":forename 'Tino';"
 									+":surname 'Faussone';"
 									+":email 'tfaussone@example.com';"
 									+":title 'Sales Rep' ;"
-									+":seniority 5 ." // outside salesman envelope
+									+":seniority 5 ."
 							))
-					)
 
-					.accept(response -> {
+							.as("previous values removed")
+							.doesNotHaveSubset(decode("</employees/1370>"
+									+":forename 'Gerard';"
+									+":surname 'Hernandez'."
+							));
 
-						assertThat(response)
-								.hasStatus(Response.NoContent)
-								.doesNotHaveBody();
+				}));
+	}
 
-						assertThat(model())
+	@Test void testRejectMissing() {
+		exec(() -> new GraphUpdater()
 
-								.as("updated values inserted")
-								.hasSubset(decode("</employees/1370>"
-										+":forename 'Tino';"
-										+":surname 'Faussone';"
-										+":email 'tfaussone@example.com';"
-										+":title 'Sales Rep' ;"
-										+":seniority 5 ."
-								))
+				.handle(new Request()
+						.base(Base)
+						.path("/employees/9999")
+						.body(jsonld(), decode(""))
+				)
 
-								.as("previous values removed")
-								.doesNotHaveSubset(decode("</employees/1370>"
-										+":forename 'Gerard';"
-										+":surname 'Hernandez'."
-								));
-
-					}));
-		}
-
-		@Test void testRejectMissing() {
-			exec(() -> new GraphUpdater()
-
-					.handle(new Request()
-							.base(Base)
-							.path("/employees/9999")
-							.body(jsonld(), decode(""))
-					)
-
-					.accept(response -> assertThat(response)
-							.hasStatus(NotFound)
-							.doesNotHaveBody()
-					)
-			);
-
-		}
+				.accept(response -> assertThat(response)
+						.hasStatus(NotFound)
+						.doesNotHaveBody()
+				)
+		);
 
 	}
 

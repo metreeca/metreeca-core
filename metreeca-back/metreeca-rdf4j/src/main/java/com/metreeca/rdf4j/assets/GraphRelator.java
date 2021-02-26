@@ -31,13 +31,14 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.GraphEngine.StatsShape;
 import static com.metreeca.rdf4j.assets.GraphEngine.TermsShape;
+import static com.metreeca.rdf4j.assets.GraphFetcher.detail;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 
-final class GraphRelator extends GraphProcessor {
+final class GraphRelator {
 
 	private final Graph graph=asset(graph());
 
@@ -50,7 +51,9 @@ final class GraphRelator extends GraphProcessor {
 
 			return query(item, shape, request.query()).fold(response::map, query -> graph.exec(connection -> {
 
-				return Optional.of(fetch(connection, item, query))
+				return Optional
+
+						.of(query.map(new GraphFetcher(connection, item)))
 
 						.filter(model -> !model.isEmpty())
 

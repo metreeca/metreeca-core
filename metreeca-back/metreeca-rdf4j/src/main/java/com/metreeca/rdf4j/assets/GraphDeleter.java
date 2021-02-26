@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 
+import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
 
@@ -28,28 +29,20 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.InternalServerError;
+import static com.metreeca.rdf4j.assets.GraphFetcher.filter;
+import static com.metreeca.rdf4j.assets.GraphFetcher.outline;
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Response.NoContent;
+import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
-final class GraphDeleter extends GraphProcessor {
+final class GraphDeleter {
 
-	private final Graph graph=Context.asset(graph());
+	private final Graph graph=asset(graph());
 
 
 	Future<Response> handle(final Request request) {
-		return request.collection() ? holder(request) : member(request);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Future<Response> holder(final Request request) {
-		return request.reply(status(InternalServerError, new UnsupportedOperationException("holder DELETE method")));
-	}
-
-	private Future<Response> member(final Request request) {
 		return request.reply(response -> graph.exec(txn(connection -> {
 
 			final IRI item=iri(request.item());
@@ -57,7 +50,7 @@ final class GraphDeleter extends GraphProcessor {
 
 			return Optional
 
-					.of(fetch(connection, item, items(shape)))
+					.of(((Query)items(shape)).map(new GraphFetcher(connection, item)))
 
 					.filter(current -> !current.isEmpty())
 
@@ -66,15 +59,11 @@ final class GraphDeleter extends GraphProcessor {
 						connection.remove(outline(item, filter(shape)));
 						connection.remove(current);
 
-						return response.status(Response.NoContent);
+						return response.status(NoContent);
 
 					})
 
-					.orElseGet(() ->
-
-							response.status(Response.NotFound) // !!! 410 Gone if previously known
-
-					);
+					.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
 
 		})));
 	}

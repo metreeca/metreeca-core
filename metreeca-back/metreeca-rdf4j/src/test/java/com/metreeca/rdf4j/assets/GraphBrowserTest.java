@@ -30,7 +30,7 @@ import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.ValuesTest.term;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.rdf4j.assets.GraphProcessorTest.EmployeeShape;
+import static com.metreeca.rdf4j.assets.GraphFetcherTest.EmployeeShape;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;

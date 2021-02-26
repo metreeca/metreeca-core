@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 
+import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.*;
 
@@ -28,39 +29,31 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.InternalServerError;
+import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Response.NoContent;
+import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
-final class GraphUpdater extends GraphProcessor {
+final class GraphUpdater {
 
-	private final Graph graph=Context.asset(graph());
+	private final Graph graph=asset(graph());
 
 
 	Future<Response> handle(final Request request) {
-		return request.collection() ? holder(request) : member(request);
-	}
+		return request
 
+				.body(jsonld())
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Future<Response> holder(final Request request) {
-		return request.reply(status(InternalServerError, new UnsupportedOperationException("holder PUT method")));
-	}
-
-	private Future<Response> member(final Request request) {
-		return request.body(jsonld()).fold(
-
-				request::reply, model -> request.reply(response -> graph.exec(txn(connection -> {
+				.fold(request::reply, model -> request.reply(response -> graph.exec(txn(connection -> {
 
 					final IRI item=iri(request.item());
 					final Shape shape=request.attribute(shape());
 
 					return Optional
 
-							.of(fetch(connection, item, items(shape)))
+							.of(((Query)items(shape)).map(new GraphFetcher(connection, item)))
 
 							.filter(current -> !current.isEmpty())
 
@@ -69,19 +62,13 @@ final class GraphUpdater extends GraphProcessor {
 								connection.remove(current);
 								connection.add(model);
 
-								return response.status(Response.NoContent);
+								return response.status(NoContent);
 
 							})
 
-							.orElseGet(() ->
+							.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
 
-									response.status(Response.NotFound) // !!! 410 Gone if previously known
-
-							);
-
-				})))
-
-		);
+				}))));
 	}
 
 }

@@ -24,7 +24,6 @@ import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
@@ -41,78 +40,58 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 
 final class GraphDeleterTest {
 
-	@Nested final class Holder {
+	@Test void testDelete() {
+		exec(model(small()), () -> new GraphDeleter()
 
-		@Test void testNotImplemented() {
-			exec(() -> new GraphDeleter()
+				.handle(new Request()
+						.base(ValuesTest.Base)
+						.path("/employees/1370").attribute(JSONLDFormat.shape(), and(
+								filter().then(
+										field(RDF.TYPE, term("Employee"))
+								),
+								convey().then(
+										field(RDF.TYPE),
+										field(RDFS.LABEL),
+										field(term("forename")),
+										field(term("surname")),
+										field(term("email")),
+										field(term("title")),
+										field(term("code")),
+										field(term("office")),
+										field(term("seniority")),
+										field(term("supervisor")),
+										field(term("subordinate"))
+								)
+						))
+				)
 
-					.handle(new Request()
-							.path("/employees/"))
+				.accept(response -> {
 
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.InternalServerError)
-					)
-			);
-		}
+					assertThat(response)
+							.hasStatus(Response.NoContent)
+							.doesNotHaveBody();
 
+					assertThat(model("construct where { <employees/1370> ?p ?o }"))
+							.isEmpty();
+
+					assertThat(model("construct where { ?s a :Employee; ?p ?o. }"))
+							.isNotEmpty();
+
+				}));
 	}
 
-	@Nested final class Member {
+	@Test void testRejectUnknown() {
+		exec(() -> new GraphDeleter()
 
-		@Test void testDelete() {
-			exec(model(small()), () -> new GraphDeleter()
+				.handle(new Request()
+						.path("/unknown")
+				)
 
-					.handle(new Request()
-							.base(ValuesTest.Base)
-							.path("/employees/1370").attribute(JSONLDFormat.shape(), and(
-									filter().then(
-											field(RDF.TYPE, term("Employee"))
-									),
-									convey().then(
-											field(RDF.TYPE),
-											field(RDFS.LABEL),
-											field(term("forename")),
-											field(term("surname")),
-											field(term("email")),
-											field(term("title")),
-											field(term("code")),
-											field(term("office")),
-											field(term("seniority")),
-											field(term("supervisor")),
-											field(term("subordinate"))
-									)
-							))
-					)
-
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(Response.NoContent)
-								.doesNotHaveBody();
-
-						assertThat(model("construct where { <employees/1370> ?p ?o }"))
-								.isEmpty();
-
-						assertThat(model("construct where { ?s a :Employee; ?p ?o. }"))
-								.isNotEmpty();
-
-					}));
-		}
-
-		@Test void testRejectUnknown() {
-			exec(() -> new GraphDeleter()
-
-					.handle(new Request()
-							.path("/unknown")
-					)
-
-					.accept(response -> assertThat(response)
-							.hasStatus(Response.NotFound)
-							.doesNotHaveBody()
-					)
-			);
-		}
-
+				.accept(response -> assertThat(response)
+						.hasStatus(Response.NotFound)
+						.doesNotHaveBody()
+				)
+		);
 	}
 
 }
