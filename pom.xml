@@ -211,7 +211,7 @@
 			<dependency> <!-- https://search.maven.org/artifact/com.google.cloud/libraries-bom -->
 				<groupId>com.google.cloud</groupId>
 				<artifactId>libraries-bom</artifactId>
-				<version>16.4.0</version>
+				<version>18.0.0</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
