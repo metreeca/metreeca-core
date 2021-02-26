@@ -48,7 +48,7 @@ import static java.util.UUID.randomUUID;
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
  * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} area;</li>
+ * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine-assisted request payload {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject) scanning};</li>
  *

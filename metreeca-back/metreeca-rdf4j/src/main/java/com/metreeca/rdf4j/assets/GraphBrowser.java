@@ -38,7 +38,8 @@ final class GraphBrowser extends GraphProcessor {
 
 	private final Graph graph=asset(graph());
 
-	public Future<Response> handle(final Request request) {
+
+	Future<Response> handle(final Request request) {
 		return request.reply(response -> {
 
 			final IRI item=iri(request.item());
@@ -46,9 +47,7 @@ final class GraphBrowser extends GraphProcessor {
 
 			return query(item, shape, request.query()).fold(response::map, query -> graph.exec(connection -> {
 
-				// containers are virtual and respond with 200 OK even if not described in the graph
-
-				return response.status(OK)
+				return response.status(OK) // containers are virtual and respond always with 200 OK
 						.attribute(shape(), query.map(new ShapeProbe()))
 						.body(jsonld(), fetch(connection, item, query));
 

@@ -80,6 +80,22 @@ final class GraphProcessorTest {
 	private static final IRI Root=iri("app:/");
 
 	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
+	static final Shape EmployeeShape=member().then(
+			filter().then(
+					field(RDF.TYPE, term("Employee"))
+			),
+			convey().then(
+					field(RDFS.LABEL),
+					field(term("forename")),
+					field(term("surname")),
+					field(term("email")),
+					field(term("title")),
+					field(term("code")),
+					field(term("office")),
+					field(term("seniority")),
+					field(term("supervisor"))
+			)
+	);
 
 
 	private void exec(final Runnable task) {

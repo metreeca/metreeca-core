@@ -28,24 +28,23 @@ import org.eclipse.rdf4j.model.IRI;
 
 import javax.json.JsonObject;
 
-import static com.metreeca.json.shapes.Guard.Detail;
+import static com.metreeca.json.shapes.Guard.Digest;
 import static com.metreeca.json.shapes.Guard.Relate;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.assets.Engine.*;
 
 
 /**
- * Model-driven resource relator.
+ * Model-driven container browser.
  *
  * <p>Performs:</p>
  *
  * <ul>
  *
  * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Guard#Relate} task and {@linkplain Guard#Detail} view;</li>
+ * {@linkplain Guard#Relate} task and {@linkplain Guard#Digest} view;</li>
  *
- * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
+ * <li>engine assisted container {@linkplain Engine#browse(Request) browsing};</li>
  *
  * <li>engine-assisted response payload {@linkplain JSONLDFormat#trim(IRI, Shape, JsonObject) trimming}, considering
  * shapes as above.</li>
@@ -54,34 +53,29 @@ import static com.metreeca.rest.assets.Engine.*;
  *
  * <p>All operations are executed inside a single {@linkplain Engine engine transaction}.</p>
  */
-public final class Relator extends Delegator {
+public final class Browser extends Delegator {
 
 	/**
-	 * Creates a resource relator.
+	 * Creates a container browser.
 	 *
-	 * @return a new resource relator
+	 * @return a new container browser
 	 */
-	public static Relator relator() {
-		return new Relator();
+	public static Browser browser() {
+		return new Browser();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Relator() {
+	private Browser() {
 
 		final Engine engine=asset(engine());
 
-		delegate(((Handler)engine::relate)
+		delegate(((Handler)engine::browse)
 
 				.with(engine)
-
 				.with(trimmer())
-
-				.with(wrapper(Request::collection,
-						throttler(Relate), // area will be redacted by engine relator
-						throttler(Relate, Detail)
-				))
+				.with(throttler(Relate, Digest))
 
 		);
 	}

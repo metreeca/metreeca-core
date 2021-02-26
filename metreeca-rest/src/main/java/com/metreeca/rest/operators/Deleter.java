@@ -37,9 +37,7 @@ import static com.metreeca.rest.assets.Engine.throttler;
  * <ul>
  *
  * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Guard#Delete} task and the {@linkplain Guard#Target} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
- * resources;</li>
+ * {@linkplain Guard#Delete} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#delete(Request) deletion}.</li>
  *
