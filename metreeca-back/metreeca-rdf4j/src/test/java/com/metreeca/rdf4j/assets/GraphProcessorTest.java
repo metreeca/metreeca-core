@@ -17,6 +17,8 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
+import com.metreeca.json.shapes.All;
+import com.metreeca.json.shapes.Any;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.*;
@@ -64,11 +66,13 @@ import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
 import static com.metreeca.rest.Context.asset;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 
 final class GraphProcessorTest {
@@ -1023,17 +1027,17 @@ final class GraphProcessorTest {
 		private final Value c=literal(3);
 
 		@Test void testInspectAll() {
-			assertThat(GraphProcessor.all(all(a, b, c)))
+			assertThat(All.all(all(a, b, c)))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectAnd() {
-			assertThat(GraphProcessor.all(and(all(a, b), all(b, c))))
+			assertThat(All.all(and(all(a, b), all(b, c))))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOtherShape() {
-			assertThat(GraphProcessor.all(and()))
+			assertThat(All.all(and()))
 					.isEmpty();
 		}
 
@@ -1046,17 +1050,17 @@ final class GraphProcessorTest {
 		private final Value c=literal(3);
 
 		@Test void testInspectAny() {
-			assertThat(GraphProcessor.any(any(a, b, c)))
+			assertThat(Any.any(any(a, b, c)))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOr() {
-			assertThat(GraphProcessor.any(or(any(a, b), any(b, c))))
+			assertThat(Any.any(or(any(a, b), any(b, c))))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOtherShape() {
-			assertThat(GraphProcessor.any(and()))
+			assertThat(Any.any(and()))
 					.isEmpty();
 		}
 	}

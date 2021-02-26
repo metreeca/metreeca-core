@@ -180,6 +180,21 @@ public interface Engine extends Wrapper {
 	public Future<Response> relate(final Request request);
 
 	/**
+	 * Handles browsing requests.
+	 *
+	 * <p>Handles browsing requests on the linked data container identified by the request {@linkplain Request#item()
+	 * item} possibly using the message {@linkplain JSONLDFormat#shape() shape}.</p>
+	 *
+	 * @param request a browsing request for the managed linked data container
+	 *
+	 * @return a lazy response generated for the managed linked data container in reaction to the retrieval {@code
+	 * request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
+	 */
+	public Future<Response> browse(final Request request);
+
+	/**
 	 * Handles updating requests.
 	 *
 	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()

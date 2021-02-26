@@ -20,13 +20,12 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.json.shapes.Guard;
-import com.metreeca.rdf.formats.RDFFormat;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import static com.metreeca.json.Shape.*;
@@ -45,8 +44,6 @@ import static com.metreeca.rest.Context.asset;
  *
  * <p>Manages graph transactions and handles model-driven CRUD actions on LDP resources stored in the shared
  * {@linkplain Graph graph}.</p>
- *
- * @see <a href="https://www.w3.org/TR/ldp/">Linked Data Platform 1.0</a>
  */
 public final class GraphEngine implements Engine {
 
@@ -115,6 +112,7 @@ public final class GraphEngine implements Engine {
 
 	private final GraphCreator creator=new GraphCreator();
 	private final GraphRelator relator=new GraphRelator();
+	private final GraphBrowser browser=new GraphBrowser();
 	private final GraphUpdater updater=new GraphUpdater();
 	private final GraphDeleter deleter=new GraphDeleter();
 
@@ -136,40 +134,29 @@ public final class GraphEngine implements Engine {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Creates an LDP resource.
+	 * Creates a linked data resource.
 	 *
 	 * <p>Handles creation requests on the linked data container identified by the request {@linkplain Request#item()
-	 * focus item}, according to the following operating modes.</p>
-	 *
-	 * <p>If the request target is a {@linkplain Request#collection() collection}:</p>
+	 * focus item}:</p>
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
+	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
-	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be
-	 * created matched by the shape using the request {@linkplain Request#item() item} as subject;</li>
+	 * <li>the request {@link JSONLDFormat JSON-LD} body is expected to contain a description of the resource to be
+	 * created matching the shape using the request {@linkplain Request#item() item} as subject;</li>
 	 *
 	 * <li>the resource to be created is assigned a unique IRI based on the stem of the the request IRI and the value
-	 * of the {@code Slug} request header, if one is found, or a random UUID, otherwise;</li>
+	 * of the {@code Slug} request header, if one is found, or a random id, otherwise;</li>
 	 *
-	 * <li>the request RDF body is rewritten to the assigned IRI and stored into the shared {@linkplain Graph graph}
-	 * ;</li>
+	 * <li>the request body is rewritten to the assigned IRI and stored into the shared {@linkplain Graph graph};</li>
 	 *
 	 * <li>the target container identified by the request item is connected to the newly created resource as required
-	 * by the LDP container profile identified by the filtering constraints in the request shape;</li>
+	 * by the filtering constraints in the request shape;</li>
 	 *
 	 * <li>the operation is completed with a {@value Response#Created} status code;</li>
 	 *
 	 * <li>the IRI of the newly created resource is advertised through the {@code Location} HTTP response header.</li>
-	 *
-	 * </ul>
-	 *
-	 * <p>Otherwise:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is reported with a {@linkplain Response#InternalServerError} status code.</li>
 	 *
 	 * </ul>
 	 *
@@ -189,49 +176,21 @@ public final class GraphEngine implements Engine {
 	}
 
 	/**
-	 * Retrieves an LDP resource.
+	 * Retrieves a linked data resource.
 	 *
 	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * focus item}, according to the following operating modes.</p>
+	 * focus item}.</p>
 	 *
-	 * <p>If the focus item is a {@linkplain Request#collection() collection}:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is expected to include a combined container/member {@linkplain JSONLDFormat#shape() shape};</li>
-	 *
-	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
-	 *
-	 * <li>the response {@linkplain RDFFormat RDF} body includes the RDF description of the container as matched by the
-	 * {@linkplain Guard#Target} area of request shape, linked using the {@code ldp:contains} property to the RDF
-	 * description of the resources matched by the {@linkplain Guard#Filter filtering} constrains of the
-	 * {@linkplain Guard#Digest} area of the request shape;</li>
-	 *
-	 * <li>{@linkplain Guard#Digest} area of the request shape doesn't contain any {@linkplain Guard#Filter filtering}
-	 * constrains, member resources explicitely to linked to the target container using the {@code ldp:contains}
-	 * property are included;</li>
-	 *
-	 * <li>if the request contains a filtering {@linkplain Request#query(String) query}, only matching container members
-	 * descriptions are included.</li>
-	 *
-	 * <li>if the request contains a {@code Prefer} header requesting the {@code ldp:preferMinimalContainer}
-	 * representation, member descriptions are omitted;</li>
-	 *
-	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item
-	 * IRI:</p>
+	 * <p>If the shared {@linkplain  Graph graph} actually contains a resource matching the request focus item IRI:</p>
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
+	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
 	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
 	 *
-	 * <li>the response {@link RDFFormat RDF} body contains the RDF description of the request item, as matched by the
-	 * request request shape;</li>
+	 * <li>the response {@link JSONLDFormat JSON-LD} body contains a description of the request item retrieved from the
+	 * shared {@linkplain  Graph graph} and matching the response shape;</li>
 	 *
 	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
 	 *
@@ -241,12 +200,9 @@ public final class GraphEngine implements Engine {
 	 *
 	 * <ul>
 	 *
-	 * <li>the operation is reported as unsuccessful with a {@value Response#NotFound} status code
-	 * .</li>
+	 * <li>the operation is reported as unsuccessful with a {@value Response#NotFound} status code.</li>
 	 *
 	 * </ul>
-	 *
-	 * <p>Regardless of the operating mode, RDF data is retrieved from the shared {@linkplain  Graph graph}.</p>
 	 *
 	 * @param request the request to be handled
 	 *
@@ -264,32 +220,58 @@ public final class GraphEngine implements Engine {
 	}
 
 	/**
-	 * Updates an LDP resource.
+	 * Browses a linked data container.
 	 *
-	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item}, according to the following operating modes.</p>
-	 *
-	 * <p>If the request target is a {@linkplain Request#collection() collection}:</p>
+	 * <p>Handles browsing requests on the linked data container identified by the request {@linkplain Request#item()
+	 * focus item}:</p>
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is reported with a {@linkplain Response#InternalServerError} status code.</li>
+	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
+	 *
+	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
+	 *
+	 * <li>the response {@link JSONLDFormat JSON-LD} body contains a description of member linked data resources
+	 * retrieved from the shared {@linkplain  Graph graph} according to the filtering constraints in the request shape
+	 * and matching the response shape; the IRI of the target container is connected to the IRIs of the member
+	 * resources using the {@link LDP#CONTAINS ldp:contains} property;</li>
+	 *
+	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
 	 *
 	 * </ul>
 	 *
-	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item
-	 * IRI:</p>
+	 * @param request the request to be handled
+	 *
+	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
+	 */
+	@Override public Future<Response> browse(final Request request) {
+
+		if ( request == null ) {
+			throw new NullPointerException("null request");
+		}
+
+		return browser.handle(request);
+	}
+
+	/**
+	 * Updates a linked data resource.
+	 *
+	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * item}.</p>
+	 *
+	 * <p>If the shared {@linkplain  Graph graph} actually contains a resource matching the request focus item IRI:</p>
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
+	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
-	 * <li>the request {@link RDFFormat RDF} body is expected to contain an RDF description of the resource to be
-	 * updated
-	 * matched by the shape;</li>
+	 * <li>the request {@link JSONLDFormat JSON-LD} body is expected to contain a description of the resource to be
+	 * updated matching by the shape;</li>
 	 *
-	 * <li>the existing RDF description of the target resource matched by the request shape
-	 * is replaced in the shared {@linkplain Graph graph} with the request RDF body;</li>
+	 * <li>the existing description of the resource matching the request shape is replaced in the shared
+	 * {@linkplain Graph graph} with the request body;</li>
 	 *
 	 * <li>the operation is completed with a {@value Response#NoContent} status code.</li>
 	 *
@@ -319,27 +301,18 @@ public final class GraphEngine implements Engine {
 	}
 
 	/**
-	 * Deletes an LDP resource.
+	 * Deletes a linked data resource.
 	 *
 	 * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item}, according to the following operating modes.</p>
+	 * item}.</p>
 	 *
-	 * <p>If the request target is a {@linkplain Request#collection() collection}:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is reported with a {@linkplain Response#InternalServerError} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request item
-	 * IRI:</p>
+	 * <p>If the shared {@linkplain  Graph graph} actually contains a resource matching the request focus item IRI:</p>
 	 *
 	 * <ul>
 	 *
-	 * <li>the request is expected to include a member resource {@linkplain JSONLDFormat#shape() shape};</li>
+	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
 	 *
-	 * <li>the existing RDF description of the target resource matched by the request shape is removed from the shared
+	 * <li>the existing description of the resource matching the request shape is removed from the shared
 	 * {@linkplain Graph graph};</li>
 	 *
 	 * <li>the operation is completed with a {@value Response#NoContent} status code.</li>

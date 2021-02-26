@@ -22,13 +22,14 @@ import com.metreeca.json.Values;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.And.and;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 
 /**
@@ -63,6 +64,11 @@ public final class All extends Shape {
 		}
 
 		return values.isEmpty() ? and() : new All(values);
+	}
+
+
+	public static Optional<Set<Value>> all(final Shape shape) {
+		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AllProbe()));
 	}
 
 
@@ -113,5 +119,25 @@ public final class All extends Shape {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class AllProbe extends Probe<Set<Value>> {
+
+		@Override public Set<Value> probe(final All all) {
+			return all.values();
+		}
+
+		@Override public Set<Value> probe(final And and) {
+			return and.shapes().stream()
+					.map(shape -> shape.map(this))
+					.reduce(null, this::union);
+		}
+
+
+		private Set<Value> union(final Set<Value> x, final Set<Value> y) {
+			return x == null ? y : y == null ? x
+					: unmodifiableSet(Stream.concat(x.stream(), y.stream()).collect(toSet()));
+		}
+
+	}
 
 }

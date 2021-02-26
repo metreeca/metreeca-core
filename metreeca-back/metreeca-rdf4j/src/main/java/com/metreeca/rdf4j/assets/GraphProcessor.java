@@ -56,9 +56,9 @@ import static com.metreeca.rdf4j.assets.Snippets.*;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
+
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
-import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -100,58 +100,6 @@ abstract class GraphProcessor {
 
 	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
 		return anchor(resource, shape).map(new Outliner(resource)).collect(toList());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static Optional<Set<Value>> all(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AllProbe()));
-	}
-
-	static Optional<Set<Value>> any(final Shape shape) {
-		return shape == null ? Optional.empty() : Optional.ofNullable(shape.map(new AnyProbe()));
-	}
-
-
-	private static final class AllProbe extends Probe<Set<Value>> {
-
-		@Override public Set<Value> probe(final All all) {
-			return all.values();
-		}
-
-		@Override public Set<Value> probe(final And and) {
-			return and.shapes().stream()
-					.map(shape -> shape.map(this))
-					.reduce(null, this::union);
-		}
-
-
-		private Set<Value> union(final Set<Value> x, final Set<Value> y) {
-			return x == null ? y : y == null ? x
-					: unmodifiableSet(Stream.concat(x.stream(), y.stream()).collect(toSet()));
-		}
-
-	}
-
-	private static final class AnyProbe extends Probe<Set<Value>> {
-
-		@Override public Set<Value> probe(final Any any) {
-			return any.values();
-		}
-
-		@Override public Set<Value> probe(final Or or) {
-			return or.shapes().stream()
-					.map(shape -> shape.map(this))
-					.reduce(null, this::union);
-		}
-
-
-		private Set<Value> union(final Set<Value> x, final Set<Value> y) {
-			return x == null ? y : y == null ? x
-					: unmodifiableSet(Stream.concat(x.stream(), y.stream()).collect(toSet()));
-		}
-
 	}
 
 
@@ -616,7 +564,7 @@ abstract class GraphProcessor {
 		}
 
 		private Snippet roots(final Shape shape) { // root universal constraints
-			return all(shape)
+			return All.all(shape)
 					.map(this::values)
 					.map(values -> values(shape, values))
 					.orElse(null);
@@ -855,8 +803,8 @@ abstract class GraphProcessor {
 				final IRI iri=field.name();
 				final Shape shape=field.shape();
 
-				final Optional<Set<Value>> all=all(shape).map(FetcherProbe.this::values);
-				final Optional<Set<Value>> any=any(shape).map(FetcherProbe.this::values);
+				final Optional<Set<Value>> all=All.all(shape).map(FetcherProbe.this::values);
+				final Optional<Set<Value>> any=Any.any(shape).map(FetcherProbe.this::values);
 
 				final Optional<Value> singleton=any
 						.filter(values -> values.size() == 1)
@@ -924,7 +872,7 @@ abstract class GraphProcessor {
 
 				return snippet( // (€) optional unless universal constraints are present
 
-						all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
+						All.all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
 
 						snippet(
 								edge(var(this.shape), iri, var(shape)), "\n",

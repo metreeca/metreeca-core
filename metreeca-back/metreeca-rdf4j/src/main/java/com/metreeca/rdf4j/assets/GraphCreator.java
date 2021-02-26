@@ -17,11 +17,13 @@
 package com.metreeca.rdf4j.assets;
 
 
+import com.metreeca.json.Values;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.regex.Matcher;
 
 import static com.metreeca.json.Values.*;
@@ -35,6 +37,7 @@ import static com.metreeca.rest.Response.Created;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
+
 import static java.util.stream.Collectors.toList;
 
 
@@ -60,7 +63,7 @@ final class GraphCreator extends GraphProcessor {
 					final IRI holder=iri(request.item());
 					final IRI member=iri(request.item()+request.header("Slug") // assign entity a slug-based id
 							.map(Xtream::encode)  // encode slug as IRI path component
-							.orElseGet(() -> UUID.randomUUID().toString()) // !! sequential generator
+							.orElseGet(Values::md5)
 					);
 
 					final boolean clashing=connection.hasStatement(member, null, null, true)
@@ -94,8 +97,8 @@ final class GraphCreator extends GraphProcessor {
 	}
 
 	private Future<Response> member(final Request request) {
-		return request.reply(status(InternalServerError, new UnsupportedOperationException("member POST "
-				+"method")));
+		return request.reply(status(InternalServerError,
+				new UnsupportedOperationException("member POST method")));
 	}
 
 
