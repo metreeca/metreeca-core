@@ -28,9 +28,9 @@ import org.eclipse.rdf4j.model.IRI;
 
 import javax.json.JsonObject;
 
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.Detail;
+import static com.metreeca.json.shapes.Guard.Update;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.assets.Engine.*;
 
 
@@ -42,7 +42,7 @@ import static com.metreeca.rest.assets.Engine.*;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Update} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine-assisted request payload {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject) scanning};</li>
@@ -74,12 +74,7 @@ public final class Updater extends Delegator {
 		delegate(((Handler)engine::update)
 
 				.with(engine)
-
-				.with(wrapper(Request::collection,
-						throttler(Update, Target),
-						throttler(Update, Detail)
-				))
-
+				.with(throttler(Update, Detail))
 				.with(scanner())
 
 		);

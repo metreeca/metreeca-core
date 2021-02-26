@@ -41,7 +41,8 @@ import static com.metreeca.rest.assets.Engine.*;
  *
  * <ul>
  *
- * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
+ * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Relate} task and {@linkplain Guard#Digest} view;</li>
  *
  * <li>engine assisted container {@linkplain Engine#browse(Request) browsing};</li>

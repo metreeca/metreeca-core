@@ -47,7 +47,7 @@ import static java.util.UUID.randomUUID;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine-assisted request payload {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject) scanning};</li>
@@ -121,9 +121,7 @@ public final class Creator extends Delegator {
 		delegate(wrapper(slug).wrap(engine::create) // wrap slug immediately before handler after custom wrappers
 
 				.with(engine)
-
 				.with(throttler(Create, Detail))
-
 				.with(scanner())
 
 		);

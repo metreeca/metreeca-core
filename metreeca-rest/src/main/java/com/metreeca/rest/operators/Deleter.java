@@ -22,9 +22,9 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.handlers.Delegator;
 
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.Delete;
+import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.assets.Engine.engine;
 import static com.metreeca.rest.assets.Engine.throttler;
 
@@ -36,7 +36,8 @@ import static com.metreeca.rest.assets.Engine.throttler;
  *
  * <ul>
  *
- * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
+ * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Delete} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#delete(Request) deletion}.</li>
@@ -66,11 +67,7 @@ public final class Deleter extends Delegator {
 		delegate(((Handler)engine::delete)
 
 				.with(engine)
-
-				.with(wrapper(Request::collection,
-						throttler(Delete, Target),
-						throttler(Delete, Detail)
-				))
+				.with(throttler(Delete, Detail))
 
 		);
 	}

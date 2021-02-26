@@ -31,7 +31,6 @@ import javax.json.JsonObject;
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.json.shapes.Guard.Relate;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.assets.Engine.*;
 
 
@@ -42,7 +41,8 @@ import static com.metreeca.rest.assets.Engine.*;
  *
  * <ul>
  *
- * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
+ * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Relate} task and {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
@@ -75,13 +75,8 @@ public final class Relator extends Delegator {
 		delegate(((Handler)engine::relate)
 
 				.with(engine)
-
 				.with(trimmer())
-
-				.with(wrapper(Request::collection,
-						throttler(Relate), // area will be redacted by engine relator
-						throttler(Relate, Detail)
-				))
+				.with(throttler(Relate, Detail))
 
 		);
 	}
