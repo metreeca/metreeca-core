@@ -25,9 +25,11 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.*;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.metreeca.rest.Request.HEAD;
 import static com.metreeca.rest.Response.NotFound;
@@ -35,6 +37,8 @@ import static com.metreeca.rest.Xtream.guarded;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
+import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 
 /**
@@ -59,12 +63,12 @@ public final class Server {
 	private final int backlog=128;
 	private final int delay=0;
 
-
-	private Function<Context, Handler> handler=context -> request -> request.reply(identity());
-
 	private InetSocketAddress address=new InetSocketAddress("localhost", 8080);
 
 	private final Context context=new Context();
+
+
+	private static Supplier<Handler> handler() { return () -> request -> request.reply(identity()); }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +90,7 @@ public final class Server {
 			throw new NullPointerException("null handler factory");
 		}
 
-		this.handler=factory;
+		context.set(handler(), () -> requireNonNull(factory.apply(context), "null handler"));
 
 		return this;
 	}
@@ -118,8 +122,7 @@ public final class Server {
 	public void start() {
 		try {
 
-			final Handler handler=Objects.requireNonNull(this.handler.apply(context), "null handler");
-
+			final Handler handler=context.get(handler());
 			final Logger logger=context.get(logger());
 
 			final HttpServer server=HttpServer.create(address, backlog);

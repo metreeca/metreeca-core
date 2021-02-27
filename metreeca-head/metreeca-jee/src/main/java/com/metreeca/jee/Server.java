@@ -19,18 +19,20 @@ package com.metreeca.jee;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Loader;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
 import static java.util.Objects.requireNonNull;
@@ -58,7 +60,7 @@ public abstract class Server implements Filter {
 
 	private final Context context=new Context();
 
-	private final Supplier<Handler> handler=() -> request -> request.reply(identity());
+	private final Supplier<Handler> handler() { return () -> request -> request.reply(identity()); }
 
 
 	/**
@@ -78,7 +80,7 @@ public abstract class Server implements Filter {
 			throw new NullPointerException("null factory");
 		}
 
-		context.set(handler, () -> requireNonNull(factory.apply(context), "null handler"));
+		context.set(handler(), () -> requireNonNull(factory.apply(context), "null handler"));
 
 		return this;
 	}
@@ -97,7 +99,7 @@ public abstract class Server implements Filter {
 					.set(Context.storage(), () -> storage(context))
 					.set(Loader.loader(), () -> loader(context))
 
-					.get(handler); // force handler loading during filter initialization
+					.get(handler()); // force handler loading during filter initialization
 
 		} catch ( final Throwable t ) {
 
@@ -156,7 +158,7 @@ public abstract class Server implements Filter {
 
 		try {
 
-			context.exec(() -> context.get(handler)
+			context.exec(() -> context.get(handler())
 					.handle(request((HttpServletRequest)request))
 					.accept(_response -> response((HttpServletResponse)response, _response))
 			);
