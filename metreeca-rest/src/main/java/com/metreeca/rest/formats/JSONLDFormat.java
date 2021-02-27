@@ -31,6 +31,8 @@ import java.util.function.Supplier;
 
 import javax.json.*;
 
+import static com.metreeca.json.Trace.trace;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
 import static com.metreeca.rest.Context.asset;
@@ -182,7 +184,11 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 						return JSONLDScanner.scan(shape, focus, model).fold(
 								trace -> Left(status(UnprocessableEntity, trace.toJSON())),
-								Either::Right
+								value -> value.size() == model.size() ? Right(value) : Left(status(UnprocessableEntity,
+										trace(value.stream().filter(s -> !model.contains(s))
+												.map(s -> format("statement <%s> is out of shape envelop", format(s)))
+										).toJSON()
+								))
 						);
 
 					} catch ( final UnsupportedEncodingException|JsonException e ) {
