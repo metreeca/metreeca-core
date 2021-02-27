@@ -480,6 +480,13 @@ public final class Values {
 
 	//// Formatters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static String format(final Statement statement) {
+		return statement == null ? null : String.format("%s %s %s",
+				format(statement.getSubject()), format(statement.getPredicate()), format(statement.getObject())
+		);
+	}
+
+
 	public static String format(final Collection<? extends Value> values) {
 		return values == null ? null : values.stream().map(Values::format).collect(joining(", "));
 	}
