@@ -16,22 +16,17 @@
 
 package com.metreeca.rest.operators;
 
-import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.handlers.Delegator;
-
-import org.eclipse.rdf4j.model.IRI;
-
-import javax.json.JsonObject;
 
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.json.shapes.Guard.Relate;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Engine.*;
+import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.throttler;
 
 
 /**
@@ -47,8 +42,7 @@ import static com.metreeca.rest.assets.Engine.*;
  *
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
  *
- * <li>engine-assisted response payload {@linkplain JSONLDFormat#trim(IRI, Shape, JsonObject) trimming}, considering
- * shapes as above.</li>
+ * <li>shape-driven response payload redaction, considering shapes as above.</li>
  *
  * </ul>
  *
@@ -75,7 +69,6 @@ public final class Relator extends Delegator {
 		delegate(((Handler)engine::relate)
 
 				.with(engine)
-				.with(trimmer())
 				.with(throttler(Relate, Detail))
 
 		);

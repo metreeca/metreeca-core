@@ -29,14 +29,16 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
+
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static com.metreeca.rest.formats._JSONLDCodec.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.*;
+
 import static javax.json.Json.*;
 
 
@@ -103,32 +105,7 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) {
 
-		final int minCount=minCount(shape).orElse(0);
 		final int maxCount=maxCount(shape).orElse(Integer.MAX_VALUE);
-
-		if ( values.size() < minCount ) {
-			error("minCount(%d) constraint violation / count = <%d>", minCount, values.size());
-		}
-
-		if ( values.size() > maxCount ) {
-			error("maxCount(%d) constraint violation / count = <%d>", maxCount, values.size());
-		}
-
-		if ( !all(shape).test(values) ) {
-			error("all(*) constraint violation"); // !!! improve and/or reporting
-		}
-
-		if ( !any(shape).test(values) ) {
-			error("any(*) constraint violation"); // !!! improve and/or reporting
-		}
-
-		datatype(shape).ifPresent(datatype -> values.stream().filter(value -> !is(value, datatype)).forEach(value ->
-				error("datatype(%s) constraint violation / datatype = <%s>", datatype, type(value))
-		));
-
-		range(shape).ifPresent(range -> values.stream().filter(value -> !range.contains(value)).forEach(value ->
-				error("range(%s) constraint violation / value = ", format(range), format(value))
-		));
 
 		if ( tagged(shape) ) { // tagged literals
 
@@ -382,24 +359,6 @@ final class JSONLDEncoder {
 						LinkedHashMap::new,
 						mapping(Value::stringValue, toList())
 				));
-
-		if ( localized && langToStrings.values().stream().anyMatch(strings -> strings.size() > 1) ) {
-			throw new IllegalArgumentException(String.format(
-					"localized() constraint violation / multiple values for {%s} tags", langToStrings.entrySet()
-							.stream()
-							.filter(entry -> entry.getValue().size() > 1)
-							.map(Map.Entry::getKey)
-							.collect(joining(", "))
-			));
-		}
-
-		if ( !langs.isEmpty() && !langs.containsAll(langToStrings.keySet()) ) {
-			throw new IllegalArgumentException(String.format(
-					"lang(%s) constraint violation / unexpected values for {%s} tags",
-					String.join(", ", langs),
-					langToStrings.keySet().stream().filter(tag -> !langs.contains(tag)).collect(joining(", "))
-			));
-		}
 
 		if ( langs.size() == 1 ) { // known language
 

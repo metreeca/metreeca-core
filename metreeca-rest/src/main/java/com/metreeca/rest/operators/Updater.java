@@ -16,22 +16,17 @@
 
 package com.metreeca.rest.operators;
 
-import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.handlers.Delegator;
-
-import org.eclipse.rdf4j.model.IRI;
-
-import javax.json.JsonObject;
 
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.json.shapes.Guard.Update;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Engine.*;
+import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.throttler;
 
 
 /**
@@ -45,7 +40,7 @@ import static com.metreeca.rest.assets.Engine.*;
  * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Update} task and the {@linkplain Guard#Detail} view;</li>
  *
- * <li>engine-assisted request payload {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject) scanning};</li>
+ * <li>shape-driven request payload validation;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
  *
@@ -75,7 +70,6 @@ public final class Updater extends Delegator {
 
 				.with(engine)
 				.with(throttler(Update, Detail))
-				.with(scanner())
 
 		);
 	}

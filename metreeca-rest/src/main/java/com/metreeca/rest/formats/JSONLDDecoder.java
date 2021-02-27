@@ -16,15 +16,14 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
+import com.metreeca.json.*;
 import com.metreeca.json.shapes.Field;
+import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import javax.json.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -33,11 +32,16 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import javax.json.*;
+
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static com.metreeca.rest.Either.Right;
+import static com.metreeca.rest.formats._JSONLDCodec.*;
+
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
+
 import static javax.json.Json.createObjectBuilder;
 
 
@@ -76,7 +80,7 @@ final class JSONLDDecoder {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Collection<Statement> decode(final JsonObject json) throws JsonException {
+	Either<Trace, Collection<Statement>> decode(final JsonObject json) throws JsonException {
 
 		if ( json == null ) {
 			throw new NullPointerException("null json");
@@ -91,14 +95,14 @@ final class JSONLDDecoder {
 			error("conflicting object identifiers: expected <%s>, declared <%s>", expected, declared);
 		}
 
-		final JsonObject object=keywords.containsKey("@id") ? // make sure the root object contains @id
-				json : createObjectBuilder(json).add("@id", expected).build();
+		final JsonObject object=keywords.containsKey("@id") ? json
+				: createObjectBuilder(json).add("@id", expected).build(); // make sure the root object contains @id
 
 		final Collection<Statement> model=new ArrayList<>();
 
 		value(object, shape).getValue().forEachOrdered(model::add);
 
-		return model;
+		return Right(model);
 	}
 
 

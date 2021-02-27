@@ -20,14 +20,18 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Trace;
 import com.metreeca.rest.Either;
 
-import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.*;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collection;
 
+import static com.metreeca.json.ModelAssert.assertThat;
+import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -52,112 +56,119 @@ import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rest.EitherAssert.assertThat;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyMap;
-import static javax.json.Json.*;
+
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 final class JSONLDScannerTest {
 
-	private static final Literal x=literal("x");
-	private static final Literal y=literal("y");
-	private static final Literal z=literal("z");
+	private final IRI f=iri("test:f");
 
+	private final IRI p=iri("test:p");
+	private final IRI q=iri("test:q");
+	private final IRI r=iri("test:r");
 
-	private Either<Trace, JsonObject> scan(final Shape shape, final JsonValue... values) {
-
-		final JsonArrayBuilder array=createArrayBuilder();
-
-		for (final JsonValue value : values) {
-			array.add(value);
-		}
-
-		return scan(field(RDF.VALUE, shape), createObjectBuilder().add("value", array));
-	}
-
-	private Either<Trace, JsonObject> scan(final Shape shape, final JsonObjectBuilder builder) {
-		return new JSONLDScanner(iri("app:/"), shape.expand(), emptyMap()).scan(builder.build());
-	}
+	private final IRI x=iri("test:x");
+	private final IRI y=iri("test:y");
+	private final IRI z=iri("test:z");
 
 
 	@Nested final class Validation {
 
+		private Either<Trace, Collection<Statement>> scan(final Shape shape, final Statement... model) {
+			return JSONLDScanner.scan(shape, f, asList(model));
+		}
+
+
 		@Test void testValidateShapeEnvelope() {
 
-			final Shape shape=field(RDF.VALUE, all(x));
+			final Shape shape=field(p, all(x));
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("value", "x")
-			)).hasRight();
-
-			assertThat(scan(shape, createObjectBuilder()
-					.add("value", "x")
-					.add("unknown", "x")
-			)).hasLeft();
+			assertThat(scan(shape, statement(f, p, x))).hasRight(singletonList(statement(f, p, x)));
+			assertThat(scan(shape, statement(f, p, x), statement(f, q, y))).hasRight(singletonList(statement(f, p, x)));
 
 		}
 
 
 		@Test void testValidateField() {
 
-			final Shape shape=field(RDF.VALUE, minCount(1));
+			final Shape shape=field(p, minCount(1));
 
-			assertThat(scan(shape, createObjectBuilder().add("value", createArrayBuilder(asList("x", "y"))))).hasRight();
+			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
+			assertThat(scan(shape, statement(f, q, x))).hasLeft();
 
-			assertThat(scan(shape, createObjectBuilder())).as("empty focus").hasLeft();
+			assertThat(scan(shape)).hasLeft();
 
 		}
 
 		@Test void testValidateDirectFields() {
 
-			final Shape shape=field(RDF.VALUE, all(y));
+			final Shape shape=field(p, all(y));
 
-			assertThat(scan(shape, createObjectBuilder().add("value", createArrayBuilder(asList("x", "y"))))).hasRight();
-
-			assertThat(scan(shape, createObjectBuilder().add("value", "x"))).hasLeft();
+			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
+			assertThat(scan(shape, statement(f, p, z))).hasLeft();
 
 		}
 
 		@Test void testValidateInverseFields() {
 
-			final Shape shape=field(inverse(RDF.VALUE), all(iri("http://example.com/")));
+			final Shape shape=field(inverse(p), all(x));
 
-			assertThat(scan(shape, createObjectBuilder().add("valueOf", "http://example.com/"))).hasRight();
-			assertThat(scan(shape, createValue("x"))).hasLeft();
+			assertThat(scan(shape, statement(x, p, f))).hasRight();
+			assertThat(scan(shape, statement(y, p, f))).hasLeft();
+
+		}
+
+		@Test void testValidateMultipleValues() {
+
+			final Shape shape=field(p, field(q, required()));
+
+			assertThat(scan(shape,
+
+					statement(f, p, x),
+					statement(f, p, y),
+					statement(x, q, x),
+					statement(y, q, y)
+
+			)).hasRight();
 
 		}
 
 
 		@Test void testValidateAnd() {
 
-			final Shape shape=and(any(x), any(y));
+			final Shape shape=field(p, and(any(x), any(y)));
 
-			assertThat(scan(shape, createValue("x"), createValue("y"), createValue("z"))).hasRight();
-			assertThat(scan(shape, createValue("x"), createValue("z"))).hasLeft();
+			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
+			assertThat(scan(shape, statement(f, p, x), statement(f, p, z))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasLeft();
+			assertThat(scan(shape)).hasLeft();
 
 		}
 
 		@Test void testValidateOr() {
 
-			final Shape shape=or(all(x, y), all(x, z));
+			final Shape shape=field(p, or(all(x, y), all(x, z)));
 
-			assertThat(scan(shape, createValue("x"), createValue("y"), createValue("z"))).hasRight();
-			assertThat(scan(shape, createValue("y"), createValue("z"))).hasLeft();
+			assertThat(scan(shape, statement(f, p, x), statement(f, p, y), statement(f, p, z))).hasRight();
+			assertThat(scan(shape, statement(f, p, y), statement(f, p, z))).hasLeft();
 
 		}
 
 		@Test void ValidateWhen() {
 
-			final Shape shape=when(
+			final Shape shape=field(p, when(
 					datatype(XSD.INTEGER),
 					maxInclusive(literal(100)),
 					maxInclusive(literal("10"))
-			);
+			));
 
-			assertThat(scan(shape, createValue(100))).hasRight();
-			assertThat(scan(shape, createValue("100.0"))).hasLeft();
+			assertThat(scan(shape, statement(f, p, literal(100)))).hasRight();
+			assertThat(scan(shape, statement(f, p, literal("100")))).hasLeft();
 		}
 
 
@@ -171,23 +182,26 @@ final class JSONLDScannerTest {
 
 	@Nested final class Constraints {
 
+		private Either<Trace, Collection<Statement>> scan(final Shape shape, final Value... values) {
+
+			return JSONLDScanner.scan(field(p, shape), f, Arrays
+					.stream(values)
+					.map(v -> statement(f, p, v))
+					.collect(toList())
+			);
+		}
+
+
 		@Test void testValidateDatatype() {
 
-			final JsonValue iri=createObjectBuilder().add("@id", "http://example.com/").build();
-			final JsonValue bnode=createObjectBuilder().build();
+			final IRI iri=iri("http://example.com/");
+			final BNode bnode=bnode();
 
-			final JsonValue number=createValue(1);
-			final JsonString string=createValue("text");
+			final Literal number=literal(1);
+			final Literal string=literal("text");
 
-			final JsonObject typed=createObjectBuilder()
-					.add("@value", "2020-09-25")
-					.add("@type", XSD.DATE.stringValue())
-					.build();
-
-			final JsonObject tagged=createObjectBuilder()
-					.add("@value", "text")
-					.add("@language", "en")
-					.build();
+			final Literal typed=literal(LocalDate.parse("2020-09-25"));
+			final Literal tagged=literal("text", "en");
 
 
 			assertThat(scan(datatype(ValueType), iri)).hasRight();
@@ -217,10 +231,10 @@ final class JSONLDScannerTest {
 			assertThat(scan(datatype(RDF.LANGSTRING), tagged)).hasRight();
 			assertThat(scan(datatype(RDF.LANGSTRING), iri)).hasLeft();
 
-			assertThat(scan(datatype(XSD.BOOLEAN), JsonValue.TRUE)).hasRight();
+			assertThat(scan(datatype(XSD.BOOLEAN), True)).hasRight();
 			assertThat(scan(datatype(XSD.BOOLEAN), bnode)).hasLeft();
 
-			assertThat(scan(datatype(IRIType))).as("empty focus").hasRight();
+			assertThat(scan(datatype(IRIType))).hasRight();
 
 		}
 
@@ -228,10 +242,10 @@ final class JSONLDScannerTest {
 
 			final Shape shape=range(x, y);
 
-			assertThat(scan(shape, createValue("x"), createValue("y"))).hasRight();
-			assertThat(scan(shape, createValue("x"), createValue("y"), createValue("z"))).hasLeft();
+			assertThat(scan(shape, x, y)).hasRight();
+			assertThat(scan(shape, x, y, z)).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -239,59 +253,25 @@ final class JSONLDScannerTest {
 
 			final Shape shape=lang();
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("@value", "one")
-					.add("@language", "en")
-			)).hasRight();
+			assertThat(scan(shape, literal("one", "en"))).hasRight();
+			assertThat(scan(shape, literal("one", "en"), literal("uno", "it"))).hasRight();
 
+			assertThat(scan(shape, iri("http://example.com/"))).hasLeft();
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("en", "one")
-					.add("it", "one")
-			)).hasRight();
-
-			assertThat(scan(shape, createObjectBuilder()
-					.add("@id", "http://example.com/")
-			)).hasLeft();
-
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
 		@Test void testValidateRestrictedLang() {
 
-			final Shape shape=lang("en", "fr");
+			final Shape shape=lang("en", "it");
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("@value", "one")
-					.add("@language", "en")
-			)).hasRight();
+			assertThat(scan(shape, literal("one", "en"))).hasRight();
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("@value", "uno")
-					.add("@language", "it")
-			)).hasLeft();
+			assertThat(scan(shape, literal("ein", "de"))).hasLeft();
+			assertThat(scan(shape, iri("http://example.com/"))).hasLeft();
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("en", "one")
-			)).hasRight();
-
-			assertThat(scan(shape, createObjectBuilder()
-					.add("en", "one")
-					.add("it", "one")
-			)).hasLeft();
-
-			assertThat(scan(shape, createObjectBuilder()
-					.add("it", "one")
-			)).hasLeft();
-
-			assertThat(scan(shape, createObjectBuilder()
-					.add("@id", "http://example.com/")
-			)).hasLeft();
-
-			assertThat(scan(lang("en"), createValue("one"))).as("known language").hasRight();
-			assertThat(scan(shape)).as("empty focus").hasRight();
-
+			assertThat(scan(shape)).hasRight();
 		}
 
 
@@ -299,11 +279,11 @@ final class JSONLDScannerTest {
 
 			final Shape shape=minExclusive(literal(1));
 
-			assertThat(scan(shape, createValue(2))).hasRight();
-			assertThat(scan(shape, createValue(1))).hasLeft();
-			assertThat(scan(shape, createValue(0))).hasLeft();
+			assertThat(scan(shape, literal(2))).hasRight();
+			assertThat(scan(shape, literal(1))).hasLeft();
+			assertThat(scan(shape, literal(0))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -311,11 +291,11 @@ final class JSONLDScannerTest {
 
 			final Shape shape=maxExclusive(literal(10));
 
-			assertThat(scan(shape, createValue(2))).hasRight();
-			assertThat(scan(shape, createValue(10))).hasLeft();
-			assertThat(scan(shape, createValue(100))).hasLeft();
+			assertThat(scan(shape, literal(2))).hasRight();
+			assertThat(scan(shape, literal(10))).hasLeft();
+			assertThat(scan(shape, literal(100))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -323,11 +303,11 @@ final class JSONLDScannerTest {
 
 			final Shape shape=minInclusive(literal(1));
 
-			assertThat(scan(shape, createValue(2))).hasRight();
-			assertThat(scan(shape, createValue(1))).hasRight();
-			assertThat(scan(shape, createValue(0))).hasLeft();
+			assertThat(scan(shape, literal(2))).hasRight();
+			assertThat(scan(shape, literal(1))).hasRight();
+			assertThat(scan(shape, literal(0))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -335,11 +315,11 @@ final class JSONLDScannerTest {
 
 			final Shape shape=maxInclusive(literal(10));
 
-			assertThat(scan(shape, createValue(2))).hasRight();
-			assertThat(scan(shape, createValue(10))).hasRight();
-			assertThat(scan(shape, createValue(100))).hasLeft();
+			assertThat(scan(shape, literal(2))).hasRight();
+			assertThat(scan(shape, literal(10))).hasRight();
+			assertThat(scan(shape, literal(100))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -348,13 +328,13 @@ final class JSONLDScannerTest {
 
 			final Shape shape=minLength(3);
 
-			assertThat(scan(shape, createValue(100))).hasRight();
-			assertThat(scan(shape, createValue(99))).hasLeft();
+			assertThat(scan(shape, literal(100))).hasRight();
+			assertThat(scan(shape, literal(99))).hasLeft();
 
-			assertThat(scan(shape, createValue("100"))).hasRight();
-			assertThat(scan(shape, createValue("99"))).hasLeft();
+			assertThat(scan(shape, literal("100"))).hasRight();
+			assertThat(scan(shape, literal("99"))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -362,13 +342,13 @@ final class JSONLDScannerTest {
 
 			final Shape shape=maxLength(2);
 
-			assertThat(scan(shape, createValue(99))).hasRight();
-			assertThat(scan(shape, createValue(100))).hasLeft();
+			assertThat(scan(shape, literal(99))).hasRight();
+			assertThat(scan(shape, literal(100))).hasLeft();
 
-			assertThat(scan(shape, createValue("99"))).hasRight();
-			assertThat(scan(shape, createValue("100"))).hasLeft();
+			assertThat(scan(shape, literal("99"))).hasRight();
+			assertThat(scan(shape, literal("100"))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -376,13 +356,13 @@ final class JSONLDScannerTest {
 
 			final Shape shape=pattern(".*\\.org");
 
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://example.org"))).hasRight();
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://example.com"))).hasLeft();
+			assertThat(scan(shape, iri("http://example.org"))).hasRight();
+			assertThat(scan(shape, iri("http://example.com"))).hasLeft();
 
-			assertThat(scan(shape, createValue("example.org"))).hasRight();
-			assertThat(scan(shape, createValue("example.com"))).hasLeft();
+			assertThat(scan(shape, literal("example.org"))).hasRight();
+			assertThat(scan(shape, literal("example.com"))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -390,13 +370,13 @@ final class JSONLDScannerTest {
 
 			final Shape shape=like("ex.org", true);
 
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://exampe.org/"))).hasRight();
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://exampe.com/"))).hasLeft();
+			assertThat(scan(shape, iri("http://exampe.org/"))).hasRight();
+			assertThat(scan(shape, iri("http://exampe.com/"))).hasLeft();
 
-			assertThat(scan(shape, createValue("example.org"))).hasRight();
-			assertThat(scan(shape, createValue("example.com"))).hasLeft();
+			assertThat(scan(shape, literal("example.org"))).hasRight();
+			assertThat(scan(shape, literal("example.com"))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -404,16 +384,16 @@ final class JSONLDScannerTest {
 
 			final Shape shape=stem("http://example.com/");
 
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://example.com/"))).hasRight();
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://example.net/"))).hasLeft();
+			assertThat(scan(shape, iri("http://example.com/"))).hasRight();
+			assertThat(scan(shape, iri("http://example.net/"))).hasLeft();
 
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://example.com/resource"))).hasRight();
-			assertThat(scan(shape, createObjectBuilder().add("@id", "http://example.net/resource"))).hasLeft();
+			assertThat(scan(shape, iri("http://example.com/resource"))).hasRight();
+			assertThat(scan(shape, iri("http://example.net/resource"))).hasLeft();
 
-			assertThat(scan(shape, createValue("http://example.com/resource"))).hasRight();
-			assertThat(scan(shape, createValue("http://example.net/resource"))).hasLeft();
+			assertThat(scan(shape, literal("http://example.com/resource"))).hasRight();
+			assertThat(scan(shape, literal("http://example.net/resource"))).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+			assertThat(scan(shape)).hasRight();
 
 		}
 
@@ -422,8 +402,8 @@ final class JSONLDScannerTest {
 
 			final Shape shape=minCount(2);
 
-			assertThat(scan(shape, createValue(1), createValue(2), createValue(3))).hasRight();
-			assertThat(scan(shape, createValue(1))).hasLeft();
+			assertThat(scan(shape, literal(1), literal(2), literal(3))).hasRight();
+			assertThat(scan(shape, literal(1))).hasLeft();
 
 		}
 
@@ -431,8 +411,8 @@ final class JSONLDScannerTest {
 
 			final Shape shape=maxCount(2);
 
-			assertThat(scan(shape, createValue(1), createValue(2))).hasRight();
-			assertThat(scan(shape, createValue(1), createValue(2), createValue(3))).hasLeft();
+			assertThat(scan(shape, literal(1), literal(2))).hasRight();
+			assertThat(scan(shape, literal(1), literal(2), literal(3))).hasLeft();
 
 		}
 
@@ -440,10 +420,10 @@ final class JSONLDScannerTest {
 
 			final Shape shape=all(x, y);
 
-			assertThat(scan(shape, createValue("x"), createValue("y"), createValue("z"))).hasRight();
-			assertThat(scan(shape, createValue("x"))).hasLeft();
+			assertThat(scan(shape, x, y, z)).hasRight();
+			assertThat(scan(shape, x)).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasLeft();
+			assertThat(scan(shape)).hasLeft();
 
 		}
 
@@ -451,10 +431,10 @@ final class JSONLDScannerTest {
 
 			final Shape shape=any(x, y);
 
-			assertThat(scan(shape, createValue("x"))).hasRight();
-			assertThat(scan(shape, createValue("z"))).hasLeft();
+			assertThat(scan(shape, x)).hasRight();
+			assertThat(scan(shape, z)).hasLeft();
 
-			assertThat(scan(shape)).as("empty focus").hasLeft();
+			assertThat(scan(shape)).hasLeft();
 
 		}
 
@@ -462,27 +442,124 @@ final class JSONLDScannerTest {
 
 			final Shape shape=localized();
 
-			assertThat(scan(shape,
-					createObjectBuilder().add("@value", "one").add("@language", "en").build(),
-					createObjectBuilder().add("@value", "uno").add("@language", "it").build()
-			)).hasRight();
+			assertThat(scan(shape, literal("one", "en"), literal("uno", "it"))).hasRight();
+			assertThat(scan(shape, literal("one", "en"), literal("two", "en"))).hasLeft();
 
-			assertThat(scan(shape,
-					createObjectBuilder().add("@value", "one").add("@language", "en").build(),
-					createObjectBuilder().add("@value", "two").add("@language", "en").build()
-			)).hasLeft();
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("en", "one")
-					.add("it", "uno")
-			)).hasRight();
+			assertThat(scan(shape)).hasRight();
 
-			assertThat(scan(shape, createObjectBuilder()
-					.add("en", createArrayBuilder().add("one").add("two"))
-					.add("it", "uno")
-			)).hasLeft();
+		}
 
-			assertThat(scan(shape)).as("empty focus").hasRight();
+	}
+
+	@Nested final class Trimming {
+
+		private Collection<Statement> scan(final Shape shape, final Statement... model) {
+			return JSONLDScanner.scan(shape, f, asList(model)).get().orElse(emptySet());
+		}
+
+
+		@Test void testPruneField() {
+			assertThat(scan(field(p),
+
+					statement(f, p, x),
+					statement(f, q, x)
+
+			)).isIsomorphicTo(
+
+					statement(f, p, x)
+
+			);
+		}
+
+		@Test void testPruneLanguageContainers() {
+			assertThat(scan(field(p, lang("en")),
+
+					statement(f, p, literal("one", "en")),
+					statement(f, q, literal("uno", "it"))
+
+
+			)).isIsomorphicTo(
+
+					statement(f, p, literal("one", "en"))
+
+			);
+		}
+
+		@Test void testTraverseAnd() {
+			assertThat(scan(and(field(p), field(q)),
+
+					statement(f, p, x),
+					statement(f, q, x),
+					statement(f, r, x)
+
+
+			)).isIsomorphicTo(
+
+					statement(f, p, x),
+					statement(f, q, x)
+
+			);
+		}
+
+		@Test void testTraverseField() {
+			assertThat(scan(field(p, field(q)),
+
+					statement(f, p, x),
+					statement(f, q, z),
+
+					statement(x, q, y),
+					statement(x, p, z)
+
+
+			)).isIsomorphicTo(
+
+					statement(f, p, x),
+					statement(x, q, y)
+
+			);
+		}
+
+		@Test void testTraverseOr() {
+			assertThat(scan(or(field(p), field(q)),
+
+					statement(f, p, x),
+					statement(f, q, y),
+					statement(f, r, z)
+
+			)).isIsomorphicTo(
+
+					statement(f, p, x),
+					statement(f, q, y)
+
+			);
+		}
+
+		@Test void testTraverseWhen() {
+
+			assertThat(scan(when(stem("test:"), field(p), field(q)),
+
+					statement(f, p, x),
+					statement(f, q, y),
+					statement(f, r, z)
+
+			)).isIsomorphicTo(
+
+					statement(f, p, x)
+
+			);
+
+			assertThat(scan(when(stem("work:"), field(p), field(q)),
+
+					statement(f, p, x),
+					statement(f, q, y),
+					statement(f, r, z)
+
+			)).isIsomorphicTo(
+
+					statement(f, q, y)
+
+			);
 
 		}
 

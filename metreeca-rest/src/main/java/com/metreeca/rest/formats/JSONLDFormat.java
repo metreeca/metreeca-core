@@ -16,7 +16,8 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Query;
+import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Or;
 import com.metreeca.rest.*;
 
@@ -43,6 +44,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
+
 import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 /**
@@ -120,7 +122,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		try {
 
-			return Right(new JSONLDParser(focus, shape, asset(keywords())).parse(query));
+			return Right(new JSONLDFilter(focus, shape, asset(keywords())).parse(query));
 
 		} catch ( final JsonException e ) {
 
@@ -131,64 +133,6 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 			return Left(status(UnprocessableEntity, e));
 
 		}
-	}
-
-
-	/**
-	 * Verifies the well-formedness of a leniently compacted/framed JSON-LD description.
-	 *
-	 * @param focus the IRI of the resource described by {@code json}
-	 * @param shape the expected description shape
-	 * @param json  the JSON-LD description to be scanned
-	 *
-	 * @return either a shape validation trace reporting well-formedness issues or the well-formed {@code json}
-	 * description
-	 *
-	 * @throws NullPointerException if any parameter is {@code null}
-	 */
-	public static Either<Trace, JsonObject> scan(final IRI focus, final Shape shape, final JsonObject json) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( json == null ) {
-			throw new NullPointerException("null json");
-		}
-
-		return new JSONLDScanner(focus, shape, asset(keywords())).scan(json);
-	}
-
-	/**
-	 * Removes out of envelope fields from a strictly compacted/framed JSON-LD description.
-	 *
-	 * @param focus the IRI of the resource described by {@code json}
-	 * @param shape the expected description shape
-	 * @param json  the JSON-LD description to be trimmed
-	 *
-	 * @return a subset of the {@code json} description trimmed according to {@code shape}
-	 *
-	 * @throws NullPointerException if any parameter is {@code null}
-	 */
-	public static JsonObject trim(final IRI focus, final Shape shape, final JsonObject json) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( json == null ) {
-			throw new NullPointerException("null json");
-		}
-
-		return new JSONLDTrimmer(focus, shape, asset(keywords())).trim(json).asJsonObject();
 	}
 
 
@@ -222,13 +166,17 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 							final JsonReader jsonReader=Json.createReader(reader)
 					) {
 
-						return Right(new JSONLDDecoder(
+						return new JSONLDDecoder(
 
 								iri(message.item()),
 								message.attribute(shape()),
 								asset(keywords())
 
-						).decode(jsonReader.readObject()));
+						)
+
+								.decode(jsonReader.readObject())
+
+								.fold(trace -> Left(status(UnprocessableEntity, trace.toJSON())), Either::Right);
 
 					} catch ( final UnsupportedEncodingException|JsonException e ) {
 

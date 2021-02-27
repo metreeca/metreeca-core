@@ -24,34 +24,33 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import javax.json.JsonObject;
 import javax.json.JsonValue;
-import java.util.Map;
 
 import static com.metreeca.json.Shape.optional;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.rest.JSONAssert.assertThat;
 import static com.metreeca.rest.Xtream.entry;
 import static com.metreeca.rest.Xtream.map;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
+
 import static javax.json.Json.*;
 import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class JSONLDEncoderTest {
 
@@ -693,125 +692,6 @@ final class JSONLDEncoderTest {
 							.add("@language", "en")
 					);
 		}
-
-	}
-
-	@Nested final class WellFormedness {
-
-		@Test void testCheckMinCount() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, minCount(2)),
-
-					statement(focus, RDF.VALUE, literal(1))
-
-			));
-		}
-
-		@Test void testCheckMaxCount() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, maxCount(2)),
-
-					statement(focus, RDF.VALUE, literal(1)),
-					statement(focus, RDF.VALUE, literal(2)),
-					statement(focus, RDF.VALUE, literal(3))
-
-			));
-		}
-
-		@Test void testCheckAll() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, all(literal(1), literal(2), literal(3))),
-
-					statement(focus, RDF.VALUE, literal(0)),
-					statement(focus, RDF.VALUE, literal(1)),
-					statement(focus, RDF.VALUE, literal(3))
-
-			));
-		}
-
-		@Test void testCheckAny() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, any(literal(1), literal(2), literal(3))),
-
-					statement(focus, RDF.VALUE, literal(0))
-
-			));
-		}
-
-		@Test void testCheckLocalized() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, localized()),
-
-					statement(focus, RDF.VALUE, literal("one", "en")),
-					statement(focus, RDF.VALUE, literal("two", "en"))
-
-			));
-		}
-
-		@Test void testReportUnexpectedDatatype() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, datatype(XSD.STRING)),
-
-					statement(focus, RDF.VALUE, literal(1))
-
-			));
-		}
-
-		@Test void testReportUnexpectedRange() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, range(literal(1), literal(2), literal(3))),
-
-					statement(focus, RDF.VALUE, literal(0))
-
-			));
-		}
-
-		@Test void testCheckLang() {
-			assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-
-					field(RDF.VALUE, lang("en")),
-
-					statement(focus, RDF.VALUE, literal("one", "en")),
-					statement(focus, RDF.VALUE, literal("uno", "it"))
-
-			));
-		}
-
-		//@Test void testReportUntaggedValues() {
-		//	assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-		//
-		//			field(RDF.VALUE, lang()),
-		//
-		//			statement(focus, RDF.VALUE, literal("text"))
-		//
-		//	));
-		//}
-		//@Test void testReportMultipleTaggedValues() {
-		//	assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-		//
-		//			field(RDF.VALUE, lang(), ),
-		//
-		//			statement(focus, RDF.VALUE, literal("text"))
-		//
-		//	));
-		//}
-		//
-		//@Test void testReportMalformedLiteral() {
-		//	assertThatIllegalArgumentException().isThrownBy(() -> encode(focus,
-		//
-		//			field(RDF.VALUE, datatype(XSD.BOOLEAN)),
-		//
-		//			statement(focus, RDF.VALUE, literal("none", XSD.BOOLEAN))
-		//
-		//	));
-		//}
 
 	}
 

@@ -21,20 +21,14 @@ import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
-import javax.json.JsonObject;
 
-import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Guard.*;
-import static com.metreeca.rest.Either.Left;
-import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.JSONLDFormat.*;
+import static com.metreeca.rest.Response.Forbidden;
+import static com.metreeca.rest.Response.Unauthorized;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
 /**
@@ -109,40 +103,6 @@ public interface Engine extends Wrapper {
 					: handler.handle(request.map(pre)).map(post);
 
 		};
-	}
-
-	/**
-	 * Creates a scanner wrapper.
-	 *
-	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject)
-	 * scanning} of request JSON-LD bodies
-	 */
-	public static Wrapper scanner() {
-		return handler -> request -> request.body(json())
-
-				.flatMap(object -> scan(iri(request.item()), request.attribute(shape()), object).fold(
-						trace -> Left(status(UnprocessableEntity, trace.toJSON())),
-						model -> Right(handler.handle(request))
-				))
-
-				.fold(request::reply);
-	}
-
-	/**
-	 * Creates a trimmer wrapper.
-	 *
-	 * @return returns a wrapper performing engine-assisted {@linkplain JSONLDFormat#trim(IRI, Shape, JsonObject)
-	 * trimming} of {@linkplain Response#success() successful} response JSON-LD bodies
-	 */
-	public static Wrapper trimmer() {
-		return handler -> request -> handler.handle(request).map(response -> response.success()
-
-				? response.body(json())
-				.map(json -> response.body(json(), trim(iri(response.item()), response.attribute(shape()), json)))
-				.fold(response::map)
-
-				: response
-		);
 	}
 
 

@@ -446,7 +446,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 				if ( max_label != null ) { model.add((Resource)max, RDFS.LABEL, max_label); }
 				if ( max_notes != null ) { model.add((Resource)max, RDFS.COMMENT, max_notes); }
 
-				counts.putIfAbsent(type, count);
+				counts.putIfAbsent(type,count);
 
 				if ( min != null ) { mins.add(min); }
 				if ( max != null ) { maxs.add(max); }
@@ -499,6 +499,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 						+"\t\twhere {\n"
 						+"\n"
 						+"\t\t\t{roots}\n"
+						+"\n"
+						+"\t(count(distinct {source}) as ?count)\n"
 						+"\n"
 						+"\t\t\t{filters}\n"
 						+"\n"

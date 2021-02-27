@@ -92,8 +92,8 @@ final class GraphFetcherTest {
 					field(term("email")),
 					field(term("title")),
 					field(term("code")),
-					field(term("office")),
 					field(term("seniority")),
+					field(term("office")),
 					field(term("supervisor"))
 			)
 	);

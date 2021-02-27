@@ -65,7 +65,7 @@ final class GraphBrowser {
 		}
 
 		@Override public Shape probe(final Stats stats) {
-			return StatsShape(stats);
+			return StatsShape();
 		}
 
 		@Override public Shape probe(final Terms terms) {

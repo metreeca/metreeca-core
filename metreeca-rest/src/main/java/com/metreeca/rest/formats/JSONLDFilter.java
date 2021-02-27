@@ -24,11 +24,11 @@ import com.metreeca.json.shapes.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import javax.json.*;
 import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
+import javax.json.*;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
@@ -37,7 +37,8 @@ import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
-import static com.metreeca.rest.formats.JSONLDCodec.driver;
+import static com.metreeca.rest.formats._JSONLDCodec.driver;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -46,7 +47,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * JSON-LD query parser.
  */
-final class JSONLDParser {
+final class JSONLDFilter {
 
 	private static final java.util.regex.Pattern StepPattern=java.util.regex.Pattern.compile("(?:^|\\.)(\\w+\\b)");
 
@@ -61,7 +62,7 @@ final class JSONLDParser {
 	private final JSONLDDecoder decoder;
 
 
-	JSONLDParser(final IRI focus, final Shape shape, final Map<String, String> keywords) {
+	JSONLDFilter(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.shape=driver(shape);
 		this.keywords=keywords;
@@ -341,7 +342,7 @@ final class JSONLDParser {
 
 		while ( matcher.lookingAt() ) {
 
-			final Map<String, Field> fields=JSONLDCodec.fields(reference, keywords);
+			final Map<String, Field> fields=_JSONLDCodec.fields(reference, keywords);
 
 			final String step=matcher.group(1);
 

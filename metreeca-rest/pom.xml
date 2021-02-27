@@ -47,9 +47,23 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency> <!-- !!! ;( required by ModelAssert -->
+		<!-- !!! ;( required by ModelAssert -->
+
+		<dependency>
 			<groupId>org.eclipse.rdf4j</groupId>
 			<artifactId>rdf4j-model</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-turtle</artifactId>
 			<scope>test</scope>
 		</dependency>
 

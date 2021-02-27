@@ -17,24 +17,20 @@
 package com.metreeca.rest.operators;
 
 
-import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.handlers.Delegator;
-
-import org.eclipse.rdf4j.model.IRI;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import javax.json.JsonObject;
 
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Engine.*;
+import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.throttler;
 
 import static java.util.UUID.randomUUID;
 
@@ -50,7 +46,7 @@ import static java.util.UUID.randomUUID;
  * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} view;</li>
  *
- * <li>engine-assisted request payload {@linkplain JSONLDFormat#scan(IRI, Shape, JsonObject) scanning};</li>
+ * <li>shape-driven request payload validation;</li>
  *
  * <li>resource {@linkplain #creator(Function) slug} generation;</li>
  *
@@ -122,7 +118,6 @@ public final class Creator extends Delegator {
 
 				.with(engine)
 				.with(throttler(Create, Detail))
-				.with(scanner())
 
 		);
 	}

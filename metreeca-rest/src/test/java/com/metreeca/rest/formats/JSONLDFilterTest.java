@@ -27,9 +27,9 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.JsonException;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+import javax.json.JsonException;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
@@ -52,10 +52,12 @@ import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
-import static java.util.Collections.emptyMap;
+
 import static org.assertj.core.api.Assertions.*;
 
-final class JSONLDParserTest {
+import static java.util.Collections.emptyMap;
+
+final class JSONLDFilterTest {
 
 	private static final Value One=literal(integer(1));
 	private static final Value Ten=literal(integer(10));
@@ -110,7 +112,7 @@ final class JSONLDParserTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new JSONLDParser(iri("http://example.com/"), shape, emptyMap()).parse(query
+		return new JSONLDFilter(iri("http://example.com/"), shape, emptyMap()).parse(query
 				.replace('\'', '"')
 				.replace("\\\"", "'")
 		);

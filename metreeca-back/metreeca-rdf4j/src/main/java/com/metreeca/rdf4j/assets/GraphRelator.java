@@ -77,7 +77,7 @@ final class GraphRelator {
 		}
 
 		@Override public Shape probe(final Stats stats) {
-			return StatsShape(stats);
+			return StatsShape();
 		}
 
 		@Override public Shape probe(final Terms terms) {

@@ -38,7 +38,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.*;
 
-final class JSONLDCodec {
+final class _JSONLDCodec {
 
 	static Shape driver(final Shape shape) { // !!! caching
 		return shape.redact(
@@ -51,7 +51,7 @@ final class JSONLDCodec {
 		).expand(); // add inferred constraints to drive json shorthands
 	}
 
-	static <V> V error(final String message, final Object... args) {
+	private static <V> V error(final String message, final Object... args) {
 		throw new IllegalArgumentException(format(message, args));
 	}
 
@@ -364,6 +364,6 @@ final class JSONLDCodec {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JSONLDCodec() {}
+	private _JSONLDCodec() {}
 
 }

@@ -33,14 +33,16 @@ import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
-import static com.metreeca.rest.formats.JSONLDCodec.fields;
-import static com.metreeca.rest.formats.JSONLDCodec.maxCount;
-import static com.metreeca.rest.formats.JSONLDCodec.minCount;
-import static java.util.Collections.singletonMap;
+import static com.metreeca.rest.formats._JSONLDCodec.fields;
+import static com.metreeca.rest.formats._JSONLDCodec.maxCount;
+import static com.metreeca.rest.formats._JSONLDCodec.minCount;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-final class JSONLDCodecTest {
+import static java.util.Collections.singletonMap;
+
+final class _JSONLDCodecTest {
 
 	@Nested final class MinCountProbe {
 
@@ -200,10 +202,6 @@ final class JSONLDCodecTest {
 
 		}
 
-	}
-
-	@Test void test() {
-		System.out.println(fields(field(RDF.VALUE, alias("alias"))));
 	}
 
 }
