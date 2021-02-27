@@ -38,9 +38,11 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
@@ -122,7 +124,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		try {
 
-			return Right(new JSONLDFilter(focus, shape, asset(keywords())).parse(query));
+			return Right(new JSONLDParser(focus, shape, asset(keywords())).parse(query));
 
 		} catch ( final JsonException e ) {
 
@@ -166,17 +168,22 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 							final JsonReader jsonReader=Json.createReader(reader)
 					) {
 
-						return new JSONLDDecoder(
+						final IRI focus=iri(message.item());
+						final Shape shape=message.attribute(shape());
+						final Map<String, String> keywords=asset(keywords());
 
-								iri(message.item()),
-								message.attribute(shape()),
-								asset(keywords())
+						final Collection<Statement> model=new JSONLDDecoder(
 
-						)
+								focus,
+								shape,
+								keywords
 
-								.decode(jsonReader.readObject())
+						).decode(jsonReader.readObject());
 
-								.fold(trace -> Left(status(UnprocessableEntity, trace.toJSON())), Either::Right);
+						return JSONLDScanner.scan(shape, focus, model).fold(
+								trace -> Left(status(UnprocessableEntity, trace.toJSON())),
+								Either::Right
+						);
 
 					} catch ( final UnsupportedEncodingException|JsonException e ) {
 
@@ -239,14 +246,26 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
 					) {
 
+						final IRI focus=iri(message.item());
+						final Shape shape=message.attribute(shape());
+						final Map<String, String> keywords=asset(keywords());
+
+						final Collection<Statement> model=JSONLDScanner.scan(shape, focus, value).fold(trace -> {
+
+							asset(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
+
+							throw new RuntimeException("invalid JSON-LD payload");
+
+						});
+
 						jsonWriter.writeObject(new JSONLDEncoder(
 
-								iri(message.item()),
-								message.attribute(shape()),
-								asset(keywords()),
+								focus,
+								shape,
+								keywords,
 								mime.equals(MIME) // include context objects for application/ld+json?
 
-						).encode(langs.isEmpty() || langs.contains("*") ? value : value.stream().filter(statement -> {
+						).encode(langs.isEmpty() || langs.contains("*") ? model : model.stream().filter(statement -> {
 
 							// retain only tagged literals with an accepted language
 

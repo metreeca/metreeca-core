@@ -23,6 +23,9 @@ import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import javax.json.Json;
 
 import static com.metreeca.json.Shape.required;
@@ -31,27 +34,97 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rest.JSONAssert.assertThat;
-import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.JSONLDFormat.*;
+import static com.metreeca.rest.formats.OutputFormat.output;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 
 final class JSONLDFormatTest {
 
+	private static final String base="http://example.com/";
+
+	private final IRI direct=iri(base, "/direct");
+	private final IRI nested=iri(base, "/nested");
+	private final IRI reverse=iri(base, "/reverse");
+	private final IRI outlier=iri(base, "/outlier");
+
+
+	private void exec(final Runnable task) {
+		new Context().exec(task).clear();
+	}
+
+
+	@Nested final class Decoder {
+
+		private Request request(final String json) {
+			return new Request().base(base)
+
+					.header("Content-Type", MIME)
+
+					.attribute(shape(), field(direct, required()))
+
+					.body(input(), () -> new ByteArrayInputStream(json.getBytes(UTF_8)));
+		}
+
+		private Future<Response> response(final Request request) {
+			return request.reply(response -> request.body(jsonld()).fold(
+					response::map,
+					model -> response.status(OK).attribute(shape(), request.attribute(shape())).body(jsonld(), model)
+			));
+		}
+
+
+		@Test void testReportMalformedPayload() {
+			exec(() -> request("{")
+
+					.map(this::response)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(BadRequest)
+					)
+			);
+		}
+
+		@Test void test() {
+			exec(() -> request("{ \"direct\": 1, \"other\": 2 }")
+
+					.map(this::response)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(BadRequest)
+					)
+			);
+		}
+
+
+		@Test void testReportInvalidPayload() {
+			exec(() -> request("{}")
+
+					.map(this::response)
+
+					.accept(response -> assertThat(response)
+							.hasStatus(UnprocessableEntity)
+					)
+			);
+		}
+
+	}
+
 	@Nested final class Encoder {
-
-		private static final String base="http://example.com/";
-
-		private final IRI direct=iri(base, "/direct");
-		private final IRI nested=iri(base, "/nested");
-		private final IRI reverse=iri(base, "/reverse");
-
 
 		private Request request() {
 			return new Request().base(base);
 		}
+
 
 		private Response response(final Response response) {
 
@@ -74,7 +147,8 @@ final class JSONLDFormatTest {
 
 							statement(item, direct, bnode),
 							statement(bnode, nested, item),
-							statement(bnode, reverse, item)
+							statement(bnode, reverse, item),
+							statement(item, outlier, bnode)
 
 					));
 		}
@@ -174,6 +248,34 @@ final class JSONLDFormatTest {
 					)
 
 					.clear();
+		}
+
+
+		@Test void testTrimPayload() {
+			new Context().exec(() -> request()
+
+					.reply(this::response)
+
+					.accept(response -> assertThat(response)
+							.hasBody(json(), json -> assertThat(json)
+									.doesNotHaveField("outlier")
+							)
+					)
+
+			).clear();
+		}
+
+		@Test void testReportInvalidPayload() {
+			new Context().exec(() -> assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> request()
+
+					.reply(response -> response(response).body(jsonld(), emptySet()))
+
+					.accept(response -> response.body(output()).accept(e -> {},
+							target -> target.accept(new ByteArrayOutputStream())
+					)))
+
+			).clear();
+
 		}
 
 	}

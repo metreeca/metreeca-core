@@ -28,6 +28,7 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
+
 import javax.json.*;
 
 import static com.metreeca.json.Order.decreasing;
@@ -47,7 +48,7 @@ import static java.util.stream.Collectors.toMap;
 /**
  * JSON-LD query parser.
  */
-final class JSONLDFilter {
+final class JSONLDParser {
 
 	private static final java.util.regex.Pattern StepPattern=java.util.regex.Pattern.compile("(?:^|\\.)(\\w+\\b)");
 
@@ -62,7 +63,7 @@ final class JSONLDFilter {
 	private final JSONLDDecoder decoder;
 
 
-	JSONLDFilter(final IRI focus, final Shape shape, final Map<String, String> keywords) {
+	JSONLDParser(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.shape=driver(shape);
 		this.keywords=keywords;

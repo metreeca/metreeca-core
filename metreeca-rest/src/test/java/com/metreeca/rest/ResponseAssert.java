@@ -46,8 +46,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 				}
 
 				response.body(OutputFormat.output(), output -> Xtream.data(output, data)); // cache output
-				response.body(InputFormat.input(), () -> new ByteArrayInputStream(data)); // make output readable for
-				// testing
+				response.body(InputFormat.input(), () -> new ByteArrayInputStream(data)); // expose output to testing
 
 			});
 

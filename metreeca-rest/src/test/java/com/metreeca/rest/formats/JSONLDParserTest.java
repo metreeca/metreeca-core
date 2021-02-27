@@ -29,6 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
+
 import javax.json.JsonException;
 
 import static com.metreeca.json.Order.decreasing;
@@ -57,7 +58,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import static java.util.Collections.emptyMap;
 
-final class JSONLDFilterTest {
+final class JSONLDParserTest {
 
 	private static final Value One=literal(integer(1));
 	private static final Value Ten=literal(integer(10));
@@ -112,7 +113,7 @@ final class JSONLDFilterTest {
 	}
 
 	private Query parse(final String query, final Shape shape) {
-		return new JSONLDFilter(iri("http://example.com/"), shape, emptyMap()).parse(query
+		return new JSONLDParser(iri("http://example.com/"), shape, emptyMap()).parse(query
 				.replace('\'', '"')
 				.replace("\\\"", "'")
 		);

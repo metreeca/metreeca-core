@@ -17,8 +17,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Trace;
-import com.metreeca.rest.Either;
 import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
@@ -45,7 +43,6 @@ import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Meta.meta;
-import static com.metreeca.rest.EitherAssert.assertThat;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -68,13 +65,13 @@ final class JSONLDDecoderTest {
 	private final IRI z=iri(base, "z");
 
 
-	private Either<Trace, Collection<Statement>> decode(
+	private Collection<Statement> decode(
 			final IRI focus, final Shape shape, final JsonObjectBuilder object
 	) {
 		return decode(focus, shape, emptyMap(), object);
 	}
 
-	private Either<Trace, Collection<Statement>> decode(
+	private Collection<Statement> decode(
 			final IRI focus, final Shape shape, final Map<String, String> keywords, final JsonObjectBuilder object
 	) {
 		return new JSONLDDecoder(focus, shape.expand(), keywords).decode(object.build());
@@ -105,11 +102,11 @@ final class JSONLDDecoderTest {
 
 					.addNull("value")
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					emptySet()
 
-			));
+			);
 
 		}
 
@@ -122,12 +119,12 @@ final class JSONLDDecoderTest {
 							.add("y")
 					)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal("x")),
 					statement(x, RDF.VALUE, literal("y"))
 
-			));
+			);
 		}
 
 	}
@@ -143,7 +140,7 @@ final class JSONLDDecoderTest {
 
 					.decode(createObjectBuilder().add("value", value).build())
 
-					.get().orElse(emptySet()).stream()
+					.stream()
 
 					.filter(s -> s.getPredicate().equals(RDF.VALUE))
 					.findFirst()
@@ -240,11 +237,11 @@ final class JSONLDDecoderTest {
 
 					createObjectBuilder()
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					emptySet()
 
-			));
+			);
 		}
 
 		@Test void testAssumeFocusAsSubject() {
@@ -257,11 +254,11 @@ final class JSONLDDecoderTest {
 									.add("@id", "/y")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, y)
 
-			));
+			);
 		}
 
 		@Test void testReportConflictingFocus() {
@@ -294,12 +291,12 @@ final class JSONLDDecoderTest {
 									)
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, y),
 					statement(y, RDF.VALUE, x)
 
-			));
+			);
 		}
 
 		@Test void testHandleBlankLoops() {
@@ -321,13 +318,13 @@ final class JSONLDDecoderTest {
 									)
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, a),
 					statement(a, RDF.VALUE, b),
 					statement(b, RDF.VALUE, a)
 
-			));
+			);
 		}
 
 	}
@@ -344,11 +341,11 @@ final class JSONLDDecoderTest {
 									.add("@id", "y")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, y)
 
-			));
+			);
 		}
 
 		@Test void testDecodeDirectInferredAliases() {
@@ -361,11 +358,11 @@ final class JSONLDDecoderTest {
 									.add("@id", "y")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, y)
 
-			));
+			);
 		}
 
 		@Test void testDecodeInverseInferredAliases() {
@@ -378,11 +375,11 @@ final class JSONLDDecoderTest {
 									.add("@id", "y")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(y, RDF.VALUE, x)
 
-			));
+			);
 		}
 
 		@Test void testDecodeDirectUserDefinedAliases() {
@@ -395,11 +392,11 @@ final class JSONLDDecoderTest {
 									.add("@id", "y")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, y)
 
-			));
+			);
 		}
 
 		@Test void testDecodeInverseUserDefinedAliases() {
@@ -412,11 +409,11 @@ final class JSONLDDecoderTest {
 									.add("@id", "y")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(y, RDF.VALUE, x)
 
-			));
+			);
 		}
 
 
@@ -451,12 +448,12 @@ final class JSONLDDecoderTest {
 									.add("_:x")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, x),
 					statement(x, RDF.VALUE, bnode("_:x"))
 
-			));
+			);
 		}
 
 
@@ -469,11 +466,11 @@ final class JSONLDDecoderTest {
 
 							.add("value", "x")
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, bnode("_:x"))
 
-			));
+			);
 		}
 
 		@Test void testDecodedProvedIRIs() {
@@ -485,11 +482,11 @@ final class JSONLDDecoderTest {
 
 							.add("value", "x")
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, x)
 
-			));
+			);
 		}
 
 
@@ -506,12 +503,12 @@ final class JSONLDDecoderTest {
 									.add("value", "_:x")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, b),
 					statement(b, RDF.VALUE, b)
 
-			));
+			);
 		}
 
 		@Test void testDecodeProvedIRIBackReferences() {
@@ -522,11 +519,11 @@ final class JSONLDDecoderTest {
 					createObjectBuilder()
 							.add("value", "x")
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, x)
 
-			));
+			);
 		}
 
 
@@ -539,11 +536,11 @@ final class JSONLDDecoderTest {
 
 							.add("value", "2016-08-11")
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal("2016-08-11", XSD.DATE))
 
-			));
+			);
 		}
 
 		@Test void testDecodeProvedDecimalsLeniently() {
@@ -555,11 +552,11 @@ final class JSONLDDecoderTest {
 
 							.add("value", 1)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal(new BigDecimal("1")))
 
-			));
+			);
 		}
 
 		@Test void testDecodeProvedDoublesLeniently() {
@@ -571,11 +568,11 @@ final class JSONLDDecoderTest {
 
 							.add("value", 1)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal(1.0))
 
-			));
+			);
 		}
 
 
@@ -591,13 +588,13 @@ final class JSONLDDecoderTest {
 									.add("it", createArrayBuilder().add("uno"))
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal("one", "en")),
 					statement(x, RDF.VALUE, literal("two", "en")),
 					statement(x, RDF.VALUE, literal("uno", "it"))
 
-			));
+			);
 		}
 
 		@Test void testDecodeProvedLocalizedValues() {
@@ -612,12 +609,12 @@ final class JSONLDDecoderTest {
 									.add("it", createValue("uno"))
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal("one", "en")),
 					statement(x, RDF.VALUE, literal("uno", "it"))
 
-			));
+			);
 		}
 
 		@Test void testDecodeProvedTaggedValuesWithKnownLanguage() {
@@ -632,12 +629,12 @@ final class JSONLDDecoderTest {
 									.add("two")
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal("one", "en")),
 					statement(x, RDF.VALUE, literal("two", "en"))
 
-			));
+			);
 		}
 
 		@Test void testDecodeProvedLocalizedValuesWithKnownLanguage() {
@@ -649,11 +646,11 @@ final class JSONLDDecoderTest {
 							.add("@id", "/x")
 							.add("value", createValue("one"))
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.VALUE, literal("one", "en"))
 
-			));
+			);
 		}
 
 	}
@@ -685,12 +682,12 @@ final class JSONLDDecoderTest {
 									)
 							)
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					statement(x, RDF.NIL, literal("string", "en")),
 					statement(x, RDF.NIL, literal("2020-09-10", XSD.DATE))
 
-			));
+			);
 		}
 
 		@Test void testIgnoreDuplicateKeywords() {
@@ -699,11 +696,11 @@ final class JSONLDDecoderTest {
 					.add("id", "/x")
 					.add("@id", "/x")
 
-			)).hasRight(model -> assertThat(model).isIsomorphicTo(
+			)).isIsomorphicTo(
 
 					emptySet()
 
-			));
+			);
 		}
 
 	}

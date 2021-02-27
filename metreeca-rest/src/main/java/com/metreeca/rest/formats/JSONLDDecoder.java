@@ -16,9 +16,9 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.formats._JSONLDCodec.*;
 
 import static java.lang.String.format;
@@ -80,7 +79,7 @@ final class JSONLDDecoder {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Either<Trace, Collection<Statement>> decode(final JsonObject json) throws JsonException {
+	Collection<Statement> decode(final JsonObject json) throws JsonException {
 
 		if ( json == null ) {
 			throw new NullPointerException("null json");
@@ -102,7 +101,7 @@ final class JSONLDDecoder {
 
 		value(object, shape).getValue().forEachOrdered(model::add);
 
-		return Right(model);
+		return model;
 	}
 
 

@@ -472,7 +472,7 @@ final class JSONLDScannerTest {
 			);
 		}
 
-		@Test void testPruneLanguageContainers() {
+		@Test void testPruneLanguages() {
 			assertThat(scan(field(p, lang("en")),
 
 					statement(f, p, literal("one", "en")),
