@@ -23,12 +23,12 @@ import com.metreeca.rest.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
+import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.json.JsonException;
-import javax.json.JsonObject;
+import javax.json.*;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
@@ -37,10 +37,13 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
+import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 /**
  * Model-driven JSON-LD message format.
@@ -83,6 +86,9 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	public static Supplier<Map<String, String>> keywords() {
 		return Collections::emptyMap;
 	}
+
+
+	private static final JsonWriterFactory JsonWriters=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,15 +205,22 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * missing or  matched by {@link JSONFormat#MIMEPattern}
 	 *
 	 * <p><strong>Warning</strong> / Decoding is completely driven by the {@code message}
-	 * {@linkplain JSONLDFormat#shape()
-	 * shape attribute}: embedded {@code @context} objects are ignored.</p>
+	 * {@linkplain JSONLDFormat#shape() shape attribute}: embedded {@code @context} objects are ignored.</p>
 	 */
 	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
-		return message.header("Content-Type").filter(JSONFormat.MIMEPattern.asPredicate().or(String::isEmpty))
+		return message
 
-				.map(type -> message.body(json()).flatMap(json -> { // parse possibly validated json
+				.header("Content-Type")
 
-					try {
+				.filter(JSONFormat.MIMEPattern.asPredicate().or(String::isEmpty))
+
+				.map(type -> message.body(input()).flatMap(source -> {
+
+					try (
+							final InputStream input=source.get();
+							final Reader reader=new InputStreamReader(input, message.charset());
+							final JsonReader jsonReader=Json.createReader(reader)
+					) {
 
 						return Right(new JSONLDDecoder(
 
@@ -215,11 +228,15 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 								message.attribute(shape()),
 								asset(keywords())
 
-						).decode(json));
+						).decode(jsonReader.readObject()));
 
-					} catch ( final JsonException e ) {
+					} catch ( final UnsupportedEncodingException|JsonException e ) {
 
 						return Left(status(BadRequest, e));
+
+					} catch ( final IOException e ) {
+
+						throw new UncheckedIOException(e);
 
 					}
 
@@ -243,16 +260,13 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		final String mime=message
 
-				// content-type explicitly defined by the handler
-
-				.header("Content-Type")
+				.header("Content-Type") // content-type explicitly defined by handler
 
 				.orElseGet(() -> mimes(message.request().header("Accept").orElse("")).stream()
 
 						// application/ld+json or application/json accepted?
 
-						.filter(type -> type.equals(MIME) || type.equals(JSONFormat.MIME))
-						.findFirst()
+						.filter(type -> type.equals(MIME) || type.equals(JSONFormat.MIME)).findFirst()
 
 						// default to application/json
 
@@ -261,7 +275,9 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 				);
 
 		final List<String> langs=message.request()
+
 				.header("Accept-Language")
+
 				.map((Function<String, List<String>>)Format::langs)
 				.orElse(emptyList());
 
@@ -269,20 +285,35 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 				.header("~Content-Type", mime)
 
-				.body(json(), new JSONLDEncoder( // make json available for trimming
+				.body(output(), output -> {
+					try (
+							final Writer writer=new OutputStreamWriter(output, message.charset());
+							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
+					) {
 
-						iri(message.item()),
-						message.attribute(shape()),
-						asset(keywords()),
-						mime.equals(MIME) // include context objects for application/ld+json
+						jsonWriter.writeObject(new JSONLDEncoder(
 
-				).encode(langs.isEmpty() || langs.contains("*") ? value : value.stream().filter(statement -> {
+								iri(message.item()),
+								message.attribute(shape()),
+								asset(keywords()),
+								mime.equals(MIME) // include context objects for application/ld+json?
 
-					final String lang=lang(statement.getObject());
+						).encode(langs.isEmpty() || langs.contains("*") ? value : value.stream().filter(statement -> {
 
-					return lang == null || langs.contains(lang);
+							// retain only tagged literals with an accepted language
 
-				}).collect(toList())));
+							final String lang=lang(statement.getObject());
+
+							return lang == null || langs.contains(lang);
+
+						}).collect(toList())));
+
+					} catch ( final IOException e ) {
+
+						throw new UncheckedIOException(e);
+
+					}
+				});
 	}
 
 }

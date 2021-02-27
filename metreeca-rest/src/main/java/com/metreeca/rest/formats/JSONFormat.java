@@ -18,17 +18,19 @@ package com.metreeca.rest.formats;
 
 import com.metreeca.rest.*;
 
-import javax.json.*;
-import javax.json.stream.JsonGenerator;
-import javax.json.stream.JsonParsingException;
 import java.io.*;
 import java.util.regex.Pattern;
+import javax.json.*;
+import javax.json.stream.JsonParsingException;
 
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.util.Collections.singletonMap;
+import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 
 /**
@@ -46,12 +48,12 @@ public final class JSONFormat extends Format<JsonObject> {
 	/**
 	 * A pattern matching JSON-based MIME types, for instance {@code application/ld+json}.
 	 */
-	public static final Pattern MIMEPattern=Pattern.compile("(?i:^(text/json|application/(?:.*\\+)?json)(?:\\s*;.*)"
-			+ "?$)");
+	public static final Pattern MIMEPattern=Pattern.compile(
+			"(?i:^(text/json|application/(?:.*\\+)?json)(?:\\s*;.*)?$)"
+	);
 
 
-	private static final JsonWriterFactory JsonWriters=Json
-			.createWriterFactory(singletonMap(JsonGenerator.PRETTY_PRINTING, true));
+	private static final JsonWriterFactory JsonWriters=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
 
 
 	/**
@@ -136,7 +138,11 @@ public final class JSONFormat extends Format<JsonObject> {
 	 * {@link #MIMEPattern}
 	 */
 	@Override public Either<MessageException, JsonObject> decode(final Message<?> message) {
-		return message.header("Content-Type").filter(MIMEPattern.asPredicate().or(String::isEmpty))
+		return message
+
+				.header("Content-Type")
+
+				.filter(MIMEPattern.asPredicate().or(String::isEmpty))
 
 				.map(type -> message.body(input()).flatMap(source -> {
 
@@ -171,7 +177,7 @@ public final class JSONFormat extends Format<JsonObject> {
 
 				.header("~Content-Type", MIME)
 
-				.body(OutputFormat.output(), output -> {
+				.body(output(), output -> {
 					try ( final Writer writer=new OutputStreamWriter(output, message.charset()) ) {
 
 						json(writer, value);

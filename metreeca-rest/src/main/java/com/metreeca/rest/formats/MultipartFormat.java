@@ -31,6 +31,7 @@ import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.lang.String.format;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.*;
@@ -139,7 +140,11 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	 * either missing or matched by {@link #MIMEPattern}
 	 */
 	@Override public Either<MessageException, Map<String, Message<?>>> decode(final Message<?> message) {
-		return message.header("Content-Type").filter(MIMEPattern.asPredicate().or(String::isEmpty))
+		return message
+
+				.header("Content-Type")
+
+				.filter(MIMEPattern.asPredicate().or(String::isEmpty))
 
 				.map(type -> message.body(input()).flatMap(source -> {
 
