@@ -164,13 +164,6 @@ public abstract class Shape {
 		}
 
 
-		//// Annotations ///////////////////////////////////////////////////////////////////////////////////////////////
-
-		public V probe(final Meta meta) { return probe((Shape)meta); }
-
-		public V probe(final Guard guard) { return probe((Shape)guard); }
-
-
 		//// Value Constraints /////////////////////////////////////////////////////////////////////////////////////////
 
 		public V probe(final Datatype datatype) { return probe((Shape)datatype); }
@@ -224,11 +217,13 @@ public abstract class Shape {
 
 		//// Logical Constraints ///////////////////////////////////////////////////////////////////////////////////////
 
+		public V probe(final Guard guard) { return probe((Shape)guard); }
+
+		public V probe(final When when) { return probe((Shape)when); }
+
 		public V probe(final And and) { return probe((Shape)and); }
 
 		public V probe(final Or or) { return probe((Shape)or); }
-
-		public V probe(final When when) { return probe((Shape)when); }
 
 
 		//// Fallback //////////////////////////////////////////////////////////////////////////////////////////////////

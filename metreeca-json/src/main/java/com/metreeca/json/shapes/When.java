@@ -137,14 +137,12 @@ public final class When extends Shape {
 		@Override public Boolean probe(final Shape shape) { return true; }
 
 
-		@Override public Boolean probe(final Meta meta) { return false; }
-
 		@Override public Boolean probe(final Guard guard) { return false; }
-
 
 		@Override public Boolean probe(final Field field) {
 			return field.shape().map(this);
 		}
+
 
 		@Override public Boolean probe(final And and) {
 			return and.shapes().stream().anyMatch(shape -> shape.map(this));

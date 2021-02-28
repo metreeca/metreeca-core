@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
@@ -59,7 +58,7 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 	}
 
 	@Override public Shape probe(final Field field) {
-		return field(field.name()).as(field.shape().map(this));
+		return field.as(field.shape().map(this));
 	}
 
 

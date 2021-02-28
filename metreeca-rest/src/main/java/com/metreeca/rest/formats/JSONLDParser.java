@@ -36,9 +36,9 @@ import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.aliases;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
-import static com.metreeca.rest.formats.JSONLDAliaser.aliases;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
 import static java.util.Collections.emptyList;

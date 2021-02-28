@@ -24,21 +24,14 @@ import static java.lang.Boolean.TRUE;
 
 final class ShapeEvaluator extends Shape.Probe<Boolean> {
 
-	@Override public Boolean probe(final Meta meta) {
-		return true;
-	}
-
-
 	@Override public Boolean probe(final And and) {
 		return and.shapes().stream()
-				.filter(shape -> !(shape instanceof Meta))
 				.map(shape -> shape.map(this))
 				.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
 	}
 
 	@Override public Boolean probe(final Or or) {
 		return or.shapes().stream()
-				.filter(shape -> !(shape instanceof Meta))
 				.map(shape -> shape.map(this))
 				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
 	}

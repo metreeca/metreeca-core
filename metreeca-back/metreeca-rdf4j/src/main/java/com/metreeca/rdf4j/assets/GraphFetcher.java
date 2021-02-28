@@ -712,11 +712,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		}
 
 
-		@Override public Snippet probe(final Meta meta) {
-			return nothing();
-		}
-
-
 		@Override public Snippet probe(final Datatype datatype) {
 
 			final IRI iri=datatype.iri();

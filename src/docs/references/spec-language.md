@@ -28,24 +28,6 @@ Linked data selection tasks identify the set of nodes in a graph whose descripti
 
 Linked data validation tasks verify that the description of an initial focus set is consistent with the constraints specified by a possibly composite shape. During the process, derived focus sets connected by [structural constraints](#structural-constraints) may be recursively validated. Validation results are reported as a structured [focus validation trace](../javadocs/com/metreeca/json/Trace.html).
 
-## Annotations
-
-Non-validating shapes documenting shape metadata, to be used for purposes such as shape redaction, form building or predictable data encoding.
-
-| shape                                                        | value                                                        |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [meta](../javadocs/com/metreeca/json/shapes/Meta.html)(IRI, value, …) | the metadata property identified by the given tag is associated with the given value in the enclosing shape |
-| [guard](../javadocs/com/metreeca/json/shapes/Guard.html)(axis, value, …) | the focus set is consistent with this shape only if the value of an externally assigned [axis variable](../javadocs/com/metreeca/json/Shape.html#redact-java.util.function.Function...-) is included in a given set of target values |
-
-Common metadata annotations are directly available as shorthand shapes.
-
-| shorthand shape                                              | value                                                        |
-| :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [alias](../javadocs/com/metreeca/json/shapes/Meta.html#alias-java.lang.String-)("alias") | an alternate property name for reporting values for the enclosing shape (e.g. in the [context](jsonld-format.md#properties) of JSON-LD serialization results) |
-| [label](../javadocs/com/metreeca/json/shapes/Meta.html#label--)("label") | a human-readable textual label  for the enclosing shape      |
-| [notes](../javadocs/com/metreeca/json/shapes/Meta.html#notes-java.lang.String-)("notes") | a human-readable textual description of the enclosing shape  |
-| [index](../javadocs/com/metreeca/json/shapes/Meta.html#index-boolean-)(true\|false) | an indexing hint: `true` if the value of the enclosing shape should be indexed in the storage backed, `false` otherwise |
-
 ## Value Constraints
 
 Primitive shapes specifying constraints to be individually satisfied by each value in the focus set.
@@ -104,9 +86,12 @@ Composite shapes specifying logical combinations of shapes.
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| [guard](../javadocs/com/metreeca/json/shapes/Guard.html)(axis, value, …) | the focus set is consistent with this shape only if the value of an externally assigned [axis variable](../javadocs/com/metreeca/json/Shape.html#redact-java.util.function.Function...-) is included in a given set of target values |
+| [when](../javadocs/com/metreeca/json/shapes/When.html)([test](../javadocs/com/metreeca/json/Shape.html),[pass](../javadocs/com/metreeca/json/Shape.html) [, [fail](../javadocs/com/metreeca/json/Shape.html)]) | the focus set is consistent either with a *
+pass* shape, if consistent also with a *test* shape, or with a *
+fail* shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
 | [and](../javadocs/com/metreeca/json/shapes/And.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with all shapes in a given target set |
 | [or](../javadocs/com/metreeca/json/shapes/Or.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
-| [when](../javadocs/com/metreeca/json/shapes/When.html)([test](../javadocs/com/metreeca/json/Shape.html),[pass](../javadocs/com/metreeca/json/Shape.html) [, [fail](../javadocs/com/metreeca/json/Shape.html)]) | the focus set is consistent either with a *pass* shape, if consistent also with a *test* shape, or with a *fail* shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
 
 !!! warning
     Test shapes for conditional constraints are currently limited to combinations of parametric <code>guards</code> and logical operators.

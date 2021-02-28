@@ -51,7 +51,6 @@ import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
 import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.json.shapes.MaxLength.maxLength;
-import static com.metreeca.json.shapes.Meta.meta;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.MinExclusive.minExclusive;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
@@ -458,29 +457,6 @@ final class GraphFetcherTest {
 
 
 	//// Shapes ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Nested final class Annotations {
-
-		@Test void testMeta() {
-			exec(() -> assertThat(query(
-
-					Root, items(meta("value", "nil"))
-
-					)).as("ignore annotations")
-							.isEmpty()
-			);
-		}
-
-		@Test void testGuard() {
-			exec(() -> assertThatThrownBy(() ->
-							query(Root, items(guard("axis", RDF.NIL)))
-
-					).as("reject partially redacted shapes")
-							.isInstanceOf(UnsupportedOperationException.class)
-			);
-		}
-
-	}
 
 	@Nested final class ValueConstraints {
 
@@ -971,6 +947,15 @@ final class GraphFetcherTest {
 	}
 
 	@Nested final class StructuralConstraints {
+
+		@Test void testGuard() {
+			exec(() -> assertThatThrownBy(() ->
+							query(Root, items(guard("axis", RDF.NIL)))
+
+					).as("reject partially redacted shapes")
+							.isInstanceOf(UnsupportedOperationException.class)
+			);
+		}
 
 		@Test void testField() {
 			exec(() -> assertThat(query(

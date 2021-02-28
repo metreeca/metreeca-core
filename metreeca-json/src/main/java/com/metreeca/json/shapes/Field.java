@@ -56,6 +56,7 @@ public final class Field extends Shape {
 			"([/#:])(?<name>"+AliasPattern+"[^/#:]+)(/|#|#_|#id|#this)?$"
 	);
 
+
 	public static Field field(final String name) {
 
 		if ( name == null ) {

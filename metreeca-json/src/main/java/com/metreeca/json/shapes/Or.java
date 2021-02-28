@@ -27,7 +27,6 @@ import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.json.shapes.Meta.metas;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
 
@@ -106,8 +105,7 @@ public final class Or extends Shape {
 	}
 
 	private static Stream<? extends Shape> merge(final Class<? extends Shape> clazz, final Stream<Shape> shapes) {
-		return clazz.equals(Meta.class) ? metas(shapes.map(Meta.class::cast))
-				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
+		return clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
 				: clazz.equals(Range.class) ? ranges(shapes.map(Range.class::cast))
 				: clazz.equals(Lang.class) ? langs(shapes.map(Lang.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))

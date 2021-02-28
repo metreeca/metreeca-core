@@ -41,8 +41,6 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
-import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.json.shapes.Meta.meta;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -59,10 +57,8 @@ final class JSONLDDecoderTest {
 	private final BNode a=bnode();
 	private final BNode b=bnode();
 
-	private final IRI w=iri(base, "w");
 	private final IRI x=iri(base, "x");
 	private final IRI y=iri(base, "y");
-	private final IRI z=iri(base, "z");
 
 
 	private Collection<Statement> decode(
@@ -89,7 +85,7 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testReportConflictingKeywords() {
-			assertThatThrownBy(() -> decode(x, meta("@id", "id"), createObjectBuilder()
+			assertThatThrownBy(() -> decode(x, and(), createObjectBuilder()
 
 					.add("id", "/x")
 					.add("@id", "/y")
@@ -98,7 +94,7 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testIgnoreNullFields() {
-			assertThat(decode(x, field(RDF.VALUE).as(and()), createObjectBuilder()
+			assertThat(decode(x, field(RDF.VALUE), createObjectBuilder()
 
 					.addNull("value")
 
@@ -383,7 +379,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeDirectUserDefinedAliases() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE).as(and(alias("alias"), required())),
+					field(RDF.VALUE).alias("alias").as(required()),
 
 					createObjectBuilder()
 							.add("alias", createObjectBuilder()
@@ -400,7 +396,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeInverseUserDefinedAliases() {
 			assertThat(decode(x,
 
-					field(inverse(RDF.VALUE)).as(and(alias("alias"), required())),
+					field(inverse(RDF.VALUE)).alias("alias").as(required()),
 
 					createObjectBuilder()
 							.add("alias", createObjectBuilder()

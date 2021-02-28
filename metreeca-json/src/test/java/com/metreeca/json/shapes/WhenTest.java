@@ -16,30 +16,41 @@
 
 package com.metreeca.json.shapes;
 
+import com.metreeca.json.Shape;
+
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Meta.alias;
+import static com.metreeca.json.shapes.Clazz.clazz;
+import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.When.when;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class WhenTest {
 
+	// different shape type to prevent collapsing by optimizers
+
+	private static final Shape pass=datatype(RDF.NIL);
+	private static final Shape fail=clazz(RDF.NIL);
+
 	@Nested final class Optimization {
 
 		@Test void testOptimizeConstantPassTest() {
-			assertThat((when(and(), alias("pass"), alias("fail")))).isEqualTo(alias("pass"));
+			assertThat((when(and(), pass, fail))).isEqualTo(pass);
 		}
 
 		@Test void testOptimizeConstantFailTest() {
-			assertThat((when(or(), alias("pass"), alias("fail")))).isEqualTo(alias("fail"));
+			assertThat((when(or(), pass, fail))).isEqualTo(fail);
 		}
 
 		@Test void testCollapseIdenticatBranchesConstantFailTest() {
-			assertThat((when(or(), alias("same"), alias("same")))).isEqualTo(alias("same"));
+			assertThat((when(pattern("me"), pass, pass))).isEqualTo(pass);
 		}
 
 	}

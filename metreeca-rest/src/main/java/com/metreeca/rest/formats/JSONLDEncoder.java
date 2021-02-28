@@ -33,7 +33,8 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats.JSONLDAliaser.aliases;
+import static com.metreeca.json.shapes.Field.aliases;
+import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -68,7 +69,7 @@ final class JSONLDEncoder {
 	JSONLDEncoder(final IRI focus, final Shape shape, final Map<String, String> keywords, final boolean context) {
 
 		this.focus=focus;
-		this.shape=JSONLDInspector.driver(shape);
+		this.shape=driver(shape);
 
 		this.keywords=keywords;
 		this.context=context;

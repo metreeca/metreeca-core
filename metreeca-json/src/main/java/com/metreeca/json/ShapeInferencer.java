@@ -28,7 +28,6 @@ import java.util.Set;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
@@ -42,11 +41,6 @@ import static java.util.stream.Collectors.toSet;
 final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Shape shape) { return shape; }
-
-
-	@Override public Shape probe(final Meta meta) {
-		return meta.label().equals("hint") ? and(meta, datatype(ResourceType)) : meta;
-	}
 
 
 	@Override public Shape probe(final Datatype datatype) {
@@ -93,9 +87,9 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		final IRI iri=field.name();
 		final Shape shape=field.shape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field(iri).as(and(shape, datatype(IRIType))), datatype(ResourceType))
-				: direct(iri) ? and(field(iri).as(shape), datatype(ResourceType))
-				: field(iri).as(and(shape, datatype(ResourceType)));
+		return iri.equals(RDF.TYPE) ? and(field.as(and(shape, datatype(IRIType))), datatype(ResourceType))
+				: direct(iri) ? and(field.as(shape), datatype(ResourceType))
+				: field.as(and(shape, datatype(ResourceType)));
 	}
 
 

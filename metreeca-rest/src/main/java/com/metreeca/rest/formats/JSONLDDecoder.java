@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats.JSONLDAliaser.aliases;
+import static com.metreeca.json.shapes.Field.aliases;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;

@@ -106,8 +106,7 @@ public final class And extends Shape {
 	}
 
 	private static Stream<? extends Shape> merge(final Class<? extends Shape> clazz, final Stream<Shape> shapes) {
-		return clazz.equals(Meta.class) ? Meta.metas(shapes.map(Meta.class::cast))
-				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
+		return clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
 				: clazz.equals(Range.class) ? ranges(shapes.map(Range.class::cast))
 				: clazz.equals(Lang.class) ? langs(shapes.map(Lang.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))

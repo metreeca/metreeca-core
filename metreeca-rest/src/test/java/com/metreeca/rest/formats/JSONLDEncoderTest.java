@@ -38,7 +38,6 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rest.JSONAssert.assertThat;
 import static com.metreeca.rest.Xtream.entry;
@@ -328,7 +327,7 @@ final class JSONLDEncoderTest {
 		@Test void testAliasUserLabelledField() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE).as(and(required(), alias("alias"))),
+					field(RDF.VALUE).alias("alias").as(required()),
 
 					statement(x, RDF.VALUE, y)
 
@@ -344,7 +343,7 @@ final class JSONLDEncoderTest {
 			assertThat(encode(x,
 
 					field(RDF.VALUE).as(and(required(),
-							field(RDF.VALUE).as(and(required(), alias("alias")))
+							field(RDF.VALUE).alias("alias").as(required())
 					)),
 
 					statement(x, RDF.VALUE, y),
@@ -376,7 +375,7 @@ final class JSONLDEncoderTest {
 			assertThatThrownBy(() -> {
 				encode(x,
 
-						field(RDF.VALUE).as(alias("@id"))
+						field(RDF.VALUE).alias("@id")
 
 				);
 			}).isInstanceOf(IllegalArgumentException.class);

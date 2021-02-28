@@ -35,12 +35,12 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 
 final class OrTest {
@@ -83,17 +83,6 @@ final class OrTest {
 					field(RDF.FIRST), field(RDF.REST)
 
 			);
-		}
-
-
-		@Test void testCollapseCompatibleAliases() {
-			assertThat(or(alias("alias"), alias("alias")))
-					.isEqualTo(alias("alias"));
-		}
-
-		@Test void testReportClashingAliases() {
-			assertThatThrownBy(() -> or(alias("this"), alias("that")))
-					.isInstanceOf(IllegalArgumentException.class);
 		}
 
 

@@ -32,7 +32,6 @@ import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.rest.JSONAssert.assertThat;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -139,7 +138,7 @@ final class JSONLDFormatTest {
 									field(nested).as(required())
 							),
 
-							field(inverse(reverse)).as(alias("reverse"), required())
+							field(inverse(reverse)).alias("reverse").as(required())
 
 					))
 
