@@ -24,8 +24,7 @@ import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
@@ -36,7 +35,19 @@ import java.util.function.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Focus.focus;
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.BNodeType;
+import static com.metreeca.json.Values.IRIType;
+import static com.metreeca.json.Values.LiteralType;
+import static com.metreeca.json.Values.ResourceType;
+import static com.metreeca.json.Values.ValueType;
+import static com.metreeca.json.Values.bnode;
+import static com.metreeca.json.Values.compare;
+import static com.metreeca.json.Values.direct;
+import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.integer;
+import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
@@ -103,7 +114,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		return time(generator).apply((t, v) -> logger
 
 				.debug(this, () -> format("executing %s", v.endsWith("\n") ? v : v+"\n"))
-				.debug(this, () -> format("generated in <,%d> ms", t))
+				.debug(this, () -> format("generated in <%,d> ms", t))
 
 		);
 	}
@@ -660,10 +671,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 			return nothing();
 		}
 
-		@Override public Snippet probe(final Guard guard) {
-			throw new UnsupportedOperationException("partially redacted shape");
-		}
-
 
 		@Override public Snippet probe(final Datatype datatype) {
 
@@ -675,6 +682,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 							: iri.equals(BNodeType) ? "filter isBlank({value})"
 							: iri.equals(IRIType) ? "filter isIRI({value})"
 							: iri.equals(LiteralType) ? "filter isLiteral({value})"
+							: iri.equals(RDF.LANGSTRING) ? "filter (lang({value}) != '')"
 							: "filter ( datatype({value}) = <{datatype}> )",
 
 					var(source),
@@ -685,32 +693,31 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		}
 
 		@Override public Snippet probe(final Clazz clazz) {
-			return snippet(var(source), " a/rdfs:subClassOf* ", Values.format(clazz.iri()), " .");
-		}
-
-		@Override public Snippet probe(final Range range) {
-			throw new UnsupportedOperationException("focus range constraint");
+			return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.iri()), " .");
 		}
 
 		@Override public Snippet probe(final Lang lang) {
-			throw new UnsupportedOperationException("focus lang constraint");
+			return ((Collection<String>)lang.tags()).isEmpty() ? nothing() : snippet("filter (lang({source}) in "
+							+ "({tags}))",
+					var(source), list(lang.tags().stream().map(Values::quote), ", ")
+			);
 		}
 
 
 		@Override public Snippet probe(final MinExclusive minExclusive) {
-			return snippet("filter ( {source} > {value} )", var(source), Values.format(value(minExclusive.limit())));
+			return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.limit())));
 		}
 
 		@Override public Snippet probe(final MaxExclusive maxExclusive) {
-			return snippet("filter ( {source} < {value} )", var(source), Values.format(value(maxExclusive.limit())));
+			return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.limit())));
 		}
 
 		@Override public Snippet probe(final MinInclusive minInclusive) {
-			return snippet("filter ( {source} >= {value} )", var(source), Values.format(value(minInclusive.limit())));
+			return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.limit())));
 		}
 
 		@Override public Snippet probe(final MaxInclusive maxInclusive) {
-			return snippet("filter ( {source} <= {value} )", var(source), Values.format(value(maxInclusive.limit())));
+			return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.limit())));
 		}
 
 		@Override public Snippet probe(final MinLength minLength) {
@@ -721,14 +728,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 			return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.limit());
 		}
 
-
-		@Override public Snippet probe(final MinCount minCount) {
-			throw new UnsupportedOperationException("minimum focus size constraint");
-		}
-
-		@Override public Snippet probe(final MaxCount maxCount) {
-			throw new UnsupportedOperationException("maximum focus size constraint");
-		}
 
 		@Override public Snippet probe(final Pattern pattern) {
 			return snippet("filter regex({source}, '{pattern}', '{flags}')",
@@ -755,15 +754,11 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		@Override public Snippet probe(final Any any) { // singleton universal constraints handled by field probe
 
-			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!!
-			// performance?
+			// values-based filtering (as opposed to in-based filtering) works also or root terms
+			// / !!! performance?
 
 			return any.values().size() > 1 ? values(source, values(any.values())) : nothing();
 
-		}
-
-		@Override public Snippet probe(final Localized localized) {
-			throw new UnsupportedOperationException("focus localized constraint");
 		}
 
 
@@ -786,11 +781,11 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 							: edge(var(source), iri, var(shape)),
 
 					all // target universal constraints
-							.map(values -> values.stream().map(value -> edge(var(source), iri, Values.format(value))))
+							.map(values -> values.stream().map(value -> edge(var(source), iri, format(value))))
 							.orElse(null),
 
 					singleton // target singleton existential constraints
-							.map(value -> edge(var(source), iri, Values.format(value)))
+							.map(value -> edge(var(source), iri, format(value)))
 							.orElse(null),
 
 					"\n\n",
@@ -811,8 +806,9 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 			);
 		}
 
-		@Override public Snippet probe(final When when) {
-			throw new UnsupportedOperationException("conditional pattern"); // !!! tbi
+
+		@Override public Snippet probe(final Shape shape) {
+			throw new UnsupportedOperationException(shape.toString());
 		}
 
 	}
