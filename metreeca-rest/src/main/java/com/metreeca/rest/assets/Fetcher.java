@@ -88,11 +88,11 @@ import static java.util.stream.Collectors.toMap;
 			try {
 
 				final String method=request.method();
-				final String item=request.item();
+				final String resource=request.resource();
 
-				logger.info(this, format("%s %s", method, item));
+				logger.info(this, format("%s %s", method, resource));
 
-				final HttpURLConnection connection=(HttpURLConnection)new URL(item).openConnection();
+				final HttpURLConnection connection=(HttpURLConnection)new URL(resource).openConnection();
 
 				connection.setRequestMethod(method);
 				connection.setDoOutput(method.equals(Request.POST) || method.equals(Request.PUT));
@@ -131,7 +131,7 @@ import static java.util.stream.Collectors.toMap;
 
 							error -> {
 
-								logger.error(this, format("unable to open input stream for <%s>", item));
+								logger.error(this, format("unable to open input stream for <%s>", resource));
 
 								throw new RuntimeException(error.toString()); // !!!
 
@@ -209,11 +209,11 @@ import static java.util.stream.Collectors.toMap;
 		private Response wild(final Request request) {
 
 			final String method=request.method();
-			final String item=request.item();
+			final String resource=request.resource();
 
 			if ( method.equals(GET) ) {
 
-				logger.info(this, format("%s %s", method, item));
+				logger.info(this, format("%s %s", method, resource));
 
 				return new Response(request)
 
@@ -222,9 +222,9 @@ import static java.util.stream.Collectors.toMap;
 						.body(input(), () -> {
 							try {
 
-								final InputStream input=new URL(item).openStream();
+								final InputStream input=new URL(resource).openStream();
 
-								return item.endsWith(".gz")
+								return resource.endsWith(".gz")
 										? new GZIPInputStream(input)
 										: input;
 
@@ -299,7 +299,7 @@ import static java.util.stream.Collectors.toMap;
 		@Override public Response apply(final Request request) {
 			return request.safe() ? cache.retrieve(
 
-					format("%s %s", request.method(), request.item()),
+					format("%s %s", request.method(), request.resource()),
 
 					input -> decode(request, input),
 					output -> encode(delegate.apply(request), output)
