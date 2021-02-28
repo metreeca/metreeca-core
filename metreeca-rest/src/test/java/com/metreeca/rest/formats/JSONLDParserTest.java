@@ -63,7 +63,7 @@ final class JSONLDParserTest {
 	private static final Value One=literal(integer(1));
 	private static final Value Ten=literal(integer(10));
 
-	private static final Shape shape=field(RDF.FIRST, field(RDF.REST));
+	private static final Shape shape=field(RDF.FIRST).as(field(RDF.REST));
 
 
 	private void items(final String query, final Shape shape, final Consumer<Items> tester) {
@@ -153,7 +153,7 @@ final class JSONLDParserTest {
 
 			items("~first=keyword", shape, items -> {
 
-				assertThat(items.shape()).isEqualTo(filter(shape, field(RDF.FIRST, like("keyword", true))));
+				assertThat(items.shape()).isEqualTo(filter(shape, field(RDF.FIRST).as(like("keyword", true))));
 
 			});
 
@@ -205,11 +205,11 @@ final class JSONLDParserTest {
 
 		@Test void testParseMultipleSteps() {
 
-			stats("{ '_stats': 'first.rest' }", field(RDF.FIRST, field(RDF.REST)),
+			stats("{ '_stats': 'first.rest' }", field(RDF.FIRST).as(field(RDF.REST)),
 					stats -> assertThat(stats.path()).containsExactly(RDF.FIRST, RDF.REST)
 			);
 
-			stats("{ '_stats': 'firstOf.rest' }", field(inverse(RDF.FIRST), field(RDF.REST)),
+			stats("{ '_stats': 'firstOf.rest' }", field(inverse(RDF.FIRST)).as(field(RDF.REST)),
 					stats -> assertThat(stats.path()).containsExactly(inverse(RDF.FIRST), RDF.REST)
 			);
 
@@ -440,30 +440,39 @@ final class JSONLDParserTest {
 
 		@Test void testParsePathFilters() {
 
-			items("{ '>= first.rest': 1 }", shape, items -> assertThat(items.shape())
-					.as("nested filter")
-					.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, minInclusive(One)))))
+			items("{ '>= first.rest': 1 }", shape, items -> {
+				assertThat(items.shape())
+						.as("nested filter")
+						.isEqualTo(filter(shape,
+								field(RDF.FIRST).as(field(RDF.REST).as(minInclusive(One)))));
+					}
 			);
 
-			items("{ 'first.rest': 1 }", shape, items -> assertThat(items.shape())
-					.as("nested filter singleton shorthand")
-					.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One)))))
+			items("{ 'first.rest': 1 }", shape, items -> {
+				assertThat(items.shape())
+						.as("nested filter singleton shorthand")
+						.isEqualTo(filter(shape, field(RDF.FIRST).as(field(RDF.REST).as(any(One)))));
+					}
 			);
 
-			items("{ 'first.rest': [1, 10] }", shape, items -> assertThat(items.shape())
-					.as("nested filter multiple shorthand")
-					.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))))
+			items("{ 'first.rest': [1, 10] }", shape, items -> {
+				assertThat(items.shape())
+						.as("nested filter multiple shorthand")
+						.isEqualTo(filter(shape, field(RDF.FIRST).as(field(RDF.REST).as(any(One, Ten)))));
+					}
 			);
 
 		}
 
 		@Test void testParseShapedFilters() {
 
-			final Shape shape=field(RDF.VALUE, datatype(XSD.LONG));
+			final Shape shape=field(RDF.VALUE).as(datatype(XSD.LONG));
 
-			items("{ 'value': '4' }", shape, items -> assertThat(items.shape())
-					.as("typed value")
-					.isEqualTo(filter(shape, field(RDF.VALUE, any(literal("4", XSD.LONG)))))
+			items("{ 'value': '4' }", shape, items -> {
+						assertThat(items.shape())
+								.as("typed value")
+								.isEqualTo(filter(shape, field(RDF.VALUE).as(any(literal("4", XSD.LONG)))));
+					}
 			);
 		}
 
@@ -480,11 +489,13 @@ final class JSONLDParserTest {
 
 		@Test void testParsePlainQuery() {
 
-			items("first=x&first.rest=y&first.rest=w+z", shape, items -> assertThat(items.shape())
-					.isEqualTo(filter(shape, field(RDF.FIRST, and(
-							any(iri("http://example.com/x")),
-							field(RDF.REST, any(literal("y"), literal("w z")))
-					)))));
+			items("first=x&first.rest=y&first.rest=w+z", shape, items -> {
+				assertThat(items.shape())
+						.isEqualTo(filter(shape, field(RDF.FIRST).as(and(
+								any(iri("http://example.com/x")),
+								field(RDF.REST).as(any(literal("y"), literal("w z")))
+						))));
+			});
 
 			items("first=x&first.rest=y&_order=-first.rest&_order=first&_offset=1&_limit=2", shape, items -> {
 
@@ -498,9 +509,9 @@ final class JSONLDParserTest {
 						.isEqualTo(2);
 
 				assertThat(items.shape())
-						.isEqualTo(filter(shape, field(RDF.FIRST, and(
+						.isEqualTo(filter(shape, field(RDF.FIRST).as(and(
 								any(iri("http://example.com/x")),
-								field(RDF.REST, any(literal("y")))
+								field(RDF.REST).as(any(literal("y")))
 						))));
 			});
 

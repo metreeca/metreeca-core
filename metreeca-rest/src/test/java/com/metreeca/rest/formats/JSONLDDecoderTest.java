@@ -98,7 +98,7 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testIgnoreNullFields() {
-			assertThat(decode(x, field(RDF.VALUE, and()), createObjectBuilder()
+			assertThat(decode(x, field(RDF.VALUE).as(and()), createObjectBuilder()
 
 					.addNull("value")
 
@@ -111,7 +111,7 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testHandleArrays() {
-			assertThat(decode(x, field(RDF.VALUE, and()), createObjectBuilder()
+			assertThat(decode(x, field(RDF.VALUE).as(and()), createObjectBuilder()
 
 					.add("value", createArrayBuilder()
 
@@ -136,7 +136,7 @@ final class JSONLDDecoderTest {
 		}
 
 		private Value decode(final JsonValue value) {
-			return new JSONLDDecoder(iri(base), field(RDF.VALUE, optional()), emptyMap())
+			return new JSONLDDecoder(iri(base), field(RDF.VALUE).as(optional()), emptyMap())
 
 					.decode(createObjectBuilder().add("value", value).build())
 
@@ -247,7 +247,7 @@ final class JSONLDDecoderTest {
 		@Test void testAssumeFocusAsSubject() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, optional()),
+					field(RDF.VALUE).as(optional()),
 
 					createObjectBuilder()
 							.add("value", createObjectBuilder()
@@ -279,8 +279,8 @@ final class JSONLDDecoderTest {
 		@Test void testHandleNamedLoops() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE, required())
+					field(RDF.VALUE).as(and(required(),
+							field(RDF.VALUE).as(required())
 					)),
 
 					createObjectBuilder()
@@ -302,10 +302,8 @@ final class JSONLDDecoderTest {
 		@Test void testHandleBlankLoops() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE,
-									field(RDF.VALUE, required())
-							)
+					field(RDF.VALUE).as(and(required(),
+							field(RDF.VALUE).as(field(RDF.VALUE).as(required()))
 					)),
 
 					createObjectBuilder()
@@ -334,7 +332,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeAbsoluteFieldIRIs() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, required()),
+					field(RDF.VALUE).as(required()),
 
 					createObjectBuilder()
 							.add("value", createObjectBuilder()
@@ -351,7 +349,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeDirectInferredAliases() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required())),
+					field(RDF.VALUE).as(and(required())),
 
 					createObjectBuilder()
 							.add("value", createObjectBuilder()
@@ -368,7 +366,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeInverseInferredAliases() {
 			assertThat(decode(x,
 
-					field(inverse(RDF.VALUE), and(required())),
+					field(inverse(RDF.VALUE)).as(and(required())),
 
 					createObjectBuilder()
 							.add("valueOf", createObjectBuilder() // !!! valueOf?
@@ -385,7 +383,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeDirectUserDefinedAliases() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(alias("alias"), required())),
+					field(RDF.VALUE).as(and(alias("alias"), required())),
 
 					createObjectBuilder()
 							.add("alias", createObjectBuilder()
@@ -402,7 +400,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeInverseUserDefinedAliases() {
 			assertThat(decode(x,
 
-					field(inverse(RDF.VALUE), and(alias("alias"), required())),
+					field(inverse(RDF.VALUE)).as(and(alias("alias"), required())),
 
 					createObjectBuilder()
 							.add("alias", createObjectBuilder()
@@ -418,16 +416,18 @@ final class JSONLDDecoderTest {
 
 
 		@Test void testReportCLashingAliases() {
-			assertThatThrownBy(() -> decode(x,
+			assertThatThrownBy(() -> {
+				decode(x,
 
-					and(
-							field(iri("http://example.org/value"), and()),
-							field(iri("http://example.net/value"), and())
-					),
+						and(
+								field(iri("http://example.org/value")).as(and()),
+								field(iri("http://example.net/value")).as(and())
+						),
 
-					createObjectBuilder()
+						createObjectBuilder()
 
-			)).isInstanceOf(IllegalArgumentException.class);
+				);
+			}).isInstanceOf(IllegalArgumentException.class);
 		}
 
 
@@ -438,7 +438,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedResources() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, datatype(ResourceType)),
+					field(RDF.VALUE).as(datatype(ResourceType)),
 
 					createObjectBuilder()
 
@@ -460,7 +460,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodedProvedBNodes() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, datatype(BNodeType)),
+					field(RDF.VALUE).as(datatype(BNodeType)),
 
 					createObjectBuilder()
 
@@ -476,7 +476,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodedProvedIRIs() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, datatype(IRIType)),
+					field(RDF.VALUE).as(datatype(IRIType)),
 
 					createObjectBuilder()
 
@@ -493,8 +493,8 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedBNodeBackReferences() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE, and(required(), datatype(BNodeType)))
+					field(RDF.VALUE).as(and(required(),
+							field(RDF.VALUE).as(and(required(), datatype(BNodeType)))
 					)),
 
 					createObjectBuilder()
@@ -514,7 +514,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedIRIBackReferences() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(), datatype(IRIType))),
+					field(RDF.VALUE).as(and(required(), datatype(IRIType))),
 
 					createObjectBuilder()
 							.add("value", "x")
@@ -530,7 +530,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedTypedLiterals() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(), datatype(XSD.DATE))),
+					field(RDF.VALUE).as(and(required(), datatype(XSD.DATE))),
 
 					createObjectBuilder()
 
@@ -546,7 +546,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedDecimalsLeniently() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(), datatype(XSD.DECIMAL))),
+					field(RDF.VALUE).as(and(required(), datatype(XSD.DECIMAL))),
 
 					createObjectBuilder()
 
@@ -562,7 +562,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedDoublesLeniently() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(), datatype(XSD.DOUBLE))),
+					field(RDF.VALUE).as(and(required(), datatype(XSD.DOUBLE))),
 
 					createObjectBuilder()
 
@@ -579,7 +579,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedTaggedValues() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, datatype(RDF.LANGSTRING)),
+					field(RDF.VALUE).as(datatype(RDF.LANGSTRING)),
 
 					createObjectBuilder()
 							.add("@id", "/x")
@@ -600,7 +600,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedLocalizedValues() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, localized()),
+					field(RDF.VALUE).as(localized()),
 
 					createObjectBuilder()
 							.add("@id", "/x")
@@ -620,7 +620,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedTaggedValuesWithKnownLanguage() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, lang("en")),
+					field(RDF.VALUE).as(lang("en")),
 
 					createObjectBuilder()
 							.add("@id", "/x")
@@ -640,7 +640,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedLocalizedValuesWithKnownLanguage() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, localized(), lang("en")),
+					field(RDF.VALUE).as(localized(), lang("en")),
 
 					createObjectBuilder()
 							.add("@id", "/x")

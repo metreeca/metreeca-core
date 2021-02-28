@@ -34,6 +34,7 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -129,18 +130,18 @@ final class ShapeInferencerTest {
 
 		final Shape nested=clazz(RDF.NIL);
 
-		assertThat(expand(field(RDF.VALUE, nested)))
+		assertThat(expand(field(RDF.VALUE).as(nested)))
 				.as("nested shapes are expanded")
 				.isEqualTo(and(
 						datatype(ResourceType),
-						field(RDF.VALUE, and(nested, datatype(ResourceType)))
+						field(RDF.VALUE).as(and(nested, datatype(ResourceType)))
 				));
 
 		assertThat(expand(field(RDF.TYPE)))
 				.as("rdf:type field have resource subjects and IRI objects")
 				.isEqualTo(and(
 						datatype(ResourceType),
-						field(RDF.TYPE, datatype(IRIType))
+						field(RDF.TYPE).as(datatype(IRIType))
 				));
 
 	}
@@ -167,13 +168,13 @@ final class ShapeInferencerTest {
 
 		assertThat(expand(plain))
 				.as("reverse field objects are resources")
-				.isEqualTo(field(inverse(RDF.VALUE), datatype(ResourceType)));
+				.isEqualTo(field(inverse(RDF.VALUE)).as(datatype(ResourceType)));
 
-		final Shape typed=field(inverse(RDF.VALUE), datatype(IRIType));
+		final Shape typed=field(inverse(RDF.VALUE)).as(datatype(IRIType));
 
 		assertThat(expand(typed))
 				.as("reverse field objects are IRIs if explicitly typed")
-				.isEqualTo(field(inverse(RDF.VALUE), datatype(IRIType)));
+				.isEqualTo(field(inverse(RDF.VALUE)).as(datatype(IRIType)));
 
 	}
 

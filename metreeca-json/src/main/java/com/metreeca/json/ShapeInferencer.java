@@ -34,6 +34,7 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -92,9 +93,9 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		final IRI iri=field.name();
 		final Shape shape=field.shape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(IRIType))), datatype(ResourceType))
-				: direct(iri) ? and(field(iri, shape), datatype(ResourceType))
-				: field(iri, and(shape, datatype(ResourceType)));
+		return iri.equals(RDF.TYPE) ? and(field(iri).as(and(shape, datatype(IRIType))), datatype(ResourceType))
+				: direct(iri) ? and(field(iri).as(shape), datatype(ResourceType))
+				: field(iri).as(and(shape, datatype(ResourceType)));
 	}
 
 

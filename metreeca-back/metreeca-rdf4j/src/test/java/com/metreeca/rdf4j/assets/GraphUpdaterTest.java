@@ -38,50 +38,52 @@ import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 final class GraphUpdaterTest {
 
 	@Test void testUpdate() {
-		exec(model(small()), () -> new GraphUpdater()
+		exec(model(small()), () -> {
+			new GraphUpdater()
 
-				.handle(new Request()
-						.base(Base)
-						.path("/employees/1370").attribute(JSONLDFormat.shape(), convey().then(
-								field(term("forename"), required()),
-								field(term("surname"), required()),
-								field(term("email"), required()),
-								field(term("title"), required()),
-								field(term("seniority"), required())
-						))
-						.body(jsonld(), decode("</employees/1370>"
-								+":forename 'Tino';"
-								+":surname 'Faussone';"
-								+":email 'tfaussone@example.com';"
-								+":title 'Sales Rep' ;"
-								+":seniority 5 ." // outside salesman envelope
-						))
-				)
-
-				.accept(response -> {
-
-					assertThat(response)
-							.hasStatus(Response.NoContent)
-							.doesNotHaveBody();
-
-					assertThat(model())
-
-							.as("updated values inserted")
-							.hasSubset(decode("</employees/1370>"
+					.handle(new Request()
+							.base(Base)
+							.path("/employees/1370").attribute(JSONLDFormat.shape(), convey().then(
+									field(term("forename")).as(required()),
+									field(term("surname")).as(required()),
+									field(term("email")).as(required()),
+									field(term("title")).as(required()),
+									field(term("seniority")).as(required())
+							))
+							.body(jsonld(), decode("</employees/1370>"
 									+":forename 'Tino';"
 									+":surname 'Faussone';"
 									+":email 'tfaussone@example.com';"
 									+":title 'Sales Rep' ;"
-									+":seniority 5 ."
+									+":seniority 5 ." // outside salesman envelope
 							))
+					)
 
-							.as("previous values removed")
-							.doesNotHaveSubset(decode("</employees/1370>"
-									+":forename 'Gerard';"
-									+":surname 'Hernandez'."
-							));
+					.accept(response -> {
 
-				}));
+						assertThat(response)
+								.hasStatus(Response.NoContent)
+								.doesNotHaveBody();
+
+						assertThat(model())
+
+								.as("updated values inserted")
+								.hasSubset(decode("</employees/1370>"
+										+":forename 'Tino';"
+										+":surname 'Faussone';"
+										+":email 'tfaussone@example.com';"
+										+":title 'Sales Rep' ;"
+										+":seniority 5 ."
+								))
+
+								.as("previous values removed")
+								.doesNotHaveSubset(decode("</employees/1370>"
+										+":forename 'Gerard';"
+										+":surname 'Hernandez'."
+								));
+
+					});
+		});
 	}
 
 	@Test void testReportMissing() {

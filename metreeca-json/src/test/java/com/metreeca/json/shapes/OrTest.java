@@ -39,8 +39,8 @@ import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import static org.assertj.core.api.Assertions.*;
 
 
 final class OrTest {
@@ -70,11 +70,19 @@ final class OrTest {
 		}
 
 		@Test void testPreserveOrder() {
-			assertThat(or(field(RDF.FIRST), field(RDF.REST)).map(new Shape.Probe<Collection<Shape>>() {
+			assertThat(or(
+
+					field(RDF.FIRST), field(RDF.REST)
+
+			).map(new Shape.Probe<Collection<Shape>>() {
 
 				@Override public Collection<Shape> probe(final Or or) { return or.shapes(); }
 
-			})).containsExactly(field(RDF.FIRST), field(RDF.REST));
+			})).containsExactly(
+
+					field(RDF.FIRST), field(RDF.REST)
+
+			);
 		}
 
 
@@ -131,8 +139,69 @@ final class OrTest {
 
 
 		@Test void testMergeCompatibleFields() {
-			assertThat(or(field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3))))
-					.isEqualTo(field(RDF.VALUE, or(minCount(1), maxCount(3))));
+			assertThat(or(
+
+					field(RDF.VALUE).as(minCount(1)),
+					field(RDF.VALUE).as(maxCount(3))
+
+			)).isEqualTo(
+
+					field(RDF.VALUE).as(or(minCount(1), maxCount(3)))
+
+			);
+		}
+
+		@Test void testDifferentiateInverseFields() {
+			assertThat(or(
+
+					field(RDF.VALUE),
+					field(RDF.VALUE).inverse()
+
+			).map(new Shape.Probe<Collection<Shape>>() {
+
+				@Override public Collection<Shape> probe(final Or or) { return or.shapes(); }
+
+			})).containsExactly(
+
+					field(RDF.VALUE),
+					field(RDF.VALUE).inverse()
+
+			);
+		}
+
+		@Test void testCollapseEqualFieldAliases() {
+			assertThat(or(
+
+					field(RDF.VALUE).alias("alias"),
+					field(RDF.VALUE).alias("alias")
+
+			)).isEqualTo(
+
+					field(RDF.VALUE).alias("alias")
+
+			);
+		}
+
+		@Test void testCollapseCompatibleFieldAliases() {
+			assertThat(or(
+
+					field(RDF.VALUE),
+					field(RDF.VALUE).alias("alias")
+
+			)).isEqualTo(
+
+					field(RDF.VALUE).alias("alias")
+
+			);
+		}
+
+		@Test void testReportClashingFieldAliases() {
+			assertThatIllegalArgumentException().isThrownBy(() -> or(
+
+					field(RDF.VALUE).alias("x"),
+					field(RDF.VALUE).alias("y")
+
+			));
 		}
 
 	}

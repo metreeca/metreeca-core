@@ -174,12 +174,15 @@ final class RDFFormatTest {
 					.base("http://example.com/base/")
 					.path("/")
 
-					.reply(response -> response
-							.status(Response.OK)
-							.attribute(shape(), field(LDP.CONTAINS, datatype(Values.IRIType)))
-							.body(rdf(), singletonList(statement(
-									iri("http://example.com/base/"), LDP.CONTAINS, iri("http://example.com/base/x")
-							)))
+					.reply(response -> {
+								return response
+										.status(Response.OK)
+										.attribute(shape(), field(LDP.CONTAINS).as(datatype(Values.IRIType)))
+										.body(rdf(), singletonList(statement(
+												iri("http://example.com/base/"), LDP.CONTAINS, iri("http://example"
+														+ ".com/base/x")
+										)));
+							}
 					)
 
 					.accept(response -> assertThat(response)

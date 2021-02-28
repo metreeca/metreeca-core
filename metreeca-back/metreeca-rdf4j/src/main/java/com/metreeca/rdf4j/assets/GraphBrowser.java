@@ -61,7 +61,7 @@ final class GraphBrowser {
 	private static final class ShapeProbe extends Query.Probe<Shape> {
 
 		@Override public Shape probe(final Items items) {
-			return field(LDP.CONTAINS, items.shape());
+			return field(LDP.CONTAINS).as(items.shape());
 		}
 
 		@Override public Shape probe(final Stats stats) {

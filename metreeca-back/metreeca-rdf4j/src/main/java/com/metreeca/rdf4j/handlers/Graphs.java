@@ -37,7 +37,6 @@ import java.util.function.Supplier;
 import static com.metreeca.json.Shape.exactly;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
-import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.Graph.txn;
@@ -47,6 +46,7 @@ import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.lang.String.format;
 
 
@@ -63,9 +63,9 @@ import static java.lang.String.format;
  */
 public final class Graphs extends Endpoint<Graphs> {
 
-	private static final Shape GraphsShape=field(RDF.VALUE, and(
-			field(RDF.TYPE, exactly(VOID.DATASET))
-	));
+	private static final Shape GraphsShape=field(RDF.VALUE).as(
+			field(RDF.TYPE).as(exactly(VOID.DATASET))
+	);
 
 
 	/**

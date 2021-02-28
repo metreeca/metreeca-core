@@ -31,6 +31,7 @@ import static com.metreeca.json.shapes.Guard.guard;
 import static com.metreeca.json.shapes.Guard.retain;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -63,7 +64,7 @@ final class ShapeRedactorTest {
 
 	@Test void testReplaceTargetedConditions() {
 
-		final Shape shape=field(RDF.TYPE, and());
+		final Shape shape=field(RDF.TYPE);
 		final Shape guard=value("first").then(shape);
 
 		assertThat(guard.redact(first)).as("included value").isEqualTo(shape);
@@ -74,15 +75,15 @@ final class ShapeRedactorTest {
 
 	@Test void testRedactNestedShapes() {
 
-		final Shape x=field(X, and());
-		final Shape y=field(Y, and());
-		final Shape z=field(Z, and());
+		final Shape x=field(X);
+		final Shape y=field(Y);
+		final Shape z=field(Z);
 
 		final Shape guard=value("first");
 
-		assertThat(field(RDF.VALUE, guard.then(x)).redact(first))
+		assertThat(field(RDF.VALUE).as(guard.then(x)).redact(first))
 				.as("field")
-				.isEqualTo(field(RDF.VALUE, x));
+				.isEqualTo(field(RDF.VALUE).as(x));
 
 		assertThat(and(guard.then(x), guard.then(y)).redact(first))
 				.as("conjunction")
@@ -101,8 +102,8 @@ final class ShapeRedactorTest {
 
 	@Test void testHandleWildcards() {
 
-		final Shape x=field(X, and());
-		final Shape y=field(Y, and());
+		final Shape x=field(X).as(and());
+		final Shape y=field(Y).as(and());
 
 		assertThat(and(value("first").then(x), value("rest").then(y)).redact(any))
 				.isEqualTo(and(x, y));
@@ -115,8 +116,8 @@ final class ShapeRedactorTest {
 
 
 	@Test void testOptimizeFields() {
-		assertThat(and(field(RDF.FIRST, value("first")), field(RDF.REST, value("rest"))).redact(first))
-				.isEqualTo(field(RDF.FIRST, and()));
+		assertThat(and(field(RDF.FIRST).as(value("first")), field(RDF.REST).as(value("rest"))).redact(first))
+				.isEqualTo(field(RDF.FIRST).as(and()));
 	}
 
 	@Test void testOptimizeAnds() {

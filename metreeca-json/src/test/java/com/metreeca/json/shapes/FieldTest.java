@@ -16,14 +16,24 @@
 
 package com.metreeca.json.shapes;
 
+import com.metreeca.json.ValuesTest;
+
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.Values.inverse;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.aliases;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.metreeca.json.shapes.When.when;
+
+import static org.assertj.core.api.Assertions.*;
+
+import static java.util.Collections.singletonMap;
 
 
 final class FieldTest {
@@ -31,7 +41,97 @@ final class FieldTest {
 	@Nested final class Optimization {
 
 		@Test void testPruneDeadFields() {
-			assertThat(field(RDF.VALUE, or())).isEqualTo(and());
+			assertThat(field(RDF.VALUE).as(or())).isEqualTo(and());
+		}
+
+	}
+
+	@Nested class Aliases {
+
+		@Test void testInspectAnd() {
+			assertThat(aliases(and(
+
+					field(RDF.FIRST),
+					field(RDF.REST)
+
+			))).containsKeys("first", "rest");
+		}
+
+		@Test void testInspectOr() {
+			assertThat(aliases(or(
+
+					field(RDF.FIRST),
+					field(RDF.REST)
+
+			))).containsKeys("first", "rest");
+		}
+
+		@Test void testInspectWhen() {
+			assertThat(aliases(when(
+
+					datatype(RDF.NIL),
+					field(RDF.FIRST),
+					field(RDF.REST)
+
+			))).containsKeys("first", "rest");
+		}
+
+		@Test void testInspectOtherShapes() {
+			assertThat(aliases(and())).isEmpty();
+		}
+
+
+		@Test void testGuessAliasFromIRI() {
+
+			assertThat(aliases(field(RDF.VALUE)))
+					.as("direct")
+					.containsKey("value");
+
+			assertThat(aliases(field(inverse(RDF.VALUE))))
+					.as("inverse")
+					.containsKey("valueOf"); // !!! inverse?
+
+		}
+
+		@Test void testRetrieveUserDefinedAlias() {
+			assertThat(aliases(field(RDF.VALUE).alias("alias")))
+					.as("user-defined")
+					.containsKey("alias");
+		}
+
+		@Test void testPreferUserDefinedFields() {
+			assertThat(aliases(and(field(RDF.VALUE).alias("alias"), field(RDF.VALUE))))
+					.as("user-defined")
+					.containsKey("alias");
+		}
+
+
+		@Test void testReportConflictingFields() {
+			assertThatThrownBy(() -> aliases(and(
+					field(RDF.FIRST).alias("alias"),
+					field(RDF.REST).alias("alias")
+			))).isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test void testReportConflictingProperties() {
+			assertThatThrownBy(() -> aliases(and(field(RDF.VALUE), field(iri("urn:example#value")).as(and()))))
+					.isInstanceOf(IllegalArgumentException.class);
+		}
+
+		@Test void testReportReservedAliases() {
+
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					aliases(field(iri(ValuesTest.Base, "@id")).as(and()))
+			);
+
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					aliases(field(RDF.VALUE).alias("@id"))
+			);
+
+			assertThatIllegalArgumentException().isThrownBy(() ->
+					aliases(field(RDF.VALUE).alias("id"), singletonMap("@id", "id"))
+			);
+
 		}
 
 	}

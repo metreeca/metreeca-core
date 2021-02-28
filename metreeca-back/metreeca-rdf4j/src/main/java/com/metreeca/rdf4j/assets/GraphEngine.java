@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
-import com.metreeca.json.shapes.Field;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -74,14 +73,14 @@ public final class GraphEngine implements Engine {
 
 		return and(
 
-				field(count, required(), datatype(XSD.INTEGER)),
-				field(min, optional(), term),
-				field(max, optional(), term),
+				field(count).as(required(), datatype(XSD.INTEGER)),
+				field(min).as(optional(), term),
+				field(max).as(optional(), term),
 
-				field(stats, multiple(),
-						field(count, required(), datatype(XSD.INTEGER)),
-						field(min, required(), term),
-						field(max, required(), term)
+				field(stats).as(multiple(),
+						field(count).as(required(), datatype(XSD.INTEGER)),
+						field(min).as(required(), term),
+						field(max).as(required(), term)
 				)
 
 		);
@@ -92,9 +91,9 @@ public final class GraphEngine implements Engine {
 		final Shape term=annotations(query.shape(), query.path());
 
 		return and(
-				field(terms, multiple(),
-						field(value, required(), term),
-						field(count, required(), datatype(XSD.INTEGER))
+				field(terms).as(multiple(),
+						field(value).as(required(), term),
+						field(count).as(required(), datatype(XSD.INTEGER))
 				)
 		);
 	}
@@ -109,7 +108,7 @@ public final class GraphEngine implements Engine {
 
 					.filter(field -> field.name().equals(step))
 					.findFirst()
-					.map(Field::shape)
+					.map(field -> field.shape())
 
 					.orElseThrow(() -> new IllegalArgumentException(String.format("unknown path step <%s>", step)));
 		}

@@ -77,20 +77,20 @@ final class JSONLDAliaserTest {
 				.as("direct")
 				.containsKey("value");
 
-		assertThat(aliases(field(inverse(RDF.VALUE), and())))
+		assertThat(aliases(field(inverse(RDF.VALUE))))
 				.as("inverse")
 				.containsKey("valueOf"); // !!! inverse?
 
 	}
 
 	@Test void testRetrieveUserDefinedAlias() {
-		assertThat(aliases(field(RDF.VALUE, alias("alias"))))
+		assertThat(aliases(field(RDF.VALUE).as(alias("alias"))))
 				.as("user-defined")
 				.containsKey("alias");
 	}
 
 	@Test void testPreferUserDefinedfields() {
-		assertThat(aliases(and(field(RDF.VALUE, alias("alias")), field(RDF.VALUE))))
+		assertThat(aliases(and(field(RDF.VALUE).as(alias("alias")), field(RDF.VALUE))))
 				.as("user-defined")
 				.containsKey("alias");
 	}
@@ -98,7 +98,7 @@ final class JSONLDAliaserTest {
 
 	@Test void testReportConflictingAliases() {
 		assertThatThrownBy(() -> {
-			aliases(field(RDF.VALUE, and(
+			aliases(field(RDF.VALUE).as(and(
 					alias("one"),
 					alias("two")
 			)));
@@ -106,7 +106,7 @@ final class JSONLDAliaserTest {
 	}
 
 	@Test void testMergeDuplicateAliases() {
-		assertThat(aliases(field(RDF.VALUE, and(alias("one"), alias("one")))))
+		assertThat(aliases(field(RDF.VALUE).as(and(alias("one"), alias("one")))))
 				.containsKeys("one");
 	}
 
@@ -114,23 +114,23 @@ final class JSONLDAliaserTest {
 	@Test void testReportConflictingFields() {
 		assertThatThrownBy(() -> {
 			aliases(and(
-					field(RDF.VALUE, alias("one")),
-					field(RDF.VALUE, alias("two"))
+					field(RDF.VALUE).as(alias("one")),
+					field(RDF.VALUE).as(alias("two"))
 			));
 		}).isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test void testMergeDuplicateFields() {
 		assertThat(aliases(and(
-				field(RDF.VALUE, alias("one")),
-				field(RDF.VALUE, alias("one"))
+				field(RDF.VALUE).as(alias("one")),
+				field(RDF.VALUE).as(alias("one"))
 		))).containsKeys("one");
 	}
 
 
 	@Test void testReportConflictingProperties() {
 		assertThatThrownBy(() -> {
-			aliases(and(field(RDF.VALUE), field(iri("urn:example#value"), and())));
+			aliases(and(field(RDF.VALUE), field(iri("urn:example#value")).as(and())));
 		})
 				.isInstanceOf(IllegalArgumentException.class);
 	}
@@ -138,16 +138,18 @@ final class JSONLDAliaserTest {
 	@Test void testReportReservedAliases() {
 
 		assertThatThrownBy(() -> {
-			aliases(field(iri(ValuesTest.Base, "@id"), and()));
+			aliases(field(iri(ValuesTest.Base, "@id")).as(and()));
 		})
 				.isInstanceOf(IllegalArgumentException.class);
 
 		assertThatThrownBy(() -> {
-			aliases(field(RDF.VALUE, alias("@id")));
+			aliases(field(RDF.VALUE).as(alias("@id")));
 		})
 				.isInstanceOf(IllegalArgumentException.class);
 
-		assertThatThrownBy(() -> aliases(field(RDF.VALUE, alias("id")), singletonMap("@id", "id")))
+		assertThatThrownBy(() -> {
+			aliases(field(RDF.VALUE).as(alias("id")), singletonMap("@id", "id"));
+		})
 				.isInstanceOf(IllegalArgumentException.class);
 
 	}

@@ -17,12 +17,15 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.format;
@@ -30,6 +33,11 @@ import static com.metreeca.json.Values.internal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 
 /**
@@ -40,101 +48,30 @@ import static com.metreeca.json.shapes.Or.or;
  */
 public final class Field extends Shape {
 
-	public static Shape field(final String name) {
+	private static final java.util.regex.Pattern AliasPattern=Pattern.compile(
+			"\\w+"
+	);
+
+	private static final Pattern NamedIRIPattern=Pattern.compile(
+			"([/#:])(?<name>"+AliasPattern+"[^/#:]+)(/|#|#_|#id|#this)?$"
+	);
+
+	public static Field field(final String name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
 		}
 
-		return field(name, all());
+		return field(internal(name));
 	}
 
-	public static Shape field(final String name, final Object... values) {
+	public static Field field(final IRI name) {
 
 		if ( name == null ) {
 			throw new NullPointerException("null name");
 		}
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		return field(name, all(values));
-	}
-
-	public static Shape field(final String name, final Shape... shapes) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null shapes");
-		}
-
-		return field(name, and(shapes));
-	}
-
-	public static Shape field(final String name, final Shape shape) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return field(internal(name), shape);
-	}
-
-
-	public static Shape field(final IRI name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return field(name, all());
-	}
-
-	public static Shape field(final IRI name, final Value... values) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		return field(name, all(values));
-	}
-
-	public static Shape field(final IRI name, final Shape... shapes) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null shapes");
-		}
-
-		return field(name, and(shapes));
-	}
-
-	public static Shape field(final IRI name, final Shape shape) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shape.equals(or()) ? and() : new Field(name, shape);
+		return new Field(name, true, "", and());
 	}
 
 
@@ -148,15 +85,124 @@ public final class Field extends Shape {
 	}
 
 
+	public static Map<String, Field> aliases(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return aliases(shape, emptyMap());
+	}
+
+	public static Map<String, Field> aliases(final Shape shape, final Map<String, String> keywords) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( keywords == null ) {
+			throw new NullPointerException("null keywords");
+		}
+
+
+		return fields(shape).collect(toMap(
+
+				field -> {
+
+					final IRI name=field.name();
+					final boolean direct=Values.direct(name); // !!! field.direct():
+					final String alias=field.alias();
+
+					if ( !alias.isEmpty() ) {
+
+						if ( !AliasPattern.matcher(alias).matches() ) {
+
+							throw new IllegalArgumentException(format(
+									"malformed alias <%s> for %s ", alias, field.shape(and())
+							));
+
+						} else if ( alias.startsWith("@") || keywords.containsValue(alias) ) {
+
+							throw new IllegalArgumentException(format(
+									"reserved alias <%s> for %s", alias, field.shape(and())
+							));
+
+						} else {
+
+							return alias;
+
+						}
+
+					} else if ( field.direct() && field.name().equals(RDF.TYPE) ) {
+
+						return keywords.getOrDefault("@type", "@type");
+
+					} else {
+
+						return Optional
+
+								.of(NamedIRIPattern.matcher(name.stringValue()))
+								.filter(Matcher::find)
+								.map(matcher -> matcher.group("name"))
+								.map(label -> direct ? label : label+"Of")
+
+								.orElseThrow(() -> new IllegalArgumentException(format(
+										"undefined alias for field %s%s", direct ? "" : "^", format(name)
+								)));
+
+					}
+
+				},
+
+				identity(),
+
+				(x, y) -> {
+
+					throw new IllegalArgumentException(format(
+							"clashing aliases for fields %s / %s", x.shape(and()), y.shape(and())
+					));
+
+				},
+
+				LinkedHashMap::new
+		));
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final IRI name;
+
+	private final boolean direct;
+	private final String alias;
+
 	private final Shape shape;
 
 
-	private Field(final IRI name, final Shape shape) {
+	private Field(final IRI name, final boolean direct, final String alias, final Shape shape) {
 		this.name=name;
+		this.direct=direct;
+		this.alias=alias;
 		this.shape=shape;
+	}
+
+
+	Field merge(final Field field) {
+		if ( field.alias.isEmpty() || field.alias.equals(alias) ) {
+
+			return this;
+
+		} else if ( alias.isEmpty() ) {
+
+			return alias(field.alias);
+
+		} else {
+
+			throw new IllegalArgumentException(format(
+					"clashing aliases <%s> / <%s> for field %s", alias, field.alias, field.shape(and())
+			));
+
+		}
 	}
 
 
@@ -164,8 +210,87 @@ public final class Field extends Shape {
 		return name;
 	}
 
+
+	public boolean direct() {
+		return direct;
+	}
+
+	public Field direct(final boolean direct) {
+		return new Field(name, direct, alias, shape);
+	}
+
+
+	public String alias() {
+		return alias;
+	}
+
+	public Field alias(final String alias) {
+
+		if ( alias == null ) {
+			throw new NullPointerException("null alias");
+		}
+
+		return new Field(name, direct, alias, shape);
+	}
+
+
 	public Shape shape() {
 		return shape;
+	}
+
+	public Field shape(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return new Field(name, direct, alias, shape);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Field inverse() {
+		return new Field(name, false, alias, shape);
+	}
+
+
+	public Shape as(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shape.equals(or()) ? and() : new Field(name, direct, alias, shape);
+	}
+
+	public Shape as(final Shape... shapes) {
+
+		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null shapes");
+		}
+
+		final Shape and=and(shapes);
+
+		return and.equals(or()) ? and() : new Field(name, direct, alias, and);
+	}
+
+	public Shape as(final Object... values) {
+
+		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
+		return new Field(name, direct, alias, all(values));
+	}
+
+	public Shape as(final Value... values) {
+
+		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
+		return new Field(name, direct, alias, all(values));
 	}
 
 
@@ -186,15 +311,35 @@ public final class Field extends Shape {
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Field
 				&& name.equals(((Field)object).name)
+				&& direct == ((Field)object).direct
+				&& alias.equals(((Field)object).alias)
 				&& shape.equals(((Field)object).shape);
 	}
 
 	@Override public int hashCode() {
-		return name.hashCode()^shape.hashCode();
+		return name.hashCode()
+				^Boolean.hashCode(direct)
+				^alias.hashCode()
+				^shape.hashCode();
 	}
 
 	@Override public String toString() {
-		return "field("+format(name)+(shape.equals(and()) ? "" : ", "+shape)+")";
+
+		final StringBuilder builder=new StringBuilder(25);
+
+		builder.append("field(");
+
+		if ( !alias.isEmpty() ) { builder.append(alias).append('='); }
+		if ( !direct ) { builder.append('^'); }
+
+		builder.append(format(name));
+
+		if ( !shape.equals(and()) ) { builder.append(" › ").append(shape); }
+
+		builder.append(")");
+
+
+		return builder.toString();
 	}
 
 

@@ -43,11 +43,13 @@ import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.json.shapes.MaxLength.maxLength;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.Pattern.pattern;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
 
 public final class ValuesTest {
@@ -88,34 +90,35 @@ public final class ValuesTest {
 			convey().then(
 
 					server().then(
-							field(RDF.TYPE, required(), datatype(IRIType)),
-							field(RDFS.LABEL, required(), datatype(XSD.STRING)),
-							field(term("code"), required(), datatype(XSD.STRING), pattern("\\d+"))
+							field(RDF.TYPE).as(required(), datatype(IRIType)),
+							field(RDFS.LABEL).as(required(), datatype(XSD.STRING)),
+							field(term("code")).as(required(), datatype(XSD.STRING), pattern("\\d+"))
 					),
 
 					and(
 
-							field(term("forename"), required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("surname"), required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("email"), required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("title"), required(), datatype(XSD.STRING), maxLength(80))
+							field(term("forename")).as(required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("surname")).as(required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("email")).as(required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("title")).as(required(), datatype(XSD.STRING), maxLength(80))
 					),
 
 					role(Manager).then(
 
-							field(term("seniority"), required(), datatype(XSD.INTEGER),
+							field(term("seniority")).as(required(),
+									datatype(XSD.INTEGER),
 									minInclusive(literal(integer(1))),
 									maxInclusive(literal(integer(5)))
 							),
 
-							field(term("supervisor"), optional(),
+							field(term("supervisor")).as(optional(),
 									datatype(IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
+									relate().then(field(RDFS.LABEL).as(required(), datatype(XSD.STRING)))
 							),
 
-							field(term("subordinate"), optional(),
+							field(term("subordinate")).as(optional(),
 									datatype(IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
+									relate().then(field(RDFS.LABEL).as(required(), datatype(XSD.STRING)))
 							)
 
 					)

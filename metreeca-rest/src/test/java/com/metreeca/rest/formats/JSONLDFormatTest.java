@@ -70,7 +70,7 @@ final class JSONLDFormatTest {
 
 					.header("Content-Type", MIME)
 
-					.attribute(shape(), field(direct, required()))
+					.attribute(shape(), field(direct).as(required()))
 
 					.body(input(), () -> new ByteArrayInputStream(json.getBytes(UTF_8)));
 		}
@@ -135,11 +135,11 @@ final class JSONLDFormatTest {
 
 					.attribute(shape(), and(
 
-							field(direct, required(),
-									field(nested, required())
+							field(direct).as(required(),
+									field(nested).as(required())
 							),
 
-							field(inverse(reverse), alias("reverse"), required())
+							field(inverse(reverse)).as(alias("reverse"), required())
 
 					))
 

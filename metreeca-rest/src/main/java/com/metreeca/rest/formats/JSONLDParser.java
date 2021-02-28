@@ -232,7 +232,7 @@ final class JSONLDParser {
 			final Field head=path.get(0);
 			final List<Field> tail=path.subList(1, path.size());
 
-			return Field.field(head.name(), filter(tail, value, head.shape(), mapper));
+			return Field.field(head.name()).as(filter(tail, value, head.shape(), mapper));
 
 		}
 	}

@@ -87,7 +87,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 				// container: connect to the focus using ldp:contains, unless otherwise specified in the filtering shape
 
-				? shape.empty() ? field(inverse(LDP.CONTAINS), focus()) : shape
+				? shape.empty() ? field(inverse(LDP.CONTAINS)).as(focus()) : shape
 
 				// resource: constraint to the focus
 

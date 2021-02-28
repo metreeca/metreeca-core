@@ -30,6 +30,7 @@ import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.Meta.metas;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
+
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
@@ -164,14 +165,25 @@ public final class Or extends Shape {
 	}
 
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
-		return fields // group by name preserving order
+		return fields
 
-				.collect(toMap(Field::name, f -> Stream.of(f.shape()), Stream::concat, LinkedHashMap::new))
+				.collect(groupingBy(  // group by name/direct preserving order
 
-				.entrySet()
+						field -> field(field.name()).direct(field.direct()),
+
+						LinkedHashMap::new,
+
+						reducing((x, y) -> x.merge(y).shape(or(x.shape(), y.shape())))
+
+				))
+
+				.values()
 				.stream()
 
-				.map(entry -> field(entry.getKey(), or(entry.getValue())));
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+
+				.map(field -> field.shape().equals(or()) ? and() : field);
 	}
 
 
