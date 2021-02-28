@@ -65,6 +65,9 @@ public final class GraphEngine implements Engine {
 	static final IRI max=iri(Base, "max");
 	static final IRI min=iri(Base, "min");
 
+
+	private static final Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
+
 	static Shape StatsShape(final Stats query) {
 
 		final Shape term=annotations(query.shape(), query.path());
