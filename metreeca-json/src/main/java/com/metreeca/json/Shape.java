@@ -69,7 +69,7 @@ public abstract class Shape {
 			throw new NullPointerException("null shapes");
 		}
 
-		return when(this, and(shapes));
+		return shapes.length == 0 ? this : when(this, and(shapes));
 	}
 
 

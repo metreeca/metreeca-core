@@ -24,18 +24,6 @@ import static java.lang.Boolean.TRUE;
 
 final class ShapeEvaluator extends Shape.Probe<Boolean> {
 
-	@Override public Boolean probe(final And and) {
-		return and.shapes().stream()
-				.map(shape -> shape.map(this))
-				.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
-	}
-
-	@Override public Boolean probe(final Or or) {
-		return or.shapes().stream()
-				.map(shape -> shape.map(this))
-				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
-	}
-
 	@Override public Boolean probe(final When when) {
 
 		final Boolean test=when.test().map(this);
@@ -47,6 +35,18 @@ final class ShapeEvaluator extends Shape.Probe<Boolean> {
 				: TRUE.equals(pass) && TRUE.equals(fail) ? TRUE
 				: FALSE.equals(pass) && FALSE.equals(fail) ? FALSE
 				: null;
+	}
+
+	@Override public Boolean probe(final And and) {
+		return and.shapes().stream()
+				.map(shape -> shape.map(this))
+				.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
+	}
+
+	@Override public Boolean probe(final Or or) {
+		return or.shapes().stream()
+				.map(shape -> shape.map(this))
+				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
 	}
 
 

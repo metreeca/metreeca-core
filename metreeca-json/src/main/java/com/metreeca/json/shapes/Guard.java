@@ -66,38 +66,33 @@ public final class Guard extends Shape {
 	public static Shape mode(final Object... modes) { return guard(Mode, modes); }
 
 
-	public static Shape create() { return task(Create); }
+	public static Shape create(final Shape... shapes) { return task(Create).then(shapes); }
 
-	public static Shape relate() { return task(Relate); }
+	public static Shape relate(final Shape... shapes) { return task(Relate).then(shapes); }
 
-	public static Shape update() { return task(Update); }
+	public static Shape update(final Shape... shapes) { return task(Update).then(shapes); }
 
-	public static Shape delete() { return task(Delete); }
-
-	/*
-	 * Marks shapes as server-defined internal.
-	 */
-	public static Shape hidden() { return task(Delete); }
+	public static Shape delete(final Shape... shapes) { return task(Delete).then(shapes); }
 
 	/*
 	 * Marks shapes as server-defined read-only.
 	 */
-	public static Shape server() { return task(Relate, Delete); }
+	public static Shape server(final Shape... shapes) { return task(Relate, Delete).then(shapes); }
 
 	/*
 	 * Marks shapes as client-defined write-once.
 	 */
-	public static Shape client() { return task(Create, Relate, Delete); }
+	public static Shape client(final Shape... shapes) { return task(Create, Relate, Delete).then(shapes); }
 
 
-	public static Shape digest() { return view(Digest); }
+	public static Shape digest(final Shape... shapes) { return view(Digest).then(shapes); }
 
-	public static Shape detail() { return view(Detail); }
+	public static Shape detail(final Shape... shapes) { return view(Detail).then(shapes); }
 
 
-	public static Shape convey() { return mode(Convey); }
+	public static Shape convey(final Shape... shapes) { return mode(Convey).then(shapes); }
 
-	public static Shape filter() { return mode(Filter); }
+	public static Shape filter(final Shape... shapes) { return mode(Filter).then(shapes); }
 
 
 	//// Guard Evaluators //////////////////////////////////////////////////////////////////////////////////////////////
