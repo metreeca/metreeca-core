@@ -37,6 +37,7 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.aliases;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;
@@ -232,7 +233,7 @@ final class JSONLDParser {
 			final Field head=path.get(0);
 			final List<Field> tail=path.subList(1, path.size());
 
-			return Field.field(head.name()).as(filter(tail, value, head.shape(), mapper));
+			return field(head.name()).as(filter(tail, value, head.shape(), mapper));
 
 		}
 	}

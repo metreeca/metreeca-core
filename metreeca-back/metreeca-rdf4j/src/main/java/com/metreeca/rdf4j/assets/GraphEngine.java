@@ -42,6 +42,7 @@ import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rdf4j.assets.GraphFetcher.convey;
 import static com.metreeca.rest.Context.asset;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
@@ -107,11 +108,13 @@ public final class GraphEngine implements Engine {
 		for (final Field step : path) {
 			nested=fields(nested)
 
-					.filter(step::equals)
+					.filter(field -> field.direct() == step.direct() && field.name().equals(step.name()))
 					.findFirst()
 					.map(Field::shape)
 
-					.orElseThrow(() -> new IllegalArgumentException(String.format("unknown path step <%s>", step)));
+					.orElseThrow(() -> new IllegalArgumentException(format(
+							"unknown path step <%s>", step.shape(and())
+					)));
 		}
 
 		return and(fields(nested).filter(field -> Annotations.contains(field.name())));

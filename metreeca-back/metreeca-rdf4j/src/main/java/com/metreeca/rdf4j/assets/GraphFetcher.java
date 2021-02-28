@@ -498,8 +498,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 						+"\n"
 						+"\t\t\t{roots}\n"
 						+"\n"
-						+"\t(count(distinct {source}) as ?count)\n"
-						+"\n"
 						+"\t\t\t{filters}\n"
 						+"\n"
 						+"\t\t\t{path}\n"

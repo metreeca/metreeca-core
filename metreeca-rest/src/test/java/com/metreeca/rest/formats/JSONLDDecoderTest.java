@@ -526,7 +526,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedTypedLiterals() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE).as(and(required(), datatype(XSD.DATE))),
+					field(RDF.VALUE).as(required(), datatype(XSD.DATE)),
 
 					createObjectBuilder()
 

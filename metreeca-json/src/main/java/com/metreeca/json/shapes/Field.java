@@ -111,35 +111,14 @@ public final class Field extends Shape {
 
 					final IRI name=field.name();
 					final boolean direct=field.direct();
-					final String alias=field.alias();
 
-					if ( !alias.isEmpty() ) {
-
-						if ( !AliasPattern.matcher(alias).matches() ) {
-
-							throw new IllegalArgumentException(format(
-									"malformed alias <%s> for %s ", alias, field.shape(and())
-							));
-
-						} else if ( alias.startsWith("@") || keywords.containsValue(alias) ) {
-
-							throw new IllegalArgumentException(format(
-									"reserved alias <%s> for %s", alias, field.shape(and())
-							));
-
-						} else {
-
-							return alias;
-
-						}
-
-					} else if ( field.direct() && field.name().equals(RDF.TYPE) ) {
+					if ( direct && name.equals(RDF.TYPE) ) {
 
 						return keywords.getOrDefault("@type", "@type");
 
 					} else {
 
-						return Optional
+						final String alias=Optional.of(field.alias()).filter(s -> !s.isEmpty()).orElseGet(() -> Optional
 
 								.of(NamedIRIPattern.matcher(name.stringValue()))
 								.filter(Matcher::find)
@@ -147,8 +126,18 @@ public final class Field extends Shape {
 								.map(label -> direct ? label : label+"Of")
 
 								.orElseThrow(() -> new IllegalArgumentException(format(
-										"undefined alias for field %s%s", direct ? "" : "^", format(name)
-								)));
+										"undefined alias for %s", field.shape(and())
+								)))
+
+						);
+
+						if ( keywords.containsValue(alias) ) {
+							throw new IllegalArgumentException(format(
+									"reserved alias <%s> for %s", alias, field.shape(and())
+							));
+						}
+
+						return alias;
 
 					}
 
@@ -228,6 +217,10 @@ public final class Field extends Shape {
 
 		if ( alias == null ) {
 			throw new NullPointerException("null alias");
+		}
+
+		if ( !(alias.isEmpty() || AliasPattern.matcher(alias).matches()) ) {
+			throw new IllegalArgumentException(format("malformed alias <%s>", alias));
 		}
 
 		return new Field(name, direct, alias, shape);
@@ -334,7 +327,7 @@ public final class Field extends Shape {
 
 		builder.append(format(name));
 
-		if ( !shape.equals(and()) ) { builder.append(" › ").append(shape); }
+		if ( !shape.equals(and()) ) { builder.append(").as(").append(shape); }
 
 		builder.append(")");
 
