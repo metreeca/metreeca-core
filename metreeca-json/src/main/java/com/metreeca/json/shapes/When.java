@@ -27,11 +27,6 @@ import static com.metreeca.json.shapes.Or.or;
  *
  * <p>States that the focus set is consistent either with a {@linkplain #pass() positive} shape, if consistent also
  * with a {@linkplain #test() test} shape, or with a {@linkplain #fail() negative} shape, otherwise.</p>
- *
- *
- * <p><strong>Warning</strong> / Test shapes are currently limited to non-filtering constraints, that is to parametric
- * {@linkplain Guard guards}, logical operators and annotations: full conditional shape matching will be evaluated for
- * future releases.</p>
  */
 public final class When extends Shape {
 
@@ -127,37 +122,6 @@ public final class When extends Shape {
 				+pass.toString().replace("\n", "\n\t")
 				+(fail.equals(and()) ? "" : ",\n\t"+fail.toString().replace("\n", "\n\t"))
 				+"\n)";
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class FilteringProbe extends Probe<Boolean> {
-
-		@Override public Boolean probe(final Shape shape) { return true; }
-
-
-		@Override public Boolean probe(final Guard guard) { return false; }
-
-		@Override public Boolean probe(final Field field) {
-			return field.shape().map(this);
-		}
-
-
-		@Override public Boolean probe(final And and) {
-			return and.shapes().stream().anyMatch(shape -> shape.map(this));
-		}
-
-		@Override public Boolean probe(final Or or) {
-			return or.shapes().stream().anyMatch(shape -> shape.map(this));
-		}
-
-		@Override public Boolean probe(final When when) {
-			return when.test().map(this)
-					|| when.pass().map(this)
-					|| when.fail().map(this);
-		}
-
 	}
 
 }
