@@ -17,8 +17,7 @@
 package com.metreeca.json.queries;
 
 import com.metreeca.json.*;
-
-import org.eclipse.rdf4j.model.IRI;
+import com.metreeca.json.shapes.Field;
 
 import java.util.List;
 
@@ -42,7 +41,8 @@ public final class Items extends Query {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Items(final Shape shape, final List<IRI> path, final List<Order> orders, final int offset, final int limit) {
+	public Items(final Shape shape, final List<Field> path, final List<Order> orders, final int offset,
+			final int limit) {
 		super(shape, path, orders, offset, limit);
 	}
 

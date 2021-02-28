@@ -42,10 +42,8 @@ import static com.metreeca.json.Values.ResourceType;
 import static com.metreeca.json.Values.ValueType;
 import static com.metreeca.json.Values.bnode;
 import static com.metreeca.json.Values.compare;
-import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.integer;
-import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.Values.md5;
 import static com.metreeca.json.Values.statement;
@@ -87,7 +85,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 				// container: connect to the focus using ldp:contains, unless otherwise specified in the filtering shape
 
-				? shape.empty() ? field(inverse(LDP.CONTAINS)).as(focus()) : shape
+				? shape.empty() ? field(LDP.CONTAINS).inverse().as(focus()) : shape
 
 				// resource: constraint to the focus
 
@@ -323,7 +321,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	@Override public Collection<Statement> probe(final Stats stats) {
 
 		final Shape shape=stats.shape();
-		final List<IRI> path=stats.path();
+		final List<Field> path=stats.path();
 		final int offset=stats.offset();
 		final int limit=stats.limit();
 
@@ -473,7 +471,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	@Override public Collection<Statement> probe(final Terms terms) {
 
 		final Shape shape=terms.shape();
-		final List<IRI> path=terms.path();
+		final List<Field> path=terms.path();
 		final int offset=terms.offset();
 		final int limit=terms.limit();
 
@@ -675,7 +673,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 			final Resource snode=bnode(source.toString());
 			final Resource tnode=bnode(target.toString());
 
-			template.accept(direct(iri) ? statement(snode, iri, tnode) : statement(tnode, inverse(iri), snode));
+			template.accept(field.direct() ? statement(snode, iri, tnode) : statement(tnode, iri, snode));
 
 			return Stream.concat(
 					Stream.of(source, target),
@@ -817,14 +815,14 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 					(shape instanceof All || singleton.isPresent()) // filtering hook
 							? null // ($) only if actually referenced by filters
-							: edge(var(source), iri, var(shape)),
+							: edge(var(source), field, var(shape)),
 
 					all // target universal constraints
-							.map(values -> values.stream().map(value -> edge(var(source), iri, format(value))))
+							.map(values -> values.stream().map(value -> edge(var(source), field, format(value))))
 							.orElse(null),
 
 					singleton // target singleton existential constraints
-							.map(value -> edge(var(source), iri, format(value)))
+							.map(value -> edge(var(source), field, format(value)))
 							.orElse(null),
 
 					"\n\n",
@@ -879,7 +877,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
 
 					snippet(
-							edge(var(this.shape), iri, var(shape)), "\n",
+							edge(var(this.shape), field, var(shape)), "\n",
 							pattern(shape)
 					)
 

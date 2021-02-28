@@ -101,8 +101,8 @@ final class JSONLDParser {
 
 		final Shape filter=filter(json);
 
-		final List<IRI> terms=terms(json);
-		final List<IRI> stats=stats(json);
+		final List<Field> terms=terms(json);
+		final List<Field> stats=stats(json);
 
 		final List<Order> order=order(json);
 
@@ -217,7 +217,7 @@ final class JSONLDParser {
 	private Shape filter(final String path,
 			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper
 	) {
-		return filter(steps(path, shape), value, shape, mapper);
+		return filter(path(path, shape), value, shape, mapper);
 	}
 
 	private Shape filter(final List<Field> path,
@@ -238,7 +238,7 @@ final class JSONLDParser {
 	}
 
 
-	private List<IRI> terms(final JsonObject query) {
+	private List<Field> terms(final JsonObject query) {
 		return Optional.ofNullable(query.get("_terms"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -249,7 +249,7 @@ final class JSONLDParser {
 				.orElse(null);
 	}
 
-	private List<IRI> stats(final JsonObject query) {
+	private List<Field> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("_stats"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -328,11 +328,7 @@ final class JSONLDParser {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<IRI> path(final String path, final Shape shape) {
-		return steps(path, shape).stream().map(Field::name).collect(toList());
-	}
-
-	private List<Field> steps(final String path, final Shape shape) {
+	private List<Field> path(final String path, final Shape shape) {
 
 		final List<Field> steps=new ArrayList<>();
 

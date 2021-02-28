@@ -22,7 +22,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
@@ -87,9 +86,9 @@ final class FieldTest {
 					.as("direct")
 					.containsKey("value");
 
-			assertThat(aliases(field(inverse(RDF.VALUE))))
+			assertThat(aliases(field(RDF.VALUE).inverse()))
 					.as("inverse")
-					.containsKey("valueOf"); // !!! inverse?
+					.containsKey("valueOf");
 
 		}
 

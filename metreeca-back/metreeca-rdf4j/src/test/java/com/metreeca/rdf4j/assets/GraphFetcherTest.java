@@ -238,15 +238,16 @@ final class GraphFetcherTest {
 						.as("default (on value)")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?employee"));
 
-				assertThat(actual.apply(items(shape, asList(increasing(RDFS.LABEL)))))
+				assertThat(actual.apply(items(shape, asList(increasing(field(RDFS.LABEL))))))
 						.as("custom increasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?label"));
 
-				assertThat(actual.apply(items(shape, asList(decreasing(RDFS.LABEL)))))
+				assertThat(actual.apply(items(shape, asList(decreasing(field(RDFS.LABEL))))))
 						.as("custom decreasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?label)"));
 
-				assertThat(actual.apply(items(shape, asList(increasing(term("office")), increasing(RDFS.LABEL)))))
+				assertThat(actual.apply(items(shape, asList(increasing(field(term("office"))),
+						increasing(field(RDFS.LABEL))))))
 						.as("custom combined")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?office ?label"));
 
@@ -324,7 +325,7 @@ final class GraphFetcherTest {
 		@Test void testRootConstraints() {
 			exec(() -> assertThat(query(
 
-					Root, stats(all(item("employees/1370")), asList(term("account")), 0, 0)
+					Root, stats(all(item("employees/1370")), asList(field(term("account"))), 0, 0)
 
 			)).isIsomorphicTo(graph(
 
@@ -399,7 +400,7 @@ final class GraphFetcherTest {
 		@Test void testRootConstraints() {
 			exec(() -> assertThat(query(
 
-					Root, terms(all(item("employees/1370")), asList(term("account")), 0, 0)
+					Root, terms(all(item("employees/1370")), asList(field(term("account"))), 0, 0)
 
 			)).isIsomorphicTo(graph(
 
@@ -444,7 +445,7 @@ final class GraphFetcherTest {
 		exec(() -> assertThat(query(
 
 				item("/employees-basic/"), items(and(
-						filter().then(field(inverse(LDP.CONTAINS)).as(focus())),
+						filter().then(field(LDP.CONTAINS).inverse().as(focus())),
 						convey().then(field(RDFS.LABEL))
 				))
 
@@ -785,7 +786,7 @@ final class GraphFetcherTest {
 			exec(() -> {
 				assertThat(query(
 
-						Root, items(field(inverse(term("office"))).as(all(item("employees/1002"), item("employees"
+						Root, items(field(term("office")).inverse().as(all(item("employees/1002"), item("employees"
 								+"/1056"))))
 
 				)).isIsomorphicTo(graph(

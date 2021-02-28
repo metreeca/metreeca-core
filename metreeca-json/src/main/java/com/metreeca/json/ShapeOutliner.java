@@ -24,7 +24,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
 
 
@@ -58,13 +58,13 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 
 				all(shape)
 
-						.map(targets -> values(targets.stream()).flatMap(target -> Arrays.stream(sources).flatMap(source -> direct(iri)
+						.map(targets -> values(targets.stream()).flatMap(target -> Arrays.stream(sources).flatMap(source -> field.direct()
 
 								? source instanceof Resource ?
 								Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
 
 								: target instanceof Resource ?
-								Stream.of(statement((Resource)target, inverse(iri), source)) : Stream.empty()
+								Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
 
 						)))
 

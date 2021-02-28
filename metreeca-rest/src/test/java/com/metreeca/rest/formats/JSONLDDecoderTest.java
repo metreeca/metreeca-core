@@ -362,7 +362,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeInverseInferredAliases() {
 			assertThat(decode(x,
 
-					field(inverse(RDF.VALUE)).as(and(required())),
+					field(RDF.VALUE).inverse().as(and(required())),
 
 					createObjectBuilder()
 							.add("valueOf", createObjectBuilder() // !!! valueOf?
@@ -396,7 +396,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeInverseUserDefinedAliases() {
 			assertThat(decode(x,
 
-					field(inverse(RDF.VALUE)).alias("alias").as(required()),
+					field(RDF.VALUE).inverse().alias("alias").as(required()),
 
 					createObjectBuilder()
 							.add("alias", createObjectBuilder()

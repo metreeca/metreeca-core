@@ -191,11 +191,11 @@ final class JSONLDEncoder {
 				final IRI predicate=field.name();
 				final Shape nestedShape=field.shape();
 
-				final boolean direct=direct(predicate);
+				final boolean direct=field.direct();
 
 				final Collection<? extends Value> values=direct
 						? objects(model, resource, predicate)
-						: subjects(model, resource, inverse(predicate));
+						: subjects(model, resource, predicate);
 
 				if ( !values.isEmpty() ) { // omit null value and empty arrays
 
@@ -237,7 +237,7 @@ final class JSONLDEncoder {
 				final IRI name=field.name();
 				final Shape shape=field.shape();
 
-				final boolean direct=direct(name);
+				final boolean direct=field.direct();
 				final String iri=name.stringValue();
 
 				final Optional<IRI> datatype=JSONLDInspector.datatype(shape);

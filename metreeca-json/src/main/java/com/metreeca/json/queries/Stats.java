@@ -17,8 +17,7 @@
 package com.metreeca.json.queries;
 
 import com.metreeca.json.*;
-
-import org.eclipse.rdf4j.model.IRI;
+import com.metreeca.json.shapes.Field;
 
 import java.util.List;
 
@@ -27,14 +26,15 @@ import static java.util.Collections.emptyList;
 
 public final class Stats extends Query {
 
-	public static Stats stats(final Shape shape, final List<IRI> path, int offset, int limit) {
+	public static Stats stats(final Shape shape, final List<Field> path, int offset, int limit) {
 		return new Stats(shape, path, emptyList(), offset, limit);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Stats(final Shape shape, final List<IRI> path, final List<Order> orders, final int offset, final int limit) {
+	public Stats(final Shape shape, final List<Field> path, final List<Order> orders, final int offset,
+			final int limit) {
 		super(shape, path, orders, offset, limit);
 	}
 

@@ -26,7 +26,6 @@ import java.util.Collection;
 
 import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -49,7 +48,7 @@ final class ShapeOutlinerTest {
 				.as("direct field")
 				.isIsomorphicTo(decode("rdf:first rdf:value rdf:rest."));
 
-		assertThat(outline(field(inverse(RDF.VALUE)).as(all(RDF.REST)), RDF.FIRST))
+		assertThat(outline(field(RDF.VALUE).inverse().as(all(RDF.REST)), RDF.FIRST))
 				.as("inverse field")
 				.isIsomorphicTo(decode("rdf:rest rdf:value rdf:first."));
 

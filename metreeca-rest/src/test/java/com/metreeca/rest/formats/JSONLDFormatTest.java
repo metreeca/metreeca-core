@@ -138,7 +138,7 @@ final class JSONLDFormatTest {
 									field(nested).as(required())
 							),
 
-							field(inverse(reverse)).alias("reverse").as(required())
+							field(reverse).inverse().alias("reverse").as(required())
 
 					))
 

@@ -22,7 +22,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
-import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.net.URL;
@@ -44,7 +43,6 @@ import static com.metreeca.json.shapes.MaxLength.maxLength;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.json.shapes.Pattern.pattern;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
 import static java.util.Collections.unmodifiableMap;
@@ -265,18 +263,6 @@ public final class ValuesTest {
 		Rio.write(model, writer, format);
 
 		return writer.toString();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testInverseIRIs() {
-
-		assertThat(direct(RDF.NIL)).isTrue();
-		assertThat(direct(inverse(RDF.NIL))).isFalse();
-
-		assertThat(inverse(inverse(RDF.NIL))).as("symmetric").isEqualTo(RDF.NIL);
-
 	}
 
 

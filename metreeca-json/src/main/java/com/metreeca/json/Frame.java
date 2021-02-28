@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
+
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
@@ -167,6 +168,36 @@ public final class Frame {
 
 	private static <V> V test(final IRI predicate, final Function<IRI, V> direct, final Function<IRI, V> inverse) {
 		return direct(predicate) ? direct.apply(predicate) : inverse.apply(inverse(predicate));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Checks predicate direction.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
+	 * #inverse(IRI)} predicate
+	 */
+	public static boolean direct(final IRI iri) {
+		return !(iri instanceof _Inverse);
+	}
+
+	/**
+	 * Inverts the direction of a predicate.
+	 *
+	 * @param iri the IRI identifying the predicate
+	 *
+	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri} ,
+	 * if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
+	 * value of {@code iri}, otherwise
+	 */
+	public static IRI inverse(final IRI iri) {
+		return iri == null ? null
+				: iri instanceof _Inverse ? iri(iri.getNamespace(), iri.getLocalName())
+				: new _Inverse(iri.getNamespace(), iri.getLocalName());
 	}
 
 

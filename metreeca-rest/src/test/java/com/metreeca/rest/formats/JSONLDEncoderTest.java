@@ -314,7 +314,7 @@ final class JSONLDEncoderTest {
 		@Test void testAliasInverseField() {
 			assertThat(encode(x,
 
-					field(inverse(RDF.VALUE)).as(required()),
+					field(RDF.VALUE).inverse().as(required()),
 
 					statement(y, RDF.VALUE, x)
 
@@ -655,7 +655,7 @@ final class JSONLDEncoderTest {
 		}
 
 		@Test void testInverseFields() {
-			assertThat(encode(field(inverse(RDF.VALUE))))
+			assertThat(encode(field(RDF.VALUE).inverse()))
 					.hasField("valueOf", createObjectBuilder()
 							.add("@reverse", RDF.VALUE.stringValue())
 					);

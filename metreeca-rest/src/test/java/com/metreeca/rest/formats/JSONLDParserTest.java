@@ -159,7 +159,7 @@ final class JSONLDParserTest {
 
 			items("_order=%2Bfirst.rest&_offset=1&_limit=2", shape, items -> {
 
-				assertThat(items.orders()).containsExactly(increasing(RDF.FIRST, RDF.REST));
+				assertThat(items.orders()).containsExactly(increasing(field(RDF.FIRST), field(RDF.REST)));
 				assertThat(items.offset()).isEqualTo(1L);
 				assertThat(items.limit()).isEqualTo(2L);
 
@@ -168,14 +168,14 @@ final class JSONLDParserTest {
 			terms("_terms=first.rest", shape, terms -> {
 
 				assertThat(filter(shape, and())).isEqualTo(terms.shape());
-				assertThat(terms.path()).containsExactly(RDF.FIRST, RDF.REST);
+				assertThat(terms.path()).containsExactly(field(RDF.FIRST), field(RDF.REST));
 
 			});
 
 			stats("_stats=first.rest", shape, stats -> {
 
 				assertThat(filter(shape, and())).isEqualTo(stats.shape());
-				assertThat(stats.path()).containsExactly(RDF.FIRST, RDF.REST);
+				assertThat(stats.path()).containsExactly(field(RDF.FIRST), field(RDF.REST));
 
 			});
 
@@ -193,24 +193,24 @@ final class JSONLDParserTest {
 
 		@Test void testParseDirectSteps() {
 			stats("{ '_stats': 'first' }", field(RDF.FIRST), stats -> assertThat(stats.path())
-					.containsExactly(RDF.FIRST)
+					.containsExactly(field(RDF.FIRST))
 			);
 		}
 
 		@Test void testParseInverseSteps() { // !!! inverse?
-			stats("{ '_stats': 'firstOf' }", field(inverse(RDF.FIRST)), stats -> assertThat(stats.path())
-					.containsExactly(inverse(RDF.FIRST))
+			stats("{ '_stats': 'firstOf' }", field(RDF.FIRST).inverse(), stats -> assertThat(stats.path())
+					.containsExactly(field(RDF.FIRST).inverse())
 			);
 		}
 
 		@Test void testParseMultipleSteps() {
 
 			stats("{ '_stats': 'first.rest' }", field(RDF.FIRST).as(field(RDF.REST)),
-					stats -> assertThat(stats.path()).containsExactly(RDF.FIRST, RDF.REST)
+					stats -> assertThat(stats.path()).containsExactly(field(RDF.FIRST), field(RDF.REST))
 			);
 
-			stats("{ '_stats': 'firstOf.rest' }", field(inverse(RDF.FIRST)).as(field(RDF.REST)),
-					stats -> assertThat(stats.path()).containsExactly(inverse(RDF.FIRST), RDF.REST)
+			stats("{ '_stats': 'firstOf.rest' }", field(RDF.FIRST).inverse().as(field(RDF.REST)),
+					stats -> assertThat(stats.path()).containsExactly(field(RDF.FIRST).inverse(), field(RDF.REST))
 			);
 
 		}
@@ -234,17 +234,17 @@ final class JSONLDParserTest {
 
 			items("{ '_order': 'first.rest' }", shape, items -> assertThat(items.orders())
 					.as("path")
-					.containsExactly(increasing(RDF.FIRST, RDF.REST))
+					.containsExactly(increasing(field(RDF.FIRST), field(RDF.REST)))
 			);
 
 			items("{ '_order': '+first.rest' }", shape, items -> assertThat(items.orders())
 					.as("path increasing")
-					.containsExactly(increasing(RDF.FIRST, RDF.REST))
+					.containsExactly(increasing(field(RDF.FIRST), field(RDF.REST)))
 			);
 
 			items("{ '_order': '-first.rest' }", shape, items -> assertThat(items.orders())
 					.as("path decreasing")
-					.containsExactly(decreasing(RDF.FIRST, RDF.REST)));
+					.containsExactly(decreasing(field(RDF.FIRST), field(RDF.REST))));
 
 			items("{ '_order': [] }", shape, items -> assertThat(items.orders()).
 					as("empty list")
@@ -253,7 +253,7 @@ final class JSONLDParserTest {
 
 			items("{ '_order': ['+first', '-first.rest'] }", shape, items -> assertThat(items.orders())
 					.as("list")
-					.containsExactly(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))
+					.containsExactly(increasing(field(RDF.FIRST)), decreasing(field(RDF.FIRST), field(RDF.REST)))
 			);
 
 		}
@@ -500,7 +500,7 @@ final class JSONLDParserTest {
 			items("first=x&first.rest=y&_order=-first.rest&_order=first&_offset=1&_limit=2", shape, items -> {
 
 				assertThat(items.orders())
-						.containsExactly(decreasing(RDF.FIRST, RDF.REST), increasing(RDF.FIRST));
+						.containsExactly(decreasing(field(RDF.FIRST), field(RDF.REST)), increasing(field(RDF.FIRST)));
 
 				assertThat(items.offset())
 						.isEqualTo(1);
@@ -539,7 +539,7 @@ final class JSONLDParserTest {
 
 				assertThat(terms.path())
 						.as("path")
-						.containsExactly(RDF.FIRST, RDF.REST);
+						.containsExactly(field(RDF.FIRST), field(RDF.REST));
 
 				assertThat(terms.offset())
 						.as("offset")
@@ -563,7 +563,7 @@ final class JSONLDParserTest {
 
 				assertThat(stats.path())
 						.as("path")
-						.containsExactly(RDF.FIRST, RDF.REST);
+						.containsExactly(field(RDF.FIRST), field(RDF.REST));
 
 				assertThat(stats.offset())
 						.as("offset")

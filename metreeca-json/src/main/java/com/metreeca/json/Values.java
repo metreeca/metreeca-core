@@ -504,13 +504,7 @@ public final class Values {
 	}
 
 	public static String format(final IRI iri) {
-		if ( iri == null ) { return null; } else {
-
-			final String role=direct(iri) ? "" : "^";
-			final String text=iri.stringValue();
-
-			return role+'<'+text+'>'; // !!! relativize wrt to base
-		}
+		return iri == null ? null : '<'+iri.stringValue()+'>'; // !!! relativize wrt to base
 	}
 
 	public static String format(final Literal literal) {
@@ -584,80 +578,6 @@ public final class Values {
 		builder.append('\'');
 
 		return builder.toString();
-	}
-
-
-	//// Inverse IRIs //////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Checks predicate direction.
-	 *
-	 * @param iri the IRI identifying the predicate
-	 *
-	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
-	 * #inverse(IRI)} predicate
-	 */
-	public static boolean direct(final IRI iri) {
-		return !(iri instanceof Inverse);
-	}
-
-	/**
-	 * Inverts the direction of a predicate.
-	 *
-	 * @param iri the IRI identifying the predicate
-	 *
-	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri} ,
-	 * if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
-	 * value of {@code iri}, otherwise
-	 */
-	public static IRI inverse(final IRI iri) {
-		return iri == null ? null
-				: iri instanceof Inverse ? factory.createIRI(iri.getNamespace(), iri.getLocalName())
-				: new Inverse(iri.getNamespace(), iri.getLocalName());
-	}
-
-
-	private static final class Inverse extends org.eclipse.rdf4j.model.base.AbstractIRI {
-
-		private static final long serialVersionUID=7576383707001017160L;
-
-
-		private final String string;
-
-		private final String namespace;
-		private final String localname;
-
-
-		private Inverse(final String namespace, final String localname) {
-			this.string=namespace+localname;
-			this.namespace=namespace;
-			this.localname=localname;
-		}
-
-
-		@Override public String stringValue() {
-			return string;
-		}
-
-		@Override public String getNamespace() {
-			return namespace;
-		}
-
-		@Override public String getLocalName() {
-			return localname;
-		}
-
-
-		@Override public boolean equals(final Object object) {
-			return object == this || object instanceof Inverse && super.equals(object);
-		}
-
-		@Override public int hashCode() { return -super.hashCode(); }
-
-		@Override public String toString() {
-			return "^"+super.toString();
-		}
-
 	}
 
 

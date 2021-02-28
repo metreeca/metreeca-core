@@ -16,11 +16,12 @@
 
 package com.metreeca.json;
 
-import org.eclipse.rdf4j.model.IRI;
+import com.metreeca.json.shapes.Field;
 
 import java.util.*;
 
 import static com.metreeca.json.Values.format;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
@@ -30,20 +31,20 @@ import static java.util.Collections.unmodifiableList;
  */
 public final class Order {
 
-	public static Order increasing(final IRI... path) {
+	public static Order increasing(final Field... path) {
 		return new Order(false, asList(path));
 	}
 
-	public static Order increasing(final List<IRI> path) {
+	public static Order increasing(final List<Field> path) {
 		return new Order(false, path);
 	}
 
 
-	public static Order decreasing(final IRI... path) {
+	public static Order decreasing(final Field... path) {
 		return new Order(true, asList(path));
 	}
 
-	public static Order decreasing(final List<IRI> path) {
+	public static Order decreasing(final List<Field> path) {
 		return new Order(true, path);
 	}
 
@@ -51,10 +52,10 @@ public final class Order {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final boolean inverse;
-	private final List<IRI> path;
+	private final List<Field> path;
 
 
-	private Order(final boolean inverse, final List<IRI> path) {
+	private Order(final boolean inverse, final List<Field> path) {
 
 		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null path or path step");
@@ -71,7 +72,7 @@ public final class Order {
 		return inverse;
 	}
 
-	public List<IRI> path() {
+	public List<Field> path() {
 		return unmodifiableList(path);
 	}
 
@@ -92,13 +93,13 @@ public final class Order {
 
 		final StringBuilder builder=new StringBuilder(20*path.size());
 
-		for (final IRI step : path) {
+		for (final Field step : path) {
 
-			if ( builder.length() > 0 ) {
-				builder.append('/');
-			}
+			if ( builder.length() > 0 ) { builder.append('/'); }
 
-			builder.append(format(step));
+			if ( !step.direct() ) { builder.append('^'); }
+
+			builder.append(format(step.name()));
 		}
 
 		return builder.insert(0, inverse ? "-" : "+").toString();

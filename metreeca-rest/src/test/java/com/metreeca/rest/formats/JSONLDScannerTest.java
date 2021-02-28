@@ -116,7 +116,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateInverseFields() {
 
-			final Shape shape=field(inverse(p)).as(all(x));
+			final Shape shape=field(p).inverse().as(all(x));
 
 			assertThat(scan(shape, statement(x, p, f))).hasRight();
 			assertThat(scan(shape, statement(y, p, f))).hasLeft();

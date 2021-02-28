@@ -17,7 +17,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -111,7 +110,7 @@ public final class Field extends Shape {
 				field -> {
 
 					final IRI name=field.name();
-					final boolean direct=Values.direct(name); // !!! field.direct():
+					final boolean direct=field.direct();
 					final String alias=field.alias();
 
 					if ( !alias.isEmpty() ) {

@@ -88,7 +88,7 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		final Shape shape=field.shape().map(this);
 
 		return iri.equals(RDF.TYPE) ? and(field.as(and(shape, datatype(IRIType))), datatype(ResourceType))
-				: direct(iri) ? and(field.as(shape), datatype(ResourceType))
+				: field.direct() ? and(field.as(shape), datatype(ResourceType))
 				: field.as(and(shape, datatype(ResourceType)));
 	}
 

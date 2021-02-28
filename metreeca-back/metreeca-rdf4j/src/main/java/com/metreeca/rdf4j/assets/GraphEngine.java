@@ -19,6 +19,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
+import com.metreeca.json.shapes.Field;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -99,16 +100,16 @@ public final class GraphEngine implements Engine {
 	}
 
 
-	private static Shape annotations(final Shape shape, final Iterable<IRI> path) {
+	private static Shape annotations(final Shape shape, final Iterable<Field> path) {
 
 		Shape nested=convey(shape);
 
-		for (final IRI step : path) {
+		for (final Field step : path) {
 			nested=fields(nested)
 
-					.filter(field -> field.name().equals(step))
+					.filter(step::equals)
 					.findFirst()
-					.map(field -> field.shape())
+					.map(Field::shape)
 
 					.orElseThrow(() -> new IllegalArgumentException(String.format("unknown path step <%s>", step)));
 		}

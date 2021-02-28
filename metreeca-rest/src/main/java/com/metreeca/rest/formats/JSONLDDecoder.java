@@ -237,8 +237,8 @@ final class JSONLDDecoder {
 					final Value target=pair.getKey();
 					final Stream<Statement> model=pair.getValue();
 
-					final Statement edge=direct(iri) ? statement(focus, iri, target)
-							: target instanceof Resource ? statement((Resource)target, inverse(iri), focus)
+					final Statement edge=field.direct() ? statement(focus, iri, target)
+							: target instanceof Resource ? statement((Resource)target, iri, focus)
 							: error("target for inverse property is not a resource <%s: %s>", label, pair);
 
 					return Stream.concat(Stream.of(edge), model);
