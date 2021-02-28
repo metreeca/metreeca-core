@@ -38,7 +38,8 @@ import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
-import static com.metreeca.rest.formats._JSONLDCodec.driver;
+import static com.metreeca.rest.formats.JSONLDAliaser.aliases;
+import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -343,12 +344,12 @@ final class JSONLDParser {
 
 		while ( matcher.lookingAt() ) {
 
-			final Map<String, Field> fields=_JSONLDCodec.fields(reference, keywords);
+			final Map<String, Field> aliases=aliases(reference, keywords);
 
 			final String step=matcher.group(1);
 
 			final Field field=Optional
-					.ofNullable(fields.get(step))
+					.ofNullable(aliases.get(step))
 					.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
 
 			steps.add(field);

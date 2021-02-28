@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats._JSONLDCodec.*;
+import static com.metreeca.rest.formats.JSONLDAliaser.aliases;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -64,7 +64,7 @@ final class JSONLDDecoder {
 	JSONLDDecoder(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
-		this.shape=driver(shape);
+		this.shape=JSONLDInspector.driver(shape);
 
 		this.keywords=keywords;
 
@@ -107,9 +107,9 @@ final class JSONLDDecoder {
 
 	Stream<Entry<Value, Stream<Statement>>> values(final JsonValue value, final Shape shape) {
 
-		final boolean tagged=tagged(shape);
+		final boolean tagged=JSONLDInspector.tagged(shape);
 
-		final Set<String> langs=tagged ? langs(shape).orElseGet(Collections::emptySet) : emptySet();
+		final Set<String> langs=tagged ? JSONLDInspector.langs(shape).orElseGet(Collections::emptySet) : emptySet();
 		final String lang=langs.size() == 1 ? langs.iterator().next() : "";
 
 		if ( tagged && value instanceof JsonArray && !lang.isEmpty() ) {
@@ -169,13 +169,14 @@ final class JSONLDDecoder {
 				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
 				: (language != null) ? entry(literal(value, language), Stream.empty())
 
-				: entry(literal(value, datatype(shape).orElse(XSD.STRING)), Stream.empty());
+				: entry(literal(value, JSONLDInspector.datatype(shape).orElse(XSD.STRING)), Stream.empty());
 	}
 
 	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
-		final IRI type=datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
+		final IRI type=
+				JSONLDInspector.datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
 
 		final Value value=ResourceType.equals(type) ? resource(text)
 				: BNodeType.equals(type) ? bnode(text)
@@ -187,7 +188,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).orElse(null);
+		final IRI datatype=JSONLDInspector.datatype(shape).orElse(null);
 
 		final Literal value
 
@@ -211,7 +212,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> resource(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final Map<String, Field> fields=fields(shape, keywords);
+		final Map<String, Field> aliases=aliases(shape, keywords);
 
 		return entry(focus, object.entrySet().stream().flatMap(entry -> {
 
@@ -224,7 +225,7 @@ final class JSONLDDecoder {
 
 			} else if ( !label.startsWith("@") && !value.equals(JsonValue.NULL) ) {
 
-				final Field field=fields.get(label);
+				final Field field=aliases.get(label);
 
 				if ( field == null ) {
 					return error("unknown property label <%s>", label);

@@ -36,7 +36,7 @@ import static com.metreeca.json.Values.lang;
 import static com.metreeca.json.Values.text;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
-import static com.metreeca.rest.formats._JSONLDCodec.driver;
+import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
 import static java.lang.String.format;
 import static java.lang.String.join;

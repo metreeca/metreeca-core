@@ -17,7 +17,7 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.shapes.Field;
+import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -26,14 +26,14 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats._JSONLDCodec.*;
+import static com.metreeca.rest.formats.JSONLDAliaser.aliases;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -68,7 +68,7 @@ final class JSONLDEncoder {
 	JSONLDEncoder(final IRI focus, final Shape shape, final Map<String, String> keywords, final boolean context) {
 
 		this.focus=focus;
-		this.shape=driver(shape);
+		this.shape=JSONLDInspector.driver(shape);
 
 		this.keywords=keywords;
 		this.context=context;
@@ -105,9 +105,9 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) {
 
-		final int maxCount=maxCount(shape).orElse(Integer.MAX_VALUE);
+		final int maxCount=Optional.ofNullable(shape.map(new MaxCountProbe())).orElse(Integer.MAX_VALUE);
 
-		if ( tagged(shape) ) { // tagged literals
+		if ( JSONLDInspector.tagged(shape) ) { // tagged literals
 
 			return taggeds(values, shape, maxCount == 1);
 
@@ -146,8 +146,8 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) { // !!! refactor
 
-		final Object datatype=datatype(shape).orElse(null);
-		final Map<String, Field> fields=fields(shape, keywords);
+		final Object datatype=JSONLDInspector.datatype(shape).orElse(null);
+		final Map<String, Field> aliases=aliases(shape, keywords);
 
 		final boolean inlineable=IRIType.equals(datatype)
 				|| BNodeType.equals(datatype)
@@ -161,7 +161,7 @@ final class JSONLDEncoder {
 					? createValue(id)
 					: createObjectBuilder().add(aliaser.apply("@id"), id).build();
 
-		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
+		} else if ( inlineable && resource instanceof IRI && aliases.isEmpty() ) { // inline proved leaf IRI
 
 			return createValue(id);
 
@@ -182,7 +182,7 @@ final class JSONLDEncoder {
 			};
 
 
-			for (final Map.Entry<String, Field> entry : fields.entrySet()) {
+			for (final Map.Entry<String, Field> entry : aliases.entrySet()) {
 
 				final String alias=entry.getKey();
 				final Field field=entry.getValue();
@@ -209,7 +209,7 @@ final class JSONLDEncoder {
 			}
 
 			if ( context ) {
-				context(resource.equals(focus) ? keywords : emptyMap(), fields).ifPresent(context ->
+				context(resource.equals(focus) ? keywords : emptyMap(), aliases).ifPresent(context ->
 						object.add("@context", context)
 				);
 			}
@@ -239,7 +239,7 @@ final class JSONLDEncoder {
 				final boolean direct=direct(name);
 				final String iri=name.stringValue();
 
-				final Optional<IRI> datatype=datatype(shape);
+				final Optional<IRI> datatype=JSONLDInspector.datatype(shape);
 
 				if ( datatype.filter(IRIType::equals).isPresent() ) {
 
@@ -250,7 +250,7 @@ final class JSONLDEncoder {
 
 				} else if ( datatype.filter(RDF.LANGSTRING::equals).isPresent() ) {
 
-					final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
+					final Set<String> langs=JSONLDInspector.langs(shape).orElseGet(Collections::emptySet);
 
 					context.add(alias, langs.size() == 1
 
@@ -303,7 +303,8 @@ final class JSONLDEncoder {
 					: datatype.equals(XSD.INTEGER) ? literal(literal.integerValue())
 					: datatype.equals(XSD.DECIMAL) ? literal(literal.decimalValue())
 					: datatype.equals(RDF.LANGSTRING) ? literal(literal, literal.getLanguage().orElse(""))
-					: datatype(shape).isPresent() ? literal(literal.stringValue()) // only lexical if type is known
+					: JSONLDInspector.datatype(shape).isPresent() ? literal(literal.stringValue()) // only lexical if
+					// type is known
 					: literal(literal, datatype);
 
 		} catch ( final IllegalArgumentException ignored ) { // malformed literals
@@ -346,11 +347,12 @@ final class JSONLDEncoder {
 
 	//// Tagged Literals //////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue taggeds(final Collection<? extends Value> values, final Shape shape, final boolean scalar) { //
+	private JsonValue taggeds(final Collection<? extends Value> values, final Shape shape, final boolean scalar) {
+
 		// !!! refactor
 
-		final boolean localized=localized(shape);
-		final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
+		final boolean localized=JSONLDInspector.localized(shape);
+		final Set<String> langs=JSONLDInspector.langs(shape).orElseGet(Collections::emptySet);
 
 		final Map<String, List<String>> langToStrings=values.stream()
 				.map(Literal.class::cast) // datatype already checked by values()
@@ -424,6 +426,38 @@ final class JSONLDEncoder {
 				.filter(pattern(resource, predicate, null))
 				.map(Statement::getObject)
 				.collect(toCollection(LinkedHashSet::new));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class MaxCountProbe extends Shape.Probe<Integer> {
+
+		@Override public Integer probe(final MaxCount maxCount) {
+			return maxCount.limit();
+		}
+
+		@Override public Integer probe(final And and) {
+			return reduce(and.shapes().stream(), Math::min);
+		}
+
+		@Override public Integer probe(final Or or) {
+			return reduce(or.shapes().stream(), Math::max);
+		}
+
+		@Override public Integer probe(final When when) {
+			return reduce(Stream.of(when.pass(), when.fail()), Math::max);
+		}
+
+
+		private Integer reduce(final Stream<Shape> shapeStream, final BinaryOperator<Integer> operator) {
+			return shapeStream
+					.map(shape -> shape.map(this))
+					.filter(Objects::nonNull)
+					.reduce(operator)
+					.orElse(null);
+		}
+
 	}
 
 }
