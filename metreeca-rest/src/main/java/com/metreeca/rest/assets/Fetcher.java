@@ -29,6 +29,7 @@ import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Request.GET;
+import static com.metreeca.rest.Response.MethodNotAllowed;
 import static com.metreeca.rest.Xtream.data;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
@@ -134,7 +135,9 @@ import static java.util.stream.Collectors.toMap;
 
 								throw new RuntimeException(error.toString()); // !!!
 
-							}, target -> {
+							},
+
+							target -> {
 
 								try (
 										final InputStream input=target.get();
@@ -162,6 +165,7 @@ import static java.util.stream.Collectors.toMap;
 				return new Response(request)
 
 						.status(min(max(100, code), 599)) // harden against illegal codes
+						.message(Optional.ofNullable(connection.getResponseMessage()).orElse(""))
 
 						.headers(connection.getHeaderFields().entrySet().stream()
 								.filter(entry -> entry.getKey() != null) // ;( may use null to hold status line
@@ -207,29 +211,35 @@ import static java.util.stream.Collectors.toMap;
 			final String method=request.method();
 			final String item=request.item();
 
-			if ( !method.equals(GET) ) {
-				throw new UnsupportedOperationException(format("unsupported method <%s> on <%s>", method, item));
+			if ( method.equals(GET) ) {
+
+				logger.info(this, format("%s %s", method, item));
+
+				return new Response(request)
+
+						.status(Response.OK)
+
+						.body(input(), () -> {
+							try {
+
+								final InputStream input=new URL(item).openStream();
+
+								return item.endsWith(".gz")
+										? new GZIPInputStream(input)
+										: input;
+
+							} catch ( final IOException e ) {
+								throw new UncheckedIOException(e);
+							}
+						});
+
+			} else {
+
+				return new Response(request)
+						.status(MethodNotAllowed)
+						.message(format("%s Method Not Allowed", method));
+
 			}
-
-			logger.info(this, format("%s %s", method, item));
-
-			return new Response(request)
-
-					.status(Response.OK)
-
-					.body(input(), () -> {
-						try {
-
-							final InputStream input=new URL(item).openStream();
-
-							return item.endsWith(".gz")
-									? new GZIPInputStream(input)
-									: input;
-
-						} catch ( final IOException e ) {
-							throw new UncheckedIOException(e);
-						}
-					});
 		}
 
 	}

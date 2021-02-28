@@ -69,7 +69,6 @@ public final class Retrieve implements Function<String, Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	@Override public Collection<Statement> apply(final String url) {
 		return Optional.of(url)
 
