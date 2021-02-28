@@ -95,7 +95,7 @@ public final class Request extends Message<Request> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Object user=null;
+	private Object user;
 	private Set<Object> roles=emptySet();
 
 	private String method="";
@@ -149,7 +149,7 @@ public final class Request extends Message<Request> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Checks ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Checks if this request is safe.
@@ -166,8 +166,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return {@code true} if the {@link #path()} of this request includes a trailing slash; {@code false} otherwise
 	 *
-	 * @see
-	 * <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
+	 * @see <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
 	 * Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
 	 */
 	public boolean collection() {
@@ -399,7 +398,7 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the query of this request.
 	 *
-	 * @return the query this request
+	 * @return the query this request; doesn't include a leading question mark
 	 */
 	public String query() {
 		return query;
@@ -408,7 +407,7 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the query of this request.
 	 *
-	 * @param query the query of this request
+	 * @param query the query of this request; doesn't include a leading question mark
 	 *
 	 * @return this request
 	 *
@@ -423,6 +422,17 @@ public final class Request extends Message<Request> {
 		this.query=query;
 
 		return this;
+	}
+
+
+	/**
+	 * Retrieves the target resource of this request.
+	 *
+	 * @return the full URL of the target resource of this request, including {@link #base() base},
+	 * {@link #path() path}  and optional {@link #query() query}
+	 */
+	public String resource() {
+		return query.isEmpty() ? item() : item()+"?"+query;
 	}
 
 
