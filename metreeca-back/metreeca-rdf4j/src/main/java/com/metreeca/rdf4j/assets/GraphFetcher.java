@@ -47,6 +47,7 @@ import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.integer;
 import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.md5;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -328,7 +329,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		final Model model=new LinkedHashModel();
 
-		final Collection<BigInteger> counts=new ArrayList<>();
+		final Map<Value, BigInteger> counts=new HashMap<>();
+
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
@@ -344,33 +346,57 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 						+"prefix : <{base}>\n"
 						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 						+"\n"
-						+"select ?type\t\n"
+						+"select \n"
 						+"\n"
-						+"\t(count(distinct {target}) as ?count)\n"
-						+"\t(min({target}) as ?min)\n"
-						+"\t(max({target}) as ?max) \n"
+						+"\t?type ?type_label ?type_notes\n"
 						+"\n"
-						+
-						"where {\n"
+						+"\t?min ?min_label ?min_notes\n"
+						+"\t?max ?max_label ?max_notes\n"
 						+"\n"
-						+"\t{roots}\n"
+						+"\t?count\n"
 						+"\n"
-						+"\t{filters}\n"
+						+"where {\n"
 						+"\n"
-						+"\t{path}\n"
+						+"\t{\n"
 						+"\n"
-						+"\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as "
+						+"\t\tselect ?type\n"
+						+"\n"
+						+"\t\t\t(min({target}) as ?min)\n"
+						+"\t\t\t(max({target}) as ?max) \n"
+						+"\n"
+						+"\t\t\t(count(distinct {target}) as ?count)\n"
+						+"\n"
+						+"\t\twhere {\n"
+						+"\n"
+						+"\t\t\t{roots}\n"
+						+"\n"
+						+"\t\t\t{filters}\n"
+						+"\n"
+						+"\t\t\t{path}\n"
+						+"\n"
+						+"\t\t\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as "
 						+"?type)\n"
 						+"\n"
-						+"}\n"
+						+"\t\t}\n"
 						+"\n"
-						+"group by ?type\n"
-						+"having ( count({target}) > 0 )\n"
-						+"order by desc(?count) ?type\n"
-						+"{offset}\n"
-						+"{limit}",
-
-				// !!! support slicing?
+						+"\t\tgroup by ?type\n"
+						+"\t\thaving ( count(distinct {target}) > 0 )\n"
+						+"\t\torder by desc(?count) ?type\n"
+						+"\t\t{offset}\n"
+						+"\t\t{limit}\n"
+						+"\n"
+						+"\t}\n"
+						+"\n"
+						+"\toptional { ?type rdfs:label ?type_label }\n"
+						+"\toptional { ?type rdfs:comment ?type_notes }\n"
+						+"\n"
+						+"\toptional { ?min rdfs:label ?min_label }\n"
+						+"\toptional { ?min rdfs:comment ?min_notes }\n"
+						+"\n"
+						+"\toptional { ?max rdfs:label ?max_label }\n"
+						+"\toptional { ?max rdfs:comment ?max_notes }\n"
+						+"\n"
+						+"}",
 
 				GraphEngine.Base,
 				target,
@@ -389,39 +415,55 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 				final Resource type=(Resource)bindings.getValue("type");
 
-				final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
+				final Value type_label=bindings.getValue("type_label");
+				final Value type_notes=bindings.getValue("type_notes");
 
 				final Value min=bindings.getValue("min");
 				final Value max=bindings.getValue("max");
 
+				final Value min_label=bindings.getValue("min_label");
+				final Value min_notes=bindings.getValue("min_notes");
+
+				final Value max_label=bindings.getValue("max_label");
+				final Value max_notes=bindings.getValue("max_notes");
+
 				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-				if ( type != null ) { model.add(resource, GraphEngine.stats, type); }
-				if ( type != null ) { model.add(type, GraphEngine.count, literal(count)); }
+				final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
 
-				if ( type != null && min != null ) { model.add(type, GraphEngine.min, min); }
-				if ( type != null && max != null ) { model.add(type, GraphEngine.max, max); }
+				model.add(resource, GraphEngine.stats, type);
+				model.add(type, GraphEngine.count, literal(count));
 
-				counts.add(count);
-				mins.add(min);
-				maxs.add(max);
+				if ( type_label != null ) { model.add(type, RDFS.LABEL, type_label); }
+				if ( type_notes != null ) { model.add(type, RDFS.COMMENT, type_notes); }
+
+				if ( min != null ) { model.add(type, GraphEngine.min, min); }
+				if ( max != null ) { model.add(type, GraphEngine.max, max); }
+
+				if ( min_label != null ) { model.add((Resource)min, RDFS.LABEL, min_label); }
+				if ( min_notes != null ) { model.add((Resource)min, RDFS.COMMENT, min_notes); }
+
+				if ( max_label != null ) { model.add((Resource)max, RDFS.LABEL, max_label); }
+				if ( max_notes != null ) { model.add((Resource)max, RDFS.COMMENT, max_notes); }
+
+				counts.putIfAbsent(type, count);
+
+				if ( min != null ) { mins.add(min); }
+				if ( max != null ) { maxs.add(max); }
 
 			}
 
 		}));
 
-		model.add(resource, GraphEngine.count, literal(counts.stream()
-				.filter(Objects::nonNull)
+		model.add(resource, GraphEngine.count, literal(counts.values().stream()
 				.reduce(BigInteger.ZERO, BigInteger::add)
 		));
 
 		mins.stream()
-				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y) < 0 ? x : y)
 				.ifPresent(min -> model.add(resource, GraphEngine.min, min));
 
 		maxs.stream()
-				.filter(Objects::nonNull)
 				.reduce((x, y) -> compare(x, y) > 0 ? x : y)
 				.ifPresent(max -> model.add(resource, GraphEngine.max, max));
 
@@ -448,30 +490,34 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 						+"\n"
 						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 						+"\n"
-						+"select ({target} as ?value)\t\n"
+						+"select ?value ?count ?label ?notes where {\n"
 						+"\n"
-						+"\t(sample(?l) as ?label)\n"
-						+"\t(sample(?n) as ?notes)\n"
-						+"\t(count(distinct {source}) as ?count)\n"
+						+"\t{\n"
 						+"\n"
-						+"where {\n"
+						+"\t\tselect ({target} as ?value) (count(distinct {source}) as ?count)\n"
 						+"\n"
-						+"\t{roots}\n"
-						+"\t\n"
-						+"\t{filters}\n"
-						+"\t\n"
-						+"\t{path}\n"
-						+"\t\n"
-						+"\toptional { {target} rdfs:label ?l }\n"
-						+"\toptional { {target} rdfs:comment ?n }\n"
-						+"\t\t\n"
-						+"}\n"
+						+"\t\twhere {\n"
 						+"\n"
-						+"group by {target} \n"
-						+"having ( count({source}) > 0 ) \n"
-						+"order by desc(?count) ?value\n"
-						+"{offset}\n"
-						+"{limit}",
+						+"\t\t\t{roots}\n"
+						+"\n"
+						+"\t\t\t{filters}\n"
+						+"\n"
+						+"\t\t\t{path}\n"
+						+"\n"
+						+"\t\t}\n"
+						+"\n"
+						+"\t\tgroup by {target} \n"
+						+"\t\thaving ( count(distinct {source}) > 0 ) \n"
+						+"\t\torder by desc(?count) ?value\n"
+						+"\t\t{offset}\n"
+						+"\t\t{limit}\n"
+						+"\n"
+						+"\t}\n"
+						+"\n"
+						+"\toptional { ?value rdfs:label ?label }\n"
+						+"\toptional { ?value rdfs:comment ?notes }\n"
+						+"\n"
+						+"}",
 
 				target, source,
 
@@ -486,22 +532,19 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		)))).evaluate(new AbstractTupleQueryResultHandler() {
 			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
 
+				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+
 				final Value value=bindings.getValue("value");
-				final Value count=bindings.getValue("count");
+				final Value count=literal(integer(bindings.getValue("count")).orElse(BigInteger.ZERO));
 				final Value label=bindings.getValue("label");
 				final Value notes=bindings.getValue("notes");
 
-				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+				final BNode term=bnode(md5(format(value)));
 
-				final BNode term=bnode();
+				model.add(resource, GraphEngine.terms, term);
 
-				if ( term != null ) { model.add(resource, GraphEngine.terms, term); }
-				if ( term != null && value != null ) { model.add(term, GraphEngine.value, value); }
-				if ( term != null && count != null ) {
-					model.add(term, GraphEngine.count, literal(integer(count).orElse(BigInteger.ZERO)));
-				}
-
-				// !!! manage multiple languages
+				model.add(term, GraphEngine.value, value);
+				model.add(term, GraphEngine.count, count);
 
 				if ( label != null ) { model.add((Resource)value, RDFS.LABEL, label); }
 				if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
@@ -697,8 +740,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		}
 
 		@Override public Snippet probe(final Lang lang) {
-			return ((Collection<String>)lang.tags()).isEmpty() ? nothing() : snippet("filter (lang({source}) in "
-							+ "({tags}))",
+			return lang.tags().isEmpty() ? nothing() : snippet("filter (lang({source}) in ({tags}))",
 					var(source), list(lang.tags().stream().map(Values::quote), ", ")
 			);
 		}

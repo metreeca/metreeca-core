@@ -23,8 +23,7 @@ import com.metreeca.rest.Response;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -42,6 +41,7 @@ import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
+
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -209,8 +209,12 @@ public final class GraphTest {
 				.flatMap(s -> Optional
 
 						.of(s.getObject())
+
+						.filter(o -> s.getPredicate().equals(RDFS.LABEL) || s.getPredicate().equals(RDFS.COMMENT))
+
 						.filter(Literal.class::isInstance)
 						.map(Literal.class::cast)
+
 						.filter(l -> l.getDatatype().equals(XSD.STRING))
 						.map(Literal::getLabel)
 

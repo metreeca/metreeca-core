@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.*;
+import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.*;
@@ -44,7 +45,6 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
-import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Like.like;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
@@ -61,6 +61,7 @@ import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.rdf4j.assets.GraphTest.localized;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
 import static com.metreeca.rest.Context.asset;
@@ -70,6 +71,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 
@@ -98,7 +100,7 @@ final class GraphFetcherTest {
 
 
 	private void exec(final Runnable task) {
-		GraphTest.exec(model(small()), task);
+		GraphTest.exec(model(localized(small(), "", "en", "it")), task);
 	}
 
 
@@ -269,13 +271,14 @@ final class GraphFetcherTest {
 		}
 
 		@Test void testEmptyProjection() {
+			//language=TEXT
 			exec(() -> assertThat(query(
 
-					Root, stats(clazz(term("Employee")), asList(), 0, 0)
+					Root, stats(clazz(term("Office")), emptyList(), 0, 0)
 
-			)).isIsomorphicTo(graph(
+			)).isIsomorphicTo(Xtream.from(
 
-					"construct { \n"
+					graph("construct { \n"
 							+"\n"
 							+"\t<app:/> app:count ?count; app:min ?min; app:max ?max;\n"
 							+"\n"
@@ -287,13 +290,30 @@ final class GraphFetcherTest {
 							+"\n"
 							+"\tselect (count(?p) as ?count) (min(?p) as ?min) (max(?p) as ?max) {\n"
 							+"\n"
-							+"\t\t?p a :Employee\n"
+							+"\t\t?p a :Office\n"
 							+"\n"
 							+"\t}\n"
 							+"\n"
 							+"}"
+					),
 
-			)));
+					graph("construct { \n"
+							+"\n"
+							+"\t?min rdfs:label ?min_label.\n"
+							+"\t?max rdfs:label ?max_label.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t{ select (min(?p) as ?min) (max(?p) as ?max) { ?p a :Office } }\n"+
+							"\n"
+							+"\t?min "
+							+"rdfs:label ?min_label.\n"
+							+"\t?max rdfs:label ?max_label.\n"
+							+"\n"
+							+"}"
+					)
+
+			).collect(toList())));
 		}
 
 		@Test void testRootConstraints() {
@@ -336,27 +356,37 @@ final class GraphFetcherTest {
 		@Test void testEmptyProjection() {
 			exec(() -> assertThat(query(
 
-					Root, terms(clazz(term("Employee")), asList(), 0, 0)
+					Root, terms(clazz(term("Office")), emptyList(), 0, 0)
 
-			)).isIsomorphicTo(graph(
+			)).isIsomorphicTo(Xtream.from(
 
-					"construct { \n"
+					graph("construct { \n"
 							+"\n"
 							+"\t<app:/> app:terms [\n"
-							+"\t\tapp:value ?employee;\n"
+							+"\t\tapp:value ?office;\n"
 							+"\t\tapp:count 1\n"
 							+"\t].\n"
 							+"\n"
-							+"\t?employee rdfs:label ?label.\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?office a :Office;\n"
+							+"\n"
+							+"}"
+					),
+
+					graph("construct { \n"
+							+"\n"
+							+"\t?office rdfs:label ?label.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\t?employee a :Employee; \n"
+							+"\t?office a :Office; \n"
 							+"\t\trdfs:label ?label.\n"
 							+"\n"
 							+"}"
+					)
 
-			)));
+			).collect(toList())));
 		}
 
 		@Test void testRootConstraints() {
@@ -506,14 +536,6 @@ final class GraphFetcherTest {
 					Root, items(field(term("office"), range(item("employees/1621"), item("employees/1625"))))
 
 			)).isInstanceOf(UnsupportedOperationException.class));
-		}
-
-		@Test void testLocalized() {
-			exec(() -> assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> query(
-
-					Root, items(field(term("employee"), lang("en", "it")))
-
-			)));
 		}
 
 

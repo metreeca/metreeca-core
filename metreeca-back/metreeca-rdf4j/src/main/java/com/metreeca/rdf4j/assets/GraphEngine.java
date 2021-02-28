@@ -26,8 +26,10 @@ import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.iri;
@@ -39,6 +41,9 @@ import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rdf4j.assets.GraphFetcher.convey;
 import static com.metreeca.rest.Context.asset;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 
 
 /**
@@ -60,9 +65,12 @@ public final class GraphEngine implements Engine {
 	static final IRI max=iri(Base, "max");
 	static final IRI min=iri(Base, "min");
 
+	private static final Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
+
+
 	static Shape StatsShape(final Stats query) {
 
-		final Shape term=nested(query.shape(), query.path());
+		final Shape term=annotations(query.shape(), query.path());
 
 		return and(
 
@@ -80,16 +88,19 @@ public final class GraphEngine implements Engine {
 	}
 
 	static Shape TermsShape(final Terms query) {
+
+		final Shape term=annotations(query.shape(), query.path());
+
 		return and(
 				field(terms, multiple(),
-						field(value, required(), nested(query.shape(), query.path())),
+						field(value, required(), term),
 						field(count, required(), datatype(XSD.INTEGER))
 				)
 		);
 	}
 
 
-	private static Shape nested(final Shape shape, final Iterable<IRI> path) {
+	private static Shape annotations(final Shape shape, final Iterable<IRI> path) {
 
 		Shape nested=convey(shape);
 
@@ -103,8 +114,7 @@ public final class GraphEngine implements Engine {
 					.orElseThrow(() -> new IllegalArgumentException(String.format("unknown path step <%s>", step)));
 		}
 
-		return nested;
-
+		return and(fields(nested).filter(field -> Annotations.contains(field.name())));
 	}
 
 
