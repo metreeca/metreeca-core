@@ -24,7 +24,9 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+
 import javax.json.JsonException;
 import javax.json.JsonObject;
 
@@ -229,10 +231,13 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	/**
 	 * Configures {@code message} {@code Content-Type} header to {@value JSONFormat#MIME}, unless already defined, and
 	 * encodes the JSON-LD model {@code value} into the output stream accepted by the {@code message}
-	 * {@link OutputFormat} body
+	 * {@link OutputFormat} body.
+	 *
+	 * <p>If the originating {@code message} {@linkplain Message#request() request} includes an {@code Accept-Language}
+	 * header, only matching tagged literals from {@code value} are included in the response body.</p>
 	 *
 	 * <p><strong>Warning</strong> / {@code @context} objects generated from the {@code message}
-	 * {@linkplain JSONLDFormat#shape() shape attribute} are currently not embedded.</p>
+	 * {@linkplain JSONLDFormat#shape() shape attribute} are embedded only if {@code Content-Type} is {@value MIME}.</p>
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 
@@ -257,7 +262,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		final List<String> langs=message.request()
 				.header("Accept-Language")
-				.map(Format::langs)
+				.map((Function<String, List<String>>)Format::langs)
 				.orElse(emptyList());
 
 		return message
