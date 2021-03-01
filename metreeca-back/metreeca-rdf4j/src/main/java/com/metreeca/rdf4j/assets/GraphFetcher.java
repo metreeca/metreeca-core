@@ -28,7 +28,6 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
-import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -59,7 +58,6 @@ import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
@@ -216,106 +214,27 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 						model.add(statement(resource, LDP.CONTAINS, match));
 					}
 
-					if ( template.isEmpty() ) { // wildcard shape => symmetric+labelled concise bounded description
+					template.forEach(statement -> {
 
-						description((Resource)match);
+						final Resource subject=statement.getSubject();
+						final Value object=statement.getObject();
 
-					} else {
+						final Value source=subject instanceof BNode
+								? bindings.getValue(((BNode)subject).getID())
+								: subject;
 
-						template(bindings);
+						final Value target=object instanceof BNode
+								? bindings.getValue(((BNode)object).getID())
+								: object;
 
-					}
-
-				}
-
-			}
-
-			private void template(final BindingSet bindings) {
-				template.forEach(statement -> {
-
-					final Resource subject=statement.getSubject();
-					final Value object=statement.getObject();
-
-					final Value source=subject instanceof BNode ? bindings.getValue(((BNode)subject).getID()) :
-							subject;
-					final Value target=object instanceof BNode ? bindings.getValue(((BNode)object).getID()) :
-							object;
-
-					if ( source instanceof Resource && target != null ) {
-						model.add(statement((Resource)source, statement.getPredicate(), target));
-					}
-
-				});
-			}
-
-			private void description(final Resource resource) {
-
-				final Collection<Resource> visited=new HashSet<>();
-				final Collection<Resource> pending=new HashSet<>(singleton(resource));
-
-				while ( !pending.isEmpty() ) {
-
-					final GraphQuery query=connection.prepareGraphQuery(source(
-
-							"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-									+"\n"
-									+"construct {\n"
-									+"\n"
-									+"\t?r ?p ?o. ?o a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
-									+"\t?s ?p ?r. ?s a ?t; rdfs:label ?l; rdfs:comment ?c.\n"
-									+"\t\n"
-									+"} where {\n"
-									+"\n"
-									+"\tvalues ?r {\n"
-									+"\t\t{resources}\n"
-									+"\t}\n"
-									+"\n"
-									+"\t{\n"
-									+"\t\n"
-									+"\t\t?r ?p ?o\n"
-									+"\n"
-									+"\t\toptional { ?o a ?t }\n"
-									+"\t\toptional { ?o rdfs:label ?l }\n"
-									+"\t\toptional { ?o rdfs:comment ?c }\n"
-									+"\n"
-									+"\t} union {\n"
-									+"\n"
-									+"\t\t?s ?p ?r\n"
-									+"\n"
-									+"\t\toptional { ?s a ?t }\n"
-									+"\t\toptional { ?s rdfs:label ?l }\n"
-									+"\t\toptional { ?s rdfs:comment ?c }\n"
-									+"\n"
-									+"\t}\n"
-									+"\n"
-									+"}",
-
-							list(pending.stream().map(Values::format), "\n")
-
-					));
-
-					pending.clear();
-
-					query.evaluate(new AbstractRDFHandler() {
-						@Override public void handleStatement(final Statement statement) {
-
-							model.add(statement);
-
-							final Resource subject=statement.getSubject();
-							final Value object=statement.getObject();
-
-							if ( subject instanceof BNode && visited.add(subject) ) {
-								pending.add(subject);
-							}
-
-							if ( object instanceof BNode && visited.add((Resource)object) ) {
-								pending.add((Resource)object);
-							}
-
+						if ( source instanceof Resource && target != null ) {
+							model.add(statement((Resource)source, statement.getPredicate(), target));
 						}
+
 					});
 
 				}
+
 			}
 
 		}));

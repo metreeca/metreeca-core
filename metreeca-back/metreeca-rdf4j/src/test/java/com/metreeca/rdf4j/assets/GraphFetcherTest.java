@@ -167,33 +167,17 @@ final class GraphFetcherTest {
 		@Test void testEmptyProjection() {
 			exec(() -> assertThat(query(
 
-					Root, items(any(item("employees/1002"), item("employees/1056")))
+					Root, items(clazz(term("Office")))
 
 			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<app:/> ldp:contains ?office.\n"
 							+"\t\n"
-							+"\t?employee ?d ?r.\n"
-							+"\t?r ?i ?employee.\n"
-							+"\n"
-							+"\t?r rdf:type ?t.\n"
-							+"\t?r rdfs:label ?l.\n"
-							+"\t?r rdfs:comment ?c.\n"
-							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\tvalues ?employee {\n"
-							+"\t\t<employees/1002>\n"
-							+"\t\t<employees/1056>\n"
-							+"\t}\n"
-							+"\n"
-							+"\t{ ?employee ?d ?r } union { ?r ?i ?employee }\n"
-							+"\n"
-							+"\toptional { ?r rdf:type ?t }\n"
-							+"\toptional { ?r rdfs:label ?l }\n"
-							+"\toptional { ?r rdfs:comment ?c }\n"
+							+"\t?office a :Office\n"
 							+"\n"
 							+"}"
 
@@ -1086,64 +1070,5 @@ final class GraphFetcherTest {
 			));
 		});
 	}
-
-
-	@Nested final class SameAs {
-
-		private Collection<Statement> query(final Query query) {
-			return asset(Graph.graph()).exec(connection -> {
-				return query.map(new GraphFetcher(connection, Root, new Options() {
-
-					@Override public boolean same() { return true;}
-
-				}));
-			});
-		}
-
-
-		@Test void testClassFilters() {
-			exec(() -> assertThat(query(
-
-					items(clazz(term("Alias")))
-
-			)).isIsomorphicTo(graph(
-
-					"construct {\n"
-							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?item a ?type values ?type { :Office :Alias }\n"
-							+"\n"
-							+"}"
-
-			)));
-		}
-
-		@Test void testEdgeFilters() {
-			exec(() -> assertThat(query(
-
-					items(field(RDF.TYPE).as(term("Alias")))
-
-			)).isIsomorphicTo(graph(
-
-					"construct {\n"
-							+"\n"
-							+"\t<app:/> ldp:contains ?item. "
-							+"?item a ?type.\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?item (owl:sameAs|^owl:sameAs)*/a/(owl:sameAs|^owl:sameAs)* ?type values ?type { "
-							+ ":Office :Alias }\n"
-							+"\n"
-							+"}"
-
-			)));
-		}
-
-	}
-
 
 }
