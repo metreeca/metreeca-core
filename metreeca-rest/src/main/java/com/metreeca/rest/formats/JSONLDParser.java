@@ -42,6 +42,7 @@ import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -233,7 +234,11 @@ final class JSONLDParser {
 			final Field head=path.get(0);
 			final List<Field> tail=path.subList(1, path.size());
 
-			return field(head.name()).as(filter(tail, value, head.shape(), mapper));
+			final Field field=field(shape, head).orElseThrow(() ->
+					new IllegalArgumentException(format("unknown path step <%s>", head))
+			);
+
+			return field(field.name()).as(filter(tail, value, field.shape(), mapper));
 
 		}
 	}
@@ -349,7 +354,7 @@ final class JSONLDParser {
 					.ofNullable(aliases.get(step))
 					.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
 
-			steps.add(field);
+			steps.add(field.alias("").shape(and())); // retain only predicate info
 			reference=field.shape();
 
 			matcher.region(last=matcher.end(), trimmed.length());

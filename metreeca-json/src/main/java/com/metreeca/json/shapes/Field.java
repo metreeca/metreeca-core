@@ -75,6 +75,25 @@ public final class Field extends Shape {
 	}
 
 
+	public static Optional<Field> field(final Shape shape, final Field step) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( step == null ) {
+			throw new NullPointerException("null step");
+		}
+
+		return fields(shape)
+
+				.filter(field -> // consider only predicate info
+						field.direct() == step.direct() && field.name().equals(step.name())
+				)
+
+				.findFirst();
+	}
+
 	public static Stream<Field> fields(final Shape shape) {
 
 		if ( shape == null ) {

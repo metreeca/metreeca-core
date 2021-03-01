@@ -106,15 +106,13 @@ public final class GraphEngine implements Engine {
 		Shape nested=convey(shape);
 
 		for (final Field step : path) {
-			nested=fields(nested)
-
-					.filter(field -> field.direct() == step.direct() && field.name().equals(step.name()))
-					.findFirst()
-					.map(Field::shape)
+			nested=field(nested, step)
 
 					.orElseThrow(() -> new IllegalArgumentException(format(
 							"unknown path step <%s>", step.shape(and())
-					)));
+					)))
+
+					.shape();
 		}
 
 		return and(fields(nested).filter(field -> Annotations.contains(field.name())));
