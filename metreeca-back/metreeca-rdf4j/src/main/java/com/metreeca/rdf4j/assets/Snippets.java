@@ -16,8 +16,6 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.json.shapes.Field;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.*;
@@ -26,8 +24,6 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import static com.metreeca.json.Values.format;
 
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyIterator;
@@ -89,22 +85,7 @@ final class Snippets {
 	}
 
 
-	//// SPARQL DSL ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static Snippet path(final Collection<Field> path) {
-		return list(path.stream().map(f -> f.direct() ? format(f.name()) : "^"+format(f.name())), '/');
-	}
-
-	static Snippet path(final Object source, final Collection<Field> path, final Object target) {
-		return source == null || path == null || path.isEmpty() || target == null ? nothing()
-				: snippet(source, " ", path(path), " ", target, " .\n");
-	}
-
-	static Snippet edge(final Object source, final Field field, final Object target) {
-		return source == null || field == null || target == null ? nothing() : field.direct()
-				? snippet(source, " ", format(field.name()), " ", target, " .\n")
-				: snippet(target, " ", format(field.name()), " ", source, " .\n");
-	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	static Snippet var() {
 		return var(new Object());

@@ -1071,4 +1071,87 @@ final class GraphFetcherTest {
 		});
 	}
 
+
+	@Nested final class SameAs {
+
+		private Collection<Statement> query(final Query query) {
+			return asset(Graph.graph()).exec(connection -> {
+				return query.map(new GraphFetcher(connection, Root, new Options() {
+
+					@Override public boolean same() { return true;}
+
+				}));
+			});
+		}
+
+
+		@Test void testClassFilters() {
+			exec(() -> assertThat(query(
+
+					items(clazz(term("Alias")))
+
+			)).isIsomorphicTo(graph(
+
+					"construct {\n"
+							+"\n"
+							+"\t<app:/> ldp:contains ?item.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?item a ?type values ?type { :Office :Alias }\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
+		@Test void testEdgeFilters() {
+			exec(() -> assertThat(query(
+
+					items(field(RDF.TYPE).as(term("Alias")))
+
+			)).isIsomorphicTo(graph(
+
+					"construct {\n"
+							+"\n"
+							+"\t<app:/> ldp:contains ?item. "
+							+"?item a ?type.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?item (owl:sameAs|^owl:sameAs)*/a/(owl:sameAs|^owl:sameAs)* ?type"
+							+" values ?type { :Office :Alias }\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
+		@Test void testFieldPatterns() {
+			exec(() -> assertThat(query(
+
+					items(and(clazz(term("Alias")), field(RDFS.LABEL)))
+
+			)).isIsomorphicTo(graph(
+
+					"construct {\n"
+							+"\n"
+							+"\t<app:/> ldp:contains ?item. "
+							+"?item rdfs:label ?label.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\tvalues ?type { :Office :Alias }\n"
+							+"\n"
+							+"\t?item (owl:sameAs|^owl:sameAs)*/a/(owl:sameAs|^owl:sameAs)* ?type;\n"
+							+"\t\t(owl:sameAs|^owl:sameAs)*/rdfs:label/(owl:sameAs|^owl:sameAs)* ?label\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
+	}
+
+
 }

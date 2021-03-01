@@ -49,6 +49,7 @@ import static com.metreeca.json.Values.md5;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.Or.or;
@@ -172,6 +173,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 						"# items query\n"
 								+"\n"
+								+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
 								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 								+"\n"
 								+"select {variables} where {\n"
@@ -266,6 +268,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 				"# stats query\n"
 						+"\n"
 						+"prefix : <{base}>\n"
+						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
 						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 						+"\n"
 						+"select \n"
@@ -368,7 +371,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 				if ( max_label != null ) { model.add((Resource)max, RDFS.LABEL, max_label); }
 				if ( max_notes != null ) { model.add((Resource)max, RDFS.COMMENT, max_notes); }
 
-				counts.putIfAbsent(type,count);
+				counts.putIfAbsent(type, count);
 
 				if ( min != null ) { mins.add(min); }
 				if ( max != null ) { maxs.add(max); }
@@ -410,6 +413,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 				"# terms query\n"
 						+"\n"
+						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
 						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 						+"\n"
 						+"select ?value ?count ?label ?notes where {\n"
@@ -560,6 +564,34 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	}
 
 
+	private Snippet path(final Object source, final Collection<Field> path, final Object target) {
+		return source == null || path == null || path.isEmpty() || target == null ? nothing()
+				: snippet(source, " ", path(path), " ", target, " .\n");
+	}
+
+	private Snippet edge(final Object source, final Field field, final Object target) {
+		return source == null || field == null || target == null ? nothing() : field.direct()
+				? snippet(source, " ", same(true), format(field.name()), same(false), " ", target, " .\n")
+				: snippet(target, " ", same(true), format(field.name()), same(false), " ", source, " .\n");
+	}
+
+
+	private Snippet path(final Collection<Field> path) {
+		return snippet(same(true), list(path.stream().map(f ->
+
+				snippet(f.direct() ? format(f.name()) : "^"+format(f.name()), same(false))
+
+		), '/'));
+	}
+
+
+	private Snippet same(final boolean head) {
+		return options.same()
+				? snippet(head ? nothing() : "/", "(owl:sameAs|^owl:sameAs)*", head ? "/" : nothing())
+				: nothing();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final class TemplateProbe extends Shape.Probe<Stream<Integer>> {
@@ -653,7 +685,10 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		}
 
 		@Override public Snippet probe(final Clazz clazz) {
-			return snippet(var(source), " a/rdfs:subClassOf* ", format(clazz.iri()), " .");
+			return snippet(var(source), " ",
+					same(true), "a/(", same(true), "rdfs:subClassOf)*", same(false), " ",
+					format(clazz.iri()), " ."
+			);
 		}
 
 		@Override public Snippet probe(final Lang lang) {
@@ -723,11 +758,10 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		@Override public Snippet probe(final Field field) {
 
-			final IRI iri=field.name();
 			final Shape shape=field.shape();
 
 			final Optional<Set<Value>> all=all(shape).map(GraphFetcher.this::values);
-			final Optional<Set<Value>> any=Any.any(shape).map(GraphFetcher.this::values);
+			final Optional<Set<Value>> any=any(shape).map(GraphFetcher.this::values);
 
 			final Optional<Value> singleton=any
 					.filter(values -> values.size() == 1)
