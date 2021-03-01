@@ -40,8 +40,10 @@ public abstract class Query {
 	private final int limit;
 
 
-	protected Query(final Shape shape, final List<Field> path, final List<Order> orders, final int offset,
-			final int limit) {
+	protected Query(final Shape shape,
+			final List<Field> path, final List<Order> orders,
+			final int offset, final int limit
+	) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -133,7 +135,7 @@ public abstract class Query {
 		return format(
 				"%s {\n\tshape: %s\n\tpath: %s\norder: %s\n\toffset: %d\n\tlimit: %d\n}",
 				getClass().getSimpleName().toLowerCase(Locale.ROOT),
-				shape.toString().replace("\n", "\n\t"),
+				Values.indent(shape.toString()),
 				path, orders, offset, limit
 		);
 	}

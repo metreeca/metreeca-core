@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.indent;
 import static com.metreeca.json.Values.internal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -346,7 +347,7 @@ public final class Field extends Shape {
 
 		builder.append(format(name));
 
-		if ( !shape.equals(and()) ) { builder.append(").as(").append(shape); }
+		if ( !shape.equals(and()) ) { builder.append(").shape(\n").append(indent(shape.toString())); }
 
 		builder.append(")");
 

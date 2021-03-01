@@ -25,6 +25,7 @@ import java.util.*;
 
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.Or.or;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
@@ -106,7 +107,7 @@ public final class Range extends Shape {
 
 	@Override public String toString() {
 		return "range("+values.stream()
-				.map(v -> format(v).replace("\n", "\n\t"))
+				.map(v -> Values.indent(format(v)))
 				.collect(joining(",\n\t", "\n\t", "\n"))
 				+")";
 	}

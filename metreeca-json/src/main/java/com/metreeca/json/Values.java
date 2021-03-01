@@ -71,6 +71,9 @@ public final class Values {
 	);
 
 
+	private static final Pattern NewlinePattern=Pattern.compile("\n");
+
+
 	private static final ValueFactory factory=new AbstractValueFactory() {}; // before constant initialization
 	private static final Comparator<Value> comparator=new ValueComparator();
 
@@ -542,6 +545,8 @@ public final class Values {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static String quote(final CharSequence text) {
 
 		if ( text == null ) {
@@ -578,6 +583,15 @@ public final class Values {
 		builder.append('\'');
 
 		return builder.toString();
+	}
+
+	public static String indent(final CharSequence text) {
+
+		if ( text == null ) {
+			throw new NullPointerException("null text");
+		}
+
+		return NewlinePattern.matcher(text).replaceAll("\n\t");
 	}
 
 

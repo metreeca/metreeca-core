@@ -18,6 +18,7 @@
 package com.metreeca.rdf4j.assets;
 
 
+import com.metreeca.json.Values;
 import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.*;
@@ -240,7 +241,7 @@ public final class GraphTest {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
-					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
+					+Values.indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
 
 			final List<Map<String, Value>> tuples=new ArrayList<>();
 
@@ -264,7 +265,7 @@ public final class GraphTest {
 
 		} catch ( final MalformedQueryException e ) {
 
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+Values.indent(sparql));
 
 		}
 	}
@@ -273,7 +274,7 @@ public final class GraphTest {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
-					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
+					+Values.indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
 
 			final Model model=new LinkedHashModel();
 
@@ -285,7 +286,7 @@ public final class GraphTest {
 
 		} catch ( final MalformedQueryException e ) {
 
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+Values.indent(sparql));
 
 		}
 	}

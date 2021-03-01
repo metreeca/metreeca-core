@@ -17,6 +17,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
@@ -118,9 +119,9 @@ public final class When extends Shape {
 
 	@Override public String toString() {
 		return "when(\n\t"
-				+test.toString().replace("\n", "\n\t")+",\n\t"
-				+pass.toString().replace("\n", "\n\t")
-				+(fail.equals(and()) ? "" : ",\n\t"+fail.toString().replace("\n", "\n\t"))
+				+Values.indent(test.toString())+",\n\t"
+				+Values.indent(pass.toString())
+				+(fail.equals(and()) ? "" : ",\n\t"+Values.indent(fail.toString()))
 				+"\n)";
 	}
 

@@ -112,7 +112,7 @@ public final class All extends Shape {
 
 	@Override public String toString() {
 		return "all("+(values.isEmpty() ? "" : values.stream()
-				.map(v -> format(v).replace("\n", "\n\t"))
+				.map(v -> Values.indent(format(v)))
 				.collect(joining(",\n\t", "\n\t", "\n"))
 		)+")";
 	}

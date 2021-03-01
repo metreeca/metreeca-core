@@ -39,6 +39,7 @@ import static com.metreeca.json.shapes.When.when;
  */
 public abstract class Shape {
 
+
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape required() { return and(minCount(1), maxCount(1)); }
@@ -51,26 +52,6 @@ public abstract class Shape {
 
 
 	public static Shape exactly(final Value... values) { return and(all(values), range(values)); }
-
-
-	/**
-	 * Creates a conditional shape.
-	 *
-	 * @param shapes the shapes this shape is to be applied as a test condition
-	 *
-	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
-	 * shapes}
-	 *
-	 * @throws NullPointerException if {@code shapes} is null or contains null items
-	 */
-	public final Shape then(final Shape... shapes) {
-
-		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null shapes");
-		}
-
-		return shapes.length == 0 ? this : when(this, and(shapes));
-	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,6 +126,26 @@ public abstract class Shape {
 		}
 
 		return mapper.apply(this);
+	}
+
+
+	/**
+	 * Creates a conditional shape.
+	 *
+	 * @param shapes the shapes this shape is to be applied as a test condition
+	 *
+	 * @return a {@linkplain When#when(Shape, Shape) conditional} shape applying this shape as test condition to {@code
+	 * shapes}
+	 *
+	 * @throws NullPointerException if {@code shapes} is null or contains null items
+	 */
+	public final Shape then(final Shape... shapes) {
+
+		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null shapes");
+		}
+
+		return shapes.length == 0 ? this : when(this, and(shapes));
 	}
 
 
