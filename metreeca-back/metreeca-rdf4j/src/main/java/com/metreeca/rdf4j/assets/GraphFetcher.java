@@ -765,19 +765,19 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 
 		@Override public Snippet probe(final Pattern pattern) {
-			return snippet("filter regex({source}, '{pattern}', '{flags}')",
+			return snippet("filter regex((str({source}), '{pattern}', '{flags}')",
 					var(source), pattern.expression().replace("\\", "\\\\"), pattern.flags()
 			);
 		}
 
 		@Override public Snippet probe(final Like like) {
-			return snippet("filter regex({source}, '{pattern}')",
+			return snippet("filter regex(str({source}), '{pattern}')",
 					var(source), like.toExpression().replace("\\", "\\\\")
 			);
 		}
 
 		@Override public Snippet probe(final Stem stem) {
-			return snippet("filter strstarts({source}, '{stem}')",
+			return snippet("filter strstarts(str({source}), '{stem}')",
 					var(source), stem.prefix()
 			);
 		}
