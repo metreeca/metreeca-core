@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 
+import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -37,9 +38,12 @@ import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 
 final class GraphUpdaterTest {
 
+	private static final Options options=new Options() {};
+
+
 	@Test void testUpdate() {
 		exec(model(small()), () -> {
-			new GraphUpdater()
+			new GraphUpdater(options)
 
 					.handle(new Request()
 							.base(Base)
@@ -87,7 +91,7 @@ final class GraphUpdaterTest {
 	}
 
 	@Test void testReportMissing() {
-		exec(() -> new GraphUpdater()
+		exec(() -> new GraphUpdater(options)
 
 				.handle(new Request()
 						.base(Base)

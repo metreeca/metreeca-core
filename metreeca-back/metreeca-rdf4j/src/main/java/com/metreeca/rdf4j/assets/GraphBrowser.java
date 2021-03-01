@@ -20,6 +20,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
+import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -36,7 +37,14 @@ import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 final class GraphBrowser {
 
+	private final Options options;
+
 	private final Graph graph=asset(graph());
+
+
+	GraphBrowser(final Options options) {
+		this.options=options;
+	}
 
 
 	Future<Response> handle(final Request request) {
@@ -49,7 +57,7 @@ final class GraphBrowser {
 
 					return response.status(OK) // containers are virtual and respond always with 200 OK
 							.attribute(shape(), query.map(new ShapeProbe()))
-							.body(jsonld(), query.map(new GraphFetcher(connection, item)));
+							.body(jsonld(), query.map(new GraphFetcher(connection, item, options)));
 
 				}))
 		);

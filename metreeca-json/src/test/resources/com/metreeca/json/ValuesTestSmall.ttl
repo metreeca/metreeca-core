@@ -449,3 +449,14 @@
 	rdfs:label "Tokyo";
 	geo:lat "35.6895";
 	geo:long "139.69171" .
+
+
+#### Aliases ##########################################################################################################
+
+<aliases/1> a :Alias; owl:sameAs <offices/1> .
+<aliases/6> a :Alias; owl:sameAs <offices/6> .
+<aliases/4> a :Alias; owl:sameAs <offices/4> .
+<aliases/2> a :Alias; owl:sameAs <offices/2> .
+<aliases/3> a :Alias; owl:sameAs <offices/3> .
+<aliases/7> a :Alias; owl:sameAs <offices/7> .
+<aliases/5> a :Alias; owl:sameAs <offices/5> .

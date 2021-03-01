@@ -20,6 +20,7 @@ import com.metreeca.json.Query;
 import com.metreeca.json.*;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
@@ -100,12 +101,16 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 	private final IRI resource;
 
+	private final Options options;
+
+
 	private final Logger logger=asset(logger());
 
 
-	GraphFetcher(final RepositoryConnection connection, final IRI resource) {
+	GraphFetcher(final RepositoryConnection connection, final IRI resource, final Options options) {
 		this.connection=connection;
 		this.resource=resource;
+		this.options=options;
 	}
 
 

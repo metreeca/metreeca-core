@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.ValuesTest;
+import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -41,6 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Nested final class GraphBrowserTest {
 
+	private static final Options options=new Options() {};
+
 	private Request request() {
 		return new Request()
 				.base(ValuesTest.Base)
@@ -50,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 	@Test void testBrowse() {
-		exec(model(small()), () -> new GraphBrowser()
+		exec(model(small()), () -> new GraphBrowser(options)
 
 				.handle(request())
 
@@ -69,7 +72,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testBrowseFiltered() {
-		exec(model(small()), () -> new GraphBrowser()
+		exec(model(small()), () -> new GraphBrowser(options)
 
 				.handle(request()
 						.query("title=Sales+Rep")
@@ -95,7 +98,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testSliceTermsQueries() {
-		exec(model(small()), () -> new GraphBrowser()
+		exec(model(small()), () -> new GraphBrowser(options)
 
 				.handle(request()
 						.query("_terms=office&_offset=1&_limit=3")

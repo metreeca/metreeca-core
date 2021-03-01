@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.ValuesTest;
+import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -36,6 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class GraphRelatorTest {
 
+	private static final Options options=new Options() {};
+
 	private Request request() {
 		return new Request()
 				.base(ValuesTest.Base)
@@ -45,7 +48,7 @@ final class GraphRelatorTest {
 
 
 	@Test void testRelate() {
-		exec(model(small()), () -> new GraphRelator()
+		exec(model(small()), () -> new GraphRelator(options)
 
 				.handle(request())
 

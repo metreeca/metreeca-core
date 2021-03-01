@@ -19,6 +19,7 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.ValuesTest;
+import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.formats.JSONLDFormat;
 
@@ -41,6 +42,8 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 
 final class GraphCreatorTest {
+
+	private static final Options options=new Options() {};
 
 	private static final Shape Employee=and(
 			filter().then(field(RDF.TYPE).as(all(term("Employee")))),
@@ -66,7 +69,7 @@ final class GraphCreatorTest {
 
 
 	@Test void testCreate() {
-		exec(() -> new GraphCreator()
+		exec(() -> new GraphCreator(options)
 
 				.handle(request())
 
@@ -98,7 +101,7 @@ final class GraphCreatorTest {
 	@Test void testConflictingSlug() {
 		exec(() -> {
 
-			final GraphCreator creator=new GraphCreator();
+			final GraphCreator creator=new GraphCreator(options);
 
 			creator.handle(request()).accept(response -> {});
 

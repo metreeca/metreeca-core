@@ -19,6 +19,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
+import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -39,7 +40,14 @@ import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 final class GraphRelator {
 
+	private final Options options;
+
 	private final Graph graph=asset(graph());
+
+
+	GraphRelator(final Options options) {
+		this.options=options;
+	}
 
 
 	Future<Response> handle(final Request request) {
@@ -52,7 +60,7 @@ final class GraphRelator {
 
 					return Optional
 
-							.of(query.map(new GraphFetcher(connection, item)))
+							.of(query.map(new GraphFetcher(connection, item, options)))
 
 							.filter(model -> !model.isEmpty())
 

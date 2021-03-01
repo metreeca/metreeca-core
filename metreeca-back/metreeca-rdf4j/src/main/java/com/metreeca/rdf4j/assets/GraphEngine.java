@@ -50,7 +50,7 @@ import static java.util.Collections.unmodifiableSet;
 /**
  * Model-driven graph engine.
  *
- * <p>Manages graph transactions and handles model-driven CRUD actions on LDP resources stored in the shared
+ * <p>Manages graph transactions and handles model-driven CRUD actions on linked data resources stored in the shared
  * {@linkplain Graph graph}.</p>
  */
 public final class GraphEngine implements Engine {
@@ -121,13 +121,48 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	static interface Options {
+
+		default boolean same() { return false; }
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private boolean same;
+
 	private final Graph graph=asset(graph());
 
-	private final GraphCreator creator=new GraphCreator();
-	private final GraphRelator relator=new GraphRelator();
-	private final GraphBrowser browser=new GraphBrowser();
-	private final GraphUpdater updater=new GraphUpdater();
-	private final GraphDeleter deleter=new GraphDeleter();
+	private final Options options=new Options() {
+
+		@Override public boolean same() { return same; }
+
+	};
+
+
+	private final GraphCreator creator=new GraphCreator(options);
+	private final GraphRelator relator=new GraphRelator(options);
+	private final GraphBrowser browser=new GraphBrowser(options);
+	private final GraphUpdater updater=new GraphUpdater(options);
+	private final GraphDeleter deleter=new GraphDeleter(options);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Configures {@link OWL#SAMEAS owl:sameAs} query rewriting.
+	 *
+	 * @param same if {@code true}, enable query-rewriting to support {@code owl:sameAs} reasoning
+	 *
+	 * @return this graph engine
+	 */
+	public GraphEngine same(final boolean same) {
+
+		this.same=same;
+
+		return this;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
