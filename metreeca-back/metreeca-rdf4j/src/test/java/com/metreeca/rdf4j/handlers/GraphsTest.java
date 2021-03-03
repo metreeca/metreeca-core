@@ -38,8 +38,10 @@ import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.export;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toCollection;
 
 
@@ -105,7 +107,7 @@ final class GraphsTest {
 	}
 
 	private Graphs _public(final Graphs endpoint) {
-		return endpoint.query();
+		return endpoint.query(emptySet());
 	}
 
 

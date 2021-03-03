@@ -26,8 +26,7 @@ import java.util.*;
 import static com.metreeca.rest.Context.asset;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.disjoint;
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 
 
 /**
@@ -49,7 +48,6 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	private int timeout=60; // endpoint operations timeout [s]
 
-
 	private final Logger logger=asset(Logger.logger());
 
 
@@ -60,17 +58,28 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected Graph graph() {
-		return graph;
-	}
-
-
 	protected boolean queryable(final Collection<Object> roles) {
 		return query.isEmpty() || !disjoint(query, roles);
 	}
 
 	protected boolean updatable(final Collection<Object> roles) {
 		return update.isEmpty() || !disjoint(update, roles);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	protected Graph graph() {
+		return graph;
+	}
+
+
+	protected Set<Object> query() {
+		return unmodifiableSet(query);
+	}
+
+	protected Set<Object> update() {
+		return unmodifiableSet(update);
 	}
 
 
