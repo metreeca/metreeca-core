@@ -51,7 +51,7 @@ public final class Graph implements AutoCloseable {
 	/**
 	 * Retrieves the default graph factory.
 	 *
-	 * @return the default graph factory,which throws an exception reporting the service as undefined
+	 * @return the default graph factory, which throws an exception reporting the asset as undefined
 	 */
 	public static Supplier<Graph> graph() {
 		return () -> { throw new IllegalStateException("undefined graph service"); };

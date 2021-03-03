@@ -17,12 +17,13 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Logger;
 import com.metreeca.rest.handlers.Delegator;
 
 import java.util.*;
+
+import static com.metreeca.rest.Context.asset;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.disjoint;
@@ -32,7 +33,7 @@ import static java.util.Collections.singleton;
 /**
  * SPARQL 1.1 endpoint handler.
  *
- * <p>Provides a standard SPARQL 1.1 endpoint exposing the contents of the shared {@linkplain Graph graph}.</p>
+ * <p>Provides a standard SPARQL 1.1 endpoint exposing the contents of a {@linkplain #graph(Graph) target graph}.</p>
  *
  * <p>Both {@linkplain #query(Collection) query} and {@linkplain #update(Collection) update} operations are disabled,
  * unless otherwise specified.</p>
@@ -41,13 +42,15 @@ import static java.util.Collections.singleton;
  */
 public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
-	private int timeout=60; // endpoint operations timeout [s]
+	private Graph graph=asset(Graph.graph());
 
 	private Set<Object> query=singleton(new Object()); // roles enabled for query operations (unmatchable by default)
 	private Set<Object> update=singleton(new Object()); // roles enabled for update operations (unmatchable by default)
 
-	private final Graph graph=Context.asset(Graph.graph());
-	private final Logger logger=Context.asset(Logger.logger());
+	private int timeout=60; // endpoint operations timeout [s]
+
+
+	private final Logger logger=asset(Logger.logger());
 
 
 	@SuppressWarnings("unchecked") private T self() {
@@ -57,8 +60,8 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected int timeout() {
-		return timeout;
+	protected Graph graph() {
+		return graph;
 	}
 
 
@@ -71,9 +74,10 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	}
 
 
-	protected Graph graph() {
-		return graph;
+	protected int timeout() {
+		return timeout;
 	}
+
 
 	protected Logger logger() {
 		return logger;
@@ -83,21 +87,23 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Configures timeout for endpoint requests.
+	 * Configures the target graph.
 	 *
-	 * @param timeout the timeout for endpoint requests in seconds; 0 to disable timeouts
+	 * <p>By default configured to the shared {@linkplain Graph#graph() graph}.</p>
+	 *
+	 * @param graph the target graph for SPARQL operations on this endpoint
 	 *
 	 * @return this endpoint
 	 *
-	 * @throws IllegalArgumentException if {@code timeout} is less than 0
+	 * @throws NullPointerException if {@code graph} is null
 	 */
-	public T timeout(final int timeout) {
+	public T graph(final Graph graph) {
 
-		if ( timeout < 0 ) {
-			throw new IllegalArgumentException("illegal timeout ["+timeout+"]");
+		if ( graph == null ) {
+			throw new NullPointerException("null graph");
 		}
 
-		this.timeout=timeout;
+		this.graph=graph;
 
 		return self();
 	}
@@ -105,6 +111,8 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	/**
 	 * Configures the roles for query operations.
+	 *
+	 * <p>By default configured to block all query operations.</p>
 	 *
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform query operations on this
 	 *              endpoint; empty for public access
@@ -119,6 +127,8 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	/**
 	 * Configures the roles for query operations.
+	 *
+	 * <p>By default configured to block all query operations.</p>
 	 *
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform query operations on this
 	 *              endpoint; empty for public access
@@ -141,6 +151,8 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	/**
 	 * Configures the roles for update operations.
 	 *
+	 * <p>By default configured to block all update operations.</p>
+	 *
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform update operations on this
 	 *              endpoint; empty for public access
 	 *
@@ -154,6 +166,8 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	/**
 	 * Configures the roles for update operations.
+	 *
+	 * <p>By default configured to block all update operations.</p>
 	 *
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform update operations on this
 	 *              endpoint; empty for public access
@@ -169,6 +183,29 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 		}
 
 		this.update=new HashSet<>(roles);
+
+		return self();
+	}
+
+
+	/**
+	 * Configures timeout for endpoint requests.
+	 *
+	 * <p>By default configured to disable timeouts.</p>
+	 *
+	 * @param timeout the timeout for endpoint requests in seconds; 0 to disable timeouts
+	 *
+	 * @return this endpoint
+	 *
+	 * @throws IllegalArgumentException if {@code timeout} is less than 0
+	 */
+	public T timeout(final int timeout) {
+
+		if ( timeout < 0 ) {
+			throw new IllegalArgumentException("illegal timeout ["+timeout+"]");
+		}
+
+		this.timeout=timeout;
 
 		return self();
 	}
