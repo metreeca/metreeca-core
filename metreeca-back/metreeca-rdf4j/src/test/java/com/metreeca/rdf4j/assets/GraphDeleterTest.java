@@ -51,7 +51,7 @@ final class GraphDeleterTest {
 						.base(ValuesTest.Base)
 						.path("/employees/1370").attribute(JSONLDFormat.shape(), and(
 								filter().then(
-										field(RDF.TYPE).as(term("Employee"))
+										field(RDF.TYPE, term("Employee"))
 								),
 								convey().then(
 										field(RDF.TYPE),

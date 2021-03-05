@@ -28,12 +28,14 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Frame.*;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toCollection;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.fail;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toCollection;
 
 final class FrameTest {
 

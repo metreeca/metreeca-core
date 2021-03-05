@@ -17,7 +17,8 @@
 package com.metreeca.json;
 
 import com.metreeca.json.queries.*;
-import com.metreeca.json.shapes.Field;
+
+import org.eclipse.rdf4j.model.IRI;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,7 +34,7 @@ public abstract class Query {
 
 	private final Shape shape;
 
-	private final List<Field> path;
+	private final List<IRI> path;
 	private final List<Order> orders;
 
 	private final int offset;
@@ -41,7 +42,7 @@ public abstract class Query {
 
 
 	protected Query(final Shape shape,
-			final List<Field> path, final List<Order> orders,
+			final List<IRI> path, final List<Order> orders,
 			final int offset, final int limit
 	) {
 
@@ -50,7 +51,7 @@ public abstract class Query {
 		}
 
 		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null path or path step");
+			throw new NullPointerException("null path or path IRI");
 		}
 
 		if ( orders == null ) {
@@ -80,7 +81,7 @@ public abstract class Query {
 	}
 
 
-	public List<Field> path() {
+	public List<IRI> path() {
 		return unmodifiableList(path);
 	}
 

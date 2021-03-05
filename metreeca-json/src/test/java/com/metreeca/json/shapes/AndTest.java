@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -65,7 +66,13 @@ final class AndTest {
 		}
 
 		@Test void testCollapseDuplicates() {
-			assertThat(and(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(and(datatype(RDF.NIL), minCount(1)));
+			assertThat(and(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(and(datatype(RDF.NIL),
+					minCount(1)));
+		}
+
+
+		@Test void test() {
+			and(field(RDF.NIL));
 		}
 
 		@Test void testPreserveOrder() {
@@ -129,12 +136,12 @@ final class AndTest {
 		@Test void testMergeCompatibleFields() {
 			assertThat(and(
 
-					field(RDF.VALUE).as(minCount(1)),
-					field(RDF.VALUE).as(maxCount(3))
+					field(RDF.VALUE, minCount(1)),
+					field(RDF.VALUE, maxCount(3))
 
 			)).isEqualTo(
 
-					field(RDF.VALUE).as(and(minCount(1), maxCount(3)))
+					field(RDF.VALUE, and(minCount(1), maxCount(3)))
 
 			);
 		}
@@ -143,7 +150,7 @@ final class AndTest {
 			assertThat(and(
 
 					field(RDF.VALUE),
-					field(RDF.VALUE).inverse()
+					field(inverse(RDF.VALUE))
 
 			).map(new Shape.Probe<Collection<Shape>>() {
 
@@ -152,7 +159,7 @@ final class AndTest {
 			})).containsExactly(
 
 					field(RDF.VALUE),
-					field(RDF.VALUE).inverse()
+					field(inverse(RDF.VALUE))
 
 			);
 		}
@@ -160,12 +167,12 @@ final class AndTest {
 		@Test void testCollapseEqualFieldAliases() {
 			assertThat(and(
 
-					field(RDF.VALUE).alias("alias"),
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE),
+					field("alias", RDF.VALUE)
 
 			)).isEqualTo(
 
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE)
 
 			);
 		}
@@ -174,11 +181,11 @@ final class AndTest {
 			assertThat(and(
 
 					field(RDF.VALUE),
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE)
 
 			)).isEqualTo(
 
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE)
 
 			);
 		}
@@ -186,8 +193,8 @@ final class AndTest {
 		@Test void testReportClashingFieldAliases() {
 			assertThatIllegalArgumentException().isThrownBy(() -> and(
 
-					field(RDF.VALUE).alias("x"),
-					field(RDF.VALUE).alias("y")
+					field("x", RDF.VALUE),
+					field("y", RDF.VALUE)
 
 			));
 		}

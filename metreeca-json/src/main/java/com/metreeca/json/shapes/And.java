@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.derives;
 import static com.metreeca.json.shapes.All.all;
-import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Field.alias;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
@@ -171,15 +171,13 @@ public final class And extends Shape {
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
 		return fields
 
-				.collect(groupingBy(  // group by name/direct preserving order
+				.collect(groupingBy(Field::iri, LinkedHashMap::new, reducing((x, y) -> new Field(
 
-						field -> field(field.name()).direct(field.direct()),
+						alias(x, x.alias(), y.alias()),
+						x.iri(),
+						and(x.shape(), y.shape())
 
-						LinkedHashMap::new,
-
-						reducing((x, y) -> x.merge(y).shape(and(x.shape(), y.shape())))
-
-				))
+				))))
 
 				.values()
 				.stream()

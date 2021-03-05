@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 
 import static com.metreeca.json.Focus.focus;
+import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.shapes.All.all;
@@ -44,11 +45,11 @@ final class ShapeOutlinerTest {
 
 	@Test void testOutlineFields() {
 
-		assertThat(outline(field(RDF.VALUE).as(all(RDF.REST)), RDF.FIRST))
+		assertThat(outline(field(RDF.VALUE, all(RDF.REST)), RDF.FIRST))
 				.as("direct field")
 				.isIsomorphicTo(decode("rdf:first rdf:value rdf:rest."));
 
-		assertThat(outline(field(RDF.VALUE).inverse().as(all(RDF.REST)), RDF.FIRST))
+		assertThat(outline(field(inverse(RDF.VALUE), all(RDF.REST)), RDF.FIRST))
 				.as("inverse field")
 				.isIsomorphicTo(decode("rdf:rest rdf:value rdf:first."));
 
@@ -61,32 +62,32 @@ final class ShapeOutlinerTest {
 	}
 
 	@Test void testOutlineSubjectExistentials() {
-		assertThat(outline(and(all(RDF.FIRST, RDF.REST), field(RDF.VALUE).as(all(RDF.NIL)))))
+		assertThat(outline(and(all(RDF.FIRST, RDF.REST), field(RDF.VALUE, all(RDF.NIL)))))
 				.as("subject existentials")
 				.isIsomorphicTo(decode("rdf:first rdf:value rdf:nil. rdf:rest rdf:value rdf:nil."));
 	}
 
 	@Test void testOutlineObjectExistentials() {
-		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE).as(all(RDF.FIRST, RDF.REST)))))
+		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE, all(RDF.FIRST, RDF.REST)))))
 				.as("object existentials")
 				.isIsomorphicTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
 	}
 
 	@Test void testOutlineConjunctions() {
-		assertThat(outline(and(all(RDF.NIL), and(field(RDF.VALUE).as(all(RDF.FIRST))))))
+		assertThat(outline(and(all(RDF.NIL), and(field(RDF.VALUE, all(RDF.FIRST))))))
 				.as("value union")
 				.isIsomorphicTo(decode("rdf:nil rdf:value rdf:first."));
 	}
 
 	@Test void testOutlineNestedConjunctions() {
-		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE).as(and(all(RDF.FIRST), all(RDF.REST))))))
+		assertThat(outline(and(all(RDF.NIL), field(RDF.VALUE, and(all(RDF.FIRST), all(RDF.REST))))))
 				.as("value union")
 				.isIsomorphicTo(decode("rdf:nil rdf:value rdf:first, rdf:rest."));
 	}
 
 
 	@Test void testResolveReferencesToTarget() {
-		assertThat(outline(field(RDF.VALUE).as(all(focus())), RDF.FIRST))
+		assertThat(outline(field(RDF.VALUE, all(focus())), RDF.FIRST))
 				.as("value union")
 				.isIsomorphicTo(decode("rdf:first rdf:value rdf:first."));
 	}

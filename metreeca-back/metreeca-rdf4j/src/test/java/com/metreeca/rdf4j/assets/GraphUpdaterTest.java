@@ -48,11 +48,11 @@ final class GraphUpdaterTest {
 					.handle(new Request()
 							.base(Base)
 							.path("/employees/1370").attribute(JSONLDFormat.shape(), convey().then(
-									field(term("forename")).as(required()),
-									field(term("surname")).as(required()),
-									field(term("email")).as(required()),
-									field(term("title")).as(required()),
-									field(term("seniority")).as(required())
+									field(term("forename"), required()),
+									field(term("surname"), required()),
+									field(term("email"), required()),
+									field(term("title"), required()),
+									field(term("seniority"), required())
 							))
 							.body(jsonld(), decode("</employees/1370>"
 									+":forename 'Tino';"

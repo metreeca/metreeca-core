@@ -16,6 +16,7 @@
 
 package com.metreeca.json.shapes;
 
+import com.metreeca.json.Frame;
 import com.metreeca.json.ValuesTest;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -40,7 +41,7 @@ final class FieldTest {
 	@Nested final class Optimization {
 
 		@Test void testPruneDeadFields() {
-			assertThat(field(RDF.VALUE).as(or())).isEqualTo(and());
+			assertThat(field(RDF.VALUE, or())).isEqualTo(and());
 		}
 
 	}
@@ -86,20 +87,20 @@ final class FieldTest {
 					.as("direct")
 					.containsKey("value");
 
-			assertThat(aliases(field(RDF.VALUE).inverse()))
+			assertThat(aliases(field(Frame.inverse(RDF.VALUE))))
 					.as("inverse")
 					.containsKey("valueOf");
 
 		}
 
 		@Test void testRetrieveUserDefinedAlias() {
-			assertThat(aliases(field(RDF.VALUE).alias("alias")))
+			assertThat(aliases(field("alias", RDF.VALUE)))
 					.as("user-defined")
 					.containsKey("alias");
 		}
 
 		@Test void testPreferUserDefinedFields() {
-			assertThat(aliases(and(field(RDF.VALUE).alias("alias"), field(RDF.VALUE))))
+			assertThat(aliases(and(field("alias", RDF.VALUE), field(RDF.VALUE))))
 					.as("user-defined")
 					.containsKey("alias");
 		}
@@ -107,28 +108,28 @@ final class FieldTest {
 
 		@Test void testReportConflictingFields() {
 			assertThatThrownBy(() -> aliases(and(
-					field(RDF.FIRST).alias("alias"),
-					field(RDF.REST).alias("alias")
+					field("alias", RDF.FIRST),
+					field("alias", RDF.REST)
 			))).isInstanceOf(IllegalArgumentException.class);
 		}
 
 		@Test void testReportConflictingProperties() {
-			assertThatThrownBy(() -> aliases(and(field(RDF.VALUE), field(iri("urn:example#value")).as(and()))))
+			assertThatThrownBy(() -> aliases(and(field(RDF.VALUE), field(iri("urn:example#value"), and()))))
 					.isInstanceOf(IllegalArgumentException.class);
 		}
 
 		@Test void testReportReservedAliases() {
 
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					aliases(field(iri(ValuesTest.Base, "@id")).as(and()))
+					aliases(field(iri(ValuesTest.Base, "@id"), and()))
 			);
 
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					aliases(field(RDF.VALUE).alias("@id"))
+					aliases(field("@id", RDF.VALUE))
 			);
 
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					aliases(field(RDF.VALUE).alias("id"), singletonMap("@id", "id"))
+					aliases(field("id", RDF.VALUE), singletonMap("@id", "id"))
 			);
 
 		}

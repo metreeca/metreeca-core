@@ -25,9 +25,11 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.Set;
 
+import static com.metreeca.json.Frame.direct;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
@@ -39,6 +41,9 @@ import static java.util.stream.Collectors.toSet;
 
 
 final class ShapeInferencer extends Shape.Probe<Shape> {
+
+	private static final Shape IRIDatatype=datatype(IRIType);
+	private static final Shape ResourceDatatype=datatype(ResourceType);
 
 	@Override public Shape probe(final Shape shape) { return shape; }
 
@@ -84,12 +89,13 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final IRI iri=field.name();
+		final String alias=field.alias();
+		final IRI iri=field.iri();
 		final Shape shape=field.shape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field.as(and(shape, datatype(IRIType))), datatype(ResourceType))
-				: field.direct() ? and(field.as(shape), datatype(ResourceType))
-				: field.as(and(shape, datatype(ResourceType)));
+		return iri.equals(RDF.TYPE) ? and(field(alias, iri, and(shape, IRIDatatype)), ResourceDatatype)
+				: direct(iri) ? and(field(alias, iri, shape), ResourceDatatype)
+				: field(alias, iri, and(shape, ResourceDatatype));
 	}
 
 

@@ -130,18 +130,18 @@ final class ShapeInferencerTest {
 
 		final Shape nested=clazz(RDF.NIL);
 
-		assertThat(expand(field(RDF.VALUE).as(nested)))
+		assertThat(expand(field(RDF.VALUE, nested)))
 				.as("nested shapes are expanded")
 				.isEqualTo(and(
 						datatype(ResourceType),
-						field(RDF.VALUE).as(and(nested, datatype(ResourceType)))
+						field(RDF.VALUE, and(nested, datatype(ResourceType)))
 				));
 
 		assertThat(expand(field(RDF.TYPE)))
 				.as("rdf:type field have resource subjects and IRI objects")
 				.isEqualTo(and(
 						datatype(ResourceType),
-						field(RDF.TYPE).as(datatype(IRIType))
+						field(RDF.TYPE, datatype(IRIType))
 				));
 
 	}
@@ -164,17 +164,17 @@ final class ShapeInferencerTest {
 
 	@Test void testFieldInverse() {
 
-		final Shape plain=field(RDF.VALUE).inverse();
+		final Shape plain=field(Frame.inverse(RDF.VALUE));
 
 		assertThat(expand(plain))
 				.as("reverse field objects are resources")
-				.isEqualTo(field(RDF.VALUE).inverse().as(datatype(ResourceType)));
+				.isEqualTo(field(Frame.inverse(RDF.VALUE), datatype(ResourceType)));
 
-		final Shape typed=field(RDF.VALUE).inverse().as(datatype(IRIType));
+		final Shape typed=field(Frame.inverse(RDF.VALUE), datatype(IRIType));
 
 		assertThat(expand(typed))
 				.as("reverse field objects are IRIs if explicitly typed")
-				.isEqualTo(field(RDF.VALUE).inverse().as(datatype(IRIType)));
+				.isEqualTo(field(Frame.inverse(RDF.VALUE), datatype(IRIType)));
 
 	}
 

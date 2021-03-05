@@ -28,6 +28,7 @@ import java.io.ByteArrayOutputStream;
 
 import javax.json.Json;
 
+import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
@@ -69,7 +70,7 @@ final class JSONLDFormatTest {
 
 					.header("Content-Type", MIME)
 
-					.attribute(shape(), field(direct).as(required()))
+					.attribute(shape(), field(direct, required()))
 
 					.body(input(), () -> new ByteArrayInputStream(json.getBytes(UTF_8)));
 		}
@@ -134,11 +135,11 @@ final class JSONLDFormatTest {
 
 					.attribute(shape(), and(
 
-							field(direct).as(required(),
-									field(nested).as(required())
+							field(direct, required(),
+									field(nested, required())
 							),
 
-							field(reverse).inverse().alias("reverse").as(required())
+							field("reverse", inverse(reverse), required())
 
 					))
 

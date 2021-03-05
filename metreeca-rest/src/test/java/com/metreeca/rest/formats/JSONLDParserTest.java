@@ -19,7 +19,6 @@ package com.metreeca.rest.formats;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
-import com.metreeca.json.shapes.Field;
 import com.metreeca.json.shapes.Guard;
 
 import org.eclipse.rdf4j.model.Value;
@@ -33,6 +32,7 @@ import java.util.function.Consumer;
 
 import javax.json.JsonException;
 
+import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Values.*;
@@ -64,10 +64,10 @@ final class JSONLDParserTest {
 	private static final Value One=literal(integer(1));
 	private static final Value Ten=literal(integer(10));
 
-	private static final Field first=field(RDF.FIRST);
-	private static final Field rest=field(RDF.REST);
+	private static final Shape first=field(RDF.FIRST);
+	private static final Shape rest=field(RDF.REST);
 
-	private static final Shape shape=first.shape(rest);
+	private static final Shape shape=field(RDF.FIRST, rest);
 
 
 	private void items(final String query, final Shape shape, final Consumer<Items> tester) {
@@ -157,13 +157,13 @@ final class JSONLDParserTest {
 
 			items("~first=keyword", shape, items -> {
 
-				assertThat(items.shape()).isEqualTo(filter(shape, first.as(like("keyword", true))));
+				assertThat(items.shape()).isEqualTo(filter(shape, field(RDF.FIRST, like("keyword", true))));
 
 			});
 
 			items("_order=%2Bfirst.rest&_offset=1&_limit=2", shape, items -> {
 
-				assertThat(items.orders()).containsExactly(increasing(first, rest));
+				assertThat(items.orders()).containsExactly(increasing(RDF.FIRST, RDF.REST));
 				assertThat(items.offset()).isEqualTo(1L);
 				assertThat(items.limit()).isEqualTo(2L);
 
@@ -172,14 +172,14 @@ final class JSONLDParserTest {
 			terms("_terms=first.rest", shape, terms -> {
 
 				assertThat(filter(shape, and())).isEqualTo(terms.shape());
-				assertThat(terms.path()).containsExactly(first, rest);
+				assertThat(terms.path()).containsExactly(RDF.FIRST, RDF.REST);
 
 			});
 
 			stats("_stats=first.rest", shape, stats -> {
 
 				assertThat(filter(shape, and())).isEqualTo(stats.shape());
-				assertThat(stats.path()).containsExactly(first, rest);
+				assertThat(stats.path()).containsExactly(RDF.FIRST, RDF.REST);
 
 			});
 
@@ -197,24 +197,25 @@ final class JSONLDParserTest {
 
 		@Test void testParseDirectSteps() {
 			stats("{ '_stats': 'first' }", first, stats -> assertThat(stats.path())
-					.containsExactly(first)
+					.containsExactly(RDF.FIRST)
 			);
 		}
 
 		@Test void testParseInverseSteps() { // !!! inverse?
-			stats("{ '_stats': 'firstOf' }", first.inverse(), stats -> assertThat(stats.path())
-					.containsExactly(first.inverse())
+			stats("{ '_stats': 'firstOf' }", field(inverse(RDF.FIRST)), stats -> assertThat(stats.path())
+					.containsExactly(inverse(RDF.FIRST))
 			);
 		}
 
 		@Test void testParseMultipleSteps() {
 
-			stats("{ '_stats': 'first.rest' }", first.as(rest), stats -> assertThat(stats.path())
-					.containsExactly(first, rest)
+			stats("{ '_stats': 'first.rest' }", field(RDF.FIRST, rest), stats -> assertThat(stats.path())
+					.containsExactly(RDF.FIRST, RDF.REST)
 			);
 
-			stats("{ '_stats': 'firstOf.rest' }", first.inverse().as(rest), stats -> assertThat(stats.path())
-					.containsExactly(first.inverse(), rest)
+			stats("{ '_stats': 'firstOf.rest' }", field(inverse(RDF.FIRST), rest),
+					stats -> assertThat(stats.path())
+							.containsExactly(inverse(RDF.FIRST), RDF.REST)
 			);
 
 		}
@@ -237,17 +238,17 @@ final class JSONLDParserTest {
 			);
 
 			items("{ '_order': 'first.rest' }", shape, items -> assertThat(items.orders())
-					.containsExactly(increasing(first, rest))
+					.containsExactly(increasing(RDF.FIRST, RDF.REST))
 			);
 
 			items("{ '_order': '+first.rest' }", shape, items -> assertThat(items.orders())
 					.as("path increasing")
-					.containsExactly(increasing(first, rest))
+					.containsExactly(increasing(RDF.FIRST, RDF.REST))
 			);
 
 			items("{ '_order': '-first.rest' }", shape, items -> assertThat(items.orders())
 					.as("path decreasing")
-					.containsExactly(decreasing(first, rest)));
+					.containsExactly(decreasing(RDF.FIRST, RDF.REST)));
 
 			items("{ '_order': [] }", shape, items -> assertThat(items.orders()).
 					as("empty list")
@@ -256,7 +257,7 @@ final class JSONLDParserTest {
 
 			items("{ '_order': ['+first', '-first.rest'] }", shape, items -> assertThat(items.orders())
 					.as("list")
-					.containsExactly(increasing(first), decreasing(first, rest))
+					.containsExactly(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))
 			);
 
 		}
@@ -447,21 +448,21 @@ final class JSONLDParserTest {
 						assertThat(items.shape())
 								.as("nested filter")
 								.isEqualTo(filter(shape,
-										first.as(rest.as(minInclusive(One)))));
+										field(RDF.FIRST, field(RDF.REST, minInclusive(One)))));
 					}
 			);
 
 			items("{ 'first.rest': 1 }", shape, items -> {
 						assertThat(items.shape())
 								.as("nested filter singleton shorthand")
-								.isEqualTo(filter(shape, first.as(rest.as(any(One)))));
+								.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One)))));
 					}
 			);
 
 			items("{ 'first.rest': [1, 10] }", shape, items -> {
 						assertThat(items.shape())
 								.as("nested filter multiple shorthand")
-								.isEqualTo(filter(shape, first.as(rest.as(any(One, Ten)))));
+								.isEqualTo(filter(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))));
 					}
 			);
 
@@ -469,10 +470,10 @@ final class JSONLDParserTest {
 
 		@Test void testParseShapedFilters() {
 
-			final Shape shape=field(RDF.VALUE).as(datatype(XSD.LONG));
+			final Shape shape=field(RDF.VALUE, datatype(XSD.LONG));
 
 			items("{ 'value': '4' }", shape, items -> assertThat(items.shape())
-					.isEqualTo(filter(shape, field(RDF.VALUE).as(any(literal("4", XSD.LONG)))))
+					.isEqualTo(filter(shape, field(RDF.VALUE, any(literal("4", XSD.LONG)))))
 			);
 		}
 
@@ -490,15 +491,15 @@ final class JSONLDParserTest {
 		@Test void testParsePlainQuery() {
 
 			items("first=x&first.rest=y&first.rest=w+z", shape, items -> assertThat(items.shape())
-					.isEqualTo(filter(shape, first.as(
+					.isEqualTo(filter(shape, field(RDF.FIRST,
 							any(iri("http://example.com/x")),
-							rest.as(any(literal("y"), literal("w z")))
+							field(RDF.REST, any(literal("y"), literal("w z")))
 					))));
 
 			items("first=x&first.rest=y&_order=-first.rest&_order=first&_offset=1&_limit=2", shape, items -> {
 
 				assertThat(items.orders())
-						.containsExactly(decreasing(first, rest), increasing(first));
+						.containsExactly(decreasing(RDF.FIRST, RDF.REST), increasing(RDF.FIRST));
 
 				assertThat(items.offset())
 						.isEqualTo(1);
@@ -507,9 +508,9 @@ final class JSONLDParserTest {
 						.isEqualTo(2);
 
 				assertThat(items.shape())
-						.isEqualTo(filter(shape, first.as(and(
+						.isEqualTo(filter(shape, field(RDF.FIRST, and(
 								any(iri("http://example.com/x")),
-								rest.as(any(literal("y")))
+								field(RDF.REST, any(literal("y")))
 						))));
 			});
 
@@ -536,7 +537,7 @@ final class JSONLDParserTest {
 						.isEqualTo(terms.shape());
 
 				assertThat(terms.path())
-						.containsExactly(first, rest);
+						.containsExactly(RDF.FIRST, RDF.REST);
 
 				assertThat(terms.offset())
 						.as("offset")
@@ -556,7 +557,7 @@ final class JSONLDParserTest {
 
 				assertThat(filter(shape, and())).isEqualTo(stats.shape());
 
-				assertThat(stats.path()).containsExactly(first, rest);
+				assertThat(stats.path()).containsExactly(RDF.FIRST, RDF.REST);
 
 				assertThat(stats.offset()).isEqualTo(1);
 				assertThat(stats.limit()).isEqualTo(2);

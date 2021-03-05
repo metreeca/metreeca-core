@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static com.metreeca.json.Focus.focus;
+import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
@@ -83,7 +84,7 @@ final class GraphFetcherTest {
 
 	static final Shape EmployeeShape=and(
 			filter().then(
-					field(RDF.TYPE).as(term("Employee"))
+					field(RDF.TYPE, term("Employee"))
 			),
 			convey().then(
 					field(RDFS.LABEL),
@@ -158,7 +159,7 @@ final class GraphFetcherTest {
 			exec(() -> {
 				assertThat(query(
 
-						Root, items(field(RDF.TYPE).as(all(RDF.NIL)))
+						Root, items(field(RDF.TYPE, all(RDF.NIL)))
 
 				)).isEmpty();
 			});
@@ -188,7 +189,7 @@ final class GraphFetcherTest {
 			exec(() -> {
 				assertThat(query(
 
-						Root, items(field(RDF.TYPE).as(all(term("Employee"))))
+						Root, items(field(RDF.TYPE, all(term("Employee"))))
 
 				)).isIsomorphicTo(graph(
 
@@ -225,16 +226,16 @@ final class GraphFetcherTest {
 						.as("default (on value)")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?employee"));
 
-				assertThat(actual.apply(items(shape, asList(increasing(field(RDFS.LABEL))))))
+				assertThat(actual.apply(items(shape, asList(increasing(RDFS.LABEL)))))
 						.as("custom increasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?label"));
 
-				assertThat(actual.apply(items(shape, asList(decreasing(field(RDFS.LABEL))))))
+				assertThat(actual.apply(items(shape, asList(decreasing(RDFS.LABEL)))))
 						.as("custom decreasing")
 						.containsExactlyElementsOf(expected.apply(query+" order by desc(?label)"));
 
-				assertThat(actual.apply(items(shape, asList(increasing(field(term("office"))),
-						increasing(field(RDFS.LABEL))))))
+				assertThat(actual.apply(items(shape, asList(increasing(term("office")),
+						increasing(RDFS.LABEL)))))
 						.as("custom combined")
 						.containsExactlyElementsOf(expected.apply(query+" order by ?office ?label"));
 
@@ -253,7 +254,7 @@ final class GraphFetcherTest {
 			exec(() -> {
 				assertThat(query(
 
-						Root, stats(field(RDF.TYPE).as(all(RDF.NIL)), asList(), 0, 0)
+						Root, stats(field(RDF.TYPE, all(RDF.NIL)), asList(), 0, 0)
 
 				)).isIsomorphicTo(decode(
 
@@ -312,7 +313,7 @@ final class GraphFetcherTest {
 		@Test void testRootConstraints() {
 			exec(() -> assertThat(query(
 
-					Root, stats(all(item("employees/1370")), asList(field(term("account"))), 0, 0)
+					Root, stats(all(item("employees/1370")), asList(term("account")), 0, 0)
 
 			)).isIsomorphicTo(graph(
 
@@ -342,7 +343,7 @@ final class GraphFetcherTest {
 			exec(() -> {
 				assertThat(query(
 
-						Root, terms(field(RDF.TYPE).as(all(RDF.NIL)), asList(), 0, 0)
+						Root, terms(field(RDF.TYPE, all(RDF.NIL)), asList(), 0, 0)
 
 				)).isEmpty();
 			});
@@ -387,7 +388,7 @@ final class GraphFetcherTest {
 		@Test void testRootConstraints() {
 			exec(() -> assertThat(query(
 
-					Root, terms(all(item("employees/1370")), asList(field(term("account"))), 0, 0)
+					Root, terms(all(item("employees/1370")), asList(term("account")), 0, 0)
 
 			)).isIsomorphicTo(graph(
 
@@ -432,7 +433,7 @@ final class GraphFetcherTest {
 			exec(() -> assertThat(query(
 
 					item("/employees-basic/"), items(and(
-							filter().then(field(LDP.CONTAINS).inverse().as(focus())),
+							filter().then(field(inverse(LDP.CONTAINS), focus())),
 							convey().then(field(RDFS.LABEL))
 					))
 
@@ -455,13 +456,13 @@ final class GraphFetcherTest {
 
 					assertThat(query(
 
-							Root, items(field(term("code")).as(datatype(XSD.INTEGER)))
+							Root, items(field(term("code"), datatype(XSD.INTEGER)))
 
 					)).isEmpty();
 
 					assertThat(query(
 
-							Root, items(field(term("code")).as(datatype(XSD.STRING)))
+							Root, items(field(term("code"), datatype(XSD.STRING)))
 
 					)).isIsomorphicTo(graph(
 
@@ -508,7 +509,7 @@ final class GraphFetcherTest {
 				exec(() -> assertThatThrownBy(() -> {
 					query(
 
-							Root, items(field(term("office")).as(range(item("employees/1621"), item("employees/1625"))))
+							Root, items(field(term("office"), range(item("employees/1621"), item("employees/1625"))))
 
 					);
 				}).isInstanceOf(UnsupportedOperationException.class));
@@ -519,7 +520,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("seniority")).as(minExclusive(literal(integer(3)))))
+							Root, items(field(term("seniority"), minExclusive(literal(integer(3)))))
 
 					)).isIsomorphicTo(graph(
 
@@ -542,7 +543,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("seniority")).as(maxExclusive(literal(integer(3)))))
+							Root, items(field(term("seniority"), maxExclusive(literal(integer(3)))))
 
 					)).isIsomorphicTo(graph(
 
@@ -565,7 +566,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("seniority")).as(minInclusive(literal(integer(3)))))
+							Root, items(field(term("seniority"), minInclusive(literal(integer(3)))))
 
 					)).isIsomorphicTo(graph(
 
@@ -588,7 +589,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("seniority")).as(maxInclusive(literal(integer(3)))))
+							Root, items(field(term("seniority"), maxInclusive(literal(integer(3)))))
 
 					)).isIsomorphicTo(graph(
 
@@ -612,7 +613,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("forename")).as(minLength(5)))
+							Root, items(field(term("forename"), minLength(5)))
 
 					)).isIsomorphicTo(graph(
 
@@ -635,7 +636,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("forename")).as(maxLength(5)))
+							Root, items(field(term("forename"), maxLength(5)))
 
 					)).isIsomorphicTo(graph(
 
@@ -658,7 +659,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(RDFS.LABEL).as(pattern("\\bgerard\\b", "i")))
+							Root, items(field(RDFS.LABEL, pattern("\\bgerard\\b", "i")))
 
 					)).isIsomorphicTo(graph(
 
@@ -681,7 +682,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(RDFS.LABEL).as(like("ger bo", true)))
+							Root, items(field(RDFS.LABEL, like("ger bo", true)))
 
 					)).isIsomorphicTo(graph(
 
@@ -704,7 +705,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(RDFS.LABEL).as(stem("Gerard B")))
+							Root, items(field(RDFS.LABEL, stem("Gerard B")))
 
 					)).isIsomorphicTo(graph(
 
@@ -731,7 +732,7 @@ final class GraphFetcherTest {
 				exec(() -> assertThatThrownBy(() -> {
 					query(
 
-							Root, items(field(term("employee")).as(minCount(3)))
+							Root, items(field(term("employee"), minCount(3)))
 
 					);
 				}).isInstanceOf(UnsupportedOperationException.class));
@@ -741,7 +742,7 @@ final class GraphFetcherTest {
 				exec(() -> assertThatThrownBy(() -> {
 					query(
 
-							Root, items(field(term("employee")).as(maxCount(3)))
+							Root, items(field(term("employee"), maxCount(3)))
 
 					);
 				}).isInstanceOf(UnsupportedOperationException.class));
@@ -752,7 +753,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("employee")).as(all(item("employees/1002"), item("employees/1056"))))
+							Root, items(field(term("employee"), all(item("employees/1002"), item("employees/1056"))))
 
 					)).isIsomorphicTo(graph(
 
@@ -775,8 +776,8 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("office")).inverse().as(all(item("employees/1002"), item("employees"
-									+"/1056"))))
+							Root, items(field(inverse(term("office")), all(item("employees/1002"), item(
+									"employees/1056"))))
 
 					)).isIsomorphicTo(graph(
 
@@ -825,7 +826,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("employee")).as(all(item("employees/1002"))))
+							Root, items(field(term("employee"), all(item("employees/1002"))))
 
 					)).isIsomorphicTo(graph(
 
@@ -849,7 +850,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("employee")).as(any(item("employees/1002"), item("employees/1056")))
+							Root, items(field(term("employee"), any(item("employees/1002"), item("employees/1056")))
 							)
 
 					)).isIsomorphicTo(graph(
@@ -874,7 +875,7 @@ final class GraphFetcherTest {
 				exec(() -> {
 					assertThat(query(
 
-							Root, items(field(term("employee")).as(any(item("employees/1002")))
+							Root, items(field(term("employee"), any(item("employees/1002")))
 							)
 
 					)).isIsomorphicTo(graph(
@@ -928,7 +929,7 @@ final class GraphFetcherTest {
 				exec(() -> assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 					query(
 
-							Root, items(field(term("employee")).as(localized()))
+							Root, items(field(term("employee"), localized()))
 
 					);
 				}));
@@ -942,8 +943,8 @@ final class GraphFetcherTest {
 				exec(() -> assertThatThrownBy(() ->
 								query(Root, items(guard("axis", RDF.NIL)))
 
-						).as("reject partially redacted shapes")
-								.isInstanceOf(UnsupportedOperationException.class)
+						, "reject partially redacted shapes")
+						.isInstanceOf(UnsupportedOperationException.class)
 				);
 			}
 
@@ -1048,7 +1049,7 @@ final class GraphFetcherTest {
 
 					Root, items(and(
 							field(term("employee")),
-							filter().then(field(term("employee")).as(any(item("employees/1002"), item("employees"
+							filter().then(field(term("employee"), any(item("employees/1002"), item("employees"
 									+"/1188"))))
 					))
 
@@ -1108,7 +1109,7 @@ final class GraphFetcherTest {
 		@Test void testEdgeFilters() {
 			exec(() -> assertThat(query(
 
-					items(field(RDF.TYPE).as(term("Alias")))
+					items(field(RDF.TYPE, term("Alias")))
 
 			)).isIsomorphicTo(graph(
 

@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
-import com.metreeca.json.shapes.Field;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -75,14 +74,14 @@ public final class GraphEngine implements Engine {
 
 		return and(
 
-				field(count).as(required(), datatype(XSD.INTEGER)),
-				field(min).as(optional(), term),
-				field(max).as(optional(), term),
+				field(count, required(), datatype(XSD.INTEGER)),
+				field(min, optional(), term),
+				field(max, optional(), term),
 
-				field(stats).as(multiple(),
-						field(count).as(required(), datatype(XSD.INTEGER)),
-						field(min).as(required(), term),
-						field(max).as(required(), term)
+				field(stats, multiple(),
+						field(count, required(), datatype(XSD.INTEGER)),
+						field(min, required(), term),
+						field(max, required(), term)
 				)
 
 		);
@@ -93,29 +92,27 @@ public final class GraphEngine implements Engine {
 		final Shape term=annotations(query.shape(), query.path());
 
 		return and(
-				field(terms).as(multiple(),
-						field(value).as(required(), term),
-						field(count).as(required(), datatype(XSD.INTEGER))
+				field(terms, multiple(),
+						field(value, required(), term),
+						field(count, required(), datatype(XSD.INTEGER))
 				)
 		);
 	}
 
 
-	private static Shape annotations(final Shape shape, final Iterable<Field> path) {
+	private static Shape annotations(final Shape shape, final Iterable<IRI> path) {
 
 		Shape nested=convey(shape);
 
-		for (final Field step : path) {
+		for (final IRI step : path) {
 			nested=field(nested, step)
 
-					.orElseThrow(() -> new IllegalArgumentException(format(
-							"unknown path step <%s>", step.shape(and())
-					)))
+					.orElseThrow(() -> new IllegalArgumentException(format("unknown path step <%s>", step)))
 
 					.shape();
 		}
 
-		return and(fields(nested).filter(field -> Annotations.contains(field.name())));
+		return and(fields(nested).filter(field -> Annotations.contains(field.iri())));
 	}
 
 

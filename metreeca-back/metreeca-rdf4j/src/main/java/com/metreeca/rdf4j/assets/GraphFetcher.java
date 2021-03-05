@@ -35,6 +35,8 @@ import java.util.function.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Focus.focus;
+import static com.metreeca.json.Frame.inverse;
+import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.BNodeType;
 import static com.metreeca.json.Values.IRIType;
 import static com.metreeca.json.Values.LiteralType;
@@ -85,7 +87,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 				// container: connect to the focus using ldp:contains, unless otherwise specified in the filtering shape
 
-				? shape.empty() ? field(LDP.CONTAINS).inverse().as(focus()) : shape
+				? shape.empty() ? field(inverse(LDP.CONTAINS), focus()) : shape
 
 				// resource: constraint to the focus
 
@@ -247,7 +249,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	@Override public Collection<Statement> probe(final Stats stats) {
 
 		final Shape shape=stats.shape();
-		final List<Field> path=stats.path();
+		final List<IRI> path=stats.path();
 		final int offset=stats.offset();
 		final int limit=stats.limit();
 
@@ -398,7 +400,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	@Override public Collection<Statement> probe(final Terms terms) {
 
 		final Shape shape=terms.shape();
-		final List<Field> path=terms.path();
+		final List<IRI> path=terms.path();
 		final int offset=terms.offset();
 		final int limit=terms.limit();
 
@@ -564,22 +566,26 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	}
 
 
-	private Snippet path(final Object source, final Collection<Field> path, final Object target) {
+	private Snippet path(final Object source, final Collection<IRI> path, final Object target) {
 		return source == null || path == null || path.isEmpty() || target == null ? nothing()
 				: snippet(source, " ", path(path), " ", target, " .\n");
 	}
 
 	private Snippet edge(final Object source, final Field field, final Object target) {
-		return source == null || field == null || target == null ? nothing() : field.direct()
-				? snippet(source, " ", same(true), format(field.name()), same(false), " ", target, " .\n")
-				: snippet(target, " ", same(true), format(field.name()), same(false), " ", source, " .\n");
+		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
+
+				iri -> snippet(source, " ", same(true), format(iri), same(false), " ", target, " .\n"),
+				iri -> snippet(target, " ", same(true), format(iri), same(false), " ", source, " .\n")
+
+		);
 	}
 
 
-	private Snippet path(final Collection<Field> path) {
-		return snippet(same(true), list(path.stream().map(f ->
+	private Snippet path(final Collection<IRI> path) {
+		return snippet(same(true), list(path.stream().map(step -> snippet(
 
-				snippet(f.direct() ? format(f.name()) : "^"+format(f.name()), same(false))
+				snippet(format(step)),
+				same(false))
 
 		), '/'));
 	}
@@ -618,7 +624,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		@Override public Stream<Integer> probe(final Field field) {
 
-			final IRI iri=field.name();
 			final Shape shape=field.shape();
 
 			final Integer source=identifier.apply(focus);
@@ -627,7 +632,10 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 			final Resource snode=bnode(source.toString());
 			final Resource tnode=bnode(target.toString());
 
-			template.accept(field.direct() ? statement(snode, iri, tnode) : statement(tnode, iri, snode));
+			template.accept(traverse(field.iri(),
+					iri -> statement(snode, iri, tnode),
+					iri -> statement(tnode, iri, snode)
+			));
 
 			return Stream.concat(
 					Stream.of(source, target),
@@ -724,7 +732,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 
 		@Override public Snippet probe(final Pattern pattern) {
-			return snippet("filter regex((str({source}), '{pattern}', '{flags}')",
+			return snippet("filter regex(str({source}), '{pattern}', '{flags}')",
 					var(source), pattern.expression().replace("\\", "\\\\"), pattern.flags()
 			);
 		}
@@ -825,7 +833,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		@Override public Snippet probe(final Field field) {
 
-			final IRI iri=field.name();
 			final Shape shape=field.shape();
 
 			return snippet( // (€) optional unless universal constraints are present

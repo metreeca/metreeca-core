@@ -103,8 +103,8 @@ final class JSONLDParser {
 
 		final Shape filter=filter(json);
 
-		final List<Field> terms=terms(json);
-		final List<Field> stats=stats(json);
+		final List<IRI> terms=terms(json);
+		final List<IRI> stats=stats(json);
 
 		final List<Order> order=order(json);
 
@@ -217,13 +217,13 @@ final class JSONLDParser {
 
 
 	private Shape filter(final String path,
-			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper
+			final JsonValue value, final Shape shape, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
 	) {
 		return filter(path(path, shape), value, shape, mapper);
 	}
 
-	private Shape filter(final List<Field> path,
-			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper
+	private Shape filter(final List<IRI> path,
+			final JsonValue value, final Shape shape, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
 	) {
 		if ( path.isEmpty() ) {
 
@@ -231,20 +231,20 @@ final class JSONLDParser {
 
 		} else {
 
-			final Field head=path.get(0);
-			final List<Field> tail=path.subList(1, path.size());
+			final IRI head=path.get(0);
+			final List<IRI> tail=path.subList(1, path.size());
 
 			final Field field=field(shape, head).orElseThrow(() ->
-					new IllegalArgumentException(format("unknown path step <%s>", head))
+					new IllegalArgumentException(format("unknown path IRI <%s>", head))
 			);
 
-			return field(field.name()).as(filter(tail, value, field.shape(), mapper));
+			return field(field.iri(), filter(tail, value, field.shape(), mapper));
 
 		}
 	}
 
 
-	private List<Field> terms(final JsonObject query) {
+	private List<IRI> terms(final JsonObject query) {
 		return Optional.ofNullable(query.get("_terms"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -255,7 +255,7 @@ final class JSONLDParser {
 				.orElse(null);
 	}
 
-	private List<Field> stats(final JsonObject query) {
+	private List<IRI> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("_stats"))
 
 				.filter(v -> !v.equals(JsonValue.NULL))
@@ -334,9 +334,9 @@ final class JSONLDParser {
 
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private List<Field> path(final String path, final Shape shape) {
+	private List<IRI> path(final String path, final Shape shape) {
 
-		final List<Field> steps=new ArrayList<>();
+		final List<IRI> steps=new ArrayList<>();
 
 		final String trimmed=path.trim();
 		final Matcher matcher=StepPattern.matcher(trimmed);
@@ -348,13 +348,13 @@ final class JSONLDParser {
 
 			final Map<String, Field> aliases=aliases(reference, keywords);
 
-			final String step=matcher.group(1);
+			final String IRI=matcher.group(1);
 
 			final Field field=Optional
-					.ofNullable(aliases.get(step))
-					.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
+					.ofNullable(aliases.get(IRI))
+					.orElseThrow(() -> new NoSuchElementException("unknown path IRI <"+IRI+">"));
 
-			steps.add(field.alias("").shape(and())); // retain only predicate info
+			steps.add(field.iri());
 			reference=field.shape();
 
 			matcher.region(last=matcher.end(), trimmed.length());

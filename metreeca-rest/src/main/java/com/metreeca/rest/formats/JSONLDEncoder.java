@@ -32,6 +32,8 @@ import java.util.stream.Stream;
 
 import javax.json.*;
 
+import static com.metreeca.json.Frame.direct;
+import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Field.aliases;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;
@@ -106,7 +108,7 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) {
 
-		final int maxCount=Optional.ofNullable(shape.map(new MaxCountProbe())).orElse(Integer.MAX_VALUE);
+		final int maxCount=maxCount(shape);
 
 		if ( JSONLDInspector.tagged(shape) ) { // tagged literals
 
@@ -182,20 +184,17 @@ final class JSONLDEncoder {
 
 			};
 
-
 			for (final Map.Entry<String, Field> entry : aliases.entrySet()) {
 
 				final String alias=entry.getKey();
 				final Field field=entry.getValue();
 
-				final IRI predicate=field.name();
 				final Shape nestedShape=field.shape();
 
-				final boolean direct=field.direct();
-
-				final Collection<? extends Value> values=direct
-						? objects(model, resource, predicate)
-						: subjects(model, resource, predicate);
+				final Collection<? extends Value> values=traverse(field.iri(),
+						iri -> objects(model, resource, iri),
+						iri -> subjects(model, resource, iri)
+				);
 
 				if ( !values.isEmpty() ) { // omit null value and empty arrays
 
@@ -234,18 +233,19 @@ final class JSONLDEncoder {
 
 			fields.forEach((alias, field) -> {
 
-				final IRI name=field.name();
+				final IRI iri=field.iri();
 				final Shape shape=field.shape();
 
-				final boolean direct=field.direct();
-				final String iri=name.stringValue();
 
 				final Optional<IRI> datatype=JSONLDInspector.datatype(shape);
+
+				final String traverse=direct(iri) ? "@id" : "@reverse";
+				final String label=traverse(iri, Value::stringValue, Value::stringValue);
 
 				if ( datatype.filter(IRIType::equals).isPresent() ) {
 
 					context.add(alias, createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@type", "@id")
 					);
 
@@ -256,30 +256,28 @@ final class JSONLDEncoder {
 					context.add(alias, langs.size() == 1
 
 							? createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@language", langs.iterator().next())
 
 							: createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@container", "@language")
 					);
 
 				} else if ( datatype.filter(type -> !InternalTypes.contains(type)).isPresent() ) {
 
 					context.add(alias, createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@type", datatype.get().stringValue())
 					);
 
-				} else if ( direct ) {
+				} else if ( direct(iri) ) {
 
-					context.add(alias, iri);
+					context.add(alias, label);
 
 				} else {
 
-					context.add(alias, createObjectBuilder()
-							.add("@reverse", iri)
-					);
+					context.add(alias, createObjectBuilder().add("@reverse", label));
 
 				}
 
@@ -431,6 +429,10 @@ final class JSONLDEncoder {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static Integer maxCount(final Shape shape) {
+		return Optional.ofNullable(shape.map(new MaxCountProbe())).orElse(Integer.MAX_VALUE);
+	}
 
 	private static final class MaxCountProbe extends Shape.Probe<Integer> {
 

@@ -21,11 +21,13 @@ import com.metreeca.json.shapes.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
+
+import static java.util.Arrays.stream;
 
 
 final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
@@ -44,33 +46,31 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 
 
 	@Override public Stream<Statement> probe(final Clazz clazz) {
-		return Arrays.stream(sources)
+		return stream(sources)
 				.filter(Resource.class::isInstance)
 				.map(source -> statement((Resource)source, RDF.TYPE, clazz.iri()));
 	}
 
 	@Override public Stream<Statement> probe(final Field field) {
-
-		final IRI iri=field.name();
-		final Shape shape=field.shape();
-
 		return Stream.concat(
 
-				all(shape)
+				all(field.shape())
 
-						.map(targets -> values(targets.stream()).flatMap(target -> Arrays.stream(sources).flatMap(source -> field.direct()
+						.map(targets -> values(targets.stream()).flatMap(target ->
+								stream(sources).flatMap(source -> traverse(field.iri(),
 
-								? source instanceof Resource ?
-								Stream.of(statement((Resource)source, iri, target)) : Stream.empty()
+										iri -> source instanceof Resource ?
+												Stream.of(statement((Resource)source, iri, target)) : Stream.empty(),
 
-								: target instanceof Resource ?
-								Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
+										iri -> target instanceof Resource ?
+												Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
 
-						)))
+										)
+								)))
 
 						.orElse(Stream.empty()),
 
-				shape.map(new ShapeOutliner())
+				field.shape().map(new ShapeOutliner())
 
 		);
 	}
@@ -95,7 +95,7 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 	private Stream<Value> values(final Stream<Value> values) {
 		return values.flatMap(value -> value instanceof Focus
 				?
-				Arrays.stream(sources).filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
+				stream(sources).filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
 				: Stream.of(value)
 		);
 	}

@@ -46,7 +46,7 @@ final class GraphCreatorTest {
 	private static final Options options=new Options() {};
 
 	private static final Shape Employee=and(
-			filter().then(field(RDF.TYPE).as(all(term("Employee")))),
+			filter().then(field(RDF.TYPE, all(term("Employee")))),
 			ValuesTest.Employee.redact(
 					retain(Role, true),
 					retain(Task, true),

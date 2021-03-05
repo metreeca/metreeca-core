@@ -17,6 +17,7 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.base.AbstractIRI;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
@@ -193,7 +194,7 @@ public final class Frame {
 	}
 
 	/**
-	 * Inverts the direction of a predicate.
+	 * Creates an inverse predicate.
 	 *
 	 * @param predicate the IRI identifying the predicate
 	 *
@@ -213,7 +214,6 @@ public final class Frame {
 				? iri(label.substring(InverseScheme.length()))
 				: iri(InverseScheme+label);
 	}
-
 
 	/**
 	 * Traverses a predicate.
@@ -596,6 +596,54 @@ public final class Frame {
 					})
 
 			)).collect(toCollection(LinkedHashSet::new)));
+		}
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class Inverse extends AbstractIRI {
+
+		private static final long serialVersionUID=7576383707001017160L;
+
+
+		private final String string;
+
+		private final String namespace;
+		private final String localname;
+
+
+		Inverse(final String namespace, final String localname) {
+
+			this.string=namespace+localname;
+
+			this.namespace=namespace;
+			this.localname=localname;
+		}
+
+
+		@Override public String stringValue() {
+			return string;
+		}
+
+		@Override public String getNamespace() {
+			return namespace;
+		}
+
+		@Override public String getLocalName() {
+			return localname;
+		}
+
+
+		@Override public boolean equals(final Object object) {
+			return object == this || object instanceof Inverse && super.equals(object);
+		}
+
+		@Override public int hashCode() { return -super.hashCode(); }
+
+		@Override public String toString() {
+			return "^"+super.toString();
 		}
 
 	}

@@ -16,8 +16,7 @@
 
 package com.metreeca.json.shapes;
 
-import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
+import com.metreeca.json.*;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -130,12 +129,12 @@ final class OrTest {
 		@Test void testMergeCompatibleFields() {
 			assertThat(or(
 
-					field(RDF.VALUE).as(minCount(1)),
-					field(RDF.VALUE).as(maxCount(3))
+					field(RDF.VALUE, minCount(1)),
+					field(RDF.VALUE, maxCount(3))
 
 			)).isEqualTo(
 
-					field(RDF.VALUE).as(or(minCount(1), maxCount(3)))
+					field(RDF.VALUE, or(minCount(1), maxCount(3)))
 
 			);
 		}
@@ -144,7 +143,7 @@ final class OrTest {
 			assertThat(or(
 
 					field(RDF.VALUE),
-					field(RDF.VALUE).inverse()
+					field(Frame.inverse(RDF.VALUE))
 
 			).map(new Shape.Probe<Collection<Shape>>() {
 
@@ -153,7 +152,7 @@ final class OrTest {
 			})).containsExactly(
 
 					field(RDF.VALUE),
-					field(RDF.VALUE).inverse()
+					field(Frame.inverse(RDF.VALUE))
 
 			);
 		}
@@ -161,12 +160,12 @@ final class OrTest {
 		@Test void testCollapseEqualFieldAliases() {
 			assertThat(or(
 
-					field(RDF.VALUE).alias("alias"),
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE),
+					field("alias", RDF.VALUE)
 
 			)).isEqualTo(
 
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE)
 
 			);
 		}
@@ -175,11 +174,11 @@ final class OrTest {
 			assertThat(or(
 
 					field(RDF.VALUE),
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE)
 
 			)).isEqualTo(
 
-					field(RDF.VALUE).alias("alias")
+					field("alias", RDF.VALUE)
 
 			);
 		}
@@ -187,8 +186,8 @@ final class OrTest {
 		@Test void testReportClashingFieldAliases() {
 			assertThatIllegalArgumentException().isThrownBy(() -> or(
 
-					field(RDF.VALUE).alias("x"),
-					field(RDF.VALUE).alias("y")
+					field("x", RDF.VALUE),
+					field("y", RDF.VALUE)
 
 			));
 		}

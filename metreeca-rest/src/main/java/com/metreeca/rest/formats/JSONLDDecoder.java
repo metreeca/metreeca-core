@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 import javax.json.*;
 
+import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Field.aliases;
 
@@ -233,13 +234,18 @@ final class JSONLDDecoder {
 
 				return values(value, field.shape()).flatMap(pair -> {
 
-					final IRI iri=field.name();
 					final Value target=pair.getKey();
 					final Stream<Statement> model=pair.getValue();
 
-					final Statement edge=field.direct() ? statement(focus, iri, target)
-							: target instanceof Resource ? statement((Resource)target, iri, focus)
-							: error("target for inverse property is not a resource <%s: %s>", label, pair);
+					final Statement edge=traverse(field.iri(),
+
+							iri -> statement(focus, iri, target),
+
+							iri -> target instanceof Resource
+									? statement((Resource)target, iri, focus)
+									: error("target for inverse property is not a resource <%s: %s>", label, pair)
+
+					);
 
 					return Stream.concat(Stream.of(edge), model);
 

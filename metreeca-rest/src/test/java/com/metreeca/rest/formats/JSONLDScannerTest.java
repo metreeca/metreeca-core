@@ -16,8 +16,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.Shape;
-import com.metreeca.json.Trace;
+import com.metreeca.json.*;
 import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.*;
@@ -86,7 +85,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateShapeEnvelope() {
 
-			final Shape shape=field(p).as(all(x));
+			final Shape shape=field(p, all(x));
 
 			assertThat(scan(shape, statement(f, p, x))).hasRight(singletonList(statement(f, p, x)));
 			assertThat(scan(shape, statement(f, p, x), statement(f, q, y))).hasRight(singletonList(statement(f, p, x)));
@@ -96,7 +95,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateField() {
 
-			final Shape shape=field(p).as(minCount(1));
+			final Shape shape=field(p, minCount(1));
 
 			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
 			assertThat(scan(shape, statement(f, q, x))).hasLeft();
@@ -107,7 +106,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateDirectFields() {
 
-			final Shape shape=field(p).as(all(y));
+			final Shape shape=field(p, all(y));
 
 			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
 			assertThat(scan(shape, statement(f, p, z))).hasLeft();
@@ -116,7 +115,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateInverseFields() {
 
-			final Shape shape=field(p).inverse().as(all(x));
+			final Shape shape=field(Frame.inverse(p), all(x));
 
 			assertThat(scan(shape, statement(x, p, f))).hasRight();
 			assertThat(scan(shape, statement(y, p, f))).hasLeft();
@@ -125,7 +124,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateMultipleValues() {
 
-			final Shape shape=field(p).as(field(q).as(required()));
+			final Shape shape=field(p, field(q, required()));
 
 			assertThat(scan(shape,
 
@@ -141,7 +140,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateAnd() {
 
-			final Shape shape=field(p).as(and(any(x), any(y)));
+			final Shape shape=field(p, and(any(x), any(y)));
 
 			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
 			assertThat(scan(shape, statement(f, p, x), statement(f, p, z))).hasLeft();
@@ -152,7 +151,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateOr() {
 
-			final Shape shape=field(p).as(or(all(x, y), all(x, z)));
+			final Shape shape=field(p, or(all(x, y), all(x, z)));
 
 			assertThat(scan(shape, statement(f, p, x), statement(f, p, y), statement(f, p, z))).hasRight();
 			assertThat(scan(shape, statement(f, p, y), statement(f, p, z))).hasLeft();
@@ -161,7 +160,7 @@ final class JSONLDScannerTest {
 
 		@Test void ValidateWhen() {
 
-			final Shape shape=field(p).as(when(
+			final Shape shape=field(p, when(
 					datatype(XSD.INTEGER),
 					maxInclusive(literal(100)),
 					maxInclusive(literal("10"))
@@ -184,7 +183,7 @@ final class JSONLDScannerTest {
 
 		private Either<Trace, Collection<Statement>> scan(final Shape shape, final Value... values) {
 
-			return JSONLDScanner.scan(field(p).as(shape), f, Arrays
+			return JSONLDScanner.scan(field(p, shape), f, Arrays
 					.stream(values)
 					.map(v -> statement(f, p, v))
 					.collect(toList())
@@ -473,7 +472,7 @@ final class JSONLDScannerTest {
 		}
 
 		@Test void testPruneLanguages() {
-			assertThat(scan(field(p).as(lang("en")),
+			assertThat(scan(field(p, lang("en")),
 
 					statement(f, p, literal("one", "en")),
 					statement(f, q, literal("uno", "it"))
@@ -503,7 +502,7 @@ final class JSONLDScannerTest {
 		}
 
 		@Test void testTraverseField() {
-			assertThat(scan(field(p).as(field(q)),
+			assertThat(scan(field(p, field(q)),
 
 					statement(f, p, x),
 					statement(f, q, z),

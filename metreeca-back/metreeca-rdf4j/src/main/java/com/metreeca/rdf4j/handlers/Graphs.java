@@ -63,8 +63,8 @@ import static java.lang.String.format;
  */
 public final class Graphs extends Endpoint<Graphs> {
 
-	private static final Shape GraphsShape=field(RDF.VALUE).as(
-			field(RDF.TYPE).as(exactly(VOID.DATASET))
+	private static final Shape GraphsShape=field(RDF.VALUE,
+			field(RDF.TYPE), exactly(VOID.DATASET)
 	);
 
 

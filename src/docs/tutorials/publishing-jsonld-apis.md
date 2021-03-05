@@ -546,11 +546,9 @@ driver(
 
 		or(relate(),role(BIRT.staff)),
 
-		filter().then(
-		field(RDF.TYPE,BIRT.Product)
-		),
+		filter(field(RDF.TYPE,BIRT.Product)),
 
-		convey().then(
+		convey(
 
 		field(RDF.TYPE,exactly(BIRT.Product)),
 
@@ -559,11 +557,11 @@ driver(
 
 		and(
 
-		server().then(field(BIRT.code,required())),
+		server(field(BIRT.code,required())),
 
 		field(BIRT.line,required(),clazz(BIRT.ProductLine),
 
-		relate().then(field(RDFS.LABEL,required()))
+		relate(field(RDFS.LABEL,required()))
 
 		),
 
@@ -584,7 +582,7 @@ driver(
 		maxExclusive(literal(integer(10_000)))
 		)),
 
-		field(BIRT.sell,alias("price"),required(),
+		field("price",BIRT.sell,required(),
 		datatype(XSD.DECIMAL),
 		minExclusive(literal(decimal(0))),
 		maxExclusive(literal(decimal(1000)))

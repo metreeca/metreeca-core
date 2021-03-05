@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Frame.direct;
+import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.compare;
 import static com.metreeca.json.Values.format;
@@ -299,25 +301,26 @@ final class JSONLDScanner extends Shape.Probe<Either<Trace, Stream<Statement>>> 
 
 	@Override public Either<Trace, Stream<Statement>> probe(final Field field) {
 
-		final IRI name=field.name();
-
 		return group.stream().map(value -> {
 
+			final IRI iri=field.iri();
+			final Shape shape=field.shape();
+
 			final List<Statement> statements=model.stream()
-					.filter(field.direct()
-							? s -> s.getPredicate().equals(name) && s.getSubject().equals(value)
-							: s -> s.getPredicate().equals(name) && s.getObject().equals(value)
-					)
+					.filter(traverse(iri,
+							recto -> s -> s.getPredicate().equals(recto) && s.getSubject().equals(value),
+							verso -> s -> s.getPredicate().equals(verso) && s.getObject().equals(value)
+					))
 					.collect(toList());
 
 			final Set<Value> values=statements.stream()
-					.map(field.direct() ? Statement::getObject : Statement::getSubject)
+					.map(direct(iri) ? Statement::getObject : Statement::getSubject)
 					.collect(toSet());
 
 			return merge(
 
-					field.shape().map(new JSONLDScanner(focus, values, model)).fold(
-							trace -> Left(trace(field.name().toString(), trace)),
+					shape.map(new JSONLDScanner(focus, values, model)).fold(
+							trace -> Left(trace(iri.toString(), trace)),
 							Either::Right
 					),
 

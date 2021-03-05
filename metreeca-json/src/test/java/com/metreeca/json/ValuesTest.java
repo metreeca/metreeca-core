@@ -88,35 +88,35 @@ public final class ValuesTest {
 			convey().then(
 
 					server().then(
-							field(RDF.TYPE).as(required(), datatype(IRIType)),
-							field(RDFS.LABEL).as(required(), datatype(XSD.STRING)),
-							field(term("code")).as(required(), datatype(XSD.STRING), pattern("\\d+"))
+							field(RDF.TYPE, required(), datatype(IRIType)),
+							field(RDFS.LABEL, required(), datatype(XSD.STRING)),
+							field(term("code"), required(), datatype(XSD.STRING), pattern("\\d+"))
 					),
 
 					and(
 
-							field(term("forename")).as(required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("surname")).as(required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("email")).as(required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("title")).as(required(), datatype(XSD.STRING), maxLength(80))
+							field(term("forename"), required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("surname"), required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("email"), required(), datatype(XSD.STRING), maxLength(80)),
+							field(term("title"), required(), datatype(XSD.STRING), maxLength(80))
 					),
 
 					role(Manager).then(
 
-							field(term("seniority")).as(required(),
+							field(term("seniority"), required(),
 									datatype(XSD.INTEGER),
 									minInclusive(literal(integer(1))),
 									maxInclusive(literal(integer(5)))
 							),
 
-							field(term("supervisor")).as(optional(),
+							field(term("supervisor"), optional(),
 									datatype(IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL).as(required(), datatype(XSD.STRING)))
+									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
 							),
 
-							field(term("subordinate")).as(optional(),
+							field(term("subordinate"), optional(),
 									datatype(IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL).as(required(), datatype(XSD.STRING)))
+									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
 							)
 
 					)
