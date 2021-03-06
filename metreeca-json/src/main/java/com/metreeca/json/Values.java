@@ -274,8 +274,19 @@ public final class Values {
 	}
 
 
-	public static Value value(final Object value) {
-		return value instanceof URI || value instanceof URL ? iri(value.toString()) : literal(value);
+	public static Value value(final Object object) {
+		return object == null ? null
+
+				: object instanceof Value ? (Value)object
+
+				: object instanceof URI ? iri((URI)object)
+				: object instanceof URL ? iri((URL)object)
+
+				: literal(object);
+	}
+
+	private static <V extends Value> V value(final Class<?> type) {
+		throw new IllegalArgumentException(String.format("unsupported object type <%s>", type.getName()));
 	}
 
 
@@ -295,6 +306,17 @@ public final class Values {
 
 	public static IRI iri() {
 		return factory.createIRI("urn:uuid:", uuid());
+	}
+
+	public static IRI iri(final Object object) {
+		return object == null ? null
+
+				: object instanceof IRI ? (IRI)object
+
+				: object instanceof URI ? iri((URI)object)
+				: object instanceof URL ? iri((URL)object)
+
+				: value(object.getClass());
 	}
 
 	public static IRI iri(final URI uri) {
@@ -324,28 +346,29 @@ public final class Values {
 	}
 
 
-	public static Literal literal(final Object value) {
-		return value == null ? null
+	public static Literal literal(final Object object) {
+		return object == null ? null
 
-				: value instanceof Boolean ? literal(((Boolean)value).booleanValue())
+				: object instanceof Literal ? (Literal)object
 
-				: value instanceof Byte ? literal(((Byte)value).byteValue())
-				: value instanceof Short ? literal(((Short)value).shortValue())
-				: value instanceof Integer ? literal(((Integer)value).intValue())
-				: value instanceof Long ? literal(((Long)value).longValue())
-				: value instanceof Float ? literal(((Float)value).floatValue())
-				: value instanceof Double ? literal(((Double)value).doubleValue())
-				: value instanceof BigInteger ? literal((BigInteger)value)
-				: value instanceof BigDecimal ? literal((BigDecimal)value)
+				: object instanceof Boolean ? literal(((Boolean)object).booleanValue())
 
-				: value instanceof TemporalAccessor ? literal((TemporalAccessor)value)
-				: value instanceof TemporalAmount ? literal((TemporalAmount)value)
+				: object instanceof Byte ? literal(((Byte)object).byteValue())
+				: object instanceof Short ? literal(((Short)object).shortValue())
+				: object instanceof Integer ? literal(((Integer)object).intValue())
+				: object instanceof Long ? literal(((Long)object).longValue())
+				: object instanceof Float ? literal(((Float)object).floatValue())
+				: object instanceof Double ? literal(((Double)object).doubleValue())
+				: object instanceof BigInteger ? literal((BigInteger)object)
+				: object instanceof BigDecimal ? literal((BigDecimal)object)
 
-				: value instanceof byte[] ? literal((byte[])value)
+				: object instanceof TemporalAccessor ? literal((TemporalAccessor)object)
+				: object instanceof TemporalAmount ? literal((TemporalAmount)object)
 
-				: literal(value.getClass());
+				: object instanceof byte[] ? literal((byte[])object)
+
+				: value(object.getClass());
 	}
-
 
 	public static Literal literal(final boolean value) {
 		return factory.createLiteral(value);
@@ -411,10 +434,6 @@ public final class Values {
 		return value == null || datatype == null ? null : factory.createLiteral(value, datatype);
 	}
 
-
-	private static Literal literal(final Class<?> type) {
-		throw new IllegalArgumentException(String.format("unsupported object type <%s>", type.getName()));
-	}
 
 
 	///// Converters //////////////////////////////////////////////////////////////////////////////////////////////////
