@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.ValuesTest;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
 
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Nested;
@@ -34,6 +33,7 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.assets.GraphFetcherTest.EmployeeShape;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
+import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
@@ -59,13 +59,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 				.accept(response -> assertThat(response)
 
-						.hasStatus(Response.OK)
+						.hasStatus(OK)
 						.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
 						.hasBody(jsonld(), rdf -> assertThat(rdf)
 								.hasStatement(iri(response.item()), LDP.CONTAINS, null)
 								.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
-										+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"))
+										+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"
+								))
 						)
 				)
 		);
@@ -80,7 +81,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 				.accept(response -> assertThat(response)
 
-						.hasStatus(Response.OK)
+						.hasStatus(OK)
 						.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
 						.hasBody(jsonld(), rdf -> assertThat(rdf)
@@ -106,7 +107,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 				.accept(response -> assertThat(response)
 
-						.hasStatus(Response.OK)
+						.hasStatus(OK)
 						.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
 						.hasBody(jsonld(), rdf -> assertThat(rdf)

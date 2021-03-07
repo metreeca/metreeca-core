@@ -71,7 +71,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	}
 
 	static Shape filter(final Shape shape) { // !!! caching
-		return shape.redact(retain(Mode, Filter));
+		return shape.map(new TrimmerProbe(Mode, Filter));
 	}
 
 
@@ -816,8 +816,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 	private final class PatternProbe extends Shape.Probe<Snippet> {
 
-		// !!! (€) remove optionals if term is required or if exists a filter on the same path
-
 		private final Shape shape;
 
 
@@ -835,7 +833,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 			final Shape shape=field.shape();
 
-			return snippet( // (€) optional unless universal constraints are present
+			return snippet( // !!! (€) optional unless universally constrained or filtered
 
 					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
 

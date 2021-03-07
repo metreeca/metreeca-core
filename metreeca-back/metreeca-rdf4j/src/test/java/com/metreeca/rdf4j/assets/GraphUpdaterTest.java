@@ -19,21 +19,21 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
-import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.ValuesTest.*;
+import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.convey;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
+import static com.metreeca.rest.Response.NoContent;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
 final class GraphUpdaterTest {
@@ -47,7 +47,8 @@ final class GraphUpdaterTest {
 
 					.handle(new Request()
 							.base(Base)
-							.path("/employees/1370").attribute(JSONLDFormat.shape(), convey().then(
+							.path("/employees/1370")
+							.attribute(shape(), and(
 									field(term("forename"), required()),
 									field(term("surname"), required()),
 									field(term("email"), required()),
@@ -66,7 +67,7 @@ final class GraphUpdaterTest {
 					.accept(response -> {
 
 						assertThat(response)
-								.hasStatus(Response.NoContent)
+								.hasStatus(NoContent)
 								.doesNotHaveBody();
 
 						assertThat(model())
