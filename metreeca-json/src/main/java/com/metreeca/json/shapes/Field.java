@@ -51,7 +51,7 @@ public final class Field extends Shape {
 	);
 
 	private static final Pattern NamedIRIPattern=Pattern.compile(
-			"([/#:])(?<name>"+AliasPattern+"[^/#:]+)(/|#|#_|#id|#this)?$"
+			"([/#:])(?<name>"+AliasPattern+")(/|#|#_|#id|#this)?$"
 	);
 
 

@@ -46,6 +46,26 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 final class AndTest {
 
+	//@Test void testOrdering() {
+	//	assertThat(and(
+	//
+	//			field(RDF.FIRST),
+	//			convey(field(RDF.VALUE)),
+	//			field(RDF.REST)
+	//
+	//	).map(new Shape.Probe<Collection<Shape>>() {
+	//
+	//		@Override public Collection<Shape> probe(final And and) { return and.shapes(); }
+	//
+	//	})).containsExactly(
+	//
+	//			field(RDF.FIRST),
+	//			convey(field(RDF.VALUE)),
+	//			field(RDF.REST)
+	//
+	//	);
+	//}
+
 	@Nested final class Optimization {
 
 		private final Value a=literal(1);
