@@ -38,6 +38,11 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Frame {
 
+	/**
+	 * An IRI scheme for inverse predicates ({@value}).
+	 */
+	private static final String InverseScheme="inverse:";
+
 	private static final IRI SchemaName=iri("http://schema.org/", "name");
 	private static final IRI SchemaDescription=iri("http://schema.org/", "description");
 
@@ -104,7 +109,7 @@ public final class Frame {
 			throw new NullPointerException("null path");
 		}
 
-		return test(path,
+		return traverse(path,
 
 				direct -> (focus, model) -> model.stream()
 						.filter(s -> focus.equals(s.getSubject()) && direct.equals(s.getPredicate()))
@@ -166,38 +171,79 @@ public final class Frame {
 	}
 
 
-	private static <V> V test(final IRI predicate, final Function<IRI, V> direct, final Function<IRI, V> inverse) {
-		return direct(predicate) ? direct.apply(predicate) : inverse.apply(inverse(predicate));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Inverse Predicates ////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Checks predicate direction.
 	 *
-	 * @param iri the IRI identifying the predicate
+	 * @param predicate the IRI identifying the predicate
 	 *
-	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
-	 * #inverse(IRI)} predicate
+	 * @return {@code true} if {@code predicate} identifies a direct predicate; {@code false} if {@code predicate}
+	 * identifies an {@link #inverse(IRI) inverse} predicate
+	 *
+	 * @throws NullPointerException if {@code predicate} is null
 	 */
-	public static boolean direct(final IRI iri) {
-		return !(iri instanceof _Inverse);
+	public static boolean direct(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return !predicate.stringValue().startsWith(InverseScheme);
 	}
 
 	/**
 	 * Inverts the direction of a predicate.
 	 *
-	 * @param iri the IRI identifying the predicate
+	 * @param predicate the IRI identifying the predicate
 	 *
-	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri} ,
-	 * if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
-	 * value of {@code iri}, otherwise
+	 * @return the inverse version of {@code predicate}
+	 *
+	 * @throws NullPointerException if {@code predicate} is null
 	 */
-	public static IRI inverse(final IRI iri) {
-		return iri == null ? null
-				: iri instanceof _Inverse ? iri(iri.getNamespace(), iri.getLocalName())
-				: new _Inverse(iri.getNamespace(), iri.getLocalName());
+	public static IRI inverse(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		final String label=predicate.stringValue();
+
+		return label.startsWith(InverseScheme)
+				? iri(label.substring(InverseScheme.length()))
+				: iri(InverseScheme+label);
+	}
+
+
+	/**
+	 * Traverses a predicate.
+	 *
+	 * @param predicate the IRI identifying the predicate to be traversed
+	 * @param direct    a predicate mapper to be executed if {@code predicate} is {@link #direct(IRI) direct}
+	 * @param inverse   a predicate mapper to be executed if {@code predicate} is {@link #inverse(IRI) inverse}
+	 * @param <V>       the type of the value returned by predicate mappers
+	 *
+	 * @return the value returned by the predicate mapper selected according to the direction of {@code predicate}
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static <V> V traverse(final IRI predicate, final Function<IRI, V> direct, final Function<IRI, V> inverse) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( direct == null ) {
+			throw new NullPointerException("null direct");
+		}
+
+		if ( inverse == null ) {
+			throw new NullPointerException("null inverse");
+		}
+
+		return predicate.stringValue().startsWith(InverseScheme)
+				? inverse.apply(iri(predicate.stringValue().substring(InverseScheme.length())))
+				: direct.apply(predicate);
 	}
 
 
@@ -349,7 +395,7 @@ public final class Frame {
 				throw new NullPointerException("null value");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
 
 					direct -> {
 
@@ -408,7 +454,7 @@ public final class Frame {
 				throw new NullPointerException("null values");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
 
 					direct -> values.map(value -> {
 
@@ -448,7 +494,7 @@ public final class Frame {
 				throw new NullPointerException("null frame");
 			}
 
-			return new Frame(this.frame.focus, Stream.concat(this.frame.model.stream(), test(path,
+			return new Frame(this.frame.focus, Stream.concat(this.frame.model.stream(), traverse(path,
 
 					direct -> {
 
@@ -513,7 +559,7 @@ public final class Frame {
 				throw new NullPointerException("null frames");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
 
 					direct -> frames.flatMap(frame -> {
 

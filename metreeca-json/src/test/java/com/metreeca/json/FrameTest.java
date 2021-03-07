@@ -43,6 +43,24 @@ final class FrameTest {
 	private static final IRI z=iri("http://example.com/z");
 
 
+	@Nested final class Inverse {
+
+		@Test void testEquality() {
+
+			assertThat(inverse(x)).isEqualTo(inverse(x));
+
+			assertThat(inverse(x)).isNotEqualTo(x);
+			assertThat(x).isNotEqualTo(inverse(x));
+
+		}
+
+		@Test void testSymmetry() {
+			assertThat(inverse(inverse(x))).isEqualTo(x);
+		}
+
+	}
+
+
 	@Nested final class Assembling {
 
 		@Test void testHandleDirectAndInverseFields() {
