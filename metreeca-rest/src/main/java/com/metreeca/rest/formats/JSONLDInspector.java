@@ -34,14 +34,14 @@ import static java.util.stream.Collectors.toSet;
 abstract class JSONLDInspector<V> extends Shape.Probe<V> {
 
 	static Shape driver(final Shape shape) { // !!! caching
-		return shape.redact(
+		return shape
 
-				retain(Role, true),
-				retain(Task, true),
-				retain(View, true),
-				retain(Mode, Convey) // remove internal filtering shapes
+				.redact(Role)
+				.redact(Task)
+				.redact(View)
+				.redact(Mode, Convey) // remove internal filtering shapes
 
-		).expand(); // add inferred constraints to drive json shorthands
+				.expand(); // add inferred constraints to drive json shorthands
 	}
 
 

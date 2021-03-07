@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.json;
 
-import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
 
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.retain;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
-final class TrimmerProbe extends Shape.Probe<Shape> {
+final class ShapePruner extends Shape.Probe<Shape> {
 
 	private final String axis;
-	private final String value;
+	private final Object value;
 
 
-	TrimmerProbe(final String axis, final String value) {
+	ShapePruner(final String axis, final Object value) {
 		this.axis=axis;
 		this.value=value;
 	}
@@ -45,7 +43,7 @@ final class TrimmerProbe extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final When when) {
 
-		final Shape test=when.test().redact(retain(axis, value));
+		final Shape test=when.test().redact(axis, value);
 
 		return test.equals(and()) ? when.pass() // retain nested shapes
 				: when(test, when.pass().map(this), when.fail().map(this));

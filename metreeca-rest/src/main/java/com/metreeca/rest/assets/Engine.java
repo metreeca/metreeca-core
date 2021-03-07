@@ -63,40 +63,40 @@ public interface Engine extends Wrapper {
 	public static Wrapper throttler(final Object task, final Object view) { // !!! optimize/cache
 		return handler -> request -> {
 
-			final Shape shape=request.attribute(shape());
+			final Shape shape=request.attribute(shape()) // visible taking into account task/area
 
-			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
-					retain(Role, true),
-					retain(Task, task),
-					retain(View, view),
-					retain(Mode, Convey)
-			);
+					.redact(Task, task)
+					.redact(View, view)
+					.redact(Mode, Convey);
 
-			final Shape authorized=shape.redact( // visible to user taking into account task/area
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(View, view),
-					retain(Mode, Convey)
-			);
+			final Shape baseline=shape // visible to anyone
+
+					.redact(Role);
+
+			final Shape authorized=shape // visible to user
+
+					.redact(Role, request.roles());
 
 			// request shape redactor
 
-			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape()).redact(
+			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape())
 
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(View, view)
+					.redact(Role, request.roles())
+					.redact(Task, task)
+					.redact(View, view)
 
-			));
+			);
 
 			// response shape redactor
 
-			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape()).redact(
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(View, view),
-					retain(Mode, Convey)
-			));
+			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape())
+
+					.redact(Role, request.roles())
+					.redact(Task, task)
+					.redact(View, view)
+					.redact(Mode, Convey)
+
+			);
 
 			return baseline.empty() ? request.reply(status(Forbidden))
 					: authorized.empty() ? request.reply(status(Unauthorized))

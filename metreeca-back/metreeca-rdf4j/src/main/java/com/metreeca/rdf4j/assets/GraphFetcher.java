@@ -74,7 +74,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static Shape filter(final Value focus, final Shape shape) {
-		return anchor(focus, shape.map(new TrimmerProbe(Mode, Filter)));
+		return anchor(focus, shape.prune(Mode, Filter));
 	}
 
 	private static Shape anchor(final Value resource, final Shape shape) {
@@ -160,7 +160,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
-		final Shape pattern=shape.redact(retain(Mode, Convey, Expose));
+		final Shape pattern=shape.redact(Mode, Convey, Expose);
 		final Shape selector=filter(resource, shape);
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(

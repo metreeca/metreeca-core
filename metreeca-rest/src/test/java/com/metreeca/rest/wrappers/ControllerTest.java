@@ -22,6 +22,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.wrappers.Controller.controller;
 
 
 final class ControllerTest {
@@ -43,7 +44,7 @@ final class ControllerTest {
 
 
 	@Test void testAcceptedPublic() {
-		exec(() -> Controller.controller()
+		exec(() -> controller()
 
 				.wrap(handler())
 
@@ -54,9 +55,9 @@ final class ControllerTest {
 	}
 
 	@Test void testAcceptedControlled() {
-		exec(() -> Controller.controller("x", "y")
+		exec(() -> controller("x", "y")
 
-				.with((Wrapper)handler -> request -> {
+				.with(handler -> request -> {
 
 					Assertions.assertThat(request.roles()).containsOnly("x");
 
@@ -73,7 +74,7 @@ final class ControllerTest {
 	}
 
 	@Test void testUnauthorized() {
-		exec(() -> Controller.controller("x", "y")
+		exec(() -> controller("x", "y")
 
 				.wrap(handler())
 

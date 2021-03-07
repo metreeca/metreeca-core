@@ -18,9 +18,8 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.HashSet;
 
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
@@ -30,11 +29,14 @@ import static com.metreeca.json.shapes.When.when;
 
 final class ShapeRedactor extends Shape.Probe<Shape> {
 
-	private final Function<Guard, Boolean>[] evaluators;
+	private final String axis;
+	private final Collection<Object> values;
 
 
-	@SafeVarargs ShapeRedactor(final Function<Guard, Boolean>... evaluators) {
-		this.evaluators=evaluators;
+	ShapeRedactor(final String axis, final Collection<Object> values) {
+
+		this.axis=axis;
+		this.values=(values == null) ? null : new HashSet<>(values);
 	}
 
 
@@ -45,16 +47,8 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 	}
 
 	@Override public Shape probe(final Guard guard) {
-
-		final Boolean include=Arrays
-				.stream(evaluators)
-				.map(redactor -> redactor.apply(guard))
-				.filter(Objects::nonNull)
-				.findFirst()
-				.orElse(null);
-
-		return Boolean.TRUE.equals(include) ? and()
-				: Boolean.FALSE.equals(include) ? or()
+		return axis.equals(guard.axis())
+				? values == null || guard.values().stream().anyMatch(values::contains) ? and() : or()
 				: guard;
 	}
 

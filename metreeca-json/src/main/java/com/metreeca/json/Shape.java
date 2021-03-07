@@ -21,8 +21,7 @@ import com.metreeca.json.shapes.*;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -33,12 +32,13 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
 
+import static java.util.Arrays.asList;
+
 
 /**
  * Linked data shape constraint.
  */
 public abstract class Shape {
-
 
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -66,6 +66,7 @@ public abstract class Shape {
 		return map(new ShapeEvaluator()) != null;
 	}
 
+
 	/**
 	 * Extends this shape with inferred constraints.
 	 *
@@ -73,26 +74,6 @@ public abstract class Shape {
 	 */
 	public Shape expand() {
 		return map(new ShapeInferencer());
-	}
-
-	/**
-	 * Redacts {@linkplain Guard guard} annotations of this shape.
-	 *
-	 * @param evaluators the guard evaluation functions; take as arguments a guard annotation and return {@code true},
-	 *                   if the guarded shape is to be included in the redacted shape, {@code false} if it is to be
-	 *                   removed, {@code null} if the guard is to be retained as is
-	 *
-	 * @return a copy of this shape redacted according to {@code evaluators}.
-	 *
-	 * @throws NullPointerException if {@code evaluators} is null or contains null elements
-	 */
-	@SafeVarargs public final Shape redact(final Function<Guard, Boolean>... evaluators) {
-
-		if ( evaluators == null || Arrays.stream(evaluators).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null evaluators");
-		}
-
-		return map(new ShapeRedactor(evaluators));
 	}
 
 	/**
@@ -115,17 +96,98 @@ public abstract class Shape {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * Redacts guards in this shape.
+	 *
+	 * @param axis the axis to be retained
+	 *
+	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced
+	 * with an empty {@link And#and() and} shape
+	 *
+	 * @throws NullPointerException if {@code axis} is null
+	 */
+	public Shape redact(final String axis) {
 
-	public abstract <V> V map(final Probe<V> probe);
-
-	public final <V> V map(final Function<Shape, V> mapper) {
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
+		if ( axis == null ) {
+			throw new NullPointerException("null axis");
 		}
 
-		return mapper.apply(this);
+		return map(new ShapeRedactor(axis, null));
+	}
+
+	/**
+	 * Redacts guards in this shape.
+	 *
+	 * @param axis   the axis to be retained
+	 * @param values the axis values to be retained
+	 *
+	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced
+	 * with an empty {@link And#and() and} shape, if their {@link Guard#values() values set} intersect {@code values},
+	 * or an empty {@link Or#or() and} shape, otherwise
+	 *
+	 * @throws NullPointerException if either {@code axis} or {@code values} is null or contains null elements
+	 */
+	public Shape redact(final String axis, final Object... values) {
+
+		if ( axis == null ) {
+			throw new NullPointerException("null axis");
+		}
+
+		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
+		return map(new ShapeRedactor(axis, asList(values)));
+	}
+
+	/**
+	 * Redacts guards in this shape.
+	 *
+	 * @param axis   the axis to be retained
+	 * @param values the axis values to be retained
+	 *
+	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced
+	 * with an empty {@link And#and() and} shape, if their {@link Guard#values() values set} intersect {@code values},
+	 * or an empty {@link Or#or() and} shape, otherwise
+	 *
+	 * @throws NullPointerException if either {@code axis} or {@code values} is null or contains null elements
+	 */
+	public Shape redact(final String axis, final Collection<Object> values) {
+
+		if ( axis == null ) {
+			throw new NullPointerException("null axis");
+		}
+
+		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null values");
+		}
+
+		return map(new ShapeRedactor(axis, values));
+	}
+
+
+	/**
+	 * Prunes this shape.
+	 *
+	 * @param axis  the axis to be retained
+	 * @param value the axis value to be retained
+	 *
+	 * @return a copy of this shape where only {@linkplain #then(Shape...) conditional} shapes
+	 * {@linkplain Guard guarded} with {@code value} along {@code axis} are retained
+	 *
+	 * @throws NullPointerException if either {@code axis} or {@code value} is null
+	 */
+	public Shape prune(final String axis, final Object value) {
+
+		if ( axis == null ) {
+			throw new NullPointerException("null axis");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		return map(new ShapePruner(axis, value));
 	}
 
 
@@ -146,6 +208,20 @@ public abstract class Shape {
 		}
 
 		return shapes.length == 0 ? this : when(this, and(shapes));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public abstract <V> V map(final Probe<V> probe);
+
+	public final <V> V map(final Function<Shape, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return mapper.apply(this);
 	}
 
 

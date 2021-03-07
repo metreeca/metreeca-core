@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
-
-import com.metreeca.json.Shape;
+package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.junit.jupiter.api.Test;
@@ -30,7 +28,7 @@ import static com.metreeca.json.shapes.Like.like;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-final class TrimmerProbeTest {
+final class ShapePrunerTest {
 
 	private static final IRI x=iri("test:x");
 
@@ -38,7 +36,7 @@ final class TrimmerProbeTest {
 
 
 	private static Shape trim(final Shape shape) {
-		return shape.map(new TrimmerProbe(Mode, Filter));
+		return shape.map(new ShapePruner(Mode, Filter));
 	}
 
 

@@ -98,33 +98,6 @@ public final class Guard extends Shape {
 	public static Shape expose(final Shape... shapes) { return mode(Expose).then(shapes); }
 
 
-	//// Guard Evaluators //////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Function<Guard, Boolean> retain(final String axis, final boolean status) {
-		return guard -> guard.axis.equals(axis)
-				? status
-				: null;
-	}
-
-	public static Function<Guard, Boolean> retain(final String axis, final Object value) {
-		return guard -> guard.axis.equals(axis)
-				? guard.values.contains(value)
-				: null;
-	}
-
-	public static Function<Guard, Boolean> retain(final String axis, final Object... values) {
-		return guard -> guard.axis.equals(axis)
-				? Arrays.stream(values).anyMatch(guard.values::contains)
-				: null;
-	}
-
-	public static Function<Guard, Boolean> retain(final String axis, final Collection<?> values) {
-		return guard -> guard.axis.equals(axis)
-				? values.stream().anyMatch(guard.values::contains)
-				: null;
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Shape guard(final String axis, final Object... values) {
