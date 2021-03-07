@@ -17,7 +17,8 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.shapes.*;
+import com.metreeca.json.shapes.Field;
+import com.metreeca.json.shapes.MaxCount;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -26,9 +27,9 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
-import java.util.stream.Stream;
 
 import javax.json.*;
 
@@ -108,7 +109,7 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) {
 
-		final int maxCount=maxCount(shape);
+		final int maxCount=MaxCount.maxCount(shape);
 
 		if ( JSONLDInspector.tagged(shape) ) { // tagged literals
 
@@ -425,42 +426,6 @@ final class JSONLDEncoder {
 				.filter(pattern(resource, predicate, null))
 				.map(Statement::getObject)
 				.collect(toCollection(LinkedHashSet::new));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static Integer maxCount(final Shape shape) {
-		return Optional.ofNullable(shape.map(new MaxCountProbe())).orElse(Integer.MAX_VALUE);
-	}
-
-	private static final class MaxCountProbe extends Shape.Probe<Integer> {
-
-		@Override public Integer probe(final MaxCount maxCount) {
-			return maxCount.limit();
-		}
-
-		@Override public Integer probe(final And and) {
-			return reduce(and.shapes().stream(), Math::min);
-		}
-
-		@Override public Integer probe(final Or or) {
-			return reduce(or.shapes().stream(), Math::max);
-		}
-
-		@Override public Integer probe(final When when) {
-			return reduce(Stream.of(when.pass(), when.fail()), Math::max);
-		}
-
-
-		private Integer reduce(final Stream<Shape> shapeStream, final BinaryOperator<Integer> operator) {
-			return shapeStream
-					.map(shape -> shape.map(this))
-					.filter(Objects::nonNull)
-					.reduce(operator)
-					.orElse(null);
-		}
-
 	}
 
 }

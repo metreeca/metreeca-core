@@ -18,6 +18,11 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BinaryOperator;
+import java.util.stream.Stream;
+
 
 /**
  * Minimum set size constraint.
@@ -33,6 +38,16 @@ public final class MinCount extends Shape {
 		}
 
 		return new MinCount(limit);
+	}
+
+
+	public static int minCount(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Optional.ofNullable(shape.map(new MinCountProbe())).orElse(0);
 	}
 
 
@@ -78,6 +93,37 @@ public final class MinCount extends Shape {
 
 	@Override public String toString() {
 		return "minCount("+limit+")";
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class MinCountProbe extends Probe<Integer> {
+
+		@Override public Integer probe(final MinCount minCount) {
+			return minCount.limit();
+		}
+
+		@Override public Integer probe(final And and) {
+			return reduce(and.shapes().stream(), Math::max);
+		}
+
+		@Override public Integer probe(final Or or) {
+			return reduce(or.shapes().stream(), Math::min);
+		}
+
+		@Override public Integer probe(final When when) {
+			return reduce(Stream.of(when.pass(), when.fail()), Math::min);
+		}
+
+
+		private Integer reduce(final Stream<Shape> shapes, final BinaryOperator<Integer> operator) {
+			return shapes
+					.map(shape -> shape.map(this))
+					.filter(Objects::nonNull)
+					.reduce(operator)
+					.orElse(null);
+		}
+
 	}
 
 }
