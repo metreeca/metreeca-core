@@ -105,7 +105,7 @@ final class GraphFetcherTest {
 		GraphTest.exec(model(localized(birt(), "", "en", "it")), task);
 	}
 
-	private static Shape always(final Shape... shapes) { return mode(Convey, Filter, Refine).then(shapes); }
+	private static Shape always(final Shape... shapes) { return mode(Convey, Filter, Expose).then(shapes); }
 
 	private Collection<Statement> query(final IRI resource, final Query query) {
 		return asset(Graph.graph()).exec(connection -> {
@@ -144,6 +144,51 @@ final class GraphFetcherTest {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Test void testUseIndependentPatternsAndFilters() {
+		exec(() -> {
+			assertThat(query(
+
+					Root, items(and(field(term("employee")), filter().then(field(term("employee"), any(
+							item("employees/1002"),
+							item("employees/1188")
+					)))))
+
+			)).isIsomorphicTo(graph(
+
+					""
+							+"\n"
+							+"construct {\n"
+							+"\n"
+							+"\t<app:/> ldp:contains ?office.\n"
+							+"\t?office :employee ?employee\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
+							+"\n"
+							+"}"
+
+			));
+		});
+	}
+
+
+	@Test void testHandlePatternFilters() {
+		exec(() -> assertThat(query(Root, items(and(
+
+				filter(clazz(term("Office"))),
+
+				field(RDFS.LABEL, expose(localized("en")))
+
+		)))).isIsomorphicTo(graph(
+
+				"construct { <app:/> ldp:contains ?office. ?office rdfs:label ?label }"
+						+" where { ?office a :Office; rdfs:label ?label filter (lang(?label) = 'en') }"
+
+		)));
+	}
+
 
 	@Nested final class Items {
 
@@ -444,7 +489,6 @@ final class GraphFetcherTest {
 		}
 
 	}
-
 
 	@Nested final class Shapes {
 
@@ -1017,37 +1061,6 @@ final class GraphFetcherTest {
 
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Test void testUseIndependentPatternsAndFilters() {
-		exec(() -> {
-			assertThat(query(
-
-					Root, items(and(field(term("employee")), filter().then(field(term("employee"), any(
-							item("employees/1002"),
-							item("employees/1188")
-					)))))
-
-			)).isIsomorphicTo(graph(
-
-					""
-							+"\n"
-							+"construct {\n"
-							+"\n"
-							+"\t<app:/> ldp:contains ?office.\n"
-							+"\t?office :employee ?employee\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
-							+"\n"
-							+"}"
-
-			));
-		});
-	}
-
-
 	@Nested final class SameAs {
 
 		private Collection<Statement> query(final Query query) {
@@ -1127,6 +1140,5 @@ final class GraphFetcherTest {
 		}
 
 	}
-
 
 }

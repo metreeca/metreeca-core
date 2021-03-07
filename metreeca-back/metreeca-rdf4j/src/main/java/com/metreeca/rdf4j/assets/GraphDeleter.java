@@ -29,8 +29,6 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rdf4j.assets.GraphFetcher.filter;
-import static com.metreeca.rdf4j.assets.GraphFetcher.outline;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Response.NoContent;
 import static com.metreeca.rest.Response.NotFound;
@@ -64,7 +62,7 @@ final class GraphDeleter {
 
 					.map(current -> {
 
-						connection.remove(outline(item, filter(shape)));
+						connection.remove(GraphFetcher.outline(item, shape));
 						connection.remove(current);
 
 						return response.status(NoContent);

@@ -53,6 +53,7 @@ public final class Guard extends Shape {
 
 	public static final String Convey="convey";
 	public static final String Filter="filter";
+	public static final String Expose="expose";
 
 
 	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
@@ -93,6 +94,8 @@ public final class Guard extends Shape {
 	public static Shape convey(final Shape... shapes) { return mode(Convey).then(shapes); }
 
 	public static Shape filter(final Shape... shapes) { return mode(Filter).then(shapes); }
+
+	public static Shape expose(final Shape... shapes) { return mode(Expose).then(shapes); }
 
 
 	//// Guard Evaluators //////////////////////////////////////////////////////////////////////////////////////////////

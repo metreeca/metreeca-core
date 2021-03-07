@@ -31,8 +31,6 @@ import java.util.regex.Matcher;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rdf4j.assets.GraphFetcher.filter;
-import static com.metreeca.rdf4j.assets.GraphFetcher.outline;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.Created;
@@ -79,7 +77,7 @@ final class GraphCreator {
 
 					} else { // store model
 
-						connection.add(outline(member, filter(shape)));
+						connection.add(GraphFetcher.outline(member, shape));
 						connection.add(rewrite(member, item, model));
 
 						final String location=member.stringValue();

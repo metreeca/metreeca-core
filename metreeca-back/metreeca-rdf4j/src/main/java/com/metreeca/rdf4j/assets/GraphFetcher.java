@@ -66,19 +66,15 @@ import static java.util.stream.Collectors.toSet;
 
 final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! refactor
 
-	static Shape convey(final Shape shape) { // !!! caching
-		return shape.redact(retain(Mode, Convey));
-	}
-
-	static Shape filter(final Shape shape) { // !!! caching
-		return shape.map(new TrimmerProbe(Mode, Filter));
+	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
+		return filter(resource, shape).outline(resource).collect(toList());
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
-		return anchor(resource, shape).outline(resource).collect(toList());
+	private static Shape filter(final Value focus, final Shape shape) {
+		return anchor(focus, shape.map(new TrimmerProbe(Mode, Filter)));
 	}
 
 	private static Shape anchor(final Value resource, final Shape shape) {
@@ -164,8 +160,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
-		final Shape pattern=convey(shape);
-		final Shape selector=anchor(resource, filter(shape));
+		final Shape pattern=shape.redact(retain(Mode, Convey, Expose));
+		final Shape selector=filter(resource, shape);
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
 
@@ -260,7 +256,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		final Shape selector=anchor(resource, filter(shape));
+		final Shape selector=filter(resource, shape);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();
@@ -406,7 +402,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		final Model model=new LinkedHashModel();
 
-		final Shape selector=anchor(resource, filter(shape));
+		final Shape selector=filter(resource, shape);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();
@@ -522,11 +518,11 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 	}
 
 	private Snippet filters(final Shape shape) {
-		return shape.map(new FilterProbe(shape));
+		return shape.map(new SkeletonProbe(shape, true));
 	}
 
 	private Snippet pattern(final Shape shape) {
-		return shape.map(new PatternProbe(shape));
+		return shape.map(new SkeletonProbe(shape, false));
 	}
 
 	private Snippet sorters(final Object root, final Collection<Order> orders) {
@@ -619,9 +615,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		}
 
 
-		@Override public Stream<Integer> probe(final Shape shape) { return Stream.empty(); }
-
-
 		@Override public Stream<Integer> probe(final Field field) {
 
 			final Shape shape=field.shape();
@@ -645,6 +638,13 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		}
 
 
+		@Override public Stream<Integer> probe(final When when) {
+			return Stream.concat(
+					when.pass().map(this),
+					when.fail().map(this)
+			);
+		}
+
 		@Override public Stream<Integer> probe(final And and) {
 			return and.shapes().stream().flatMap(shape -> shape.map(this));
 		}
@@ -653,22 +653,19 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 			return or.shapes().stream().flatMap(shape -> shape.map(this));
 		}
 
-		@Override public Stream<Integer> probe(final When when) {
-			return Stream.concat(
-					when.pass().map(this),
-					when.fail().map(this)
-			);
-		}
+		@Override public Stream<Integer> probe(final Shape shape) { return Stream.empty(); }
 
 	}
 
-	private final class FilterProbe extends Shape.Probe<Snippet> {
+	private final class SkeletonProbe extends Shape.Probe<Snippet> {
 
 		private final Shape source;
+		private final boolean prune;
 
 
-		private FilterProbe(final Shape source) {
+		private SkeletonProbe(final Shape source, final boolean prune) {
 			this.source=source;
+			this.prune=prune;
 		}
 
 
@@ -699,10 +696,32 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 			);
 		}
 
+		@Override public Snippet probe(final Range range) {
+			if ( prune ) {
+
+				return probe((Shape)range); // !!! tbi (filter not exists w/ special root treatment)
+
+			} else {
+
+				return range.values().isEmpty() ? nothing() : snippet("filter ({source} in ({values}))",
+						var(source), list(range.values().stream().map(Values::format), ", ")
+				);
+
+			}
+		}
+
 		@Override public Snippet probe(final Lang lang) {
-			return lang.tags().isEmpty() ? nothing() : snippet("filter (lang({source}) in ({tags}))",
-					var(source), list(lang.tags().stream().map(Values::quote), ", ")
-			);
+			if ( prune ) {
+
+				return probe((Shape)lang); // !!! tbi (filter not exists w/ special root treatment)
+
+			} else {
+
+				return lang.tags().isEmpty() ? nothing() : snippet("filter (lang({source}) in ({tags}))",
+						var(source), list(lang.tags().stream().map(Values::quote), ", ")
+				);
+
+			}
 		}
 
 
@@ -721,6 +740,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		@Override public Snippet probe(final MaxInclusive maxInclusive) {
 			return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.limit())));
 		}
+
 
 		@Override public Snippet probe(final MinLength minLength) {
 			return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.limit());
@@ -750,21 +770,32 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		}
 
 
+		public Snippet probe(final MinCount minCount) { return prune ? probe((Shape)minCount) : nothing(); }
+
+		public Snippet probe(final MaxCount maxCount) { return prune ? probe((Shape)maxCount) : nothing(); }
+
+
 		@Override public Snippet probe(final All all) {
 			return nothing(); // universal constraints handled by field probe
 		}
 
-		@Override public Snippet probe(final Any any) { // singleton universal constraints handled by field probe
+		@Override public Snippet probe(final Any any) {
 
 			// values-based filtering (as opposed to in-based filtering) works also or root terms
 			// / !!! performance?
 
-			return any.values().size() > 1 ? values(source, values(any.values())) : nothing();
+			return any.values().size() <= 1
+					? nothing() // singleton universal constraints handled by field probe
+					: values(source, values(any.values()));
 
 		}
 
 
+		public Snippet probe(final Localized localized) { return prune ? probe((Shape)localized) : nothing(); }
+
+
 		@Override public Snippet probe(final Field field) {
+
 
 			final Shape shape=field.shape();
 
@@ -777,22 +808,32 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 			return snippet(
 
-					(shape instanceof All || singleton.isPresent()) // filtering hook
-							? null // ($) only if actually referenced by filters
-							: edge(var(source), field, var(shape)),
+					// (€) optional unless universally constrained // !!! or filtered
 
-					all // target universal constraints
-							.map(values -> values.stream().map(value -> edge(var(source), field, format(value))))
-							.orElse(null),
+					prune || (all.isPresent() || singleton.isPresent())
+							? "\n\n{pattern}\n\n"
+							: "\n\noptional {\n\n{pattern}\n\n}\n\n",
 
-					singleton // target singleton existential constraints
-							.map(value -> edge(var(source), field, format(value)))
-							.orElse(null),
+					snippet(
 
-					"\n\n",
+							prune && (all.isPresent() || singleton.isPresent())
+									? nothing() // (€) filtering hook already available on all/any edges
+									: edge(var(source), field, var(shape)), // filtering or projection hook
 
-					filters(shape)
+							all.map(values -> // insert universal constraints edges
+									values.stream().map(value -> edge(var(source), field, format(value)))
+							).orElse(Stream.empty()),
+
+							singleton.map(value -> // insert singleton existential constraint edge
+									edge(var(source), field, format(value))
+							).orElse(nothing()),
+
+							"\n\n",
+
+							shape.map(new SkeletonProbe(shape, prune))
+					)
 			);
+
 		}
 
 
@@ -810,52 +851,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 
 		@Override public Snippet probe(final Shape shape) {
 			throw new UnsupportedOperationException(shape.toString());
-		}
-
-	}
-
-	private final class PatternProbe extends Shape.Probe<Snippet> {
-
-		private final Shape shape;
-
-
-		private PatternProbe(final Shape shape) {
-			this.shape=shape;
-		}
-
-
-		@Override public Snippet probe(final Guard guard) {
-			throw new UnsupportedOperationException("partially redacted shape");
-		}
-
-
-		@Override public Snippet probe(final Field field) {
-
-			final Shape shape=field.shape();
-
-			return snippet( // !!! (€) optional unless universally constrained or filtered
-
-					all(shape).isPresent() ? "\n\n{pattern}\n\n" : "\n\noptional {\n\n{pattern}\n\n}\n\n",
-
-					snippet(
-							edge(var(this.shape), field, var(shape)), "\n",
-							pattern(shape)
-					)
-
-			);
-		}
-
-
-		@Override public Snippet probe(final And and) {
-			return snippet(and.shapes().stream().map(s -> s.map(this)));
-		}
-
-		@Override public Snippet probe(final Or or) {
-			return snippet(or.shapes().stream().map(s -> s.map(this)));
-		}
-
-		@Override public Snippet probe(final When when) {
-			throw new UnsupportedOperationException("conditional shape");
 		}
 
 	}

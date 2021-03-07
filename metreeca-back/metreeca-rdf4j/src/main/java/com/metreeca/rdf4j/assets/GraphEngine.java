@@ -36,9 +36,9 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Field.fields;
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rdf4j.assets.GraphFetcher.convey;
 import static com.metreeca.rest.Context.asset;
 
 import static java.lang.String.format;
@@ -102,7 +102,7 @@ public final class GraphEngine implements Engine {
 
 	private static Shape annotations(final Shape shape, final Iterable<IRI> path) {
 
-		Shape nested=convey(shape);
+		Shape nested=shape.redact(retain(Mode, Convey));
 
 		for (final IRI step : path) {
 			nested=field(nested, step)
