@@ -235,7 +235,7 @@ final class JSONLDParser {
 			final List<IRI> tail=path.subList(1, path.size());
 
 			final Field field=field(shape, head).orElseThrow(() ->
-					new IllegalArgumentException(format("unknown path IRI <%s>", head))
+					new IllegalArgumentException(format("unknown path step <%s>", head))
 			);
 
 			return field(field.iri(), filter(tail, value, field.shape(), mapper));

@@ -312,7 +312,7 @@ public final class Field extends Shape {
 		builder.append("field(");
 
 		if ( !alias.isEmpty() ) {
-			builder.append('<').append(alias).append(">=");
+			builder.append(alias).append(" = ");
 		}
 
 		builder.append(iri);

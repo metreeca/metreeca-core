@@ -56,6 +56,15 @@ public final class Like extends Shape {
 	}
 
 
+	public static Shape like(final String keywords) {
+
+		if ( keywords == null ) {
+			throw new NullPointerException("null keywords");
+		}
+
+		return new Like(keywords, false);
+	}
+
 	public static Shape like(final String keywords, final boolean stemming) {
 
 		if ( keywords == null ) {
