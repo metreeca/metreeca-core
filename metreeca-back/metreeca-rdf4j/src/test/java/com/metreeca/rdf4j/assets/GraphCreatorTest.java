@@ -18,14 +18,13 @@ package com.metreeca.rdf4j.assets;
 
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.ValuesTest;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
@@ -34,8 +33,12 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.filter;
+import static com.metreeca.json.shapes.Guard.required;
+import static com.metreeca.json.shapes.MaxLength.maxLength;
+import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -46,12 +49,15 @@ final class GraphCreatorTest {
 	private static final Options options=new Options() {};
 
 	private static final Shape Employee=and(
-			filter().then(field(RDF.TYPE, all(term("Employee")))),
-			ValuesTest.Employee.redact(
-					retain(Role, true),
-					retain(Task, true),
-					retain(View, Detail)
-			));
+			filter(field(RDF.TYPE, all(term("Employee")))),
+			field(RDFS.LABEL, required(), datatype(XSD.STRING)),
+			field(term("code"), required(), datatype(XSD.STRING), pattern("\\d+")),
+			field(term("forename"), required(), datatype(XSD.STRING), maxLength(80)),
+			field(term("surname"), required(), datatype(XSD.STRING), maxLength(80)),
+			field(term("email"), required(), datatype(XSD.STRING), maxLength(80)),
+			field(term("title"), required(), datatype(XSD.STRING), maxLength(80))
+
+	);
 
 	private Request request() {
 		return new Request()

@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.literal;
-import static com.metreeca.json.ValuesTest.small;
+import static com.metreeca.json.ValuesTest.birt;
 import static com.metreeca.json.ValuesTest.term;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.assets.GraphFetcherTest.EmployeeShape;
@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 	@Test void testBrowse() {
-		exec(model(small()), () -> new GraphBrowser(options)
+		exec(model(birt()), () -> new GraphBrowser(options)
 
 				.handle(request())
 
@@ -72,7 +72,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testBrowseFiltered() {
-		exec(model(small()), () -> new GraphBrowser(options)
+		exec(model(birt()), () -> new GraphBrowser(options)
 
 				.handle(request()
 						.query("title=Sales+Rep")
@@ -98,7 +98,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testSliceTermsQueries() {
-		exec(model(small()), () -> new GraphBrowser(options)
+		exec(model(birt()), () -> new GraphBrowser(options)
 
 				.handle(request()
 						.query("_terms=office&_offset=1&_limit=3")

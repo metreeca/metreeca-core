@@ -17,7 +17,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Frame;
-import com.metreeca.json.ValuesTest;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
@@ -121,7 +120,7 @@ final class FieldTest {
 		@Test void testReportReservedAliases() {
 
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					aliases(field(iri(ValuesTest.Base, "@id"), and()))
+					aliases(field(iri("http://exampe.com/", "@id"), and()))
 			);
 
 			assertThatIllegalArgumentException().isThrownBy(() ->

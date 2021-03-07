@@ -22,6 +22,7 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
 import java.io.*;
 import java.net.URL;
@@ -30,21 +31,11 @@ import java.util.Map;
 import java.util.logging.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Shape.optional;
-import static com.metreeca.json.Shape.required;
-import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Clazz.clazz;
-import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.*;
-import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
-import static com.metreeca.json.shapes.MaxLength.maxLength;
-import static com.metreeca.json.shapes.MinInclusive.minInclusive;
-import static com.metreeca.json.shapes.Pattern.pattern;
+import static com.metreeca.json.Values.iri;
 
 import static org.assertj.core.api.Assertions.entry;
 
+import static java.lang.String.format;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
@@ -80,55 +71,6 @@ public final class ValuesTest {
 	public static final String Base="http://example.com/";
 	public static final String Namespace=Base+"terms#";
 
-	public static final IRI Manager=term("roles/manager");
-	public static final IRI Salesman=term("roles/salesman");
-
-	public static final Shape Employee=role(Manager, Salesman).then(
-
-			convey().then(
-
-					server().then(
-							field(RDF.TYPE, required(), datatype(IRIType)),
-							field(RDFS.LABEL, required(), datatype(XSD.STRING)),
-							field(term("code"), required(), datatype(XSD.STRING), pattern("\\d+"))
-					),
-
-					and(
-
-							field(term("forename"), required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("surname"), required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("email"), required(), datatype(XSD.STRING), maxLength(80)),
-							field(term("title"), required(), datatype(XSD.STRING), maxLength(80))
-					),
-
-					role(Manager).then(
-
-							field(term("seniority"), required(),
-									datatype(XSD.INTEGER),
-									minInclusive(literal(integer(1))),
-									maxInclusive(literal(integer(5)))
-							),
-
-							field(term("supervisor"), optional(),
-									datatype(IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
-							),
-
-							field(term("subordinate"), optional(),
-									datatype(IRIType), clazz(term("Employee")),
-									relate().then(field(RDFS.LABEL, required(), datatype(XSD.STRING)))
-							)
-
-					)
-
-			),
-
-			delete().then(
-					field(term("office"))
-			)
-
-	);
-
 
 	public static final Map<String, String> Prefixes=unmodifiableMap(Stream.of(
 			entry("app", "app:/terms#"),
@@ -140,10 +82,6 @@ public final class ValuesTest {
 			entry("ldp", LDP.NAMESPACE),
 			entry("skos", SKOS.NAMESPACE)
 	).collect(toMap(MapEntry::getKey, MapEntry::getValue)));
-
-	private static final String TurtlePrefixes=Prefixes.entrySet().stream()
-			.map(entry -> "@prefix "+entry.getKey()+": <"+entry.getValue()+">.")
-			.collect(joining("\n"));
 
 
 	private static final Map<String, Model> DatasetCache=new HashMap<>();
@@ -172,12 +110,8 @@ public final class ValuesTest {
 
 	//// Datasets //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Model small() {
-		return dataset(ValuesTest.class.getResource("ValuesTestSmall.ttl"));
-	}
-
-	public static Model large() {
-		return dataset(ValuesTest.class.getResource("ValuesTestLarge.ttl"));
+	public static Model birt() {
+		return dataset(ValuesTest.class.getResource(ValuesTest.class.getSimpleName()+".ttl"));
 	}
 
 
@@ -205,44 +139,31 @@ public final class ValuesTest {
 	}
 
 
-	//// RDF Codecs ////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Turtle Codecs /////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static String turtle(final String rdf) {
-		return TurtlePrefixes+"\n\n"+rdf; // !!! avoid prefix clashes
-	}
+	public static Model decode(final String turtle) {
 
-
-	public static Model decode(final String rdf) {
-		return decode(rdf, Base);
-	}
-
-	public static Model decode(final String rdf, final String base) {
-		return decode(rdf, RDFFormat.TURTLE, base);
-	}
-
-	public static Model decode(final String rdf, final RDFFormat format) {
-		return decode(rdf, format, Base);
-	}
-
-	public static Model decode(final String rdf, final RDFFormat format, final String base) {
-
-		// includes default base/prefixes
-
-		if ( rdf == null ) {
-			throw new NullPointerException("null rdf");
+		if ( turtle == null ) {
+			throw new NullPointerException("null turtle");
 		}
 
 		try {
 
 			final StatementCollector collector=new StatementCollector();
 
-			final RDFParser parser=RDFParserRegistry.getInstance().get(format)
-					.orElseThrow(() -> new UnsupportedOperationException("unsupported format ["+format+"]"))
-					.getParser();
+			final RDFParser parser=new TurtleParser();
 
 			parser.setPreserveBNodeIDs(true);
 			parser.setRDFHandler(collector);
-			parser.parse(new StringReader(format.equals(RDFFormat.TURTLE) ? turtle(rdf) : rdf), base);
+
+			parser.parse(new StringReader(Prefixes.entrySet().stream()
+					.map(entry -> format("@prefix %s: <%s> .", entry.getKey(), entry.getValue()))
+					.collect(joining("\n",
+							format("@base <%s> .\n\n", Base),
+							format("%s\n\n", turtle)
+					))
+			));
+
 
 			return new LinkedHashModel(collector.getStatements());
 
@@ -251,16 +172,11 @@ public final class ValuesTest {
 		}
 	}
 
-
 	public static String encode(final Iterable<Statement> model) {
-		return encode(model, RDFFormat.TURTLE);
-	}
-
-	public static String encode(final Iterable<Statement> model, final RDFFormat format) {
 
 		final StringWriter writer=new StringWriter();
 
-		Rio.write(model, writer, format);
+		Rio.write(model, writer, RDFFormat.TURTLE);
 
 		return writer.toString();
 	}

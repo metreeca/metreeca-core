@@ -28,7 +28,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.ValuesTest.small;
+import static com.metreeca.json.ValuesTest.birt;
 import static com.metreeca.json.ValuesTest.term;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
@@ -45,7 +45,7 @@ final class GraphDeleterTest {
 
 
 	@Test void testDelete() {
-		exec(model(small()), () -> new GraphDeleter(options)
+		exec(model(birt()), () -> new GraphDeleter(options)
 
 				.handle(new Request()
 						.base(ValuesTest.Base)

@@ -24,7 +24,7 @@ import com.metreeca.rest.Response;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.ValuesTest.small;
+import static com.metreeca.json.ValuesTest.birt;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.assets.GraphFetcherTest.EmployeeShape;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
@@ -48,7 +48,7 @@ final class GraphRelatorTest {
 
 
 	@Test void testRelate() {
-		exec(model(small()), () -> new GraphRelator(options)
+		exec(model(birt()), () -> new GraphRelator(options)
 
 				.handle(request())
 

@@ -42,7 +42,7 @@ final class GraphUpdaterTest {
 
 
 	@Test void testUpdate() {
-		exec(model(small()), () -> {
+		exec(model(birt()), () -> {
 			new GraphUpdater(options)
 
 					.handle(new Request()

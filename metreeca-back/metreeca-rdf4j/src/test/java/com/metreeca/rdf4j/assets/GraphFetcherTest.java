@@ -103,7 +103,7 @@ final class GraphFetcherTest {
 
 
 	private void exec(final Runnable task) {
-		GraphTest.exec(model(localized(small(), "", "en", "it")), task);
+		GraphTest.exec(model(localized(birt(), "", "en", "it")), task);
 	}
 
 
