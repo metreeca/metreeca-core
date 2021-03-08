@@ -90,11 +90,6 @@ final class AndTest {
 					minCount(1)));
 		}
 
-
-		@Test void test() {
-			and(field(RDF.NIL));
-		}
-
 		@Test void testPreserveOrder() {
 			assertThat(and(
 
@@ -128,11 +123,25 @@ final class AndTest {
 		}
 
 		@Test void testOptimizeRange() {
+
 			assertThat(and(range(a, b), range(b, c))).isEqualTo(range(b));
+
+			assertThat(and(range(a, b), range())).isEqualTo(range(a, b));
+			assertThat(and(range(), range(b, c))).isEqualTo(range(b, c));
+
+			assertThatIllegalArgumentException().isThrownBy(() -> and(range(a), range(b)));
+
 		}
 
 		@Test void testOptimizeLang() {
+
 			assertThat(and(lang("en", "it"), lang("en", "fr"))).isEqualTo(lang("en"));
+
+			assertThat(and(lang(), lang("en", "fr"))).isEqualTo(lang("en", "fr"));
+			assertThat(and(lang("en", "it"), lang())).isEqualTo(lang("en", "it"));
+
+			assertThatIllegalArgumentException().isThrownBy(() -> and(lang("en"), lang("fr")));
+
 		}
 
 

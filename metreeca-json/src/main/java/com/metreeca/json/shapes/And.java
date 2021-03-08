@@ -19,8 +19,6 @@ package com.metreeca.json.shapes;
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 
-import org.eclipse.rdf4j.model.Value;
-
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -33,6 +31,7 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
@@ -130,21 +129,34 @@ public final class And extends Shape {
 	}
 
 	private static Stream<? extends Shape> ranges(final Stream<Range> ranges) {
+		return Stream.of(range(ranges
+				.map(Range::values)
+				.reduce((x, y) -> x.isEmpty() ? y : y.isEmpty() ? x : Optional
 
-		final List<Set<Value>> sets=ranges.map(Range::values).collect(toList());
+						.of(x.stream().filter(y::contains).collect(toCollection(LinkedHashSet::new)))
+						.filter(tags -> !tags.isEmpty())
 
-		return Stream.of(range(sets // value sets intersection
-				.stream()
-				.flatMap(Collection::stream)
-				.filter(value -> sets.stream().allMatch(set -> set.contains(value)))
-				.collect(toSet())
-		));
+						.orElseThrow(() -> new IllegalArgumentException(format(
+								"conflicting range value sets <%s> / <%s>", x, y
+						)))
+
+				)
+				.orElseGet(Collections::emptySet)));
 	}
 
 	private static Stream<? extends Shape> langs(final Stream<Lang> langs) {
 		return Stream.of(lang(langs
 				.map(Lang::tags)
-				.reduce((x, y) -> x.stream().filter(y::contains).collect(toCollection(LinkedHashSet::new)))
+				.reduce((x, y) -> x.isEmpty() ? y : y.isEmpty() ? x : Optional
+
+						.of(x.stream().filter(y::contains).collect(toCollection(LinkedHashSet::new)))
+						.filter(tags -> !tags.isEmpty())
+
+						.orElseThrow(() -> new IllegalArgumentException(format(
+								"conflicting language tag sets <%s> / <%s>", x, y
+						)))
+
+				)
 				.orElseGet(Collections::emptySet)));
 	}
 

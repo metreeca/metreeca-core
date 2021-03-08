@@ -132,7 +132,7 @@ public final class Or extends Shape {
 		return Stream.of(range(ranges // value sets union
 				.map(Range::values)
 				.flatMap(Collection::stream)
-				.collect(toSet())
+				.collect(toCollection(LinkedHashSet::new))
 		));
 	}
 
