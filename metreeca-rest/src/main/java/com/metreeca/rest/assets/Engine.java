@@ -94,7 +94,7 @@ public interface Engine extends Wrapper {
 					.redact(Role, request.roles())
 					.redact(Task, task)
 					.redact(View, view)
-					.redact(Mode, Convey)
+					.redact(Mode, Convey, Expose)
 
 			);
 
