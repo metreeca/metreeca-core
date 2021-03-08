@@ -97,6 +97,47 @@ public abstract class Shape {
 
 
 	/**
+	 * Localizes this shape.
+	 *
+	 * @param tags the target language tag set
+	 *
+	 * @return a copy of this shape where tag sets of {@link Lang lang} shapes are replaced with their intersection
+	 * with {@code tags} or {@code tags}, if the intersection is empty; if {@code tags} is empty or contains a wildcard
+	 * ("{@code *}") the shape is not modified
+	 *
+	 * @throws NullPointerException if {@code tags} is null or contains null elements
+	 */
+	public Shape localize(final String... tags) {
+
+		if ( tags == null || Arrays.stream(tags).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
+		}
+
+		return localize(asList(tags));
+	}
+
+	/**
+	 * Localizes this shape.
+	 *
+	 * @param tags the target language tag set
+	 *
+	 * @return a copy of this shape where tag sets of {@link Lang lang} shapes are replaced with their intersection
+	 * with {@code tags} or {@code tags}, if the intersection is empty; if {@code tags} is empty or contains a wildcard
+	 * ("{@code *}") the shape is not modified
+	 *
+	 * @throws NullPointerException if {@code tags} is null or contains null elements
+	 */
+	public Shape localize(final Collection<String> tags) {
+
+		if ( tags == null || tags.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
+		}
+
+		return tags.isEmpty() || tags.contains("*") ? this : map(new ShapeLocalizer(tags));
+	}
+
+
+	/**
 	 * Redacts guards in this shape.
 	 *
 	 * @param axis the axis to be retained

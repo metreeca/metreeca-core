@@ -18,7 +18,7 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
-import java.util.Collection;
+import java.util.*;
 
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Lang.lang;
@@ -31,14 +31,32 @@ import static com.metreeca.json.shapes.Lang.lang;
  */
 public final class Localized extends Shape {
 
-	public static Shape localized() { return new Localized(); }
+	// always include a lang() shape as a hook for Shape.localize(tags)
 
 	public static Shape localized(final String... tags) {
-		return and(localized(), lang(tags));
+
+		if ( tags == null || Arrays.stream(tags).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
+		}
+
+		if ( Arrays.stream(tags).anyMatch(String::isEmpty) ) {
+			throw new IllegalArgumentException("empty tags");
+		}
+
+		return and(new Localized(), lang(tags));
 	}
 
 	public static Shape localized(final Collection<String> tags) {
-		return and(localized(), lang(tags));
+
+		if ( tags == null || tags.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
+		}
+
+		if ( tags.stream().anyMatch(String::isEmpty) ) {
+			throw new IllegalArgumentException("empty tags");
+		}
+
+		return and(new Localized(), lang(tags));
 	}
 
 
