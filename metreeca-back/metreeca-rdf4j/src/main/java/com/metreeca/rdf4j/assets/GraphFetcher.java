@@ -166,7 +166,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
-		final Shape pattern=shape.redact(Mode, Convey, Expose);
+		final Shape pattern=shape.redact(Mode, Convey);
 		final Shape selector=filter(resource, shape);
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(

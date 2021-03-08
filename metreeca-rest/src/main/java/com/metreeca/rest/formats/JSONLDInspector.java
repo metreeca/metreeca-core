@@ -39,7 +39,7 @@ abstract class JSONLDInspector<V> extends Shape.Probe<V> {
 				.redact(Role)
 				.redact(Task)
 				.redact(View)
-				.redact(Mode, Convey, Expose) // remove internal filtering shapes
+				.redact(Mode, Convey) // remove internal filtering shapes
 
 				.expand(); // add inferred constraints to drive json shorthands
 	}

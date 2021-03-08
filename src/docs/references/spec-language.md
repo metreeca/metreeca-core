@@ -1,5 +1,6 @@
 ---
-title:      Shape Specification Language Reference excerpt:    Shape-based data modelling language semantics and components
+title:      Shape Specification Language Reference excerpt:    Shape-based data modelling language semantics and
+components
 ---
 
 Most framework services are driven by declarative linked data models defined using a [shape](#shapes)-based specification language.
@@ -143,7 +144,5 @@ Parametric guards for the [mode](../javadocs/com/metreeca/json/shapes/Guard.html
 
 | shorthand                                                    | usage pattern                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [convey](../javadocs/com/metreeca/json/shapes/Guard.html#convey--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be used only for validating incoming data or extracting outgoing data |
-| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be used only for selecting existing resources to be processed |
-| [expose](../javadocs/com/metreeca/json/shapes/Guard.html#expose--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be used only for restricting outgoing data to a subset of the available values (e.g. only a specific language subset) |
-
+| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when selecting existing resources to be processed |
+| [convey](../javadocs/com/metreeca/json/shapes/Guard.html#convey--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when validating incoming data or extracting outgoing data |

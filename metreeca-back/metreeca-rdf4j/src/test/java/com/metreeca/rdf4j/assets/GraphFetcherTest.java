@@ -105,7 +105,7 @@ final class GraphFetcherTest {
 		GraphTest.exec(model(localized(birt(), "", "en", "it")), task);
 	}
 
-	private static Shape always(final Shape... shapes) { return mode(Convey, Filter, Expose).then(shapes); }
+	private static Shape always(final Shape... shapes) { return mode(Filter, Convey).then(shapes); }
 
 	private Collection<Statement> query(final IRI resource, final Query query) {
 		return asset(Graph.graph()).exec(connection -> {
@@ -179,7 +179,7 @@ final class GraphFetcherTest {
 
 				filter(clazz(term("Office"))),
 
-				field(RDFS.LABEL, expose(localized("en")))
+				field(RDFS.LABEL, convey(localized("en")))
 
 		)))).isIsomorphicTo(graph(
 

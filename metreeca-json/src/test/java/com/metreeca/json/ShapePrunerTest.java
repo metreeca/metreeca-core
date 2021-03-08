@@ -35,23 +35,23 @@ final class ShapePrunerTest {
 	private static final Shape f=like("filter");
 
 
-	private static Shape trim(final Shape shape) {
+	private static Shape prune(final Shape shape) {
 		return shape.map(new ShapePruner(Mode, Filter));
 	}
 
 
 	@Test void testPrune() {
-		assertThat(trim(f)).isEqualTo(and());
-		assertThat(trim(field(x, f))).isEqualTo(and());
+		assertThat(prune(f)).isEqualTo(and());
+		assertThat(prune(field(x, f))).isEqualTo(and());
 	}
 
 	@Test void testRetainFilter() {
-		assertThat(trim(filter(f))).isEqualTo(f);
-		assertThat(trim(field(x, filter(f)))).isEqualTo(field(x, f));
+		assertThat(prune(filter(f))).isEqualTo(f);
+		assertThat(prune(field(x, filter(f)))).isEqualTo(field(x, f));
 	}
 
-	@Test void testIgnoreOtherAxisValues() {
-		assertThat(trim(convey(field(x)))).isEqualTo(and());
+	@Test void testRemoveConvey() {
+		assertThat(prune(convey(field(x)))).isEqualTo(and());
 	}
 
 }
