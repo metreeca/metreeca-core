@@ -681,12 +681,12 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 			return iri.equals(ValueType) ? nothing() : snippet(
 
-					iri.equals(ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )"
-							: iri.equals(BNodeType) ? "filter isBlank({value})"
-							: iri.equals(IRIType) ? "filter isIRI({value})"
-							: iri.equals(LiteralType) ? "filter isLiteral({value})"
-							: iri.equals(RDF.LANGSTRING) ? "filter (lang({value}) != '')"
-							: "filter ( datatype({value}) = <{datatype}> )",
+					iri.equals(ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )\n"
+							: iri.equals(BNodeType) ? "filter isBlank({value})\n"
+							: iri.equals(IRIType) ? "filter isIRI({value})\n"
+							: iri.equals(LiteralType) ? "filter isLiteral({value})\n"
+							: iri.equals(RDF.LANGSTRING) ? "filter (lang({value}) != '')\n"
+							: "filter ( datatype({value}) = <{datatype}> )\n",
 
 					var(source),
 					iri
@@ -698,7 +698,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		@Override public Snippet probe(final Clazz clazz) {
 			return snippet(var(source), " ",
 					same(true), "a/(", same(true), "rdfs:subClassOf)*", same(false), " ",
-					format(clazz.iri()), " ."
+					format(clazz.iri()), " .\n"
 			);
 		}
 
@@ -709,7 +709,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 			} else {
 
-				return range.values().isEmpty() ? nothing() : snippet("filter ({source} in ({values}))",
+				return range.values().isEmpty() ? nothing() : snippet("filter ({source} in ({values}))\n",
 						var(source), list(range.values().stream().map(Values::format), ", ")
 				);
 
@@ -723,7 +723,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 			} else {
 
-				return lang.tags().isEmpty() ? nothing() : snippet("filter (lang({source}) in ({tags}))",
+				return lang.tags().isEmpty() ? nothing() : snippet("filter (lang({source}) in ({tags}))\n",
 						var(source), list(lang.tags().stream().map(Values::quote), ", ")
 				);
 
@@ -732,45 +732,45 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 
 		@Override public Snippet probe(final MinExclusive minExclusive) {
-			return snippet("filter ( {source} > {value} )", var(source), format(value(minExclusive.limit())));
+			return snippet("filter ( {source} > {value} )\n", var(source), format(value(minExclusive.limit())));
 		}
 
 		@Override public Snippet probe(final MaxExclusive maxExclusive) {
-			return snippet("filter ( {source} < {value} )", var(source), format(value(maxExclusive.limit())));
+			return snippet("filter ( {source} < {value} )\n", var(source), format(value(maxExclusive.limit())));
 		}
 
 		@Override public Snippet probe(final MinInclusive minInclusive) {
-			return snippet("filter ( {source} >= {value} )", var(source), format(value(minInclusive.limit())));
+			return snippet("filter ( {source} >= {value} )\n", var(source), format(value(minInclusive.limit())));
 		}
 
 		@Override public Snippet probe(final MaxInclusive maxInclusive) {
-			return snippet("filter ( {source} <= {value} )", var(source), format(value(maxInclusive.limit())));
+			return snippet("filter ( {source} <= {value} )\n", var(source), format(value(maxInclusive.limit())));
 		}
 
 
 		@Override public Snippet probe(final MinLength minLength) {
-			return snippet("filter (strlen(str({source})) >= {limit} )", var(source), minLength.limit());
+			return snippet("filter (strlen(str({source})) >= {limit} )\n", var(source), minLength.limit());
 		}
 
 		@Override public Snippet probe(final MaxLength maxLength) {
-			return snippet("filter (strlen(str({source})) <= {limit} )", var(source), maxLength.limit());
+			return snippet("filter (strlen(str({source})) <= {limit} )\n", var(source), maxLength.limit());
 		}
 
 
 		@Override public Snippet probe(final Pattern pattern) {
-			return snippet("filter regex(str({source}), '{pattern}', '{flags}')",
+			return snippet("filter regex(str({source}), '{pattern}', '{flags}')\n",
 					var(source), pattern.expression().replace("\\", "\\\\"), pattern.flags()
 			);
 		}
 
 		@Override public Snippet probe(final Like like) {
-			return snippet("filter regex(str({source}), '{pattern}')",
+			return snippet("filter regex(str({source}), '{pattern}')\n",
 					var(source), like.toExpression().replace("\\", "\\\\")
 			);
 		}
 
 		@Override public Snippet probe(final Stem stem) {
-			return snippet("filter strstarts(str({source}), '{stem}')",
+			return snippet("filter strstarts(str({source}), '{stem}')\n",
 					var(source), stem.prefix()
 			);
 		}
@@ -787,8 +787,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		@Override public Snippet probe(final Any any) {
 
-			// values-based filtering (as opposed to in-based filtering) works also or root terms
-			// / !!! performance?
+			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
 			return any.values().size() <= 1
 					? nothing() // singleton universal constraints handled by field probe
