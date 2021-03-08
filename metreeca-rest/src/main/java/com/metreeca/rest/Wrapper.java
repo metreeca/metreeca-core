@@ -22,6 +22,7 @@ import java.util.function.*;
 
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.MethodNotAllowed;
 import static com.metreeca.rest.Response.Unauthorized;
 
 import static java.util.Arrays.asList;
@@ -197,12 +198,45 @@ import static java.util.Objects.requireNonNull;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Creates a method-based access controller.
+	 *
+	 * @return a new method-based access rejecting all {@linkplain Request#safe() unsafe} requests with a
+	 * {@link Response#MethodNotAllowed} status code
+	 */
+	public static Wrapper readonly() {
+		return readonly(request -> true);
+	}
+
+	/**
+	 * Creates a method-based access controller.
+	 *
+	 * @param safe an acceptability test for unsafe requests
+	 *
+	 * @return a new method-based access rejecting all {@linkplain Request#safe() unsafe} requests failing the
+	 * {@code safe } test  with a {@link Response#MethodNotAllowed} status code
+	 *
+	 * @throws NullPointerException if {@code safe} is null
+	 */
+	public static Wrapper readonly(final Predicate<Request> safe) {
+
+		if ( safe == null ) {
+			throw new NullPointerException("null safe predicate");
+		}
+
+		return handler -> request -> safe.or(Request::safe).test(request)
+				? handler.handle(request)
+				: request.reply(status(MethodNotAllowed));
+	}
+
+
+	/**
 	 * Creates a role-based access controller.
 	 *
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access
 	 *
-	 * @return a new role-based access controller admitting {@code roles}
+	 * @return a new role-based access controller rejecting all requests with no enabled user {@code roles} with
+	 * a {@link Response#Unauthorized} status code
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
@@ -221,7 +255,8 @@ import static java.util.Objects.requireNonNull;
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
 	 *              wrapped handler; empty for public access
 	 *
-	 * @return a new role-based access controller admitting {@code roles}
+	 * @return a new role-based access controller rejecting all requests with no enabled user {@code roles} with
+	 * a {@link Response#Unauthorized} status code
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
