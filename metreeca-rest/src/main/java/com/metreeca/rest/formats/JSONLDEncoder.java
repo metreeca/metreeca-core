@@ -37,6 +37,7 @@ import static com.metreeca.json.Frame.direct;
 import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Field.aliases;
+import static com.metreeca.rest.formats.JSONLDInspector.datatype;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
 import static java.util.Arrays.asList;
@@ -150,7 +151,7 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) { // !!! refactor
 
-		final Object datatype=JSONLDInspector.datatype(shape).orElse(null);
+		final Object datatype=datatype(shape).orElse(null);
 		final Map<String, Field> aliases=aliases(shape, keywords);
 
 		final boolean inlineable=IRIType.equals(datatype)
@@ -238,7 +239,7 @@ final class JSONLDEncoder {
 				final Shape shape=field.shape();
 
 
-				final Optional<IRI> datatype=JSONLDInspector.datatype(shape);
+				final Optional<IRI> datatype=datatype(shape);
 
 				final String traverse=direct(iri) ? "@id" : "@reverse";
 				final String label=traverse(iri, Value::stringValue, Value::stringValue);
@@ -303,8 +304,7 @@ final class JSONLDEncoder {
 					: datatype.equals(XSD.INTEGER) ? literal(literal.integerValue())
 					: datatype.equals(XSD.DECIMAL) ? literal(literal.decimalValue())
 					: datatype.equals(RDF.LANGSTRING) ? literal(literal, literal.getLanguage().orElse(""))
-					: JSONLDInspector.datatype(shape).isPresent() ? literal(literal.stringValue()) // only lexical if
-					// type is known
+					: datatype(shape).isPresent() ? literal(literal.stringValue()) // only lexical if type is known
 					: literal(literal, datatype);
 
 		} catch ( final IllegalArgumentException ignored ) { // malformed literals

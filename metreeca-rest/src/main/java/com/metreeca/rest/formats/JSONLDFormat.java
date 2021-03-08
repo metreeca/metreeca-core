@@ -212,7 +212,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * {@link OutputFormat} body.
 	 *
 	 * <p>If the originating {@code message} {@linkplain Message#request() request} includes an {@code Accept-Language}
-	 * header, only matching tagged literals from {@code value} are included in the response body.</p>
+	 * header, a suitably {@linkplain Shape#localize localized} version of the message shape is used in the conversion
+	 * process and only matching tagged literals from {@code value} are included in the response body.</p>
 	 *
 	 * <p><strong>Warning</strong> / {@code @context} objects generated from the {@code message}
 	 * {@linkplain JSONLDFormat#shape() shape attribute} are embedded only if {@code Content-Type} is {@value MIME}.</p>
@@ -267,7 +268,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 						jsonWriter.writeObject(new JSONLDEncoder(
 
 								focus,
-								shape,
+								shape.localize(langs),
 								keywords,
 								mime.equals(MIME) // include context objects for application/ld+json?
 

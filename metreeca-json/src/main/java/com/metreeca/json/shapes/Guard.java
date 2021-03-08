@@ -19,7 +19,6 @@ package com.metreeca.json.shapes;
 import com.metreeca.json.Shape;
 
 import java.util.*;
-import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -32,7 +31,7 @@ import static java.util.stream.Collectors.joining;
  * <p>States that the focus set meets this shape only if at least one of the externally defined values of an axis
  * variable is included in a given set of target values.</p>
  *
- * @see Shape#redact(Function[])
+ * @see Shape#redact(String, Collection)
  */
 public final class Guard extends Shape {
 
