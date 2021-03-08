@@ -60,11 +60,17 @@ import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 
+import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! refactor
+final class GraphFetcher extends Query.Probe<Collection<Statement>> {
+
+	private static final int ItemsSampling=1_000; // the maximum number of resources to be returned from items queries
+	private static final int StatsSampling=10_000; // the maximum number of resources to be evaluated by stats queries
+	private static final int TermsSampling=10_000; // the maximum number of resources to be evaluated by terms queries
+
 
 	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
 		return filter(resource, shape).outline(resource).collect(toList());
@@ -242,6 +248,92 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		return model;
 	}
 
+	@Override public Collection<Statement> probe(final Terms terms) {
+
+		final Shape shape=terms.shape();
+		final List<IRI> path=terms.path();
+		final int offset=terms.offset();
+		final int limit=terms.limit();
+
+		final Model model=new LinkedHashModel();
+
+		final Shape selector=filter(resource, shape);
+
+		final Object source=var(selector);
+		final Object target=path.isEmpty() ? source : var();
+
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
+
+				"# terms query\n"
+						+"\n"
+						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
+						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+						+"\n"
+						+"select ?value ?count ?label ?notes where {\n"
+						+"\n"
+						+"\t{\n"
+						+"\n"
+						+"\t\tselect ({target} as ?value) (count(distinct {source}) as ?count)\n"
+						+"\n"
+						+"\t\twhere {\n"
+						+"\n"
+						+"\t\t\t{roots}\n"
+						+"\n"
+						+"\t\t\t{filters}\n"
+						+"\n"
+						+"\t\t\t{path}\n"
+						+"\n"
+						+"\t\t}\n"
+						+"\n"
+						+"\t\tgroup by {target} \n"
+						+"\t\thaving ( count(distinct {source}) > 0 ) \n"
+						+"\t\torder by desc(?count) ?value\n"
+						+"\t\t{offset}\n"
+						+"\t\t{limit}\n"
+						+"\n"
+						+"\t}\n"
+						+"\n"
+						+"\toptional { ?value rdfs:label ?label }\n"
+						+"\toptional { ?value rdfs:comment ?notes }\n"
+						+"\n"
+						+"}",
+
+				target, source,
+
+				roots(selector),
+				filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+
+				path(source, path, target),
+
+				offset > 0 ? snippet("offset {offset}", offset) : null,
+				snippet("limit {limit}", limit > 0 ? min(limit, TermsSampling) : TermsSampling)
+
+		)))).evaluate(new AbstractTupleQueryResultHandler() {
+			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
+
+				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+
+				final Value value=bindings.getValue("value");
+				final Value count=literal(integer(bindings.getValue("count")).orElse(BigInteger.ZERO));
+				final Value label=bindings.getValue("label");
+				final Value notes=bindings.getValue("notes");
+
+				final BNode term=bnode(md5(format(value)));
+
+				model.add(resource, GraphEngine.terms, term);
+
+				model.add(term, GraphEngine.value, value);
+				model.add(term, GraphEngine.count, count);
+
+				if ( label != null ) { model.add((Resource)value, RDFS.LABEL, label); }
+				if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
+
+			}
+		}));
+
+		return model;
+	}
+
 	@Override public Collection<Statement> probe(final Stats stats) {
 
 		final Shape shape=stats.shape();
@@ -330,7 +422,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 				path(source, path, target),
 
 				offset > 0 ? snippet("offset {offset}", offset) : null,
-				limit > 0 ? snippet("limit {limit}", limit) : null
+				snippet("limit {limit}", limit > 0 ? min(limit, StatsSampling) : StatsSampling)
 
 		)))).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -393,92 +485,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 		return model;
 	}
 
-	@Override public Collection<Statement> probe(final Terms terms) {
-
-		final Shape shape=terms.shape();
-		final List<IRI> path=terms.path();
-		final int offset=terms.offset();
-		final int limit=terms.limit();
-
-		final Model model=new LinkedHashModel();
-
-		final Shape selector=filter(resource, shape);
-
-		final Object source=var(selector);
-		final Object target=path.isEmpty() ? source : var();
-
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
-
-				"# terms query\n"
-						+"\n"
-						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-						+"\n"
-						+"select ?value ?count ?label ?notes where {\n"
-						+"\n"
-						+"\t{\n"
-						+"\n"
-						+"\t\tselect ({target} as ?value) (count(distinct {source}) as ?count)\n"
-						+"\n"
-						+"\t\twhere {\n"
-						+"\n"
-						+"\t\t\t{roots}\n"
-						+"\n"
-						+"\t\t\t{filters}\n"
-						+"\n"
-						+"\t\t\t{path}\n"
-						+"\n"
-						+"\t\t}\n"
-						+"\n"
-						+"\t\tgroup by {target} \n"
-						+"\t\thaving ( count(distinct {source}) > 0 ) \n"
-						+"\t\torder by desc(?count) ?value\n"
-						+"\t\t{offset}\n"
-						+"\t\t{limit}\n"
-						+"\n"
-						+"\t}\n"
-						+"\n"
-						+"\toptional { ?value rdfs:label ?label }\n"
-						+"\toptional { ?value rdfs:comment ?notes }\n"
-						+"\n"
-						+"}",
-
-				target, source,
-
-				roots(selector),
-				filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
-
-				path(source, path, target),
-
-				offset > 0 ? snippet("offset {offset}", offset) : null,
-				limit > 0 ? snippet("limit {limit}", limit) : null
-
-		)))).evaluate(new AbstractTupleQueryResultHandler() {
-			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
-
-				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
-
-				final Value value=bindings.getValue("value");
-				final Value count=literal(integer(bindings.getValue("count")).orElse(BigInteger.ZERO));
-				final Value label=bindings.getValue("label");
-				final Value notes=bindings.getValue("notes");
-
-				final BNode term=bnode(md5(format(value)));
-
-				model.add(resource, GraphEngine.terms, term);
-
-				model.add(term, GraphEngine.value, value);
-				model.add(term, GraphEngine.count, count);
-
-				if ( label != null ) { model.add((Resource)value, RDFS.LABEL, label); }
-				if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
-
-			}
-		}));
-
-		return model;
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -504,7 +510,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> { // !!! ref
 				offset > 0 || limit > 0 ? snippet(" order by ", criteria(shape, orders)) : null,
 
 				offset > 0 ? snippet(" offset ", offset) : null,
-				limit > 0 ? snippet(" limit ", limit) : null
+				snippet(" limit ", limit > 0 ? min(limit, ItemsSampling) : ItemsSampling)
 
 		);
 
