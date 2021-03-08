@@ -24,7 +24,7 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.*;
 
 import static com.metreeca.json.Values.format;
-import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.And.and;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -63,7 +63,7 @@ public final class Range extends Shape {
 			throw new NullPointerException("null values");
 		}
 
-		return values.isEmpty() ? or() : new Range(values);
+		return values.isEmpty() ? and() : new Range(values);
 	}
 
 

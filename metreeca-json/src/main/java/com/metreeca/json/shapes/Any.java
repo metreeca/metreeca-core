@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.format;
-import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.And.and;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -62,7 +62,7 @@ public final class Any extends Shape {
 		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
-		return values.isEmpty() ? or() : new Any(values);
+		return values.isEmpty() ? and() : new Any(values);
 	}
 
 

@@ -33,7 +33,7 @@ final class AnyTest {
 	@Nested final class Optimization {
 
 		@Test void testIgnoreEmptyValueSet() {
-			assertThat(any()).isEqualTo(or());
+			assertThat(any()).isEqualTo(and());
 		}
 
 		@Test void testCollapseDuplicates() {
