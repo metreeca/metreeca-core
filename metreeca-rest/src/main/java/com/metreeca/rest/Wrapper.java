@@ -17,9 +17,14 @@
 package com.metreeca.rest;
 
 
+import java.util.*;
 import java.util.function.*;
 
 import static com.metreeca.rest.Handler.handler;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.Unauthorized;
+
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 
@@ -90,6 +95,8 @@ import static java.util.Objects.requireNonNull;
 		return handler -> handler(test, pass.wrap(handler), fail.wrap(handler));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Creates a pre-processing wrapper.
@@ -182,8 +189,51 @@ import static java.util.Objects.requireNonNull;
 				response.success() ? response.body(format).fold(error -> { throw error; },
 						value -> response.body(format,
 								requireNonNull(mapper.apply(response, value), "null mapper return value")
-				)) : response
+						)) : response
 		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a role-based access controller.
+	 *
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
+	 *              wrapped handler; empty for public access
+	 *
+	 * @return a new role-based access controller admitting {@code roles}
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public static Wrapper restricted(final Object... roles) {
+
+		if ( roles == null || Arrays.stream(roles).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		return restricted(asList(roles));
+	}
+
+	/**
+	 * Creates a role-based access controller.
+	 *
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
+	 *              wrapped handler; empty for public access
+	 *
+	 * @return a new role-based access controller admitting {@code roles}
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public static Wrapper restricted(final Collection<Object> roles) {
+
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		return handler -> request -> roles.isEmpty() || request.roles().stream().anyMatch(roles::contains)
+				? handler.handle(request.roles(roles))
+				: request.reply(status(Unauthorized)); // !!! 404 under strict security
 	}
 
 
