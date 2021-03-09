@@ -259,6 +259,26 @@ public abstract class Shape {
 
 
 	/**
+	 * Uniquely label fields in this shape.
+	 *
+	 * @param reserved the number of reserved field labels
+	 *
+	 * @return a copy of this shape where fields are assigned a unique numeric alias; numbering starts from {@code
+	 * reserved}
+	 *
+	 * @throws IllegalArgumentException if {@code reserved} is negative
+	 */
+	public Shape tag(final int reserved) {
+
+		if ( reserved < 0 ) {
+			throw new IllegalArgumentException("negative reserved count");
+		}
+
+		return map(new ShapeTagger(reserved));
+	}
+
+
+	/**
 	 * Creates a conditional shape.
 	 *
 	 * @param shapes the shapes this shape is to be applied as a test condition

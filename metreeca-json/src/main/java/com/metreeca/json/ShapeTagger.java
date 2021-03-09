@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.json;
 
-import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.*;
 
 import static com.metreeca.json.shapes.And.and;
@@ -26,11 +25,12 @@ import static com.metreeca.json.shapes.When.when;
 
 import static java.lang.String.valueOf;
 
-final class ShapeLabeller extends Shape.Probe<Shape> {
+final class ShapeTagger extends Shape.Probe<Shape> {
 
 	private int next;
 
-	ShapeLabeller(final int next) {
+
+	ShapeTagger(final int next) {
 		this.next=next;
 	}
 

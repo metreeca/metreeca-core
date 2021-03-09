@@ -136,10 +136,10 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final int offset=items.offset();
 		final int limit=items.limit();
 
-		final ShapeLabeller labeller=new ShapeLabeller(1+orders.size()); // single probe for global numbering
+		final int reserved=1+orders.size();
 
-		final Shape filter=shape.filter(resource).map(labeller);
-		final Shape convey=shape.convey().map(labeller);
+		final Shape filter=shape.filter(resource).tag(reserved);
+		final Shape convey=shape.convey().tag(reserved);
 
 		final Collection<Triple> template=convey.map(new TemplateProbe(Root)).collect(toList());
 		final Collection<Statement> model=new LinkedHashSet<>();
@@ -233,7 +233,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final String source=Root;
 		final String target=path.isEmpty() ? source : "hook";
 
-		final Shape filter=shape.filter(resource).map(new ShapeLabeller(1));
+		final Shape filter=shape.filter(resource).tag(1);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -320,7 +320,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final String source=Root;
 		final String target=path.isEmpty() ? source : "hook";
 
-		final Shape filter=shape.filter(resource).map(new ShapeLabeller(1));
+		final Shape filter=shape.filter(resource).tag(1);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
