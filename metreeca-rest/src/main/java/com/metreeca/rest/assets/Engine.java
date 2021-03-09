@@ -77,21 +77,18 @@ public interface Engine extends Wrapper {
 
 					.redact(Role, request.roles());
 
-			// request shape redactor
 
-			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape())
+			final UnaryOperator<Request> incoming=message -> message.attribute(shape(), message.attribute(shape())
 
-					.redact(Role, request.roles())
+					.redact(Role, message.roles())
 					.redact(Task, task)
 					.redact(View, view)
 
 			);
 
-			// response shape redactor
+			final UnaryOperator<Response> outgoing=message -> message.attribute(shape(), message.attribute(shape())
 
-			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape())
-
-					.redact(Role, request.roles())
+					.redact(Role, message.request().roles())
 					.redact(Task, task)
 					.redact(View, view)
 					.redact(Mode, Convey)
@@ -100,7 +97,7 @@ public interface Engine extends Wrapper {
 
 			return baseline.empty() ? request.reply(status(Forbidden))
 					: authorized.empty() ? request.reply(status(Unauthorized))
-					: handler.handle(request.map(pre)).map(post);
+					: handler.handle(request.map(incoming)).map(outgoing);
 
 		};
 	}
