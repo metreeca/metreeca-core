@@ -68,11 +68,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 	private static final int TermsSampling=10_000; // the maximum number of resources to be evaluated by terms queries
 
 
-	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
-		return shape.filter(resource).outline(resource).collect(toList());
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final RepositoryConnection connection;

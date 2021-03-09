@@ -24,19 +24,20 @@ import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.Mode;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -72,22 +73,21 @@ public abstract class Shape {
 
 
 	/**
-	 * Identifies RDF statements implied by this shape.
+	 * Identifies statements implied by this shape.
 	 *
 	 * @param focus the initial focus values for shape traversal
 	 *
-	 * @return a stream of RDF statements implied by this shape when recursively traversed starting from the intial
-	 * {@code focus}
+	 * @return a set of statements implied by this shape when recursively traversed starting from {@code focus} values
 	 *
 	 * @throws NullPointerException if {@code focus} is null or contains null elements
 	 */
-	public Stream<Statement> outline(final Value... focus) {
+	public Set<Statement> outline(final Value... focus) {
 
 		if ( focus == null || Arrays.stream(focus).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null focus");
 		}
 
-		return map(new ShapeOutliner(focus));
+		return redact(Mode).map(new ShapeOutliner(focus)).collect(toSet());
 	}
 
 

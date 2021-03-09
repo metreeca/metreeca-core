@@ -77,7 +77,7 @@ final class GraphCreator {
 
 					} else { // store model
 
-						connection.add(GraphFetcher.outline(member, shape));
+						connection.add(shape.outline(member));
 						connection.add(rewrite(member, item, model));
 
 						final String location=member.stringValue();

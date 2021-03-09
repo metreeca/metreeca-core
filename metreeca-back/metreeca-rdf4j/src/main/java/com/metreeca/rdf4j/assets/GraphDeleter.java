@@ -62,7 +62,7 @@ final class GraphDeleter {
 
 					.map(current -> {
 
-						connection.remove(GraphFetcher.outline(item, shape));
+						connection.remove(shape.outline(item));
 						connection.remove(current);
 
 						return response.status(NoContent);
