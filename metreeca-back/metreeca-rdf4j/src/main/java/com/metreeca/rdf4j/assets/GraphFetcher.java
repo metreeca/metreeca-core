@@ -21,6 +21,7 @@ import com.metreeca.json.*;
 import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
+import com.metreeca.rest.Scribe;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
@@ -32,6 +33,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.traverse;
@@ -51,8 +53,8 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.rdf4j.assets.Scribe.*;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 
@@ -144,7 +146,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> Scribe.code(text(
 
 				"# items query\n"
 						+"\n"
@@ -235,7 +237,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> Scribe.code(text(
 
 				"# terms query\n"
 						+"\n"
@@ -327,7 +329,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> Scribe.code(text(
 
 				"# stats query\n"
 						+"\n"
@@ -462,7 +464,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private /*static*/ Scribe filter(final String anchor, final Shape shape, final List<Order> orders, final int offset
+	private /*static*/ UnaryOperator<Appendable> filter(final String anchor, final Shape shape,
+			final List<Order> orders, final int offset
 			, final int limit) {
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? text("filter (false)") : text(
 
@@ -491,22 +494,23 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	}
 
-	private /*static*/ Scribe roots(final String anchor, final Shape shape) { // root universal constraints
+	private /*static*/ UnaryOperator<Appendable> roots(final String anchor, final Shape shape) { // root universal
+		// constraints
 		return all(shape)
 				.map(this::values)
 				.map(values -> values(anchor, values))
 				.orElse(nothing());
 	}
 
-	private /*static*/ Scribe filters(final String anchor, final Shape shape) {
+	private /*static*/ UnaryOperator<Appendable> filters(final String anchor, final Shape shape) {
 		return shape.map(new SkeletonProbe(anchor, true));
 	}
 
-	private /*static*/ Scribe convey(final String anchor, final Shape shape) {
+	private /*static*/ UnaryOperator<Appendable> convey(final String anchor, final Shape shape) {
 		return shape.map(new SkeletonProbe(anchor, false));
 	}
 
-	private /*static*/ Scribe sorters(final String anchor, final List<Order> orders) {
+	private /*static*/ UnaryOperator<Appendable> sorters(final String anchor, final List<Order> orders) {
 		return list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
 				.map(order -> text("optional { {root} {path} {order} }\n",
@@ -515,7 +519,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		);
 	}
 
-	private static Scribe criteria(final String anchor, final List<Order> orders) {
+	private static UnaryOperator<Appendable> criteria(final String anchor, final List<Order> orders) {
 		return list(Stream.concat(
 
 				orders.stream().map(order -> text(
@@ -527,22 +531,22 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						.map(Order::path)
 						.filter(List::isEmpty)
 						.findFirst()
-						.map(empty -> Stream.<Scribe>empty())
+						.map(empty -> Stream.<UnaryOperator<Appendable>>empty())
 						.orElseGet(() -> Stream.of(var(anchor)))  // root as last resort, unless already used
 
 		), " ");
 	}
 
-	private static Scribe offset(final int offset) {
+	private static UnaryOperator<Appendable> offset(final int offset) {
 		return offset > 0 ? text("offset %d", offset) : nothing();
 	}
 
-	private static Scribe limit(final int limit, final int sampling) {
+	private static UnaryOperator<Appendable> limit(final int limit, final int sampling) {
 		return text("limit %d", limit > 0 ? min(limit, sampling) : sampling);
 	}
 
 
-	private static Scribe values(final String anchor, final Collection<Value> values) {
+	private static UnaryOperator<Appendable> values(final String anchor, final Collection<Value> values) {
 		return text("\fvalues {anchor} {\n{values}\n}\f",
 
 				var(anchor), list(values.stream().map(Values::format).map(Scribe::text), "\n")
@@ -551,23 +555,23 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 	}
 
 
-	private /*static*/ Scribe path(final String source, final List<IRI> path, final String target) {
+	private /*static*/ UnaryOperator<Appendable> path(final String source, final List<IRI> path, final String target) {
 		return source == null || path == null || path.isEmpty() || target == null ? nothing()
 				: list(var(source), text(" "), path(path), text(" "), var(target), text(" .\n"));
 	}
 
-	private /*static*/ Scribe edge(final String source, final Field field, final String target) {
+	private /*static*/ UnaryOperator<Appendable> edge(final String source, final Field field, final String target) {
 		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
 
 				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), var(target), text(" "
-						+ ".\n")),
+						+".\n")),
 				iri -> list(var(target), text(" "), same(true), text(iri), same(false), text(" "), var(source), text(" "
-						+ ".\n"))
+						+".\n"))
 
 		);
 	}
 
-	private /*static*/ Scribe edge(final String source, final Field field, final Value target) {
+	private /*static*/ UnaryOperator<Appendable> edge(final String source, final Field field, final Value target) {
 		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
 
 				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), text(target), text(
@@ -579,7 +583,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 	}
 
 
-	private Scribe path(final List<IRI> path) {
+	private UnaryOperator<Appendable> path(final List<IRI> path) {
 		return list(same(true), list(path.stream().map(step ->
 
 				list(text(step), same(false))
@@ -587,19 +591,18 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		), "/"));
 	}
 
-	private static Scribe var(final String id) {
+	private static UnaryOperator<Appendable> var(final String id) {
 		return text(" ?%s", id);
 	}
 
 
-	private Scribe same() {
+	private UnaryOperator<Appendable> same() {
 		return options.same() ? text("(owl:sameAs|^owl:sameAs)*") : nothing();
 	}
 
-	private Scribe same(final boolean head) {
-		final Scribe[] snippets=new Scribe[]{ head ? nothing() : text("/"), same(), head ? text("/") : nothing() };
+	private UnaryOperator<Appendable> same(final boolean head) {
 		return options.same()
-				? list(snippets)
+				? list(head ? nothing() : text("/"), same(), head ? text("/") : nothing())
 				: nothing();
 	}
 
@@ -653,7 +656,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	}
 
-	private final class SkeletonProbe extends Shape.Probe<Scribe> {
+	private final class SkeletonProbe extends Shape.Probe<UnaryOperator<Appendable>> {
 
 		private final String anchor;
 		private final boolean prune;
@@ -665,7 +668,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		@Override public Scribe probe(final Datatype datatype) {
+		@Override public UnaryOperator<Appendable> probe(final Datatype datatype) {
 
 			final IRI iri=datatype.iri();
 
@@ -685,7 +688,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		}
 
-		@Override public Scribe probe(final Clazz clazz) {
+		@Override public UnaryOperator<Appendable> probe(final Clazz clazz) {
 			return text("{source} {path} {class}.\n",
 
 					var(anchor),
@@ -699,7 +702,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 			);
 		}
 
-		@Override public Scribe probe(final Range range) {
+		@Override public UnaryOperator<Appendable> probe(final Range range) {
 			if ( prune ) {
 
 				return probe((Shape)range); // !!! tbi (filter not exists w/ special root treatment)
@@ -713,7 +716,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 			}
 		}
 
-		@Override public Scribe probe(final Lang lang) {
+		@Override public UnaryOperator<Appendable> probe(final Lang lang) {
 			if ( prune ) {
 
 				return probe((Shape)lang); // !!! tbi (filter not exists w/ special root treatment)
@@ -728,61 +731,63 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		@Override public Scribe probe(final MinExclusive minExclusive) {
+		@Override public UnaryOperator<Appendable> probe(final MinExclusive minExclusive) {
 			return text("filter ( {source} > {value} )\n", var(anchor), text(value(minExclusive.limit())));
 		}
 
-		@Override public Scribe probe(final MaxExclusive maxExclusive) {
+		@Override public UnaryOperator<Appendable> probe(final MaxExclusive maxExclusive) {
 			return text("filter ( {source} < {value} )\n", var(anchor), text(value(maxExclusive.limit())));
 		}
 
-		@Override public Scribe probe(final MinInclusive minInclusive) {
+		@Override public UnaryOperator<Appendable> probe(final MinInclusive minInclusive) {
 			return text("filter ( {source} >= {value} )\n", var(anchor), text(value(minInclusive.limit())));
 		}
 
-		@Override public Scribe probe(final MaxInclusive maxInclusive) {
+		@Override public UnaryOperator<Appendable> probe(final MaxInclusive maxInclusive) {
 			return text("filter ( {source} <= {value} )\n", var(anchor), text(value(maxInclusive.limit())));
 		}
 
 
-		@Override public Scribe probe(final MinLength minLength) {
+		@Override public UnaryOperator<Appendable> probe(final MinLength minLength) {
 			return text("filter (strlen(str({source})) >= {limit} )\n", var(anchor), text(minLength.limit()));
 		}
 
-		@Override public Scribe probe(final MaxLength maxLength) {
+		@Override public UnaryOperator<Appendable> probe(final MaxLength maxLength) {
 			return text("filter (strlen(str({source})) <= {limit} )\n", var(anchor), text(maxLength.limit()));
 		}
 
 
-		@Override public Scribe probe(final Pattern pattern) {
+		@Override public UnaryOperator<Appendable> probe(final Pattern pattern) {
 			return text("filter regex(str({source}), '{pattern}', '{flags}')\n",
 					var(anchor), text(pattern.expression().replace("\\", "\\\\")), text(pattern.flags())
 			);
 		}
 
-		@Override public Scribe probe(final Like like) {
+		@Override public UnaryOperator<Appendable> probe(final Like like) {
 			return text("filter regex(str({source}), '{pattern}')\n",
 					var(anchor), text(like.toExpression().replace("\\", "\\\\"))
 			);
 		}
 
-		@Override public Scribe probe(final Stem stem) {
+		@Override public UnaryOperator<Appendable> probe(final Stem stem) {
 			return text("filter strstarts(str({source}), '{stem}')\n",
 					var(anchor), text(stem.prefix())
 			);
 		}
 
 
-		public Scribe probe(final MinCount minCount) { return prune ? probe((Shape)minCount) : nothing(); }
+		public UnaryOperator<Appendable> probe(final MinCount minCount) { return prune ? probe((Shape)minCount) :
+				nothing(); }
 
-		public Scribe probe(final MaxCount maxCount) { return prune ? probe((Shape)maxCount) : nothing(); }
+		public UnaryOperator<Appendable> probe(final MaxCount maxCount) { return prune ? probe((Shape)maxCount) :
+				nothing(); }
 
 
-		@Override public Scribe probe(final All all) {
+		@Override public UnaryOperator<Appendable> probe(final All all) {
 			return nothing(); // universal constraints handled by field probe
 		}
 
-		@Override public Scribe probe(final Any any) {
+		@Override public UnaryOperator<Appendable> probe(final Any any) {
 
 			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
@@ -793,10 +798,11 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		public Scribe probe(final Localized localized) { return prune ? probe((Shape)localized) : nothing(); }
+		public UnaryOperator<Appendable> probe(final Localized localized) { return prune ? probe((Shape)localized) :
+				nothing(); }
 
 
-		@Override public Scribe probe(final Field field) {
+		@Override public UnaryOperator<Appendable> probe(final Field field) {
 
 			final Shape shape=field.shape();
 			final String alias=field.alias();
@@ -839,11 +845,11 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		@Override public Scribe probe(final And and) {
+		@Override public UnaryOperator<Appendable> probe(final And and) {
 			return list(and.shapes().stream().map(shape -> shape.map(this)));
 		}
 
-		@Override public Scribe probe(final Or or) {
+		@Override public UnaryOperator<Appendable> probe(final Or or) {
 			return list(
 					or.shapes().stream().map(s -> text("{\f{branch}\f}", s.map(this))),
 					" union "
@@ -851,7 +857,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		@Override public Scribe probe(final Shape shape) {
+		@Override public UnaryOperator<Appendable> probe(final Shape shape) {
 			throw new UnsupportedOperationException(shape.toString());
 		}
 
