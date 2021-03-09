@@ -24,16 +24,14 @@ import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
-import org.eclipse.rdf4j.model.vocabulary.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.traverse;
@@ -58,8 +56,12 @@ import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 
+import static org.eclipse.rdf4j.model.util.Values.triple;
+
 import static java.lang.Math.min;
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 final class GraphFetcher extends Query.Probe<Collection<Statement>> {
@@ -67,6 +69,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 	private static final int ItemsSampling=1_000; // the maximum number of resources to be returned from items queries
 	private static final int StatsSampling=10_000; // the maximum number of resources to be evaluated by stats queries
 	private static final int TermsSampling=10_000; // the maximum number of resources to be evaluated by terms queries
+
+	private static final String Root="0";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,7 +102,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 	}
 
 	private void evaluate(final Runnable task) {
-		time(task).apply((t) -> logger
+		time(task).apply(t -> logger
 
 				.debug(this, () -> format("evaluated in <%,d> ms", t))
 
@@ -130,86 +134,69 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final int offset=items.offset();
 		final int limit=items.limit();
 
-		final Object root=new Object(); // root object
+		final ShapeLabeller labeller=new ShapeLabeller(1+orders.size()); // single probe for global numbering
 
+		final Shape filter=shape.filter(resource).map(labeller);
+		final Shape convey=shape.convey().map(labeller);
+
+		final Collection<Triple> template=convey.map(new TemplateProbe(Root)).collect(toList());
 		final Collection<Statement> model=new LinkedHashSet<>();
-		final Collection<Statement> template=new ArrayList<>();
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
-		final Shape pattern=shape.convey();
-		final Shape selector=shape.filter(resource);
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(
+				"# items query\n"
+						+"\n"
+						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
+						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+						+"\n"
+						+"select {variables} where {\n"
+						+"\n"
+						+"\t{filter}\n"
+						+"\n"
+						+"\t{pattern}\n"
+						+"\n"
+						+"\t{sorters}\n"
+						+"\n"
+						+"} order by {criteria}",
 
-				nothing(id(root, pattern, selector)), // link root to pattern and selector shapes
+				list(Stream.concat(
 
-				text(
+						Stream.of(Root), /// always project root
 
-						"# items query\n"
-								+"\n"
-								+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-								+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-								+"\n"
-								+"select {variables} where {\n"
-								+"\n"
-								+"\t{filter}\n"
-								+"\n"
-								+"\t{pattern}\n"
-								+"\n"
-								+"\t{sorters}\n"
-								+"\n"
-								+"} order by {criteria}",
+						Stream.concat( // project template variables
 
-						new Scribe() {
-							@Override public Appendable scribe(final Appendable code, final BiFunction<Object, Object[]
-									, Integer> scope) {
+								template.stream().map(Triple::getSubject),
+								template.stream().map(Triple::getObject)
 
-								Stream
-										.concat(
-												Stream.of(scope.apply(root, new Object[0])), /// always project root
-												pattern.map(new TemplateProbe(pattern, s -> scope.apply(s,
-														new Object[0]),
-														template::add))
-										)
-										.distinct()
-										.sorted()
-										.forEachOrdered(id -> {
-											try {
-												code.append(" ?").append(String.valueOf(id));
-											} catch ( final IOException e ) {
-												throw new UncheckedIOException(e);
-											}
-										});
+						).distinct().map(BNode.class::cast).map(BNode::getID)
 
-								return code;
-							}
-						},
+				).distinct().sorted().map(GraphFetcher::var)),
 
-						selector(selector, orders, offset, limit),
-						pattern(pattern),
+				filter(Root, filter, orders, offset, limit),
+				convey(Root, convey),
 
-						sorters(root, orders), // !!! (€) don't extract if already present in pattern
-						criteria(root, orders)
+				sorters(Root, orders), // !!! (€) don't extract if already present in pattern
+				criteria(Root, orders)
 
-				)
-
-		))).evaluate(new AbstractTupleQueryResultHandler() {
+		)))).evaluate(new AbstractTupleQueryResultHandler() {
 
 			@Override public void handleSolution(final BindingSet bindings) {
 
-				final Value match=bindings.getValue("0"); // root id
+				final Value match=bindings.getValue(Root);
 
 				if ( match != null ) {
 
 					if ( !match.equals(resource) ) {
-						model.add(statement(resource, LDP.CONTAINS, match));
+						model.add(statement(resource, Shape.Contains, match));
 					}
 
 					template.forEach(statement -> {
 
 						final Resource subject=statement.getSubject();
 						final Value object=statement.getObject();
+
 
 						final Value source=subject instanceof BNode
 								? bindings.getValue(((BNode)subject).getID())
@@ -241,12 +228,12 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final int offset=terms.offset();
 		final int limit=terms.limit();
 
-		final Model model=new LinkedHashModel();
+		final String source=Root;
+		final String target=path.isEmpty() ? source : "hook";
 
-		final Shape selector=shape.filter(resource);
+		final Shape filter=shape.filter(resource).map(new ShapeLabeller(1));
 
-		final Scribe source=var(selector);
-		final Scribe target=path.isEmpty() ? source : var();
+		final Collection<Statement> model=new LinkedHashSet<>();
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
 
@@ -284,15 +271,16 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						+"\n"
 						+"}",
 
-				target, source,
+				var(target),
+				var(source),
 
-				roots(selector),
-				filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+				roots(Root, filter),
+				filters(Root, filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
 				path(source, path, target),
 
-				offset > 0 ? text("offset %d", offset) : nothing(),
-				text("limit %d", limit > 0 ? min(limit, TermsSampling) : TermsSampling)
+				offset(offset),
+				limit(limit, TermsSampling)
 
 		)))).evaluate(new AbstractTupleQueryResultHandler() {
 			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
@@ -306,13 +294,13 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 				final BNode term=bnode(md5(format(value)));
 
-				model.add(resource, GraphEngine.terms, term);
+				model.add(statement(resource, GraphEngine.terms, term));
 
-				model.add(term, GraphEngine.value, value);
-				model.add(term, GraphEngine.count, count);
+				model.add(statement(term, GraphEngine.value, value));
+				model.add(statement(term, GraphEngine.count, count));
 
-				if ( label != null ) { model.add((Resource)value, RDFS.LABEL, label); }
-				if ( notes != null ) { model.add((Resource)value, RDFS.COMMENT, notes); }
+				if ( label != null ) { model.add(statement((Resource)value, RDFS.LABEL, label)); }
+				if ( notes != null ) { model.add(statement((Resource)value, RDFS.COMMENT, notes)); }
 
 			}
 		}));
@@ -327,17 +315,17 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final int offset=stats.offset();
 		final int limit=stats.limit();
 
-		final Model model=new LinkedHashModel();
+		final String source=Root;
+		final String target=path.isEmpty() ? source : "hook";
+
+		final Shape filter=shape.filter(resource).map(new ShapeLabeller(1));
+
+		final Collection<Statement> model=new LinkedHashSet<>();
 
 		final Map<Value, BigInteger> counts=new HashMap<>();
 
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
-
-		final Shape selector=shape.filter(resource);
-
-		final Scribe source=var(selector);
-		final Scribe target=path.isEmpty() ? source : var();
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
 
@@ -400,15 +388,15 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						+"}",
 
 				text(GraphEngine.Base),
-				target,
+				var(target),
 
-				roots(selector),
-				filters(selector), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+				roots(Root, filter),
+				filters(Root, filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
 				path(source, path, target),
 
-				offset > 0 ? text("offset %d", offset) : nothing(),
-				text("limit %d", limit > 0 ? min(limit, StatsSampling) : StatsSampling)
+				offset(offset),
+				limit(limit, StatsSampling)
 
 		)))).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -432,20 +420,20 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 				final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
 
-				model.add(resource, GraphEngine.stats, type);
-				model.add(type, GraphEngine.count, literal(count));
+				model.add(statement(resource, GraphEngine.stats, type));
+				model.add(statement(type, GraphEngine.count, literal(count)));
 
-				if ( type_label != null ) { model.add(type, RDFS.LABEL, type_label); }
-				if ( type_notes != null ) { model.add(type, RDFS.COMMENT, type_notes); }
+				if ( type_label != null ) { model.add(statement(type, RDFS.LABEL, type_label)); }
+				if ( type_notes != null ) { model.add(statement(type, RDFS.COMMENT, type_notes)); }
 
-				if ( min != null ) { model.add(type, GraphEngine.min, min); }
-				if ( max != null ) { model.add(type, GraphEngine.max, max); }
+				if ( min != null ) { model.add(statement(type, GraphEngine.min, min)); }
+				if ( max != null ) { model.add(statement(type, GraphEngine.max, max)); }
 
-				if ( min_label != null ) { model.add((Resource)min, RDFS.LABEL, min_label); }
-				if ( min_notes != null ) { model.add((Resource)min, RDFS.COMMENT, min_notes); }
+				if ( min_label != null ) { model.add(statement((Resource)min, RDFS.LABEL, min_label)); }
+				if ( min_notes != null ) { model.add(statement((Resource)min, RDFS.COMMENT, min_notes)); }
 
-				if ( max_label != null ) { model.add((Resource)max, RDFS.LABEL, max_label); }
-				if ( max_notes != null ) { model.add((Resource)max, RDFS.COMMENT, max_notes); }
+				if ( max_label != null ) { model.add(statement((Resource)max, RDFS.LABEL, max_label)); }
+				if ( max_notes != null ) { model.add(statement((Resource)max, RDFS.COMMENT, max_notes)); }
 
 				counts.putIfAbsent(type, count);
 
@@ -456,17 +444,17 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		}));
 
-		model.add(resource, GraphEngine.count, literal(counts.values().stream()
+		model.add(statement(resource, GraphEngine.count, literal(counts.values().stream()
 				.reduce(BigInteger.ZERO, BigInteger::add)
-		));
+		)));
 
 		mins.stream()
 				.reduce((x, y) -> compare(x, y) < 0 ? x : y)
-				.ifPresent(min -> model.add(resource, GraphEngine.min, min));
+				.ifPresent(min -> model.add(statement(resource, GraphEngine.min, min)));
 
 		maxs.stream()
 				.reduce((x, y) -> compare(x, y) > 0 ? x : y)
-				.ifPresent(max -> model.add(resource, GraphEngine.max, max));
+				.ifPresent(max -> model.add(statement(resource, GraphEngine.max, max)));
 
 		return model;
 	}
@@ -474,7 +462,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Scribe selector(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
+	private /*static*/ Scribe filter(final String anchor, final Shape shape, final List<Order> orders, final int offset
+			, final int limit) {
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? text("filter (false)") : text(
 
 				"{ select distinct {root} {\n"
@@ -487,13 +476,13 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						+"\n"
 						+"} {orders} {offset} {limit} }",
 
-				var(shape),
+				var(anchor),
 
-				roots(shape),
-				filters(shape),
+				roots(Root, shape),
+				filters(Root, shape),
 
-				offset > 0 || limit > 0 ? sorters(shape, orders) : nothing(),
-				offset > 0 || limit > 0 ? text(" order by ", criteria(shape, orders)) : nothing(),
+				offset > 0 || limit > 0 ? sorters(Root, orders) : nothing(),
+				offset > 0 || limit > 0 ? text(" order by ", criteria(Root, orders)) : nothing(),
 
 				offset > 0 ? text(" offset %d", offset) : nothing(),
 				text(" limit %d", limit > 0 ? min(limit, ItemsSampling) : ItemsSampling)
@@ -502,37 +491,36 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	}
 
-	private Scribe roots(final Shape shape) { // root universal constraints
+	private /*static*/ Scribe roots(final String anchor, final Shape shape) { // root universal constraints
 		return all(shape)
 				.map(this::values)
-				.map(values -> values(shape, values))
+				.map(values -> values(anchor, values))
 				.orElse(nothing());
 	}
 
-	private Scribe filters(final Shape shape) {
-		return shape.map(new SkeletonProbe(shape, true));
+	private /*static*/ Scribe filters(final String anchor, final Shape shape) {
+		return shape.map(new SkeletonProbe(anchor, true));
 	}
 
-	private Scribe pattern(final Shape shape) {
-		return shape.map(new SkeletonProbe(shape, false));
+	private /*static*/ Scribe convey(final String anchor, final Shape shape) {
+		return shape.map(new SkeletonProbe(anchor, false));
 	}
 
-	private Scribe sorters(final Object root, final Collection<Order> orders) {
+	private /*static*/ Scribe sorters(final String anchor, final List<Order> orders) {
 		return list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
-				.map(order -> text(
-						"optional { {root} {path} {order} }\n", var(root), path(order.path()), var(order)
+				.map(order -> text("optional { {root} {path} {order} }\n",
+						var(anchor), path(order.path()), var(valueOf(1+orders.indexOf(order)))
 				))
 		);
 	}
 
-	private Scribe criteria(final Object root, final Collection<Order> orders) {
-
+	private static Scribe criteria(final String anchor, final List<Order> orders) {
 		return list(Stream.concat(
 
 				orders.stream().map(order -> text(
 						order.inverse() ? "desc({criterion})" : "asc({criterion})",
-						var(order.path().isEmpty() ? root : order)
+						order.path().isEmpty() ? var(anchor) : var(valueOf(1+orders.indexOf(order)))
 				)),
 
 				orders.stream()
@@ -540,53 +528,67 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						.filter(List::isEmpty)
 						.findFirst()
 						.map(empty -> Stream.<Scribe>empty())
-						.orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
+						.orElseGet(() -> Stream.of(var(anchor)))  // root as last resort, unless already used
 
 		), " ");
 	}
 
-	private Scribe values(final Shape source, final Collection<Value> values) {
-		return text("\n\nvalues {source} {\n{values}\n}\n\n",
+	private static Scribe offset(final int offset) {
+		return offset > 0 ? text("offset %d", offset) : nothing();
+	}
 
-				var(source), list(values.stream().map(Values::format).map(Scribe::text), "\n")
+	private static Scribe limit(final int limit, final int sampling) {
+		return text("limit %d", limit > 0 ? min(limit, sampling) : sampling);
+	}
+
+
+	private static Scribe values(final String anchor, final Collection<Value> values) {
+		return text("\fvalues {anchor} {\n{values}\n}\f",
+
+				var(anchor), list(values.stream().map(Values::format).map(Scribe::text), "\n")
 
 		);
 	}
 
-	private static Scribe var() {
-		return var(new Object());
-	}
 
-	private static Scribe var(final Object object) {
-		return object == null ? nothing() : list(text("?"), id(object));
-	}
-
-
-	private Scribe path(final Scribe source, final Collection<IRI> path, final Scribe target) {
+	private /*static*/ Scribe path(final String source, final List<IRI> path, final String target) {
 		return source == null || path == null || path.isEmpty() || target == null ? nothing()
-				: list(source, text(" "), path(path), text(" "), target, text(" .\n"));
+				: list(var(source), text(" "), path(path), text(" "), var(target), text(" .\n"));
 	}
 
-	private Scribe edge(final Scribe source, final Field field, final Scribe target) {
+	private /*static*/ Scribe edge(final String source, final Field field, final String target) {
 		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
 
-				iri -> {
-					return list(source, text(" "), same(true), text(iri), same(false), text(" "), target, text(" .\n"));
-				},
-				iri -> {
-					return list(target, text(" "), same(true), text(iri), same(false), text(" "), source, text(" .\n"));
-				}
+				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), var(target), text(" "
+						+ ".\n")),
+				iri -> list(var(target), text(" "), same(true), text(iri), same(false), text(" "), var(source), text(" "
+						+ ".\n"))
+
+		);
+	}
+
+	private /*static*/ Scribe edge(final String source, final Field field, final Value target) {
+		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
+
+				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), text(target), text(
+						" .\n")),
+				iri -> list(text(target), text(" "), same(true), text(iri), same(false), text(" "), var(source), text(
+						" .\n"))
 
 		);
 	}
 
 
-	private Scribe path(final Collection<IRI> path) {
-		return list(same(true), list(path.stream().map(step -> {
-					return list(Scribe.text(step), same(false));
-				}
+	private Scribe path(final List<IRI> path) {
+		return list(same(true), list(path.stream().map(step ->
+
+				list(text(step), same(false))
 
 		), "/"));
+	}
+
+	private static Scribe var(final String id) {
+		return text(" ?%s", id);
 	}
 
 
@@ -604,76 +606,61 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class TemplateProbe extends Shape.Probe<Stream<Integer>> {
+	private static final class TemplateProbe extends Shape.Probe<Stream<Triple>> {
 
-		private final Shape focus;
-
-		private final Function<Shape, Integer> identifier;
-		private final Consumer<Statement> template;
+		private final String anchor;
 
 
-		private TemplateProbe(
-				final Shape focus, final Function<Shape, Integer> identifier, final Consumer<Statement> template
-		) {
-
-			this.focus=focus;
-
-			this.identifier=identifier;
-			this.template=template;
+		private TemplateProbe(final String anchor) {
+			this.anchor=anchor;
 		}
 
 
-		@Override public Stream<Integer> probe(final Field field) {
+		@Override public Stream<Triple> probe(final Field field) {
 
 			final Shape shape=field.shape();
+			final String alias=field.alias();
 
-			final Integer source=identifier.apply(focus);
-			final Integer target=identifier.apply(shape);
+			final BNode source=bnode(anchor);
+			final BNode target=bnode(alias);
 
-			final Resource snode=bnode(source.toString());
-			final Resource tnode=bnode(target.toString());
-
-			template.accept(traverse(field.iri(),
-					iri -> statement(snode, iri, tnode),
-					iri -> statement(tnode, iri, snode)
-			));
-
-			return Stream.concat(
-					Stream.of(source, target),
-					shape.map(new TemplateProbe(shape, identifier, template))
+			final Triple triple=traverse(field.iri(),
+					iri -> triple(source, iri, target),
+					iri -> triple(target, iri, source)
 			);
 
+			return Stream.concat(Stream.of(triple), shape.map(new TemplateProbe(alias)));
 		}
 
 
-		@Override public Stream<Integer> probe(final When when) {
+		@Override public Stream<Triple> probe(final When when) {
 			return Stream.concat(
 					when.pass().map(this),
 					when.fail().map(this)
 			);
 		}
 
-		@Override public Stream<Integer> probe(final And and) {
+		@Override public Stream<Triple> probe(final And and) {
 			return and.shapes().stream().flatMap(shape -> shape.map(this));
 		}
 
-		@Override public Stream<Integer> probe(final Or or) {
+		@Override public Stream<Triple> probe(final Or or) {
 			return or.shapes().stream().flatMap(shape -> shape.map(this));
 		}
 
 
-		@Override public Stream<Integer> probe(final Shape shape) { return Stream.empty(); }
+		@Override public Stream<Triple> probe(final Shape shape) { return Stream.empty(); }
 
 	}
 
 	private final class SkeletonProbe extends Shape.Probe<Scribe> {
 
-		private final Shape source;
+		private final String anchor;
 		private final boolean prune;
 
 
-		private SkeletonProbe(final Shape source, final boolean prune) {
-			this.source=source;
+		private SkeletonProbe(final String anchor, final boolean prune) {
+			this.anchor=anchor;
 			this.prune=prune;
 		}
 
@@ -691,8 +678,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 							: iri.equals(RDF.LANGSTRING) ? "filter (lang({value}) != '')\n"
 							: "filter ( datatype({value}) = {datatype} )\n",
 
-					var(source),
-					Scribe.text(iri)
+					var(anchor),
+					text(iri)
 
 			);
 
@@ -701,13 +688,13 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		@Override public Scribe probe(final Clazz clazz) {
 			return text("{source} {path} {class}.\n",
 
-					var(source),
+					var(anchor),
 
 					options.same()
 							? text(" {same}/a/({same}/rdfs:subClassOf)* ", same())
 							: text(" a/rdfs:subClassOf* "),
 
-					Scribe.text(clazz.iri())
+					text(clazz.iri())
 
 			);
 		}
@@ -720,7 +707,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 			} else {
 
 				return range.values().isEmpty() ? nothing() : text("filter ({source} in ({values}))\n",
-						var(source), list(range.values().stream().map(Values::format).map(Scribe::text), ", ")
+						var(anchor), list(range.values().stream().map(Values::format).map(Scribe::text), ", ")
 				);
 
 			}
@@ -734,7 +721,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 			} else {
 
 				return lang.tags().isEmpty() ? nothing() : text("filter (lang({source}) in ({tags}))\n",
-						var(source), list(lang.tags().stream().map(Values::quote).map(Scribe::text), ", ")
+						var(anchor), list(lang.tags().stream().map(Values::quote).map(Scribe::text), ", ")
 				);
 
 			}
@@ -742,46 +729,46 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 
 		@Override public Scribe probe(final MinExclusive minExclusive) {
-			return text("filter ( {source} > {value} )\n", var(source), Scribe.text(value(minExclusive.limit())));
+			return text("filter ( {source} > {value} )\n", var(anchor), text(value(minExclusive.limit())));
 		}
 
 		@Override public Scribe probe(final MaxExclusive maxExclusive) {
-			return text("filter ( {source} < {value} )\n", var(source), Scribe.text(value(maxExclusive.limit())));
+			return text("filter ( {source} < {value} )\n", var(anchor), text(value(maxExclusive.limit())));
 		}
 
 		@Override public Scribe probe(final MinInclusive minInclusive) {
-			return text("filter ( {source} >= {value} )\n", var(source), Scribe.text(value(minInclusive.limit())));
+			return text("filter ( {source} >= {value} )\n", var(anchor), text(value(minInclusive.limit())));
 		}
 
 		@Override public Scribe probe(final MaxInclusive maxInclusive) {
-			return text("filter ( {source} <= {value} )\n", var(source), Scribe.text(value(maxInclusive.limit())));
+			return text("filter ( {source} <= {value} )\n", var(anchor), text(value(maxInclusive.limit())));
 		}
 
 
 		@Override public Scribe probe(final MinLength minLength) {
-			return text("filter (strlen(str({source})) >= {limit} )\n", var(source), text(minLength.limit()));
+			return text("filter (strlen(str({source})) >= {limit} )\n", var(anchor), text(minLength.limit()));
 		}
 
 		@Override public Scribe probe(final MaxLength maxLength) {
-			return text("filter (strlen(str({source})) <= {limit} )\n", var(source), text(maxLength.limit()));
+			return text("filter (strlen(str({source})) <= {limit} )\n", var(anchor), text(maxLength.limit()));
 		}
 
 
 		@Override public Scribe probe(final Pattern pattern) {
 			return text("filter regex(str({source}), '{pattern}', '{flags}')\n",
-					var(source), text(pattern.expression().replace("\\", "\\\\")), text(pattern.flags())
+					var(anchor), text(pattern.expression().replace("\\", "\\\\")), text(pattern.flags())
 			);
 		}
 
 		@Override public Scribe probe(final Like like) {
 			return text("filter regex(str({source}), '{pattern}')\n",
-					var(source), text(like.toExpression().replace("\\", "\\\\"))
+					var(anchor), text(like.toExpression().replace("\\", "\\\\"))
 			);
 		}
 
 		@Override public Scribe probe(final Stem stem) {
 			return text("filter strstarts(str({source}), '{stem}')\n",
-					var(source), text(stem.prefix())
+					var(anchor), text(stem.prefix())
 			);
 		}
 
@@ -801,7 +788,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 			return any.values().size() <= 1
 					? nothing() // singleton universal constraints handled by field probe
-					: values(source, values(any.values()));
+					: values(anchor, values(any.values()));
 
 		}
 
@@ -811,8 +798,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		@Override public Scribe probe(final Field field) {
 
-
 			final Shape shape=field.shape();
+			final String alias=field.alias();
 
 			final Optional<Set<Value>> all=all(shape).map(GraphFetcher.this::values);
 			final Optional<Set<Value>> any=any(shape).map(GraphFetcher.this::values);
@@ -825,27 +812,27 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 					// (€) optional unless universally constrained // !!! or filtered
 
-					prune || (all.isPresent() || singleton.isPresent())
-							? "\n\n{pattern}\n\n"
-							: "\n\noptional {\n\n{pattern}\n\n}\n\n",
+					prune || all.isPresent() || singleton.isPresent()
+							? "\f{pattern}\f"
+							: "\foptional {\f{pattern}\f}\f",
 
 					list(
 
 							prune && (all.isPresent() || singleton.isPresent())
 									? nothing() // (€) filtering hook already available on all/any edges
-									: edge(var(source), field, var(shape)), // filtering or projection hook
+									: edge(anchor, field, alias), // filtering or projection hook
 
 							list(all.map(values -> // insert universal constraints edges
-									values.stream().map(value -> edge(var(source), field, text(value)))
+									values.stream().map(value -> edge(anchor, field, value))
 							).orElse(Stream.empty())),
 
 							singleton.map(value -> // insert singleton existential constraint edge
-									edge(var(source), field, text(value))
+									edge(anchor, field, value)
 							).orElse(nothing()),
 
-							text("\n\n"),
+							text("\f"),
 
-							shape.map(new SkeletonProbe(shape, prune))
+							shape.map(new SkeletonProbe(alias, prune))
 					)
 			);
 

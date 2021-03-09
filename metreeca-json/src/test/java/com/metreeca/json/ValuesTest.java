@@ -28,7 +28,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.iri;
@@ -48,18 +49,7 @@ public final class ValuesTest {
 		if ( System.getProperty("java.util.logging.config.file") == null
 				&& System.getProperty("java.util.logging.config.class") == null ) {
 
-			final Level level=Level.FINE;
-
-			LogManager.getLogManager().reset();
-
-			final ConsoleHandler handler=new ConsoleHandler();
-
-			handler.setLevel(level);
-
-			final Logger logger=Logger.getLogger("");
-
-			logger.setLevel(level);
-			logger.addHandler(handler);
+			Logger.getLogger("").setLevel(Level.FINE);
 
 		}
 

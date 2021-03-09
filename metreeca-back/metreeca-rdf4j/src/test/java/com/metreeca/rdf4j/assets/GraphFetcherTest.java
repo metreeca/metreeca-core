@@ -144,32 +144,38 @@ final class GraphFetcherTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Test void test() {
+		exec(() -> assertThat(query(
+
+				Root, items(and())
+
+		)));
+	}
+
 	@Test void testUseIndependentPatternsAndFilters() {
-		exec(() -> {
-			assertThat(query(
+		exec(() -> assertThat(query(
 
-					Root, items(and(field(term("employee")), filter().then(field(term("employee"), any(
-							item("employees/1002"),
-							item("employees/1188")
-					)))))
+				Root, items(and(field(term("employee")), filter().then(field(term("employee"), any(
+						item("employees/1002"),
+						item("employees/1188")
+				)))))
 
-			)).isIsomorphicTo(graph(
+		)).isIsomorphicTo(graph(
 
-					""
-							+"\n"
-							+"construct {\n"
-							+"\n"
-							+"\t<app:/> ldp:contains ?office.\n"
-							+"\t?office :employee ?employee\n"
-							+"\n"
-							+"} where {\n"
-							+"\n"
-							+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
-							+"\n"
-							+"}"
+				""
+						+"\n"
+						+"construct {\n"
+						+"\n"
+						+"\t<app:/> ldp:contains ?office.\n"
+						+"\t?office :employee ?employee\n"
+						+"\n"
+						+"} where {\n"
+						+"\n"
+						+"\t?office :employee ?employee, ?x filter (?x in (<employees/1002>, <employees/1188>))\n"
+						+"\n"
+						+"}"
 
-			));
-		});
+		)));
 	}
 
 

@@ -21,7 +21,7 @@ import org.eclipse.rdf4j.model.Value;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.function.BiFunction;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -36,33 +36,20 @@ import static java.util.stream.Collectors.toList;
 /**
  * Source code generator.
  */
-public abstract class Scribe {
+@FunctionalInterface public interface Scribe extends UnaryOperator<Appendable> {
 
-	private static final Pattern VariablePattern=Pattern.compile("\\{\\w+}"); // e.g. {value}
+	public static final Pattern VariablePattern=Pattern.compile("\\{\\w+}"); // e.g. {value} // !!! hide
 
 
 	public static String code(final Scribe... scribes) {
-		return list(scribes).scribe(
-
-				new ScribeCode(new StringBuilder(1000)),
-				new ScribeScope()
-
-		).toString();
-
+		return list(scribes).apply(new ScribeCode(new StringBuilder(1000))).toString();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Scribe nothing() {
-		return scribe((code, scope) -> code);
-	}
-
-	public static Scribe nothing(final Scribe... scribes) {
-		return scribe((code, scope) -> stream(scribes)
-				.map(scribe -> scribe.scribe(new ScribeCode(null), scope))
-				.reduce(code, (x, y) -> code)
-		);
+		return code -> code;
 	}
 
 
@@ -79,33 +66,16 @@ public abstract class Scribe {
 	}
 
 	public static Scribe list(final Collection<Scribe> items) {
-		return scribe((code, scope) -> items.stream()
-				.map(item -> item.scribe(code, scope))
-				.reduce(code, (x, y) -> code)
-		);
+		return code -> items.stream()
+				.map(item -> item.apply(code))
+				.reduce(code, (x, y) -> code);
 	}
 
 	public static Scribe list(final Collection<Scribe> items, final CharSequence separator) {
-		return scribe((code, scope) -> items.stream()
+		return code -> items.stream()
 				.flatMap(item -> Stream.of(text(separator), item)).skip(1)
-				.map(item -> item.scribe(code, scope))
-				.reduce(code, (x, y) -> code)
-		);
-	}
-
-
-	public static Scribe id(final Object object, final Object... aliases) {
-		return scribe((code, scope) -> {
-			try {
-
-				return code.append(valueOf(scope.apply(object, aliases)));
-
-			} catch ( final IOException e ) {
-
-				throw new UncheckedIOException(e);
-
-			}
-		});
+				.map(item -> item.apply(code))
+				.reduce(code, (x, y) -> code);
 	}
 
 
@@ -118,7 +88,7 @@ public abstract class Scribe {
 	}
 
 	public static Scribe text(final CharSequence text) {
-		return scribe((code, scope) -> {
+		return code -> {
 			try {
 
 				return code.append(text);
@@ -128,7 +98,7 @@ public abstract class Scribe {
 				throw new UncheckedIOException(e);
 
 			}
-		});
+		};
 	}
 
 	public static Scribe text(final String format, final Object... args) {
@@ -136,7 +106,7 @@ public abstract class Scribe {
 	}
 
 	public static Scribe text(final String template, final Scribe... args) {
-		return args.length == 0 ? text(template) : scribe((code, scope) -> {
+		return args.length == 0 ? text(template) : code -> {
 			try {
 
 				final Matcher matcher=VariablePattern.matcher(template);
@@ -155,7 +125,7 @@ public abstract class Scribe {
 					variables.computeIfAbsent( // cached variable value, if available
 							template.subSequence(start, end),
 							name -> iterator.hasNext() ? iterator.next() : nothing()
-					).scribe(code, scope);
+					).apply(code);
 
 					last=end;
 				}
@@ -163,7 +133,7 @@ public abstract class Scribe {
 				code.append(template.subSequence(last, template.length())); // trailing text
 
 				while ( iterator.hasNext() ) {
-					iterator.next().scribe(code, scope); // trailing args
+					iterator.next().apply(code); // trailing args
 				}
 
 				return code;
@@ -173,21 +143,7 @@ public abstract class Scribe {
 				throw new UncheckedIOException(e);
 
 			}
-		});
-	}
-
-
-	private static Scribe scribe(final BiFunction<Appendable, BiFunction<Object, Object[], Integer>, Appendable> delegate) {
-		return new Scribe() {
-			@Override Appendable scribe(final Appendable code, final BiFunction<Object, Object[], Integer> scope) {
-				return delegate.apply(code, scope);
-			}
 		};
 	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	abstract Appendable scribe(final Appendable code, final BiFunction<Object, Object[], Integer> scope);
 
 }
