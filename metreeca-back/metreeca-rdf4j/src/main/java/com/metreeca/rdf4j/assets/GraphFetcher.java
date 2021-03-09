@@ -29,6 +29,8 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.function.*;
@@ -51,14 +53,13 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.rdf4j.assets.Snippets.*;
+import static com.metreeca.rdf4j.assets.Scribe.*;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 
 import static java.lang.Math.min;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 final class GraphFetcher extends Query.Probe<Collection<Statement>> {
@@ -139,11 +140,11 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final Shape pattern=shape.convey();
 		final Shape selector=shape.filter(resource);
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(
 
 				nothing(id(root, pattern, selector)), // link root to pattern and selector shapes
 
-				snippet(
+				text(
 
 						"# items query\n"
 								+"\n"
@@ -160,15 +161,30 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 								+"\n"
 								+"} order by {criteria}",
 
-						(Snippet)(source, identifiers) -> Stream
-								.concat(
-										Stream.of(identifiers.apply(root, root)), /// always project root
-										pattern.map(new TemplateProbe(pattern, s -> identifiers.apply(s, s),
-												template::add))
-								)
-								.distinct()
-								.sorted()
-								.forEachOrdered(id -> source.accept(" ?"+id)),
+						new Scribe() {
+							@Override public Appendable scribe(final Appendable code, final BiFunction<Object, Object[]
+									, Integer> scope) {
+
+								Stream
+										.concat(
+												Stream.of(scope.apply(root, new Object[0])), /// always project root
+												pattern.map(new TemplateProbe(pattern, s -> scope.apply(s,
+														new Object[0]),
+														template::add))
+										)
+										.distinct()
+										.sorted()
+										.forEachOrdered(id -> {
+											try {
+												code.append(" ?").append(String.valueOf(id));
+											} catch ( final IOException e ) {
+												throw new UncheckedIOException(e);
+											}
+										});
+
+								return code;
+							}
+						},
 
 						selector(selector, orders, offset, limit),
 						pattern(pattern),
@@ -229,10 +245,10 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		final Shape selector=shape.filter(resource);
 
-		final Object source=var(selector);
-		final Object target=path.isEmpty() ? source : var();
+		final Scribe source=var(selector);
+		final Scribe target=path.isEmpty() ? source : var();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
 
 				"# terms query\n"
 						+"\n"
@@ -275,8 +291,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 				path(source, path, target),
 
-				offset > 0 ? snippet("offset {offset}", offset) : null,
-				snippet("limit {limit}", limit > 0 ? min(limit, TermsSampling) : TermsSampling)
+				offset > 0 ? text("offset %d", offset) : nothing(),
+				text("limit %d", limit > 0 ? min(limit, TermsSampling) : TermsSampling)
 
 		)))).evaluate(new AbstractTupleQueryResultHandler() {
 			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
@@ -320,10 +336,10 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		final Shape selector=shape.filter(resource);
 
-		final Object source=var(selector);
-		final Object target=path.isEmpty() ? source : var();
+		final Scribe source=var(selector);
+		final Scribe target=path.isEmpty() ? source : var();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(snippet(
+		evaluate(() -> connection.prepareTupleQuery(compile(() -> code(text(
 
 				"# stats query\n"
 						+"\n"
@@ -383,7 +399,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						+"\n"
 						+"}",
 
-				GraphEngine.Base,
+				text(GraphEngine.Base),
 				target,
 
 				roots(selector),
@@ -391,8 +407,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 				path(source, path, target),
 
-				offset > 0 ? snippet("offset {offset}", offset) : null,
-				snippet("limit {limit}", limit > 0 ? min(limit, StatsSampling) : StatsSampling)
+				offset > 0 ? text("offset %d", offset) : nothing(),
+				text("limit %d", limit > 0 ? min(limit, StatsSampling) : StatsSampling)
 
 		)))).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -458,8 +474,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Snippet selector(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
-		return shape.equals(and()) ? nothing() : shape.equals(or()) ? snippet("filter (false)") : snippet(
+	private Scribe selector(final Shape shape, final Collection<Order> orders, final int offset, final int limit) {
+		return shape.equals(and()) ? nothing() : shape.equals(or()) ? text("filter (false)") : text(
 
 				"{ select distinct {root} {\n"
 						+"\n"
@@ -476,45 +492,45 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 				roots(shape),
 				filters(shape),
 
-				offset > 0 || limit > 0 ? sorters(shape, orders) : null,
-				offset > 0 || limit > 0 ? snippet(" order by ", criteria(shape, orders)) : null,
+				offset > 0 || limit > 0 ? sorters(shape, orders) : nothing(),
+				offset > 0 || limit > 0 ? text(" order by ", criteria(shape, orders)) : nothing(),
 
-				offset > 0 ? snippet(" offset ", offset) : null,
-				snippet(" limit ", limit > 0 ? min(limit, ItemsSampling) : ItemsSampling)
+				offset > 0 ? text(" offset %d", offset) : nothing(),
+				text(" limit %d", limit > 0 ? min(limit, ItemsSampling) : ItemsSampling)
 
 		);
 
 	}
 
-	private Snippet roots(final Shape shape) { // root universal constraints
+	private Scribe roots(final Shape shape) { // root universal constraints
 		return all(shape)
 				.map(this::values)
 				.map(values -> values(shape, values))
-				.orElse(null);
+				.orElse(nothing());
 	}
 
-	private Snippet filters(final Shape shape) {
+	private Scribe filters(final Shape shape) {
 		return shape.map(new SkeletonProbe(shape, true));
 	}
 
-	private Snippet pattern(final Shape shape) {
+	private Scribe pattern(final Shape shape) {
 		return shape.map(new SkeletonProbe(shape, false));
 	}
 
-	private Snippet sorters(final Object root, final Collection<Order> orders) {
-		return snippet(orders.stream()
+	private Scribe sorters(final Object root, final Collection<Order> orders) {
+		return list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
-				.map(order -> snippet(
-						"optional { {root} {path} {order} }\n", var(root),
-						path(order.path().stream().collect(toList())), var(order))
-				)
+				.map(order -> text(
+						"optional { {root} {path} {order} }\n", var(root), path(order.path()), var(order)
+				))
 		);
 	}
 
-	private Snippet criteria(final Object root, final Collection<Order> orders) {
+	private Scribe criteria(final Object root, final Collection<Order> orders) {
+
 		return list(Stream.concat(
 
-				orders.stream().map(order -> snippet(
+				orders.stream().map(order -> text(
 						order.inverse() ? "desc({criterion})" : "asc({criterion})",
 						var(order.path().isEmpty() ? root : order)
 				)),
@@ -523,49 +539,65 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						.map(Order::path)
 						.filter(List::isEmpty)
 						.findFirst()
-						.map(empty -> Stream.empty())
+						.map(empty -> Stream.<Scribe>empty())
 						.orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
 
 		), " ");
 	}
 
-	private Snippet values(final Shape source, final Collection<Value> values) {
-		return snippet("\n\nvalues {source} {\n{values}\n}\n\n",
+	private Scribe values(final Shape source, final Collection<Value> values) {
+		return text("\n\nvalues {source} {\n{values}\n}\n\n",
 
-				var(source), list(values.stream().map(Values::format), "\n")
+				var(source), list(values.stream().map(Values::format).map(Scribe::text), "\n")
 
 		);
 	}
 
-
-	private Snippet path(final Object source, final Collection<IRI> path, final Object target) {
-		return source == null || path == null || path.isEmpty() || target == null ? nothing()
-				: snippet(source, " ", path(path), " ", target, " .\n");
+	private static Scribe var() {
+		return var(new Object());
 	}
 
-	private Snippet edge(final Object source, final Field field, final Object target) {
+	private static Scribe var(final Object object) {
+		return object == null ? nothing() : list(text("?"), id(object));
+	}
+
+
+	private Scribe path(final Scribe source, final Collection<IRI> path, final Scribe target) {
+		return source == null || path == null || path.isEmpty() || target == null ? nothing()
+				: list(source, text(" "), path(path), text(" "), target, text(" .\n"));
+	}
+
+	private Scribe edge(final Scribe source, final Field field, final Scribe target) {
 		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
 
-				iri -> snippet(source, " ", same(true), format(iri), same(false), " ", target, " .\n"),
-				iri -> snippet(target, " ", same(true), format(iri), same(false), " ", source, " .\n")
+				iri -> {
+					return list(source, text(" "), same(true), text(iri), same(false), text(" "), target, text(" .\n"));
+				},
+				iri -> {
+					return list(target, text(" "), same(true), text(iri), same(false), text(" "), source, text(" .\n"));
+				}
 
 		);
 	}
 
 
-	private Snippet path(final Collection<IRI> path) {
-		return snippet(same(true), list(path.stream().map(step -> snippet(
+	private Scribe path(final Collection<IRI> path) {
+		return list(same(true), list(path.stream().map(step -> {
+					return list(Scribe.text(step), same(false));
+				}
 
-				snippet(format(step)),
-				same(false))
-
-		), '/'));
+		), "/"));
 	}
 
 
-	private Snippet same(final boolean head) {
+	private Scribe same() {
+		return options.same() ? text("(owl:sameAs|^owl:sameAs)*") : nothing();
+	}
+
+	private Scribe same(final boolean head) {
+		final Scribe[] snippets=new Scribe[]{ head ? nothing() : text("/"), same(), head ? text("/") : nothing() };
 		return options.same()
-				? snippet(head ? nothing() : "/", "(owl:sameAs|^owl:sameAs)*", head ? "/" : nothing())
+				? list(snippets)
 				: nothing();
 	}
 
@@ -629,11 +661,12 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 			return or.shapes().stream().flatMap(shape -> shape.map(this));
 		}
 
+
 		@Override public Stream<Integer> probe(final Shape shape) { return Stream.empty(); }
 
 	}
 
-	private final class SkeletonProbe extends Shape.Probe<Snippet> {
+	private final class SkeletonProbe extends Shape.Probe<Scribe> {
 
 		private final Shape source;
 		private final boolean prune;
@@ -645,117 +678,124 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		@Override public Snippet probe(final Datatype datatype) {
+		@Override public Scribe probe(final Datatype datatype) {
 
 			final IRI iri=datatype.iri();
 
-			return iri.equals(ValueType) ? nothing() : snippet(
+			return iri.equals(ValueType) ? nothing() : text(
 
 					iri.equals(ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )\n"
 							: iri.equals(BNodeType) ? "filter isBlank({value})\n"
 							: iri.equals(IRIType) ? "filter isIRI({value})\n"
 							: iri.equals(LiteralType) ? "filter isLiteral({value})\n"
 							: iri.equals(RDF.LANGSTRING) ? "filter (lang({value}) != '')\n"
-							: "filter ( datatype({value}) = <{datatype}> )\n",
+							: "filter ( datatype({value}) = {datatype} )\n",
 
 					var(source),
-					iri
+					Scribe.text(iri)
 
 			);
 
 		}
 
-		@Override public Snippet probe(final Clazz clazz) {
-			return snippet(var(source), " ",
-					same(true), "a/(", same(true), "rdfs:subClassOf)*", same(false), " ",
-					format(clazz.iri()), " .\n"
+		@Override public Scribe probe(final Clazz clazz) {
+			return text("{source} {path} {class}.\n",
+
+					var(source),
+
+					options.same()
+							? text(" {same}/a/({same}/rdfs:subClassOf)* ", same())
+							: text(" a/rdfs:subClassOf* "),
+
+					Scribe.text(clazz.iri())
+
 			);
 		}
 
-		@Override public Snippet probe(final Range range) {
+		@Override public Scribe probe(final Range range) {
 			if ( prune ) {
 
 				return probe((Shape)range); // !!! tbi (filter not exists w/ special root treatment)
 
 			} else {
 
-				return range.values().isEmpty() ? nothing() : snippet("filter ({source} in ({values}))\n",
-						var(source), list(range.values().stream().map(Values::format), ", ")
+				return range.values().isEmpty() ? nothing() : text("filter ({source} in ({values}))\n",
+						var(source), list(range.values().stream().map(Values::format).map(Scribe::text), ", ")
 				);
 
 			}
 		}
 
-		@Override public Snippet probe(final Lang lang) {
+		@Override public Scribe probe(final Lang lang) {
 			if ( prune ) {
 
 				return probe((Shape)lang); // !!! tbi (filter not exists w/ special root treatment)
 
 			} else {
 
-				return lang.tags().isEmpty() ? nothing() : snippet("filter (lang({source}) in ({tags}))\n",
-						var(source), list(lang.tags().stream().map(Values::quote), ", ")
+				return lang.tags().isEmpty() ? nothing() : text("filter (lang({source}) in ({tags}))\n",
+						var(source), list(lang.tags().stream().map(Values::quote).map(Scribe::text), ", ")
 				);
 
 			}
 		}
 
 
-		@Override public Snippet probe(final MinExclusive minExclusive) {
-			return snippet("filter ( {source} > {value} )\n", var(source), format(value(minExclusive.limit())));
+		@Override public Scribe probe(final MinExclusive minExclusive) {
+			return text("filter ( {source} > {value} )\n", var(source), Scribe.text(value(minExclusive.limit())));
 		}
 
-		@Override public Snippet probe(final MaxExclusive maxExclusive) {
-			return snippet("filter ( {source} < {value} )\n", var(source), format(value(maxExclusive.limit())));
+		@Override public Scribe probe(final MaxExclusive maxExclusive) {
+			return text("filter ( {source} < {value} )\n", var(source), Scribe.text(value(maxExclusive.limit())));
 		}
 
-		@Override public Snippet probe(final MinInclusive minInclusive) {
-			return snippet("filter ( {source} >= {value} )\n", var(source), format(value(minInclusive.limit())));
+		@Override public Scribe probe(final MinInclusive minInclusive) {
+			return text("filter ( {source} >= {value} )\n", var(source), Scribe.text(value(minInclusive.limit())));
 		}
 
-		@Override public Snippet probe(final MaxInclusive maxInclusive) {
-			return snippet("filter ( {source} <= {value} )\n", var(source), format(value(maxInclusive.limit())));
-		}
-
-
-		@Override public Snippet probe(final MinLength minLength) {
-			return snippet("filter (strlen(str({source})) >= {limit} )\n", var(source), minLength.limit());
-		}
-
-		@Override public Snippet probe(final MaxLength maxLength) {
-			return snippet("filter (strlen(str({source})) <= {limit} )\n", var(source), maxLength.limit());
+		@Override public Scribe probe(final MaxInclusive maxInclusive) {
+			return text("filter ( {source} <= {value} )\n", var(source), Scribe.text(value(maxInclusive.limit())));
 		}
 
 
-		@Override public Snippet probe(final Pattern pattern) {
-			return snippet("filter regex(str({source}), '{pattern}', '{flags}')\n",
-					var(source), pattern.expression().replace("\\", "\\\\"), pattern.flags()
+		@Override public Scribe probe(final MinLength minLength) {
+			return text("filter (strlen(str({source})) >= {limit} )\n", var(source), text(minLength.limit()));
+		}
+
+		@Override public Scribe probe(final MaxLength maxLength) {
+			return text("filter (strlen(str({source})) <= {limit} )\n", var(source), text(maxLength.limit()));
+		}
+
+
+		@Override public Scribe probe(final Pattern pattern) {
+			return text("filter regex(str({source}), '{pattern}', '{flags}')\n",
+					var(source), text(pattern.expression().replace("\\", "\\\\")), text(pattern.flags())
 			);
 		}
 
-		@Override public Snippet probe(final Like like) {
-			return snippet("filter regex(str({source}), '{pattern}')\n",
-					var(source), like.toExpression().replace("\\", "\\\\")
+		@Override public Scribe probe(final Like like) {
+			return text("filter regex(str({source}), '{pattern}')\n",
+					var(source), text(like.toExpression().replace("\\", "\\\\"))
 			);
 		}
 
-		@Override public Snippet probe(final Stem stem) {
-			return snippet("filter strstarts(str({source}), '{stem}')\n",
-					var(source), stem.prefix()
+		@Override public Scribe probe(final Stem stem) {
+			return text("filter strstarts(str({source}), '{stem}')\n",
+					var(source), text(stem.prefix())
 			);
 		}
 
 
-		public Snippet probe(final MinCount minCount) { return prune ? probe((Shape)minCount) : nothing(); }
+		public Scribe probe(final MinCount minCount) { return prune ? probe((Shape)minCount) : nothing(); }
 
-		public Snippet probe(final MaxCount maxCount) { return prune ? probe((Shape)maxCount) : nothing(); }
+		public Scribe probe(final MaxCount maxCount) { return prune ? probe((Shape)maxCount) : nothing(); }
 
 
-		@Override public Snippet probe(final All all) {
+		@Override public Scribe probe(final All all) {
 			return nothing(); // universal constraints handled by field probe
 		}
 
-		@Override public Snippet probe(final Any any) {
+		@Override public Scribe probe(final Any any) {
 
 			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
@@ -766,10 +806,10 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		public Snippet probe(final Localized localized) { return prune ? probe((Shape)localized) : nothing(); }
+		public Scribe probe(final Localized localized) { return prune ? probe((Shape)localized) : nothing(); }
 
 
-		@Override public Snippet probe(final Field field) {
+		@Override public Scribe probe(final Field field) {
 
 
 			final Shape shape=field.shape();
@@ -781,7 +821,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 					.filter(values -> values.size() == 1)
 					.map(values -> values.iterator().next());
 
-			return snippet(
+			return text(
 
 					// (€) optional unless universally constrained // !!! or filtered
 
@@ -789,21 +829,21 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 							? "\n\n{pattern}\n\n"
 							: "\n\noptional {\n\n{pattern}\n\n}\n\n",
 
-					snippet(
+					list(
 
 							prune && (all.isPresent() || singleton.isPresent())
 									? nothing() // (€) filtering hook already available on all/any edges
 									: edge(var(source), field, var(shape)), // filtering or projection hook
 
-							all.map(values -> // insert universal constraints edges
-									values.stream().map(value -> edge(var(source), field, format(value)))
-							).orElse(Stream.empty()),
+							list(all.map(values -> // insert universal constraints edges
+									values.stream().map(value -> edge(var(source), field, text(value)))
+							).orElse(Stream.empty())),
 
 							singleton.map(value -> // insert singleton existential constraint edge
-									edge(var(source), field, format(value))
+									edge(var(source), field, text(value))
 							).orElse(nothing()),
 
-							"\n\n",
+							text("\n\n"),
 
 							shape.map(new SkeletonProbe(shape, prune))
 					)
@@ -812,19 +852,19 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		}
 
 
-		@Override public Snippet probe(final And and) {
-			return snippet(and.shapes().stream().map(shape -> shape.map(this)));
+		@Override public Scribe probe(final And and) {
+			return list(and.shapes().stream().map(shape -> shape.map(this)));
 		}
 
-		@Override public Snippet probe(final Or or) {
+		@Override public Scribe probe(final Or or) {
 			return list(
-					or.shapes().stream().map(s -> snippet("{\f{branch}\f}", s.map(this))),
+					or.shapes().stream().map(s -> text("{\f{branch}\f}", s.map(this))),
 					" union "
 			);
 		}
 
 
-		@Override public Snippet probe(final Shape shape) {
+		@Override public Scribe probe(final Shape shape) {
 			throw new UnsupportedOperationException(shape.toString());
 		}
 
