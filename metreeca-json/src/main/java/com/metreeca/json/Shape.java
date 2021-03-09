@@ -268,13 +268,33 @@ public abstract class Shape {
 	 *
 	 * @throws IllegalArgumentException if {@code reserved} is negative
 	 */
-	public Shape tag(final int reserved) {
+	public Shape label(final int reserved) {
 
 		if ( reserved < 0 ) {
 			throw new IllegalArgumentException("negative reserved count");
 		}
 
-		return map(new ShapeTagger(reserved));
+		return map(new ShapeLabeller(reserved));
+	}
+
+	/**
+	 * Resolve focus values in this shape.
+	 *
+	 * @param base the base IRI focus values should be resolved against
+	 *
+	 * @return a copy of this shape where {@linkplain Focus focus} values are replaced by absolute IRIs by resolving
+	 * them
+	 * against {@code base}
+	 *
+	 * @throws IllegalArgumentException if {@code base} is null
+	 */
+	public Shape resolve(final IRI base) {
+
+		if ( base == null ) {
+			throw new NullPointerException("null base");
+		}
+
+		return map(new ShapeResolver(base));
 	}
 
 

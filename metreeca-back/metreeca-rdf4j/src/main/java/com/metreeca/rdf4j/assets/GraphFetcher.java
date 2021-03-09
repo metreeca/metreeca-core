@@ -64,7 +64,6 @@ import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
@@ -110,21 +109,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Value value(final Value value) {
-		return value instanceof Focus
-				? ((Focus)value).resolve(resource)
-				: value;
-	}
-
-	private Set<Value> values(final Collection<Value> values) {
-		return values.stream()
-				.map(this::value)
-				.collect(toSet());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Override public Collection<Statement> probe(final Items items) {
 
 		final Shape shape=items.shape();
@@ -134,8 +118,15 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		final int reserved=1+orders.size();
 
-		final Shape filter=shape.filter(resource).tag(reserved);
-		final Shape convey=shape.convey().tag(reserved);
+		final Shape filter=shape
+				.filter(resource)
+				.resolve(resource)
+				.label(reserved);
+
+		final Shape convey=shape
+				.convey()
+				.resolve(resource)
+				.label(reserved);
 
 		final Collection<Triple> template=convey.map(new TemplateProbe(Root)).collect(toList());
 		final Collection<Statement> model=new LinkedHashSet<>();
@@ -228,10 +219,12 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final int offset=terms.offset();
 		final int limit=terms.limit();
 
-		final String source=Root;
-		final String target=path.isEmpty() ? source : "hook";
+		final String target=path.isEmpty() ? Root : "hook";
 
-		final Shape filter=shape.filter(resource).tag(1);
+		final Shape filter=shape
+				.filter(resource)
+				.resolve(resource)
+				.label(1);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -273,7 +266,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 							+"}",
 
 					var(target),
-					var(source),
+					var(Root),
 
 					roots(filter),
 					filters(filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
@@ -317,10 +310,12 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final int offset=stats.offset();
 		final int limit=stats.limit();
 
-		final String source=Root;
-		final String target=path.isEmpty() ? source : "hook";
+		final String target=path.isEmpty() ? Root : "hook";
 
-		final Shape filter=shape.filter(resource).tag(1);
+		final Shape filter=shape
+				.filter(resource)
+				.resolve(resource)
+				.label(1);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -467,7 +462,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private /*static*/ UnaryOperator<Appendable> matcher(final Shape shape, final List<Order> orders, final int offset,
+	private UnaryOperator<Appendable> matcher(final Shape shape, final List<Order> orders, final int offset,
 			final int limit) {
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? text("filter (false)") : text(
 
@@ -495,11 +490,11 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		);
 	}
 
-	private /*static*/ UnaryOperator<Appendable> pattern(final Shape shape) {
+	private UnaryOperator<Appendable> pattern(final Shape shape) {
 		return shape.map(new SkeletonProbe(Root, false));
 	}
 
-	private /*static*/ UnaryOperator<Appendable> sorters(final List<Order> orders) {
+	private UnaryOperator<Appendable> sorters(final List<Order> orders) {
 		return list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
 				.map(order -> text("optional { {root} {path} {order} }\n",
@@ -529,21 +524,19 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private /*static*/ UnaryOperator<Appendable> roots(final Shape shape) { // root universal
-		// constraints
+	private UnaryOperator<Appendable> roots(final Shape shape) { // root universal constraints
 		return all(shape)
-				.map(this::values)
 				.map(values -> values(Root, values))
 				.orElse(nothing());
 	}
 
-	private /*static*/ UnaryOperator<Appendable> filters(final Shape shape) {
+	private UnaryOperator<Appendable> filters(final Shape shape) {
 		return shape.map(new SkeletonProbe(Root, true));
 	}
 
-	private /*static*/ UnaryOperator<Appendable> path(final List<IRI> path, final String target) {
-		return "0" == null || path == null || path.isEmpty() || target == null ? nothing()
-				: list(var("0"), text(" "), path(path), text(" "), var(target), text(" .\n"));
+	private UnaryOperator<Appendable> path(final List<IRI> path, final String target) {
+		return path.isEmpty() ? nothing()
+				: list(var(Root), text(" "), path(path), text(" "), var(target), text(" .\n"));
 	}
 
 
@@ -565,7 +558,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 	}
 
 
-	private /*static*/ UnaryOperator<Appendable> edge(final String source, final Field field, final String target) {
+	private UnaryOperator<Appendable> edge(final String source, final Field field, final String target) {
 		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
 
 				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), var(target), text(" "
@@ -576,7 +569,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		);
 	}
 
-	private /*static*/ UnaryOperator<Appendable> edge(final String source, final Field field, final Value target) {
+	private UnaryOperator<Appendable> edge(final String source, final Field field, final Value target) {
 		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
 
 				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), text(target), text(
@@ -737,19 +730,19 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 
 		@Override public UnaryOperator<Appendable> probe(final MinExclusive minExclusive) {
-			return text("filter ( {source} > {value} )\n", var(anchor), text(value(minExclusive.limit())));
+			return text("filter ( {source} > {value} )\n", var(anchor), text(minExclusive.limit()));
 		}
 
 		@Override public UnaryOperator<Appendable> probe(final MaxExclusive maxExclusive) {
-			return text("filter ( {source} < {value} )\n", var(anchor), text(value(maxExclusive.limit())));
+			return text("filter ( {source} < {value} )\n", var(anchor), text(maxExclusive.limit()));
 		}
 
 		@Override public UnaryOperator<Appendable> probe(final MinInclusive minInclusive) {
-			return text("filter ( {source} >= {value} )\n", var(anchor), text(value(minInclusive.limit())));
+			return text("filter ( {source} >= {value} )\n", var(anchor), text(minInclusive.limit()));
 		}
 
 		@Override public UnaryOperator<Appendable> probe(final MaxInclusive maxInclusive) {
-			return text("filter ( {source} <= {value} )\n", var(anchor), text(value(maxInclusive.limit())));
+			return text("filter ( {source} <= {value} )\n", var(anchor), text(maxInclusive.limit()));
 		}
 
 
@@ -798,7 +791,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 			return any.values().size() <= 1
 					? nothing() // singleton universal constraints handled by field probe
-					: values(anchor, values(any.values()));
+					: values(anchor, any.values());
 
 		}
 
@@ -812,8 +805,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 			final Shape shape=field.shape();
 			final String alias=field.alias();
 
-			final Optional<Set<Value>> all=all(shape).map(GraphFetcher.this::values);
-			final Optional<Set<Value>> any=any(shape).map(GraphFetcher.this::values);
+			final Optional<Set<Value>> all=all(shape);
+			final Optional<Set<Value>> any=any(shape);
 
 			final Optional<Value> singleton=any
 					.filter(values -> values.size() == 1)

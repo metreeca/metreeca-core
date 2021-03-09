@@ -25,12 +25,12 @@ import static com.metreeca.json.shapes.When.when;
 
 import static java.lang.String.valueOf;
 
-final class ShapeTagger extends Shape.Probe<Shape> {
+final class ShapeLabeller extends Shape.Probe<Shape> {
 
 	private int next;
 
 
-	ShapeTagger(final int next) {
+	ShapeLabeller(final int next) {
 		this.next=next;
 	}
 

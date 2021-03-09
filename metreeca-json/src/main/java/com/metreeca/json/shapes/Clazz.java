@@ -21,7 +21,6 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.json.Values.format;
-import static com.metreeca.json.Values.internal;
 
 
 /**
@@ -30,24 +29,6 @@ import static com.metreeca.json.Values.internal;
  * <p>States that each value in the focus set is a member of a given resource class or one of its superclasses.</p>
  */
 public final class Clazz extends Shape {
-
-	/**
-	 * Creates a class constraint.
-	 *
-	 * @param name the expected class name
-	 *
-	 * @return a new datatype constraint for the provided {@code name}
-	 *
-	 * @throws NullPointerException if {@code name} is null
-	 */
-	public static Shape clazz(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return clazz(internal(name));
-	}
 
 	/**
 	 * Creates a class constraint.

@@ -21,7 +21,6 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.json.Values.format;
-import static com.metreeca.json.Values.internal;
 
 
 /**
@@ -30,24 +29,6 @@ import static com.metreeca.json.Values.internal;
  * <p>States that each value in the focus set has a given datatype.</p>
  */
 public final class Datatype extends Shape {
-
-	/**
-	 * Creates a datatype constraint.
-	 *
-	 * @param name the expected datatype name
-	 *
-	 * @return a new datatype constraint for the provided {@code name}
-	 *
-	 * @throws NullPointerException if {@code name} is null
-	 */
-	public static Shape datatype(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return datatype(internal(name));
-	}
 
 	/**
 	 * Creates a datatype constraint.
