@@ -29,23 +29,19 @@ import java.util.Optional;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rdf4j.assets.GraphEngine.StatsShape;
-import static com.metreeca.rdf4j.assets.GraphEngine.TermsShape;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rdf4j.assets.GraphQueryBase.StatsShape;
+import static com.metreeca.rdf4j.assets.GraphQueryBase.TermsShape;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 
-final class GraphRelator {
+final class GraphActorRelator {
 
 	private final Options options;
 
-	private final Graph graph=asset(graph());
 
-
-	GraphRelator(final Options options) {
+	GraphActorRelator(final Options options) {
 		this.options=options;
 	}
 

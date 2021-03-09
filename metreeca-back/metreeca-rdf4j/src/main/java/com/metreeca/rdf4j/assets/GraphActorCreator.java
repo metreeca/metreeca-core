@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
@@ -41,16 +40,9 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphCreator {
-
-	private final Options options;
+final class GraphActorCreator {
 
 	private final Graph graph=asset(graph());
-
-
-	GraphCreator(final Options options) {
-		this.options=options;
-	}
 
 
 	Future<Response> handle(final Request request) {

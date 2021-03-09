@@ -335,6 +335,11 @@ public final class Field extends Shape {
 			return Stream.of(field);
 		}
 
+
+		@Override public Stream<Field> probe(final When when) {
+			return Stream.of(when.pass(), when.fail()).flatMap(this);
+		}
+
 		@Override public Stream<Field> probe(final And and) {
 			return and.shapes().stream().flatMap(shape -> shape.map(this));
 		}
@@ -343,9 +348,6 @@ public final class Field extends Shape {
 			return or.shapes().stream().flatMap(shape -> shape.map(this));
 		}
 
-		@Override public Stream<Field> probe(final When when) {
-			return Stream.of(when.pass(), when.fail()).flatMap(this);
-		}
 
 		@Override public Stream<Field> probe(final Shape shape) {
 			return Stream.empty();

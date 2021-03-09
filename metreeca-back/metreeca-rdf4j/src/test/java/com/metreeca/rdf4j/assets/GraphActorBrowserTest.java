@@ -40,9 +40,11 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Nested final class GraphBrowserTest {
+@Nested final class GraphActorBrowserTest {
 
-	private static final Options options=new Options() {};
+	private static Options options() {
+		return new Options(new GraphEngine());
+	}
 
 	private Request request() {
 		return new Request()
@@ -53,7 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 	@Test void testBrowse() {
-		exec(model(birt()), () -> new GraphBrowser(options)
+		exec(model(birt()), () -> new GraphActorBrowser(options())
 
 				.handle(request())
 
@@ -73,7 +75,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testBrowseFiltered() {
-		exec(model(birt()), () -> new GraphBrowser(options)
+		exec(model(birt()), () -> new GraphActorBrowser(options())
 
 				.handle(request()
 						.query("title=Sales+Rep")
@@ -99,7 +101,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testSliceTermsQueries() {
-		exec(model(birt()), () -> new GraphBrowser(options)
+		exec(model(birt()), () -> new GraphActorBrowser(options())
 
 				.handle(request()
 						.query("_terms=office&_offset=1&_limit=3")

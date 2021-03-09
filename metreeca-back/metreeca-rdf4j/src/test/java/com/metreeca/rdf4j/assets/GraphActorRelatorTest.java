@@ -35,9 +35,11 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-final class GraphRelatorTest {
+final class GraphActorRelatorTest {
 
-	private static final Options options=new Options() {};
+	private static Options options() {
+		return new Options(new GraphEngine());
+	}
 
 	private Request request() {
 		return new Request()
@@ -48,7 +50,7 @@ final class GraphRelatorTest {
 
 
 	@Test void testRelate() {
-		exec(model(birt()), () -> new GraphRelator(options)
+		exec(model(birt()), () -> new GraphActorRelator(options())
 
 				.handle(request())
 

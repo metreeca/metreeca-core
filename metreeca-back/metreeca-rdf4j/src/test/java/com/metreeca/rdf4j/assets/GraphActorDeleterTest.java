@@ -37,13 +37,15 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
-final class GraphDeleterTest {
+final class GraphActorDeleterTest {
 
-	private static final Options options=new Options() {};
+	private static Options options() {
+		return new Options(new GraphEngine());
+	}
 
 
 	@Test void testDelete() {
-		exec(model(birt()), () -> new GraphDeleter(options)
+		exec(model(birt()), () -> new GraphActorDeleter(options())
 
 				.handle(new Request()
 						.base(ValuesTest.Base)
@@ -79,7 +81,7 @@ final class GraphDeleterTest {
 	}
 
 	@Test void testReportUnknown() {
-		exec(() -> new GraphDeleter(options)
+		exec(() -> new GraphActorDeleter(options())
 
 				.handle(new Request()
 						.path("/unknown")

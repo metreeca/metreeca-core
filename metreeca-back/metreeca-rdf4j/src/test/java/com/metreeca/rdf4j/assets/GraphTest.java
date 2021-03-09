@@ -19,7 +19,7 @@ package com.metreeca.rdf4j.assets;
 
 
 import com.metreeca.json.Values;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
@@ -37,10 +37,8 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.literal;
-import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.*;
-import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
 
 import static java.util.Collections.singleton;
@@ -56,19 +54,23 @@ public final class GraphTest {
 			.map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
 			.collect(joining("\n"));
 
+
+	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
+
+
 	private final Statement data=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 
 
 	public static void exec(final Runnable... tasks) {
-		new com.metreeca.rest.Context()
-				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+		new Context()
+				.set(Graph.graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 				.exec(tasks)
 				.clear();
 	}
 
 
 	@Test void testConfigureRequest() {
-		exec(() -> assertThat(Graph.<com.metreeca.rest.Request>query(
+		exec(() -> assertThat(Graph.<Request>query(
 
 				sparql("\n"
 						+"construct { \n"
@@ -91,9 +93,9 @@ public final class GraphTest {
 
 				)
 
-						.apply(new com.metreeca.rest.Request()
+						.apply(new Request()
 
-										.method(com.metreeca.rest.Request.POST)
+										.method(Request.POST)
 										.base(Base)
 										.path("/test/request"),
 
@@ -125,7 +127,7 @@ public final class GraphTest {
 	}
 
 	@Test void testConfigureResponse() {
-		exec(() -> assertThat(Graph.<com.metreeca.rest.Response>query(
+		exec(() -> assertThat(Graph.<Response>query(
 
 				sparql("\n"
 						+"construct { \n"
@@ -149,9 +151,9 @@ public final class GraphTest {
 
 				)
 
-						.apply(new com.metreeca.rest.Response(new com.metreeca.rest.Request()
+						.apply(new Response(new Request()
 
-										.method(com.metreeca.rest.Request.POST)
+										.method(Request.POST)
 										.base(Base)
 										.path("/test/request"))
 
@@ -188,23 +190,23 @@ public final class GraphTest {
 
 
 	public static Model model(final Resource... contexts) {
-		return asset(graph()).exec(connection -> { return export(connection, contexts); });
+		return asset(Graph.graph()).exec(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return asset(graph()).exec(connection -> { return construct(connection, sparql); });
+		return asset(Graph.graph()).exec(connection -> { return construct(connection, sparql); });
 	}
 
-	public static List<Map<String, Value>> tuples(final String sparql) {
-		return asset(graph()).exec(connection -> { return select(connection, sparql); });
+	static List<Map<String, Value>> tuples(final String sparql) {
+		return asset(Graph.graph()).exec(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> asset(graph()).exec(connection -> { connection.add(model, contexts); });
+		return () -> asset(Graph.graph()).exec(connection -> { connection.add(model, contexts); });
 	}
 
-	public static List<Statement> localized(final Collection<Statement> model, final String... tags) {
+	static List<Statement> localized(final Collection<Statement> model, final String... tags) {
 		return model.stream()
 
 				.flatMap(s -> Optional
@@ -232,12 +234,28 @@ public final class GraphTest {
 
 	//// Graph Operations /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static String sparql(final String sparql) {
+	static Collection<Statement> graph(final String sparql) {
+		return model(sparql)
+
+				.stream()
+
+				// ;(stardog) statement from default context explicitly tagged // !!! review dependency
+
+				.map(statement -> StardogDefault.equals(statement.getContext()) ? statement(
+						statement.getSubject(),
+						statement.getPredicate(),
+						statement.getObject()
+				) : statement)
+
+				.collect(toList());
+	}
+
+	static String sparql(final String sparql) {
 		return SPARQLPrefixes+"\n\n"+sparql; // !!! avoid prefix clashes
 	}
 
 
-	public static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
+	static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
@@ -270,7 +288,7 @@ public final class GraphTest {
 		}
 	}
 
-	public static Model construct(final RepositoryConnection connection, final String sparql) {
+	static Model construct(final RepositoryConnection connection, final String sparql) {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"

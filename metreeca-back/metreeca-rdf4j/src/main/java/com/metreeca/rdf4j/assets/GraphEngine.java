@@ -17,34 +17,16 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.queries.Stats;
-import com.metreeca.json.queries.Terms;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.*;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.metreeca.json.Shape.*;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.Guard.Convey;
-import static com.metreeca.json.shapes.Guard.Mode;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.Context.asset;
-
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableSet;
 
 
 /**
@@ -55,95 +37,14 @@ import static java.util.Collections.unmodifiableSet;
  */
 public final class GraphEngine implements Engine {
 
-	static final String Base="app:/terms#";
-
-	static final IRI terms=iri(Base, "terms");
-	static final IRI stats=iri(Base, "stats");
-
-	static final IRI value=iri(Base, "value");
-	static final IRI count=iri(Base, "count");
-
-	static final IRI max=iri(Base, "max");
-	static final IRI min=iri(Base, "min");
-
-
-	private static final Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
-
-	static Shape StatsShape(final Stats query) {
-
-		final Shape term=annotations(query.shape(), query.path());
-
-		return and(
-
-				field(count, required(), datatype(XSD.INTEGER)),
-				field(min, optional(), term),
-				field(max, optional(), term),
-
-				field(stats, multiple(),
-						field(count, required(), datatype(XSD.INTEGER)),
-						field(min, required(), term),
-						field(max, required(), term)
-				)
-
-		);
-	}
-
-	static Shape TermsShape(final Terms query) {
-
-		final Shape term=annotations(query.shape(), query.path());
-
-		return and(
-				field(terms, multiple(),
-						field(value, required(), term),
-						field(count, required(), datatype(XSD.INTEGER))
-				)
-		);
-	}
-
-
-	private static Shape annotations(final Shape shape, final Iterable<IRI> path) {
-
-		Shape nested=shape.redact(Mode, Convey);
-
-		for (final IRI step : path) {
-			nested=field(nested, step)
-
-					.orElseThrow(() -> new IllegalArgumentException(format("unknown path step <%s>", step)))
-
-					.shape();
-		}
-
-		return and(fields(nested).filter(field -> Annotations.contains(field.iri())));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static interface Options {
-
-		default boolean same() { return false; }
-
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private boolean same;
 
+	private int items=1_000; // the maximum number of resources to be returned from items queries
+	private int stats=10_000; // the maximum number of resources to be evaluated by stats queries
+	private int terms=10_000; // the maximum number of resources to be evaluated by terms queries
+
+
 	private final Graph graph=asset(graph());
-
-	private final Options options=new Options() {
-
-		@Override public boolean same() { return same; }
-
-	};
-
-
-	private final GraphCreator creator=new GraphCreator(options);
-	private final GraphRelator relator=new GraphRelator(options);
-	private final GraphBrowser browser=new GraphBrowser(options);
-	private final GraphUpdater updater=new GraphUpdater(options);
-	private final GraphDeleter deleter=new GraphDeleter(options);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,6 +59,40 @@ public final class GraphEngine implements Engine {
 	public GraphEngine same(final boolean same) {
 
 		this.same=same;
+
+		return this;
+	}
+
+
+	GraphEngine items(final int items) {
+
+		if ( items < 0 ) {
+			throw new IllegalArgumentException("negative items sampling limit");
+		}
+
+		this.items=items;
+
+		return this;
+	}
+
+	GraphEngine stats(final int stats) {
+
+		if ( stats < 0 ) {
+			throw new IllegalArgumentException("negative stats sampling limit");
+		}
+
+		this.stats=stats;
+
+		return this;
+	}
+
+	GraphEngine terms(final int terms) {
+
+		if ( terms < 0 ) {
+			throw new IllegalArgumentException("negative terms sampling limit");
+		}
+
+		this.terms=terms;
 
 		return this;
 	}
@@ -218,7 +153,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return creator.handle(request);
+		return new GraphActorCreator().handle(request);
 	}
 
 	/**
@@ -262,7 +197,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return relator.handle(request);
+		return new GraphActorRelator(new Options(this)).handle(request);
 	}
 
 	/**
@@ -298,7 +233,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return browser.handle(request);
+		return new GraphActorBrowser(new Options(this)).handle(request);
 	}
 
 	/**
@@ -343,7 +278,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return updater.handle(request);
+		return new GraphActorUpdater(new Options(this)).handle(request);
 	}
 
 	/**
@@ -385,7 +320,30 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return deleter.handle(request);
+		return new GraphActorDeleter(new Options(this)).handle(request);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static final class Options {
+
+		private final GraphEngine engine;
+
+		Options(final GraphEngine engine) {
+			this.engine=engine;
+		}
+
+
+		public boolean same() { return engine.same; }
+
+
+		public int items() { return engine.items; }
+
+		public int terms() { return engine.terms; }
+
+		public int stats() { return engine.stats; }
+
 	}
 
 }

@@ -36,14 +36,16 @@ import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
-final class GraphUpdaterTest {
+final class GraphActorUpdaterTest {
 
-	private static final Options options=new Options() {};
+	private static Options options() {
+		return new Options(new GraphEngine());
+	}
 
 
 	@Test void testUpdate() {
 		exec(model(birt()), () -> {
-			new GraphUpdater(options)
+			new GraphActorUpdater(options())
 
 					.handle(new Request()
 							.base(Base)
@@ -92,7 +94,7 @@ final class GraphUpdaterTest {
 	}
 
 	@Test void testReportMissing() {
-		exec(() -> new GraphUpdater(options)
+		exec(() -> new GraphActorUpdater(options())
 
 				.handle(new Request()
 						.base(Base)
