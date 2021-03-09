@@ -56,7 +56,7 @@ final class GraphDeleter {
 
 			return Optional
 
-					.of(items(shape).map(new GraphFetcher(connection, item, options)))
+					.of(items(shape).map(new GraphFetcher(item, options)))
 
 					.filter(current -> !current.isEmpty())
 

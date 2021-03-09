@@ -108,7 +108,7 @@ final class GraphFetcherTest {
 
 	private Collection<Statement> query(final IRI resource, final Query query) {
 		return asset(Graph.graph()).exec(connection -> {
-			return query.map(new GraphFetcher(connection, resource, options))
+			return query.map(new GraphFetcher(resource, options))
 
 					.stream()
 
@@ -1087,7 +1087,7 @@ final class GraphFetcherTest {
 
 		private Collection<Statement> query(final Query query) {
 			return asset(Graph.graph()).exec(connection -> {
-				return query.map(new GraphFetcher(connection, Root, new Options() {
+				return query.map(new GraphFetcher(Root, new Options() {
 
 					@Override public boolean same() { return true;}
 

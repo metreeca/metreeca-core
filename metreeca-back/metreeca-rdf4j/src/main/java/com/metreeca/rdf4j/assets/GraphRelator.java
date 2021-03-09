@@ -56,22 +56,19 @@ final class GraphRelator {
 		final Shape shape=and(all(item), request.attribute(shape()));
 
 		return query(item, shape, request.query()).fold(request::reply, query ->
-				request.reply(response -> graph.exec(connection -> {
+				request.reply(response -> Optional
 
-					return Optional
+						.of(query.map(new GraphFetcher(item, options)))
 
-							.of(query.map(new GraphFetcher(connection, item, options)))
+						.filter(model -> !model.isEmpty())
 
-							.filter(model -> !model.isEmpty())
+						.map(model -> response.status(OK)
+								.attribute(shape(), query.map(new ShapeProbe()))
+								.body(jsonld(), model)
+						)
 
-							.map(model -> response.status(OK)
-									.attribute(shape(), query.map(new ShapeProbe()))
-									.body(jsonld(), model)
-							)
-
-							.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
-
-				}))
+						.orElseGet(() -> response.status(NotFound)) // !!! 410 Gone if previously known
+				)
 		);
 	}
 

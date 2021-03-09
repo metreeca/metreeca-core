@@ -28,7 +28,6 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.*;
-import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -53,6 +52,7 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.assets.Logger.logger;
@@ -77,18 +77,14 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final RepositoryConnection connection;
-
 	private final IRI resource;
-
 	private final Options options;
 
-
+	private final Graph graph=asset(graph());
 	private final Logger logger=asset(logger());
 
 
-	GraphFetcher(final RepositoryConnection connection, final IRI resource, final Options options) {
-		this.connection=connection;
+	GraphFetcher(final IRI resource, final Options options) {
 		this.resource=resource;
 		this.options=options;
 	}
@@ -146,78 +142,80 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> Scribe.code(text(
+		evaluate(() -> graph.exec(connection -> {
+			connection.prepareTupleQuery(compile(() -> code(text(
 
-				"# items query\n"
-						+"\n"
-						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-						+"\n"
-						+"select {variables} where {\n"
-						+"\n"
-						+"\t{filter}\n"
-						+"\n"
-						+"\t{pattern}\n"
-						+"\n"
-						+"\t{sorters}\n"
-						+"\n"
-						+"} order by {criteria}",
+					"# items query\n"
+							+"\n"
+							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
+							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+							+"\n"
+							+"select {variables} where {\n"
+							+"\n"
+							+"\t{filter}\n"
+							+"\n"
+							+"\t{pattern}\n"
+							+"\n"
+							+"\t{sorters}\n"
+							+"\n"
+							+"} order by {criteria}",
 
-				list(Stream.concat(
+					list(Stream.concat(
 
-						Stream.of(Root), /// always project root
+							Stream.of(Root), /// always project root
 
-						Stream.concat( // project template variables
+							Stream.concat( // project template variables
 
-								template.stream().map(Triple::getSubject),
-								template.stream().map(Triple::getObject)
+									template.stream().map(Triple::getSubject),
+									template.stream().map(Triple::getObject)
 
-						).distinct().map(BNode.class::cast).map(BNode::getID)
+							).distinct().map(BNode.class::cast).map(BNode::getID)
 
-				).distinct().sorted().map(GraphFetcher::var)),
+					).distinct().sorted().map(GraphFetcher::var)),
 
-				filter(Root, filter, orders, offset, limit),
-				convey(Root, convey),
+					matcher(filter, orders, offset, limit),
+					pattern(convey),
 
-				sorters(Root, orders), // !!! (€) don't extract if already present in pattern
-				criteria(Root, orders)
+					sorters(orders), // !!! (€) don't extract if already present in pattern
+					criteria(orders)
 
-		)))).evaluate(new AbstractTupleQueryResultHandler() {
+			)))).evaluate(new AbstractTupleQueryResultHandler() {
 
-			@Override public void handleSolution(final BindingSet bindings) {
+				@Override public void handleSolution(final BindingSet bindings) {
 
-				final Value match=bindings.getValue(Root);
+					final Value match=bindings.getValue(Root);
 
-				if ( match != null ) {
+					if ( match != null ) {
 
-					if ( !match.equals(resource) ) {
-						model.add(statement(resource, Shape.Contains, match));
-					}
-
-					template.forEach(statement -> {
-
-						final Resource subject=statement.getSubject();
-						final Value object=statement.getObject();
-
-
-						final Value source=subject instanceof BNode
-								? bindings.getValue(((BNode)subject).getID())
-								: subject;
-
-						final Value target=object instanceof BNode
-								? bindings.getValue(((BNode)object).getID())
-								: object;
-
-						if ( source instanceof Resource && target != null ) {
-							model.add(statement((Resource)source, statement.getPredicate(), target));
+						if ( !match.equals(resource) ) {
+							model.add(statement(resource, Shape.Contains, match));
 						}
 
-					});
+						template.forEach(statement -> {
+
+							final Resource subject=statement.getSubject();
+							final Value object=statement.getObject();
+
+
+							final Value source=subject instanceof BNode
+									? bindings.getValue(((BNode)subject).getID())
+									: subject;
+
+							final Value target=object instanceof BNode
+									? bindings.getValue(((BNode)object).getID())
+									: object;
+
+							if ( source instanceof Resource && target != null ) {
+								model.add(statement((Resource)source, statement.getPredicate(), target));
+							}
+
+						});
+
+					}
 
 				}
 
-			}
-
+			});
 		}));
 
 		return model;
@@ -237,74 +235,76 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> Scribe.code(text(
+		evaluate(() -> graph.exec(connection -> {
+			connection.prepareTupleQuery(compile(() -> code(text(
 
-				"# terms query\n"
-						+"\n"
-						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-						+"\n"
-						+"select ?value ?count ?label ?notes where {\n"
-						+"\n"
-						+"\t{\n"
-						+"\n"
-						+"\t\tselect ({target} as ?value) (count(distinct {source}) as ?count)\n"
-						+"\n"
-						+"\t\twhere {\n"
-						+"\n"
-						+"\t\t\t{roots}\n"
-						+"\n"
-						+"\t\t\t{filters}\n"
-						+"\n"
-						+"\t\t\t{path}\n"
-						+"\n"
-						+"\t\t}\n"
-						+"\n"
-						+"\t\tgroup by {target} \n"
-						+"\t\thaving ( count(distinct {source}) > 0 ) \n"
-						+"\t\torder by desc(?count) ?value\n"
-						+"\t\t{offset}\n"
-						+"\t\t{limit}\n"
-						+"\n"
-						+"\t}\n"
-						+"\n"
-						+"\toptional { ?value rdfs:label ?label }\n"
-						+"\toptional { ?value rdfs:comment ?notes }\n"
-						+"\n"
-						+"}",
+					"# terms query\n"
+							+"\n"
+							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
+							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+							+"\n"
+							+"select ?value ?count ?label ?notes where {\n"
+							+"\n"
+							+"\t{\n"
+							+"\n"
+							+"\t\tselect ({target} as ?value) (count(distinct {source}) as ?count)\n"
+							+"\n"
+							+"\t\twhere {\n"
+							+"\n"
+							+"\t\t\t{roots}\n"
+							+"\n"
+							+"\t\t\t{filters}\n"
+							+"\n"
+							+"\t\t\t{path}\n"
+							+"\n"
+							+"\t\t}\n"
+							+"\n"
+							+"\t\tgroup by {target} \n"
+							+"\t\thaving ( count(distinct {source}) > 0 ) \n"
+							+"\t\torder by desc(?count) ?value\n"
+							+"\t\t{offset}\n"
+							+"\t\t{limit}\n"
+							+"\n"
+							+"\t}\n"
+							+"\n"
+							+"\toptional { ?value rdfs:label ?label }\n"
+							+"\toptional { ?value rdfs:comment ?notes }\n"
+							+"\n"
+							+"}",
 
-				var(target),
-				var(source),
+					var(target),
+					var(source),
 
-				roots(Root, filter),
-				filters(Root, filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+					roots(filter),
+					filters(filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-				path(source, path, target),
+					path(path, target),
 
-				offset(offset),
-				limit(limit, TermsSampling)
+					offset(offset),
+					limit(limit, TermsSampling)
 
-		)))).evaluate(new AbstractTupleQueryResultHandler() {
-			@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
+			)))).evaluate(new AbstractTupleQueryResultHandler() {
+				@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {
 
-				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+					// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-				final Value value=bindings.getValue("value");
-				final Value count=literal(integer(bindings.getValue("count")).orElse(BigInteger.ZERO));
-				final Value label=bindings.getValue("label");
-				final Value notes=bindings.getValue("notes");
+					final Value value=bindings.getValue("value");
+					final Value count=literal(integer(bindings.getValue("count")).orElse(BigInteger.ZERO));
+					final Value label=bindings.getValue("label");
+					final Value notes=bindings.getValue("notes");
 
-				final BNode term=bnode(md5(format(value)));
+					final BNode term=bnode(md5(format(value)));
 
-				model.add(statement(resource, GraphEngine.terms, term));
+					model.add(statement(resource, GraphEngine.terms, term));
 
-				model.add(statement(term, GraphEngine.value, value));
-				model.add(statement(term, GraphEngine.count, count));
+					model.add(statement(term, GraphEngine.value, value));
+					model.add(statement(term, GraphEngine.count, count));
 
-				if ( label != null ) { model.add(statement((Resource)value, RDFS.LABEL, label)); }
-				if ( notes != null ) { model.add(statement((Resource)value, RDFS.COMMENT, notes)); }
+					if ( label != null ) { model.add(statement((Resource)value, RDFS.LABEL, label)); }
+					if ( notes != null ) { model.add(statement((Resource)value, RDFS.COMMENT, notes)); }
 
-			}
+				}
+			});
 		}));
 
 		return model;
@@ -329,121 +329,124 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		evaluate(() -> connection.prepareTupleQuery(compile(() -> Scribe.code(text(
+		evaluate(() -> graph.exec(connection -> {
+			connection.prepareTupleQuery(compile(() -> code(text(
 
-				"# stats query\n"
-						+"\n"
-						+"prefix : <{base}>\n"
-						+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-						+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-						+"\n"
-						+"select \n"
-						+"\n"
-						+"\t?type ?type_label ?type_notes\n"
-						+"\n"
-						+"\t?min ?min_label ?min_notes\n"
-						+"\t?max ?max_label ?max_notes\n"
-						+"\n"
-						+"\t?count\n"
-						+"\n"
-						+"where {\n"
-						+"\n"
-						+"\t{\n"
-						+"\n"
-						+"\t\tselect ?type\n"
-						+"\n"
-						+"\t\t\t(min({target}) as ?min)\n"
-						+"\t\t\t(max({target}) as ?max) \n"
-						+"\n"
-						+"\t\t\t(count(distinct {target}) as ?count)\n"
-						+"\n"
-						+"\t\twhere {\n"
-						+"\n"
-						+"\t\t\t{roots}\n"
-						+"\n"
-						+"\t\t\t{filters}\n"
-						+"\n"
-						+"\t\t\t{path}\n"
-						+"\n"
-						+"\t\t\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) as "
-						+"?type)\n"
-						+"\n"
-						+"\t\t}\n"
-						+"\n"
-						+"\t\tgroup by ?type\n"
-						+"\t\thaving ( count(distinct {target}) > 0 )\n"
-						+"\t\torder by desc(?count) ?type\n"
-						+"\t\t{offset}\n"
-						+"\t\t{limit}\n"
-						+"\n"
-						+"\t}\n"
-						+"\n"
-						+"\toptional { ?type rdfs:label ?type_label }\n"
-						+"\toptional { ?type rdfs:comment ?type_notes }\n"
-						+"\n"
-						+"\toptional { ?min rdfs:label ?min_label }\n"
-						+"\toptional { ?min rdfs:comment ?min_notes }\n"
-						+"\n"
-						+"\toptional { ?max rdfs:label ?max_label }\n"
-						+"\toptional { ?max rdfs:comment ?max_notes }\n"
-						+"\n"
-						+"}",
+					"# stats query\n"
+							+"\n"
+							+"prefix : <{base}>\n"
+							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
+							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
+							+"\n"
+							+"select \n"
+							+"\n"
+							+"\t?type ?type_label ?type_notes\n"
+							+"\n"
+							+"\t?min ?min_label ?min_notes\n"
+							+"\t?max ?max_label ?max_notes\n"
+							+"\n"
+							+"\t?count\n"
+							+"\n"
+							+"where {\n"
+							+"\n"
+							+"\t{\n"
+							+"\n"
+							+"\t\tselect ?type\n"
+							+"\n"
+							+"\t\t\t(min({target}) as ?min)\n"
+							+"\t\t\t(max({target}) as ?max) \n"
+							+"\n"
+							+"\t\t\t(count(distinct {target}) as ?count)\n"
+							+"\n"
+							+"\t\twhere {\n"
+							+"\n"
+							+"\t\t\t{roots}\n"
+							+"\n"
+							+"\t\t\t{filters}\n"
+							+"\n"
+							+"\t\t\t{path}\n"
+							+"\n"
+							+"\t\t\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) "
+							+"as "
+							+"?type)\n"
+							+"\n"
+							+"\t\t}\n"
+							+"\n"
+							+"\t\tgroup by ?type\n"
+							+"\t\thaving ( count(distinct {target}) > 0 )\n"
+							+"\t\torder by desc(?count) ?type\n"
+							+"\t\t{offset}\n"
+							+"\t\t{limit}\n"
+							+"\n"
+							+"\t}\n"
+							+"\n"
+							+"\toptional { ?type rdfs:label ?type_label }\n"
+							+"\toptional { ?type rdfs:comment ?type_notes }\n"
+							+"\n"
+							+"\toptional { ?min rdfs:label ?min_label }\n"
+							+"\toptional { ?min rdfs:comment ?min_notes }\n"
+							+"\n"
+							+"\toptional { ?max rdfs:label ?max_label }\n"
+							+"\toptional { ?max rdfs:comment ?max_notes }\n"
+							+"\n"
+							+"}",
 
-				text(GraphEngine.Base),
-				var(target),
+					text(GraphEngine.Base),
+					var(target),
 
-				roots(Root, filter),
-				filters(Root, filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+					roots(filter),
+					filters(filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-				path(source, path, target),
+					path(path, target),
 
-				offset(offset),
-				limit(limit, StatsSampling)
+					offset(offset),
+					limit(limit, StatsSampling)
 
-		)))).evaluate(new AbstractTupleQueryResultHandler() {
+			)))).evaluate(new AbstractTupleQueryResultHandler() {
 
-			@Override public void handleSolution(final BindingSet bindings) {
+				@Override public void handleSolution(final BindingSet bindings) {
 
-				final Resource type=(Resource)bindings.getValue("type");
+					final Resource type=(Resource)bindings.getValue("type");
 
-				final Value type_label=bindings.getValue("type_label");
-				final Value type_notes=bindings.getValue("type_notes");
+					final Value type_label=bindings.getValue("type_label");
+					final Value type_notes=bindings.getValue("type_notes");
 
-				final Value min=bindings.getValue("min");
-				final Value max=bindings.getValue("max");
+					final Value min=bindings.getValue("min");
+					final Value max=bindings.getValue("max");
 
-				final Value min_label=bindings.getValue("min_label");
-				final Value min_notes=bindings.getValue("min_notes");
+					final Value min_label=bindings.getValue("min_label");
+					final Value min_notes=bindings.getValue("min_notes");
 
-				final Value max_label=bindings.getValue("max_label");
-				final Value max_notes=bindings.getValue("max_notes");
+					final Value max_label=bindings.getValue("max_label");
+					final Value max_notes=bindings.getValue("max_notes");
 
-				// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+					// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-				final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
+					final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
 
-				model.add(statement(resource, GraphEngine.stats, type));
-				model.add(statement(type, GraphEngine.count, literal(count)));
+					model.add(statement(resource, GraphEngine.stats, type));
+					model.add(statement(type, GraphEngine.count, literal(count)));
 
-				if ( type_label != null ) { model.add(statement(type, RDFS.LABEL, type_label)); }
-				if ( type_notes != null ) { model.add(statement(type, RDFS.COMMENT, type_notes)); }
+					if ( type_label != null ) { model.add(statement(type, RDFS.LABEL, type_label)); }
+					if ( type_notes != null ) { model.add(statement(type, RDFS.COMMENT, type_notes)); }
 
-				if ( min != null ) { model.add(statement(type, GraphEngine.min, min)); }
-				if ( max != null ) { model.add(statement(type, GraphEngine.max, max)); }
+					if ( min != null ) { model.add(statement(type, GraphEngine.min, min)); }
+					if ( max != null ) { model.add(statement(type, GraphEngine.max, max)); }
 
-				if ( min_label != null ) { model.add(statement((Resource)min, RDFS.LABEL, min_label)); }
-				if ( min_notes != null ) { model.add(statement((Resource)min, RDFS.COMMENT, min_notes)); }
+					if ( min_label != null ) { model.add(statement((Resource)min, RDFS.LABEL, min_label)); }
+					if ( min_notes != null ) { model.add(statement((Resource)min, RDFS.COMMENT, min_notes)); }
 
-				if ( max_label != null ) { model.add(statement((Resource)max, RDFS.LABEL, max_label)); }
-				if ( max_notes != null ) { model.add(statement((Resource)max, RDFS.COMMENT, max_notes)); }
+					if ( max_label != null ) { model.add(statement((Resource)max, RDFS.LABEL, max_label)); }
+					if ( max_notes != null ) { model.add(statement((Resource)max, RDFS.COMMENT, max_notes)); }
 
-				counts.putIfAbsent(type, count);
+					counts.putIfAbsent(type, count);
 
-				if ( min != null ) { mins.add(min); }
-				if ( max != null ) { maxs.add(max); }
+					if ( min != null ) { mins.add(min); }
+					if ( max != null ) { maxs.add(max); }
 
-			}
+				}
 
+			});
 		}));
 
 		model.add(statement(resource, GraphEngine.count, literal(counts.values().stream()
@@ -464,9 +467,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private /*static*/ UnaryOperator<Appendable> filter(final String anchor, final Shape shape,
-			final List<Order> orders, final int offset
-			, final int limit) {
+	private /*static*/ UnaryOperator<Appendable> matcher(final Shape shape, final List<Order> orders, final int offset,
+			final int limit) {
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? text("filter (false)") : text(
 
 				"{ select distinct {root} {\n"
@@ -479,52 +481,39 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						+"\n"
 						+"} {orders} {offset} {limit} }",
 
-				var(anchor),
+				var(Root),
 
-				roots(Root, shape),
-				filters(Root, shape),
+				roots(shape),
+				filters(shape),
 
-				offset > 0 || limit > 0 ? sorters(Root, orders) : nothing(),
-				offset > 0 || limit > 0 ? text(" order by ", criteria(Root, orders)) : nothing(),
+				offset > 0 || limit > 0 ? sorters(orders) : nothing(),
+				offset > 0 || limit > 0 ? text(" order by {criteria}", criteria(orders)) : nothing(),
 
-				offset > 0 ? text(" offset %d", offset) : nothing(),
-				text(" limit %d", limit > 0 ? min(limit, ItemsSampling) : ItemsSampling)
+				offset(offset),
+				limit(limit, ItemsSampling)
 
 		);
-
 	}
 
-	private /*static*/ UnaryOperator<Appendable> roots(final String anchor, final Shape shape) { // root universal
-		// constraints
-		return all(shape)
-				.map(this::values)
-				.map(values -> values(anchor, values))
-				.orElse(nothing());
+	private /*static*/ UnaryOperator<Appendable> pattern(final Shape shape) {
+		return shape.map(new SkeletonProbe(Root, false));
 	}
 
-	private /*static*/ UnaryOperator<Appendable> filters(final String anchor, final Shape shape) {
-		return shape.map(new SkeletonProbe(anchor, true));
-	}
-
-	private /*static*/ UnaryOperator<Appendable> convey(final String anchor, final Shape shape) {
-		return shape.map(new SkeletonProbe(anchor, false));
-	}
-
-	private /*static*/ UnaryOperator<Appendable> sorters(final String anchor, final List<Order> orders) {
+	private /*static*/ UnaryOperator<Appendable> sorters(final List<Order> orders) {
 		return list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
 				.map(order -> text("optional { {root} {path} {order} }\n",
-						var(anchor), path(order.path()), var(valueOf(1+orders.indexOf(order)))
+						var(Root), path(order.path()), var(valueOf(1+orders.indexOf(order)))
 				))
 		);
 	}
 
-	private static UnaryOperator<Appendable> criteria(final String anchor, final List<Order> orders) {
+	private static UnaryOperator<Appendable> criteria(final List<Order> orders) {
 		return list(Stream.concat(
 
 				orders.stream().map(order -> text(
 						order.inverse() ? "desc({criterion})" : "asc({criterion})",
-						order.path().isEmpty() ? var(anchor) : var(valueOf(1+orders.indexOf(order)))
+						order.path().isEmpty() ? var(Root) : var(valueOf(1+orders.indexOf(order)))
 				)),
 
 				orders.stream()
@@ -532,10 +521,31 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 						.filter(List::isEmpty)
 						.findFirst()
 						.map(empty -> Stream.<UnaryOperator<Appendable>>empty())
-						.orElseGet(() -> Stream.of(var(anchor)))  // root as last resort, unless already used
+						.orElseGet(() -> Stream.of(var(Root)))  // root as last resort, unless already used
 
 		), " ");
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private /*static*/ UnaryOperator<Appendable> roots(final Shape shape) { // root universal
+		// constraints
+		return all(shape)
+				.map(this::values)
+				.map(values -> values(Root, values))
+				.orElse(nothing());
+	}
+
+	private /*static*/ UnaryOperator<Appendable> filters(final Shape shape) {
+		return shape.map(new SkeletonProbe(Root, true));
+	}
+
+	private /*static*/ UnaryOperator<Appendable> path(final List<IRI> path, final String target) {
+		return "0" == null || path == null || path.isEmpty() || target == null ? nothing()
+				: list(var("0"), text(" "), path(path), text(" "), var(target), text(" .\n"));
+	}
+
 
 	private static UnaryOperator<Appendable> offset(final int offset) {
 		return offset > 0 ? text("offset %d", offset) : nothing();
@@ -554,11 +564,6 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		);
 	}
 
-
-	private /*static*/ UnaryOperator<Appendable> path(final String source, final List<IRI> path, final String target) {
-		return source == null || path == null || path.isEmpty() || target == null ? nothing()
-				: list(var(source), text(" "), path(path), text(" "), var(target), text(" .\n"));
-	}
 
 	private /*static*/ UnaryOperator<Appendable> edge(final String source, final Field field, final String target) {
 		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
