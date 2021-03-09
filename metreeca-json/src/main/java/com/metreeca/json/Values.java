@@ -274,6 +274,14 @@ public final class Values {
 	}
 
 
+	public static Triple triple(
+			final Resource subject, final IRI predicate, final Value object
+	) {
+		return subject == null || predicate == null || object == null ? null
+				: factory.createTriple(subject, predicate, object);
+	}
+
+
 	public static Value value(final Object object) {
 		return object == null ? null
 
