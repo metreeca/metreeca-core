@@ -18,8 +18,7 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.*;
@@ -44,6 +43,12 @@ import static java.util.stream.Collectors.toSet;
  * Linked data shape constraint.
  */
 public abstract class Shape {
+
+	/**
+	 * The default predicate linking resource collections to their items.
+	 */
+	public static final IRI Contains=LDP.CONTAINS;
+
 
 	//// Shape Shorthands //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -243,7 +248,7 @@ public abstract class Shape {
 
 				// container: connect to the anchor using ldp:contains, unless otherwise specified in the shape
 
-				? shape.empty() ? and(field(inverse(LDP.CONTAINS), focus()), shape) : shape
+				? shape.empty() ? and(field(inverse(Contains), focus()), shape) : shape
 
 				// resource: constraint to the anchor
 

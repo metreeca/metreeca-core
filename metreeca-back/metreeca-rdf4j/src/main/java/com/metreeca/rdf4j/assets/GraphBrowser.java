@@ -24,7 +24,6 @@ import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Field.field;
@@ -69,7 +68,7 @@ final class GraphBrowser {
 	private static final class ShapeProbe extends Query.Probe<Shape> {
 
 		@Override public Shape probe(final Items items) {
-			return field(LDP.CONTAINS, items.shape());
+			return field(Shape.Contains, items.shape());
 		}
 
 		@Override public Shape probe(final Stats stats) {

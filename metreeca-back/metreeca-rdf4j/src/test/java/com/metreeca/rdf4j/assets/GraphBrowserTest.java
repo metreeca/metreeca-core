@@ -16,11 +16,11 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.json.Shape;
 import com.metreeca.json.ValuesTest;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 
-import org.eclipse.rdf4j.model.vocabulary.LDP;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +63,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 						.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
 						.hasBody(jsonld(), rdf -> assertThat(rdf)
-								.hasStatement(iri(response.item()), LDP.CONTAINS, null)
+								.hasStatement(iri(response.item()), Shape.Contains, null)
 								.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
 										+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"
 								))

@@ -280,7 +280,7 @@ public final class GraphEngine implements Engine {
 	 * <li>the response {@link JSONLDFormat JSON-LD} body contains a description of member linked data resources
 	 * retrieved from the shared {@linkplain  Graph graph} according to the filtering constraints in the request shape
 	 * and matching the response shape; the IRI of the target container is connected to the IRIs of the member
-	 * resources using the {@link LDP#CONTAINS ldp:contains} property;</li>
+	 * resources using the {@link Shape#Contains ldp:contains} property;</li>
 	 *
 	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
 	 *
