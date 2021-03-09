@@ -144,5 +144,5 @@ Parametric guards for the [mode](../javadocs/com/metreeca/json/shapes/Guard.html
 
 | shorthand                                                    | usage pattern                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when selecting existing resources to be processed |
 | [convey](../javadocs/com/metreeca/json/shapes/Guard.html#convey--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when validating incoming data or extracting outgoing data |
+| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when selecting resources to be processed |

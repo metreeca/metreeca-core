@@ -45,8 +45,6 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 	private static final Shape IRIDatatype=datatype(IRIType);
 	private static final Shape ResourceDatatype=datatype(ResourceType);
 
-	@Override public Shape probe(final Shape shape) { return shape; }
-
 
 	@Override public Shape probe(final Datatype datatype) {
 		return datatype.iri().equals(XSD.BOOLEAN) ? and(datatype,
@@ -99,6 +97,14 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 	}
 
 
+	@Override public Shape probe(final When when) {
+		return when(
+				when.test().map(this),
+				when.pass().map(this),
+				when.fail().map(this)
+		);
+	}
+
 	@Override public Shape probe(final And and) {
 
 		final Shape shape=and(and.shapes().stream().map(s -> s.map(this)).collect(toList()));
@@ -142,12 +148,7 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		return or(or.shapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
-	@Override public Shape probe(final When when) {
-		return when(
-				when.test().map(this),
-				when.pass().map(this),
-				when.fail().map(this)
-		);
-	}
+
+	@Override public Shape probe(final Shape shape) { return shape; }
 
 }

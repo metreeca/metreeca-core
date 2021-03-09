@@ -40,11 +40,6 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 	}
 
 
-	@Override public Stream<Statement> probe(final Shape shape) {
-		return Stream.empty();
-	}
-
-
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return stream(sources)
 				.filter(Resource.class::isInstance)
@@ -92,10 +87,14 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 	}
 
 
+	@Override public Stream<Statement> probe(final Shape shape) {
+		return Stream.empty();
+	}
+
+
 	private Stream<Value> values(final Stream<Value> values) {
 		return values.flatMap(value -> value instanceof Focus
-				?
-				stream(sources).filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
+				? stream(sources).filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
 				: Stream.of(value)
 		);
 	}

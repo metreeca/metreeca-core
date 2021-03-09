@@ -40,11 +40,10 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Shape probe(final Shape shape) {
-		return shape;
+	@Override public Shape probe(final Field field) {
+		return field(field.alias(), field.iri(), field.shape().map(this));
 	}
+
 
 	@Override public Shape probe(final Guard guard) {
 		return axis.equals(guard.axis())
@@ -52,10 +51,9 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 				: guard;
 	}
 
-	@Override public Shape probe(final Field field) {
-		return field(field.alias(), field.iri(), field.shape().map(this));
+	@Override public Shape probe(final When when) {
+		return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
 	}
-
 
 	@Override public Shape probe(final And and) {
 		return and(and.shapes().stream().map(this));
@@ -65,8 +63,9 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 		return or(or.shapes().stream().map(this));
 	}
 
-	@Override public Shape probe(final When when) {
-		return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
+
+	@Override public Shape probe(final Shape shape) {
+		return shape;
 	}
 
 }

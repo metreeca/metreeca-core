@@ -34,8 +34,6 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Focus.focus;
-import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.BNodeType;
 import static com.metreeca.json.Values.IRIType;
@@ -52,8 +50,6 @@ import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rdf4j.assets.Snippets.*;
 import static com.metreeca.rest.Context.asset;
@@ -73,28 +69,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 
 	static Iterable<Statement> outline(final IRI resource, final Shape shape) {
-		return filter(resource, shape).outline(resource).collect(toList());
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static Shape filter(final Value focus, final Shape shape) {
-		return anchor(focus, shape.prune(Mode, Filter));
-	}
-
-	private static Shape anchor(final Value resource, final Shape shape) {
-
-		return resource.stringValue().endsWith("/")
-
-				// container: connect to the focus using ldp:contains, unless otherwise specified in the filtering shape
-
-				? shape.empty() ? field(inverse(LDP.CONTAINS), focus()) : shape
-
-				// resource: constraint to the focus
-
-				: and(all(focus()), shape);
-
+		return shape.filter(resource).outline(resource).collect(toList());
 	}
 
 
@@ -166,8 +141,8 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
-		final Shape pattern=shape.redact(Mode, Convey);
-		final Shape selector=filter(resource, shape);
+		final Shape pattern=shape.convey();
+		final Shape selector=shape.filter(resource);
 
 		evaluate(() -> connection.prepareTupleQuery(compile(() -> source(
 
@@ -257,7 +232,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 		final Model model=new LinkedHashModel();
 
-		final Shape selector=filter(resource, shape);
+		final Shape selector=shape.filter(resource);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();
@@ -348,7 +323,7 @@ final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		final Shape selector=filter(resource, shape);
+		final Shape selector=shape.filter(resource);
 
 		final Object source=var(selector);
 		final Object target=path.isEmpty() ? source : var();

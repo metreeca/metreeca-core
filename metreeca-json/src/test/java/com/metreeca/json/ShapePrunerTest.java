@@ -17,12 +17,14 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.convey;
+import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Like.like;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,28 +32,55 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class ShapePrunerTest {
 
-	private static final IRI x=iri("test:x");
+	private static final IRI property=iri("test:x");
+	private static final Shape constraint=like("constraint");
 
-	private static final Shape f=like("filter");
+
+	@Nested final class Filter {
+
+		private Shape prune(final Shape shape) {
+			return shape.map(new ShapePruner(true));
+		}
 
 
-	private static Shape prune(final Shape shape) {
-		return shape.map(new ShapePruner(Mode, Filter));
+		@Test void testPrune() {
+			assertThat(prune(constraint)).isEqualTo(and());
+			assertThat(prune(field(property, constraint))).isEqualTo(and());
+		}
+
+		@Test void testRetainFilter() {
+			assertThat(prune(filter(constraint))).isEqualTo(constraint);
+			assertThat(prune(field(property, filter(constraint)))).isEqualTo(field(property, constraint));
+		}
+
+		@Test void testRemoveConvey() {
+			assertThat(prune(convey(field(property)))).isEqualTo(and());
+		}
+
 	}
 
 
-	@Test void testPrune() {
-		assertThat(prune(f)).isEqualTo(and());
-		assertThat(prune(field(x, f))).isEqualTo(and());
-	}
+	@Nested final class Convey {
 
-	@Test void testRetainFilter() {
-		assertThat(prune(filter(f))).isEqualTo(f);
-		assertThat(prune(field(x, filter(f)))).isEqualTo(field(x, f));
-	}
+		private Shape prune(final Shape shape) {
+			return shape.map(new ShapePruner(false));
+		}
 
-	@Test void testRemoveConvey() {
-		assertThat(prune(convey(field(x)))).isEqualTo(and());
+
+		@Test void testPrune() {
+			assertThat(prune(constraint)).isEqualTo(and());
+			assertThat(prune(field(property, constraint))).isEqualTo(field(property));
+		}
+
+		@Test void testRemoveFilter() {
+			assertThat(prune(filter(constraint))).isEqualTo(and());
+			assertThat(prune(field(property, filter(constraint)))).isEqualTo(field(property));
+		}
+
+		@Test void testRetainConvey() {
+			assertThat(prune(convey(field(property)))).isEqualTo(field(property));
+		}
+
 	}
 
 }

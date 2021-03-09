@@ -20,13 +20,17 @@ import com.metreeca.json.shapes.*;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Focus.focus;
+import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
@@ -68,15 +72,6 @@ public abstract class Shape {
 
 
 	/**
-	 * Extends this shape with inferred constraints.
-	 *
-	 * @return a copy of this shape extended with inferred constraints
-	 */
-	public Shape expand() {
-		return map(new ShapeInferencer());
-	}
-
-	/**
 	 * Identifies RDF statements implied by this shape.
 	 *
 	 * @param focus the initial focus values for shape traversal
@@ -97,12 +92,22 @@ public abstract class Shape {
 
 
 	/**
+	 * Extends this shape with inferred constraints.
+	 *
+	 * @return a copy of this shape extended with inferred constraints
+	 */
+	public Shape expand() {
+		return map(new ShapeInferencer());
+	}
+
+
+	/**
 	 * Localizes this shape.
 	 *
 	 * @param tags the target language tag set
 	 *
-	 * @return a copy of this shape where tag sets of {@link Lang lang} shapes are replaced with their intersection
-	 * with {@code tags} or {@code tags}, if the intersection is empty; if {@code tags} is empty or contains a wildcard
+	 * @return a copy of this shape where tag sets of {@link Lang lang} shapes are replaced with their intersection with
+	 * {@code tags} or {@code tags}, if the intersection is empty; if {@code tags} is empty or contains a wildcard
 	 * ("{@code *}") the shape is not modified
 	 *
 	 * @throws NullPointerException if {@code tags} is null or contains null elements
@@ -121,8 +126,8 @@ public abstract class Shape {
 	 *
 	 * @param tags the target language tag set
 	 *
-	 * @return a copy of this shape where tag sets of {@link Lang lang} shapes are replaced with their intersection
-	 * with {@code tags} or {@code tags}, if the intersection is empty; if {@code tags} is empty or contains a wildcard
+	 * @return a copy of this shape where tag sets of {@link Lang lang} shapes are replaced with their intersection with
+	 * {@code tags} or {@code tags}, if the intersection is empty; if {@code tags} is empty or contains a wildcard
 	 * ("{@code *}") the shape is not modified
 	 *
 	 * @throws NullPointerException if {@code tags} is null or contains null elements
@@ -142,8 +147,8 @@ public abstract class Shape {
 	 *
 	 * @param axis the axis to be retained
 	 *
-	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced
-	 * with an empty {@link And#and() and} shape
+	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced with an empty
+	 * {@link And#and() and} shape
 	 *
 	 * @throws NullPointerException if {@code axis} is null
 	 */
@@ -162,9 +167,9 @@ public abstract class Shape {
 	 * @param axis   the axis to be retained
 	 * @param values the axis values to be retained
 	 *
-	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced
-	 * with an empty {@link And#and() and} shape, if their {@link Guard#values() values set} intersect {@code values},
-	 * or an empty {@link Or#or() and} shape, otherwise
+	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced with an empty
+	 * {@link And#and() and} shape, if their {@link Guard#values() values set} intersect {@code values}, or an empty
+	 * {@link Or#or() and} shape, otherwise
 	 *
 	 * @throws NullPointerException if either {@code axis} or {@code values} is null or contains null elements
 	 */
@@ -187,9 +192,9 @@ public abstract class Shape {
 	 * @param axis   the axis to be retained
 	 * @param values the axis values to be retained
 	 *
-	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced
-	 * with an empty {@link And#and() and} shape, if their {@link Guard#values() values set} intersect {@code values},
-	 * or an empty {@link Or#or() and} shape, otherwise
+	 * @return a copy of this shape where {@link Guard} shapes along {@code axis} are selectively replaced with an empty
+	 * {@link And#and() and} shape, if their {@link Guard#values() values set} intersect {@code values}, or an empty
+	 * {@link Or#or() and} shape, otherwise
 	 *
 	 * @throws NullPointerException if either {@code axis} or {@code values} is null or contains null elements
 	 */
@@ -208,27 +213,43 @@ public abstract class Shape {
 
 
 	/**
-	 * Prunes this shape.
+	 * Extracts the conveying form of this shape.
 	 *
-	 * @param axis  the axis to be retained
-	 * @param value the axis value to be retained
-	 *
-	 * @return a copy of this shape where only {@linkplain #then(Shape...) conditional} shapes
-	 * {@linkplain Guard guarded} with {@code value} along {@code axis} are retained
-	 *
-	 * @throws NullPointerException if either {@code axis} or {@code value} is null
+	 * @return a copy of this shape where constraint shapes are retained only inside {@linkplain Guard#convey(Shape...)
+	 * conveying} {@linkplain #then(Shape...) conditional} shapes
 	 */
-	public Shape prune(final String axis, final Object value) {
+	public Shape convey() {
+		return map(new ShapePruner(false));
+	}
 
-		if ( axis == null ) {
-			throw new NullPointerException("null axis");
+	/**
+	 * Extracts the filtering form of this shape.
+	 *
+	 * @param anchor a target resource filtering matches will be linked to
+	 *
+	 * @return a copy of this shape where constraint shapes are retained only inside {@linkplain Guard#filter(Shape...)
+	 * filtering} {@linkplain #then(Shape...) conditional} shapes, extended to link matches to the {@code anchor}
+	 * resource
+	 *
+	 * @throws NullPointerException if {@code anchor} is null
+	 */
+	public Shape filter(final Value anchor) {
+
+		if ( anchor == null ) {
+			throw new NullPointerException("null anchor");
 		}
 
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
+		return map(new ShapePruner(true)).map(shape -> anchor.isIRI() && anchor.stringValue().endsWith("/")
 
-		return map(new ShapePruner(axis, value));
+				// container: connect to the anchor using ldp:contains, unless otherwise specified in the shape
+
+				? shape.empty() ? and(field(inverse(LDP.CONTAINS), focus()), shape) : shape
+
+				// resource: constraint to the anchor
+
+				: and(all(focus()), shape)
+
+		);
 	}
 
 

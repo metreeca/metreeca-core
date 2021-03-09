@@ -18,35 +18,44 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
+import java.util.Optional;
+
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 final class ShapePruner extends Shape.Probe<Shape> {
 
-	private final String axis;
-	private final Object value;
+	private final boolean deep;
 
 
-	ShapePruner(final String axis, final Object value) {
-		this.axis=axis;
-		this.value=value;
-	}
+	ShapePruner(final boolean deep) { this.deep=deep; }
 
 
 	@Override public Shape probe(final Field field) {
 		return field.shape().map(this).map(shape ->
-				shape.empty() ? and() : field(field.alias(), field.iri(), shape)
+				deep && shape.empty() ? shape : field(field.alias(), field.iri(), shape)
 		);
 	}
 
+
+	@Override public Shape probe(final Guard guard) {
+		return guard.axis().equals(Mode)
+				? guard.values().contains(deep ? Filter : Convey) ? and() : or()
+				: guard;
+	}
+
 	@Override public Shape probe(final When when) {
-
-		final Shape test=when.test().redact(axis, value);
-
-		return test.equals(and()) ? when.pass() // retain nested shapes
-				: when(test, when.pass().map(this), when.fail().map(this));
+		return when.test().map(this).map(test -> Optional
+				.ofNullable(test.map(new ShapeEvaluator())) // constant? retain nested shapes w/o processing
+				.map(value -> value.equals(TRUE) ? when.pass() : value.equals(FALSE) ? when.fail() : null)
+				.orElseGet(() -> when(test, when.pass().map(this), when.fail().map(this)))
+		);
 	}
 
 	@Override public Shape probe(final And and) {
@@ -56,6 +65,7 @@ final class ShapePruner extends Shape.Probe<Shape> {
 	@Override public Shape probe(final Or or) {
 		return or(or.shapes().stream().map(this));
 	}
+
 
 	@Override public Shape probe(final Shape shape) {
 		return and();

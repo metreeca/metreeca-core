@@ -49,9 +49,4 @@ final class ShapeEvaluator extends Shape.Probe<Boolean> {
 				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
 	}
 
-
-	@Override public Boolean probe(final Shape shape) {
-		return null;
-	}
-
 }

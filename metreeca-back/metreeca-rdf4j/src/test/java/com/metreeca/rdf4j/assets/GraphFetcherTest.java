@@ -105,7 +105,6 @@ final class GraphFetcherTest {
 		GraphTest.exec(model(localized(birt(), "", "en", "it")), task);
 	}
 
-	private static Shape always(final Shape... shapes) { return mode(Filter, Convey).then(shapes); }
 
 	private Collection<Statement> query(final IRI resource, final Query query) {
 		return asset(Graph.graph()).exec(connection -> {
@@ -185,6 +184,20 @@ final class GraphFetcherTest {
 
 				"construct { <app:/> ldp:contains ?office. ?office rdfs:label ?label }"
 						+" where { ?office a :Office; rdfs:label ?label filter (lang(?label) = 'en') }"
+
+		)));
+	}
+
+	@Test void testIgnoreNonConveyPatternFilters() {
+		exec(() -> assertThat(query(Root, items(and(
+
+				filter(clazz(term("Employee"))),
+				field(term("seniority"), minInclusive(integer(10)))
+
+		)))).isIsomorphicTo(graph(
+
+				"construct { <app:/> ldp:contains ?employee. ?employee :seniority ?seniority }"
+						+" where { ?employee a :Employee; :seniority ?seniority }"
 
 		)));
 	}
@@ -989,9 +1002,20 @@ final class GraphFetcherTest {
 
 		@Nested final class LogicalConstraints {
 
+			private Shape always(final Shape... shapes) { return mode(Filter, Convey).then(shapes); }
+
+
 			@Test void testGuard() { // reject partially redacted shapes
 				exec(() -> assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
 						query(Root, items(guard("axis", RDF.NIL)))
+				));
+			}
+
+			@Test void testWhen() { // reject conditional shapes
+				exec(() -> assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() ->
+
+						query(Root, items(when(guard("axis", RDF.NIL), field(RDF.VALUE))))
+
 				));
 			}
 
@@ -1047,14 +1071,6 @@ final class GraphFetcherTest {
 								+"}"
 
 				)));
-			}
-
-			@Test void testWhen() {
-				exec(() -> assertThatThrownBy(() -> query(
-
-						Root, items(when(guard("axis", RDF.NIL), clazz(RDFS.LITERAL)))
-
-				)).isInstanceOf(UnsupportedOperationException.class));
 			}
 
 		}

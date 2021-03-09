@@ -50,8 +50,8 @@ public final class Guard extends Shape {
 	public static final String Digest="digest";
 	public static final String Detail="detail";
 
+	public static final String Convey="convey";
 	public static final String Filter="filter";
-	public static final String Convey="convery";
 
 
 	//// Parametric Guards /////////////////////////////////////////////////////////////////////////////////////////////
