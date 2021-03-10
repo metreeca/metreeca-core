@@ -22,6 +22,7 @@ import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -30,10 +31,12 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.rdf4j.SPARQLScribe.is;
+import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Scribe.code;
 import static com.metreeca.rest.Scribe.text;
+import static com.metreeca.rest.Scribe.*;
 
 final class GraphQueryStats extends GraphQueryBase {
 
@@ -69,74 +72,87 @@ final class GraphQueryStats extends GraphQueryBase {
 		final Collection<Value> maxs=new ArrayList<>();
 
 		evaluate(() -> graph.exec(connection -> {
-			connection.prepareTupleQuery(compile(() -> code(text(
+			connection.prepareTupleQuery(compile(() -> code(list(
 
-					"# stats query\n"
-							+"\n"
-							+"prefix : <%s>\n"
-							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select\n\t"
-							+"\n"
-							+"?type ?type_label ?type_notes\n"
-							+"\n"
-							+"?min ?min_label ?min_notes\n"
-							+"?max ?max_label ?max_notes\n"
-							+"\n"
-							+"?count\n"
-							+"\n"
-							+"\bwhere {\n"
-							+"\n"
-							+"\t{\n"
-							+"\n"
-							+"\t\tselect ?type\n"
-							+"\n"
-							+"\t\t\t(min(%s) as ?min)\n"
-							+"\t\t\t(max(%2$s) as ?max) \n"
-							+"\n"
-							+"\t\t\t(count(distinct %2$s) as ?count)\n"
-							+"\n"
-							+"\t\twhere {\n"
-							+"\n"
-							+"\t\t\t%s\n"
-							+"\n"
-							+"\t\t\t%s\n"
-							+"\n"
-							+"\t\t\t%s\n"
-							+"\n"
-							+"\t\t\tbind (if(isBlank(%2$s), :bnode, if(isIRI(%2$s), :iri, datatype(%2$s))) "
-							+"as "
-							+"?type)\n"
-							+"\n"
-							+"\t\t}\n"
-							+"\n"
-							+"\t\tgroup by ?type\n"
-							+"\t\thaving ( count(distinct %2$s) > 0 )\n"
-							+"\t\torder by desc(?count) ?type\n"
-							+"\t\t%s\n"
-							+"\t\t%s\n"
-							+"\n"
-							+"\t}\n"
-							+"\n"
-							+"\toptional { ?type rdfs:label ?type_label }\n"
-							+"\toptional { ?type rdfs:comment ?type_notes }\n"
-							+"\n"
-							+"\toptional { ?min rdfs:label ?min_label }\n"
-							+"\toptional { ?min rdfs:comment ?min_notes }\n"
-							+"\n"
-							+"\toptional { ?max rdfs:label ?max_label }\n"
-							+"\toptional { ?max rdfs:comment ?max_notes }\n"
-							+"\n"
-							+"}",
+					comment("stats query"),
 
-					text(Engine.Base),
-					var(target),
+					prefix("", Engine.Base),
+					prefix(OWL.NS),
+					prefix(RDFS.NS),
 
-					roots(filter),
-					filters(filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+					select(
 
-					anchor(path, target),
+							form(
+									line(var("type"), var("type_label"), var("type_notes"))
+							),
+
+							form(
+									line(var("min"), var("min_label"), var("min_notes")),
+									line(var("max"), var("max_label"), var("max_notes"))
+							),
+
+							form(
+									line(var("count"))
+							)
+
+					),
+
+					where(
+
+							form(block(
+
+									select(var("type"),
+
+											form(
+													as("min", min(var(target))),
+													as("max", max(var(target)))
+											),
+
+											form(
+													line(as("count", count(true, var(target))))
+											)
+
+									),
+
+									where(
+
+											filters(filter),
+											anchor(path, target),
+
+											form(bind("type", is(
+													isBlank(var(target)),
+													text(":bnode"),
+													is(
+															isIRI(var(target)),
+															text(":iri"),
+															datatype(var(target))
+													)
+											)))
+
+									),
+
+									line(group(var("type"))),
+									line(having(gt(count(true, var(target)), text(0)))),
+									line(order(desc(var("count")), var("type")))
+
+							)),
+
+							form(
+									line(optional(edge(var("type"), "rdfs:label", var("type_label")))),
+									line(optional(edge(var("type"), "rdfs:comment", var("type_notes"))))
+							),
+
+							form(
+									line(optional(edge(var("min"), "rdfs:label", var("min_label")))),
+									line(optional(edge(var("min"), "rdfs:comment", var("min_notes"))))
+							),
+
+							form(
+									line(optional(edge(var("max"), "rdfs:label", var("max_label")))),
+									line(optional(edge(var("max"), "rdfs:comment", var("max_notes"))))
+							)
+
+					),
 
 					offset(offset),
 					limit(limit, options.stats())

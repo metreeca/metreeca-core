@@ -20,10 +20,13 @@ import com.metreeca.json.Order;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rdf4j.SPARQLScribe;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Scribe;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
 import org.eclipse.rdf4j.query.BindingSet;
 
@@ -35,6 +38,7 @@ import static com.metreeca.json.Values.bnode;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Scribe.*;
@@ -81,24 +85,14 @@ final class GraphQueryItems extends GraphQueryBase {
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
 		evaluate(() -> graph.exec(connection -> {
-			connection.prepareTupleQuery(compile(() -> code(text(
+			connection.prepareTupleQuery(compile(() -> code(list(
 
-					"# items query\n"
-							+"\n"
-							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select %s where {\n"
-							+"\n"
-							+"\t%s\n"
-							+"\n"
-							+"\t%s\n"
-							+"\n"
-							+"\t%s\n"
-							+"\n"
-							+"} order by %s",
+					comment("items query"),
 
-					list(Stream.concat(
+					prefix(OWL.NS),
+					prefix(RDFS.NS),
+
+					select(list(Stream.concat(
 
 							Stream.of(root), /// always project root
 
@@ -107,15 +101,17 @@ final class GraphQueryItems extends GraphQueryBase {
 									template.stream().map(Triple::getSubject),
 									template.stream().map(Triple::getObject)
 
-							).distinct().map(BNode.class::cast).map(BNode::getID)
+							).map(BNode.class::cast).map(BNode::getID)
 
-					).distinct().sorted().map(GraphQueryBase::var)),
+					).distinct().sorted().map(SPARQLScribe::var))),
 
-					matcher(filter, orders, offset, limit),
-					pattern(convey),
+					where(
+							matcher(filter, orders, offset, limit),
+							pattern(convey),
+							sorters(orders) // !!! (€) don't extract if already present in pattern
+					),
 
-					sorters(orders), // !!! (€) don't extract if already present in pattern
-					criteria(orders)
+					order(criteria(orders))
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -163,47 +159,35 @@ final class GraphQueryItems extends GraphQueryBase {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Scribe matcher(final Shape shape, final List<Order> orders, final int offset, final int limit) {
-		return shape.equals(and()) ? nothing() : shape.equals(or()) ? text("filter (false)") : text(
+		return shape.equals(and()) ? nothing() : shape.equals(or()) ? filter(text(false)) : form(block(
 
-				"{ select distinct %s {\n"
-						+"\n"
-						+"\t%s\n"
-						+"\n"
-						+"\t%s\n"
-						+"\n"
-						+"\t%s\n"
-						+"\n"
-						+"} %s %s %s }",
+				select(true, var(root)),
 
-				var(root),
+				block(filters(shape)),
 
-				roots(shape),
-				filters(shape),
-
-				offset > 0 || limit > 0 ? sorters(orders) : nothing(),
-				offset > 0 || limit > 0 ? text(" order by %s", criteria(orders)) : nothing(),
+				with(offset > 0 || limit > 0,
+						sorters(orders),
+						order(criteria(orders))
+				),
 
 				offset(offset),
 				limit(limit, options.items())
 
-		);
+		));
 	}
 
-
-	private Scribe sorters(final List<Order> orders) {
-		return list(orders.stream()
+	private Scribe sorters(final List<Order> orders
+	) {
+		return form(list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
-				.map(order -> text("optional { %s %s %s }\n",
-						var(root), path(order.path()), var(valueOf(1+orders.indexOf(order)))
-				))
-		);
+				.map(order -> optional(var(root), path(order.path()), var(valueOf(1+orders.indexOf(order)))))
+		));
 	}
 
 	private static Scribe criteria(final List<Order> orders) {
 		return list(Stream.concat(
 
-				orders.stream().map(order -> text(
-						order.inverse() ? "desc(%s)" : "asc(%s)",
+				orders.stream().map(order -> sort(order.inverse(),
 						order.path().isEmpty() ? var(root) : var(valueOf(1+orders.indexOf(order)))
 				)),
 
@@ -214,7 +198,7 @@ final class GraphQueryItems extends GraphQueryBase {
 						.map(empty -> Stream.<Scribe>empty())
 						.orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
 
-		), " ");
+		));
 	}
 
 

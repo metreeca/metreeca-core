@@ -22,6 +22,7 @@ import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.*;
 
@@ -29,10 +30,11 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Scribe.code;
 import static com.metreeca.rest.Scribe.text;
+import static com.metreeca.rest.Scribe.*;
 
 final class GraphQueryTerms extends GraphQueryBase {
 
@@ -63,52 +65,42 @@ final class GraphQueryTerms extends GraphQueryBase {
 		final Collection<Statement> model=new LinkedHashSet<>();
 
 		evaluate(() -> graph.exec(connection -> {
-			connection.prepareTupleQuery(compile(() -> code(text(
+			connection.prepareTupleQuery(compile(() -> code(list(
 
-					"# terms query\n"
-							+"\n"
-							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
-							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-							+"\n"
-							+"select ?value ?count ?label ?notes where {\n"
-							+"\n"
-							+"\t{\n"
-							+"\n"
-							+"\t\tselect (%s as ?value) (count(distinct %s) as ?count)\n"
-							+"\n"
-							+"\t\twhere {\n"
-							+"\n"
-							+"\t\t\t%s\n"
-							+"\n"
-							+"\t\t\t%s\n"
-							+"\n"
-							+"\t\t\t%s\n"
-							+"\n"
-							+"\t\t}\n"
-							+"\n"
-							+"\t\tgroup by %1$s \n"
-							+"\t\thaving ( count(distinct %2$s) > 0 ) \n"
-							+"\t\torder by desc(?count) ?value\n"
-							+"\t\t%s\n"
-							+"\t\t%s\n"
-							+"\n"
-							+"\t}\n"
-							+"\n"
-							+"\toptional { ?value rdfs:label ?label }\n"
-							+"\toptional { ?value rdfs:comment ?notes }\n"
-							+"\n"
-							+"}",
+					comment("terms query"),
 
-					var(target),
-					var(root),
+					prefix(OWL.NS),
+					prefix(RDFS.NS),
 
-					roots(filter),
-					filters(filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
+					select(var("value"), var("count"), var("label"), var("notes")),
 
-					anchor(path, target),
+					where(
 
-					offset(offset),
-					limit(limit, options.terms())
+							form(block(
+
+									select(
+											as("value", var(target)),
+											as("count", count(true, var(root)))
+									),
+
+									where(
+											filters(filter),
+											anchor(path, target)
+									),
+
+									line(group(var(target))),
+									line(having(gt(count(var(root)), text(0)))),
+									line(order(desc(var("count")), var("value"))),
+
+									offset(offset),
+									limit(limit, options.terms())
+
+							)),
+
+							line(optional(edge(var("value"), "rdfs:label", var("label")))),
+							line(optional(edge(var("value"), "rdfs:comment", var("notes"))))
+
+					)
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 				@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {

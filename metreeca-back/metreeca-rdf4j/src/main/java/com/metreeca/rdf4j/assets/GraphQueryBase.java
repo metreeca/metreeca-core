@@ -35,18 +35,24 @@ import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.Any.any;
+import static com.metreeca.rdf4j.SPARQLScribe.values;
+import static com.metreeca.rdf4j.SPARQLScribe.var;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 
-import static java.lang.Math.min;
 import static java.lang.String.format;
 
 abstract class GraphQueryBase {
 
 	static final String root="0";
+
+
+	static Scribe same() {
+		return text("(owl:sameAs|^owl:sameAs)*");
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,23 +94,20 @@ abstract class GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Scribe roots(final Shape shape) { // root universal constraints
-		return all(shape)
-				.map(values -> values(root, values))
-				.orElse(nothing());
-	}
-
 	Scribe filters(final Shape shape) {
-		return shape.map(new SkeletonProbe(root, true, options.same()));
+		return form(
+				all(shape).map(values -> values(root, values)).orElse(nothing()), // root universal constraints
+				shape.map(new SkeletonProbe(root, true, options.same()))
+		);
 	}
 
 	Scribe pattern(final Shape shape) {
-		return shape.map(new SkeletonProbe(root, false, options.same()));
+		return form(shape.map(new SkeletonProbe(root, false, options.same())));
 	}
 
 	Scribe anchor(final List<IRI> path, final String target) {
 		return path.isEmpty() ? nothing()
-				: list(var(root), text(" "), path(path), text(" "), var(target), text(" .\n"));
+				: form(var(root), text(" "), path(path), text(" "), var(target), text(" .\n"));
 	}
 
 
@@ -112,32 +115,6 @@ abstract class GraphQueryBase {
 		return options.same()
 				? list(same(), list(path.stream().map(step -> list(text(step), same())), "/"))
 				: list(path.stream().map(Scribe::text), "/");
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static Scribe values(final String anchor, final Collection<Value> values) {
-		return text("\fvalues %s {\n%s\n}\f",
-				var(anchor), list(values.stream().map(Values::format).map(Scribe::text), "\n")
-		);
-	}
-
-	static Scribe same() {
-		return text("(owl:sameAs|^owl:sameAs)*");
-	}
-
-	static Scribe var(final String id) {
-		return text(" ?%s", id);
-	}
-
-	static Scribe offset(final int offset) {
-		return offset > 0 ? text("offset %d", offset) : nothing();
-	}
-
-	static Scribe limit(final int limit, final int sampling) {
-		return limit == 0 && sampling == 0 ? nothing()
-				: text("limit %d", limit > 0 ? min(limit, sampling) : sampling);
 	}
 
 

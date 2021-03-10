@@ -30,7 +30,7 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Source code generator.
+ * Source code composer.
  */
 public abstract class Scribe {
 
@@ -46,12 +46,21 @@ public abstract class Scribe {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Scribe nothing() {
-		return new Scribe() {
+	public static Scribe with(final boolean condition, final Scribe... scribes) {
+		return condition ? list(scribes) : nothing();
+	}
 
-			@Override protected Appendable scribe(final Appendable code) { return code; }
 
-		};
+	public static Scribe block(final Scribe... scribes) {
+		return list(text(" { "), list(scribes), text(" }"));
+	}
+
+	public static Scribe form(final Scribe... scribes) {
+		return list(text("\t\f"), list(scribes), text("\b\f"));
+	}
+
+	public static Scribe line(final Scribe... scribes) {
+		return list(text("\n"), list(scribes), text("\n"));
 	}
 
 
@@ -177,6 +186,15 @@ public abstract class Scribe {
 	}
 
 
+	public static Scribe nothing() {
+		return new Scribe() {
+
+			@Override protected Appendable scribe(final Appendable code) { return code; }
+
+		};
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Scribe() {}
@@ -257,16 +275,27 @@ public abstract class Scribe {
 
 		private Formatter feed() {
 
-			append('\n');
-			append('\n');
+			if ( last != '\0' ) {
+				if ( last != '\n' ) {
+
+					write('\n');
+					write('\n');
+
+				} else if ( next != '\n' ) {
+
+					write('\n');
+
+				}
+			}
 
 			return this;
 		}
 
 		private Formatter newline() {
+
 			if ( last == '{' ) { ++indent; }
 
-			if ( last != '\n' || next != '\n' ) { write('\n'); }
+			if ( last != '\n' ) { write('\n'); }
 
 			return this;
 		}
@@ -300,6 +329,7 @@ public abstract class Scribe {
 				if ( c == '}' ) { --indent; }
 
 				for (int i=4*indent; i > 0; --i) { write(' '); }
+
 			}
 
 			write(c);

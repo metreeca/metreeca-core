@@ -20,8 +20,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.rest.Scribe.code;
-import static com.metreeca.rest.Scribe.text;
+import static com.metreeca.rest.Scribe.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +43,11 @@ final class ScribeTest {
 		}
 
 
+		@Test void test() {
+			System.out.println(code(block((text("\n@")))));
+		}
+
+
 		@Test void testIndentBraceBlocks() {
 
 			assertThat(format("{\nuno\n}\ndue"))
@@ -53,15 +57,12 @@ final class ScribeTest {
 			assertThat(format("{ {\nuno\n} }\ndue"))
 					.as("inline block")
 					.isEqualTo("{ {\n    uno\n} }\ndue");
-
 		}
 
 		@Test void testIgnoreLeadingSpaces() {
-
-			assertThat(format("  {\n\tuno\n  due\n }"))
+			assertThat(format("  {\n  uno\n\tdue\n }"))
 					.as("single")
 					.isEqualTo("{\n    uno\n    due\n}");
-
 		}
 
 		@Test void testCollapseSpaces() {
@@ -83,6 +84,23 @@ final class ScribeTest {
 					.isEqualTo("uno\ndue");
 
 			assertThat(format("uno\n\n\n\ndue"))
+					.as("multiple")
+					.isEqualTo("uno\ndue");
+
+		}
+
+		@Test void testIgnoreLeadingFeeds() {
+			assertThat(format("\f{}"))
+					.isEqualTo("{}");
+		}
+
+		@Test void testCollapseFeeds() {
+
+			assertThat(format("uno\fdue"))
+					.as("single")
+					.isEqualTo("uno\n\ndue");
+
+			assertThat(format("uno\n\f\n\fdue"))
 					.as("multiple")
 					.isEqualTo("uno\n\ndue");
 
