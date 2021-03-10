@@ -95,18 +95,16 @@ final class GraphQueryItemsTest {
 	}
 
 	@Test void testMatching() {
-		exec(() -> {
-			assertThat(query(
+		exec(() -> assertThat(query(
 
-					items(field(RDF.TYPE, filter(all(term("Employee")))))
+				items(field(RDF.TYPE, filter(all(term("Employee")))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+		)).isIsomorphicTo(GraphTest.graph(
 
-					"construct { <app:/> ldp:contains ?employee. ?employee a :Employee }"
-							+" where { ?employee a :Employee }"
+				"construct { <app:/> ldp:contains ?employee. ?employee a :Employee }"
+						+" where { ?employee a :Employee }"
 
-			));
-		});
+		)));
 	}
 
 	@Test void testSorting() {

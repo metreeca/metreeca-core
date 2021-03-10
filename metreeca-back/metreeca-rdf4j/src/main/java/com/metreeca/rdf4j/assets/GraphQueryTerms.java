@@ -33,6 +33,7 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
 
@@ -72,35 +73,40 @@ final class GraphQueryTerms extends GraphQueryBase {
 					prefix(OWL.NS),
 					prefix(RDFS.NS),
 
-					select(var("value"), var("count"), var("label"), var("notes")),
+					space(select(
 
-					where(
+							var("value"), var("count"), var("label"), var("notes")
 
-							form(block(
+					)),
 
-									select(
+					space(where(
+
+							space(block(
+
+									space(select(space(indent(
 											as("value", var(target)),
 											as("count", count(true, var(root)))
-									),
+									)))),
 
-									where(
+									space(where(
 											filters(filter),
 											anchor(path, target)
-									),
+									)),
 
-									line(group(var(target))),
-									line(having(gt(count(var(root)), text(0)))),
-									line(order(desc(var("count")), var("value"))),
-
-									offset(offset),
-									limit(limit, options.terms())
+									space(
+											line(group(var(target))),
+											line(having(gt(count(var(root)), text(0)))),
+											line(order(desc(var("count")), var("value"))),
+											line(offset(offset)),
+											line(limit(limit, options.terms()))
+									)
 
 							)),
 
 							line(optional(edge(var("value"), "rdfs:label", var("label")))),
 							line(optional(edge(var("value"), "rdfs:comment", var("notes"))))
 
-					)
+					))
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 				@Override public void handleSolution(final BindingSet bindings) throws TupleQueryResultHandlerException {

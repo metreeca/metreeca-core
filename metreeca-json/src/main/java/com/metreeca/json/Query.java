@@ -134,7 +134,7 @@ public abstract class Query {
 
 	@Override public String toString() {
 		return format(
-				"%s {\n\tshape: %s\n\tpath: %s\norder: %s\n\toffset: %d\n\tlimit: %d\n}",
+				"%s {\n\tshape: %s\n\tpath: %s\n\torder: %s\n\toffset: %d\n\tlimit: %d\n}",
 				getClass().getSimpleName().toLowerCase(Locale.ROOT),
 				Values.indent(shape.toString()),
 				path, orders, offset, limit

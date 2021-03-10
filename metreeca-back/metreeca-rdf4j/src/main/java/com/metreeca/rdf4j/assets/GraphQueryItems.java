@@ -92,7 +92,7 @@ final class GraphQueryItems extends GraphQueryBase {
 					prefix(OWL.NS),
 					prefix(RDFS.NS),
 
-					select(list(Stream.concat(
+					space(select(list(Stream.concat(
 
 							Stream.of(root), /// always project root
 
@@ -103,15 +103,17 @@ final class GraphQueryItems extends GraphQueryBase {
 
 							).map(BNode.class::cast).map(BNode::getID)
 
-					).distinct().sorted().map(SPARQLScribe::var))),
+					).distinct().sorted().map(SPARQLScribe::var)))),
 
-					where(
+					space(where(
 							matcher(filter, orders, offset, limit),
 							pattern(convey),
 							sorters(orders) // !!! (€) don't extract if already present in pattern
-					),
+					)),
 
-					order(criteria(orders))
+					space(
+							order(criteria(orders))
+					)
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -159,17 +161,16 @@ final class GraphQueryItems extends GraphQueryBase {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Scribe matcher(final Shape shape, final List<Order> orders, final int offset, final int limit) {
-		return shape.equals(and()) ? nothing() : shape.equals(or()) ? filter(text(false)) : form(block(
+		return shape.equals(and()) ? nothing() : shape.equals(or()) ? filter(text(false)) : space(block(
 
 				select(true, var(root)),
 
-				block(filters(shape)),
-
-				with(offset > 0 || limit > 0,
-						sorters(orders),
-						order(criteria(orders))
+				block(
+						filters(shape),
+						with(offset > 0 || limit > 0, sorters(orders))
 				),
 
+				with(offset > 0 || limit > 0, order(criteria(orders))),
 				offset(offset),
 				limit(limit, options.items())
 
@@ -178,9 +179,13 @@ final class GraphQueryItems extends GraphQueryBase {
 
 	private Scribe sorters(final List<Order> orders
 	) {
-		return form(list(orders.stream()
+		return space(list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
-				.map(order -> optional(var(root), path(order.path()), var(valueOf(1+orders.indexOf(order)))))
+				.map(order -> optional(edge(
+						var(root),
+						options.same() ? same(order.path()) : path(order.path()),
+						var(valueOf(1+orders.indexOf(order)))
+				)))
 		));
 	}
 

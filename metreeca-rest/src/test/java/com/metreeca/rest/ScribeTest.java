@@ -20,7 +20,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.rest.Scribe.*;
+import static com.metreeca.rest.Scribe.code;
+import static com.metreeca.rest.Scribe.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,67 +44,77 @@ final class ScribeTest {
 		}
 
 
-		@Test void test() {
-			System.out.println(code(block((text("\n@")))));
+		@Test void testCollapseFeeds() {
+			assertThat(format("x\fy")).isEqualTo("x\n\ny");
+			assertThat(format("x\n\f\n\fy")).isEqualTo("x\n\ny");
+		}
+
+		@Test void testCollapseFolds() {
+			assertThat(format("x\ry")).isEqualTo("x y");
+			assertThat(format("x\r\r\ry")).isEqualTo("x y");
+			assertThat(format("x\n\ry")).isEqualTo("x\n\ny");
+			assertThat(format("x\n\r\r\ry")).isEqualTo("x\n\ny");
+		}
+
+		@Test void testCollapseNewlines() {
+			assertThat(format("x\ny")).isEqualTo("x\ny");
+			assertThat(format("x\n\n\n\ny")).isEqualTo("x\ny");
+		}
+
+		@Test void testCollapseSpaces() {
+			assertThat(format("x y")).isEqualTo("x y");
+			assertThat(format("x    y")).isEqualTo("x y");
+		}
+
+
+		@Test void testIgnoreLeadingWhitespace() {
+			assertThat(format(" {}")).isEqualTo("{}");
+			assertThat(format("\n{}")).isEqualTo("{}");
+			assertThat(format("\r{}")).isEqualTo("{}");
+			assertThat(format("\f{}")).isEqualTo("{}");
+			assertThat(format("\f \n\r{}")).isEqualTo("{}");
+		}
+
+		@Test void testIgnoreTrailingWhitespace() {
+			assertThat(format("{} ")).isEqualTo("{}");
+			assertThat(format("{}\n")).isEqualTo("{}");
+			assertThat(format("{}\r")).isEqualTo("{}");
+			assertThat(format("{}\f")).isEqualTo("{}");
+			assertThat(format("{} \f\n\r")).isEqualTo("{}");
+		}
+
+
+		@Test void testIgnoreLineLeadingWhitespace() {
+			assertThat(format("x\n  x")).isEqualTo("x\nx");
+		}
+
+		@Test void testIgnoreLineTrailingWhitespace() {
+			assertThat(format("x  \nx")).isEqualTo("x\nx");
+		}
+
+
+		@Test void tesExpandFolds() {
+			assertThat(format("x\rx\n\rx")).isEqualTo("x x\n\nx");
+		}
+
+		@Test void testStripWhitespaceInsidePairs() {
+			assertThat(format("( x )")).isEqualTo("(x)");
+			assertThat(format("[ x ]")).isEqualTo("[x]");
+			assertThat(format("{ x }")).isEqualTo("{ x }");
 		}
 
 
 		@Test void testIndentBraceBlocks() {
-
-			assertThat(format("{\nuno\n}\ndue"))
-					.as("indented block")
-					.isEqualTo("{\n    uno\n}\ndue");
-
-			assertThat(format("{ {\nuno\n} }\ndue"))
-					.as("inline block")
-					.isEqualTo("{ {\n    uno\n} }\ndue");
+			assertThat(format("{\nx\n}\ny")).isEqualTo("{\n    x\n}\ny");
+			assertThat(format("{\f{ x }\f}")).isEqualTo("{\n\n    { x }\n\n}");
 		}
 
-		@Test void testIgnoreLeadingSpaces() {
-			assertThat(format("  {\n  uno\n\tdue\n }"))
-					.as("single")
-					.isEqualTo("{\n    uno\n    due\n}");
+		@Test void testInlineBraceBlocks() {
+			assertThat(format("{ {\nx\n} }\ny")).isEqualTo("{ {\n    x\n} }\ny");
 		}
 
-		@Test void testCollapseSpaces() {
-
-			assertThat(format(" text"))
-					.as("leading")
-					.isEqualTo("text");
-
-			assertThat(format("uno  due"))
-					.as("inside")
-					.isEqualTo("uno due");
-
-		}
-
-		@Test void testCollapseNewlines() {
-
-			assertThat(format("uno\ndue"))
-					.as("single")
-					.isEqualTo("uno\ndue");
-
-			assertThat(format("uno\n\n\n\ndue"))
-					.as("multiple")
-					.isEqualTo("uno\ndue");
-
-		}
-
-		@Test void testIgnoreLeadingFeeds() {
-			assertThat(format("\f{}"))
-					.isEqualTo("{}");
-		}
-
-		@Test void testCollapseFeeds() {
-
-			assertThat(format("uno\fdue"))
-					.as("single")
-					.isEqualTo("uno\n\ndue");
-
-			assertThat(format("uno\n\f\n\fdue"))
-					.as("multiple")
-					.isEqualTo("uno\n\ndue");
-
+		@Test void test() {
+			System.out.println(code(text("\rwhere {\f{\rselect {\f@\f} limit }\f}")));
 		}
 
 	}

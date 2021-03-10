@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.format;
 
 import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
@@ -52,15 +53,20 @@ public abstract class Scribe {
 
 
 	public static Scribe block(final Scribe... scribes) {
-		return list(text(" { "), list(scribes), text(" }"));
-	}
-
-	public static Scribe form(final Scribe... scribes) {
-		return list(text("\t\f"), list(scribes), text("\b\f"));
+		return list(text("\r{ "), list(scribes), text(" }"));
 	}
 
 	public static Scribe line(final Scribe... scribes) {
-		return list(text("\n"), list(scribes), text("\n"));
+		return list(text('\n'), list(scribes), text('\n'));
+	}
+
+
+	public static Scribe space(final Scribe... scribes) {
+		return list(text('\f'), list(scribes), text('\f'));
+	}
+
+	public static Scribe indent(final Scribe... scribes) {
+		return list(text('\t'), list(scribes), text('\b'));
 	}
 
 
@@ -99,6 +105,19 @@ public abstract class Scribe {
 		};
 	}
 
+
+	public static Scribe list(final Scribe[] items, final CharSequence separator) {
+
+		if ( items == null ) {
+			throw new NullPointerException("null items");
+		}
+
+		if ( separator == null ) {
+			throw new NullPointerException("null separator");
+		}
+
+		return list(asList(items), separator);
+	}
 
 	public static Scribe list(final Stream<Scribe> items, final CharSequence separator) {
 
@@ -153,6 +172,22 @@ public abstract class Scribe {
 		}
 
 		return text(format(value));
+	}
+
+	public static Scribe text(final char c) {
+		return new Scribe() {
+			@Override protected Appendable scribe(final Appendable code) {
+				try {
+
+					return code.append(c);
+
+				} catch ( final IOException e ) {
+
+					throw new UncheckedIOException(e);
+
+				}
+			}
+		};
 	}
 
 	public static Scribe text(final CharSequence text) {
@@ -212,12 +247,12 @@ public abstract class Scribe {
 
 	private static final class Formatter implements Appendable {
 
-		private final Appendable code;
+		private final Appendable code; // output target
 
-		private int indent;
+		private int indent; // indent level
 
-		private int last;
-		private int next;
+		private char last; // last output
+		private char wait; // pending optional whitespace
 
 
 		private Formatter(final Appendable code) {
@@ -227,10 +262,6 @@ public abstract class Scribe {
 
 		@Override public Appendable append(final CharSequence sequence) {
 
-			if ( sequence == null ) {
-				throw new NullPointerException("null sequence");
-			}
-
 			for (int i=0, n=sequence.length(); i < n; ++i) { append(sequence.charAt(i)); }
 
 			return this;
@@ -238,30 +269,24 @@ public abstract class Scribe {
 
 		@Override public Appendable append(final CharSequence sequence, final int start, final int end) {
 
-			if ( sequence == null ) {
-				throw new NullPointerException("null sequence");
-			}
-
 			for (int i=start; i < end; ++i) { append(sequence.charAt(i)); }
 
 			return this;
 		}
 
 		@Override public Appendable append(final char c) {
-			if ( code == null ) { return this; } else {
-				switch ( c ) {
+			switch ( c ) {
 
-					case '\f': return feed();
-					case '\n': return newline();
+				case '\f': return feed();
+				case '\r': return fold();
+				case '\n': return newline();
+				case ' ': return space();
 
-					case '\t': return indent();
-					case '\b': return outdent();
+				case '\t': return indent();
+				case '\b': return outdent();
 
-					case ' ': return space();
+				default: return other(c);
 
-					default: return other(c);
-
-				}
 			}
 		}
 
@@ -275,75 +300,70 @@ public abstract class Scribe {
 
 		private Formatter feed() {
 
-			if ( last != '\0' ) {
-				if ( last != '\n' ) {
+			if ( last != '\0' ) { wait='\f'; }
 
-					write('\n');
-					write('\n');
+			return this;
+		}
 
-				} else if ( next != '\n' ) {
+		private Formatter fold() {
 
-					write('\n');
-
-				}
-			}
+			if ( last != '\0' && wait != '\f' ) { wait=(wait == '\n') ? '\f' : ' '; }
 
 			return this;
 		}
 
 		private Formatter newline() {
 
-			if ( last == '{' ) { ++indent; }
-
-			if ( last != '\n' ) { write('\n'); }
-
-			return this;
-		}
-
-		private Formatter indent() {
-
-			if ( last != '\0' && last != '\n' ) { ++indent; }
-
-			return this;
-		}
-
-		private Formatter outdent() {
-
-			--indent;
+			if ( last != '\0' && wait != '\f' ) { wait='\n'; }
 
 			return this;
 		}
 
 		private Formatter space() {
 
-			if ( last != '\0' && last != '\n' && last != ' ' ) { write(' '); }
+			if ( last != '\0' && wait != '\f' && wait != '\n' ) { wait=' '; }
+
+			return this;
+		}
+
+
+		private Formatter indent() {
+
+			if ( last != '\0' ) { ++indent; }
+
+			return this;
+		}
+
+		private Formatter outdent() {
+
+			if ( indent > 0 ) { --indent; }
 
 			return this;
 		}
 
 
 		private Formatter other(final char c) {
-
-			if ( last == '\n' ) {
-
-				if ( c == '}' ) { --indent; }
-
-				for (int i=4*indent; i > 0; --i) { write(' '); }
-
-			}
-
-			write(c);
-
-			return this;
-		}
-
-
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-		private void write(final char c) {
 			try {
 
+				if ( wait == '\f' || wait == '\n' ) {
+
+					if ( last == '{' ) { ++indent; }
+
+					if ( c == '}' && indent > 0 ) { --indent; }
+
+					code.append(wait == '\f' ? "\n\n" : "\n");
+
+					for (int i=4*indent; i > 0; --i) { code.append(' '); }
+
+				} else if ( wait == ' ' && last != '(' && c != ')' && last != '[' && c != ']' ) {
+
+					code.append(' ');
+
+				}
+
 				code.append(c);
+
+				return this;
 
 			} catch ( final IOException e ) {
 
@@ -351,8 +371,8 @@ public abstract class Scribe {
 
 			} finally {
 
-				next=last;
 				last=c;
+				wait='\0';
 
 			}
 		}

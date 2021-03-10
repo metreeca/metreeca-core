@@ -19,12 +19,13 @@ package com.metreeca.rdf4j;
 import com.metreeca.json.Values;
 import com.metreeca.rest.Scribe;
 
-import org.eclipse.rdf4j.model.Namespace;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Frame.traverse;
+import static com.metreeca.json.Values.quote;
 import static com.metreeca.rest.Scribe.*;
 
 import static java.util.Arrays.stream;
@@ -35,12 +36,12 @@ import static java.util.Arrays.stream;
 public final class SPARQLScribe {
 
 	public static Scribe comment(final String text) {
-		return form(text("# %s", text));
+		return space(text("# %s", text));
 	}
 
 
 	public static Scribe base(final String base) {
-		return form(text("base <%s>", base));
+		return space(text("base <%s>", base));
 	}
 
 	public static Scribe prefix(final Namespace namespace) {
@@ -57,47 +58,75 @@ public final class SPARQLScribe {
 	}
 
 	public static Scribe select(final boolean distinct, final Scribe... vars) {
-		return list(text(" select ", distinct ? text(" distinct ") : nothing()), list(vars));
+		return list(text("\rselect"), distinct ? text(" distinct") : nothing(), list(vars));
 	}
 
 	public static Scribe where(final Scribe... pattern) {
-		return list(text(" where"), block(pattern));
+		return list(text("\rwhere"), block(pattern));
 	}
 
 
 	public static Scribe union(final Scribe... patterns) {
-		return list(stream(patterns).flatMap(pattern -> Stream.of(text(" union "), pattern)).skip(1));
+		return union(stream(patterns));
+	}
+
+	public static Scribe union(final Stream<Scribe> patterns) {
+		return list(patterns.flatMap(pattern -> Stream.of(text(" union "), pattern)).skip(1));
 	}
 
 	public static Scribe optional(final Scribe... pattern) {
-		return list(text(" optional"), block(pattern));
+		return line(text("optional"), block(pattern));
 	}
 
 	public static Scribe values(final String anchor, final Collection<Value> values) {
-		return form(list(text(" values"), var(anchor), block(list(
+		return space(list(text("\rvalues"), var(anchor), block(list(
 				values.stream().map(Values::format).map(Scribe::text).map(Scribe::line)
 		))));
-	}
-
-	public static Scribe bind(final String id, final Scribe expression) {
-		return line(list(text("bind"), as(id, expression)));
-	}
-
-
-	public static Scribe edge(final Scribe subject, final String predicate, final Scribe object) {
-		return list(subject, text(" "), text(predicate), text(" "), object);
 	}
 
 	public static Scribe filter(final Scribe... expressions) {
 		return list(text(" filter ( "), list(expressions), text(" )"));
 	}
 
+	public static Scribe bind(final String id, final Scribe expression) {
+		return line(list(text(" bind"), as(id, expression)));
+	}
+
+	public static Scribe as(final String id, final Scribe expression) {
+		return list(text(" ("), expression, text(" as "), var(id), text(')'));
+	}
+
 	public static Scribe var(final String id) {
 		return text(" ?%s", id);
 	}
 
-	public static Scribe as(final String id, final Scribe expression) {
-		return list(text("("), expression, text(" as "), var(id), text(")"));
+	public static Scribe string(final String text) {
+		return text(quote(text));
+	}
+
+
+	public static Scribe path(final Scribe... path) {
+		return list(stream(path), "/");
+	}
+
+	public static Scribe path(final Collection<IRI> path) {
+		return list(path.stream().map(Scribe::text), "/");
+	}
+
+
+	public static Scribe edge(final Scribe source, final String path, final Scribe target) {
+		return edge(source, text(path), target);
+	}
+
+	public static Scribe edge(final Scribe source, final IRI path, final Scribe target) {
+		return traverse(path,
+				iri -> edge(source, text(iri), target),
+				iri -> edge(target, text(iri), source)
+		);
+	}
+
+	public static Scribe edge(final Scribe source, final Scribe path, final Scribe target) {
+		return list(text(' '), source, text(' '), path, text(' '), target, text(" ."));
 	}
 
 
@@ -136,11 +165,11 @@ public final class SPARQLScribe {
 
 
 	public static Scribe min(final Scribe expression) {
-		return list(text("min("), expression, text(")"));
+		return list(text(" min("), expression, text(")"));
 	}
 
 	public static Scribe max(final Scribe expression) {
-		return list(text("max("), expression, text(")"));
+		return list(text(" max("), expression, text(")"));
 	}
 
 	public static Scribe count(final Scribe expression) {
@@ -148,7 +177,7 @@ public final class SPARQLScribe {
 	}
 
 	public static Scribe count(final boolean distinct, final Scribe expression) {
-		return list(text("count(", distinct ? text("distinct") : nothing()), expression, text(")"));
+		return list(text(" count(", distinct ? text("distinct") : nothing()), expression, text(")"));
 	}
 
 
@@ -157,20 +186,91 @@ public final class SPARQLScribe {
 	}
 
 	public static Scribe isBlank(final Scribe expression) {
-		return list(text(" isBlank("), expression, text(")"));
+		return function("isBlank", expression);
 	}
 
 	public static Scribe isIRI(final Scribe expression) {
-		return list(text(" isIRI("), expression, text(")"));
+		return function("isIRI", expression);
+	}
+
+	public static Scribe isLiteral(final Scribe expression) {
+		return function("isLiteral", expression);
+	}
+
+	public static Scribe lang(final Scribe expression) {
+		return function("lang", expression);
 	}
 
 	public static Scribe datatype(final Scribe expression) {
-		return list(text(" datatype("), expression, text(")"));
+		return function("datatype", expression);
+	}
+
+	public static Scribe str(final Scribe expression) {
+		return function("str", expression);
+	}
+
+	public static Scribe strlen(final Scribe expression) {
+		return function("strlen", expression);
+	}
+
+	public static Scribe strstarts(final Scribe expression, final Scribe prefix) {
+		return function("strstarts", expression, prefix);
+	}
+
+	public static Scribe regex(final Scribe expression, final Scribe pattern) {
+		return function("regex", expression, pattern);
+	}
+
+	public static Scribe regex(final Scribe expression, final Scribe pattern, final Scribe flags) {
+		return function("regex", expression, pattern, flags);
 	}
 
 
+
+	public static Scribe or(final Scribe... expressions) {
+		return list(expressions, " || ");
+	}
+
+	public static Scribe and(final Scribe... expressions) {
+		return list(expressions, " && ");
+	}
+
+
+	public static Scribe eq(final Scribe x, final Scribe y) {
+		return op(x, "=", y);
+	}
+
+	public static Scribe neq(final Scribe x, final Scribe y) {
+		return op(x, "!=", y);
+	}
+
+	public static Scribe lt(final Scribe x, final Scribe y) {
+		return op(x, "<", y);
+	}
+
 	public static Scribe gt(final Scribe x, final Scribe y) {
-		return list(x, text(" > "), y);
+		return op(x, ">", y);
+	}
+
+	public static Scribe lte(final Scribe x, final Scribe y) {
+		return op(x, "<=", y);
+	}
+
+	public static Scribe gte(final Scribe x, final Scribe y) {
+		return op(x, ">=", y);
+	}
+
+	public static Scribe in(final Scribe expression, final Stream<Scribe> expressions) {
+		return list(expression, text(" in ("), list(expressions, ", "), text(')'));
+	}
+
+
+	public static Scribe function(final String name, final Scribe... args) {
+		return list(text(' '), text(name), text('('), list(args, ", "), text(')'));
+	}
+
+	public static Scribe op(final Scribe x, final String name, final Scribe y) {
+		return list(x, text(' '), text(name), text(' '), y);
 	}
 
 

@@ -35,6 +35,7 @@ import static com.metreeca.rdf4j.SPARQLScribe.is;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
 
@@ -80,46 +81,40 @@ final class GraphQueryStats extends GraphQueryBase {
 					prefix(OWL.NS),
 					prefix(RDFS.NS),
 
-					select(
+					space(select(indent(
 
-							form(
+							space(
 									line(var("type"), var("type_label"), var("type_notes"))
 							),
 
-							form(
+							space(
 									line(var("min"), var("min_label"), var("min_notes")),
 									line(var("max"), var("max_label"), var("max_notes"))
 							),
 
-							form(
+							space(
 									line(var("count"))
 							)
 
-					),
+					))),
 
-					where(
+					space(where(
 
-							form(block(
+							space(block(
 
-									select(var("type"),
+									space(select(space(indent(
+											var("type"),
+											as("min", min(var(target))),
+											as("max", max(var(target))),
+											as("count", count(true, var(target)))
+									)))),
 
-											form(
-													as("min", min(var(target))),
-													as("max", max(var(target)))
-											),
-
-											form(
-													line(as("count", count(true, var(target))))
-											)
-
-									),
-
-									where(
+									space(where(
 
 											filters(filter),
 											anchor(path, target),
 
-											form(bind("type", is(
+											space(bind("type", is(
 													isBlank(var(target)),
 													text(":bnode"),
 													is(
@@ -129,33 +124,37 @@ final class GraphQueryStats extends GraphQueryBase {
 													)
 											)))
 
-									),
+									)),
 
-									line(group(var("type"))),
-									line(having(gt(count(true, var(target)), text(0)))),
-									line(order(desc(var("count")), var("type")))
+									space(
+											line(group(var("type"))),
+											line(having(gt(count(true, var(target)), text(0)))),
+											line(order(desc(var("count")), var("type")))
+									)
 
 							)),
 
-							form(
+							space(
 									line(optional(edge(var("type"), "rdfs:label", var("type_label")))),
 									line(optional(edge(var("type"), "rdfs:comment", var("type_notes"))))
 							),
 
-							form(
+							space(
 									line(optional(edge(var("min"), "rdfs:label", var("min_label")))),
 									line(optional(edge(var("min"), "rdfs:comment", var("min_notes"))))
 							),
 
-							form(
+							space(
 									line(optional(edge(var("max"), "rdfs:label", var("max_label")))),
 									line(optional(edge(var("max"), "rdfs:comment", var("max_notes"))))
 							)
 
-					),
+					)),
 
-					offset(offset),
-					limit(limit, options.stats())
+					space(
+							line(offset(offset)),
+							line(limit(limit, options.stats()))
+					)
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 
