@@ -24,7 +24,6 @@ import static com.metreeca.rest.Scribe.code;
 import static com.metreeca.rest.Scribe.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 final class ScribeTest {
 
@@ -36,32 +35,12 @@ final class ScribeTest {
 			assertThat(code(text("verbatim"))).isEqualTo("verbatim");
 		}
 
-		@Test void testTemplate() {
-
-			assertThat(code(text("<< {} {-} { } >>")))
-					.as("ignore non-placeholders")
-					.isEqualTo("<< {} {-} { } >>");
-
-			assertThat(code(text("<< {reused} {reused} >>", text("text"))))
-					.as("reuse values)")
-					.isEqualTo("<< text text >>");
-
-			assertThatIllegalArgumentException()
-					.as("report missing arguments")
-					.isThrownBy(() -> code(text("<< {text} {missing} >>", text("string"))));
-
-			assertThatIllegalArgumentException()
-					.as("report trailing arguments")
-					.isThrownBy(() -> code(text("<< {text} >>", text("string"), text("redundant"))));
-
-		}
-
 	}
 
 	@Nested final class Formatting {
 
 		private String format(final CharSequence text) {
-			return new Scribe(new StringBuilder(10)).append(text).toString();
+			return code(text(text));
 		}
 
 

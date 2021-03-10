@@ -54,7 +54,7 @@ final class GraphQueryStats extends GraphQueryBase {
 		final int offset=stats.offset();
 		final int limit=stats.limit();
 
-		final String target=path.isEmpty() ? Root : "hook";
+		final String target=path.isEmpty() ? root : "hook";
 
 		final Shape filter=shape
 				.filter(resource)
@@ -73,7 +73,7 @@ final class GraphQueryStats extends GraphQueryBase {
 
 					"# stats query\n"
 							+"\n"
-							+"prefix : <{base}>\n"
+							+"prefix : <%s>\n"
 							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
 							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 							+"\n"
@@ -92,30 +92,30 @@ final class GraphQueryStats extends GraphQueryBase {
 							+"\n"
 							+"\t\tselect ?type\n"
 							+"\n"
-							+"\t\t\t(min({target}) as ?min)\n"
-							+"\t\t\t(max({target}) as ?max) \n"
+							+"\t\t\t(min(%s) as ?min)\n"
+							+"\t\t\t(max(%2$s) as ?max) \n"
 							+"\n"
-							+"\t\t\t(count(distinct {target}) as ?count)\n"
+							+"\t\t\t(count(distinct %2$s) as ?count)\n"
 							+"\n"
 							+"\t\twhere {\n"
 							+"\n"
-							+"\t\t\t{roots}\n"
+							+"\t\t\t%s\n"
 							+"\n"
-							+"\t\t\t{filters}\n"
+							+"\t\t\t%s\n"
 							+"\n"
-							+"\t\t\t{path}\n"
+							+"\t\t\t%s\n"
 							+"\n"
-							+"\t\t\tbind (if(isBlank({target}), :bnode, if(isIRI({target}), :iri, datatype({target}))) "
+							+"\t\t\tbind (if(isBlank(%2$s), :bnode, if(isIRI(%2$s), :iri, datatype(%2$s))) "
 							+"as "
 							+"?type)\n"
 							+"\n"
 							+"\t\t}\n"
 							+"\n"
 							+"\t\tgroup by ?type\n"
-							+"\t\thaving ( count(distinct {target}) > 0 )\n"
+							+"\t\thaving ( count(distinct %2$s) > 0 )\n"
 							+"\t\torder by desc(?count) ?type\n"
-							+"\t\t{offset}\n"
-							+"\t\t{limit}\n"
+							+"\t\t%s\n"
+							+"\t\t%s\n"
 							+"\n"
 							+"\t}\n"
 							+"\n"
@@ -136,7 +136,7 @@ final class GraphQueryStats extends GraphQueryBase {
 					roots(filter),
 					filters(filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					path(path, target),
+					anchor(path, target),
 
 					offset(offset),
 					limit(limit, options.stats())

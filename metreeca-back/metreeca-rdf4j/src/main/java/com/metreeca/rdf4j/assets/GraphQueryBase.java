@@ -29,7 +29,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.traverse;
@@ -47,7 +46,7 @@ import static java.lang.String.format;
 
 abstract class GraphQueryBase {
 
-	static final String Root="0";
+	static final String root="0";
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,27 +88,27 @@ abstract class GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	UnaryOperator<Appendable> roots(final Shape shape) { // root universal constraints
+	Scribe roots(final Shape shape) { // root universal constraints
 		return all(shape)
-				.map(values -> values(Root, values))
+				.map(values -> values(root, values))
 				.orElse(nothing());
 	}
 
-	UnaryOperator<Appendable> filters(final Shape shape) {
-		return shape.map(new SkeletonProbe(Root, true, options.same()));
+	Scribe filters(final Shape shape) {
+		return shape.map(new SkeletonProbe(root, true, options.same()));
 	}
 
-	UnaryOperator<Appendable> pattern(final Shape shape) {
-		return shape.map(new SkeletonProbe(Root, false, options.same()));
+	Scribe pattern(final Shape shape) {
+		return shape.map(new SkeletonProbe(root, false, options.same()));
 	}
 
-
-	UnaryOperator<Appendable> path(final List<IRI> path, final String target) {
+	Scribe anchor(final List<IRI> path, final String target) {
 		return path.isEmpty() ? nothing()
-				: list(var(Root), text(" "), path(path), text(" "), var(target), text(" .\n"));
+				: list(var(root), text(" "), path(path), text(" "), var(target), text(" .\n"));
 	}
 
-	UnaryOperator<Appendable> path(final List<IRI> path) {
+
+	Scribe path(final List<IRI> path) {
 		return options.same()
 				? list(same(), list(path.stream().map(step -> list(text(step), same())), "/"))
 				: list(path.stream().map(Scribe::text), "/");
@@ -118,27 +117,25 @@ abstract class GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	static UnaryOperator<Appendable> values(final String anchor, final Collection<Value> values) {
-		return text("\fvalues {anchor} {\n{values}\n}\f",
-
+	static Scribe values(final String anchor, final Collection<Value> values) {
+		return text("\fvalues %s {\n%s\n}\f",
 				var(anchor), list(values.stream().map(Values::format).map(Scribe::text), "\n")
-
 		);
 	}
 
-	static UnaryOperator<Appendable> same() {
+	static Scribe same() {
 		return text("(owl:sameAs|^owl:sameAs)*");
 	}
 
-	static UnaryOperator<Appendable> var(final String id) {
+	static Scribe var(final String id) {
 		return text(" ?%s", id);
 	}
 
-	static UnaryOperator<Appendable> offset(final int offset) {
+	static Scribe offset(final int offset) {
 		return offset > 0 ? text("offset %d", offset) : nothing();
 	}
 
-	static UnaryOperator<Appendable> limit(final int limit, final int sampling) {
+	static Scribe limit(final int limit, final int sampling) {
 		return limit == 0 && sampling == 0 ? nothing()
 				: text("limit %d", limit > 0 ? min(limit, sampling) : sampling);
 	}
@@ -146,7 +143,7 @@ abstract class GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class SkeletonProbe extends Shape.Probe<UnaryOperator<Appendable>> {
+	private static final class SkeletonProbe extends Shape.Probe<Scribe> {
 
 		private final String anchor;
 
@@ -163,101 +160,80 @@ abstract class GraphQueryBase {
 		}
 
 
-		private UnaryOperator<Appendable> edge(final String source, final IRI predicate, final String target) {
-
-			final UnaryOperator<Appendable> vs=var(source);
-			final UnaryOperator<Appendable> vt=var(target);
-			final UnaryOperator<Appendable> sp=same();
-
+		private Scribe edge(final String source, final IRI predicate, final String target) {
 			return traverse(predicate,
 
 					iri -> same
-							? text("{source} {same}/{predicate}/{same} {target} .\n", vs, sp, text(iri), vt)
-							: text("{source} {predicate} {target} .\n", vs, text(iri), vt),
+							? text("%s %s/%s/%s %s .\n", var(source), same(), text(iri), same(), var(target))
+							: text("%s %s %s .\n", var(source), text(iri), var(target)),
 
 					iri -> same
-							? text("{target} {same}/{predicate}/{same} {source} .\n", vt, sp, text(iri), vs)
-							: text("{target} {predicate} {source} .\n", vt, text(iri), vs)
+							? text("%s %s/%s/%s %s .\n", var(target), same(), text(iri), same(), var(source))
+							: text("%s %s %s .\n", var(target), text(iri), var(source))
 
 			);
 		}
 
-		private UnaryOperator<Appendable> edge(final String source, final IRI predicate, final Value target) {
-
-			final UnaryOperator<Appendable> vs=var(source);
-			final UnaryOperator<Appendable> vt=text(target);
-			final UnaryOperator<Appendable> sp=same();
-
+		private Scribe edge(final String source, final IRI predicate, final Value target) {
 			return traverse(predicate,
 
 					iri -> same
-							? text("{source} {same}/{predicate}/{same} {target} .\n", vs, sp, text(iri), vt)
-							: text("{source} {predicate} {target} .\n", vs, text(iri), vt),
+							? text("%s %s/%s/%s %s .\n", var(source), same(), text(iri), same(), text(target))
+							: text("%s %s %s .\n", var(source), text(iri), text(target)),
 
 					iri -> same
-							? text("{target} {same}/{predicate}/{same} {source} .\n", vt, sp, text(iri), vs)
-							: text("{target} {predicate} {source} .\n", vt, text(iri), vs)
+							? text("%s %s/%s/%s %s .\n", text(target), same(), text(iri), same(), var(source))
+							: text("%s %s %s .\n", text(target), text(iri), var(source))
 
 			);
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final Datatype datatype) {
+		@Override public Scribe probe(final Datatype datatype) {
 
 			final IRI iri=datatype.iri();
 
-			return iri.equals(ValueType) ? nothing() : text(
+			return iri.equals(ValueType) ? nothing()
 
-					iri.equals(ResourceType) ? "filter ( isBlank({value}) || isIRI({value}) )\n"
-							: iri.equals(BNodeType) ? "filter isBlank({value})\n"
-							: iri.equals(IRIType) ? "filter isIRI({value})\n"
-							: iri.equals(LiteralType) ? "filter isLiteral({value})\n"
-							: iri.equals(RDF.LANGSTRING) ? "filter (lang({value}) != '')\n"
-							: "filter ( datatype({value}) = {datatype} )\n",
+					: iri.equals(ResourceType) ? text("filter ( isBlank(%1$s) || isIRI(%1$s) )\n", var(anchor))
+					: iri.equals(BNodeType) ? text("filter isBlank(%s)\n", var(anchor))
+					: iri.equals(IRIType) ? text("filter isIRI(%s)\n", var(anchor))
+					: iri.equals(LiteralType) ? text("filter isLiteral(%s)\n", var(anchor))
+					: iri.equals(RDF.LANGSTRING) ? text("filter (lang(%s) != '')\n", var(anchor))
 
-					var(anchor),
-					text(iri)
-
-			);
+					: text("filter ( datatype(%s) = %s )\n", var(anchor), text(iri));
 
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final Clazz clazz) {
-			return text("{source} {path} {class}.\n",
-
-					var(anchor),
-
-					same
-							? text(" {same}/a/({same}/rdfs:subClassOf)* ", same())
-							: text(" a/rdfs:subClassOf* "),
-
-					text(clazz.iri())
-
-			);
+		@Override public Scribe probe(final Clazz clazz) {
+			return same
+					? text("%s (owl:sameAs|^owl:sameAs)*/a/((owl:sameAs|^owl:sameAs)*/rdfs:subClassOf)* %s.\n",
+					var(anchor), text(clazz.iri()))
+					: text("%s a/rdfs:subClassOf* %s.\n", var(anchor), text(clazz.iri()));
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final Range range) {
+		@Override public Scribe probe(final Range range) {
 			if ( prune ) {
 
 				return probe((Shape)range); // !!! tbi (filter not exists w/ special root treatment)
 
 			} else {
 
-				return range.values().isEmpty() ? nothing() : text("filter ({source} in ({values}))\n",
+				return range.values().isEmpty() ? nothing() : text("filter (%s in (%s))\n",
 						var(anchor), list(range.values().stream().map(Values::format).map(Scribe::text), ", ")
 				);
 
 			}
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final Lang lang) {
+		@Override public Scribe probe(final Lang lang) {
 			if ( prune ) {
 
 				return probe((Shape)lang); // !!! tbi (filter not exists w/ special root treatment)
 
 			} else {
 
-				return lang.tags().isEmpty() ? nothing() : text("filter (lang({source}) in ({tags}))\n",
+				return lang.tags().isEmpty() ? nothing() : text("filter (lang(%s) in (%s))\n",
 						var(anchor), list(lang.tags().stream().map(Values::quote).map(Scribe::text), ", ")
 				);
 
@@ -265,67 +241,65 @@ abstract class GraphQueryBase {
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final MinExclusive minExclusive) {
-			return text("filter ( {source} > {value} )\n", var(anchor), text(minExclusive.limit()));
+		@Override public Scribe probe(final MinExclusive minExclusive) {
+			return text("filter ( %s > %s )\n", var(anchor), text(minExclusive.limit()));
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final MaxExclusive maxExclusive) {
-			return text("filter ( {source} < {value} )\n", var(anchor), text(maxExclusive.limit()));
+		@Override public Scribe probe(final MaxExclusive maxExclusive) {
+			return text("filter ( %s < %s )\n", var(anchor), text(maxExclusive.limit()));
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final MinInclusive minInclusive) {
-			return text("filter ( {source} >= {value} )\n", var(anchor), text(minInclusive.limit()));
+		@Override public Scribe probe(final MinInclusive minInclusive) {
+			return text("filter ( %s >= %s )\n", var(anchor), text(minInclusive.limit()));
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final MaxInclusive maxInclusive) {
-			return text("filter ( {source} <= {value} )\n", var(anchor), text(maxInclusive.limit()));
-		}
-
-
-		@Override public UnaryOperator<Appendable> probe(final MinLength minLength) {
-			return text("filter (strlen(str({source})) >= {limit} )\n", var(anchor), text(minLength.limit()));
-		}
-
-		@Override public UnaryOperator<Appendable> probe(final MaxLength maxLength) {
-			return text("filter (strlen(str({source})) <= {limit} )\n", var(anchor), text(maxLength.limit()));
+		@Override public Scribe probe(final MaxInclusive maxInclusive) {
+			return text("filter ( %s <= %s )\n", var(anchor), text(maxInclusive.limit()));
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final Pattern pattern) {
-			return text("filter regex(str({source}), '{pattern}', '{flags}')\n",
-					var(anchor), text(pattern.expression().replace("\\", "\\\\")), text(pattern.flags())
+		@Override public Scribe probe(final MinLength minLength) {
+			return text("filter (strlen(str(%s)) >= %s )\n", var(anchor), text(minLength.limit()));
+		}
+
+		@Override public Scribe probe(final MaxLength maxLength) {
+			return text("filter (strlen(str(%s)) <= %s )\n", var(anchor), text(maxLength.limit()));
+		}
+
+
+		@Override public Scribe probe(final Pattern pattern) {
+			return text("filter regex(str(%s), %s, %s)\n",
+					var(anchor), text(quote(pattern.expression())), text(quote(pattern.flags()))
 			);
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final Like like) {
-			return text("filter regex(str({source}), '{pattern}')\n",
-					var(anchor), text(like.toExpression().replace("\\", "\\\\"))
+		@Override public Scribe probe(final Like like) {
+			return text("filter regex(str(%s), %s)\n",
+					var(anchor), text(quote(like.toExpression()))
 			);
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final Stem stem) {
-			return text("filter strstarts(str({source}), '{stem}')\n",
-					var(anchor), text(stem.prefix())
+		@Override public Scribe probe(final Stem stem) {
+			return text("filter strstarts(str(%s), %s)\n",
+					var(anchor), text(quote(stem.prefix()))
 			);
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final MinCount minCount) {
-			return prune ? probe((Shape)minCount) :
-					nothing();
+		@Override public Scribe probe(final MinCount minCount) {
+			return prune ? probe((Shape)minCount) : nothing();
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final MaxCount maxCount) {
-			return prune ? probe((Shape)maxCount) :
-					nothing();
+		@Override public Scribe probe(final MaxCount maxCount) {
+			return prune ? probe((Shape)maxCount) : nothing();
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final All all) {
+		@Override public Scribe probe(final All all) {
 			return nothing(); // universal constraints handled by field probe
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final Any any) {
+		@Override public Scribe probe(final Any any) {
 
 			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
 
@@ -336,13 +310,13 @@ abstract class GraphQueryBase {
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final Localized localized) {
+		@Override public Scribe probe(final Localized localized) {
 			return prune ? probe((Shape)localized) :
 					nothing();
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final Field field) {
+		@Override public Scribe probe(final Field field) {
 
 			final Shape shape=field.shape();
 			final String alias=field.alias();
@@ -354,13 +328,9 @@ abstract class GraphQueryBase {
 					.filter(values -> values.size() == 1)
 					.map(values -> values.iterator().next());
 
-			return text(
+			return text( // (€) optional unless universally constrained // !!! or filtered
 
-					// (€) optional unless universally constrained // !!! or filtered
-
-					prune || all.isPresent() || singleton.isPresent()
-							? "\f{pattern}\f"
-							: "\foptional {\f{pattern}\f}\f",
+					prune || all.isPresent() || singleton.isPresent() ? "\f%s\f" : "\foptional {\f%s\f}\f",
 
 					list(
 
@@ -385,19 +355,16 @@ abstract class GraphQueryBase {
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final And and) {
+		@Override public Scribe probe(final And and) {
 			return list(and.shapes().stream().map(shape -> shape.map(this)));
 		}
 
-		@Override public UnaryOperator<Appendable> probe(final Or or) {
-			return list(
-					or.shapes().stream().map(s -> text("{\f{branch}\f}", s.map(this))),
-					" union "
-			);
+		@Override public Scribe probe(final Or or) {
+			return list(or.shapes().stream().map(s -> text("{\f%s\f}", s.map(this))), " union ");
 		}
 
 
-		@Override public UnaryOperator<Appendable> probe(final Shape shape) {
+		@Override public Scribe probe(final Shape shape) {
 			throw new UnsupportedOperationException(shape.toString());
 		}
 

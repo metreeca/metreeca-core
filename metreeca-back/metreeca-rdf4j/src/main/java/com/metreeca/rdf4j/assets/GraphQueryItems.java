@@ -21,13 +21,13 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
+import com.metreeca.rest.Scribe;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.query.AbstractTupleQueryResultHandler;
 import org.eclipse.rdf4j.query.BindingSet;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.traverse;
@@ -75,7 +75,7 @@ final class GraphQueryItems extends GraphQueryBase {
 				.resolve(resource)
 				.label(reserved);
 
-		final Collection<Triple> template=convey.map(new TemplateProbe(Root)).collect(toList());
+		final Collection<Triple> template=convey.map(new TemplateProbe(root)).collect(toList());
 		final Collection<Statement> model=new LinkedHashSet<>();
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
@@ -88,19 +88,19 @@ final class GraphQueryItems extends GraphQueryBase {
 							+"prefix owl: <http://www.w3.org/2002/07/owl#>\n"
 							+"prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
 							+"\n"
-							+"select {variables} where {\n"
+							+"select %s where {\n"
 							+"\n"
-							+"\t{matcher}\n"
+							+"\t%s\n"
 							+"\n"
-							+"\t{pattern}\n"
+							+"\t%s\n"
 							+"\n"
-							+"\t{sorters}\n"
+							+"\t%s\n"
 							+"\n"
-							+"} order by {criteria}",
+							+"} order by %s",
 
 					list(Stream.concat(
 
-							Stream.of(Root), /// always project root
+							Stream.of(root), /// always project root
 
 							Stream.concat( // project template variables
 
@@ -121,7 +121,7 @@ final class GraphQueryItems extends GraphQueryBase {
 
 				@Override public void handleSolution(final BindingSet bindings) {
 
-					final Value match=bindings.getValue(Root);
+					final Value match=bindings.getValue(root);
 
 					if ( match != null ) {
 
@@ -162,27 +162,26 @@ final class GraphQueryItems extends GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private UnaryOperator<Appendable> matcher(
-			final Shape shape, final List<Order> orders, final int offset, final int limit) {
+	private Scribe matcher(final Shape shape, final List<Order> orders, final int offset, final int limit) {
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? text("filter (false)") : text(
 
-				"{ select distinct {root} {\n"
+				"{ select distinct %s {\n"
 						+"\n"
-						+"\t{roots}\n"
+						+"\t%s\n"
 						+"\n"
-						+"\t{filters}\n"
+						+"\t%s\n"
 						+"\n"
-						+"\t{sorters}\n"
+						+"\t%s\n"
 						+"\n"
-						+"} {orders} {offset} {limit} }",
+						+"} %s %s %s }",
 
-				var(Root),
+				var(root),
 
 				roots(shape),
 				filters(shape),
 
 				offset > 0 || limit > 0 ? sorters(orders) : nothing(),
-				offset > 0 || limit > 0 ? text(" order by {criteria}", criteria(orders)) : nothing(),
+				offset > 0 || limit > 0 ? text(" order by %s", criteria(orders)) : nothing(),
 
 				offset(offset),
 				limit(limit, options.items())
@@ -191,29 +190,29 @@ final class GraphQueryItems extends GraphQueryBase {
 	}
 
 
-	private UnaryOperator<Appendable> sorters(final List<Order> orders) {
+	private Scribe sorters(final List<Order> orders) {
 		return list(orders.stream()
 				.filter(order -> !order.path().isEmpty()) // root already retrieved
-				.map(order -> text("optional { {root} {path} {order} }\n",
-						var(Root), path(order.path()), var(valueOf(1+orders.indexOf(order)))
+				.map(order -> text("optional { %s %s %s }\n",
+						var(root), path(order.path()), var(valueOf(1+orders.indexOf(order)))
 				))
 		);
 	}
 
-	private static UnaryOperator<Appendable> criteria(final List<Order> orders) {
+	private static Scribe criteria(final List<Order> orders) {
 		return list(Stream.concat(
 
 				orders.stream().map(order -> text(
-						order.inverse() ? "desc({criterion})" : "asc({criterion})",
-						order.path().isEmpty() ? var(Root) : var(valueOf(1+orders.indexOf(order)))
+						order.inverse() ? "desc(%s)" : "asc(%s)",
+						order.path().isEmpty() ? var(root) : var(valueOf(1+orders.indexOf(order)))
 				)),
 
 				orders.stream()
 						.map(Order::path)
 						.filter(List::isEmpty)
 						.findFirst()
-						.map(empty -> Stream.<UnaryOperator<Appendable>>empty())
-						.orElseGet(() -> Stream.of(var(Root)))  // root as last resort, unless already used
+						.map(empty -> Stream.<Scribe>empty())
+						.orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
 
 		), " ");
 	}

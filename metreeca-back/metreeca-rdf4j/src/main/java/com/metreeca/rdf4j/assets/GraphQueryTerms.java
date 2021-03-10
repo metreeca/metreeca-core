@@ -53,7 +53,7 @@ final class GraphQueryTerms extends GraphQueryBase {
 		final int offset=terms.offset();
 		final int limit=terms.limit();
 
-		final String target=path.isEmpty() ? Root : "hook";
+		final String target=path.isEmpty() ? root : "hook";
 
 		final Shape filter=shape
 				.filter(resource)
@@ -74,23 +74,23 @@ final class GraphQueryTerms extends GraphQueryBase {
 							+"\n"
 							+"\t{\n"
 							+"\n"
-							+"\t\tselect ({target} as ?value) (count(distinct {source}) as ?count)\n"
+							+"\t\tselect (%s as ?value) (count(distinct %s) as ?count)\n"
 							+"\n"
 							+"\t\twhere {\n"
 							+"\n"
-							+"\t\t\t{roots}\n"
+							+"\t\t\t%s\n"
 							+"\n"
-							+"\t\t\t{filters}\n"
+							+"\t\t\t%s\n"
 							+"\n"
-							+"\t\t\t{path}\n"
+							+"\t\t\t%s\n"
 							+"\n"
 							+"\t\t}\n"
 							+"\n"
-							+"\t\tgroup by {target} \n"
-							+"\t\thaving ( count(distinct {source}) > 0 ) \n"
+							+"\t\tgroup by %1$s \n"
+							+"\t\thaving ( count(distinct %2$s) > 0 ) \n"
 							+"\t\torder by desc(?count) ?value\n"
-							+"\t\t{offset}\n"
-							+"\t\t{limit}\n"
+							+"\t\t%s\n"
+							+"\t\t%s\n"
 							+"\n"
 							+"\t}\n"
 							+"\n"
@@ -100,12 +100,12 @@ final class GraphQueryTerms extends GraphQueryBase {
 							+"}",
 
 					var(target),
-					var(Root),
+					var(root),
 
 					roots(filter),
 					filters(filter), // !!! use filter(selector, emptySet(), 0, 0) to support sampling
 
-					path(path, target),
+					anchor(path, target),
 
 					offset(offset),
 					limit(limit, options.terms())
