@@ -57,6 +57,7 @@ import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.rdf4j.assets.GraphTest.graph;
 import static com.metreeca.rdf4j.assets.GraphTest.localized;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.Context.asset;
@@ -127,7 +128,7 @@ final class GraphFetcherTest {
 						item("employees/1188")
 				)))))
 
-		)).isIsomorphicTo(GraphTest.graph(
+		)).isIsomorphicTo(graph(
 
 				""
 						+"\n"
@@ -153,7 +154,7 @@ final class GraphFetcherTest {
 
 				field(RDFS.LABEL, convey(localized("en")))
 
-		)))).isIsomorphicTo(GraphTest.graph(
+		)))).isIsomorphicTo(graph(
 
 				"construct { <app:/> ldp:contains ?office. ?office rdfs:label ?label }"
 						+" where { ?office a :Office; rdfs:label ?label filter (lang(?label) = 'en') }"
@@ -167,7 +168,7 @@ final class GraphFetcherTest {
 				filter(clazz(term("Employee"))),
 				field(term("seniority"), minInclusive(integer(10)))
 
-		)))).isIsomorphicTo(GraphTest.graph(
+		)))).isIsomorphicTo(graph(
 
 				"construct { <app:/> ldp:contains ?employee. ?employee :seniority ?seniority }"
 						+" where { ?employee a :Employee; :seniority ?seniority }"
@@ -183,7 +184,7 @@ final class GraphFetcherTest {
 
 					item("/employees-basic/"), items(convey(field(RDFS.LABEL)))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct where { </employees-basic/> ldp:contains [rdfs:label ?label] }"
 
@@ -198,7 +199,7 @@ final class GraphFetcherTest {
 							convey().then(field(RDFS.LABEL))
 					))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct where { </employees-basic/> ldp:contains [rdfs:label ?label] }"
 
@@ -223,7 +224,7 @@ final class GraphFetcherTest {
 
 						Root, items(field(term("code"), filter(datatype(XSD.STRING))))
 
-				)).isIsomorphicTo(GraphTest.graph(
+				)).isIsomorphicTo(graph(
 
 						"construct {\n"
 								+"\n"
@@ -246,7 +247,7 @@ final class GraphFetcherTest {
 
 					Root, items(and(field(RDF.TYPE), filter(clazz(term("Employee")))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -281,7 +282,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(term("seniority"), filter(minExclusive(literal(integer(3))))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -302,7 +303,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(term("seniority"), filter(maxExclusive(literal(integer(3))))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -323,7 +324,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(term("seniority"), filter(minInclusive(literal(integer(3))))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -344,7 +345,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(term("seniority"), filter(maxInclusive(literal(integer(3))))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -366,7 +367,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(term("forename"), filter(minLength(5))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -387,7 +388,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(term("forename"), filter(maxLength(5))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -408,7 +409,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(RDFS.LABEL, filter(pattern("\\bgerard\\b", "i"))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -429,7 +430,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(RDFS.LABEL, filter(like("ger bo", true))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -450,7 +451,7 @@ final class GraphFetcherTest {
 
 					Root, items(field(RDFS.LABEL, filter(stem("Gerard B"))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -495,7 +496,7 @@ final class GraphFetcherTest {
 							item("employees/1056")
 					))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -520,7 +521,7 @@ final class GraphFetcherTest {
 								item("employees/1056")
 						))))
 
-				)).isIsomorphicTo(GraphTest.graph(
+				)).isIsomorphicTo(graph(
 
 						"construct {\n"
 								+"\n"
@@ -545,7 +546,7 @@ final class GraphFetcherTest {
 							field(RDF.TYPE)
 					))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -569,7 +570,7 @@ final class GraphFetcherTest {
 
 						Root, items(field(term("employee"), filter(all(item("employees/1002")))))
 
-				)).isIsomorphicTo(GraphTest.graph(
+				)).isIsomorphicTo(graph(
 
 						"construct {\n"
 								+"\n"
@@ -588,54 +589,50 @@ final class GraphFetcherTest {
 
 
 		@Test void testAny() {
-			exec(() -> {
-				assertThat(query(
+			exec(() -> assertThat(query(
 
-						Root, items(field(term("employee"), filter(any(
-								item("employees/1002"), item("employees/1056")
-						))))
+					Root, items(field(term("employee"), filter(any(
+							item("employees/1002"), item("employees/1056")
+					))))
 
-				)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
-						"construct {\n"
-								+"\n"
-								+"\t<app:/> ldp:contains ?office.\n"
-								+"\t?office :employee ?employee.\n"
-								+"\n"
-								+"} where {\n"
-								+"\n"
-								+"\t?office :employee ?employee, ?value filter (?value in (<employees/1002>, "
-								+"<employees/1056>))\n"
-								+"\n"
-								+"}"
+					"construct {\n"
+							+"\n"
+							+"\t<app:/> ldp:contains ?office.\n"
+							+"\t?office :employee ?employee.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?office :employee ?employee, ?value filter (?value in (<employees/1002>, "
+							+"<employees/1056>))\n"
+							+"\n"
+							+"}"
 
-				));
-			});
+			)));
 		}
 
 		@Test void testAnySingleton() {
-			exec(() -> {
-				assertThat(query(
+			exec(() -> assertThat(query(
 
-						Root, items(field(term("employee"), filter(any(
-								item("employees/1002")
-						))))
+					Root, items(field(term("employee"), filter(any(
+							item("employees/1002")
+					))))
 
-				)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
-						"construct {\n"
-								+"\n"
-								+"\t<app:/> ldp:contains ?office.\n"
-								+"\t?office :employee ?employee.\n"
-								+"\n"
-								+"} where {\n"
-								+"\n"
-								+"\t?office :employee ?employee, <employees/1002>\n"
-								+"\n"
-								+"}"
+					"construct {\n"
+							+"\n"
+							+"\t<app:/> ldp:contains ?office.\n"
+							+"\t?office :employee ?employee.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t?office :employee ?employee, <employees/1002>\n"
+							+"\n"
+							+"}"
 
-				));
-			});
+			)));
 		}
 
 		@Test void testAnyRoot() {
@@ -646,7 +643,7 @@ final class GraphFetcherTest {
 							field(RDFS.LABEL)
 					))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -685,7 +682,7 @@ final class GraphFetcherTest {
 
 					Root, items(and(filter(field(term("country"))), field(term("country"))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -730,7 +727,7 @@ final class GraphFetcherTest {
 							always(field(term("city")))
 					))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -755,7 +752,7 @@ final class GraphFetcherTest {
 					))))
 
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -797,7 +794,7 @@ final class GraphFetcherTest {
 
 					items(filter(clazz(term("Alias"))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -817,7 +814,7 @@ final class GraphFetcherTest {
 
 					items(filter(field(RDF.TYPE, term("Alias"))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"
@@ -838,7 +835,7 @@ final class GraphFetcherTest {
 
 					items(and(field(RDFS.LABEL), filter(clazz(term("Alias")))))
 
-			)).isIsomorphicTo(GraphTest.graph(
+			)).isIsomorphicTo(graph(
 
 					"construct {\n"
 							+"\n"

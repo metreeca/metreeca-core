@@ -96,26 +96,29 @@ abstract class GraphQueryBase {
 	}
 
 	UnaryOperator<Appendable> filters(final Shape shape) {
-		return shape.map(new SkeletonProbe(Root, true));
+		return shape.map(new SkeletonProbe(Root, true, options.same()));
 	}
+
+	UnaryOperator<Appendable> pattern(final Shape shape) {
+		return shape.map(new SkeletonProbe(Root, false, options.same()));
+	}
+
 
 	UnaryOperator<Appendable> path(final List<IRI> path, final String target) {
 		return path.isEmpty() ? nothing()
 				: list(var(Root), text(" "), path(path), text(" "), var(target), text(" .\n"));
 	}
 
-
-	UnaryOperator<Appendable> offset(final int offset) {
-		return offset > 0 ? text("offset %d", offset) : nothing();
-	}
-
-	UnaryOperator<Appendable> limit(final int limit, final int sampling) {
-		return limit == 0 && sampling == 0 ? nothing()
-				: text("limit %d", limit > 0 ? min(limit, sampling) : sampling);
+	UnaryOperator<Appendable> path(final List<IRI> path) {
+		return options.same()
+				? list(same(), list(path.stream().map(step -> list(text(step), same())), "/"))
+				: list(path.stream().map(Scribe::text), "/");
 	}
 
 
-	private static UnaryOperator<Appendable> values(final String anchor, final Collection<Value> values) {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	static UnaryOperator<Appendable> values(final String anchor, final Collection<Value> values) {
 		return text("\fvalues {anchor} {\n{values}\n}\f",
 
 				var(anchor), list(values.stream().map(Values::format).map(Scribe::text), "\n")
@@ -123,69 +126,79 @@ abstract class GraphQueryBase {
 		);
 	}
 
-
-	private UnaryOperator<Appendable> edge(final String source, final Field field, final String target) {
-		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
-
-				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), var(target), text(" "
-						+".\n")),
-				iri -> list(var(target), text(" "), same(true), text(iri), same(false), text(" "), var(source), text(" "
-						+".\n"))
-
-		);
-	}
-
-	private UnaryOperator<Appendable> edge(final String source, final Field field, final Value target) {
-		return source == null || field == null || target == null ? nothing() : traverse(field.iri(),
-
-				iri -> list(var(source), text(" "), same(true), text(iri), same(false), text(" "), text(target), text(
-						" .\n")),
-				iri -> list(text(target), text(" "), same(true), text(iri), same(false), text(" "), var(source), text(
-						" .\n"))
-
-		);
-	}
-
-
-	UnaryOperator<Appendable> path(final List<IRI> path) {
-		return list(same(true), list(path.stream().map(step ->
-
-				list(text(step), same(false))
-
-		), "/"));
+	static UnaryOperator<Appendable> same() {
+		return text("(owl:sameAs|^owl:sameAs)*");
 	}
 
 	static UnaryOperator<Appendable> var(final String id) {
 		return text(" ?%s", id);
 	}
 
-
-	private UnaryOperator<Appendable> same() {
-		return options.same() ? text("(owl:sameAs|^owl:sameAs)*") : nothing();
+	static UnaryOperator<Appendable> offset(final int offset) {
+		return offset > 0 ? text("offset %d", offset) : nothing();
 	}
 
-	private UnaryOperator<Appendable> same(final boolean head) {
-		return options.same()
-				? list(head ? nothing() : text("/"), same(), head ? text("/") : nothing())
-				: nothing();
-	}
-
-	UnaryOperator<Appendable> pattern(final Shape shape) {
-		return shape.map(new SkeletonProbe(Root, false));
+	static UnaryOperator<Appendable> limit(final int limit, final int sampling) {
+		return limit == 0 && sampling == 0 ? nothing()
+				: text("limit %d", limit > 0 ? min(limit, sampling) : sampling);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final class SkeletonProbe extends Shape.Probe<UnaryOperator<Appendable>> {
+	private static final class SkeletonProbe extends Shape.Probe<UnaryOperator<Appendable>> {
 
 		private final String anchor;
+
 		private final boolean prune;
+		private final boolean same;
 
 
-		private SkeletonProbe(final String anchor, final boolean prune) {
+		private SkeletonProbe(final String anchor, final boolean prune, final boolean same) {
+
 			this.anchor=anchor;
+
 			this.prune=prune;
+			this.same=same;
+		}
+
+
+		private UnaryOperator<Appendable> edge(final String source, final IRI predicate, final String target) {
+
+			final UnaryOperator<Appendable> vs=var(source);
+			final UnaryOperator<Appendable> vt=var(target);
+			final UnaryOperator<Appendable> sp=same();
+
+			return traverse(predicate,
+
+					iri -> same
+							? text("{source} {same}/{predicate}/{same} {target} .\n", vs, sp, text(iri), vt)
+							: text("{source} {predicate} {target} .\n", vs, text(iri), vt),
+
+					iri -> same
+							? text("{target} {same}/{predicate}/{same} {source} .\n", vt, sp, text(iri), vs)
+							: text("{target} {predicate} {source} .\n", vt, text(iri), vs)
+
+			);
+		}
+
+		private UnaryOperator<Appendable> edge(final String source, final IRI predicate, final Value target) {
+
+			final UnaryOperator<Appendable> vs=var(source);
+			final UnaryOperator<Appendable> vt=text(target);
+			final UnaryOperator<Appendable> sp=same();
+
+			return traverse(predicate,
+
+					iri -> same
+							? text("{source} {same}/{predicate}/{same} {target} .\n", vs, sp, text(iri), vt)
+							: text("{source} {predicate} {target} .\n", vs, text(iri), vt),
+
+					iri -> same
+							? text("{target} {same}/{predicate}/{same} {source} .\n", vt, sp, text(iri), vs)
+							: text("{target} {predicate} {source} .\n", vt, text(iri), vs)
+
+			);
 		}
 
 
@@ -214,7 +227,7 @@ abstract class GraphQueryBase {
 
 					var(anchor),
 
-					options.same()
+					same
 							? text(" {same}/a/({same}/rdfs:subClassOf)* ", same())
 							: text(" a/rdfs:subClassOf* "),
 
@@ -297,12 +310,12 @@ abstract class GraphQueryBase {
 		}
 
 
-		public UnaryOperator<Appendable> probe(final MinCount minCount) {
+		@Override public UnaryOperator<Appendable> probe(final MinCount minCount) {
 			return prune ? probe((Shape)minCount) :
 					nothing();
 		}
 
-		public UnaryOperator<Appendable> probe(final MaxCount maxCount) {
+		@Override public UnaryOperator<Appendable> probe(final MaxCount maxCount) {
 			return prune ? probe((Shape)maxCount) :
 					nothing();
 		}
@@ -323,7 +336,7 @@ abstract class GraphQueryBase {
 		}
 
 
-		public UnaryOperator<Appendable> probe(final Localized localized) {
+		@Override public UnaryOperator<Appendable> probe(final Localized localized) {
 			return prune ? probe((Shape)localized) :
 					nothing();
 		}
@@ -353,19 +366,19 @@ abstract class GraphQueryBase {
 
 							prune && (all.isPresent() || singleton.isPresent())
 									? nothing() // (€) filtering hook already available on all/any edges
-									: edge(anchor, field, alias), // filtering or projection hook
+									: edge(anchor, field.iri(), alias), // filtering or projection hook
 
 							list(all.map(values -> // insert universal constraints edges
-									values.stream().map(value -> edge(anchor, field, value))
+									values.stream().map(value -> edge(anchor, field.iri(), value))
 							).orElse(Stream.empty())),
 
 							singleton.map(value -> // insert singleton existential constraint edge
-									edge(anchor, field, value)
+									edge(anchor, field.iri(), value)
 							).orElse(nothing()),
 
 							text("\f"),
 
-							shape.map(new SkeletonProbe(alias, prune))
+							shape.map(new SkeletonProbe(alias, prune, same))
 					)
 			);
 
