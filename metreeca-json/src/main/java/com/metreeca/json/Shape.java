@@ -35,6 +35,7 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 
@@ -76,6 +77,35 @@ public abstract class Shape {
 		return map(new ShapeEvaluator()) != null;
 	}
 
+
+	/**
+	 * Traverses this shape.
+	 *
+	 * @param path the property path to be traversed
+	 *
+	 * @return the shape reached following {@code path} from this shape
+	 *
+	 * @throws NullPointerException     if {@code path} is null or contains null elements
+	 * @throws IllegalArgumentException if {@code path} includes unknown steps
+	 */
+	public Shape walk(final Collection<IRI> path) {
+
+		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null path");
+		}
+
+		Shape shape=this;
+
+		for (final IRI step : path) {
+			shape=field(shape, step)
+
+					.orElseThrow(() -> new IllegalArgumentException(format("unknown path step <%s>", step)))
+
+					.shape();
+		}
+
+		return shape;
+	}
 
 	/**
 	 * Identifies statements implied by this shape.

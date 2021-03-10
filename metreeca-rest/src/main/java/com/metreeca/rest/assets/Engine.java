@@ -17,18 +17,34 @@
 package com.metreeca.rest.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.shapes.Guard;
+import com.metreeca.json.queries.Stats;
+import com.metreeca.json.queries.Terms;
+import com.metreeca.json.shapes.*;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
+
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 
 
 /**
@@ -39,6 +55,62 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
  * <p>When acting as a wrapper, ensures that requests are handled on a single connection to the storage backend.</p>
  */
 public interface Engine extends Wrapper {
+
+	public static String Base="app:/terms#";
+
+	public static IRI terms=iri(Base, "terms");
+	public static IRI stats=iri(Base, "stats");
+
+	public static IRI value=iri(Base, "value");
+	public static IRI count=iri(Base, "count");
+
+	public static IRI min=iri(Base, "min");
+	public static IRI max=iri(Base, "max");
+
+	public static Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
+
+
+	public static Shape StatsShape(final Stats query) {
+
+		final Shape shape=query.shape();
+		final List<IRI> path=query.path();
+
+		final Stream<Field> fields=fields(shape.redact(Mode, Convey).walk(path));
+		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
+
+		return and(
+
+				field(count, required(), datatype(XSD.INTEGER)),
+				field(min, optional(), term),
+				field(max, optional(), term),
+
+				field(stats, multiple(),
+						field(count, required(), datatype(XSD.INTEGER)),
+						field(min, required(), term),
+						field(max, required(), term)
+				)
+
+		);
+	}
+
+	public static Shape TermsShape(final Terms query) {
+
+		final Shape shape=query.shape();
+		final List<IRI> path=query.path();
+
+		final Stream<Field> fields=fields(shape.redact(Mode, Convey).walk(path));
+		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
+
+		return And.and(
+				field(terms, multiple(),
+						field(value, required(), term),
+						field(count, required(), datatype(XSD.INTEGER))
+				)
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the default engine factory.

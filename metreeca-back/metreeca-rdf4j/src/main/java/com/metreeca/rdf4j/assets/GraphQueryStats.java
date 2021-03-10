@@ -19,6 +19,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
+import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -129,7 +130,7 @@ final class GraphQueryStats extends GraphQueryBase {
 							+"\n"
 							+"}",
 
-					text(GraphQueryBase.Base),
+					text(Engine.Base),
 					var(target),
 
 					roots(filter),
@@ -162,14 +163,14 @@ final class GraphQueryStats extends GraphQueryBase {
 
 					final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
 
-					model.add(statement(resource, GraphQueryBase.stats, type));
-					model.add(statement(type, GraphQueryBase.count, literal(count)));
+					model.add(statement(resource, Engine.stats, type));
+					model.add(statement(type, Engine.count, literal(count)));
 
 					if ( type_label != null ) { model.add(statement(type, RDFS.LABEL, type_label)); }
 					if ( type_notes != null ) { model.add(statement(type, RDFS.COMMENT, type_notes)); }
 
-					if ( min != null ) { model.add(statement(type, GraphQueryBase.min, min)); }
-					if ( max != null ) { model.add(statement(type, GraphQueryBase.max, max)); }
+					if ( min != null ) { model.add(statement(type, Engine.min, min)); }
+					if ( max != null ) { model.add(statement(type, Engine.max, max)); }
 
 					if ( min_label != null ) { model.add(statement((Resource)min, RDFS.LABEL, min_label)); }
 					if ( min_notes != null ) { model.add(statement((Resource)min, RDFS.COMMENT, min_notes)); }
@@ -187,17 +188,17 @@ final class GraphQueryStats extends GraphQueryBase {
 			});
 		}));
 
-		model.add(statement(resource, GraphQueryBase.count, literal(counts.values().stream()
+		model.add(statement(resource, Engine.count, literal(counts.values().stream()
 				.reduce(BigInteger.ZERO, BigInteger::add)
 		)));
 
 		mins.stream()
 				.reduce((x, y) -> compare(x, y) < 0 ? x : y)
-				.ifPresent(min -> model.add(statement(resource, GraphQueryBase.min, min)));
+				.ifPresent(min -> model.add(statement(resource, Engine.min, min)));
 
 		maxs.stream()
 				.reduce((x, y) -> compare(x, y) > 0 ? x : y)
-				.ifPresent(max -> model.add(statement(resource, GraphQueryBase.max, max)));
+				.ifPresent(max -> model.add(statement(resource, Engine.max, max)));
 
 		return model;
 	}

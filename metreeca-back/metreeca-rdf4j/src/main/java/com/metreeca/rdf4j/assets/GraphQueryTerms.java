@@ -19,6 +19,7 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
+import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -122,10 +123,10 @@ final class GraphQueryTerms extends GraphQueryBase {
 
 					final BNode term=bnode(md5(format(value)));
 
-					model.add(statement(resource, GraphQueryBase.terms, term));
+					model.add(statement(resource, Engine.terms, term));
 
-					model.add(statement(term, GraphQueryBase.value, value));
-					model.add(statement(term, GraphQueryBase.count, count));
+					model.add(statement(term, Engine.value, value));
+					model.add(statement(term, Engine.count, count));
 
 					if ( label != null ) { model.add(statement((Resource)value, RDFS.LABEL, label)); }
 					if ( notes != null ) { model.add(statement((Resource)value, RDFS.COMMENT, notes)); }

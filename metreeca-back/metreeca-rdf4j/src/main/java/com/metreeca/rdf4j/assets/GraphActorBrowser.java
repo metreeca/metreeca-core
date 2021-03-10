@@ -27,9 +27,9 @@ import org.eclipse.rdf4j.model.IRI;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.rdf4j.assets.GraphQueryBase.StatsShape;
-import static com.metreeca.rdf4j.assets.GraphQueryBase.TermsShape;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.assets.Engine.StatsShape;
+import static com.metreeca.rest.assets.Engine.TermsShape;
 import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 final class GraphActorBrowser {

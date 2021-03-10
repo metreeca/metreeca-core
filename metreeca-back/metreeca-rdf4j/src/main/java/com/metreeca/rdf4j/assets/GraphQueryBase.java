@@ -18,8 +18,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
-import com.metreeca.json.queries.Stats;
-import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Scribe;
@@ -27,7 +25,7 @@ import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -35,16 +33,9 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.traverse;
-import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
-import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
-import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.Guard.Convey;
-import static com.metreeca.json.shapes.Guard.Mode;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
@@ -53,74 +44,10 @@ import static com.metreeca.rest.assets.Logger.time;
 
 import static java.lang.Math.min;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableSet;
 
 abstract class GraphQueryBase {
 
 	static final String Root="0";
-
-	static final String Base="app:/terms#";
-
-	static final IRI terms=iri(Base, "terms");
-	static final IRI stats=iri(Base, "stats");
-
-	static final IRI value=iri(Base, "value");
-	static final IRI count=iri(Base, "count");
-
-	static final IRI min=iri(Base, "min");
-	static final IRI max=iri(Base, "max");
-
-
-	private static final Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
-
-
-	static Shape StatsShape(final Stats query) {
-
-		final Shape term=annotations(query.shape(), query.path());
-
-		return and(
-
-				field(count, required(), datatype(XSD.INTEGER)),
-				field(min, optional(), term),
-				field(max, optional(), term),
-
-				field(stats, multiple(),
-						field(count, required(), datatype(XSD.INTEGER)),
-						field(min, required(), term),
-						field(max, required(), term)
-				)
-
-		);
-	}
-
-	static Shape TermsShape(final Terms query) {
-
-		final Shape term=annotations(query.shape(), query.path());
-
-		return and(
-				field(terms, multiple(),
-						field(value, required(), term),
-						field(count, required(), datatype(XSD.INTEGER))
-				)
-		);
-	}
-
-
-	private static Shape annotations(final Shape shape, final Iterable<IRI> path) {
-
-		Shape nested=shape.redact(Mode, Convey);
-
-		for (final IRI step : path) {
-			nested=field(nested, step)
-
-					.orElseThrow(() -> new IllegalArgumentException(format("unknown path step <%s>", step)))
-
-					.shape();
-		}
-
-		return and(fields(nested).filter(field -> Annotations.contains(field.iri())));
-	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

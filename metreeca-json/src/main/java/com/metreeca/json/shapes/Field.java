@@ -130,6 +130,15 @@ public final class Field extends Shape {
 	}
 
 
+	public static Stream<Field> fields(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return shape.map(new FieldsProbe());
+	}
+
 	public static Optional<Field> field(final Shape shape, final IRI iri) {
 
 		if ( shape == null ) {
@@ -145,15 +154,6 @@ public final class Field extends Shape {
 				.filter(field -> field.iri().equals(iri))
 
 				.findFirst();
-	}
-
-	public static Stream<Field> fields(final Shape shape) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return shape.map(new FieldsProbe());
 	}
 
 
