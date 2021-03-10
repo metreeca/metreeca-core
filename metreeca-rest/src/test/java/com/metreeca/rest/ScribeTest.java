@@ -19,26 +19,40 @@ package com.metreeca.rest;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.rest.Scribe.code;
 import static com.metreeca.rest.Scribe.text;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 final class ScribeTest {
 
 	@Nested final class Assembling {
 
-		@Test void testTemplate() { // !!! empty placeholders // missing args // redundant args
-
+		@Test void testText() {
+			assertThat(code(text(100))).isEqualTo("100");
+			assertThat(code(text(iri("test:iri")))).isEqualTo("<test:iri>");
 			assertThat(code(text("verbatim"))).isEqualTo("verbatim");
+		}
 
-			//assertThat(code(Snippets.text(
-			//		"<< {article} a {object} >>",  Scribe.text("string")
-			//))).isEqualTo("<< a string >>");
+		@Test void testTemplate() {
 
-			assertThat(code(text(
-					"<< {reused} {reused} >>", text("text")
-			))).isEqualTo("<< text text >>");
+			assertThat(code(text("<< {} {-} { } >>")))
+					.as("ignore non-placeholders")
+					.isEqualTo("<< {} {-} { } >>");
+
+			assertThat(code(text("<< {reused} {reused} >>", text("text"))))
+					.as("reuse values)")
+					.isEqualTo("<< text text >>");
+
+			assertThatIllegalArgumentException()
+					.as("report missing arguments")
+					.isThrownBy(() -> code(text("<< {text} {missing} >>", text("string"))));
+
+			assertThatIllegalArgumentException()
+					.as("report trailing arguments")
+					.isThrownBy(() -> code(text("<< {text} >>", text("string"), text("redundant"))));
 
 		}
 
@@ -94,7 +108,6 @@ final class ScribeTest {
 					.isEqualTo("uno\n\ndue");
 
 		}
-
 
 	}
 

@@ -60,19 +60,22 @@ public final class Scribe implements Appendable {
 		return list(items.collect(toList())); // memoize to enable reuse
 	}
 
-	public static UnaryOperator<Appendable> list(final Stream<UnaryOperator<Appendable>> items,
-			final CharSequence separator) {
-		return list(items.collect(toList()), separator); // memoize to enable reuse
-	}
-
 	public static UnaryOperator<Appendable> list(final Collection<UnaryOperator<Appendable>> items) {
 		return code -> items.stream()
 				.map(item -> item.apply(code))
 				.reduce(code, (x, y) -> code);
 	}
 
-	public static UnaryOperator<Appendable> list(final Collection<UnaryOperator<Appendable>> items,
-			final CharSequence separator) {
+
+	public static UnaryOperator<Appendable> list(
+			final Stream<UnaryOperator<Appendable>> items, final CharSequence separator
+	) {
+		return list(items.collect(toList()), separator); // memoize to enable reuse
+	}
+
+	public static UnaryOperator<Appendable> list(
+			final Collection<UnaryOperator<Appendable>> items, final CharSequence separator
+	) {
 		return code -> items.stream()
 				.flatMap(item -> Stream.of(text(separator), item)).skip(1)
 				.map(item -> item.apply(code))
@@ -81,14 +84,29 @@ public final class Scribe implements Appendable {
 
 
 	public static UnaryOperator<Appendable> text(final Object value) {
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return text(valueOf(value));
 	}
 
 	public static UnaryOperator<Appendable> text(final Value value) {
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
 		return text(format(value));
 	}
 
 	public static UnaryOperator<Appendable> text(final CharSequence text) {
+
+		if ( text == null ) {
+			throw new NullPointerException("null text");
+		}
+
 		return code -> {
 			try {
 
@@ -102,12 +120,24 @@ public final class Scribe implements Appendable {
 		};
 	}
 
+
 	public static UnaryOperator<Appendable> text(final String format, final Object... args) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
 		return text(String.format(format, args));
 	}
 
-	@SafeVarargs public static UnaryOperator<Appendable> text(final String template,
-			final UnaryOperator<Appendable>... args) {
+	@SafeVarargs public static UnaryOperator<Appendable> text(
+			final String template, final UnaryOperator<Appendable>... args
+	) {
+
+		if ( template == null ) {
+			throw new NullPointerException("null template");
+		}
+
 		return args.length == 0 ? text(template) : code -> {
 			try {
 
@@ -124,18 +154,27 @@ public final class Scribe implements Appendable {
 
 					code.append(template.subSequence(last, start)); // leading text
 
-					variables.computeIfAbsent( // cached variable value, if available
-							template.subSequence(start, end),
-							name -> iterator.hasNext() ? iterator.next() : nothing()
-					).apply(code);
+					final CharSequence name=template.subSequence(start, end);
+
+					variables.computeIfAbsent(name, _name -> { // cached variable value
+
+						if ( !iterator.hasNext() ) {
+							throw new IllegalArgumentException(String.format(
+									"missing argument for variable {%s}", _name
+							));
+						}
+
+						return iterator.next();
+
+					}).apply(code);
 
 					last=end;
 				}
 
 				code.append(template.subSequence(last, template.length())); // trailing text
 
-				while ( iterator.hasNext() ) {
-					iterator.next().apply(code); // trailing args
+				if ( iterator.hasNext() ) {
+					throw new IllegalArgumentException("redundant trailing arguments");
 				}
 
 				return code;
