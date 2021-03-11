@@ -45,7 +45,6 @@ import static com.metreeca.rest.Scribe.*;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
-import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.toList;
 
 final class GraphQueryItems extends GraphQueryBase {
@@ -67,17 +66,15 @@ final class GraphQueryItems extends GraphQueryBase {
 		final int offset=items.offset();
 		final int limit=items.limit();
 
-		final int reserved=1+orders.size();
-
 		final Shape filter=shape
 				.filter(resource)
 				.resolve(resource)
-				.label(reserved);
+				.label(this::label);
 
 		final Shape convey=shape
 				.convey()
 				.resolve(resource)
-				.label(reserved);
+				.label(this::label);
 
 		final Collection<Triple> template=convey.map(new TemplateProbe(root)).collect(toList());
 		final Collection<Statement> model=new LinkedHashSet<>();
@@ -92,28 +89,19 @@ final class GraphQueryItems extends GraphQueryBase {
 					prefix(OWL.NS),
 					prefix(RDFS.NS),
 
-					space(select(list(Stream.concat(
+					space(select(space(indent(
 
-							Stream.of(root), /// always project root
+							projection(template)
 
-							Stream.concat( // project template variables
-
-									template.stream().map(Triple::getSubject),
-									template.stream().map(Triple::getObject)
-
-							).map(BNode.class::cast).map(BNode::getID)
-
-					).distinct().sorted().map(SPARQLScribe::var)))),
+					)))),
 
 					space(where(
-							matcher(filter, orders, offset, limit),
-							pattern(convey),
-							sorters(orders) // !!! (€) don't extract if already present in pattern
-					)),
 
-					space(
-							order(criteria(orders))
-					)
+							matcher(filter, orders, offset, limit),
+
+							pattern(convey)
+
+					))
 
 			)))).evaluate(new AbstractTupleQueryResultHandler() {
 
@@ -160,48 +148,97 @@ final class GraphQueryItems extends GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private Scribe projection(final Collection<Triple> template) {
+		return list(Stream.concat(
+
+				Stream.of(root), /// always project root
+
+				Stream.concat( // project template variables
+
+						template.stream().map(Triple::getSubject),
+						template.stream().map(Triple::getObject)
+
+				).map(BNode.class::cast).map(BNode::getID)
+
+		).distinct().sorted().map(SPARQLScribe::var));
+	}
+
 	private Scribe matcher(final Shape shape, final List<Order> orders, final int offset, final int limit) {
+
+		final Map<List<IRI>, String> sorting=new HashMap<>();
+		final Map<List<IRI>, String> missing=new HashMap<>();
+
+		for (final Order order : orders) {
+
+			final List<IRI> path=order.path();
+
+			if ( path.isEmpty() ) { // root path › well-known label
+
+				sorting.put(path, root);
+
+			} else {
+
+				Field.field(shape, path)
+
+						.map(field -> { // filtering path › record the existing label
+
+							sorting.put(path, field.alias());
+
+							return field;
+
+						})
+
+						.orElseGet(() -> { // sorting path > assign a unique label
+
+							final String label=label();
+
+							sorting.put(path, label);
+							missing.put(path, label);
+
+							return null;
+
+						});
+
+			}
+
+		}
+
 		return shape.equals(and()) ? nothing() : shape.equals(or()) ? filter(text(false)) : space(block(
 
 				select(true, var(root)),
 
 				block(
-						filters(shape),
-						when(offset > 0 || limit > 0, sorters(orders))
+
+						space(filters(shape)),
+
+						space(list(missing.entrySet().stream().map(entry -> { // link non-filtering sorting variables
+
+							final List<IRI> path=entry.getKey();
+							final String label=entry.getValue();
+
+							return line(optional(edge(var(root), path(path), var(label))));
+
+						})))
+
 				),
 
-				when(offset > 0 || limit > 0, order(criteria(orders))),
+				order(
+
+						list(orders.stream().map(order ->
+								sort(order.inverse(), var(sorting.get(order.path())))
+						)),
+
+						orders.stream()
+								.map(Order::path)
+								.filter(List::isEmpty)
+								.findFirst()
+								.map(empty -> nothing())
+								.orElseGet(() -> asc(var(root)))  // root as last resort, unless already used
+
+				),
+
 				offset(offset),
 				limit(limit, options.items())
-
-		));
-	}
-
-	private Scribe sorters(final List<Order> orders
-	) {
-		return space(list(orders.stream()
-				.filter(order -> !order.path().isEmpty()) // root already retrieved
-				.map(order -> optional(edge(
-						var(root),
-						options.same() ? same(order.path()) : path(order.path()),
-						var(valueOf(1+orders.indexOf(order)))
-				)))
-		));
-	}
-
-	private static Scribe criteria(final List<Order> orders) {
-		return list(Stream.concat(
-
-				orders.stream().map(order -> sort(order.inverse(),
-						order.path().isEmpty() ? var(root) : var(valueOf(1+orders.indexOf(order)))
-				)),
-
-				orders.stream()
-						.map(Order::path)
-						.filter(List::isEmpty)
-						.findFirst()
-						.map(empty -> Stream.<Scribe>empty())
-						.orElseGet(() -> Stream.of(var(root)))  // root as last resort, unless already used
 
 		));
 	}

@@ -28,14 +28,11 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
-import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.rdf4j.SPARQLScribe.lang;
 import static com.metreeca.rdf4j.SPARQLScribe.string;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
@@ -46,27 +43,18 @@ import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.assets.Logger.time;
 
 import static java.lang.String.format;
-import static java.util.Collections.singleton;
+import static java.lang.String.valueOf;
 
 abstract class GraphQueryBase {
 
 	static final String root="0";
 
-	static Scribe same() {
-		return text("(owl:sameAs|^owl:sameAs)*");
-	}
-
-	static Scribe same(final Collection<IRI> path) {
-		return list(Stream.concat(
-				Stream.of(same()),
-				path.stream().flatMap(step -> Stream.of(text(step), same()))
-		), "/");
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Options options;
+
+	private int label=1; // the next label available for tagging (0 reserved for the root node)
 
 	private final Logger logger=asset(logger());
 
@@ -76,8 +64,13 @@ abstract class GraphQueryBase {
 	}
 
 
-	protected Options options() {
+	Options options() {
 		return options;
+	}
+
+
+	String label() {
+		return valueOf(label++);
 	}
 
 
@@ -105,21 +98,21 @@ abstract class GraphQueryBase {
 
 	Scribe filters(final Shape shape) {
 		return space(
-				all(shape).map(values -> values(root, values)).orElse(nothing()), // root universal constraints
-				shape.map(new SkeletonProbe(root, true, options.same()))
+
+				space(all(shape).map(values -> values(root, values)).orElse(nothing())),  // root universal constraints
+
+				space(shape.map(new SkeletonProbe(root, true, this::label)))
+
 		);
 	}
 
+
 	Scribe pattern(final Shape shape) {
-		return space(shape.map(new SkeletonProbe(root, false, options.same())));
+		return space(shape.map(new SkeletonProbe(root, false, this::label)));
 	}
 
 	Scribe anchor(final Collection<IRI> path, final String target) {
-		return path.isEmpty() ? nothing() : space(edge(
-				var(root),
-				options.same() ? same(path) : path(path),
-				var(target)
-		));
+		return path.isEmpty() ? nothing() : space(edge(var(root), path(path), var(target)));
 	}
 
 
@@ -128,17 +121,15 @@ abstract class GraphQueryBase {
 	private static final class SkeletonProbe extends Shape.Probe<Scribe> {
 
 		private final String anchor;
-
 		private final boolean prune;
-		private final boolean same;
+
+		private final Supplier<String> labels;
 
 
-		private SkeletonProbe(final String anchor, final boolean prune, final boolean same) {
-
+		private SkeletonProbe(final String anchor, final boolean prune, final Supplier<String> labels) {
 			this.anchor=anchor;
-
 			this.prune=prune;
-			this.same=same;
+			this.labels=labels;
 		}
 
 
@@ -160,11 +151,7 @@ abstract class GraphQueryBase {
 		}
 
 		@Override public Scribe probe(final Clazz clazz) {
-			return line(edge(
-					var(anchor),
-					same ? text("%1$s/a/(%1$s/rdfs:subClassOf)*/%1$s", same()) : text("a/rdfs:subClassOf*"),
-					text(clazz.iri())
-			));
+			return edge(var(anchor), text("a/rdfs:subClassOf*"), text(clazz.iri()));
 		}
 
 		@Override public Scribe probe(final Range range) {
@@ -188,56 +175,56 @@ abstract class GraphQueryBase {
 
 			} else {
 
-				return lang.tags().isEmpty() ? nothing() : line(filter(
+				return lang.tags().isEmpty() ? nothing() : filter(
 						in(lang(var(anchor)), lang.tags().stream().map(Values::quote).map(Scribe::text))
-				));
+				);
 
 			}
 		}
 
 
 		@Override public Scribe probe(final MinExclusive minExclusive) {
-			return line(filter(gt(var(anchor), text(minExclusive.limit()))));
+			return filter(gt(var(anchor), text(minExclusive.limit())));
 		}
 
 		@Override public Scribe probe(final MaxExclusive maxExclusive) {
-			return line(filter(lt(var(anchor), text(maxExclusive.limit()))));
+			return filter(lt(var(anchor), text(maxExclusive.limit())));
 		}
 
 		@Override public Scribe probe(final MinInclusive minInclusive) {
-			return line(filter(gte(var(anchor), text(minInclusive.limit()))));
+			return filter(gte(var(anchor), text(minInclusive.limit())));
 		}
 
 		@Override public Scribe probe(final MaxInclusive maxInclusive) {
-			return line(filter(lte(var(anchor), text(maxInclusive.limit()))));
+			return filter(lte(var(anchor), text(maxInclusive.limit())));
 		}
 
 
 		@Override public Scribe probe(final MinLength minLength) {
-			return line(filter(gte(strlen(str(var(anchor))), text(minLength.limit()))));
+			return filter(gte(strlen(str(var(anchor))), text(minLength.limit())));
 		}
 
 		@Override public Scribe probe(final MaxLength maxLength) {
-			return line(filter(lte(strlen(str(var(anchor))), text(maxLength.limit()))));
+			return filter(lte(strlen(str(var(anchor))), text(maxLength.limit())));
 		}
 
 
 		@Override public Scribe probe(final Pattern pattern) {
-			return line(filter(regex(
+			return filter(regex(
 					str(var(anchor)), text(quote(pattern.expression())), text(quote(pattern.flags()))
-			)));
+			));
 		}
 
 		@Override public Scribe probe(final Like like) {
-			return line(filter(regex(
+			return filter(regex(
 					str(var(anchor)), text(quote(like.toExpression()))
-			)));
+			));
 		}
 
 		@Override public Scribe probe(final Stem stem) {
-			return line(filter(strstarts(
+			return filter(strstarts(
 					str(var(anchor)), text(quote(stem.prefix()))
-			)));
+			));
 		}
 
 
@@ -255,13 +242,9 @@ abstract class GraphQueryBase {
 		}
 
 		@Override public Scribe probe(final Any any) {
-
-			// values-based filtering (as opposed to in-based filtering) works also or root terms // !!! performance?
-
-			return any.values().size() <= 1
-					? nothing() // singleton universal constraints handled by field probe
-					: values(anchor, any.values());
-
+			return anchor.equals(root)
+					? values(anchor, any.values())
+					: filter(in(var(anchor), any.values().stream().map(Scribe::text)));
 		}
 
 
@@ -276,39 +259,20 @@ abstract class GraphQueryBase {
 			final String alias=field.alias();
 
 			final Optional<Set<Value>> all=all(shape);
-			final Optional<Set<Value>> any=any(shape);
-
-			final Optional<Value> singleton=any
-					.filter(values -> values.size() == 1)
-					.map(values -> values.iterator().next());
-
-			final Function<Scribe, Scribe> edge=target -> (traverse(field.iri(),
-
-					iri -> line(edge(var(anchor), same ? same(singleton(iri)) : text(iri), target)),
-					iri -> line(edge(target, same ? same(singleton(iri)) : text(iri), var(anchor)))
-
-			));
 
 			final Scribe constraints=list(
 
-					prune && (all.isPresent() || singleton.isPresent())
-							? nothing() // (€) filtering hook already available on all/any edges
-							: edge.apply(var(alias)), // filtering or projection hook
+					prune && all.isPresent() ? nothing() // (€) filtering hook already available on universal edges
+							: line(edge(var(anchor), field.iri(), var(alias))), // filtering or projection hook
 
-					list(all.map(values -> // insert universal constraints edges
-							values.stream().map(value -> edge.apply(text(value)))
-					).orElse(Stream.empty())),
+					list(all.map(values -> values.stream().map(value ->  // universal constraints edges
+							line(edge(var(anchor), field.iri(), text(value)))
+					)).orElse(Stream.empty())),
 
-					singleton.map(value -> // insert singleton existential constraint edge
-							edge.apply(text(value))
-					).orElse(nothing()),
-
-					space(shape.map(new SkeletonProbe(alias, prune, same)))
+					space(shape.map(new SkeletonProbe(alias, prune, labels)))
 			);
 
-			return space( // (€) optional unless universally constrained // !!! or filtered
-					prune || all.isPresent() || singleton.isPresent() ? constraints : optional(space(constraints))
-			);
+			return space(prune ? constraints : optional(space(constraints)));
 
 		}
 

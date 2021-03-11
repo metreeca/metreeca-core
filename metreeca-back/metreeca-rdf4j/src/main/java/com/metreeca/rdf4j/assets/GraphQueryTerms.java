@@ -61,7 +61,7 @@ final class GraphQueryTerms extends GraphQueryBase {
 		final Shape filter=shape
 				.filter(resource)
 				.resolve(resource)
-				.label(1);
+				.label(this::label);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -103,8 +103,10 @@ final class GraphQueryTerms extends GraphQueryBase {
 
 							)),
 
-							line(optional(edge(var("value"), "rdfs:label", var("label")))),
-							line(optional(edge(var("value"), "rdfs:comment", var("notes"))))
+							space(
+									line(optional(edge(var("value"), "rdfs:label", var("label")))),
+									line(optional(edge(var("value"), "rdfs:comment", var("notes"))))
+							)
 
 					))
 

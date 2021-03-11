@@ -101,7 +101,7 @@ final class ShapeRedactorTest {
 				.isEqualTo(and(x, y));
 	}
 
-	@Test void testHandleEMptyValueSets() {
+	@Test void testHandleEmptyValueSets() {
 		assertThat(value("first").redact("value", emptySet()))
 				.isEqualTo(or());
 	}
@@ -109,8 +109,7 @@ final class ShapeRedactorTest {
 
 	@Test void testOptimizeFields() {
 		assertThat(and(field(RDF.FIRST, value("first")), field(RDF.REST, value("rest")))
-				.redact("value", "first"
-				))
+				.redact("value", "first"))
 				.isEqualTo(field(RDF.FIRST, and()));
 	}
 

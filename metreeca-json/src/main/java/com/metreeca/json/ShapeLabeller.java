@@ -18,25 +18,25 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
+import java.util.function.Supplier;
+
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
-import static java.lang.String.valueOf;
-
 final class ShapeLabeller extends Shape.Probe<Shape> {
 
-	private int next;
 
+	private final Supplier<String> labels;
 
-	ShapeLabeller(final int next) {
-		this.next=next;
+	ShapeLabeller(final Supplier<String> labels) {
+		this.labels=labels;
 	}
 
 
 	@Override public Shape probe(final Field field) {
-		return field(valueOf(next++), field.iri(), field.shape().map(this));
+		return field(labels.get(), field.iri(), field.shape().map(this));
 	}
 
 

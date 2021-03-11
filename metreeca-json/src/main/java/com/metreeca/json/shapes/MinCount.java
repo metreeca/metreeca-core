@@ -103,16 +103,17 @@ public final class MinCount extends Shape {
 			return minCount.limit();
 		}
 
+
+		@Override public Integer probe(final When when) {
+			return reduce(Stream.of(when.pass(), when.fail()), Math::min);
+		}
+
 		@Override public Integer probe(final And and) {
 			return reduce(and.shapes().stream(), Math::max);
 		}
 
 		@Override public Integer probe(final Or or) {
 			return reduce(or.shapes().stream(), Math::min);
-		}
-
-		@Override public Integer probe(final When when) {
-			return reduce(Stream.of(when.pass(), when.fail()), Math::min);
 		}
 
 

@@ -32,6 +32,7 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
 
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptyMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
@@ -60,7 +61,7 @@ public final class Field extends Shape {
 			throw new NullPointerException("null iri");
 		}
 
-		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+		if ( shapes == null || stream(shapes).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null shapes");
 		}
 
@@ -73,7 +74,7 @@ public final class Field extends Shape {
 			throw new NullPointerException("null iri");
 		}
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+		if ( values == null || stream(values).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
 
@@ -95,7 +96,7 @@ public final class Field extends Shape {
 			throw new NullPointerException("null iri");
 		}
 
-		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+		if ( shapes == null || stream(shapes).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null shapes");
 		}
 
@@ -116,7 +117,7 @@ public final class Field extends Shape {
 			throw new NullPointerException("null iri");
 		}
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+		if ( values == null || stream(values).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
 
@@ -153,6 +154,25 @@ public final class Field extends Shape {
 				.filter(field -> field.iri().equals(iri))
 
 				.findFirst();
+	}
+
+	public static Optional<Field> field(final Shape shape, final Collection<IRI> path) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null path");
+		}
+
+		Optional<Field> field=null;
+
+		for (final IRI step : path) {
+			field=(field != null ? field.map(Field::shape) : Optional.of(shape)).flatMap(s -> field(s, step));
+		}
+
+		return field != null ? field : Optional.empty();
 	}
 
 

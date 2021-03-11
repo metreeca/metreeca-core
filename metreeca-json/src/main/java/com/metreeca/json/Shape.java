@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.vocabulary.LDP;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.Frame.inverse;
@@ -35,7 +36,6 @@ import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toSet;
 
@@ -83,25 +83,21 @@ public abstract class Shape {
 	 *
 	 * @param path the property path to be traversed
 	 *
-	 * @return the shape reached following {@code path} from this shape
+	 * @return the optional shape reached following {@code path} from this shape or an empty optional, if {@code path}
+	 * includes unknown steps
 	 *
-	 * @throws NullPointerException     if {@code path} is null or contains null elements
-	 * @throws IllegalArgumentException if {@code path} includes unknown steps
+	 * @throws NullPointerException if {@code path} is null or contains null elements
 	 */
-	public Shape walk(final Collection<IRI> path) {
+	public Optional<Shape> walk(final Collection<IRI> path) {
 
 		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null path");
 		}
 
-		Shape shape=this;
+		Optional<Shape> shape=Optional.of(this);
 
 		for (final IRI step : path) {
-			shape=field(shape, step)
-
-					.orElseThrow(() -> new IllegalArgumentException(format("unknown path step <%s>", step)))
-
-					.shape();
+			shape=shape.flatMap(s -> field(s, step)).map(Field::shape);
 		}
 
 		return shape;
@@ -291,20 +287,19 @@ public abstract class Shape {
 	/**
 	 * Uniquely label fields in this shape.
 	 *
-	 * @param reserved the number of reserved field labels
+	 * @param labels a supplier of unique labels
 	 *
-	 * @return a copy of this shape where fields are assigned a unique numeric alias; numbering starts from {@code
-	 * reserved}
+	 * @return a copy of this shape where fields are assigned a unique alias supplied by {@code labels}
 	 *
-	 * @throws IllegalArgumentException if {@code reserved} is negative
+	 * @throws NullPointerException if {@code labels} is null
 	 */
-	public Shape label(final int reserved) {
+	public Shape label(final Supplier<String> labels) {
 
-		if ( reserved < 0 ) {
-			throw new IllegalArgumentException("negative reserved count");
+		if ( labels == null ) {
+			throw new NullPointerException("null labels");
 		}
 
-		return map(new ShapeLabeller(reserved));
+		return map(new ShapeLabeller(labels));
 	}
 
 	/**

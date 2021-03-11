@@ -22,7 +22,8 @@ import com.metreeca.json.queries.Items;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -117,7 +118,7 @@ final class GraphQueryItemsTest {
 
 			final Function<Items, List<Value>> actual=edges -> query(edges)
 					.stream()
-					.filter(Values.pattern(null, LDP.CONTAINS, null))
+					.filter(Values.pattern(null, Shape.Contains, null))
 					.map(Statement::getObject)
 					.distinct()
 					.collect(toList());
@@ -152,5 +153,30 @@ final class GraphQueryItemsTest {
 
 		});
 	}
+
+	//@Test void testSortingOnVirtuals() {
+	//	exec(() -> assertThat(query(items(
+	//
+	//			virtual(OWL.SAMEAS, filter(clazz(term("Office")))), singletonList(decreasing(term("code")))
+	//
+	//	))
+	//			.stream()
+	//			.filter(Values.pattern(null, Shape.Contains, null))
+	//			.map(Statement::getObject)
+	//			.distinct()
+	//			.collect(toList())
+	//
+	//	).isEqualTo(tuples(
+	//
+	//			"select ?alias { ?alias a :Alias; owl:sameAs/birt:code ?code } order by desc(?code)"
+	//
+	//	)
+	//
+	//			.stream()
+	//			.map(map -> map.get("alias"))
+	//			.collect(toList())
+	//
+	//	));
+	//}
 
 }

@@ -54,6 +54,7 @@ final class ShapePrunerTest {
 		}
 
 		@Test void testRemoveConvey() {
+			assertThat(prune(convey(constraint))).isEqualTo(and());
 			assertThat(prune(convey(field(property)))).isEqualTo(and());
 		}
 
@@ -78,6 +79,7 @@ final class ShapePrunerTest {
 		}
 
 		@Test void testRetainConvey() {
+			assertThat(prune(convey(constraint))).isEqualTo(constraint);
 			assertThat(prune(convey(field(property)))).isEqualTo(field(property));
 		}
 

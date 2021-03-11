@@ -222,7 +222,6 @@ public final class SPARQLScribe {
 	}
 
 
-
 	public static Scribe or(final Scribe... expressions) {
 		return list(expressions, " || ");
 	}

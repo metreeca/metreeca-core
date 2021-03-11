@@ -289,6 +289,10 @@ final class JSONLDParserTest {
 					items("{ 'first.nil': 1 }", shape, items -> {})
 			);
 
+			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
+					items("{ '_order': '-nil' }", shape, items -> {})
+			);
+
 		}
 
 		@Test void testReportReferencesForEmptyShape() {

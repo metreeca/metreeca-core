@@ -63,7 +63,7 @@ final class GraphQueryStats extends GraphQueryBase {
 		final Shape filter=shape
 				.filter(resource)
 				.resolve(resource)
-				.label(1);
+				.label(this::label);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -103,10 +103,12 @@ final class GraphQueryStats extends GraphQueryBase {
 							space(block(
 
 									space(select(space(indent(
+
 											var("type"),
 											as("min", min(var(target))),
 											as("max", max(var(target))),
 											as("count", count(true, var(target)))
+
 									)))),
 
 									space(where(

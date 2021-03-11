@@ -17,6 +17,7 @@
 package com.metreeca.rest;
 
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -171,7 +172,7 @@ public abstract class Scribe {
 			throw new NullPointerException("null value");
 		}
 
-		return text(format(value));
+		return text(value.equals(RDF.TYPE) ? "a" : format(value));
 	}
 
 	public static Scribe text(final char c) {

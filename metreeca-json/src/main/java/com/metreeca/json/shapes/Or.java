@@ -75,9 +75,9 @@ public final class Or extends Shape {
 
 				.flatMap(new Shape.Probe<Stream<Shape>>() {
 
-					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
-
 					@Override public Stream<Shape> probe(final Or or) { return or.shapes().stream(); }
+
+					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
 				})
 

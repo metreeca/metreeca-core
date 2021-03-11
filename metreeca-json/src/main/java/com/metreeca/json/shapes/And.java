@@ -75,9 +75,9 @@ public final class And extends Shape {
 
 				.flatMap(new Probe<Stream<Shape>>() {
 
-					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
-
 					@Override public Stream<Shape> probe(final And and) { return and.shapes().stream(); }
+
+					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
 				})
 

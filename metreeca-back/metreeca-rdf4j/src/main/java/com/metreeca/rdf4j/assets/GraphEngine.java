@@ -22,7 +22,6 @@ import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.OWL;
 
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
@@ -37,32 +36,14 @@ import static com.metreeca.rest.Context.asset;
  */
 public final class GraphEngine implements Engine {
 
-	private boolean same;
-
 	private int items=1_000; // the maximum number of resources to be returned from items queries
 	private int stats=10_000; // the maximum number of resources to be evaluated by stats queries
 	private int terms=10_000; // the maximum number of resources to be evaluated by terms queries
-
 
 	private final Graph graph=asset(graph());
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Configures {@link OWL#SAMEAS owl:sameAs} query rewriting.
-	 *
-	 * @param same if {@code true}, enable query-rewriting to support {@code owl:sameAs} reasoning
-	 *
-	 * @return this graph engine
-	 */
-	public GraphEngine same(final boolean same) {
-
-		this.same=same;
-
-		return this;
-	}
-
 
 	GraphEngine items(final int items) {
 
@@ -333,9 +314,6 @@ public final class GraphEngine implements Engine {
 		Options(final GraphEngine engine) {
 			this.engine=engine;
 		}
-
-
-		public boolean same() { return engine.same; }
 
 
 		public int items() { return engine.items; }

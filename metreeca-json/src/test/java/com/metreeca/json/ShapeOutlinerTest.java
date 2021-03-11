@@ -25,6 +25,7 @@ import java.util.Collection;
 import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.ModelAssert.assertThat;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -36,17 +37,17 @@ import static java.util.stream.Collectors.toSet;
 
 final class ShapeOutlinerTest {
 
-	private static final IRI p=RDF.VALUE;
+	private static final IRI p=iri("test:p");
+	private static final IRI q=iri("test:q");
 
-	private static final IRI x=RDF.FIRST;
-	private static final IRI y=RDF.REST;
-	private static final IRI z=RDF.NIL;
+	private static final IRI x=iri("test:x");
+	private static final IRI y=iri("test:y");
+	private static final IRI z=iri("test:z");
 
 
 	private Collection<Statement> outline(final Shape shape, final Value... sources) {
 		return shape.map(new ShapeOutliner(sources)).collect(toSet());
 	}
-
 
 	@Test void testOutlineFields() {
 
@@ -59,6 +60,7 @@ final class ShapeOutlinerTest {
 				.isIsomorphicTo(statement(y, p, x));
 
 	}
+
 
 	@Test void testOutlineClasses() {
 		assertThat(outline(and(all(x), clazz(y))))

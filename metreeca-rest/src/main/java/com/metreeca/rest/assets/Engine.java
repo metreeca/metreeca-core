@@ -19,7 +19,8 @@ package com.metreeca.rest.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
-import com.metreeca.json.shapes.*;
+import com.metreeca.json.shapes.Field;
+import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 
@@ -36,7 +37,6 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.Forbidden;
@@ -75,7 +75,7 @@ public interface Engine extends Wrapper {
 		final Shape shape=query.shape();
 		final List<IRI> path=query.path();
 
-		final Stream<Field> fields=fields(shape.redact(Mode, Convey).walk(path));
+		final Stream<Field> fields=shape.redact(Mode, Convey).walk(path).map(Field::fields).orElseGet(Stream::empty);
 		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
 
 		return and(
@@ -98,10 +98,10 @@ public interface Engine extends Wrapper {
 		final Shape shape=query.shape();
 		final List<IRI> path=query.path();
 
-		final Stream<Field> fields=fields(shape.redact(Mode, Convey).walk(path));
+		final Stream<Field> fields=shape.redact(Mode, Convey).walk(path).map(Field::fields).orElseGet(Stream::empty);
 		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
 
-		return And.and(
+		return and(
 				field(terms, multiple(),
 						field(value, required(), term),
 						field(count, required(), datatype(XSD.INTEGER))

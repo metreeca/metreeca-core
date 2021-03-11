@@ -46,6 +46,7 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 				.map(source -> statement((Resource)source, RDF.TYPE, clazz.iri()));
 	}
 
+
 	@Override public Stream<Statement> probe(final Field field) {
 		return Stream.concat(
 
@@ -69,6 +70,7 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 
 		);
 	}
+
 
 	@Override public Stream<Statement> probe(final And and) {
 		return Stream.concat(
