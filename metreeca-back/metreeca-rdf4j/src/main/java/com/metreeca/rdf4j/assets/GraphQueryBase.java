@@ -101,14 +101,14 @@ abstract class GraphQueryBase {
 
 				space(all(shape).map(values -> values(root, values)).orElse(nothing())),  // root universal constraints
 
-				space(shape.map(new SkeletonProbe(root, true, this::label)))
+				space(shape.map(new SkeletonProbe(root, true)))
 
 		);
 	}
 
 
 	Scribe pattern(final Shape shape) {
-		return space(shape.map(new SkeletonProbe(root, false, this::label)));
+		return space(shape.map(new SkeletonProbe(root, false)));
 	}
 
 	Scribe anchor(final Collection<IRI> path, final String target) {
@@ -123,13 +123,10 @@ abstract class GraphQueryBase {
 		private final String anchor;
 		private final boolean prune;
 
-		private final Supplier<String> labels;
 
-
-		private SkeletonProbe(final String anchor, final boolean prune, final Supplier<String> labels) {
+		private SkeletonProbe(final String anchor, final boolean prune) {
 			this.anchor=anchor;
 			this.prune=prune;
-			this.labels=labels;
 		}
 
 
@@ -269,7 +266,7 @@ abstract class GraphQueryBase {
 							line(edge(var(anchor), field.iri(), text(value)))
 					)).orElse(Stream.empty())),
 
-					space(shape.map(new SkeletonProbe(alias, prune, labels)))
+					space(shape.map(new SkeletonProbe(alias, prune)))
 			);
 
 			return space(prune ? constraints : optional(space(constraints)));

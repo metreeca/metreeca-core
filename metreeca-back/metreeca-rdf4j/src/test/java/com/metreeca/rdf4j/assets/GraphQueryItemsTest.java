@@ -114,7 +114,9 @@ final class GraphQueryItemsTest {
 			final String query="select ?employee "
 					+" where { ?employee a :Employee; rdfs:label ?label; :office ?office }";
 
-			final Shape shape=filter().then(clazz(term("Employee")));
+			final Shape shape=and(
+					filter(clazz(term("Employee"))), field(RDFS.LABEL), field(term("office"))
+			);
 
 			final Function<Items, List<Value>> actual=edges -> query(edges)
 					.stream()

@@ -16,13 +16,11 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.json.Order;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rdf4j.SPARQLScribe;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
-import com.metreeca.rest.Scribe;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
@@ -37,14 +35,24 @@ import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.bnode;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Field.fields;
 import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Scribe.*;
+import static com.metreeca.rest.Scribe.block;
+import static com.metreeca.rest.Scribe.code;
+import static com.metreeca.rest.Scribe.indent;
+import static com.metreeca.rest.Scribe.list;
+import static com.metreeca.rest.Scribe.space;
+import static com.metreeca.rest.Scribe.when;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 final class GraphQueryItems extends GraphQueryBase {
@@ -77,6 +85,8 @@ final class GraphQueryItems extends GraphQueryBase {
 				.label(this::label);
 
 		final Collection<Triple> template=convey.map(new TemplateProbe(root)).collect(toList());
+		final Map<List<IRI>, String> sorting=sorting(filter, convey, orders);
+
 		final Collection<Statement> model=new LinkedHashSet<>();
 
 		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
@@ -91,13 +101,42 @@ final class GraphQueryItems extends GraphQueryBase {
 
 					space(select(space(indent(
 
-							projection(template)
+							list(projection(template).map(SPARQLScribe::var))
 
 					)))),
 
 					space(where(
 
-							matcher(filter, orders, offset, limit),
+							space(block(
+
+									select(true, var(root)),
+
+									block(
+
+											space(filters(filter)),
+
+											// non-filtering sorting variables; use pattern to honor convey constraints
+
+											space(pattern(convey.map(new SortingProbe(sorting))))
+
+									),
+
+									order(
+
+											list(orders.stream().map(order ->
+													sort(order.inverse(), var(sorting.get(order.path())))
+											)),
+
+											// sort on root as last resort, unless already included
+
+											when(!sorting.containsValue(root), asc(var(root)))
+
+									),
+
+									offset(offset),
+									limit(limit, options.items())
+
+							)),
 
 							pattern(convey)
 
@@ -148,8 +187,8 @@ final class GraphQueryItems extends GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Scribe projection(final Collection<Triple> template) {
-		return list(Stream.concat(
+	private Stream<String> projection(final Collection<Triple> template) {
+		return Stream.concat(
 
 				Stream.of(root), /// always project root
 
@@ -160,87 +199,29 @@ final class GraphQueryItems extends GraphQueryBase {
 
 				).map(BNode.class::cast).map(BNode::getID)
 
-		).distinct().sorted().map(SPARQLScribe::var));
+		).distinct().sorted();
 	}
 
-	private Scribe matcher(final Shape shape, final List<Order> orders, final int offset, final int limit) {
+	private Map<List<IRI>, String> sorting(final Shape filter, final Shape convey, final Collection<Order> orders) {
 
-		final Map<List<IRI>, String> sorting=new HashMap<>();
-		final Map<List<IRI>, String> missing=new HashMap<>();
+		final Map<List<IRI>, String> labels=new HashMap<>();
 
-		for (final Order order : orders) {
+		orders.stream().map(Order::path).distinct().forEach(path -> {
 
-			final List<IRI> path=order.path();
+			Optional.of(root).filter(label -> path.isEmpty()).ifPresent(label -> labels.putIfAbsent(path, label));
 
-			if ( path.isEmpty() ) { // root path › well-known label
+			field(filter, path).map(Field::alias).ifPresent(label -> labels.putIfAbsent(path, label));
+			field(convey, path).map(Field::alias).ifPresent(label -> labels.putIfAbsent(path, label));
 
-				sorting.put(path, root);
-
-			} else {
-
-				Field.field(shape, path)
-
-						.map(field -> { // filtering path › record the existing label
-
-							sorting.put(path, field.alias());
-
-							return field;
-
-						})
-
-						.orElseGet(() -> { // sorting path > assign a unique label
-
-							final String label=label();
-
-							sorting.put(path, label);
-							missing.put(path, label);
-
-							return null;
-
-						});
-
+			if ( !labels.containsKey(path) ) {
+				throw new IllegalArgumentException(format("unknown sorting path %s",
+						path.stream().map(Values::format).collect(joining("/"))
+				));
 			}
 
-		}
+		});
 
-		return shape.equals(and()) ? nothing() : shape.equals(or()) ? filter(text(false)) : space(block(
-
-				select(true, var(root)),
-
-				block(
-
-						space(filters(shape)),
-
-						space(list(missing.entrySet().stream().map(entry -> { // link non-filtering sorting variables
-
-							final List<IRI> path=entry.getKey();
-							final String label=entry.getValue();
-
-							return line(optional(edge(var(root), path(path), var(label))));
-
-						})))
-
-				),
-
-				order(
-
-						list(orders.stream().map(order ->
-								sort(order.inverse(), var(sorting.get(order.path())))
-						)),
-
-						orders.stream()
-								.map(Order::path)
-								.filter(List::isEmpty)
-								.findFirst()
-								.map(empty -> nothing())
-								.orElseGet(() -> asc(var(root)))  // root as last resort, unless already used
-
-				),
-
-				offset(offset),
-				limit(limit, options.items())
-
-		));
+		return labels;
 	}
 
 
@@ -290,6 +271,44 @@ final class GraphQueryItems extends GraphQueryBase {
 
 
 		@Override public Stream<Triple> probe(final Shape shape) { return Stream.empty(); }
+
+	}
+
+	private static final class SortingProbe extends Shape.Probe<Shape> {
+
+		private final Map<List<IRI>, String> labels;
+
+
+		SortingProbe(final Map<List<IRI>, String> labels) {this.labels=labels;}
+
+
+		@Override public Shape probe(final Field field) {
+
+			final String alias=field.alias();
+			final IRI iri=field.iri();
+			final Shape shape=field.shape().map(this);
+
+			return labels.containsValue(alias) || fields(shape).findFirst().isPresent() ?
+					field(alias, iri, shape) : and();
+		}
+
+
+		@Override public Shape probe(final When when) {
+			return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
+		}
+
+		@Override public Shape probe(final And and) {
+			return and(and.shapes().stream().map(this));
+		}
+
+		@Override public Shape probe(final Or or) {
+			return or(or.shapes().stream().map(this));
+		}
+
+
+		@Override public Shape probe(final Shape shape) {
+			return shape;
+		}
 
 	}
 
