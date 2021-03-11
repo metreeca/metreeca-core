@@ -53,6 +53,8 @@ public final class SPARQLScribe {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static Scribe select(final Scribe... vars) {
 		return select(false, vars);
 	}
@@ -61,10 +63,47 @@ public final class SPARQLScribe {
 		return list(text("\rselect"), distinct ? text(" distinct") : nothing(), list(vars));
 	}
 
+
 	public static Scribe where(final Scribe... pattern) {
 		return list(text("\rwhere"), block(pattern));
 	}
 
+
+	public static Scribe group(final Scribe... expressions) {
+		return list(text(" group by"), list(expressions));
+	}
+
+	public static Scribe having(final Scribe... expressions) {
+		return list(text(" having ( "), list(expressions), text(" )"));
+	}
+
+	public static Scribe order(final Scribe... expressions) {
+		return list(text(" order by"), list(expressions));
+	}
+
+	public static Scribe sort(final boolean inverse, final Scribe expression) {
+		return inverse ? desc(expression) : asc(expression);
+	}
+
+	public static Scribe asc(final Scribe expression) {
+		return list(text(" asc("), expression, text(")"));
+	}
+
+	public static Scribe desc(final Scribe expression) {
+		return list(text(" desc("), expression, text(")"));
+	}
+
+	public static Scribe offset(final int offset) {
+		return offset > 0 ? text(" offset %d", offset) : nothing();
+	}
+
+	public static Scribe limit(final int limit, final int sampling) {
+		return limit == 0 && sampling == 0 ? nothing()
+				: text(" limit %d", limit > 0 ? Math.min(limit, sampling) : sampling);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Scribe union(final Scribe... patterns) {
 		return list(stream(patterns).flatMap(pattern -> Stream.of(text(" union "), pattern)).skip(1));
@@ -126,39 +165,7 @@ public final class SPARQLScribe {
 	}
 
 
-	public static Scribe group(final Scribe... expressions) {
-		return list(text(" group by"), list(expressions));
-	}
-
-	public static Scribe having(final Scribe... expressions) {
-		return list(text(" having ( "), list(expressions), text(" )"));
-	}
-
-	public static Scribe order(final Scribe... expressions) {
-		return list(text(" order by"), list(expressions));
-	}
-
-	public static Scribe sort(final boolean inverse, final Scribe expression) {
-		return inverse ? desc(expression) : asc(expression);
-	}
-
-	public static Scribe asc(final Scribe expression) {
-		return list(text(" asc("), expression, text(")"));
-	}
-
-	public static Scribe desc(final Scribe expression) {
-		return list(text(" desc("), expression, text(")"));
-	}
-
-	public static Scribe offset(final int offset) {
-		return offset > 0 ? text(" offset %d", offset) : nothing();
-	}
-
-	public static Scribe limit(final int limit, final int sampling) {
-		return limit == 0 && sampling == 0 ? nothing()
-				: text(" limit %d", limit > 0 ? Math.min(limit, sampling) : sampling);
-	}
-
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Scribe min(final Scribe expression) {
 		return list(text(" min("), expression, text(")"));
@@ -176,6 +183,8 @@ public final class SPARQLScribe {
 		return list(text(" count(", distinct ? text("distinct") : nothing()), expression, text(")"));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Scribe is(final Scribe test, final Scribe pass, final Scribe fail) {
 		return list(text(" if("), test, text(", "), pass, text(", "), fail, text(")"));
@@ -231,6 +240,8 @@ public final class SPARQLScribe {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static Scribe eq(final Scribe x, final Scribe y) {
 		return op(x, "=", y);
 	}
@@ -259,6 +270,8 @@ public final class SPARQLScribe {
 		return list(expression, text(" in ("), list(expressions, ", "), text(')'));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static Scribe function(final String name, final Scribe... args) {
 		return list(text(' '), text(name), text('('), list(args, ", "), text(')'));
