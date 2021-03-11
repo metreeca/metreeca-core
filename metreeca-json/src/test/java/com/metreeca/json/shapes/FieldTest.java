@@ -39,7 +39,7 @@ final class FieldTest {
 
 	@Nested final class Optimization {
 
-		@Test void testPruneDeadFields() {
+		@Test void testPruneDeadPaths() {
 			assertThat(field(RDF.VALUE, or())).isEqualTo(and());
 		}
 

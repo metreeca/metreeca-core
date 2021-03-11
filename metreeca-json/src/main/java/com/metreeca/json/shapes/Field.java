@@ -27,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.indent;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
@@ -312,13 +311,13 @@ public final class Field extends Shape {
 		builder.append("field(");
 
 		if ( !alias.isEmpty() ) {
-			builder.append(alias).append(" = ");
+			builder.append('\'').append(alias).append("' = ");
 		}
 
-		builder.append(iri);
+		builder.append('<').append(iri).append('>');
 
 		if ( !shape.equals(and()) ) {
-			builder.append(", ").append(indent(shape.toString()));
+			builder.append(", ").append(shape);
 		}
 
 		builder.append(")");
