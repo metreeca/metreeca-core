@@ -368,7 +368,7 @@ public abstract class Shape {
 	 */
 	public abstract static class Probe<V> implements Function<Shape, V> {
 
-		public V apply(final Shape shape) {
+		@Override public final V apply(final Shape shape) {
 			return shape == null ? null : shape.map(this);
 		}
 

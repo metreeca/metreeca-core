@@ -153,7 +153,7 @@ public abstract class Query {
 	 */
 	public abstract static class Probe<V> implements Function<Query, V> {
 
-		@Override public V apply(final Query query) {
+		@Override public final V apply(final Query query) {
 			return query == null ? null : query.map(this);
 		}
 
