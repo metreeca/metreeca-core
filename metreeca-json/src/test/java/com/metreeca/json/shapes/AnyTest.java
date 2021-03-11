@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Or.or;
@@ -40,6 +41,10 @@ final class AnyTest {
 			assertThat(any(True, True, False)).isEqualTo(any(True, False));
 		}
 
+		@Test void testConvertSingletonToUniversal() {
+			assertThat(any(True)).isEqualTo(all(True));
+		}
+
 	}
 
 	@Nested final class Probe {
@@ -49,17 +54,17 @@ final class AnyTest {
 		private final Value c=literal(3);
 
 		@Test void testInspectAny() {
-			assertThat(Any.any(any(a, b, c)))
+			assertThat(any(any(a, b, c)))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOr() {
-			assertThat(Any.any(or(any(a, b), any(b, c))))
+			assertThat(any(or(any(a, b), any(b, c))))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOtherShape() {
-			assertThat(Any.any(and()))
+			assertThat(any(and()))
 					.isEmpty();
 		}
 	}
