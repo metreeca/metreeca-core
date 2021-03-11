@@ -477,10 +477,11 @@ final class JSONLDParserTest {
 			);
 		}
 
-		@Test void testIgnoreNullFilters() {
+		@Test void testIgnoreEmptyFilters() {
 
-			items("{ '>': null }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
 			items("{ 'first': null }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
+			items("{ 'first': '' }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
+			items("{ 'first': [] }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
 
 		}
 

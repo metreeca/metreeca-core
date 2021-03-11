@@ -48,10 +48,15 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import static javax.json.JsonValue.EMPTY_JSON_ARRAY;
+import static javax.json.JsonValue.NULL;
+
 /**
  * JSON-LD query parser.
  */
 final class JSONLDParser {
+
+	private static final JsonString EMPTY_JSON_STRING=Json.createValue("");
 
 	private static final java.util.regex.Pattern StepPattern=java.util.regex.Pattern.compile("(?:^|\\.)(\\w+\\b)");
 
@@ -180,7 +185,10 @@ final class JSONLDParser {
 		return and(query.entrySet().stream()
 
 				.filter(entry -> !entry.getKey().startsWith("_")) // ignore reserved properties
-				.filter(entry -> !entry.getValue().equals(JsonValue.NULL)) // ignore null properties
+
+				.filter(entry -> !entry.getValue().equals(NULL))
+				.filter(entry -> !entry.getValue().equals(EMPTY_JSON_STRING))
+				.filter(entry -> !entry.getValue().equals(EMPTY_JSON_ARRAY))
 
 				.map(entry -> { // longest matches first
 
@@ -247,7 +255,7 @@ final class JSONLDParser {
 	private List<IRI> terms(final JsonObject query) {
 		return Optional.ofNullable(query.get("_terms"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
 				.map(v -> v instanceof JsonString ? (JsonString)v : error("_terms is not a string"))
 				.map(path -> path(path.getString(), shape))
@@ -258,7 +266,7 @@ final class JSONLDParser {
 	private List<IRI> stats(final JsonObject query) {
 		return Optional.ofNullable(query.get("_stats"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
 				.map(v -> v instanceof JsonString ? (JsonString)v : error("_stats is not a string"))
 				.map(path -> path(path.getString(), shape))
@@ -270,7 +278,7 @@ final class JSONLDParser {
 	private List<Order> order(final JsonObject query) {
 		return Optional.ofNullable(query.get("_order"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
 				.map(this::order)
 
@@ -310,7 +318,7 @@ final class JSONLDParser {
 	private int offset(final JsonObject query) {
 		return Optional.ofNullable(query.get("_offset"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
 				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : error("_offset not a number"))
 				.map(JsonNumber::intValue)
@@ -322,7 +330,7 @@ final class JSONLDParser {
 	private int limit(final JsonObject query) {
 		return Optional.ofNullable(query.get("_limit"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
 				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : error("_limit is not a number"))
 				.map(JsonNumber::intValue)
