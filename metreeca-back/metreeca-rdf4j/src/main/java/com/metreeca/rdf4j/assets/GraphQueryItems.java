@@ -167,10 +167,10 @@ final class GraphQueryItems extends GraphQueryBase {
 
 				block(
 						filters(shape),
-						with(offset > 0 || limit > 0, sorters(orders))
+						when(offset > 0 || limit > 0, sorters(orders))
 				),
 
-				with(offset > 0 || limit > 0, order(criteria(orders))),
+				when(offset > 0 || limit > 0, order(criteria(orders))),
 				offset(offset),
 				limit(limit, options.items())
 

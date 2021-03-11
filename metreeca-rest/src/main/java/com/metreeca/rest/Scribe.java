@@ -47,7 +47,7 @@ public abstract class Scribe {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Scribe with(final boolean condition, final Scribe... scribes) {
+	public static Scribe when(final boolean condition, final Scribe... scribes) {
 		return condition ? list(scribes) : nothing();
 	}
 

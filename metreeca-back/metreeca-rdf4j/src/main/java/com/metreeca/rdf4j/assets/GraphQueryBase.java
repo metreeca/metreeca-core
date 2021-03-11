@@ -318,7 +318,7 @@ abstract class GraphQueryBase {
 		}
 
 		@Override public Scribe probe(final Or or) {
-			return union(or.shapes().stream().map(s -> block(space(s.map(this)))));
+			return union(or.shapes().stream().map(s -> block(space(s.map(this)))).toArray(Scribe[]::new));
 		}
 
 

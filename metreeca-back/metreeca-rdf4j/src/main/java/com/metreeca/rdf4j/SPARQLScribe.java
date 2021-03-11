@@ -67,11 +67,7 @@ public final class SPARQLScribe {
 
 
 	public static Scribe union(final Scribe... patterns) {
-		return union(stream(patterns));
-	}
-
-	public static Scribe union(final Stream<Scribe> patterns) {
-		return list(patterns.flatMap(pattern -> Stream.of(text(" union "), pattern)).skip(1));
+		return list(stream(patterns).flatMap(pattern -> Stream.of(text(" union "), pattern)).skip(1));
 	}
 
 	public static Scribe optional(final Scribe... pattern) {
@@ -265,11 +261,11 @@ public final class SPARQLScribe {
 	}
 
 
-	public static Scribe function(final String name, final Scribe... args) {
+	private static Scribe function(final String name, final Scribe... args) {
 		return list(text(' '), text(name), text('('), list(args, ", "), text(')'));
 	}
 
-	public static Scribe op(final Scribe x, final String name, final Scribe y) {
+	private static Scribe op(final Scribe x, final String name, final Scribe y) {
 		return list(x, text(' '), text(name), text(' '), y);
 	}
 
