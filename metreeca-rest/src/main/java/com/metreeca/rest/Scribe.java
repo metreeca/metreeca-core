@@ -49,11 +49,6 @@ public abstract class Scribe {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Scribe when(final boolean condition, final Scribe... scribes) {
-		return condition ? list(scribes) : nothing();
-	}
-
-
 	public static Scribe block(final Scribe... scribes) {
 		return list(text("\r{ "), list(scribes), text(" }"));
 	}

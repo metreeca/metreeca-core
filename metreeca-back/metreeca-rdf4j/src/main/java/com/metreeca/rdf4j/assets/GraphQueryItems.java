@@ -42,12 +42,7 @@ import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Scribe.block;
-import static com.metreeca.rest.Scribe.code;
-import static com.metreeca.rest.Scribe.indent;
-import static com.metreeca.rest.Scribe.list;
-import static com.metreeca.rest.Scribe.space;
-import static com.metreeca.rest.Scribe.when;
+import static com.metreeca.rest.Scribe.*;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
@@ -129,7 +124,7 @@ final class GraphQueryItems extends GraphQueryBase {
 
 											// sort on root as last resort, unless already included
 
-											when(!sorting.containsValue(root), asc(var(root)))
+											sorting.containsValue(root) ? nothing() : asc(var(root))
 
 									),
 
