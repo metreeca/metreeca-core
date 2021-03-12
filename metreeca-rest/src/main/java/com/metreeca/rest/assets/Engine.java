@@ -33,7 +33,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.term;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
@@ -56,16 +56,14 @@ import static java.util.Collections.unmodifiableSet;
  */
 public interface Engine extends Wrapper {
 
-	public static String Base="app:/terms#";
+	public static IRI terms=term("terms");
+	public static IRI stats=term("stats");
 
-	public static IRI terms=iri(Base, "terms");
-	public static IRI stats=iri(Base, "stats");
+	public static IRI value=term("value");
+	public static IRI count=term("count");
 
-	public static IRI value=iri(Base, "value");
-	public static IRI count=iri(Base, "count");
-
-	public static IRI min=iri(Base, "min");
-	public static IRI max=iri(Base, "max");
+	public static IRI min=term("min");
+	public static IRI max=term("max");
 
 	public static Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
 
