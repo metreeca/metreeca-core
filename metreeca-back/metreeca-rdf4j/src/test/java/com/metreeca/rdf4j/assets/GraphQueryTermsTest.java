@@ -16,6 +16,7 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.json.Values;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.rest.Xtream;
 
@@ -26,15 +27,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.ValuesTest.item;
-import static com.metreeca.json.ValuesTest.term;
 import static com.metreeca.json.queries.Terms.terms;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.rdf4j.assets.GraphFetcherTest.exec;
+import static com.metreeca.rdf4j.assets.GraphTest.graph;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -43,7 +42,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphQueryTermsTest {
 
 	private Collection<Statement> query(final Terms terms) {
-		return new GraphQueryTerms(new GraphEngine.Options(new GraphEngine())).process(iri("app:/"), terms);
+		return new GraphQueryTerms(new GraphEngine.Options(new GraphEngine())).process(Values.Root, terms);
 	}
 
 
@@ -60,15 +59,15 @@ final class GraphQueryTermsTest {
 	@Test void testEmptyProjection() {
 		exec(() -> assertThat(query(
 
-				terms(filter(clazz(term("Office"))), emptyList(), 0, 0)
+				terms(filter(clazz(Values.term("Office"))), emptyList(), 0, 0)
 
 		)).isIsomorphicTo(Xtream.from(
 
-				GraphTest.graph("construct { \n"
+				graph("construct { \n"
 						+"\n"
-						+"\t<app:/> app:terms [\n"
-						+"\t\tapp:value ?office;\n"
-						+"\t\tapp:count 1\n"
+						+"\t<> :terms [\n"
+						+"\t\t:value ?office;\n"
+						+"\t\t:count 1\n"
 						+"\t].\n"
 						+"\n"
 						+"} where {\n"
@@ -78,7 +77,7 @@ final class GraphQueryTermsTest {
 						+"}"
 				),
 
-				GraphTest.graph("construct { \n"
+				graph("construct { \n"
 						+"\n"
 						+"\t?office rdfs:label ?label.\n"
 						+"\n"
@@ -96,15 +95,15 @@ final class GraphQueryTermsTest {
 	@Test void testRootConstraints() {
 		exec(() -> assertThat(query(
 
-				terms(all(item("employees/1370")), singletonList(term("account")), 0, 0)
+				terms(all(Values.item("employees/1370")), singletonList(Values.term("account")), 0, 0)
 
-		)).isIsomorphicTo(GraphTest.graph(
+		)).isIsomorphicTo(graph(
 
 				"construct { \n"
 						+"\n"
-						+"\t<app:/> app:items [\n"
-						+"\t\tapp:value ?account;\n"
-						+"\t\tapp:count 1\n"
+						+"\t<> :items [\n"
+						+"\t\t:value ?account;\n"
+						+"\t\t:count 1\n"
 						+"\t].\n"
 						+"\n"
 						+"\t?account rdfs:label ?label.\n"

@@ -16,6 +16,7 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.json.Values;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Xtream;
@@ -27,8 +28,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.ValuesTest.*;
+import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.queries.Stats.stats;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.Clazz.clazz;
@@ -44,7 +44,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphQueryStatsTest {
 
 	private Collection<Statement> query(final Stats stats) {
-		return new GraphQueryStats(new Options(new GraphEngine())).process(iri("app:/"), stats);
+		return new GraphQueryStats(new Options(new GraphEngine())).process(Values.Root, stats);
 	}
 
 
@@ -55,7 +55,7 @@ final class GraphQueryStatsTest {
 
 		)).isIsomorphicTo(decode(
 
-				"@prefix app: <app:/terms#> . <app:/> app:count 0 ."
+				"<> :count 0 ."
 
 		)));
 	}
@@ -63,17 +63,17 @@ final class GraphQueryStatsTest {
 	@Test void testEmptyProjection() {
 		exec(() -> assertThat(query(
 
-				stats(filter(clazz(term("Office"))), emptyList(), 0, 0)
+				stats(filter(clazz(Values.term("Office"))), emptyList(), 0, 0)
 
 		)).isIsomorphicTo(Xtream.from(
 
 				graph("construct { \n"
 						+"\n"
-						+"\t<app:/> app:count ?count; app:min ?min; app:max ?max;\n"
+						+"\t<> :count ?count; :min ?min; :max ?max;\n"
 						+"\n"
-						+"\t\t\tapp:stats app:iri.\n"
+						+"\t\t\t:stats :iri.\n"
 						+"\t\t\t\n"
-						+"\tapp:iri app:count ?count; app:min ?min; app:max ?max.\n"
+						+"\t:iri :count ?count; :min ?min; :max ?max.\n"
 						+"\n"
 						+"} where {\n"
 						+"\n"
@@ -108,14 +108,14 @@ final class GraphQueryStatsTest {
 	@Test void testRootConstraints() {
 		exec(() -> assertThat(query(
 
-				stats(all(item("employees/1370")), singletonList(term("account")), 0, 0)
+				stats(all(Values.item("employees/1370")), singletonList(Values.term("account")), 0, 0)
 
 		)).isIsomorphicTo(graph(
 
 				"construct { \n"
 						+"\n"
-						+"\t<app:/> \n"
-						+"\t\tapp:count ?count; app:min ?min; app:max ?max.\n"
+						+"\t<> \n"
+						+"\t\t:count ?count; :min ?min; :max ?max.\n"
 						+"\n"
 						+"} where {\n"
 						+"\n"

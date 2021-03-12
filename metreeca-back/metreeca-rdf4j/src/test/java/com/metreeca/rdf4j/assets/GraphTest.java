@@ -38,7 +38,8 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.ValuesTest.*;
+import static com.metreeca.json.ValuesTest.Prefixes;
+import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.rest.Context.asset;
 
 import static java.util.Collections.singleton;
@@ -158,7 +159,7 @@ public final class GraphTest {
 										.path("/test/request"))
 
 										.status(Response.OK)
-										.header("Location", Base+"test/response"),
+										.header("Location", Root+"test/response"),
 
 								new LinkedHashModel(singleton(data))
 						)

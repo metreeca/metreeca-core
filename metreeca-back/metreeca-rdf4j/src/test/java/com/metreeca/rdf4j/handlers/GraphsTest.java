@@ -16,9 +16,9 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.json.ValuesTest;
 import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rdf4j.assets.GraphTest;
+import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 import com.metreeca.rest.formats.InputFormat;
 
@@ -31,12 +31,12 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.encode;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.export;
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -47,21 +47,19 @@ import static java.util.stream.Collectors.toCollection;
 
 final class GraphsTest {
 
-	private static final Object Root=new Object();
-
 	private static final Statement First=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 	private static final Statement Rest=statement(RDF.NIL, RDF.VALUE, RDF.REST);
 
 
 	private Model catalog() {
 		return new LinkedHashModel(asList(
-				statement(iri(ValuesTest.Base), RDF.VALUE, RDF.NIL),
+				statement(Root, RDF.VALUE, RDF.NIL),
 				statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
 		));
 	}
 
 	private Model dflt() {
-		return com.metreeca.rest.Context.asset(Graph.graph()).exec(connection -> {
+		return asset(Graph.graph()).exec(connection -> {
 
 			return export(connection, (Resource)null);
 
@@ -69,7 +67,7 @@ final class GraphsTest {
 	}
 
 	private Model named() {
-		return com.metreeca.rest.Context.asset(Graph.graph()).exec(connection -> {
+		return asset(Graph.graph()).exec(connection -> {
 
 			return export(connection, RDF.NIL).stream()
 					.map(s -> statement(s.getSubject(), s.getPredicate(), s.getObject())) // strip context info
@@ -97,8 +95,8 @@ final class GraphsTest {
 		return Graphs.graphs().query(Root).update(Root);
 	}
 
-	private com.metreeca.rest.Request request() {
-		return new com.metreeca.rest.Request().base(ValuesTest.Base);
+	private Request request() {
+		return new Request().base(Base);
 	}
 
 
@@ -111,45 +109,45 @@ final class GraphsTest {
 	}
 
 
-	private com.metreeca.rest.Request anonymous(final com.metreeca.rest.Request request) {
+	private Request anonymous(final Request request) {
 		return request;
 	}
 
-	private com.metreeca.rest.Request authenticated(final com.metreeca.rest.Request request) {
+	private Request authenticated(final Request request) {
 		return request.roles(Root);
 	}
 
 
-	private com.metreeca.rest.Request catalog(final com.metreeca.rest.Request request) {
-		return request.method(com.metreeca.rest.Request.GET);
+	private Request catalog(final Request request) {
+		return request.method(Request.GET);
 	}
 
-	private com.metreeca.rest.Request get(final com.metreeca.rest.Request request) {
-		return request.method(com.metreeca.rest.Request.GET);
+	private Request get(final Request request) {
+		return request.method(Request.GET);
 	}
 
-	private com.metreeca.rest.Request put(final com.metreeca.rest.Request request) {
-		return request.method(com.metreeca.rest.Request.PUT).body(InputFormat.input(), () ->
+	private Request put(final Request request) {
+		return request.method(Request.PUT).body(InputFormat.input(), () ->
 				new ByteArrayInputStream(encode(model(Rest)).getBytes(UTF_8))
 		);
 	}
 
-	private com.metreeca.rest.Request delete(final com.metreeca.rest.Request request) {
-		return request.method(com.metreeca.rest.Request.DELETE);
+	private Request delete(final Request request) {
+		return request.method(Request.DELETE);
 	}
 
-	private com.metreeca.rest.Request post(final com.metreeca.rest.Request request) {
-		return request.method(com.metreeca.rest.Request.POST).body(InputFormat.input(), () ->
+	private Request post(final Request request) {
+		return request.method(Request.POST).body(InputFormat.input(), () ->
 				new ByteArrayInputStream(encode(model(Rest)).getBytes(UTF_8))
 		);
 	}
 
 
-	private com.metreeca.rest.Request dflt(final com.metreeca.rest.Request request) {
+	private Request dflt(final Request request) {
 		return request.parameter("default", "");
 	}
 
-	private com.metreeca.rest.Request named(final com.metreeca.rest.Request request) {
+	private Request named(final Request request) {
 		return request.parameter("graph", RDF.NIL.stringValue());
 	}
 

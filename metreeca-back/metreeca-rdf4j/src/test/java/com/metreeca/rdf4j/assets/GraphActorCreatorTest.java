@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.ValueAssert.assertThat;
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.ValuesTest.*;
+import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;

@@ -23,8 +23,7 @@ import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.vocabulary.*;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -33,7 +32,7 @@ import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.ValuesTest.*;
+import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -70,8 +69,6 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphFetcherTest {
 
-	private static final IRI Root=iri("app:/");
-
 	static final Shape EmployeeShape=and(
 
 			filter(field(RDF.TYPE, term("Employee"))),
@@ -94,7 +91,7 @@ final class GraphFetcherTest {
 
 
 	static void exec(final Runnable task) {
-		GraphTest.exec(model(localized(birt(), "", "en", "it")), task);
+		GraphTest.exec(model(localized(small(), "", "en", "it")), task);
 	}
 
 
@@ -123,7 +120,7 @@ final class GraphFetcherTest {
 	@Test void testUseIndependentPatternsAndFilters() {
 		exec(() -> assertThat(query(
 
-				Root, items(and(field(term("employee")), filter().then(field(term("employee"), any(
+				Root, items(and(field(term("employee")), filter(field(term("employee"), any(
 						item("employees/1002"),
 						item("employees/1188")
 				)))))
@@ -134,7 +131,7 @@ final class GraphFetcherTest {
 						+"\n"
 						+"construct {\n"
 						+"\n"
-						+"\t<app:/> ldp:contains ?office.\n"
+						+"\t<> ldp:contains ?office.\n"
 						+"\t?office :employee ?employee\n"
 						+"\n"
 						+"} where {\n"
@@ -156,7 +153,7 @@ final class GraphFetcherTest {
 
 		)))).isIsomorphicTo(graph(
 
-				"construct { <app:/> ldp:contains ?office. ?office rdfs:label ?label }"
+				"construct { <> ldp:contains ?office. ?office rdfs:label ?label }"
 						+" where { ?office a :Office; rdfs:label ?label filter (lang(?label) = 'en') }"
 
 		)));
@@ -170,7 +167,7 @@ final class GraphFetcherTest {
 
 		)))).isIsomorphicTo(graph(
 
-				"construct { <app:/> ldp:contains ?employee. ?employee :seniority ?seniority }"
+				"construct { <> ldp:contains ?employee. ?employee :seniority ?seniority }"
 						+" where { ?employee a :Employee; :seniority ?seniority }"
 
 		)));
@@ -195,8 +192,8 @@ final class GraphFetcherTest {
 			exec(() -> assertThat(query(
 
 					item("/employees-basic/"), items(and(
-							filter().then(field(inverse(LDP.CONTAINS), focus())),
-							convey().then(field(RDFS.LABEL))
+							filter(field(inverse(LDP.CONTAINS), focus())),
+							convey(field(RDFS.LABEL))
 					))
 
 			)).isIsomorphicTo(graph(
@@ -205,6 +202,61 @@ final class GraphFetcherTest {
 
 			)));
 		}
+
+
+		@Disabled @Test void testVirtualClassFilters() {
+			exec(() -> assertThat(query(Root, items(
+
+					filter(field(OWL.SAMEAS, clazz(term("Office"))))
+
+			))).isIsomorphicTo(graph(
+
+					"construct { <> ldp:contains ?item } where { ?item owl:sameAs/a :Office }"
+
+			)));
+		}
+
+		//@Test void testVirtualEdgeFilters() {
+		//	exec(() -> assertThat(query(
+		//
+		//			Root, items(virtual(OWL.SAMEAS, filter(field(RDF.TYPE, term("Office")))))
+		//
+		//	)).isIsomorphicTo(graph(
+		//
+		//			"construct {\n"
+		//					+"\n"
+		//					+"\t<> ldp:contains ?item. "
+		//					+"\n"
+		//					+"\n"
+		//					+"} where {\n"
+		//					+"\n"
+		//					+"\t?item owl:sameAs/a :Office\n"
+		//					+"\n"
+		//					+"}"
+		//
+		//	)));
+		//}
+		//
+		//@Test void testVirtualFieldPatterns() {
+		//	exec(() -> assertThat(query(
+		//
+		//			Root, items(and(filter(clazz(term("Alias"))), virtual(OWL.SAMEAS, field(RDFS.LABEL))))
+		//
+		//	)).isIsomorphicTo(graph(
+		//
+		//			"construct {\n"
+		//					+"\n"
+		//					+"\t<> ldp:contains ?item. "
+		//					+"?item rdfs:label ?label.\n"
+		//					+"\n"
+		//					+"} where {\n"
+		//					+"\n"
+		//					+"\t?item a :Alias; owl:sameAs/rdfs:label ?label"
+		//					+"\n"
+		//					+"}"
+		//
+		//	)));
+		//}
 
 	}
 
@@ -227,7 +279,7 @@ final class GraphFetcherTest {
 
 						"construct {\n"
 								+"\n"
-								+"\t<app:/> ldp:contains ?item.\n"
+								+"\t<> ldp:contains ?item.\n"
 								+"\t?item :code ?code.\n"
 								+"\n"
 								+"} where {\n"
@@ -250,7 +302,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee a ?type\n"
 							+"\n"
 							+"} where {\n"
@@ -285,7 +337,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -306,7 +358,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -327,7 +379,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -348,7 +400,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee :seniority ?seniority.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -370,7 +422,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee :forename ?forename.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -391,7 +443,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee :forename ?forename.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -412,7 +464,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t<> ldp:contains ?item.\n"
 							+"\t?item rdfs:label ?label.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -433,7 +485,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t<> ldp:contains ?item.\n"
 							+"\t?item rdfs:label ?label.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -454,7 +506,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t<> ldp:contains ?item.\n"
 							+"\t?item rdfs:label ?label.\n"
 							+"\t \n"
 							+"} where { \n"
@@ -499,7 +551,7 @@ final class GraphFetcherTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t<> ldp:contains ?item.\n"
 							+"\t?item :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
@@ -524,7 +576,7 @@ final class GraphFetcherTest {
 
 						"construct {\n"
 								+"\n"
-								+"\t<app:/> ldp:contains ?office.\n"
+								+"\t<> ldp:contains ?office.\n"
 								+"\t?employee :office ?office.\n"
 								+"\n"
 								+"} where {\n"
@@ -549,7 +601,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee a ?type\n"
 							+"\n"
 							+"} where {\n"
@@ -573,7 +625,7 @@ final class GraphFetcherTest {
 
 						"construct {\n"
 								+"\n"
-								+"\t<app:/> ldp:contains ?office.\n"
+								+"\t<> ldp:contains ?office.\n"
 								+"\t?office :employee ?employee.\n"
 								+"\n"
 								+"} where {\n"
@@ -598,7 +650,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?office.\n"
+							+"\t<> ldp:contains ?office.\n"
 							+"\t?office :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
@@ -622,7 +674,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?office.\n"
+							+"\t<> ldp:contains ?office.\n"
 							+"\t?office :employee ?employee.\n"
 							+"\n"
 							+"} where {\n"
@@ -646,7 +698,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?employee.\n"
+							+"\t<> ldp:contains ?employee.\n"
 							+"\t?employee rdfs:label ?label.\n"
 							+"\n"
 							+"} where {\n"
@@ -685,7 +737,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t<> ldp:contains ?item.\n"
 							+"\t?item :country ?country.\n"
 							+"\n"
 							+"} where {\n"
@@ -696,70 +748,6 @@ final class GraphFetcherTest {
 
 			)));
 		}
-
-
-		//@Test void testVirtualClassFilters() {
-		//	exec(() -> assertThat(query(
-		//
-		//			Root, items(filter(virtual(OWL.SAMEAS, clazz(term("Office")))))
-		//
-		//	)).isIsomorphicTo(graph(
-		//
-		//			"construct {\n"
-		//					+"\n"
-		//					+"\t<app:/> ldp:contains ?item.\n"
-		//					+"\n"
-		//					+"\n"
-		//					+"} where {\n"
-		//					+"\n"
-		//					+"\t?item owl:sameAs/a :Office\n"
-		//					+"\n"
-		//					+"}"
-		//
-		//	)));
-		//}
-		//
-		//@Test void testVirtualEdgeFilters() {
-		//	exec(() -> assertThat(query(
-		//
-		//			Root, items(virtual(OWL.SAMEAS, filter(field(RDF.TYPE, term("Office")))))
-		//
-		//	)).isIsomorphicTo(graph(
-		//
-		//			"construct {\n"
-		//					+"\n"
-		//					+"\t<app:/> ldp:contains ?item. "
-		//					+"\n"
-		//					+"\n"
-		//					+"} where {\n"
-		//					+"\n"
-		//					+"\t?item owl:sameAs/a :Office\n"
-		//					+"\n"
-		//					+"}"
-		//
-		//	)));
-		//}
-		//
-		//@Test void testVirtualFieldPatterns() {
-		//	exec(() -> assertThat(query(
-		//
-		//			Root, items(and(filter(clazz(term("Alias"))), virtual(OWL.SAMEAS, field(RDFS.LABEL))))
-		//
-		//	)).isIsomorphicTo(graph(
-		//
-		//			"construct {\n"
-		//					+"\n"
-		//					+"\t<app:/> ldp:contains ?item. "
-		//					+"?item rdfs:label ?label.\n"
-		//					+"\n"
-		//					+"} where {\n"
-		//					+"\n"
-		//					+"\t?item a :Alias; owl:sameAs/rdfs:label ?label"
-		//					+"\n"
-		//					+"}"
-		//
-		//	)));
-		//}
 
 	}
 
@@ -794,7 +782,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t<> ldp:contains ?item.\n"
 							+"\t?item :country ?country; :city ?city.\n"
 							+"\n"
 							+"} where {\n"
@@ -819,7 +807,7 @@ final class GraphFetcherTest {
 
 					"construct {\n"
 							+"\n"
-							+"\t<app:/> ldp:contains ?item.\n"
+							+"\t<> ldp:contains ?item.\n"
 							+"\t?item a ?type.\n"
 							+"\n"
 							+"} where {\n"

@@ -17,7 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.json.ValuesTest;
+import com.metreeca.json.Values;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -27,8 +27,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.ValuesTest.birt;
-import static com.metreeca.json.ValuesTest.term;
+import static com.metreeca.json.Values.Base;
+import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
@@ -45,23 +45,25 @@ final class GraphActorDeleterTest {
 
 
 	@Test void testDelete() {
-		exec(model(birt()), () -> new GraphActorDeleter(options())
+		exec(model(small()), () -> new GraphActorDeleter(options())
 
 				.handle(new Request()
-						.base(ValuesTest.Base)
+						.base(Base)
 						.path("/employees/1370")
 						.attribute(shape(), and(
+
 								field(RDF.TYPE),
 								field(RDFS.LABEL),
-								field(term("forename")),
-								field(term("surname")),
-								field(term("email")),
-								field(term("title")),
-								field(term("code")),
-								field(term("office")),
-								field(term("seniority")),
-								field(term("supervisor")),
-								field(term("subordinate"))
+
+								field(Values.term("forename")),
+								field(Values.term("surname")),
+								field(Values.term("email")),
+								field(Values.term("title")),
+								field(Values.term("code")),
+								field(Values.term("office")),
+								field(Values.term("seniority")),
+								field(Values.term("supervisor")),
+								field(Values.term("subordinate"))
 						))
 				)
 

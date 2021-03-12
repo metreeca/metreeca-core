@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 
+import com.metreeca.json.Values;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 
@@ -24,7 +25,9 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.required;
-import static com.metreeca.json.ValuesTest.*;
+import static com.metreeca.json.Values.Base;
+import static com.metreeca.json.ValuesTest.decode;
+import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
@@ -44,18 +47,18 @@ final class GraphActorUpdaterTest {
 
 
 	@Test void testUpdate() {
-		exec(model(birt()), () -> {
+		exec(model(small()), () -> {
 			new GraphActorUpdater(options())
 
 					.handle(new Request()
 							.base(Base)
 							.path("/employees/1370")
 							.attribute(shape(), and(
-									field(term("forename"), required()),
-									field(term("surname"), required()),
-									field(term("email"), required()),
-									field(term("title"), required()),
-									field(term("seniority"), required())
+									field(Values.term("forename"), required()),
+									field(Values.term("surname"), required()),
+									field(Values.term("email"), required()),
+									field(Values.term("title"), required()),
+									field(Values.term("seniority"), required())
 							))
 							.body(jsonld(), decode("</employees/1370>"
 									+":forename 'Tino';"

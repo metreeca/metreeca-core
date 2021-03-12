@@ -17,7 +17,7 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.ValuesTest;
+import com.metreeca.json.Values;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 
@@ -25,10 +25,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.Values.literal;
-import static com.metreeca.json.ValuesTest.birt;
-import static com.metreeca.json.ValuesTest.term;
+import static com.metreeca.json.Values.*;
+import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.assets.GraphFetcherTest.EmployeeShape;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
@@ -48,14 +46,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 	private Request request() {
 		return new Request()
-				.base(ValuesTest.Base)
+				.base(Base)
 				.path("/employees/")
 				.attribute(shape(), EmployeeShape);
 	}
 
 
 	@Test void testBrowse() {
-		exec(model(birt()), () -> new GraphActorBrowser(options())
+		exec(model(small()), () -> new GraphActorBrowser(options())
 
 				.handle(request())
 
@@ -75,7 +73,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testBrowseFiltered() {
-		exec(model(birt()), () -> new GraphActorBrowser(options())
+		exec(model(small()), () -> new GraphActorBrowser(options())
 
 				.handle(request()
 						.query("title=Sales+Rep")
@@ -94,14 +92,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 								))
 
 								.as("only resources matching filter included")
-								.doesNotHaveStatement(null, term("title"), literal("President"))
+								.doesNotHaveStatement(null, Values.term("title"), literal("President"))
 						)
 				)
 		);
 	}
 
 	@Test void testSliceTermsQueries() {
-		exec(model(birt()), () -> new GraphActorBrowser(options())
+		exec(model(small()), () -> new GraphActorBrowser(options())
 
 				.handle(request()
 						.query("_terms=office&_offset=1&_limit=3")
@@ -117,7 +115,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 								.isIsomorphicTo(model(""
 										+"construct { \n"
 										+"\n"
-										+"\t<employees/> app:terms [app:value ?o; app:count ?c]. \n"
+										+"\t<employees/> :terms [:value ?o; :count ?c]. \n"
 										+"\t?o rdfs:label ?l\n"
 										+"\n"
 										+"} where { { select ?o ?l (count(?e) as ?c) {\n"

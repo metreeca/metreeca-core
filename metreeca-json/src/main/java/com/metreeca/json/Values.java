@@ -84,98 +84,37 @@ public final class Values {
 	private static final char[] HexDigits="0123456789abcdef".toCharArray();
 
 
-	private static String hex(final byte[] bytes) {
-
-		final char[] hex=new char[bytes.length*2];
-
-		for (int i=0, l=bytes.length; i < l; ++i) {
-
-			final int b=bytes[i]&0xFF;
-
-			hex[2*i]=HexDigits[b >>> 4];
-			hex[2*i+1]=HexDigits[b&0x0F];
-		}
-
-		return new String(hex);
-	}
-
-
-	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static String uuid() {
-		return randomUUID().toString();
-	}
-
-	public static String uuid(final String text) {
-		return text == null ? null : uuid(text.getBytes(UTF_8));
-	}
-
-	public static String uuid(final byte[] data) {
-		return data == null ? null : nameUUIDFromBytes(data).toString();
-	}
-
-
-	public static String md5() {
-
-		final byte[] bytes=new byte[16];
-
-		ThreadLocalRandom.current().nextBytes(bytes);
-
-		return hex(bytes);
-	}
-
-	public static String md5(final String text) {
-		return text == null ? null : md5(text.getBytes(UTF_8));
-	}
-
-	public static String md5(final byte[] data) {
-		try {
-
-			return data == null ? null : hex(MessageDigest.getInstance("MD5").digest(data));
-
-		} catch ( final NoSuchAlgorithmException unexpected ) {
-			throw new InternalError(unexpected);
-		}
-	}
-
-
-	public static BigInteger integer(final long value) {
-		return BigInteger.valueOf(value);
-	}
-
-	public static BigInteger integer(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? (BigInteger)value
-				: value instanceof BigDecimal ? ((BigDecimal)value).toBigInteger()
-				: BigInteger.valueOf(value.longValue());
-	}
-
-
-	public static BigDecimal decimal(final double value) {
-		return BigDecimal.valueOf(value);
-	}
-
-	public static BigDecimal decimal(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
-				: value instanceof BigDecimal ? (BigDecimal)value
-				: BigDecimal.valueOf(value.doubleValue());
-	}
-
-
 	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static final Literal True=literal(true);
 	public static final Literal False=literal(false);
 
 
+	//// Internal Namespace ////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final String Base="app:/";
+
+	public static final IRI Root=iri(Base);
+
+	public static final Namespace NS=namespace("", Base+"terms#");
+
+
+	public static IRI term(final String name) {
+		return name == null ? null : iri(NS.getName(), name);
+	}
+
+	public static IRI item(final String name) {
+		return name == null ? null : iri(Root, name);
+	}
+
+
 	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final IRI ValueType=iri("type:value"); // abstract datatype IRI for values
-	public static final IRI ResourceType=iri("type:resource"); // abstract datatype IRI for resources
-	public static final IRI BNodeType=iri("type:bnode"); // datatype IRI for blank nodes
-	public static final IRI IRIType=iri("type:iri"); // datatype IRI for IRI references
-	public static final IRI LiteralType=iri("type:literal"); // abstract datatype IRI for literals
+	public static final IRI ValueType=term("value"); // abstract datatype IRI for values
+	public static final IRI ResourceType=term("resource"); // abstract datatype IRI for resources
+	public static final IRI BNodeType=term("bnode"); // datatype IRI for blank nodes
+	public static final IRI IRIType=term("iri"); // datatype IRI for IRI references
+	public static final IRI LiteralType=term("literal"); // abstract datatype IRI for literals
 
 
 	public static boolean derives(final IRI upper, final IRI lower) {
@@ -346,11 +285,6 @@ public final class Values {
 	public static IRI iri(final String space, final String name) {
 		return space == null || name == null ? null
 				: factory.createIRI(space, space.endsWith("/") && name.startsWith("/") ? name.substring(1) : name);
-	}
-
-
-	public static IRI internal(final String name) {
-		return name == null ? null : factory.createIRI("app:/terms#", name);
 	}
 
 
@@ -572,7 +506,87 @@ public final class Values {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String uuid() {
+		return randomUUID().toString();
+	}
+
+	public static String uuid(final String text) {
+		return text == null ? null : uuid(text.getBytes(UTF_8));
+	}
+
+	public static String uuid(final byte[] data) {
+		return data == null ? null : nameUUIDFromBytes(data).toString();
+	}
+
+
+	public static String md5() {
+
+		final byte[] bytes=new byte[16];
+
+		ThreadLocalRandom.current().nextBytes(bytes);
+
+		return hex(bytes);
+	}
+
+	public static String md5(final String text) {
+		return text == null ? null : md5(text.getBytes(UTF_8));
+	}
+
+	public static String md5(final byte[] data) {
+		try {
+
+			return data == null ? null : hex(MessageDigest.getInstance("MD5").digest(data));
+
+		} catch ( final NoSuchAlgorithmException unexpected ) {
+			throw new InternalError(unexpected);
+		}
+	}
+
+
+	public static BigInteger integer(final long value) {
+		return BigInteger.valueOf(value);
+	}
+
+	public static BigInteger integer(final Number value) {
+		return value == null ? null
+				: value instanceof BigInteger ? (BigInteger)value
+				: value instanceof BigDecimal ? ((BigDecimal)value).toBigInteger()
+				: BigInteger.valueOf(value.longValue());
+	}
+
+
+	public static BigDecimal decimal(final double value) {
+		return BigDecimal.valueOf(value);
+	}
+
+	public static BigDecimal decimal(final Number value) {
+		return value == null ? null
+				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
+				: value instanceof BigDecimal ? (BigDecimal)value
+				: BigDecimal.valueOf(value.doubleValue());
+	}
+
+
+	public static String hex(final byte[] bytes) {
+		if ( bytes == null ) { return null; } else {
+
+			final char[] hex=new char[bytes.length*2];
+
+			for (int i=0, l=bytes.length; i < l; ++i) {
+
+				final int b=bytes[i]&0xFF;
+
+				hex[2*i]=HexDigits[b >>> 4];
+				hex[2*i+1]=HexDigits[b&0x0F];
+			}
+
+			return new String(hex);
+		}
+	}
+
 
 	public static String quote(final CharSequence text) {
 

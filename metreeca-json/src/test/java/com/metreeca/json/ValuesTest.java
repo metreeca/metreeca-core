@@ -16,7 +16,6 @@
 
 package com.metreeca.json;
 
-import org.assertj.core.data.MapEntry;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.*;
@@ -32,10 +31,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.iri;
-
-import static org.assertj.core.api.Assertions.entry;
-
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.joining;
@@ -43,6 +38,19 @@ import static java.util.stream.Collectors.toMap;
 
 
 public final class ValuesTest {
+
+	public static final Map<String, String> Prefixes=unmodifiableMap(Stream.of(
+
+			Values.NS,
+			RDF.NS, RDFS.NS, XSD.NS,
+			OWL.NS, SKOS.NS,
+			LDP.NS
+
+	).collect(toMap(Namespace::getPrefix, Namespace::getName)));
+
+
+	private static final Map<String, Model> DatasetCache=new HashMap<>();
+
 
 	static { // logging not configured: reset and enable fine console logging
 
@@ -56,57 +64,15 @@ public final class ValuesTest {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static final String Base="http://example.com/";
-	public static final String Namespace=Base+"terms#";
-
-
-	public static final Map<String, String> Prefixes=unmodifiableMap(Stream.of(
-			entry("app", "app:/terms#"),
-			entry("", Namespace),
-			entry("birt", Namespace),
-			entry("rdf", RDF.NAMESPACE),
-			entry("rdfs", RDFS.NAMESPACE),
-			entry("xsd", XSD.NAMESPACE),
-			entry("ldp", LDP.NAMESPACE),
-			entry("skos", SKOS.NAMESPACE)
-	).collect(toMap(MapEntry::getKey, MapEntry::getValue)));
-
-
-	private static final Map<String, Model> DatasetCache=new HashMap<>();
-
-
-	//// Factories /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static IRI term(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return iri(Namespace, name);
-	}
-
-	public static IRI item(final String name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return iri(Base, name);
-	}
-
-
 	//// Datasets //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static Model birt() {
+	public static Model small() {
 		return dataset(ValuesTest.class.getResource(ValuesTest.class.getSimpleName()+".ttl"));
 	}
 
 
 	public static Model dataset(final URL resource) {
-		return dataset(resource, Base);
+		return dataset(resource, Values.Base);
 	}
 
 	public static Model dataset(final URL resource, final String base) {
@@ -149,7 +115,7 @@ public final class ValuesTest {
 			parser.parse(new StringReader(Prefixes.entrySet().stream()
 					.map(entry -> format("@prefix %s: <%s> .", entry.getKey(), entry.getValue()))
 					.collect(joining("\n",
-							format("@base <%s> .\n\n", Base),
+							format("@base <%s> .\n\n", Values.Root),
 							format("%s\n\n", turtle)
 					))
 			));

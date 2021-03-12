@@ -33,8 +33,8 @@ import java.util.function.Function;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.ValuesTest.term;
+import static com.metreeca.json.Values.Root;
+import static com.metreeca.json.Values.term;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -53,7 +53,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphQueryItemsTest {
 
 	private Collection<Statement> query(final Items items) {
-		return new GraphQueryItems(new GraphEngine.Options(new GraphEngine())).process(iri("app:/"), items);
+		return new GraphQueryItems(new GraphEngine.Options(new GraphEngine())).process(Root, items);
 	}
 
 
@@ -84,7 +84,7 @@ final class GraphQueryItemsTest {
 
 				"construct {\n"
 						+"\n"
-						+"\t<app:/> ldp:contains ?office.\n"
+						+"\t<> ldp:contains ?office.\n"
 						+"\t\n"
 						+"} where {\n"
 						+"\n"
@@ -102,7 +102,7 @@ final class GraphQueryItemsTest {
 
 		)).isIsomorphicTo(GraphTest.graph(
 
-				"construct { <app:/> ldp:contains ?employee. ?employee a :Employee }"
+				"construct { <> ldp:contains ?employee. ?employee a :Employee }"
 						+" where { ?employee a :Employee }"
 
 		)));

@@ -16,7 +16,6 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.json.ValuesTest;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
@@ -24,7 +23,8 @@ import com.metreeca.rest.Response;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.ValuesTest.birt;
+import static com.metreeca.json.Values.Base;
+import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.assets.GraphFetcherTest.EmployeeShape;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
@@ -43,14 +43,14 @@ final class GraphActorRelatorTest {
 
 	private Request request() {
 		return new Request()
-				.base(ValuesTest.Base)
+				.base(Base)
 				.path("/employees/1370")
 				.attribute(shape(), EmployeeShape);
 	}
 
 
 	@Test void testRelate() {
-		exec(model(birt()), () -> new GraphActorRelator(options())
+		exec(model(small()), () -> new GraphActorRelator(options())
 
 				.handle(request())
 
