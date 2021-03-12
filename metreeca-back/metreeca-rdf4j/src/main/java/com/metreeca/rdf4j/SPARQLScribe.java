@@ -64,6 +64,11 @@ public final class SPARQLScribe {
 	}
 
 
+	public static Scribe construct(final Scribe... patterns) {
+		return list(text("\rconstruct"), list(patterns));
+	}
+
+
 	public static Scribe where(final Scribe... pattern) {
 		return list(text("\rwhere"), block(pattern));
 	}

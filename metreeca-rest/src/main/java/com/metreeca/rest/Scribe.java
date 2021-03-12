@@ -22,6 +22,7 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.format;
@@ -36,13 +37,13 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class Scribe {
 
-	public static String code(final Scribe scribe) {
+	public static String code(final Scribe... scribes) {
 
-		if ( scribe == null ) {
-			throw new NullPointerException("null scribe");
+		if ( scribes == null || stream(scribes).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null scribes");
 		}
 
-		return scribe.toString();
+		return list(scribes).toString();
 	}
 
 
