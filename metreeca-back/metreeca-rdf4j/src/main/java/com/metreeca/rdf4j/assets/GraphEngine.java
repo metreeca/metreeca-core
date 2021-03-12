@@ -37,8 +37,8 @@ import static com.metreeca.rest.Context.asset;
 public final class GraphEngine implements Engine {
 
 	private int items=1_000; // the maximum number of resources to be returned from items queries
-	private int stats=10_000; // the maximum number of resources to be evaluated by stats queries
-	private int terms=10_000; // the maximum number of resources to be evaluated by terms queries
+	private int stats; // the maximum number of resources to be evaluated by stats queries // !!! tbi
+	private int terms; // the maximum number of resources to be evaluated by terms queries // !!! tbi
 
 	private final Graph graph=asset(graph());
 
