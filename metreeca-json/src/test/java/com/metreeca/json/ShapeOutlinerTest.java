@@ -23,10 +23,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 
 import static com.metreeca.json.Focus.focus;
-import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;

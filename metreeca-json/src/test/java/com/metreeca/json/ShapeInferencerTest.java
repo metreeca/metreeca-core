@@ -164,17 +164,17 @@ final class ShapeInferencerTest {
 
 	@Test void testFieldInverse() {
 
-		final Shape plain=field(Frame.inverse(RDF.VALUE));
+		final Shape plain=field(inverse(RDF.VALUE));
 
 		assertThat(expand(plain))
 				.as("reverse field objects are resources")
-				.isEqualTo(field(Frame.inverse(RDF.VALUE), datatype(ResourceType)));
+				.isEqualTo(field(inverse(RDF.VALUE), datatype(ResourceType)));
 
-		final Shape typed=field(Frame.inverse(RDF.VALUE), datatype(IRIType));
+		final Shape typed=field(inverse(RDF.VALUE), datatype(IRIType));
 
 		assertThat(expand(typed))
 				.as("reverse field objects are IRIs if explicitly typed")
-				.isEqualTo(field(Frame.inverse(RDF.VALUE), datatype(IRIType)));
+				.isEqualTo(field(inverse(RDF.VALUE), datatype(IRIType)));
 
 	}
 

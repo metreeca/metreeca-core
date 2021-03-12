@@ -17,7 +17,6 @@
 package com.metreeca.rest;
 
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -52,6 +51,10 @@ public abstract class Scribe {
 
 	public static Scribe block(final Scribe... scribes) {
 		return list(text("\r{ "), list(scribes), text(" }"));
+	}
+
+	public static Scribe parens(final Scribe... scribes) {
+		return list(text("("), list(scribes), text(")"));
 	}
 
 	public static Scribe line(final Scribe... scribes) {
@@ -104,7 +107,7 @@ public abstract class Scribe {
 	}
 
 
-	public static Scribe list(final Scribe[] items, final CharSequence separator) {
+	public static Scribe list(final CharSequence separator, final Scribe... items) {
 
 		if ( items == null ) {
 			throw new NullPointerException("null items");
@@ -114,10 +117,10 @@ public abstract class Scribe {
 			throw new NullPointerException("null separator");
 		}
 
-		return list(asList(items), separator);
+		return list(separator, asList(items));
 	}
 
-	public static Scribe list(final Stream<Scribe> items, final CharSequence separator) {
+	public static Scribe list(final CharSequence separator, final Stream<Scribe> items) {
 
 		if ( items == null ) {
 			throw new NullPointerException("null items");
@@ -127,10 +130,10 @@ public abstract class Scribe {
 			throw new NullPointerException("null separator");
 		}
 
-		return list(items.collect(toList()), separator); // memoize to enable reuse
+		return list(separator, items.collect(toList())); // memoize to enable reuse
 	}
 
-	public static Scribe list(final Collection<Scribe> items, final CharSequence separator) {
+	public static Scribe list(final CharSequence separator, final Collection<Scribe> items) {
 
 		if ( items == null ) {
 			throw new NullPointerException("null items");
@@ -169,7 +172,7 @@ public abstract class Scribe {
 			throw new NullPointerException("null value");
 		}
 
-		return text(value.equals(RDF.TYPE) ? "a" : format(value));
+		return text(format(value));
 	}
 
 	public static Scribe text(final char c) {

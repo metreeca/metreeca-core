@@ -19,6 +19,7 @@ package com.metreeca.json;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.base.AbstractNamespace;
 import org.eclipse.rdf4j.model.base.AbstractValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.math.BigDecimal;
@@ -132,6 +133,87 @@ public final class Values {
 
 	private static boolean literal(final IRI type) {
 		return type.equals(LiteralType) || !type.equals(ValueType) && !resource(type);
+	}
+
+
+	//// Inverse Predicates ////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * An IRI scheme for inverse predicates ({@value}).
+	 */
+	private static final String InverseScheme="inverse:";
+
+
+	/**
+	 * Checks predicate direction.
+	 *
+	 * @param predicate the IRI identifying the predicate
+	 *
+	 * @return {@code true} if {@code predicate} identifies a direct predicate; {@code false} if {@code predicate}
+	 * identifies an {@link #inverse(IRI) inverse} predicate
+	 *
+	 * @throws NullPointerException if {@code predicate} is null
+	 */
+	public static boolean direct(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return !predicate.stringValue().startsWith(InverseScheme);
+	}
+
+	/**
+	 * Creates an inverse predicate.
+	 *
+	 * @param predicate the IRI identifying the predicate
+	 *
+	 * @return the inverse version of {@code predicate}
+	 *
+	 * @throws NullPointerException if {@code predicate} is null
+	 */
+	public static IRI inverse(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		final String label=predicate.stringValue();
+
+		return label.startsWith(InverseScheme)
+				? iri(label.substring(InverseScheme.length()))
+				: iri(InverseScheme+label);
+	}
+
+	/**
+	 * Traverses a predicate.
+	 *
+	 * @param predicate the IRI identifying the predicate to be traversed
+	 * @param direct    a predicate mapper to be executed if {@code predicate} is {@link #direct(IRI) direct}
+	 * @param inverse   a predicate mapper to be executed if {@code predicate} is {@link #inverse(IRI) inverse}
+	 * @param <V>       the type of the value returned by predicate mappers
+	 *
+	 * @return the value returned by the predicate mapper selected according to the direction of {@code predicate}
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static <V> V traverse(final IRI predicate, final Function<IRI, V> direct, final Function<IRI, V> inverse) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( direct == null ) {
+			throw new NullPointerException("null direct");
+		}
+
+		if ( inverse == null ) {
+			throw new NullPointerException("null inverse");
+		}
+
+		return predicate.stringValue().startsWith(InverseScheme)
+				? inverse.apply(iri(predicate.stringValue().substring(InverseScheme.length())))
+				: direct.apply(predicate);
 	}
 
 
@@ -377,7 +459,6 @@ public final class Values {
 	}
 
 
-
 	///// Converters //////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Optional<IRI> iri(final Value value) {
@@ -467,8 +548,11 @@ public final class Values {
 		return bnode == null ? null : "_:"+bnode.getID();
 	}
 
-	public static String format(final IRI iri) {
-		return iri == null ? null : '<'+iri.stringValue()+'>'; // !!! relativize wrt to base
+	public static String format(final IRI iri) { // !!! relativize wrt to base
+		return iri == null ? null : traverse(iri,
+				direct -> direct.equals(RDF.TYPE) ? "a" : '<'+iri.stringValue()+'>',
+				inverse -> "^<"+inverse.stringValue()+'>'
+		);
 	}
 
 	public static String format(final Literal literal) {
@@ -504,7 +588,6 @@ public final class Values {
 	private static String format(final CharSequence label, final IRI type) {
 		return quote(label)+"^^"+format(type);
 	}
-
 
 
 	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////

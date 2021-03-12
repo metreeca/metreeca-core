@@ -26,14 +26,14 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Frame.direct;
-import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.compare;
+import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.is;
 import static com.metreeca.json.Values.lang;
 import static com.metreeca.json.Values.text;
+import static com.metreeca.json.Values.traverse;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;

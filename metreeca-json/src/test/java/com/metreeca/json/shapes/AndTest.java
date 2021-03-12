@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static com.metreeca.json.Frame.inverse;
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;

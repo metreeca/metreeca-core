@@ -16,7 +16,7 @@
 
 package com.metreeca.json.shapes;
 
-import com.metreeca.json.Frame;
+import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Nested;
@@ -86,7 +86,7 @@ final class FieldTest {
 					.as("direct")
 					.containsKey("value");
 
-			assertThat(aliases(field(Frame.inverse(RDF.VALUE))))
+			assertThat(aliases(field(Values.inverse(RDF.VALUE))))
 					.as("inverse")
 					.containsKey("valueOf");
 

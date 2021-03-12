@@ -28,7 +28,6 @@ import java.io.ByteArrayOutputStream;
 
 import javax.json.Json;
 
-import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;

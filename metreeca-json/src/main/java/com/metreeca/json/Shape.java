@@ -26,7 +26,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.json.Focus.focus;
-import static com.metreeca.json.Frame.inverse;
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;

@@ -31,9 +31,7 @@ import org.eclipse.rdf4j.query.BindingSet;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Frame.traverse;
-import static com.metreeca.json.Values.bnode;
-import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Field.fields;
@@ -42,6 +40,7 @@ import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.*;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;

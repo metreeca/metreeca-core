@@ -32,7 +32,6 @@ import java.util.function.Consumer;
 
 import javax.json.JsonException;
 
-import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Values.*;

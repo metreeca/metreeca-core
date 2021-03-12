@@ -25,7 +25,6 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 
 import java.util.Set;
 
-import static com.metreeca.json.Frame.direct;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;

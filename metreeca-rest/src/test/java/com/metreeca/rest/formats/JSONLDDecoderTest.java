@@ -31,7 +31,6 @@ import java.util.Map;
 
 import javax.json.*;
 
-import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.optional;
 import static com.metreeca.json.Shape.required;

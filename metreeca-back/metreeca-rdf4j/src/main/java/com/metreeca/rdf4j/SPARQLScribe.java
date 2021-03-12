@@ -24,8 +24,8 @@ import org.eclipse.rdf4j.model.*;
 import java.util.Collection;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.quote;
+import static com.metreeca.json.Values.traverse;
 import static com.metreeca.rest.Scribe.*;
 
 import static java.util.Arrays.stream;

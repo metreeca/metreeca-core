@@ -16,7 +16,8 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.Trace;
 import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.*;
@@ -115,7 +116,7 @@ final class JSONLDScannerTest {
 
 		@Test void testValidateInverseFields() {
 
-			final Shape shape=field(Frame.inverse(p), all(x));
+			final Shape shape=field(inverse(p), all(x));
 
 			assertThat(scan(shape, statement(x, p, f))).hasRight();
 			assertThat(scan(shape, statement(y, p, f))).hasLeft();

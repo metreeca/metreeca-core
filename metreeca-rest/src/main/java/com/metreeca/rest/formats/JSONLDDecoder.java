@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import javax.json.*;
 
-import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Field.aliases;
 

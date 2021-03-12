@@ -23,8 +23,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.statement;
+import static com.metreeca.json.Values.traverse;
 import static com.metreeca.json.shapes.All.all;
 
 import static java.util.Arrays.stream;

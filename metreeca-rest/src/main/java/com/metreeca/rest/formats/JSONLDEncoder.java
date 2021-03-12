@@ -33,8 +33,6 @@ import java.util.regex.Matcher;
 
 import javax.json.*;
 
-import static com.metreeca.json.Frame.direct;
-import static com.metreeca.json.Frame.traverse;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Field.aliases;
 import static com.metreeca.rest.formats.JSONLDInspector.datatype;

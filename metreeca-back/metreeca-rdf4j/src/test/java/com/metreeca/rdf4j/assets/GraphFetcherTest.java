@@ -29,7 +29,6 @@ import java.math.BigInteger;
 import java.util.Collection;
 
 import static com.metreeca.json.Focus.focus;
-import static com.metreeca.json.Frame.inverse;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.small;

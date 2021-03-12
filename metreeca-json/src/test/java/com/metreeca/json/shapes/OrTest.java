@@ -16,7 +16,8 @@
 
 package com.metreeca.json.shapes;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -143,7 +144,7 @@ final class OrTest {
 			assertThat(or(
 
 					field(RDF.VALUE),
-					field(Frame.inverse(RDF.VALUE))
+					field(Values.inverse(RDF.VALUE))
 
 			).map(new Shape.Probe<Collection<Shape>>() {
 
@@ -152,7 +153,7 @@ final class OrTest {
 			})).containsExactly(
 
 					field(RDF.VALUE),
-					field(Frame.inverse(RDF.VALUE))
+					field(Values.inverse(RDF.VALUE))
 
 			);
 		}
