@@ -103,8 +103,9 @@ public final class SPARQLScribe {
 	}
 
 	public static Scribe limit(final int limit, final int sampling) {
-		return limit == 0 && sampling == 0 ? nothing()
-				: text(" limit %d", limit > 0 ? Math.min(limit, sampling) : sampling);
+		return limit > 0 ? text(" limit %d", sampling > 0 ? Math.min(limit, sampling) : limit)
+				: sampling > 0 ? text(" limit %d", sampling)
+				: nothing();
 	}
 
 
@@ -142,15 +143,6 @@ public final class SPARQLScribe {
 
 	public static Scribe string(final String text) {
 		return text(quote(text));
-	}
-
-
-	public static Scribe path(final Scribe... path) {
-		return list(stream(path), "/");
-	}
-
-	public static Scribe path(final Collection<IRI> path) {
-		return list(path.stream().map(Scribe::text), "/");
 	}
 
 
@@ -237,11 +229,11 @@ public final class SPARQLScribe {
 
 
 	public static Scribe or(final Scribe... expressions) {
-		return list(expressions, " || ");
+		return list(" || ", expressions);
 	}
 
 	public static Scribe and(final Scribe... expressions) {
-		return list(expressions, " && ");
+		return list(" && ", expressions);
 	}
 
 
@@ -272,14 +264,14 @@ public final class SPARQLScribe {
 	}
 
 	public static Scribe in(final Scribe expression, final Stream<Scribe> expressions) {
-		return list(expression, text(" in ("), list(expressions, ", "), text(')'));
+		return list(expression, text(" in ("), list(", ", expressions), text(')'));
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private static Scribe function(final String name, final Scribe... args) {
-		return list(text(' '), text(name), text('('), list(args, ", "), text(')'));
+		return list(text(' '), text(name), text('('), list(", ", args), text(')'));
 	}
 
 	private static Scribe op(final Scribe x, final String name, final Scribe y) {
