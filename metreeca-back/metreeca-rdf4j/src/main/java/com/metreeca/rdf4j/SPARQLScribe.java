@@ -102,6 +102,10 @@ public final class SPARQLScribe {
 		return offset > 0 ? text(" offset %d", offset) : nothing();
 	}
 
+	public static Scribe limit(final int limit) {
+		return limit(limit, 0);
+	}
+
 	public static Scribe limit(final int limit, final int sampling) {
 		return limit > 0 ? text(" limit %d", sampling > 0 ? Math.min(limit, sampling) : limit)
 				: sampling > 0 ? text(" limit %d", sampling)

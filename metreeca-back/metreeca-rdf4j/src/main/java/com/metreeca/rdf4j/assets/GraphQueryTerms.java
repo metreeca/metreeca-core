@@ -89,8 +89,11 @@ final class GraphQueryTerms extends GraphQueryBase {
 									)))),
 
 									space(where(
+
 											filters(filter),
 											anchor(path, target)
+
+											// !!! sampling w/ options.stats()
 									)),
 
 									space(
@@ -98,7 +101,7 @@ final class GraphQueryTerms extends GraphQueryBase {
 											line(having(gt(count(var(root)), text(0)))),
 											line(order(desc(var("count")), var("value"))),
 											line(offset(offset)),
-											line(limit(limit, options.terms()))
+											line(limit(limit))
 									)
 
 							)),
