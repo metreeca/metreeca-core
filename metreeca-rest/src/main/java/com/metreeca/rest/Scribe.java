@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.format;
@@ -233,6 +234,16 @@ public abstract class Scribe {
 
 
 	abstract Appendable scribe(final Appendable code);
+
+
+	public Scribe map(final Function<Scribe, Scribe> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return mapper.apply(this);
+	}
 
 
 	@Override public String toString() {
