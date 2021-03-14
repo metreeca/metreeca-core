@@ -26,7 +26,6 @@ import org.eclipse.rdf4j.model.Statement;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.json.*;
@@ -42,10 +41,10 @@ import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONLDScanner.scan;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 
@@ -182,7 +181,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 						).decode(jsonReader.readObject());
 
-						return JSONLDScanner.scan(shape, focus, model).fold(
+						return scan(shape, focus, model).fold(
 								trace -> Left(status(UnprocessableEntity, trace.toJSON())),
 								value -> value.size() == model.size() ? Right(value) : Left(status(UnprocessableEntity,
 										trace(value.stream().filter(s -> !model.contains(s))
@@ -236,12 +235,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 				);
 
-		final List<String> langs=message.request()
-
-				.header("Accept-Language")
-
-				.map((Function<String, List<String>>)Format::langs)
-				.orElse(emptyList());
+		final List<String> langs=message.request().langs();
 
 		return message
 
@@ -257,7 +251,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 						final Shape shape=message.attribute(shape());
 						final Map<String, String> keywords=asset(keywords());
 
-						final Collection<Statement> model=JSONLDScanner.scan(shape, focus, value).fold(trace -> {
+						final Collection<Statement> model=scan(shape, focus, value).fold(trace -> {
 
 							asset(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
 

@@ -177,8 +177,8 @@ public final class Request extends Message<Request> {
 	 * Checks if request is interactive.
 	 *
 	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #GET} and the {@code Accept}
-	 * header includes a MIME type usually associated with an interactive browser-managed HTTP request
-	 * (e.g. {@code text/html}
+	 * header includes a MIME type usually associated with an interactive browser-managed HTTP request (e.g. {@code
+	 * text/html}
 	 */
 	public boolean interactive() {
 		return method.equals(GET) && headers("accept")
@@ -335,8 +335,7 @@ public final class Request extends Message<Request> {
 	 * @return this request
 	 *
 	 * @throws NullPointerException     if {@code base} is null
-	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing
-	 *                                  slash
+	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing slash
 	 */
 	public Request base(final String base) {
 
@@ -371,8 +370,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the resource path of this request.
 	 *
-	 * @param path the resource path of this request, that is the absolute server path of the linked data resources
-	 *             this request refers to
+	 * @param path the resource path of this request, that is the absolute server path of the linked data resources this
+	 *             request refers to
 	 *
 	 * @return this request
 	 *
@@ -428,8 +427,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the target resource of this request.
 	 *
-	 * @return the full URL of the target resource of this request, including {@link #base() base},
-	 * {@link #path() path}  and optional {@link #query() query}
+	 * @return the full URL of the target resource of this request, including {@link #base() base}, {@link #path() path}
+	 * and optional {@link #query() query}
 	 */
 	public String resource() {
 		return query.isEmpty() ? item() : item()+"?"+query;
@@ -437,6 +436,20 @@ public final class Request extends Message<Request> {
 
 
 	//// Parameters ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves request accepted languages.
+	 *
+	 * @return a list of language tags included in the {@code Accept-Language} header of this request or an empty
+	 * list if
+	 * no such header is included; may include a wildcard tag ({@code *})
+	 */
+	public List<String> langs() {
+		return header("Accept-Language")
+				.map((Function<String, List<String>>)Format::langs)
+				.orElse(emptyList());
+	}
+
 
 	/**
 	 * Retrieves request query parameters.

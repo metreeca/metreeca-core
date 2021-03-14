@@ -154,6 +154,8 @@ public interface Engine extends Wrapper {
 					.redact(Task, task)
 					.redact(View, view)
 
+					.localize(message.request().langs())
+
 			);
 
 			final UnaryOperator<Response> outgoing=message -> message.attribute(shape(), message.attribute(shape())
@@ -162,6 +164,8 @@ public interface Engine extends Wrapper {
 					.redact(Task, task)
 					.redact(View, view)
 					.redact(Mode, Convey)
+
+					.localize(message.request().langs())
 
 			);
 
