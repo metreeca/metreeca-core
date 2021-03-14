@@ -56,7 +56,7 @@ import static java.util.function.Function.identity;
  *
  * </ul>
  */
-public abstract class Server implements Filter {
+public abstract class JEEServer implements Filter {
 
 	private final Context context=new Context();
 
@@ -66,15 +66,15 @@ public abstract class Server implements Filter {
 	/**
 	 * Configures the delegate handler.
 	 *
-	 * @param factory a handler factory; takes as argument a shared asset context (which may configured with
-	 *                additional application-specific assets as a side effect) and must return a non-null handler
-	 *                to be used as entry point for serving requests
+	 * @param factory a handler factory; takes as argument a shared asset context (which may configured with additional
+	 *                application-specific assets as a side effect) and must return a non-null handler to be used as
+	 *                entry point for serving requests
 	 *
 	 * @return this server
 	 *
 	 * @throws NullPointerException if {@code factory} is null or returns null values
 	 */
-	protected Server delegate(final Function<Context, Handler> factory) {
+	protected JEEServer delegate(final Function<Context, Handler> factory) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null factory");

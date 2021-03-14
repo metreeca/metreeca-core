@@ -102,7 +102,7 @@ Finally, define a minimal server stub like:
 ```java
 package com.metreeca.demo;
 
-import com.metreeca.jee.Server;
+import com.metreeca.jee.JEEServer;
 import com.metreeca.rdf4j.assets.Graph;
 
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -116,7 +116,7 @@ import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.wrappers.Gateway.gateway;
 
 @WebFilter(urlPatterns="/*")
-public final class Demo extends Server {
+public final class Demo extends JEEServer {
 
 	public Demo() {
 		delegate(context -> context.get(() ->

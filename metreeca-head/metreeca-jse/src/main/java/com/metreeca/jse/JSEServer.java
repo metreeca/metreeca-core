@@ -56,7 +56,7 @@ import static java.util.function.Function.identity;
  *
  * </ul>
  */
-public final class Server {
+public final class JSEServer {
 
 	private final String root="/"; // must end with slash
 
@@ -84,7 +84,7 @@ public final class Server {
 	 *
 	 * @throws NullPointerException if {@code factory} is null or returns null values
 	 */
-	public Server delegate(final Function<Context, Handler> factory) {
+	public JSEServer delegate(final Function<Context, Handler> factory) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null handler factory");
@@ -105,7 +105,7 @@ public final class Server {
 	 *
 	 * @throws NullPointerException if {@code address} is null
 	 */
-	public Server address(final InetSocketAddress address) {
+	public JSEServer address(final InetSocketAddress address) {
 
 		if ( address == null ) {
 			throw new NullPointerException("null address");

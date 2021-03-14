@@ -49,7 +49,7 @@ Metreeca/Link is server and storage-agnostic and may be easily connected to your
 2. Write your first server and launch it
 
 ```java
-import com.metreeca.jse.Server;
+import com.metreeca.jse.JSEServer;
 
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.TextFormat.text;
@@ -57,7 +57,7 @@ import static com.metreeca.rest.formats.TextFormat.text;
 public final class Hello {
 
   public static void main(final String... args) {
-    new Server()
+    new JSEServer()
 
         .delegate(context -> request ->
             request.reply(response -> response
