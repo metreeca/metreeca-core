@@ -216,6 +216,7 @@ public final class JSEServer {
 				.base(base)
 				.path(path)
 				.query(Optional.ofNullable(uri.getRawQuery()).orElse(""))
+				.headers(exchange.getRequestHeaders())
 				.body(input(), exchange::getRequestBody);
 	}
 
