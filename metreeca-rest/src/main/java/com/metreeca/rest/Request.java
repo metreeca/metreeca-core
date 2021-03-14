@@ -16,6 +16,8 @@
 
 package com.metreeca.rest;
 
+import com.metreeca.json.Values;
+
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -99,7 +101,7 @@ public final class Request extends Message<Request> {
 	private Set<Object> roles=emptySet();
 
 	private String method="";
-	private String base="app:/";
+	private String base=Values.Base;
 	private String path="/";
 	private String query="";
 

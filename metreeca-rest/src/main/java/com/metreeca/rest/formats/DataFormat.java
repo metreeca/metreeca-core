@@ -61,8 +61,8 @@ public final class DataFormat extends Format<byte[]> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Decodes the binary {@code message} body from the input stream supplied by the {@code message}
-	 * {@link InputFormat} body, if one is available
+	 * Decodes the binary {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available
 	 */
 	@Override public Either<MessageException, byte[]> decode(final Message<?> message) {
 		return message.body(input()).map(source -> {
@@ -77,8 +77,8 @@ public final class DataFormat extends Format<byte[]> {
 	}
 
 	/**
-	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
-	 * the binary {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes the
+	 * binary {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final byte... value) {
 		return message
@@ -86,7 +86,7 @@ public final class DataFormat extends Format<byte[]> {
 				.header("~Content-Type", MIME)
 				.header("~Content-Length", valueOf(value.length))
 
-				.body(output(), output -> Xtream.data(output, value));
+				.body(output(), output -> { Xtream.data(output, value); });
 	}
 
 }

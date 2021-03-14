@@ -151,7 +151,7 @@ public final class Graphs extends Endpoint<Graphs> {
 									target.isEmpty() ? "default" : target, format.getDefaultFileExtension()
 							))
 
-							.body(output(), output -> connection.export(factory.getWriter(output), context))
+							.body(output(), output -> { connection.export(factory.getWriter(output), context); })
 
 					).accept(consumer);
 				});

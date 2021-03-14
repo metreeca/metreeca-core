@@ -16,11 +16,14 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.formats.*;
+import com.metreeca.rest.formats.TextFormat;
 
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static java.util.function.Function.identity;
 
@@ -31,7 +34,7 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 
 		if ( response != null ) {
 
-			response.body(OutputFormat.output()).accept(e -> {}, target -> {
+			response.body(output()).accept(e -> {}, target -> {
 
 				final byte[] data;
 
@@ -45,8 +48,8 @@ public final class ResponseAssert extends MessageAssert<ResponseAssert, Response
 					throw new UncheckedIOException(e);
 				}
 
-				response.body(OutputFormat.output(), output -> Xtream.data(output, data)); // cache output
-				response.body(InputFormat.input(), () -> new ByteArrayInputStream(data)); // expose output to testing
+				response.body(output(), output -> { Xtream.data(output, data); }); // cache output
+				response.body(input(), () -> new ByteArrayInputStream(data)); // expose output to testing
 
 			});
 

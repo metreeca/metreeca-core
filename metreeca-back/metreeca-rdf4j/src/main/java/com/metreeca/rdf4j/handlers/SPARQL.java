@@ -191,7 +191,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(output(), output -> factory.getWriter(output).handleBoolean(result))
+				.body(output(), output -> { factory.getWriter(output).handleBoolean(result); })
 		);
 	}
 
@@ -267,7 +267,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(output(), output -> factory.getWriter(output).handleBoolean(true))
+				.body(output(), output -> { factory.getWriter(output).handleBoolean(true); })
 		);
 	}
 
