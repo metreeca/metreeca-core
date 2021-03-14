@@ -27,12 +27,14 @@ import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.logging.Level.ALL;
+import static java.util.logging.Level.FINE;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
@@ -51,13 +53,19 @@ public final class ValuesTest {
 
 	private static final Map<String, Model> DatasetCache=new HashMap<>();
 
+	private static final Logger logger=Logger.getLogger("com.metreeca"); // retain reference to prevent gc
+
 
 	static { // logging not configured: reset and enable fine console logging
 
 		if ( System.getProperty("java.util.logging.config.file") == null
 				&& System.getProperty("java.util.logging.config.class") == null ) {
 
-			Logger.getLogger("").setLevel(Level.FINE);
+			logger.setLevel(FINE);
+
+			for (final Handler handler : Logger.getLogger("").getHandlers()) {
+				handler.setLevel(ALL); // enable detailed reporting from children loggers
+			}
 
 		}
 

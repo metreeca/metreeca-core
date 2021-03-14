@@ -25,8 +25,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -38,6 +37,7 @@ import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
+import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 
@@ -76,9 +76,9 @@ public final class JSEServer {
 	/**
 	 * Configures the delegate handler.
 	 *
-	 * @param factory a handler factory; takes as argument a shared asset context (which may configured with
-	 *                additional application-specific assets as a side effect) and must return a non-null handler
-	 *                to be used as entry point for serving requests
+	 * @param factory a handler factory; takes as argument a shared asset context (which may configured with additional
+	 *                application-specific assets as a side effect) and must return a non-null handler to be used as
+	 *                entry point for serving requests
 	 *
 	 * @return this server
 	 *
@@ -94,7 +94,6 @@ public final class JSEServer {
 
 		return this;
 	}
-
 
 	/**
 	 * Configures the socket address.
@@ -112,6 +111,33 @@ public final class JSEServer {
 		}
 
 		this.address=address;
+
+		return this;
+	}
+
+	/**
+	 * Configures subsystem logging level.
+	 *
+	 * @param level the loggin level to be configured
+	 * @param names fully-qualified names of packages/classes whose logging level is to be configured; empty for root
+	 *              logger
+	 *
+	 * @return this server
+	 *
+	 * @throws NullPointerException if either {@code level} or {@code names} is null or {@code names} contains null
+	 *                              elements
+	 */
+	public JSEServer logging(final Logger.Level level, final String... names) {
+
+		if ( level == null ) {
+			throw new NullPointerException("null level");
+		}
+
+		if ( names == null || stream(names).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null names");
+		}
+
+		level.log(names);
 
 		return this;
 	}
