@@ -73,7 +73,7 @@ public final class CORS implements Wrapper {
 						"X-Requested-With",
 						"Access-Control-Allow-Header",
 						"Access-Control-Request-Method",
-						"Access-Control-Request-Heade"
+						"Access-Control-Request-Header"
 				))
 
 		);
