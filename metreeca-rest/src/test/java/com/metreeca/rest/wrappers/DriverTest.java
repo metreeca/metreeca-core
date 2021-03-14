@@ -17,65 +17,44 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rest.*;
-import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.Request;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Guard.filter;
-import static com.metreeca.json.shapes.Guard.role;
-import static com.metreeca.json.shapes.MinCount.minCount;
-import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
+import static com.metreeca.rest.wrappers.Driver.driver;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class DriverTest {
 
-	private static final String Root="root";
-	private static final String None="none";
+	@Test void testConfigureRequestShape() {
 
-	private static final Shape RootShape=Shape.optional();
-	private static final Shape NoneShape=Shape.required();
+		final Shape test=clazz(RDF.NIL);
 
-	private static final Shape TestShape=and(
-			filter().then(minCount(1)),
-			when(role(Root), RootShape),
-			when(role(None), NoneShape)
-	);
+		driver(test)
 
+					.wrap(request -> {
 
-	private static Request request() {
-		return new Request()
-				.user(Root)
-				.roles(None)
-				.method(Request.GET)
-				.base("http://example.org/")
-				.path("/resource");
-	}
+					assertThat(request)
+							.hasAttribute(shape(), shape -> assertThat(shape).isEqualTo(shape));
 
+						return request.reply(status(OK));
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					})
 
-	@Test void testConfigureExchangeShape() {
-		Driver.driver(TestShape)
+				.handle(new Request())
 
-				.wrap(request -> {
-
-					RequestAssert.assertThat(request)
-							.hasAttribute(JSONLDFormat.shape(), shape -> assertThat(shape).isEqualTo(TestShape));
-
-					return request.reply(status(OK));
-
-				})
-
-				.handle(request())
-
-				.accept(response -> ResponseAssert.assertThat(response)
-						.hasStatus(OK)
-				);
-	}
+				.accept(response -> assertThat(response)
+							.hasStatus(OK)
+					);
+		}
 
 }

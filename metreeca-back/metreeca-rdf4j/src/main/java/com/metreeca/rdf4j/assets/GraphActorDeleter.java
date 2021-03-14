@@ -35,7 +35,7 @@ import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
-final class GraphActorDeleter {
+final class GraphActorDeleter implements Handler {
 
 	private final Options options;
 
@@ -47,7 +47,7 @@ final class GraphActorDeleter {
 	}
 
 
-	Future<Response> handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 
 		final IRI item=iri(request.item());
 		final Shape shape=request.attribute(shape());

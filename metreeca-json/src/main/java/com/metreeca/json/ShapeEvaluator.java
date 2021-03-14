@@ -24,6 +24,11 @@ import static java.lang.Boolean.TRUE;
 
 final class ShapeEvaluator extends Shape.Probe<Boolean> {
 
+	@Override public Boolean probe(final Link link) {
+		return link.shape().map(this);
+	}
+
+
 	@Override public Boolean probe(final When when) {
 
 		final Boolean test=when.test().map(this);

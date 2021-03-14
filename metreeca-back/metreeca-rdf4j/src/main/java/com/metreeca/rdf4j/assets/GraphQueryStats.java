@@ -31,6 +31,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.is;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
@@ -58,12 +59,18 @@ final class GraphQueryStats extends GraphQueryBase {
 		final int offset=stats.offset();
 		final int limit=stats.limit();
 
-		final String target=path.isEmpty() ? root : "hook";
-
 		final Shape filter=shape
 				.filter(resource)
 				.resolve(resource)
 				.label(this::label);
+
+		final Shape convey=shape
+				.convey()
+				.resolve(resource)
+				.label(this::label);
+
+		final Shape follow=path(convey, path);
+		final String hook=hook(follow, path);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -77,52 +84,34 @@ final class GraphQueryStats extends GraphQueryBase {
 
 					comment("stats query"),
 
-					prefix("", Engine.Base),
+					prefix(NS),
 					prefix(OWL.NS),
 					prefix(RDFS.NS),
 
-					space(select(indent(
-
-							space(
-									line(var("type"), var("type_label"), var("type_notes"))
-							),
-
-							space(
-									line(var("min"), var("min_label"), var("min_notes")),
-									line(var("max"), var("max_label"), var("max_notes"))
-							),
-
-							space(
-									line(var("count"))
-							)
-
-					))),
-
-					space(where(
+					space(select(), where(
 
 							space(block(
 
 									space(select(space(indent(
 
 											var("type"),
-											as("min", min(var(target))),
-											as("max", max(var(target))),
-											as("count", count(true, var(target)))
+											as("min", min(var(hook))),
+											as("max", max(var(hook))),
+											as("count", count(true, var(hook)))
 
 									)))),
 
 									space(where(
 
-											filters(filter),
-											anchor(path, target),
+											space(tree(and(filter, follow), true)),
 
 											space(bind("type", is(
-													isBlank(var(target)),
+													isBlank(var(hook)),
 													text(":bnode"),
 													is(
-															isIRI(var(target)),
+															isIRI(var(hook)),
 															text(":iri"),
-															datatype(var(target))
+															datatype(var(hook))
 													)
 											)))
 
@@ -132,7 +121,7 @@ final class GraphQueryStats extends GraphQueryBase {
 
 									space(
 											line(group(var("type"))),
-											line(having(gt(count(true, var(target)), text(0)))),
+											line(having(gt(count(true, var(hook)), text(0)))),
 											line(order(desc(var("count")), var("type"))),
 											line(offset(offset)),
 											line(limit(limit))

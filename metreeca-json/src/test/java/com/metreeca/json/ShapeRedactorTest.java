@@ -17,13 +17,15 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.guard;
+import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
@@ -111,6 +113,17 @@ final class ShapeRedactorTest {
 		assertThat(and(field(RDF.FIRST, value("first")), field(RDF.REST, value("rest")))
 				.redact("value", "first"))
 				.isEqualTo(field(RDF.FIRST, and()));
+	}
+
+	@Test void testLimitLinksToRelateTask() {
+
+		final Shape link=link(OWL.SAMEAS, field(RDF.NIL));
+
+		assertThat(link.redact(Task, Relate)).as("retain on relate task").isEqualTo(link);
+		assertThat(link.redact(Task, Update)).as("redact on other tasks").isEqualTo(and());
+
+		assertThat(link.redact(View, Detail)).as("immaterial axis").isEqualTo(link);
+
 	}
 
 	@Test void testOptimizeAnds() {

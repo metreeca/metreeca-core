@@ -94,7 +94,8 @@ public final class Creator extends Delegator {
 	 * @param <T>    the type of the message body to be inspected during slug generation
 	 * @param format the format of the message body to be inspected during slug generation
 	 * @param slug   a function mapping from the creation request and its payload to the identifier to be assigned to
-	 *               the newly created resource; must return a non-null non-clashing value
+	 *                 the
+	 *               newly created resource; must return a non-null non-clashing value
 	 *
 	 * @return a new resource creator
 	 *
@@ -114,7 +115,7 @@ public final class Creator extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(wrapper(slug).wrap(engine::create) // wrap slug immediately before handler after custom wrappers
+		delegate(wrapper(slug).wrap(engine::create) // immediately around handler after custom wrappers
 
 				.with(engine)
 				.with(throttler(Create, Detail))

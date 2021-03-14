@@ -20,8 +20,7 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -33,12 +32,15 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.guard;
 import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
+import static com.metreeca.json.shapes.When.when;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -226,6 +228,48 @@ final class AndTest {
 					field("y", RDF.VALUE)
 
 			));
+		}
+
+
+		@Test void testMergeDirectLinks() {
+			assertThat(and(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(OWL.SAMEAS, maxCount(2))
+
+			)).isEqualTo(link(OWL.SAMEAS, and(minCount(1), maxCount(2))));
+		}
+
+		@Test void testMergeInverseLinks() {
+			assertThat(and(
+
+					link(inverse(OWL.SAMEAS), minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			)).isEqualTo(link(inverse(OWL.SAMEAS), and(minCount(1), maxCount(2))));
+		}
+
+		@Test void testReportConflictingLinks() {
+			assertThatIllegalArgumentException().isThrownBy(() -> and(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			));
+		}
+
+
+		@Test void testMergeCompatibleWhens() {
+			assertThat(and(
+
+					when(guard("axis", "value"), minCount(1)),
+					when(guard("axis", "value"), maxCount(3))
+
+			)).isEqualTo(
+
+					when(guard("axis", "value"), and(minCount(1), maxCount(3)))
+
+			);
 		}
 
 	}

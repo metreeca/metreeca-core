@@ -17,12 +17,14 @@
 package com.metreeca.json.shapes;
 
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Link.link;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,17 +50,22 @@ final class AllTest {
 		private final Value c=literal(3);
 
 		@Test void testInspectAll() {
-			assertThat(All.all(all(a, b, c)))
+			assertThat(all(all(a, b, c)))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectLink() {
+			assertThat(all(link(OWL.SAMEAS, all(a, b, c))))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectAnd() {
-			assertThat(All.all(and(all(a, b), all(b, c))))
+			assertThat(all(and(all(a, b), all(b, c))))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 
 		@Test void testInspectOtherShape() {
-			assertThat(All.all(and()))
+			assertThat(all(and()))
 					.isEmpty();
 		}
 

@@ -40,12 +40,23 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 	}
 
 
+	private Stream<Value> values(final Stream<Value> values) {
+		return values.flatMap(value -> value instanceof Focus
+				? stream(sources).filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
+				: Stream.of(value)
+		);
+	}
+
+
 	@Override public Stream<Statement> probe(final Clazz clazz) {
 		return stream(sources)
 				.filter(Resource.class::isInstance)
 				.map(source -> statement((Resource)source, RDF.TYPE, clazz.iri()));
 	}
 
+	@Override public Stream<Statement> probe(final Link link) {
+		return link.shape().map(this);
+	}
 
 	@Override public Stream<Statement> probe(final Field field) {
 		return Stream.concat(
@@ -55,11 +66,13 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 						.map(targets -> values(targets.stream()).flatMap(target ->
 								stream(sources).flatMap(source -> traverse(field.iri(),
 
-										iri -> source instanceof Resource ?
-												Stream.of(statement((Resource)source, iri, target)) : Stream.empty(),
+										iri -> source instanceof Resource
+												? Stream.of(statement((Resource)source, iri, target))
+												: Stream.empty(),
 
-										iri -> target instanceof Resource ?
-												Stream.of(statement((Resource)target, iri, source)) : Stream.empty()
+										iri -> target instanceof Resource
+												? Stream.of(statement((Resource)target, iri, source))
+												: Stream.empty()
 
 										)
 								)))
@@ -91,14 +104,6 @@ final class ShapeOutliner extends Shape.Probe<Stream<Statement>> {
 
 	@Override public Stream<Statement> probe(final Shape shape) {
 		return Stream.empty();
-	}
-
-
-	private Stream<Value> values(final Stream<Value> values) {
-		return values.flatMap(value -> value instanceof Focus
-				? stream(sources).filter(IRI.class::isInstance).map(source -> ((Focus)value).resolve((IRI)source))
-				: Stream.of(value)
-		);
 	}
 
 }

@@ -20,6 +20,7 @@ import com.metreeca.json.*;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rest.wrappers.Driver;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -28,16 +29,19 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
 import javax.json.*;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.aliases;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;
@@ -64,8 +68,6 @@ final class JSONLDParser {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
-	private final Map<String, String> keywords;
-
 	private final Shape baseline;
 
 	private final JSONLDDecoder decoder;
@@ -74,8 +76,6 @@ final class JSONLDParser {
 	JSONLDParser(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.shape=driver(shape);
-		this.keywords=keywords;
-
 		this.baseline=shape;
 
 		this.decoder=new JSONLDDecoder(focus, shape, keywords);
@@ -116,7 +116,7 @@ final class JSONLDParser {
 		final int offset=offset(json);
 		final int limit=limit(json);
 
-		final Shape filtered=and(baseline, Guard.filter().then(filter)); // filtering only >> don't include in results
+		final Shape filtered=and(baseline, Guard.filter(filter)); // filtering only >> don't include in results
 
 		return terms != null ? Terms.terms(filtered, terms, offset, limit)
 				: stats != null ? Stats.stats(filtered, stats, offset, limit)
@@ -195,27 +195,27 @@ final class JSONLDParser {
 					final String key=entry.getKey();
 					final JsonValue value=entry.getValue();
 
-					return key.startsWith("^") ? filter(key.substring(1), value, shape, this::datatype)
-							: key.startsWith("@") ? filter(key.substring(1), value, shape, this::clazz)
-							: key.startsWith("%") ? filter(key.substring(1), value, shape, this::range)
+					return key.startsWith("^") ? filter(value, shape, key.substring(1), this::datatype)
+							: key.startsWith("@") ? filter(value, shape, key.substring(1), this::clazz)
+							: key.startsWith("%") ? filter(value, shape, key.substring(1), this::range)
 
-							: key.startsWith(">=") ? filter(key.substring(2), value, shape, this::minInclusive)
-							: key.startsWith("<=") ? filter(key.substring(2), value, shape, this::maxInclusive)
-							: key.startsWith(">") ? filter(key.substring(1), value, shape, this::minExclusive)
-							: key.startsWith("<") ? filter(key.substring(1), value, shape, this::maxExclusive)
+							: key.startsWith(">=") ? filter(value, shape, key.substring(2), this::minInclusive)
+							: key.startsWith("<=") ? filter(value, shape, key.substring(2), this::maxInclusive)
+							: key.startsWith(">") ? filter(value, shape, key.substring(1), this::minExclusive)
+							: key.startsWith("<") ? filter(value, shape, key.substring(1), this::maxExclusive)
 
-							: key.startsWith("$>") ? filter(key.substring(2), value, shape, this::minLength)
-							: key.startsWith("$<") ? filter(key.substring(2), value, shape, this::maxLength)
-							: key.startsWith("*") ? filter(key.substring(1), value, shape, this::pattern)
-							: key.startsWith("~") ? filter(key.substring(1), value, shape, this::like)
-							: key.startsWith("'") ? filter(key.substring(1), value, shape, this::stem)
+							: key.startsWith("$>") ? filter(value, shape, key.substring(2), this::minLength)
+							: key.startsWith("$<") ? filter(value, shape, key.substring(2), this::maxLength)
+							: key.startsWith("*") ? filter(value, shape, key.substring(1), this::pattern)
+							: key.startsWith("~") ? filter(value, shape, key.substring(1), this::like)
+							: key.startsWith("'") ? filter(value, shape, key.substring(1), this::stem)
 
-							: key.startsWith("#>") ? filter(key.substring(2), value, shape, this::minCount)
-							: key.startsWith("#<") ? filter(key.substring(2), value, shape, this::maxCount)
-							: key.startsWith("!") ? filter(key.substring(1), value, shape, this::all)
-							: key.startsWith("?") ? filter(key.substring(1), value, shape, this::any)
+							: key.startsWith("#>") ? filter(value, shape, key.substring(2), this::minCount)
+							: key.startsWith("#<") ? filter(value, shape, key.substring(2), this::maxCount)
+							: key.startsWith("!") ? filter(value, shape, key.substring(1), this::all)
+							: key.startsWith("?") ? filter(value, shape, key.substring(1), this::any)
 
-							: filter(key, value, shape, this::any);
+							: filter(value, shape, key, this::any);
 
 				})
 
@@ -224,31 +224,64 @@ final class JSONLDParser {
 	}
 
 
-	private Shape filter(final String path,
-			final JsonValue value, final Shape shape, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
+	private Shape filter(final JsonValue value, final Shape shape,
+			final String path, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
 	) {
-		return filter(path(path, shape), value, shape, mapper);
+		return filter(value, shape, path(path, shape), mapper);
 	}
 
-	private Shape filter(final List<IRI> path,
-			final JsonValue value, final Shape shape, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
+	private Shape filter(final JsonValue value, final Shape shape,
+			final List<IRI> path, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
 	) {
-		if ( path.isEmpty() ) {
 
-			return mapper.apply(value, shape);
+		return Optional
 
-		} else {
+				.ofNullable(shape.map(new Shape.Probe<Shape>() {
 
-			final IRI head=path.get(0);
-			final List<IRI> tail=path.subList(1, path.size());
+					@Override public Shape probe(final Field field) {
+						return path.isEmpty() || !field.iri().equals(path.get(0)) ? null : Optional
+								.ofNullable(filter(value, field.shape(), path.subList(1, path.size()), mapper))
+								.map(s -> field(field.alias(), field.iri(), s))
+								.orElse(null);
+					}
 
-			final Field field=field(shape, head).orElseThrow(() ->
-					new IllegalArgumentException(format("unknown path step <%s>", head))
-			);
+					@Override public Shape probe(final Link link) {
+						return Optional
+								.ofNullable(filter(value, link.shape(), path, mapper))
+								.map(s -> link(link.iri(), s))
+								.orElse(null);
+					}
 
-			return field(field.iri(), filter(tail, value, field.shape(), mapper));
 
-		}
+					@Override public Shape probe(final When when) {
+						throw new UnsupportedOperationException(when.toString());
+					}
+
+					@Override public Shape probe(final And and) {
+						return probe(and.shapes().stream());
+					}
+
+					@Override public Shape probe(final Or or) {
+						return probe(or.shapes().stream());
+					}
+
+
+					private Shape probe(final Stream<Shape> shapes) {
+						return shapes.map(this).filter(Objects::nonNull).findFirst().orElse(null);
+					}
+
+				}))
+
+				.orElseGet(() -> {
+
+					if ( !path.isEmpty() ) {
+						throw new NoSuchElementException(format("unknown path step %s", format(path.get(0))));
+					}
+
+					return mapper.apply(value, shape);
+
+				});
+
 	}
 
 
@@ -344,27 +377,15 @@ final class JSONLDParser {
 
 	private List<IRI> path(final String path, final Shape shape) {
 
-		final List<IRI> steps=new ArrayList<>();
+		final List<String> steps=new ArrayList<>();
 
 		final String trimmed=path.trim();
 		final Matcher matcher=StepPattern.matcher(trimmed);
 
 		int last=0;
-		Shape reference=shape;
 
 		while ( matcher.lookingAt() ) {
-
-			final Map<String, Field> aliases=aliases(reference, keywords);
-
-			final String IRI=matcher.group(1);
-
-			final Field field=Optional
-					.ofNullable(aliases.get(IRI))
-					.orElseThrow(() -> new NoSuchElementException("unknown path IRI <"+IRI+">"));
-
-			steps.add(field.iri());
-			reference=field.shape();
-
+			steps.add(matcher.group(1));
 			matcher.region(last=matcher.end(), trimmed.length());
 		}
 
@@ -372,8 +393,23 @@ final class JSONLDParser {
 			throw new JsonException("malformed path ["+trimmed+"]");
 		}
 
-		return steps;
+		return path(steps, shape).collect(toList());
+	}
 
+	private Stream<IRI> path(final List<String> steps, final Shape shape) {
+		if ( steps.isEmpty() ) { return Stream.empty(); } else {
+
+			final String head=steps.get(0);
+			final List<String> tail=steps.subList(1, steps.size());
+
+			final Map<String, Field> aliases=aliases(shape);
+
+			return Optional.ofNullable(aliases.get(head))
+
+					.map(field -> Stream.concat(Stream.of(field.iri()), path(tail, field.shape())))
+
+					.orElseThrow(() -> new NoSuchElementException(format("unknown path step <%s>", head)));
+		}
 	}
 
 
@@ -491,6 +527,8 @@ final class JSONLDParser {
 				: Any.any(values(value, shape));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private <V> V error(final String message) {
 		throw new JsonException(message);

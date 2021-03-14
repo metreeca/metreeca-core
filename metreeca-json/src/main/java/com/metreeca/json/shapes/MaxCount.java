@@ -103,6 +103,11 @@ public final class MaxCount extends Shape {
 		}
 
 
+		@Override public Integer probe(final Link link) {
+			return link.shape().map(this);
+		}
+
+
 		@Override public Integer probe(final When when) {
 			return reduce(Stream.of(when.pass(), when.fail()), Math::max);
 		}

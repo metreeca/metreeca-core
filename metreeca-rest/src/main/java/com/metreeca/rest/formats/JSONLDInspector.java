@@ -79,16 +79,22 @@ abstract class JSONLDInspector<V> extends Shape.Probe<V> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+	@Override public V probe(final Link link) {
+		return link.shape().map(this);
+	}
+
+
+	@Override public V probe(final When when) {
+		return value(Stream.of(when.pass(), when.fail()));
+	}
+
 	@Override public V probe(final And and) {
 		return value(and.shapes().stream());
 	}
 
 	@Override public V probe(final Or or) {
 		return value(or.shapes().stream());
-	}
-
-	@Override public V probe(final When when) {
-		return value(Stream.of(when.pass(), when.fail()));
 	}
 
 

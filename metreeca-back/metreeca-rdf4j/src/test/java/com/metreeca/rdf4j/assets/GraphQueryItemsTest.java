@@ -22,8 +22,7 @@ import com.metreeca.json.queries.Items;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -41,7 +40,8 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
-import static com.metreeca.rdf4j.assets.GraphFetcherTest.exec;
+import static com.metreeca.json.shapes.Link.link;
+import static com.metreeca.rdf4j.assets.GraphQueryBaseTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -156,29 +156,36 @@ final class GraphQueryItemsTest {
 		});
 	}
 
-	//@Test void testSortingOnVirtuals() {
-	//	exec(() -> assertThat(query(items(
-	//
-	//			virtual(OWL.SAMEAS, filter(clazz(term("Office")))), singletonList(decreasing(term("code")))
-	//
-	//	))
-	//			.stream()
-	//			.filter(Values.pattern(null, Shape.Contains, null))
-	//			.map(Statement::getObject)
-	//			.distinct()
-	//			.collect(toList())
-	//
-	//	).isEqualTo(tuples(
-	//
-	//			"select ?alias { ?alias a :Alias; owl:sameAs/birt:code ?code } order by desc(?code)"
-	//
-	//	)
-	//
-	//			.stream()
-	//			.map(map -> map.get("alias"))
-	//			.collect(toList())
-	//
-	//	));
-	//}
+	@Test void testSortingWithLink() {
+		exec(() -> assertThat(
+
+				query(items(
+
+						and(
+								filter(clazz(term("Alias"))),
+								link(OWL.SAMEAS, field(term("code")))
+						),
+
+						singletonList(decreasing(term("code")))
+
+				))
+						.stream()
+						.filter(Values.pattern(null, Shape.Contains, null))
+						.map(Statement::getObject)
+						.distinct()
+						.collect(toList())
+
+		).isEqualTo(tuples(
+
+				"select ?alias { ?alias a :Alias; owl:sameAs/:code ?code } order by desc(?code)"
+
+				)
+
+						.stream()
+						.map(map -> map.get("alias"))
+						.collect(toList())
+
+		));
+	}
 
 }

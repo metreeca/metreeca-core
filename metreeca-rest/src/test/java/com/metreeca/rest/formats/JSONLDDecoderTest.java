@@ -17,7 +17,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -41,6 +40,8 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
+import static com.metreeca.rest.Xtream.entry;
+import static com.metreeca.rest.Xtream.map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -656,18 +657,18 @@ final class JSONLDDecoderTest {
 		@Test void testHandleKeywordAliases() {
 			assertThat(decode(x,
 
-					field(RDF.NIL),
+					field(RDF.FIRST),
 
-					Xtream.map(
-							Xtream.entry("@id", "id"),
-							Xtream.entry("@value", "value"),
-							Xtream.entry("@type", "type"),
-							Xtream.entry("@language", "language")
+					map(
+							entry("@id", "id"),
+							entry("@value", "value"),
+							entry("@type", "type"),
+							entry("@language", "language")
 					),
 
 					createObjectBuilder()
 							.add("id", "/x")
-							.add("nil", createArrayBuilder() // keyword alias overrides field alias
+							.add("first", createArrayBuilder() // keyword alias overrides field alias
 									.add(createObjectBuilder()
 											.add("value", "string")
 											.add("language", "en")
@@ -680,14 +681,14 @@ final class JSONLDDecoderTest {
 
 			)).isIsomorphicTo(
 
-					statement(x, RDF.NIL, literal("string", "en")),
-					statement(x, RDF.NIL, literal("2020-09-10", XSD.DATE))
+					statement(x, RDF.FIRST, literal("string", "en")),
+					statement(x, RDF.FIRST, literal("2020-09-10", XSD.DATE))
 
 			);
 		}
 
 		@Test void testIgnoreDuplicateKeywords() {
-			assertThat(decode(x, and(), Xtream.map(Xtream.entry("@id", "id")), createObjectBuilder()
+			assertThat(decode(x, and(), map(entry("@id", "id")), createObjectBuilder()
 
 					.add("id", "/x")
 					.add("@id", "/x")

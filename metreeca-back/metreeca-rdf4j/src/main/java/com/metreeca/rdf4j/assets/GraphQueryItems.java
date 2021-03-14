@@ -16,10 +16,10 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Order;
+import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf4j.SPARQLScribe;
 import com.metreeca.rdf4j.assets.GraphEngine.Options;
 
 import org.eclipse.rdf4j.model.*;
@@ -33,20 +33,13 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Field.fields;
-import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.*;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 final class GraphQueryItems extends GraphQueryBase {
@@ -78,12 +71,10 @@ final class GraphQueryItems extends GraphQueryBase {
 				.resolve(resource)
 				.label(this::label);
 
+		final Shape follow=and(orders.stream().map(Order::path).map(path -> path(convey, path)));
 		final Collection<Triple> template=convey.map(new TemplateProbe(root)).collect(toList());
-		final Map<List<IRI>, String> sorting=sorting(filter, convey, orders);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
-
-		// construct results are serialized with no ordering guarantee >> transfer data as tuples to preserve order
 
 		evaluate(() -> graph.exec(connection -> {
 			connection.prepareTupleQuery(compile(() -> code(list(
@@ -93,46 +84,37 @@ final class GraphQueryItems extends GraphQueryBase {
 					prefix(OWL.NS),
 					prefix(RDFS.NS),
 
-					space(select(space(indent(
-
-							list(projection(template).map(SPARQLScribe::var))
-
-					)))),
-
-					space(where(
+					space(select(), where(
 
 							space(block(
 
-									select(true, var(root)),
+									select(true, var(root)), // transfer matches as tuples to preserve order
 
 									block(
 
-											space(filters(filter)),
-
-											// non-filtering sorting variables; use pattern to honor convey constraints
-
-											space(pattern(convey.map(new SortingProbe(sorting))))
+											space(tree(filter, true)),
+											space(tree(follow, false))
 
 									),
 
-									order(
+									order(list(Stream.concat(
 
-											list(orders.stream().map(order ->
-													sort(order.inverse(), var(sorting.get(order.path())))
-											)),
+											orders.stream().map(order ->
+													sort(order.inverse(), var(hook(follow, order.path())))
+											),
 
-											// sort on root as last resort, unless already included
+											Stream.of(asc(var(root))).filter(s -> // then root, unless already included
+													orders.stream().map(Order::path).noneMatch(List::isEmpty)
+											)
 
-											sorting.containsValue(root) ? nothing() : asc(var(root))
-
-									),
+									))),
 
 									offset(offset),
 									limit(limit, options.items())
 
 							)),
 
-							pattern(convey)
+							tree(convey, false)
 
 					))
 
@@ -153,13 +135,12 @@ final class GraphQueryItems extends GraphQueryBase {
 							final Resource subject=statement.getSubject();
 							final Value object=statement.getObject();
 
-
 							final Value source=subject instanceof BNode
-									? bindings.getValue(((BNode)subject).getID())
+									? bindings.getValue(principal(((BNode)subject).getID(), bindings.getBindingNames()))
 									: subject;
 
 							final Value target=object instanceof BNode
-									? bindings.getValue(((BNode)object).getID())
+									? bindings.getValue(principal(((BNode)object).getID(), bindings.getBindingNames()))
 									: object;
 
 							if ( source instanceof Resource && target != null ) {
@@ -181,46 +162,6 @@ final class GraphQueryItems extends GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Stream<String> projection(final Collection<Triple> template) {
-		return Stream.concat(
-
-				Stream.of(root), /// always project root
-
-				Stream.concat( // project template variables
-
-						template.stream().map(Triple::getSubject),
-						template.stream().map(Triple::getObject)
-
-				).map(BNode.class::cast).map(BNode::getID)
-
-		).distinct().sorted();
-	}
-
-	private Map<List<IRI>, String> sorting(final Shape filter, final Shape convey, final Collection<Order> orders) {
-
-		final Map<List<IRI>, String> labels=new HashMap<>();
-
-		orders.stream().map(Order::path).distinct().forEach(path -> {
-
-			Optional.of(root).filter(label -> path.isEmpty()).ifPresent(label -> labels.putIfAbsent(path, label));
-
-			field(filter, path).map(Field::alias).ifPresent(label -> labels.putIfAbsent(path, label));
-			field(convey, path).map(Field::alias).ifPresent(label -> labels.putIfAbsent(path, label));
-
-			if ( !labels.containsKey(path) ) {
-				throw new IllegalArgumentException(format("unknown sorting path %s",
-						path.stream().map(Values::format).collect(joining("/"))
-				));
-			}
-
-		});
-
-		return labels;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private static final class TemplateProbe extends Shape.Probe<Stream<Triple>> {
 
 		private final String anchor;
@@ -230,6 +171,10 @@ final class GraphQueryItems extends GraphQueryBase {
 			this.anchor=anchor;
 		}
 
+
+		@Override public Stream<Triple> probe(final Link link) {
+			return link.shape().map(this);
+		}
 
 		@Override public Stream<Triple> probe(final Field field) {
 
@@ -265,44 +210,6 @@ final class GraphQueryItems extends GraphQueryBase {
 
 
 		@Override public Stream<Triple> probe(final Shape shape) { return Stream.empty(); }
-
-	}
-
-	private static final class SortingProbe extends Shape.Probe<Shape> {
-
-		private final Map<List<IRI>, String> labels;
-
-
-		SortingProbe(final Map<List<IRI>, String> labels) {this.labels=labels;}
-
-
-		@Override public Shape probe(final Field field) {
-
-			final String alias=field.alias();
-			final IRI iri=field.iri();
-			final Shape shape=field.shape().map(this);
-
-			return labels.containsValue(alias) || fields(shape).findFirst().isPresent() ?
-					field(alias, iri, shape) : and();
-		}
-
-
-		@Override public Shape probe(final When when) {
-			return when(when.test().map(this), when.pass().map(this), when.fail().map(this));
-		}
-
-		@Override public Shape probe(final And and) {
-			return and(and.shapes().stream().map(this));
-		}
-
-		@Override public Shape probe(final Or or) {
-			return or(or.shapes().stream().map(this));
-		}
-
-
-		@Override public Shape probe(final Shape shape) {
-			return shape;
-		}
 
 	}
 

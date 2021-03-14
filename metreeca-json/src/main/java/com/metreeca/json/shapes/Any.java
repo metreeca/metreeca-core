@@ -128,6 +128,10 @@ public final class Any extends Shape {
 			return any.values();
 		}
 
+		@Override public Set<Value> probe(final Link link) {
+			return link.shape().map(this);
+		}
+
 		@Override public Set<Value> probe(final Or or) {
 			return or.shapes().stream()
 					.map(shape -> shape.map(this))

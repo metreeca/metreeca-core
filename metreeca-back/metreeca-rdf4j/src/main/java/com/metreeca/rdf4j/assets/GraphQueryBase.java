@@ -24,7 +24,6 @@ import com.metreeca.rest.Scribe;
 import com.metreeca.rest.assets.Logger;
 
 import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 
 import java.util.*;
@@ -33,10 +32,37 @@ import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Link.link;
+import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.When.when;
+import static com.metreeca.rdf4j.SPARQLScribe.datatype;
+import static com.metreeca.rdf4j.SPARQLScribe.edge;
+import static com.metreeca.rdf4j.SPARQLScribe.eq;
+import static com.metreeca.rdf4j.SPARQLScribe.filter;
+import static com.metreeca.rdf4j.SPARQLScribe.gt;
+import static com.metreeca.rdf4j.SPARQLScribe.gte;
+import static com.metreeca.rdf4j.SPARQLScribe.in;
+import static com.metreeca.rdf4j.SPARQLScribe.isBlank;
+import static com.metreeca.rdf4j.SPARQLScribe.isIRI;
+import static com.metreeca.rdf4j.SPARQLScribe.isLiteral;
 import static com.metreeca.rdf4j.SPARQLScribe.lang;
+import static com.metreeca.rdf4j.SPARQLScribe.lt;
+import static com.metreeca.rdf4j.SPARQLScribe.lte;
+import static com.metreeca.rdf4j.SPARQLScribe.neq;
+import static com.metreeca.rdf4j.SPARQLScribe.optional;
+import static com.metreeca.rdf4j.SPARQLScribe.or;
+import static com.metreeca.rdf4j.SPARQLScribe.regex;
+import static com.metreeca.rdf4j.SPARQLScribe.str;
 import static com.metreeca.rdf4j.SPARQLScribe.string;
-import static com.metreeca.rdf4j.SPARQLScribe.*;
+import static com.metreeca.rdf4j.SPARQLScribe.strlen;
+import static com.metreeca.rdf4j.SPARQLScribe.strstarts;
+import static com.metreeca.rdf4j.SPARQLScribe.union;
+import static com.metreeca.rdf4j.SPARQLScribe.values;
+import static com.metreeca.rdf4j.SPARQLScribe.var;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.assets.Logger.logger;
@@ -48,6 +74,30 @@ import static java.lang.String.valueOf;
 abstract class GraphQueryBase {
 
 	static final String root="0";
+
+
+	static String alias(final String id) {
+		return id+'a';
+	}
+
+	static String value(final String id) {
+		return id+'v';
+	}
+
+
+	/**
+	 * @param id  a template node id
+	 * @param ids the set of known template node ids
+	 *
+	 * @return the id of the principal node proxied by {@code id}
+	 *
+	 * @see "linking @ metreeca-json design notes"
+	 */
+	static String principal(final String id, final Collection<String> ids) {
+		return id.endsWith("a") ? id
+				: id.endsWith("v") ? id.substring(0, id.length()-1)
+				: Optional.of(alias(id)).filter(ids::contains).orElse(id);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -96,37 +146,63 @@ abstract class GraphQueryBase {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Scribe filters(final Shape shape) {
-		return space(
+	static Scribe tree(final Shape shape, final boolean required) {
+		return list(
 
-				space(all(shape).map(values -> values(root, values)).orElse(nothing())),  // root universal constraints
+				all(shape) // root universal constraints
+						.map(values -> space(values(var(root), values)))
+						.map(Scribe::space)
+						.orElse(nothing()),
 
-				space(shape.map(new SkeletonProbe(root, true)))
+				space(shape.map(new TreeProbe(root, required)))
 
 		);
 	}
 
+	static Shape path(final Shape shape, final List<IRI> path) {
+		return Optional.of(shape.map(new PathProbe(path)))
 
-	Scribe pattern(final Shape shape) {
-		return space(shape.map(new SkeletonProbe(root, false)));
+				.filter(s -> path.isEmpty() || !s.equals(and()))
+
+				.orElseThrow(() ->
+
+						new IllegalArgumentException(format("unknown path step %s", Values.format(path.get(0))))
+
+				);
 	}
 
-	Scribe anchor(final Collection<IRI> path, final String target) {
-		return path.isEmpty() ? nothing() : space(edge(var(root), path(path), var(target)));
+	static String hook(final Shape shape, final List<IRI> path) {
+		return hook(root, shape, path);
+	}
+
+
+	private static String hook(final String anchor, final Shape shape, final List<IRI> path) {
+		return Optional.ofNullable(shape.map(new HookProbe(anchor, path)))
+
+				.orElseGet(() -> {
+
+					if ( !path.isEmpty() ) {
+						throw new IllegalArgumentException(format("unknown path step %s", Values.format(path.get(0))));
+					}
+
+					return anchor;
+
+				});
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class SkeletonProbe extends Shape.Probe<Scribe> {
+	private static final class TreeProbe extends Shape.Probe<Scribe> {
 
 		private final String anchor;
-		private final boolean prune;
+
+		private final boolean required;
 
 
-		private SkeletonProbe(final String anchor, final boolean prune) {
+		private TreeProbe(final String anchor, final boolean filter) {
 			this.anchor=anchor;
-			this.prune=prune;
+			this.required=filter;
 		}
 
 
@@ -137,6 +213,7 @@ abstract class GraphQueryBase {
 			return iri.equals(ValueType) ? nothing() : line(filter(
 
 					iri.equals(ResourceType) ? or(isBlank(var(anchor)), isIRI(var(anchor)))
+
 							: iri.equals(BNodeType) ? isBlank(var(anchor))
 							: iri.equals(IRIType) ? isIRI(var(anchor))
 							: iri.equals(LiteralType) ? isLiteral(var(anchor))
@@ -152,7 +229,7 @@ abstract class GraphQueryBase {
 		}
 
 		@Override public Scribe probe(final Range range) {
-			if ( prune ) {
+			if ( required ) {
 
 				return probe((Shape)range); // !!! tbi (filter not exists w/ special root treatment)
 
@@ -166,7 +243,7 @@ abstract class GraphQueryBase {
 		}
 
 		@Override public Scribe probe(final Lang lang) {
-			if ( prune ) {
+			if ( required ) {
 
 				return probe((Shape)lang); // !!! tbi (filter not exists w/ special root treatment)
 
@@ -226,51 +303,65 @@ abstract class GraphQueryBase {
 
 
 		@Override public Scribe probe(final MinCount minCount) {
-			return prune ? probe((Shape)minCount) : nothing();
+			return required ? probe((Shape)minCount) : nothing();
 		}
 
 		@Override public Scribe probe(final MaxCount maxCount) {
-			return prune ? probe((Shape)maxCount) : nothing();
+			return required ? probe((Shape)maxCount) : nothing();
 		}
 
 
 		@Override public Scribe probe(final All all) {
-			return nothing(); // universal constraints handled by field probe
+			return nothing(); // universal constraints handled by skeleton()
 		}
 
 		@Override public Scribe probe(final Any any) {
-			return anchor.equals(root)
-					? values(anchor, any.values())
-					: filter(in(var(anchor), any.values().stream().map(Scribe::text)));
+			return space(anchor.equals(root)
+					? values(var(anchor), any.values())
+					: filter(in(var(anchor), any.values().stream().map(Scribe::text)))
+			);
 		}
 
-
 		@Override public Scribe probe(final Localized localized) {
-			return prune ? probe((Shape)localized) : nothing();
+			return required ? probe((Shape)localized) : nothing();
 		}
 
 
 		@Override public Scribe probe(final Field field) {
 
-			final Shape shape=field.shape();
 			final String alias=field.alias();
+			final IRI iri=field.iri();
+			final Shape shape=field.shape();
 
-			final Optional<Set<Value>> all=all(shape);
+			return list(
 
-			final Scribe constraints=list(
+					space(edge(var(anchor), text(iri), indent(list(", ", Stream.concat(
 
-					prune && all.isPresent() ? nothing() // (€) filtering hook already available on universal edges
-							: line(edge(var(anchor), field.iri(), var(alias))), // filtering or projection hook
+							Stream.of(var(alias)), // filtering/projection hook
 
-					list(all.map(values -> values.stream().map(value ->  // universal constraints edges
-							line(edge(var(anchor), field.iri(), text(value)))
-					)).orElse(Stream.empty())),
+							all(shape).orElseGet(Collections::emptySet).stream().map(Scribe::text)
 
-					space(shape.map(new SkeletonProbe(alias, prune)))
+					))))),
+
+					space(shape.map(new TreeProbe(alias, required)))
+
+			).map(scribe -> required ? scribe : space(optional(scribe)));
+		}
+
+		@Override public Scribe probe(final Link link) {
+
+			final IRI iri=link.iri();
+			final Shape shape=link.shape();
+
+			final String id=direct(iri) ? value(anchor) : alias(anchor);
+
+			return list(
+
+					space(edge(var(anchor), text(iri), var(id))),
+
+					space(shape.map(new TreeProbe(id, required)))
+
 			);
-
-			return space(prune ? constraints : optional(space(constraints)));
-
 		}
 
 
@@ -279,12 +370,96 @@ abstract class GraphQueryBase {
 		}
 
 		@Override public Scribe probe(final Or or) {
-			return union(or.shapes().stream().map(s -> block(space(s.map(this)))).toArray(Scribe[]::new));
+			return space(union(or.shapes().stream().map(s -> block(space(s.map(this)))).toArray(Scribe[]::new)));
 		}
 
 
 		@Override public Scribe probe(final Shape shape) {
 			throw new UnsupportedOperationException(shape.toString());
+		}
+
+	}
+
+	private static final class PathProbe extends Shape.Probe<Shape> {
+
+		private final List<IRI> path;
+
+
+		PathProbe(final List<IRI> path) {
+			this.path=path;
+		}
+
+
+		@Override public Shape probe(final Field field) {
+			return path.isEmpty() || !field.iri().equals(path.get(0)) ? and() : field(
+					field.alias(), field.iri(), path(field.shape(), path.subList(1, path.size()))
+			);
+		}
+
+		@Override public Shape probe(final Link link) {
+			return link(link.iri(), link.shape().map(this));
+		}
+
+
+		@Override public Shape probe(final When when) {
+			return when(when.test(), when.pass().map(this), when.fail().map(this));
+		}
+
+		@Override public Shape probe(final And and) {
+			return and(and.shapes().stream().map(this));
+		}
+
+		@Override public Shape probe(final Or or) {
+			return or(or.shapes().stream().map(this));
+		}
+
+
+		@Override protected Shape probe(final Shape shape) {
+			return and();
+		}
+
+	}
+
+	private static final class HookProbe extends Shape.Probe<String> {
+
+		private final String anchor;
+		private final List<IRI> path;
+
+
+		HookProbe(final String anchor, final List<IRI> path) {
+			this.anchor=anchor;
+			this.path=path;
+		}
+
+
+		@Override public String probe(final Field field) {
+			return path.isEmpty() || !field.iri().equals(path.get(0)) ? null : Optional
+					.ofNullable(hook(field.alias(), field.shape(), path.subList(1, path.size())))
+					.orElse(field.alias());
+		}
+
+		@Override public String probe(final Link link) {
+			return Optional
+					.ofNullable(link.shape().map(this))
+					.orElseGet(() -> direct(link.iri()) ? value(anchor) : alias(anchor));
+		}
+
+
+		@Override public String probe(final When when) {
+			throw new UnsupportedOperationException(when.toString()); // make sure we can't reach multiple field hooks
+		}
+
+		@Override public String probe(final And and) {
+			return probe(and.shapes().stream());
+		}
+
+		@Override public String probe(final Or or) {
+			return probe(or.shapes().stream());
+		}
+
+
+		private String probe(final Stream<Shape> shapes) {
+			return shapes.map(this).filter(Objects::nonNull).findFirst().orElse(null);
 		}
 
 	}

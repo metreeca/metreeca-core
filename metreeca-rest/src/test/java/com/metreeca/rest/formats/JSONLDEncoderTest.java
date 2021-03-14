@@ -607,7 +607,7 @@ final class JSONLDEncoderTest {
 		@Test void testHandleKeywordAliases() {
 			assertThat(encode(x,
 
-					field(RDF.NIL),
+					field(RDF.FIRST),
 
 					map(
 							entry("@id", "id"),
@@ -616,12 +616,12 @@ final class JSONLDEncoderTest {
 							entry("@language", "language")
 					),
 
-					statement(x, RDF.NIL, literal("string", "en")),
-					statement(x, RDF.NIL, literal("2020-09-10", XSD.DATE)))
+					statement(x, RDF.FIRST, literal("string", "en")),
+					statement(x, RDF.FIRST, literal("2020-09-10", XSD.DATE)))
 
 			).isEqualTo(createObjectBuilder()
 					.add("id", "/x")
-					.add("nil", createArrayBuilder() // keyword alias overrides field alias
+					.add("first", createArrayBuilder() // keyword alias overrides field alias
 							.add(createObjectBuilder()
 									.add("value", "string")
 									.add("language", "en")
@@ -671,10 +671,10 @@ final class JSONLDEncoderTest {
 		}
 
 		@Test void testKnownDatatype() {
-			assertThat(encode(field(RDF.VALUE, datatype(RDF.NIL))))
+			assertThat(encode(field(RDF.VALUE, datatype(RDF.FIRST))))
 					.hasField("value", createObjectBuilder()
 							.add("@id", RDF.VALUE.stringValue())
-							.add("@type", RDF.NIL.stringValue())
+							.add("@type", RDF.FIRST.stringValue())
 					);
 		}
 

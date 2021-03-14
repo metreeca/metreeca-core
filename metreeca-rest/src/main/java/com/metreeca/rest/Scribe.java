@@ -37,6 +37,13 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class Scribe {
 
+	private static final Scribe Nothing=new Scribe() {
+
+		@Override protected Appendable scribe(final Appendable code) { return code; }
+
+	};
+
+
 	public static String code(final Scribe... scribes) {
 
 		if ( scribes == null || stream(scribes).anyMatch(Objects::isNull) ) {
@@ -223,11 +230,7 @@ public abstract class Scribe {
 
 
 	public static Scribe nothing() {
-		return new Scribe() {
-
-			@Override protected Appendable scribe(final Appendable code) { return code; }
-
-		};
+		return Nothing;
 	}
 
 

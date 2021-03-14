@@ -299,8 +299,11 @@ final class JSONLDScanner extends Shape.Probe<Either<Trace, Stream<Statement>>> 
 	}
 
 
-	@Override public Either<Trace, Stream<Statement>> probe(final Field field) {
+	@Override public Either<Trace, Stream<Statement>> probe(final Link link) {
+		return link.shape().map(this);
+	}
 
+	@Override public Either<Trace, Stream<Statement>> probe(final Field field) {
 		return group.stream().map(value -> {
 
 			final IRI iri=field.iri();
@@ -331,6 +334,10 @@ final class JSONLDScanner extends Shape.Probe<Either<Trace, Stream<Statement>>> 
 	}
 
 
+	@Override public Either<Trace, Stream<Statement>> probe(final When when) {
+		return when.test().map(this).fold(trace -> when.fail(), stream -> when.pass()).map(this);
+	}
+
 	@Override public Either<Trace, Stream<Statement>> probe(final And and) {
 		return and.shapes().stream()
 
@@ -353,11 +360,6 @@ final class JSONLDScanner extends Shape.Probe<Either<Trace, Stream<Statement>>> 
 		return reports.isEmpty()
 				? Left(trace("values don't match any alternative"))
 				: reports.stream().reduce(Right(Stream.empty()), this::merge);
-	}
-
-
-	@Override public Either<Trace, Stream<Statement>> probe(final When when) {
-		return when.test().map(this).fold(trace -> when.fail(), stream -> when.pass()).map(this);
 	}
 
 

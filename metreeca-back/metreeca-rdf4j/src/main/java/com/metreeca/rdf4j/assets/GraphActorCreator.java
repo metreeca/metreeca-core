@@ -40,12 +40,12 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphActorCreator {
+final class GraphActorCreator implements Handler {
 
 	private final Graph graph=asset(graph());
 
 
-	Future<Response> handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 
 		final IRI item=iri(request.item());
 		final Shape shape=request.attribute(shape());

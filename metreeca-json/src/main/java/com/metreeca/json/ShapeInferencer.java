@@ -29,6 +29,7 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
@@ -83,6 +84,9 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		return and(localized, datatype(RDF.LANGSTRING));
 	}
 
+	@Override public Shape probe(final Link link) {
+		return and(link(link.iri(), and(link.shape().map(this), ResourceDatatype)), ResourceDatatype);
+	}
 
 	@Override public Shape probe(final Field field) {
 
@@ -114,6 +118,10 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 				return true;
 			}
 
+			@Override public Boolean probe(final Link link) {
+				return link.shape().map(this);
+			}
+
 			@Override public Boolean probe(final And and) {
 				return and.shapes().stream().map(this).anyMatch(b -> b);
 			}
@@ -128,6 +136,10 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 			@Override public Integer probe(final Lang lang) {
 				return lang.tags().size();
+			}
+
+			@Override public Integer probe(final Link link) {
+				return link.shape().map(this);
 			}
 
 			@Override public Integer probe(final And and) {

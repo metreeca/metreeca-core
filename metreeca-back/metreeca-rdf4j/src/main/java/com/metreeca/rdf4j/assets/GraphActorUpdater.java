@@ -36,7 +36,7 @@ import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 
-final class GraphActorUpdater {
+final class GraphActorUpdater implements Handler {
 
 	private final Options options;
 
@@ -48,7 +48,7 @@ final class GraphActorUpdater {
 	}
 
 
-	Future<Response> handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 
 		final IRI item=iri(request.item());
 		final Shape shape=request.attribute(shape());

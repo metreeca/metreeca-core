@@ -16,8 +16,7 @@
 
 package com.metreeca.json;
 
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.*;
@@ -28,6 +27,7 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
@@ -175,6 +175,24 @@ final class ShapeInferencerTest {
 		assertThat(expand(typed))
 				.as("reverse field objects are IRIs if explicitly typed")
 				.isEqualTo(field(inverse(RDF.VALUE), datatype(IRIType)));
+
+	}
+
+
+	@Test void testLink() {
+
+		final Shape nested=clazz(RDF.NIL);
+
+		assertThat(expand(link(OWL.SAMEAS, nested)))
+				.as("nested shapes are expanded")
+				.isEqualTo((and(
+						datatype(ResourceType),
+						link(OWL.SAMEAS, nested, datatype(ResourceType)))
+				));
+
+		assertThat(expand(link(OWL.SAMEAS, field(RDF.VALUE))))
+				.as("links have resource subjects and objects")
+				.isEqualTo(and(datatype(ResourceType), link(OWL.SAMEAS, datatype(ResourceType), field(RDF.VALUE))));
 
 	}
 

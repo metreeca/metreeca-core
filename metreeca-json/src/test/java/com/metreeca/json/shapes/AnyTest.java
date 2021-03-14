@@ -17,6 +17,7 @@
 package com.metreeca.json.shapes;
 
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,7 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Or.or;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +57,11 @@ final class AnyTest {
 
 		@Test void testInspectAny() {
 			assertThat(any(any(a, b, c)))
+					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
+		}
+
+		@Test void testInspectLink() {
+			assertThat(any(link(OWL.SAMEAS, any(a, b, c))))
 					.hasValueSatisfying(values -> assertThat(values).containsExactly(a, b, c));
 		}
 

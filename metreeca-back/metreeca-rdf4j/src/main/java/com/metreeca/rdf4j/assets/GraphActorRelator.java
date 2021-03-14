@@ -29,6 +29,8 @@ import java.util.Optional;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Guard.Convey;
+import static com.metreeca.json.shapes.Guard.Mode;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.assets.Engine.StatsShape;
@@ -36,7 +38,7 @@ import static com.metreeca.rest.assets.Engine.TermsShape;
 import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 
-final class GraphActorRelator {
+final class GraphActorRelator implements Handler {
 
 	private final Options options;
 
@@ -46,7 +48,7 @@ final class GraphActorRelator {
 	}
 
 
-	Future<Response> handle(final Request request) {
+	@Override public Future<Response> handle(final Request request) {
 
 		final IRI item=iri(request.item());
 		final Shape shape=and(all(item), request.attribute(shape()));
@@ -74,7 +76,8 @@ final class GraphActorRelator {
 	private static final class ShapeProbe extends Query.Probe<Shape> {
 
 		@Override public Shape probe(final Items items) {
-			return items.shape(); // !!! add ldp:contains if items.path is not empty
+			return items.shape().redact(Mode, Convey); // remove filters // !!! add Shape.Contains if items.path is not
+			// empty
 		}
 
 		@Override public Shape probe(final Stats stats) {

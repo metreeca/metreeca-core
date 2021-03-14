@@ -17,6 +17,7 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +30,7 @@ import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Link.link;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -44,8 +46,31 @@ final class ShapeOutlinerTest {
 
 
 	private Collection<Statement> outline(final Shape shape, final Value... sources) {
-		return shape.map(new ShapeOutliner(sources)).collect(toSet());
+		return shape
+				.map(new ShapeOutliner(sources))
+				.collect(toSet());
 	}
+
+
+
+	@Test void testOutlineClazz() {
+		assertThat(outline(and(all(x), clazz(y))))
+				.as("classes")
+				.isIsomorphicTo(statement(x, RDF.TYPE, y));
+	}
+
+	@Test void testOutlineSubjectAll() {
+		assertThat(outline(and(all(x, y), field(p, all(z)))))
+				.as("subject existential")
+				.isIsomorphicTo(statement(x, p, z), statement(y, p, z));
+	}
+
+	@Test void testOutlineObjectAll() {
+		assertThat(outline(and(all(z), field(p, all(x, y)))))
+				.as("object existential")
+				.isIsomorphicTo(statement(z, p, x), statement(z, p, y));
+	}
+
 
 	@Test void testOutlineFields() {
 
@@ -59,32 +84,26 @@ final class ShapeOutlinerTest {
 
 	}
 
+	@Test void testOutlineLinks() {
 
-	@Test void testOutlineClasses() {
-		assertThat(outline(and(all(x), clazz(y))))
-				.as("classes")
-				.isIsomorphicTo(statement(x, RDF.TYPE, y));
+		assertThat(outline(link(OWL.SAMEAS, field(p, all(y))), x))
+				.as("direct field")
+				.isIsomorphicTo(statement(x, p, y));
+
+		assertThat(outline(field(inverse(p), link(OWL.SAMEAS, all(y))), x))
+				.as("inverse field")
+				.isIsomorphicTo(statement(y, p, x));
+
 	}
 
-	@Test void testOutlineSubjectExistentials() {
-		assertThat(outline(and(all(x, y), field(p, all(z)))))
-				.as("subject existentials")
-				.isIsomorphicTo(statement(x, p, z), statement(y, p, z));
-	}
 
-	@Test void testOutlineObjectExistentials() {
-		assertThat(outline(and(all(z), field(p, all(x, y)))))
-				.as("object existentials")
-				.isIsomorphicTo(statement(z, p, x), statement(z, p, y));
-	}
-
-	@Test void testOutlineConjunctions() {
+	@Test void testOutlineAnd() {
 		assertThat(outline(and(all(z), and(field(p, all(x))))))
 				.as("value union")
 				.isIsomorphicTo(statement(z, p, x));
 	}
 
-	@Test void testOutlineNestedConjunctions() {
+	@Test void testOutlineNestedAnd() {
 		assertThat(outline(and(all(z), field(p, and(all(x), all(y))))))
 				.as("value union")
 				.isIsomorphicTo(statement(z, p, x), statement(z, p, y));

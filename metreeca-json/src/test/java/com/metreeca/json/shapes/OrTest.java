@@ -20,24 +20,27 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.guard;
 import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
+import static com.metreeca.json.shapes.When.when;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -65,8 +68,15 @@ final class OrTest {
 		}
 
 		@Test void testCollapseDuplicates() {
-			assertThat(or(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(or(datatype(RDF.NIL),
-					minCount(1)));
+			assertThat(
+
+					or(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))
+
+			).isEqualTo(
+
+					or(datatype(RDF.NIL), minCount(1))
+
+			);
 		}
 
 		@Test void testPreserveOrder() {
@@ -191,6 +201,48 @@ final class OrTest {
 					field("y", RDF.VALUE)
 
 			));
+		}
+
+
+		@Test void testMergeDirectLinks() {
+			assertThat(or(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(OWL.SAMEAS, maxCount(2))
+
+			)).isEqualTo(link(OWL.SAMEAS, or(minCount(1), maxCount(2))));
+		}
+
+		@Test void testMergeInverseLinks() {
+			assertThat(or(
+
+					link(inverse(OWL.SAMEAS), minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			)).isEqualTo(link(inverse(OWL.SAMEAS), or(minCount(1), maxCount(2))));
+		}
+
+		@Test void testReportConflictingLinks() {
+			assertThatIllegalArgumentException().isThrownBy(() -> or(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			));
+		}
+
+
+		@Test void testMergeCompatibleWhens() {
+			assertThat(or(
+
+					when(guard("axis", "value"), minCount(1)),
+					when(guard("axis", "value"), maxCount(3))
+
+			)).isEqualTo(
+
+					when(guard("axis", "value"), or(minCount(1), maxCount(3)))
+
+			);
 		}
 
 	}

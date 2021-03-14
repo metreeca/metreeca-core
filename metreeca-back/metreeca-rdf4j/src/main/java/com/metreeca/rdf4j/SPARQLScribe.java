@@ -28,7 +28,7 @@ import static com.metreeca.json.Values.quote;
 import static com.metreeca.json.Values.traverse;
 import static com.metreeca.rest.Scribe.*;
 
-import static java.util.Arrays.stream;
+import static java.util.Arrays.asList;
 
 /**
  * SPARQL query composer.
@@ -60,7 +60,10 @@ public final class SPARQLScribe {
 	}
 
 	public static Scribe select(final boolean distinct, final Scribe... vars) {
-		return list(text("\rselect"), distinct ? text(" distinct") : nothing(), list(vars));
+		return list(text("\rselect"),
+				distinct ? text(" distinct") : nothing(),
+				vars.length == 0 ? text(" *") : list(vars)
+		);
 	}
 
 
@@ -116,17 +119,21 @@ public final class SPARQLScribe {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Scribe union(final Scribe... patterns) {
-		return list(stream(patterns).flatMap(pattern -> Stream.of(text(" union "), pattern)).skip(1));
+		return union(asList(patterns));
+	}
+
+	public static Scribe union(final Collection<Scribe> patterns) {
+		return list(patterns.stream().flatMap(pattern -> Stream.of(text(" union "), pattern)).skip(1));
 	}
 
 	public static Scribe optional(final Scribe... pattern) {
-		return line(text("optional"), block(pattern));
+		return list(text("optional"), block(pattern));
 	}
 
-	public static Scribe values(final String anchor, final Collection<Value> values) {
-		return space(list(text("\rvalues"), var(anchor), block(list(
+	public static Scribe values(final Scribe var, final Collection<Value> values) {
+		return list(text("\rvalues"), var, block(list(
 				values.stream().map(Values::format).map(Scribe::text).map(Scribe::line)
-		))));
+		)));
 	}
 
 	public static Scribe filter(final Scribe... expressions) {
@@ -201,6 +208,10 @@ public final class SPARQLScribe {
 
 	public static Scribe isLiteral(final Scribe expression) {
 		return function("isLiteral", expression);
+	}
+
+	public static Scribe bound(final Scribe expression) {
+		return function("bound", expression);
 	}
 
 	public static Scribe lang(final Scribe expression) {

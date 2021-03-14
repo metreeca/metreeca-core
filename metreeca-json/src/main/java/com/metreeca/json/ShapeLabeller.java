@@ -22,18 +22,23 @@ import java.util.function.Supplier;
 
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
 final class ShapeLabeller extends Shape.Probe<Shape> {
 
-
 	private final Supplier<String> labels;
+
 
 	ShapeLabeller(final Supplier<String> labels) {
 		this.labels=labels;
 	}
 
+
+	@Override public Shape probe(final Link link) {
+		return link(link.iri(), link.shape().map(this));
+	}
 
 	@Override public Shape probe(final Field field) {
 		return field(labels.get(), field.iri(), field.shape().map(this));

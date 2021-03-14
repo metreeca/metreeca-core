@@ -23,6 +23,7 @@ import java.util.Optional;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
@@ -36,6 +37,12 @@ final class ShapePruner extends Shape.Probe<Shape> {
 
 	ShapePruner(final boolean deep) { this.deep=deep; }
 
+
+	@Override public Shape probe(final Link link) {
+		return link.shape().map(this).map(shape ->
+				deep && shape.empty() ? shape : link(link.iri(), shape)
+		);
+	}
 
 	@Override public Shape probe(final Field field) {
 		return field.shape().map(this).map(shape ->

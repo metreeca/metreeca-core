@@ -532,6 +532,10 @@ public final class Values {
 	}
 
 
+	public static String format(final List<IRI> path) {
+		return path == null ? null : path.stream().map(Values::format).collect(joining("/"));
+	}
+
 	public static String format(final Collection<? extends Value> values) {
 		return values == null ? null : values.stream().map(Values::format).collect(joining(", "));
 	}

@@ -30,6 +30,7 @@ import java.math.BigInteger;
 import java.util.*;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
@@ -56,12 +57,18 @@ final class GraphQueryTerms extends GraphQueryBase {
 		final int offset=terms.offset();
 		final int limit=terms.limit();
 
-		final String target=path.isEmpty() ? root : "hook";
-
 		final Shape filter=shape
 				.filter(resource)
 				.resolve(resource)
 				.label(this::label);
+
+		final Shape convey=shape
+				.convey()
+				.resolve(resource)
+				.label(this::label);
+
+		final Shape follow=path(convey, path);
+		final String hook=hook(follow, path);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -73,31 +80,25 @@ final class GraphQueryTerms extends GraphQueryBase {
 					prefix(OWL.NS),
 					prefix(RDFS.NS),
 
-					space(select(
-
-							var("value"), var("count"), var("label"), var("notes")
-
-					)),
-
-					space(where(
+					space(select(), where(
 
 							space(block(
 
 									space(select(space(indent(
-											as("value", var(target)),
+											as("value", var(hook)),
 											as("count", count(true, var(root)))
 									)))),
 
 									space(where(
 
-											filters(filter),
-											anchor(path, target)
+											space(tree(and(filter, follow), true))
 
 											// !!! sampling w/ options.stats()
+
 									)),
 
 									space(
-											line(group(var(target))),
+											line(group(var(hook))),
 											line(having(gt(count(var(root)), text(0)))),
 											line(order(desc(var("count")), var("value"))),
 											line(offset(offset)),

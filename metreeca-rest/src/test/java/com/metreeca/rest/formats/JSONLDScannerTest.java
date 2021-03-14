@@ -21,8 +21,7 @@ import com.metreeca.json.Trace;
 import com.metreeca.rest.Either;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +40,7 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.guard;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Like.like;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MaxExclusive.maxExclusive;
@@ -66,7 +66,7 @@ import static java.util.stream.Collectors.toList;
 
 final class JSONLDScannerTest {
 
-	private final IRI f=iri("test:f");
+	private final IRI s=iri("test:s");
 
 	private final IRI p=iri("test:p");
 	private final IRI q=iri("test:q");
@@ -80,7 +80,7 @@ final class JSONLDScannerTest {
 	@Nested final class Validation {
 
 		private Either<Trace, Collection<Statement>> scan(final Shape shape, final Statement... model) {
-			return JSONLDScanner.scan(shape, f, asList(model));
+			return JSONLDScanner.scan(shape, s, asList(model));
 		}
 
 
@@ -88,18 +88,27 @@ final class JSONLDScannerTest {
 
 			final Shape shape=field(p, all(x));
 
-			assertThat(scan(shape, statement(f, p, x))).hasRight(singletonList(statement(f, p, x)));
-			assertThat(scan(shape, statement(f, p, x), statement(f, q, y))).hasRight(singletonList(statement(f, p, x)));
+			assertThat(scan(shape, statement(s, p, x))).hasRight(singletonList(statement(s, p, x)));
+			assertThat(scan(shape, statement(s, p, x), statement(s, q, y))).hasRight(singletonList(statement(s, p, x)));
 
 		}
 
+
+		@Test void testValidateLink() {
+
+			final Shape shape=link(OWL.SAMEAS, field(p, minCount(1)));
+
+			assertThat(scan(shape, statement(s, p, x))).hasRight();
+			assertThat(scan(shape, statement(s, q, x))).hasLeft();
+
+		}
 
 		@Test void testValidateField() {
 
 			final Shape shape=field(p, minCount(1));
 
-			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
-			assertThat(scan(shape, statement(f, q, x))).hasLeft();
+			assertThat(scan(shape, statement(s, p, x), statement(s, p, y))).hasRight();
+			assertThat(scan(shape, statement(s, q, x))).hasLeft();
 
 			assertThat(scan(shape)).hasLeft();
 
@@ -109,8 +118,8 @@ final class JSONLDScannerTest {
 
 			final Shape shape=field(p, all(y));
 
-			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
-			assertThat(scan(shape, statement(f, p, z))).hasLeft();
+			assertThat(scan(shape, statement(s, p, x), statement(s, p, y))).hasRight();
+			assertThat(scan(shape, statement(s, p, z))).hasLeft();
 
 		}
 
@@ -118,8 +127,8 @@ final class JSONLDScannerTest {
 
 			final Shape shape=field(inverse(p), all(x));
 
-			assertThat(scan(shape, statement(x, p, f))).hasRight();
-			assertThat(scan(shape, statement(y, p, f))).hasLeft();
+			assertThat(scan(shape, statement(x, p, s))).hasRight();
+			assertThat(scan(shape, statement(y, p, s))).hasLeft();
 
 		}
 
@@ -129,8 +138,8 @@ final class JSONLDScannerTest {
 
 			assertThat(scan(shape,
 
-					statement(f, p, x),
-					statement(f, p, y),
+					statement(s, p, x),
+					statement(s, p, y),
 					statement(x, q, x),
 					statement(y, q, y)
 
@@ -143,8 +152,8 @@ final class JSONLDScannerTest {
 
 			final Shape shape=field(p, and(any(x), any(y)));
 
-			assertThat(scan(shape, statement(f, p, x), statement(f, p, y))).hasRight();
-			assertThat(scan(shape, statement(f, p, x), statement(f, p, z))).hasLeft();
+			assertThat(scan(shape, statement(s, p, x), statement(s, p, y))).hasRight();
+			assertThat(scan(shape, statement(s, p, x), statement(s, p, z))).hasLeft();
 
 			assertThat(scan(shape)).hasLeft();
 
@@ -154,8 +163,8 @@ final class JSONLDScannerTest {
 
 			final Shape shape=field(p, or(all(x, y), all(x, z)));
 
-			assertThat(scan(shape, statement(f, p, x), statement(f, p, y), statement(f, p, z))).hasRight();
-			assertThat(scan(shape, statement(f, p, y), statement(f, p, z))).hasLeft();
+			assertThat(scan(shape, statement(s, p, x), statement(s, p, y), statement(s, p, z))).hasRight();
+			assertThat(scan(shape, statement(s, p, y), statement(s, p, z))).hasLeft();
 
 		}
 
@@ -167,8 +176,8 @@ final class JSONLDScannerTest {
 					maxInclusive(literal("10"))
 			));
 
-			assertThat(scan(shape, statement(f, p, literal(100)))).hasRight();
-			assertThat(scan(shape, statement(f, p, literal("100")))).hasLeft();
+			assertThat(scan(shape, statement(s, p, literal(100)))).hasRight();
+			assertThat(scan(shape, statement(s, p, literal("100")))).hasLeft();
 		}
 
 
@@ -184,9 +193,9 @@ final class JSONLDScannerTest {
 
 		private Either<Trace, Collection<Statement>> scan(final Shape shape, final Value... values) {
 
-			return JSONLDScanner.scan(field(p, shape), f, Arrays
+			return JSONLDScanner.scan(field(p, shape), s, Arrays
 					.stream(values)
-					.map(v -> statement(f, p, v))
+					.map(v -> statement(s, p, v))
 					.collect(toList())
 			);
 		}
@@ -455,19 +464,19 @@ final class JSONLDScannerTest {
 	@Nested final class Trimming {
 
 		private Collection<Statement> scan(final Shape shape, final Statement... model) {
-			return JSONLDScanner.scan(shape, f, asList(model)).get().orElse(emptySet());
+			return JSONLDScanner.scan(shape, s, asList(model)).get().orElse(emptySet());
 		}
 
 
 		@Test void testPruneField() {
 			assertThat(scan(field(p),
 
-					statement(f, p, x),
-					statement(f, q, x)
+					statement(s, p, x),
+					statement(s, q, x)
 
 			)).isIsomorphicTo(
 
-					statement(f, p, x)
+					statement(s, p, x)
 
 			);
 		}
@@ -475,13 +484,13 @@ final class JSONLDScannerTest {
 		@Test void testPruneLanguages() {
 			assertThat(scan(field(p, lang("en")),
 
-					statement(f, p, literal("one", "en")),
-					statement(f, q, literal("uno", "it"))
+					statement(s, p, literal("one", "en")),
+					statement(s, q, literal("uno", "it"))
 
 
 			)).isIsomorphicTo(
 
-					statement(f, p, literal("one", "en"))
+					statement(s, p, literal("one", "en"))
 
 			);
 		}
@@ -489,15 +498,15 @@ final class JSONLDScannerTest {
 		@Test void testTraverseAnd() {
 			assertThat(scan(and(field(p), field(q)),
 
-					statement(f, p, x),
-					statement(f, q, x),
-					statement(f, r, x)
+					statement(s, p, x),
+					statement(s, q, x),
+					statement(s, r, x)
 
 
 			)).isIsomorphicTo(
 
-					statement(f, p, x),
-					statement(f, q, x)
+					statement(s, p, x),
+					statement(s, q, x)
 
 			);
 		}
@@ -505,8 +514,8 @@ final class JSONLDScannerTest {
 		@Test void testTraverseField() {
 			assertThat(scan(field(p, field(q)),
 
-					statement(f, p, x),
-					statement(f, q, z),
+					statement(s, p, x),
+					statement(s, q, z),
 
 					statement(x, q, y),
 					statement(x, p, z)
@@ -514,7 +523,7 @@ final class JSONLDScannerTest {
 
 			)).isIsomorphicTo(
 
-					statement(f, p, x),
+					statement(s, p, x),
 					statement(x, q, y)
 
 			);
@@ -523,14 +532,14 @@ final class JSONLDScannerTest {
 		@Test void testTraverseOr() {
 			assertThat(scan(or(field(p), field(q)),
 
-					statement(f, p, x),
-					statement(f, q, y),
-					statement(f, r, z)
+					statement(s, p, x),
+					statement(s, q, y),
+					statement(s, r, z)
 
 			)).isIsomorphicTo(
 
-					statement(f, p, x),
-					statement(f, q, y)
+					statement(s, p, x),
+					statement(s, q, y)
 
 			);
 		}
@@ -539,25 +548,25 @@ final class JSONLDScannerTest {
 
 			assertThat(scan(when(stem("test:"), field(p), field(q)),
 
-					statement(f, p, x),
-					statement(f, q, y),
-					statement(f, r, z)
+					statement(s, p, x),
+					statement(s, q, y),
+					statement(s, r, z)
 
 			)).isIsomorphicTo(
 
-					statement(f, p, x)
+					statement(s, p, x)
 
 			);
 
 			assertThat(scan(when(stem("work:"), field(p), field(q)),
 
-					statement(f, p, x),
-					statement(f, q, y),
-					statement(f, r, z)
+					statement(s, p, x),
+					statement(s, q, y),
+					statement(s, r, z)
 
 			)).isIsomorphicTo(
 
-					statement(f, q, y)
+					statement(s, q, y)
 
 			);
 

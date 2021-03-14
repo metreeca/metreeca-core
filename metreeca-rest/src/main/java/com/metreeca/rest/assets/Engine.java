@@ -148,7 +148,7 @@ public interface Engine extends Wrapper {
 					.redact(Role, request.roles());
 
 
-			final UnaryOperator<Request> incoming=message -> message.attribute(shape(), message.attribute(shape())
+			final UnaryOperator<Request> incoming=message -> message.map(shape(), s -> s
 
 					.redact(Role, message.roles())
 					.redact(Task, task)
@@ -158,7 +158,7 @@ public interface Engine extends Wrapper {
 
 			);
 
-			final UnaryOperator<Response> outgoing=message -> message.attribute(shape(), message.attribute(shape())
+			final UnaryOperator<Response> outgoing=message -> message.map(shape(), s -> s
 
 					.redact(Role, message.request().roles())
 					.redact(Task, task)

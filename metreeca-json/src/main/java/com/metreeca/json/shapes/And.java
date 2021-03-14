@@ -20,16 +20,20 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.derives;
+import static com.metreeca.json.Values.direct;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.All.all;
-import static com.metreeca.json.shapes.Field.alias;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
+import static com.metreeca.json.shapes.When.when;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -114,6 +118,8 @@ public final class And extends Shape {
 				: clazz.equals(All.class) ? alls(shapes.map(All.class::cast))
 				: clazz.equals(Localized.class) ? localizeds(shapes.map(Localized.class::cast))
 				: clazz.equals(Field.class) ? fields(shapes.map(Field.class::cast))
+				: clazz.equals(Link.class) ? links(shapes.map(Link.class::cast))
+				: clazz.equals(When.class) ? whens(shapes.map(When.class::cast))
 				: shapes;
 	}
 
@@ -185,8 +191,12 @@ public final class And extends Shape {
 
 				.collect(groupingBy(Field::iri, LinkedHashMap::new, reducing((x, y) -> new Field(
 
-						alias(x, x.alias(), y.alias()),
+						Field.label(x.alias(), y.alias()).orElseThrow(() -> new IllegalArgumentException(format(
+								"clashing aliases <%s> / <%s> for field %s", x.alias(), y.alias(), format(x.iri())
+						))),
+
 						x.iri(),
+
 						and(x.shape(), y.shape())
 
 				))))
@@ -198,6 +208,57 @@ public final class And extends Shape {
 				.map(Optional::get)
 
 				.map(field -> field.shape().equals(or()) ? and() : field);
+	}
+
+	private static Stream<? extends Shape> links(final Stream<Link> links) {
+		return links
+
+				.collect(groupingBy(Link::iri, LinkedHashMap::new, reducing((x, y) -> new Link(
+
+						x.iri(),
+
+						and(x.shape(), y.shape())
+
+				))))
+
+				.values()
+				.stream()
+
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+
+				.map(new Function<Link, Shape>() {
+
+					private final AtomicReference<Boolean> way=new AtomicReference<>();
+
+					@Override public Shape apply(final Link link) {
+						if ( link.shape().equals(or()) ) { return and(); } else {
+
+							final Boolean x=direct(link.iri());
+							final Boolean y=way.getAndSet(x);
+
+							if ( y != null && !y.equals(x) ) {
+								throw new IllegalArgumentException("both direct and inverse links specified");
+							}
+
+							return link;
+						}
+					}
+				});
+	}
+
+	private static Stream<? extends Shape> whens(final Stream<When> whens) {
+		return whens
+
+				.collect(groupingBy(When::test))
+
+				.entrySet()
+				.stream()
+
+				.map(entry -> when(entry.getKey(),
+						and(entry.getValue().stream().map(When::pass)),
+						and(entry.getValue().stream().map(When::fail))
+				));
 	}
 
 

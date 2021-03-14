@@ -23,6 +23,7 @@ import java.util.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
@@ -47,6 +48,10 @@ final class ShapeLocalizer extends Shape.Probe<Shape> {
 				.orElseGet(() -> tags.isEmpty() ? lang : lang(tags));
 	}
 
+
+	@Override public Shape probe(final Link link) {
+		return link(link.iri(), link.shape().map(this));
+	}
 
 	@Override public Shape probe(final Field field) {
 		return field(field.alias(), field.iri(), field.shape().map(this));
