@@ -18,8 +18,7 @@ package com.metreeca.rest;
 
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.MessageException.status;
@@ -121,6 +120,33 @@ import static java.util.Objects.requireNonNull;
 	}
 
 	/**
+	 * Creates a pre-processing body wrapper.
+	 *
+	 * @param <V>    the type of the request body to be pre-processed
+	 * @param format the format of the request body to be pre-processed
+	 * @param mapper the request body mapper; takes as argument a request and its {@code format} body and must return a
+	 *               non-null updated value
+	 *
+	 * @return a wrapper that pre-process request {@code format} bodies using {@code mapper}
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
+	 */
+	public static <V> Wrapper preprocessor(
+			final Format<V> format, final BiFunction<? super Request, ? super V, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request ->
+				request.body(format).fold(request::reply, value -> handler.handle(
+						request.body(format, requireNonNull(mapper.apply(request, value), "null mapper return value"))
+						)
+				);
+	}
+
+
+	/**
 	 * Creates a  {@linkplain Response#success() successful} post-processing wrapper.
 	 *
 	 * @param mapper a response mapping function; must return a non-null value
@@ -138,6 +164,34 @@ import static java.util.Objects.requireNonNull;
 		return handler -> request -> handler.handle(request).map(response -> response.success()
 				? requireNonNull(mapper.apply(response), "null mapper return value")
 				: response
+		);
+	}
+
+	/**
+	 * Creates a {@linkplain Response#success() successful} post-processing body wrapper.
+	 *
+	 * @param <V>    the type of the response body to be post-processed
+	 * @param format the format of the response body to be post-processed
+	 * @param mapper the response body mapper; takes as argument a response and its {@code format} body and must
+	 *                  return a
+	 *               non-null updated value
+	 *
+	 * @return a wrapper that post-process successful response {@code format} bodies using {@code mapper}
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
+	 */
+	public static <V> Wrapper postprocessor(
+			final Format<V> format, final BiFunction<? super Response, ? super V, V> mapper) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request -> handler.handle(request).map(response ->
+				response.success() ? response.body(format).fold(error -> { throw error; },
+						value -> response.body(format,
+								requireNonNull(mapper.apply(response, value), "null mapper return value")
+						)) : response
 		);
 	}
 
