@@ -193,7 +193,7 @@ public interface Engine extends Wrapper {
 	 * request}
 	 *
 	 * @throws NullPointerException if {@code request} is null
-	 * @implNote Concrete implementations must assume that {@link Request#path()} was already configured with a unique
+	 * @implSpec Concrete implementations must assume that {@link Request#path()} was already configured with a unique
 	 * identifier for the resource to be created and the {@linkplain JSONLDFormat JSON-LD} payload of the request
 	 * rewritten accordingly, for instance by an outer {@link Creator} handler
 	 */

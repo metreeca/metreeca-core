@@ -59,18 +59,13 @@ import static java.util.Objects.requireNonNull;
  */
 public final class GraphEngine implements Engine {
 
-	private static int items=1_000; // the maximum number of resources to be returned from items queries
-	private static int stats; // the maximum number of resources to be evaluated by stats queries // !!! tbi
-	private static int terms; // the maximum number of resources to be evaluated by terms queries // !!! tbi
-
-
 	/**
 	 * Maximum number of resources returned by items queries.
 	 *
-	 * @return an {@linkplain #set(Supplier, Object) option} with a default value of {@value items}
+	 * @return an {@linkplain #set(Supplier, Object) option} with a default value of {@code 1000}
 	 */
 	public static Supplier<Integer> items() {
-		return () -> items;
+		return () -> 1_000;
 	}
 
 
