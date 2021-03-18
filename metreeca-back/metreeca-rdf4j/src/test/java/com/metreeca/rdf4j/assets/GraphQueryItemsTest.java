@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Order.decreasing;
@@ -52,8 +53,17 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphQueryItemsTest {
 
+	private static GraphQueryBase.Options options() {
+		return new GraphQueryBase.Options() {
+			@Override public <V> V get(final Supplier<V> option) {
+				return option.get();
+			}
+		};
+	}
+
+
 	private Collection<Statement> query(final Items items) {
-		return new GraphQueryItems(new GraphEngine.Options(new GraphEngine())).process(Root, items);
+		return new GraphQueryItems(options()).process(Root, items);
 	}
 
 

@@ -20,7 +20,6 @@ import com.metreeca.json.Order;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
@@ -35,6 +34,7 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.rdf4j.assets.GraphEngine.items;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Scribe.*;
 
@@ -110,7 +110,7 @@ final class GraphQueryItems extends GraphQueryBase {
 									))),
 
 									offset(offset),
-									limit(limit, options.items())
+									limit(limit, options.get(items()))
 
 							)),
 

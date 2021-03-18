@@ -18,7 +18,6 @@ package com.metreeca.rdf4j.assets;
 
 
 import com.metreeca.json.Values;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -31,6 +30,7 @@ import static com.metreeca.json.Values.Base;
 import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.rdf4j.assets.GraphEngineTest.options;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
@@ -39,13 +39,8 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 final class GraphActorDeleterTest {
 
-	private static Options options() {
-		return new Options(new GraphEngine());
-	}
-
-
 	@Test void testDelete() {
-		exec(model(small()), () -> new GraphActorDeleter(options())
+		exec(model(small()), () -> new GraphActorDeleter(options)
 
 				.handle(new Request()
 						.base(Base)
@@ -83,7 +78,7 @@ final class GraphActorDeleterTest {
 	}
 
 	@Test void testReportUnknown() {
-		exec(() -> new GraphActorDeleter(options())
+		exec(() -> new GraphActorDeleter(options)
 
 				.handle(new Request()
 						.path("/unknown")

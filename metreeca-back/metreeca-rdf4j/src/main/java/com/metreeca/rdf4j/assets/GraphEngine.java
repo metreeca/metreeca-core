@@ -23,9 +23,15 @@ import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.Value;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.Context.asset;
+
+import static java.util.Objects.requireNonNull;
 
 
 /**
@@ -36,44 +42,73 @@ import static com.metreeca.rest.Context.asset;
  */
 public final class GraphEngine implements Engine {
 
-	private int items=1_000; // the maximum number of resources to be returned from items queries
-	private int stats; // the maximum number of resources to be evaluated by stats queries // !!! tbi
-	private int terms; // the maximum number of resources to be evaluated by terms queries // !!! tbi
+	private static int items=1_000; // the maximum number of resources to be returned from items queries
+	private static int stats; // the maximum number of resources to be evaluated by stats queries // !!! tbi
+	private static int terms; // the maximum number of resources to be evaluated by terms queries // !!! tbi
 
-	private final Graph graph=asset(graph());
+
+	/**
+	 * Maximum number of resources returned by items queries.
+	 *
+	 * @return an {@linkplain #set(Supplier, Object) option} with a default value of {@value items}
+	 */
+	public static Supplier<Integer> items() {
+		return () -> items;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	GraphEngine items(final int items) {
+	private final Map<Supplier<?>, Object> options=new LinkedHashMap<>();
 
-		if ( items < 0 ) {
-			throw new IllegalArgumentException("negative items sampling limit");
+	private final Graph graph=asset(graph());
+
+
+	/**
+	 * Retrieves an engine option.
+	 *
+	 * @param option the option to be retrieved; must return a non-null default value
+	 * @param <V>    the type of the option to be retrieved
+	 *
+	 * @return the value previously {@linkplain #set(Supplier, Object) configured} for {@code option} or its default
+	 * value, if no custom value was configured; in the latter case the returned value is cached
+	 *
+	 * @throws NullPointerException if {@code option} is null or returns a null value
+	 */
+	@SuppressWarnings("unchecked")
+	private <V> V get(final Supplier<V> option) {
+
+		if ( option == null ) {
+			throw new NullPointerException("null option");
 		}
 
-		this.items=items;
-
-		return this;
+		return (V)options.computeIfAbsent(option, key ->
+				requireNonNull(key.get(), "null option return value")
+		);
 	}
 
-	GraphEngine stats(final int stats) {
+	/**
+	 * Configures an engine option.
+	 *
+	 * @param option the option to be configured; must return a non-null default value
+	 * @param value  the value to be configured for {@code option}
+	 * @param <V>    the type of the option to be configured
+	 *
+	 * @return this engine
+	 *
+	 * @throws NullPointerException if either {@code option} or {@code value} is null
+	 */
+	public <V> GraphEngine set(final Supplier<V> option, final V value) {
 
-		if ( stats < 0 ) {
-			throw new IllegalArgumentException("negative stats sampling limit");
+		if ( option == null ) {
+			throw new NullPointerException("null option");
 		}
 
-		this.stats=stats;
-
-		return this;
-	}
-
-	GraphEngine terms(final int terms) {
-
-		if ( terms < 0 ) {
-			throw new IllegalArgumentException("negative terms sampling limit");
+		if ( value == null ) {
+			throw new NullPointerException("null value");
 		}
 
-		this.terms=terms;
+		options.put(option, value);
 
 		return this;
 	}
@@ -178,7 +213,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorRelator(new Options(this)).handle(request);
+		return new GraphActorRelator(this::get).handle(request);
 	}
 
 	/**
@@ -214,7 +249,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorBrowser(new Options(this)).handle(request);
+		return new GraphActorBrowser(this::get).handle(request);
 	}
 
 	/**
@@ -259,7 +294,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorUpdater(new Options(this)).handle(request);
+		return new GraphActorUpdater(this::get).handle(request);
 	}
 
 	/**
@@ -301,27 +336,7 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorDeleter(new Options(this)).handle(request);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	static final class Options {
-
-		private final GraphEngine engine;
-
-		Options(final GraphEngine engine) {
-			this.engine=engine;
-		}
-
-
-		public int items() { return engine.items; }
-
-		public int terms() { return engine.terms; }
-
-		public int stats() { return engine.stats; }
-
+		return new GraphActorDeleter(this::get).handle(request);
 	}
 
 }

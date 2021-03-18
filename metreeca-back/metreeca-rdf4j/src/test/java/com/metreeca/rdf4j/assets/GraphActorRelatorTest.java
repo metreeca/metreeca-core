@@ -16,7 +16,6 @@
 
 package com.metreeca.rdf4j.assets;
 
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
 
@@ -26,6 +25,7 @@ import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.Base;
 import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.rdf4j.assets.GraphEngineTest.options;
 import static com.metreeca.rdf4j.assets.GraphQueryBaseTest.EmployeeShape;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
@@ -37,10 +37,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 final class GraphActorRelatorTest {
 
-	private static Options options() {
-		return new Options(new GraphEngine());
-	}
-
 	private Request request() {
 		return new Request()
 				.base(Base)
@@ -50,7 +46,7 @@ final class GraphActorRelatorTest {
 
 
 	@Test void testRelate() {
-		exec(model(small()), () -> new GraphActorRelator(options())
+		exec(model(small()), () -> new GraphActorRelator(options)
 
 				.handle(request())
 

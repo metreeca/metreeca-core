@@ -18,7 +18,6 @@ package com.metreeca.rdf4j.assets;
 
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -37,12 +36,12 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 final class GraphActorDeleter implements Handler {
 
-	private final Options options;
+	private final GraphQueryBase.Options options;
 
 	private final Graph graph=asset(graph());
 
 
-	GraphActorDeleter(final Options options) {
+	GraphActorDeleter(final GraphQueryBase.Options options) {
 		this.options=options;
 	}
 

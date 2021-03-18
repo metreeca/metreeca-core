@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Scribe;
 import com.metreeca.rest.assets.Logger;
 
@@ -97,6 +96,11 @@ abstract class GraphQueryBase {
 		return id.endsWith("a") ? id
 				: id.endsWith("v") ? id.substring(0, id.length()-1)
 				: Optional.of(alias(id)).filter(ids::contains).orElse(id);
+	}
+
+
+	@FunctionalInterface static interface Options {
+		<V> V get(final Supplier<V> option);
 	}
 
 

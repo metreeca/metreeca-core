@@ -18,7 +18,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 
 import org.junit.jupiter.api.Nested;
@@ -28,6 +27,7 @@ import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.rdf4j.assets.GraphEngineTest.options;
 import static com.metreeca.rdf4j.assets.GraphQueryBaseTest.EmployeeShape;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
@@ -40,10 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Nested final class GraphActorBrowserTest {
 
-	private static Options options() {
-		return new Options(new GraphEngine());
-	}
-
 	private Request request() {
 		return new Request()
 				.base(Base)
@@ -53,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 	@Test void testBrowse() {
-		exec(model(small()), () -> new GraphActorBrowser(options())
+		exec(model(small()), () -> new GraphActorBrowser(options)
 
 				.handle(request())
 
@@ -73,7 +69,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testBrowseFiltered() {
-		exec(model(small()), () -> new GraphActorBrowser(options())
+		exec(model(small()), () -> new GraphActorBrowser(options)
 
 				.handle(request()
 						.query("title=Sales+Rep")
@@ -99,7 +95,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 	}
 
 	@Test void testSliceTermsQueries() {
-		exec(model(small()), () -> new GraphActorBrowser(options())
+		exec(model(small()), () -> new GraphActorBrowser(options)
 
 				.handle(request()
 						.query("_terms=office&_offset=1&_limit=3")

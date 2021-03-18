@@ -20,7 +20,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -36,10 +35,10 @@ import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 final class GraphActorBrowser implements Handler {
 
-	private final Options options;
+	private final GraphQueryBase.Options options;
 
 
-	GraphActorBrowser(final Options options) {
+	GraphActorBrowser(final GraphQueryBase.Options options) {
 		this.options=options;
 	}
 

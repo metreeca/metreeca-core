@@ -18,7 +18,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.queries.*;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -28,10 +27,10 @@ import java.util.Collection;
 final class GraphFetcher extends Query.Probe<Collection<Statement>> {
 
 	private final IRI resource;
-	private final Options options;
+	private final GraphQueryBase.Options options;
 
 
-	GraphFetcher(final IRI resource, final Options options) {
+	GraphFetcher(final IRI resource, final GraphQueryBase.Options options) {
 		this.resource=resource;
 		this.options=options;
 	}

@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -40,10 +39,10 @@ import static com.metreeca.rest.formats.JSONLDFormat.*;
 
 final class GraphActorRelator implements Handler {
 
-	private final Options options;
+	private final GraphQueryBase.Options options;
 
 
-	GraphActorRelator(final Options options) {
+	GraphActorRelator(final GraphQueryBase.Options options) {
 		this.options=options;
 	}
 
@@ -75,9 +74,8 @@ final class GraphActorRelator implements Handler {
 
 	private static final class ShapeProbe extends Query.Probe<Shape> {
 
-		@Override public Shape probe(final Items items) {
-			return items.shape().redact(Mode, Convey); // remove filters // !!! add Shape.Contains if items.path is not
-			// empty
+		@Override public Shape probe(final Items items) { // !!! add Shape.Contains if items.path is not empty
+			return items.shape().redact(Mode, Convey); // remove filters
 		}
 
 		@Override public Shape probe(final Stats stats) {

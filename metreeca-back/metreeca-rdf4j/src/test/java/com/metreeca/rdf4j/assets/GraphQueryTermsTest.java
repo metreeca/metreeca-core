@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.item;
@@ -49,8 +50,16 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphQueryTermsTest {
 
+	private static GraphQueryBase.Options options() {
+		return new GraphQueryBase.Options() {
+			@Override public <V> V get(final Supplier<V> option) {
+				return option.get();
+			}
+		};
+	}
+
 	private Collection<Statement> query(final Terms terms) {
-		return new GraphQueryTerms(new GraphEngine.Options(new GraphEngine())).process(Values.Root, terms);
+		return new GraphQueryTerms(options()).process(Values.Root, terms);
 	}
 
 

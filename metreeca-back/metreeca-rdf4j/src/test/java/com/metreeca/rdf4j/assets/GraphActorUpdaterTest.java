@@ -18,7 +18,6 @@ package com.metreeca.rdf4j.assets;
 
 
 import com.metreeca.json.Values;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Request;
 
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,7 @@ import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.rdf4j.assets.GraphEngineTest.options;
 import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.Response.NoContent;
@@ -41,14 +41,9 @@ import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 final class GraphActorUpdaterTest {
 
-	private static Options options() {
-		return new Options(new GraphEngine());
-	}
-
-
 	@Test void testUpdate() {
 		exec(model(small()), () -> {
-			new GraphActorUpdater(options())
+			new GraphActorUpdater(options)
 
 					.handle(new Request()
 							.base(Base)
@@ -97,7 +92,7 @@ final class GraphActorUpdaterTest {
 	}
 
 	@Test void testReportMissing() {
-		exec(() -> new GraphActorUpdater(options())
+		exec(() -> new GraphActorUpdater(options)
 
 				.handle(new Request()
 						.base(Base)

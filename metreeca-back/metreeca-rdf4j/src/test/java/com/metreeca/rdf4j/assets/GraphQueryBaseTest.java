@@ -17,7 +17,6 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.ModelAssert.assertThat;
@@ -101,7 +101,11 @@ final class GraphQueryBaseTest {
 	);
 
 	private static Options options() {
-		return new Options(new GraphEngine());
+		return new Options() {
+			@Override public <V> V get(final Supplier<V> option) {
+				return option.get();
+			}
+		};
 	}
 
 

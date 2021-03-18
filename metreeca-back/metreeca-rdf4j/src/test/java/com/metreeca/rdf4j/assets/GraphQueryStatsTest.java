@@ -17,7 +17,6 @@
 package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.queries.Stats;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.function.Supplier;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
@@ -49,8 +49,17 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphQueryStatsTest {
 
+	private static GraphQueryBase.Options options() {
+		return new GraphQueryBase.Options() {
+			@Override public <V> V get(final Supplier<V> option) {
+				return option.get();
+			}
+		};
+	}
+
+
 	private Collection<Statement> query(final Stats stats) {
-		return new GraphQueryStats(new Options(new GraphEngine())).process(Root, stats);
+		return new GraphQueryStats(options()).process(Root, stats);
 	}
 
 

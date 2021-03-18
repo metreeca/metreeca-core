@@ -18,7 +18,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Terms;
-import com.metreeca.rdf4j.assets.GraphEngine.Options;
 import com.metreeca.rest.assets.Engine;
 
 import org.eclipse.rdf4j.model.*;

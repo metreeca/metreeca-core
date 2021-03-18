@@ -37,6 +37,7 @@ import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 
 
@@ -50,7 +51,7 @@ final class GraphActorCreator implements Handler {
 		final IRI item=iri(request.item());
 		final Shape shape=request.attribute(shape());
 
-		final IRI member=iri(item, request.header("Slug") // assign entity a slug-based id
+		final IRI resource=iri(item, request.header("Slug") // assign entity a slug-based id
 				.map(Xtream::encode)  // encode slug as IRI path component
 				.orElseGet(Values::md5)
 		);
@@ -58,25 +59,25 @@ final class GraphActorCreator implements Handler {
 		return request.body(jsonld()).fold(request::reply, model ->
 				request.reply(response -> graph.exec(txn(connection -> {
 
-					final boolean clashing=connection.hasStatement(member, null, null, true)
-							|| connection.hasStatement(null, null, member, true);
+					final boolean clashing=connection.hasStatement(resource, null, null, true)
+							|| connection.hasStatement(null, null, resource, true);
 
 					if ( clashing ) { // report clashing slug
 
 						return response.map(status(InternalServerError,
-								new IllegalStateException("clashing entity slug {"+member+"}")
+								new IllegalStateException(format("clashing resource slug <%s>", resource))
 						));
 
 					} else { // store model
 
-						connection.add(shape.outline(member));
-						connection.add(rewrite(member, item, model));
+						connection.add(shape.outline(resource));
+						connection.add(rewrite(resource, item, model));
 
-						final String location=member.stringValue();
+						final String location=resource.stringValue();
 
 						return response.status(Created)
 								.header("Location", Optional // root-relative to support relocation
-										.of(member.stringValue())
+										.of(resource.stringValue())
 										.map(IRIPattern::matcher)
 										.filter(Matcher::matches)
 										.map(matcher -> matcher.group("pathall"))
