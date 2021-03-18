@@ -37,14 +37,14 @@ import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
 
-final class GraphQueryTerms extends GraphQueryBase {
+final class GraphTerms extends GraphFacts {
 
 	private final Options options=options();
 
 	private final Graph graph=asset(graph());
 
 
-	GraphQueryTerms(final Options options) {
+	GraphTerms(final Options options) {
 		super(options);
 	}
 

@@ -70,7 +70,7 @@ import static com.metreeca.rest.assets.Logger.time;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 
-abstract class GraphQueryBase {
+abstract class GraphFacts {
 
 	static final String root="0";
 
@@ -113,7 +113,7 @@ abstract class GraphQueryBase {
 	private final Logger logger=asset(logger());
 
 
-	GraphQueryBase(final Options options) {
+	GraphFacts(final Options options) {
 		this.options=options;
 	}
 

@@ -42,14 +42,14 @@ import static org.eclipse.rdf4j.model.util.Values.triple;
 
 import static java.util.stream.Collectors.toList;
 
-final class GraphQueryItems extends GraphQueryBase {
+final class GraphItems extends GraphFacts {
 
 	private final Options options=options();
 
 	private final Graph graph=asset(graph());
 
 
-	GraphQueryItems(final Options options) {
+	GraphItems(final Options options) {
 		super(options);
 	}
 

@@ -57,8 +57,8 @@ import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rdf4j.assets.GraphQueryBase.value;
-import static com.metreeca.rdf4j.assets.GraphQueryBase.*;
+import static com.metreeca.rdf4j.assets.GraphFacts.value;
+import static com.metreeca.rdf4j.assets.GraphFacts.*;
 import static com.metreeca.rdf4j.assets.GraphTest.graph;
 import static com.metreeca.rdf4j.assets.GraphTest.localized;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
@@ -74,7 +74,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 
-final class GraphQueryBaseTest {
+final class GraphFactsTest {
 
 	private static final IRI p=iri("test:p");
 	private static final IRI q=iri("test:q");
@@ -120,7 +120,7 @@ final class GraphQueryBaseTest {
 
 	private Collection<Statement> query(final IRI root, final Shape shape) {
 		return asset(graph()).exec(connection -> {
-			return items(shape).map(new GraphFetcher(root, options()))
+			return new GraphItems(options()).process(root, items(shape))
 
 					.stream()
 

@@ -42,7 +42,7 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Link.link;
-import static com.metreeca.rdf4j.assets.GraphQueryBaseTest.exec;
+import static com.metreeca.rdf4j.assets.GraphFactsTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,10 +51,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
-final class GraphQueryItemsTest {
+final class GraphItemsTest {
 
-	private static GraphQueryBase.Options options() {
-		return new GraphQueryBase.Options() {
+	private static GraphFacts.Options options() {
+		return new GraphFacts.Options() {
 			@Override public <V> V get(final Supplier<V> option) {
 				return option.get();
 			}
@@ -63,7 +63,7 @@ final class GraphQueryItemsTest {
 
 
 	private Collection<Statement> query(final Items items) {
-		return new GraphQueryItems(options()).process(Root, items);
+		return new GraphItems(options()).process(Root, items);
 	}
 
 

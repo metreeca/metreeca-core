@@ -16,21 +16,38 @@
 
 package com.metreeca.rdf4j.assets;
 
+import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
+import com.metreeca.json.queries.*;
+import com.metreeca.rdf4j.assets.GraphFacts.Options;
 import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
 
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 
+import static com.metreeca.json.Values.IRIPattern;
+import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.shapes.All.all;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.Convey;
+import static com.metreeca.json.shapes.Guard.Mode;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.assets.Engine.StatsShape;
+import static com.metreeca.rest.assets.Engine.TermsShape;
+import static com.metreeca.rest.formats.JSONLDFormat.*;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 
@@ -169,7 +186,41 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorCreator().handle(request);
+		final IRI item=iri(request.item());
+		final Shape shape=request.attribute(shape());
+
+		return request.body(jsonld()).fold(request::reply, model ->
+				request.reply(response -> graph.exec(txn(connection -> {
+
+					final boolean clashing=connection.hasStatement(item, null, null, true)
+							|| connection.hasStatement(null, null, item, true);
+
+					if ( clashing ) { // report clash
+
+						return response.map(status(InternalServerError,
+								new IllegalStateException(format("clashing resource identifier %s", format(item)))
+						));
+
+					} else { // store model
+
+						connection.add(shape.outline(item));
+						connection.add(model);
+
+						final String location=item.stringValue();
+
+						return response.status(Created)
+								.header("Location", Optional // root-relative to support relocation
+										.of(item.stringValue())
+										.map(IRIPattern::matcher)
+										.filter(Matcher::matches)
+										.map(matcher -> matcher.group("pathall"))
+										.orElse(location)
+								);
+
+					}
+
+				})))
+		);
 	}
 
 	/**
@@ -213,7 +264,24 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorRelator(this::get).handle(request);
+		final IRI item=iri(request.item());
+		final Shape shape=and(all(item), request.attribute(shape()));
+
+		return query(item, shape, request.query()).fold(request::reply, query ->
+				request.reply(response -> Optional
+
+						.of(query.map(new QueryProbe(item, this::get)))
+
+						.filter(model -> !model.isEmpty())
+
+						.map(model -> response.status(OK)
+								.attribute(shape(), query.map(new ShapeProbe(false)))
+								.body(jsonld(), model)
+						)
+
+						.orElseGet(() -> response.status(NotFound)) // !!! 410 Gone if previously known
+				)
+		);
 	}
 
 	/**
@@ -249,7 +317,15 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorBrowser(this::get).handle(request);
+		final IRI item=iri(request.item());
+		final Shape shape=request.attribute(shape());
+
+		return query(item, shape, request.query()).fold(request::reply, query ->
+				request.reply(response -> response.status(OK) // containers are virtual and respond always with 200 OK
+						.attribute(shape(), query.map(new ShapeProbe(true)))
+						.body(jsonld(), query.map(new QueryProbe(item, this::get)))
+				)
+		);
 	}
 
 	/**
@@ -294,7 +370,31 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorUpdater(this::get).handle(request);
+		final IRI item=iri(request.item());
+		final Shape shape=request.attribute(shape());
+
+		return request.body(jsonld()).fold(request::reply, model ->
+				request.reply(response -> graph.exec(txn(connection -> {
+
+					return Optional
+
+							.of(Items.items(shape).map(new QueryProbe(item, this::get)))
+
+							.filter(current -> !current.isEmpty())
+
+							.map(current -> {
+
+								connection.remove(current);
+								connection.add(model);
+
+								return response.status(NoContent);
+
+							})
+
+							.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
+
+				})))
+		);
 	}
 
 	/**
@@ -336,7 +436,88 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
-		return new GraphActorDeleter(this::get).handle(request);
+		final IRI item=iri(request.item());
+		final Shape shape=request.attribute(shape());
+
+		return request.reply(response -> graph.exec(txn(connection -> {
+
+			return Optional
+
+					.of(Items.items(shape).map(new QueryProbe(item, this::get)))
+
+					.filter(current -> !current.isEmpty())
+
+					.map(current -> {
+
+						connection.remove(shape.outline(item));
+						connection.remove(current);
+
+						return response.status(NoContent);
+
+					})
+
+					.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
+
+		})));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class QueryProbe extends Query.Probe<Collection<Statement>> {
+
+		private final IRI resource;
+		private final Options options;
+
+
+		QueryProbe(final IRI resource, final Options options) {
+			this.resource=resource;
+			this.options=options;
+		}
+
+
+		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		@Override public Collection<Statement> probe(final Items items) {
+			return new GraphItems(options).process(resource, items);
+		}
+
+		@Override public Collection<Statement> probe(final Terms terms) {
+			return new GraphTerms(options).process(resource, terms);
+		}
+
+		@Override public Collection<Statement> probe(final Stats stats) {
+			return new GraphStats(options).process(resource, stats);
+		}
+
+	}
+
+	private static final class ShapeProbe extends Query.Probe<Shape> {
+
+		private final boolean container;
+
+
+		private ShapeProbe(final boolean container) {
+			this.container=container;
+		}
+
+
+		@Override public Shape probe(final Items items) { // !!! add Shape.Contains if items.path is not empty
+			return (container ?
+
+					field(Shape.Contains, items.shape()) : items.shape()
+
+			).redact(Mode, Convey); // remove filters
+		}
+
+		@Override public Shape probe(final Stats stats) {
+			return StatsShape(stats);
+		}
+
+		@Override public Shape probe(final Terms terms) {
+			return TermsShape(terms);
+		}
+
 	}
 
 }
