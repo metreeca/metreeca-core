@@ -90,13 +90,13 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Field field) {
 
-		final String alias=field.alias();
+		final String label=field.label();
 		final IRI iri=field.iri();
 		final Shape shape=field.shape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field(alias, iri, and(shape, IRIDatatype)), ResourceDatatype)
-				: direct(iri) ? and(field(alias, iri, shape), ResourceDatatype)
-				: field(alias, iri, and(shape, ResourceDatatype));
+		return iri.equals(RDF.TYPE) ? and(field(label, iri, and(shape, IRIDatatype)), ResourceDatatype)
+				: direct(iri) ? and(field(label, iri, shape), ResourceDatatype)
+				: field(label, iri, and(shape, ResourceDatatype));
 	}
 
 

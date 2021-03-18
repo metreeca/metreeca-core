@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.Field.aliases;
+import static com.metreeca.json.shapes.Field.labels;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -70,10 +70,10 @@ final class JSONLDDecoder {
 
 		this.base=URI.create(focus.stringValue());
 
-		final Map<String, String> aliases2keywords=keywords
+		final Map<String, String> labels2keywords=keywords
 				.entrySet().stream().collect(toMap(Entry::getValue, Entry::getKey));
 
-		this.resolver=alias -> aliases2keywords.getOrDefault(alias, alias);
+		this.resolver=label -> labels2keywords.getOrDefault(label, label);
 	}
 
 
@@ -212,7 +212,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> resource(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final Map<String, Field> aliases=aliases(shape, keywords);
+		final Map<String, Field> labels=labels(shape, keywords);
 
 		return entry(focus, object.entrySet().stream().flatMap(entry -> {
 
@@ -225,7 +225,7 @@ final class JSONLDDecoder {
 
 			} else if ( !label.startsWith("@") && !value.equals(JsonValue.NULL) ) {
 
-				final Field field=aliases.get(label);
+				final Field field=labels.get(label);
 
 				if ( field == null ) {
 					return error("unknown property label <%s>", label);

@@ -195,7 +195,7 @@ final class AndTest {
 			);
 		}
 
-		@Test void testCollapseEqualFieldAliases() {
+		@Test void testCollapseEqualFieldLabels() {
 			assertThat(and(
 
 					field("alias", RDF.VALUE),
@@ -208,7 +208,7 @@ final class AndTest {
 			);
 		}
 
-		@Test void testCollapseCompatibleFieldAliases() {
+		@Test void testCollapseCompatibleFieldLabels() {
 			assertThat(and(
 
 					field(RDF.VALUE),
@@ -221,7 +221,7 @@ final class AndTest {
 			);
 		}
 
-		@Test void testReportClashingFieldAliases() {
+		@Test void testReportClashingFieldLabels() {
 			assertThatIllegalArgumentException().isThrownBy(() -> and(
 
 					field("x", RDF.VALUE),

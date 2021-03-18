@@ -49,7 +49,7 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 	}
 
 	@Override public Shape probe(final Field field) {
-		return field(field.alias(), field.iri(),
+		return field(field.label(), field.iri(),
 				axis.equals(Task) && values != null && !values.contains(Relate) ? or() : field.shape().map(this)
 		);
 	}

@@ -289,7 +289,7 @@ public abstract class Shape {
 	 *
 	 * @param labels a supplier of unique labels
 	 *
-	 * @return a copy of this shape where fields are assigned a unique alias supplied by {@code labels}
+	 * @return a copy of this shape where fields are assigned a unique label supplied by {@code labels}
 	 *
 	 * @throws NullPointerException if {@code labels} is null
 	 */

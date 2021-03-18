@@ -93,25 +93,26 @@ When writing, local `<iri>` references are relativized as root-relative IRIs aga
 # Properties
 
 ```
-<property> ::= <alias>: [<value>(, <value>)*]
+<property> ::= <label>: [<value>(, <value>)*]
 ```
 
-Direct/inverse  resource property values are serialized as JSON object fields including the property *alias* as label and a JSON array containing serialized property objects/subjects as value.
+Direct/inverse resource property values are serialized as JSON object fields including the property *label* and a JSON
+array containing serialized property objects/subjects as value.
 
 ```
-<alias> ::= <shape-defined alias> | <system-inferred-alias>
+<label> ::= <shape-defined label> | <system-inferred-label>
 ```
 
-Poperty aliases are either defined in the target shape using the [alias](../javadocs/com/metreeca/json/shapes/Meta.html#alias-java.lang.String-) annotation or inferred by the system on the basis of the property IRI.
+Property labels are either defined in the target shape using
+the [label](../javadocs/com/metreeca/json/shapes/Meta.html#label-java.lang.String-) annotation or inferred by the system
+on the basis of the property IRI.
 
-!!! warning
-	JSON-LD keywords (i.e. object field names staring with `@`) are reserved for system use.
+!!! warning JSON-LD keywords (i.e. object field names staring with `@`) are reserved for system use.
 
-!!! warning
-	Predicate IRIs with undefined or clashing aliases are reported as errors.
+!!! warning Predicate IRIs with undefined or clashing labels are reported as errors.
 
 ```
-<property> ::= <alias>: <value>
+<property> ::= <label>: <value>
 ```
 
 If  the property value may be proved to be non-repeatable, it may be included as a single JSON value, rather than a JSON array.

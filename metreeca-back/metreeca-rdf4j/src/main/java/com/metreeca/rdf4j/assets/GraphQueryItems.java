@@ -178,18 +178,18 @@ final class GraphQueryItems extends GraphQueryBase {
 
 		@Override public Stream<Triple> probe(final Field field) {
 
+			final String label=field.label();
 			final Shape shape=field.shape();
-			final String alias=field.alias();
 
 			final BNode source=bnode(anchor);
-			final BNode target=bnode(alias);
+			final BNode target=bnode(label);
 
 			final Triple triple=traverse(field.iri(),
 					iri -> triple(source, iri, target),
 					iri -> triple(target, iri, source)
 			);
 
-			return Stream.concat(Stream.of(triple), shape.map(new TemplateProbe(alias)));
+			return Stream.concat(Stream.of(triple), shape.map(new TemplateProbe(label)));
 		}
 
 

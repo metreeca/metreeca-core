@@ -34,7 +34,7 @@ import java.util.regex.Matcher;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.shapes.Field.aliases;
+import static com.metreeca.json.shapes.Field.labels;
 import static com.metreeca.rest.formats.JSONLDInspector.datatype;
 import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
@@ -150,7 +150,7 @@ final class JSONLDEncoder {
 	) { // !!! refactor
 
 		final Object datatype=datatype(shape).orElse(null);
-		final Map<String, Field> aliases=aliases(shape, keywords);
+		final Map<String, Field> labels=labels(shape, keywords);
 
 		final boolean inlineable=IRIType.equals(datatype)
 				|| BNodeType.equals(datatype)
@@ -164,7 +164,7 @@ final class JSONLDEncoder {
 					? createValue(id)
 					: createObjectBuilder().add(aliaser.apply("@id"), id).build();
 
-		} else if ( inlineable && resource instanceof IRI && aliases.isEmpty() ) { // inline proved leaf IRI
+		} else if ( inlineable && resource instanceof IRI && labels.isEmpty() ) { // inline proved leaf IRI
 
 			return createValue(id);
 
@@ -184,9 +184,9 @@ final class JSONLDEncoder {
 
 			};
 
-			for (final Map.Entry<String, Field> entry : aliases.entrySet()) {
+			for (final Map.Entry<String, Field> entry : labels.entrySet()) {
 
-				final String alias=entry.getKey();
+				final String label=entry.getKey();
 				final Field field=entry.getValue();
 
 				final Shape nestedShape=field.shape();
@@ -198,7 +198,7 @@ final class JSONLDEncoder {
 
 				if ( !values.isEmpty() ) { // omit null value and empty arrays
 
-					object.add(alias, values(values, nestedShape, model, nestedTrail));
+					object.add(label, values(values, nestedShape, model, nestedTrail));
 
 				}
 
@@ -209,7 +209,7 @@ final class JSONLDEncoder {
 			}
 
 			if ( context ) {
-				context(resource.equals(focus) ? keywords : emptyMap(), aliases).ifPresent(context ->
+				context(resource.equals(focus) ? keywords : emptyMap(), labels).ifPresent(context ->
 						object.add("@context", context)
 				);
 			}

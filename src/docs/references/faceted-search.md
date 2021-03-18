@@ -158,5 +158,5 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 ## Property Paths
 
 ```
-<path> ::= (<alias> ('.' <alias>)*)?
+<path> ::= (<label> ('.' <label>)*)?
 ```

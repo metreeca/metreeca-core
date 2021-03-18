@@ -46,7 +46,7 @@ final class ShapePruner extends Shape.Probe<Shape> {
 
 	@Override public Shape probe(final Field field) {
 		return field.shape().map(this).map(shape ->
-				deep && shape.empty() ? shape : field(field.alias(), field.iri(), shape)
+				deep && shape.empty() ? shape : field(field.label(), field.iri(), shape)
 		);
 	}
 

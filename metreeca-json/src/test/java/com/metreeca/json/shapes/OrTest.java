@@ -168,7 +168,7 @@ final class OrTest {
 			);
 		}
 
-		@Test void testCollapseEqualFieldAliases() {
+		@Test void testCollapseEqualFieldLabels() {
 			assertThat(or(
 
 					field("alias", RDF.VALUE),
@@ -181,7 +181,7 @@ final class OrTest {
 			);
 		}
 
-		@Test void testCollapseCompatibleFieldAliases() {
+		@Test void testCollapseCompatibleFieldLabels() {
 			assertThat(or(
 
 					field(RDF.VALUE),
@@ -194,7 +194,7 @@ final class OrTest {
 			);
 		}
 
-		@Test void testReportClashingFieldAliases() {
+		@Test void testReportClashingFieldLabels() {
 			assertThatIllegalArgumentException().isThrownBy(() -> or(
 
 					field("x", RDF.VALUE),

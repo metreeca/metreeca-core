@@ -46,12 +46,12 @@ import static java.util.stream.Collectors.toMap;
  */
 public final class Field extends Shape {
 
-	private static final java.util.regex.Pattern AliasPattern=Pattern.compile(
+	private static final java.util.regex.Pattern LabelPattern=Pattern.compile(
 			"\\w+"
 	);
 
 	private static final Pattern NamedIRIPattern=Pattern.compile(
-			"([/#:])(?<name>"+AliasPattern+")(/|#|#_|#id|#this)?$"
+			"([/#:])(?<name>"+LabelPattern+")(/|#|#_|#id|#this)?$"
 	);
 
 
@@ -97,14 +97,14 @@ public final class Field extends Shape {
 	}
 
 
-	public static Shape field(final String alias, final IRI iri, final Shape... shapes) {
+	public static Shape field(final String label, final IRI iri, final Shape... shapes) {
 
-		if ( alias == null ) {
-			throw new NullPointerException("null alias");
+		if ( label == null ) {
+			throw new NullPointerException("null label");
 		}
 
-		if ( !(alias.isEmpty() || AliasPattern.matcher(alias).matches()) ) {
-			throw new IllegalArgumentException(format("malformed alias <%s>", alias));
+		if ( !(label.isEmpty() || LabelPattern.matcher(label).matches()) ) {
+			throw new IllegalArgumentException(format("malformed label <%s>", label));
 		}
 
 		if ( iri == null ) {
@@ -115,17 +115,17 @@ public final class Field extends Shape {
 			throw new NullPointerException("null shapes");
 		}
 
-		return field(alias, iri, and(shapes));
+		return field(label, iri, and(shapes));
 	}
 
-	public static Shape field(final String alias, final IRI iri, final Object... values) {
+	public static Shape field(final String label, final IRI iri, final Object... values) {
 
-		if ( alias == null ) {
-			throw new NullPointerException("null alias");
+		if ( label == null ) {
+			throw new NullPointerException("null label");
 		}
 
-		if ( !(alias.isEmpty() || AliasPattern.matcher(alias).matches()) ) {
-			throw new IllegalArgumentException(format("malformed alias <%s>", alias));
+		if ( !(label.isEmpty() || LabelPattern.matcher(label).matches()) ) {
+			throw new IllegalArgumentException(format("malformed label <%s>", label));
 		}
 
 		if ( iri == null ) {
@@ -136,13 +136,13 @@ public final class Field extends Shape {
 			throw new NullPointerException("null values");
 		}
 
-		return field(alias, iri, all(values));
+		return field(label, iri, all(values));
 	}
 
-	public static Shape field(final String alias, final IRI iri, final Shape shape) {
+	public static Shape field(final String label, final IRI iri, final Shape shape) {
 
-		if ( alias == null ) {
-			throw new NullPointerException("null alias");
+		if ( label == null ) {
+			throw new NullPointerException("null label");
 		}
 
 		if ( iri == null ) {
@@ -153,7 +153,7 @@ public final class Field extends Shape {
 			throw new NullPointerException("null shape");
 		}
 
-		return shape.equals(or()) ? and() : new Field(alias, iri, shape);
+		return shape.equals(or()) ? and() : new Field(label, iri, shape);
 	}
 
 
@@ -203,16 +203,16 @@ public final class Field extends Shape {
 	}
 
 
-	public static Map<String, Field> aliases(final Shape shape) {
+	public static Map<String, Field> labels(final Shape shape) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
 		}
 
-		return aliases(shape, emptyMap());
+		return labels(shape, emptyMap());
 	}
 
-	public static Map<String, Field> aliases(final Shape shape, final Map<String, String> keywords) {
+	public static Map<String, Field> labels(final Shape shape, final Map<String, String> keywords) {
 
 		if ( shape == null ) {
 			throw new NullPointerException("null shape");
@@ -236,24 +236,24 @@ public final class Field extends Shape {
 
 					} else {
 
-						final String alias=Optional.of(field.alias()).filter(s -> !s.isEmpty()).orElseGet(() -> Optional
+						final String label=Optional.of(field.label()).filter(s -> !s.isEmpty()).orElseGet(() -> Optional
 
 								.of(NamedIRIPattern.matcher(iri.stringValue()))
 								.filter(Matcher::find)
 								.map(matcher -> matcher.group("name"))
-								.map(label -> direct ? label : label+"Of")
+								.map(name -> direct ? name : name+"Of")
 
 								.orElseThrow(() ->
-										new IllegalArgumentException(format("undefined alias for %s", iri))
+										new IllegalArgumentException(format("undefined label for %s", iri))
 								)
 
 						);
 
-						if ( keywords.containsValue(alias) ) {
-							throw new IllegalArgumentException(format("reserved alias <%s> for %s", alias, iri));
+						if ( keywords.containsValue(label) ) {
+							throw new IllegalArgumentException(format("reserved label <%s> for %s", label, iri));
 						}
 
-						return alias;
+						return label;
 
 					}
 
@@ -264,7 +264,7 @@ public final class Field extends Shape {
 				(x, y) -> {
 
 					throw new IllegalArgumentException(format(
-							"clashing aliases for fields <%s>=%s / <%s>=%s", x.alias(), x.iri(), y.alias(), y.iri()
+							"clashing labels for fields <%s>=%s / <%s>=%s", x.label(), x.iri(), y.label(), y.iri()
 					));
 
 				},
@@ -281,23 +281,23 @@ public final class Field extends Shape {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final String alias;
+	private final String label;
 
 	private final IRI iri;
 	private final Shape shape;
 
 
-	Field(final String alias, final IRI iri, final Shape shape) {
+	Field(final String label, final IRI iri, final Shape shape) {
 
-		this.alias=alias;
+		this.label=label;
 
 		this.iri=iri;
 		this.shape=shape;
 	}
 
 
-	public String alias() {
-		return alias;
+	public String label() {
+		return label;
 	}
 
 
@@ -326,13 +326,13 @@ public final class Field extends Shape {
 
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Field
-				&& alias.equals(((Field)object).alias)
+				&& label.equals(((Field)object).label)
 				&& iri.equals(((Field)object).iri)
 				&& shape.equals(((Field)object).shape);
 	}
 
 	@Override public int hashCode() {
-		return alias.hashCode()
+		return label.hashCode()
 				^iri.hashCode()
 				^shape.hashCode();
 	}
@@ -343,8 +343,8 @@ public final class Field extends Shape {
 
 		builder.append("field(");
 
-		if ( !alias.isEmpty() ) {
-			builder.append('\'').append(alias).append("' = ");
+		if ( !label.isEmpty() ) {
+			builder.append('\'').append(label).append("' = ");
 		}
 
 		builder.append('<').append(iri).append('>');

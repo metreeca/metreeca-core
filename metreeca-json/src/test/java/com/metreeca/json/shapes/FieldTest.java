@@ -25,8 +25,8 @@ import org.junit.jupiter.api.Test;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
-import static com.metreeca.json.shapes.Field.aliases;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Field.labels;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.When.when;
 
@@ -45,10 +45,10 @@ final class FieldTest {
 
 	}
 
-	@Nested class Aliases {
+	@Nested class Labels {
 
 		@Test void testInspectAnd() {
-			assertThat(aliases(and(
+			assertThat(Field.labels(and(
 
 					field(RDF.FIRST),
 					field(RDF.REST)
@@ -57,7 +57,7 @@ final class FieldTest {
 		}
 
 		@Test void testInspectOr() {
-			assertThat(aliases(or(
+			assertThat(Field.labels(or(
 
 					field(RDF.FIRST),
 					field(RDF.REST)
@@ -66,7 +66,7 @@ final class FieldTest {
 		}
 
 		@Test void testInspectWhen() {
-			assertThat(aliases(when(
+			assertThat(Field.labels(when(
 
 					datatype(RDF.NIL),
 					field(RDF.FIRST),
@@ -76,59 +76,59 @@ final class FieldTest {
 		}
 
 		@Test void testInspectOtherShapes() {
-			assertThat(aliases(and())).isEmpty();
+			assertThat(Field.labels(and())).isEmpty();
 		}
 
 
-		@Test void testGuessAliasFromIRI() {
+		@Test void testGuessLabelFromIRI() {
 
-			assertThat(aliases(field(RDF.VALUE)))
+			assertThat(Field.labels(field(RDF.VALUE)))
 					.as("direct")
 					.containsKey("value");
 
-			assertThat(aliases(field(Values.inverse(RDF.VALUE))))
+			assertThat(Field.labels(field(Values.inverse(RDF.VALUE))))
 					.as("inverse")
 					.containsKey("valueOf");
 
 		}
 
-		@Test void testRetrieveUserDefinedAlias() {
-			assertThat(aliases(field("alias", RDF.VALUE)))
+		@Test void testRetrieveUserDefinedLabel() {
+			assertThat(Field.labels(field("alias", RDF.VALUE)))
 					.as("user-defined")
 					.containsKey("alias");
 		}
 
 		@Test void testPreferUserDefinedFields() {
-			assertThat(aliases(and(field("alias", RDF.VALUE), field(RDF.VALUE))))
+			assertThat(Field.labels(and(field("alias", RDF.VALUE), field(RDF.VALUE))))
 					.as("user-defined")
 					.containsKey("alias");
 		}
 
 
 		@Test void testReportConflictingFields() {
-			assertThatThrownBy(() -> aliases(and(
+			assertThatThrownBy(() -> Field.labels(and(
 					field("alias", RDF.FIRST),
 					field("alias", RDF.REST)
 			))).isInstanceOf(IllegalArgumentException.class);
 		}
 
 		@Test void testReportConflictingProperties() {
-			assertThatThrownBy(() -> aliases(and(field(RDF.VALUE), field(iri("urn:example#value"), and()))))
+			assertThatThrownBy(() -> Field.labels(and(field(RDF.VALUE), field(iri("urn:example#value"), and()))))
 					.isInstanceOf(IllegalArgumentException.class);
 		}
 
-		@Test void testReportReservedAliases() {
+		@Test void testReportReservedLabels() {
 
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					aliases(field(iri("http://exampe.com/", "@id"), and()))
+					Field.labels(field(iri("http://exampe.com/", "@id"), and()))
 			);
 
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					aliases(field("@id", RDF.VALUE))
+					Field.labels(field("@id", RDF.VALUE))
 			);
 
 			assertThatIllegalArgumentException().isThrownBy(() ->
-					aliases(field("id", RDF.VALUE), singletonMap("@id", "id"))
+					labels(field("id", RDF.VALUE), singletonMap("@id", "id"))
 			);
 
 		}

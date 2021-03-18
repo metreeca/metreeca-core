@@ -324,7 +324,7 @@ final class JSONLDDecoderTest {
 
 	}
 
-	@Nested final class Aliases {
+	@Nested final class Labels {
 
 		@Test void testDecodeAbsoluteFieldIRIs() {
 			assertThat(decode(x,
@@ -343,7 +343,7 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeDirectInferredAliases() {
+		@Test void testDecodeDirectInferredLabels() {
 			assertThat(decode(x,
 
 					field(RDF.VALUE, and(required())),
@@ -360,7 +360,7 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeInverseInferredAliases() {
+		@Test void testDecodeInverseInferredLabels() {
 			assertThat(decode(x,
 
 					field(inverse(RDF.VALUE), and(required())),
@@ -377,7 +377,7 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeDirectUserDefinedAliases() {
+		@Test void testDecodeDirectUserDefinedLabels() {
 			assertThat(decode(x,
 
 					field("alias", RDF.VALUE, required()),
@@ -394,7 +394,7 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeInverseUserDefinedAliases() {
+		@Test void testDecodeInverseUserDefinedLabels() {
 			assertThat(decode(x,
 
 					field("alias", inverse(RDF.VALUE), required()),
@@ -412,7 +412,7 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Test void testReportCLashingAliases() {
+		@Test void testReportCLashingLabels() {
 			assertThatThrownBy(() -> {
 				decode(x,
 
@@ -654,7 +654,7 @@ final class JSONLDDecoderTest {
 
 	@Nested final class Keywords {
 
-		@Test void testHandleKeywordAliases() {
+		@Test void testHandleKeywordLabels() {
 			assertThat(decode(x,
 
 					field(RDF.FIRST),

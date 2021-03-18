@@ -97,7 +97,7 @@ final class ShapeResolver extends Shape.Probe<Shape> {
 	}
 
 	@Override public Shape probe(final Field field) {
-		return field(field.alias(), field.iri(), field.shape().map(this));
+		return field(field.label(), field.iri(), field.shape().map(this));
 	}
 
 

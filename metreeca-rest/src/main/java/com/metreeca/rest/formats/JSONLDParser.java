@@ -20,7 +20,6 @@ import com.metreeca.json.*;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.*;
-import com.metreeca.rest.wrappers.Driver;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -39,8 +38,8 @@ import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Field.aliases;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Field.labels;
 import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
@@ -241,7 +240,7 @@ final class JSONLDParser {
 					@Override public Shape probe(final Field field) {
 						return path.isEmpty() || !field.iri().equals(path.get(0)) ? null : Optional
 								.ofNullable(filter(value, field.shape(), path.subList(1, path.size()), mapper))
-								.map(s -> field(field.alias(), field.iri(), s))
+								.map(s -> field(field.label(), field.iri(), s))
 								.orElse(null);
 					}
 
@@ -402,9 +401,9 @@ final class JSONLDParser {
 			final String head=steps.get(0);
 			final List<String> tail=steps.subList(1, steps.size());
 
-			final Map<String, Field> aliases=aliases(shape);
+			final Map<String, Field> labels=labels(shape);
 
-			return Optional.ofNullable(aliases.get(head))
+			return Optional.ofNullable(labels.get(head))
 
 					.map(field -> Stream.concat(Stream.of(field.iri()), path(tail, field.shape())))
 

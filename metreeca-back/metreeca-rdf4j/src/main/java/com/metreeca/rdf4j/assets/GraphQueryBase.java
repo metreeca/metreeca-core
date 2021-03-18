@@ -329,7 +329,7 @@ abstract class GraphQueryBase {
 
 		@Override public Scribe probe(final Field field) {
 
-			final String alias=field.alias();
+			final String label=field.label();
 			final IRI iri=field.iri();
 			final Shape shape=field.shape();
 
@@ -337,13 +337,13 @@ abstract class GraphQueryBase {
 
 					space(edge(var(anchor), text(iri), indent(list(", ", Stream.concat(
 
-							Stream.of(var(alias)), // filtering/projection hook
+							Stream.of(var(label)), // filtering/projection hook
 
 							all(shape).orElseGet(Collections::emptySet).stream().map(Scribe::text)
 
 					))))),
 
-					space(shape.map(new TreeProbe(alias, required)))
+					space(shape.map(new TreeProbe(label, required)))
 
 			).map(scribe -> required ? scribe : space(optional(scribe)));
 		}
@@ -392,7 +392,7 @@ abstract class GraphQueryBase {
 
 		@Override public Shape probe(final Field field) {
 			return path.isEmpty() || !field.iri().equals(path.get(0)) ? and() : field(
-					field.alias(), field.iri(), path(field.shape(), path.subList(1, path.size()))
+					field.label(), field.iri(), path(field.shape(), path.subList(1, path.size()))
 			);
 		}
 
@@ -434,8 +434,8 @@ abstract class GraphQueryBase {
 
 		@Override public String probe(final Field field) {
 			return path.isEmpty() || !field.iri().equals(path.get(0)) ? null : Optional
-					.ofNullable(hook(field.alias(), field.shape(), path.subList(1, path.size())))
-					.orElse(field.alias());
+					.ofNullable(hook(field.label(), field.shape(), path.subList(1, path.size())))
+					.orElse(field.label());
 		}
 
 		@Override public String probe(final Link link) {

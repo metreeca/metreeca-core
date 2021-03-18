@@ -175,8 +175,8 @@ public final class Or extends Shape {
 
 				.collect(groupingBy(Field::iri, LinkedHashMap::new, reducing((x, y) -> new Field(
 
-						Field.label(x.alias(), y.alias()).orElseThrow(() -> new IllegalArgumentException(format(
-								"clashing aliases <%s> / <%s> for field %s", x.alias(), y.alias(), format(x.iri())
+						Field.label(x.label(), y.label()).orElseThrow(() -> new IllegalArgumentException(format(
+								"clashing labels <%s> / <%s> for field %s", x.label(), y.label(), format(x.iri())
 						))),
 
 						x.iri(),
