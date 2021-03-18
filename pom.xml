@@ -431,6 +431,8 @@
 							<reportOutputDirectory>${project.basedir}/docs/javadocs</reportOutputDirectory>
 							<destDir>javadocs</destDir>
 
+							<docfilessubdirs>true</docfilessubdirs>
+
 							<groups> <!-- colon-separated patterns / single line -->
 								<group>
 									<title>JSON Modelling</title>
