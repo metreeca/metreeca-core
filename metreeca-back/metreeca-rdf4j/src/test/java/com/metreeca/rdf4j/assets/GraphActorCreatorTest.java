@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.assets;
 
 import com.metreeca.json.Shape;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.formats.JSONLDFormat;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
@@ -42,6 +41,7 @@ import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 final class GraphActorCreatorTest {
 
@@ -59,15 +59,14 @@ final class GraphActorCreatorTest {
 	private Request request() {
 		return new Request()
 				.base(Base)
-				.path("/employees/")
-				.header("Slug", "slug")
-				.body(jsonld(), decode("</employees/>"
+				.path("/employees/slug")
+				.body(jsonld(), decode("</employees/slug>"
 						+" :forename 'Tino' ;"
 						+" :surname 'Faussone' ;"
 						+" :email 'tfaussone@classicmodelcars.com' ;"
 						+" :title 'Sales Rep' ;"
 						+" :seniority 1 ."
-				)).attribute(JSONLDFormat.shape(), Employee);
+				)).attribute(shape(), Employee);
 	}
 
 

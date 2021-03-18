@@ -23,6 +23,7 @@ import com.metreeca.json.shapes.Field;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.operators.Creator;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -182,7 +183,7 @@ public interface Engine extends Wrapper {
 	/**
 	 * Handles creation requests.
 	 *
-	 * <p>Handles creation requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * <p>Handles creation requests of the linked data resource identified by the request {@linkplain Request#item()
 	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
 	 * {@linkplain JSONLDFormat#shape() shape}.</p>
 	 *
@@ -192,6 +193,9 @@ public interface Engine extends Wrapper {
 	 * request}
 	 *
 	 * @throws NullPointerException if {@code request} is null
+	 * @implNote Concrete implementations must assume that {@link Request#path()} was already configured with a unique
+	 * identifier for the resource to be created and the {@linkplain JSONLDFormat JSON-LD} payload of the request
+	 * rewritten accordingly, for instance by an outer {@link Creator} handler
 	 */
 	public Future<Response> create(final Request request);
 

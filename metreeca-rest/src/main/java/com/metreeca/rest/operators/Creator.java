@@ -22,17 +22,25 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.handlers.Delegator;
 
-import java.util.Objects;
+import org.eclipse.rdf4j.model.*;
+
+import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Xtream.encode;
 import static com.metreeca.rest.assets.Engine.engine;
 import static com.metreeca.rest.assets.Engine.throttler;
+import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -57,8 +65,6 @@ import static java.util.UUID.randomUUID;
  * <p>All operations are executed inside a single {@linkplain Engine engine transaction}.</p>
  */
 public final class Creator extends Delegator {
-
-	private static final Object monitor=new Object();
 
 	/**
 	 * Creates a resource creator with a UUID-based slug generator.
@@ -110,7 +116,6 @@ public final class Creator extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 	private Creator(final Function<Request, String> slug) {
 
 		final Engine engine=asset(engine());
@@ -127,15 +132,39 @@ public final class Creator extends Delegator {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Wrapper wrapper(final Function<Request, String> slug) {
-		return handler -> request -> consumer -> {
-			synchronized ( monitor ) { // attempt to serialize slug operations from multiple snapshot txns
-				handler.handle(request.header("Slug",
+		return handler -> request -> {
 
-						Objects.requireNonNull(slug.apply(request), "null resource name")
+			final String name=encode( // encode slug as IRI path component
+					requireNonNull(slug.apply(request), "null resource name")
+			);
 
-				)).accept(consumer);
-			}
+			final IRI source=iri(request.item());
+			final IRI target=iri(source, name);
+
+			return handler.handle(request
+					.path(request.path()+name)
+					.map(jsonld(), model -> rewrite(target, source, model)));
 		};
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Collection<Statement> rewrite(final IRI target, final IRI source, final Collection<Statement> model) {
+		return model.stream().map(statement -> rewrite(target, source, statement)).collect(toList());
+	}
+
+	private Statement rewrite(final IRI target, final IRI source, final Statement statement) {
+		return statement(
+				rewrite(target, source, statement.getSubject()),
+				rewrite(target, source, statement.getPredicate()),
+				rewrite(target, source, statement.getObject()),
+				rewrite(target, source, statement.getContext())
+		);
+	}
+
+	private <T extends Value> T rewrite(final T target, final T source, final T value) {
+		return source.equals(value) ? target : value;
 	}
 
 }

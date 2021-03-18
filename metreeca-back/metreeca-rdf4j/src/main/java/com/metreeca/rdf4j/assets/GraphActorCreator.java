@@ -18,16 +18,16 @@ package com.metreeca.rdf4j.assets;
 
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
 import com.metreeca.rest.*;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.regex.Matcher;
 
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.IRIPattern;
+import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rdf4j.assets.Graph.txn;
 import static com.metreeca.rest.Context.asset;
@@ -38,7 +38,6 @@ import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 
 final class GraphActorCreator implements Handler {
@@ -51,33 +50,28 @@ final class GraphActorCreator implements Handler {
 		final IRI item=iri(request.item());
 		final Shape shape=request.attribute(shape());
 
-		final IRI resource=iri(item, request.header("Slug") // assign entity a slug-based id
-				.map(Xtream::encode)  // encode slug as IRI path component
-				.orElseGet(Values::md5)
-		);
-
 		return request.body(jsonld()).fold(request::reply, model ->
 				request.reply(response -> graph.exec(txn(connection -> {
 
-					final boolean clashing=connection.hasStatement(resource, null, null, true)
-							|| connection.hasStatement(null, null, resource, true);
+					final boolean clashing=connection.hasStatement(item, null, null, true)
+							|| connection.hasStatement(null, null, item, true);
 
-					if ( clashing ) { // report clashing slug
+					if ( clashing ) { // report clash
 
 						return response.map(status(InternalServerError,
-								new IllegalStateException(format("clashing resource slug <%s>", resource))
+								new IllegalStateException(format("clashing resource identifier %s", format(item)))
 						));
 
 					} else { // store model
 
-						connection.add(shape.outline(resource));
-						connection.add(rewrite(resource, item, model));
+						connection.add(shape.outline(item));
+						connection.add(model);
 
-						final String location=resource.stringValue();
+						final String location=item.stringValue();
 
 						return response.status(Created)
 								.header("Location", Optional // root-relative to support relocation
-										.of(resource.stringValue())
+										.of(item.stringValue())
 										.map(IRIPattern::matcher)
 										.filter(Matcher::matches)
 										.map(matcher -> matcher.group("pathall"))
@@ -88,26 +82,6 @@ final class GraphActorCreator implements Handler {
 
 				})))
 		);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Collection<Statement> rewrite(final IRI target, final IRI source, final Collection<Statement> model) {
-		return model.stream().map(statement -> rewrite(target, source, statement)).collect(toList());
-	}
-
-	private Statement rewrite(final IRI target, final IRI source, final Statement statement) {
-		return statement(
-				rewrite(target, source, statement.getSubject()),
-				rewrite(target, source, statement.getPredicate()),
-				rewrite(target, source, statement.getObject()),
-				rewrite(target, source, statement.getContext())
-		);
-	}
-
-	private <T extends Value> T rewrite(final T target, final T source, final T value) {
-		return source.equals(value) ? target : value;
 	}
 
 }
