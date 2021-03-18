@@ -323,7 +323,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 	 *
 	 * @throws IllegalArgumentException if either {@code factory} or {@code delegate} is null
 	 */
-	public <T> T get(final Supplier<T> factory, final Supplier<T> delegate) {
+	public <T> T get(final Supplier<T> factory, final Supplier<? extends T> delegate) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null factory");

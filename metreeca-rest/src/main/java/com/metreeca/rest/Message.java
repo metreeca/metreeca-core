@@ -218,7 +218,7 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Configures message attribute.
 	 *
-	 * @param name  the name for the attribute to be retrieved; must return a non-null default value for the attribute
+	 * @param name  the name for the attribute to be configured; must return a non-null default value for the attribute
 	 * @param value the attribute value to be associated with {@code name}
 	 * @param <V>   the type of the attribute to be configured
 	 *
