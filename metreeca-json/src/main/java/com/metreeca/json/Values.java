@@ -545,6 +545,7 @@ public final class Values {
 		return value == null ? null
 				: value instanceof BNode ? format((BNode)value)
 				: value instanceof IRI ? format((IRI)value)
+				: value instanceof Focus ? format((Focus)value)
 				: format((Literal)value);
 	}
 
@@ -557,6 +558,10 @@ public final class Values {
 				direct -> direct.equals(RDF.TYPE) ? "a" : '<'+iri.stringValue()+'>',
 				inverse -> "^<"+inverse.stringValue()+'>'
 		);
+	}
+
+	public static String format(final Focus focus) {
+		return focus == null ? null : "{"+focus.stringValue()+"}";
 	}
 
 	public static String format(final Literal literal) {

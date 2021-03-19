@@ -20,7 +20,6 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
 import java.net.URI;
-import java.util.function.UnaryOperator;
 
 import static com.metreeca.json.Values.iri;
 
@@ -30,7 +29,10 @@ import static com.metreeca.json.Values.iri;
  * <p>Provides a placeholder for a shape IRI value dynamically derived from a target IRI while performing a
  * shape-driven operation, for instance serving a linked data resource.</p>
  */
-public abstract class Focus implements Value {
+public final class Focus implements Value {
+
+	private static final long serialVersionUID=7112279683949649474L;
+
 
 	/**
 	 * Creates a target focus value.
@@ -38,13 +40,7 @@ public abstract class Focus implements Value {
 	 * @return a focus value resolving to the target IRI of a shape-driven operation
 	 */
 	public static Focus focus() {
-		return new Focus() {
-
-			@Override public String stringValue() { return ""; }
-
-			@Override public IRI resolve(final IRI base) { return base; }
-
-		};
+		return new Focus("");
 	}
 
 	/**
@@ -63,29 +59,27 @@ public abstract class Focus implements Value {
 			throw new NullPointerException("null relative IRI");
 		}
 
-		final boolean slash=relative.endsWith("/");
-
-		final UnaryOperator<String> resolve=path -> URI.create(path).resolve(relative).toString();
-		final UnaryOperator<String> convert=path -> path.endsWith("/") ? path.substring(0, path.length()-1) : path;
-
-		return new Focus() {
-
-			@Override public String stringValue() { return relative; }
-
-			@Override public IRI resolve(final IRI base) {
-				return relative.isEmpty() ? base
-						: slash ? iri(resolve.apply(base.stringValue()))
-						: iri(convert.apply(resolve.apply(base.stringValue())));
-			}
-
-		};
-
+		return new Focus(relative);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Focus() {}
+	private final String relative;
+
+
+	private Focus(final String relative) {
+		this.relative=relative;
+	}
+
+
+	private String resolve(final String path) {
+		return URI.create(path).resolve(relative).toString();
+	}
+
+	private String convert(final String path) {
+		return path.endsWith("/") ? path.substring(0, path.length()-1) : path;
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,6 +94,33 @@ public abstract class Focus implements Value {
 	 * @throws NullPointerException     if {@code base} is {@code null}
 	 * @throws IllegalArgumentException if {@code base} is malformed
 	 */
-	public abstract IRI resolve(final IRI base);
+	public IRI resolve(final IRI base) {
+		return relative.isEmpty() ? base
+				: relative.endsWith("/") ? iri(resolve(base.stringValue()))
+				: iri(convert(resolve(base.stringValue())));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public String stringValue() {
+		return relative;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public boolean equals(final Object object) {
+		return this == object || object instanceof Focus
+				&& relative.equals(((Focus)object).relative);
+	}
+
+	@Override public int hashCode() {
+		return relative.hashCode();
+	}
+
+	@Override public String toString() {
+		return String.format("focus(%s)", relative);
+	}
 
 }
