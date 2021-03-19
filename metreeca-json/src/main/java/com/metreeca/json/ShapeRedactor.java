@@ -37,21 +37,20 @@ final class ShapeRedactor extends Shape.Probe<Shape> {
 
 
 	ShapeRedactor(final String axis, final Collection<Object> values) {
-
 		this.axis=axis;
 		this.values=(values == null) ? null : new HashSet<>(values);
 	}
 
 
 	@Override public Shape probe(final Link link) {
-		return axis.equals(Task) && values != null && !values.contains(Relate) ?
-				and() : link(link.iri(), link.shape().map(this));
+
+		final boolean active=!axis.equals(Task) || values == null || values.contains(Relate);
+
+		return active ? link(link.iri(), link.shape().map(this)) : and();
 	}
 
 	@Override public Shape probe(final Field field) {
-		return field(field.label(), field.iri(),
-				axis.equals(Task) && values != null && !values.contains(Relate) ? or() : field.shape().map(this)
-		);
+		return field(field.label(), field.iri(), field.shape().map(this));
 	}
 
 
