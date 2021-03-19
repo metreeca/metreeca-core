@@ -7,12 +7,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="metreeca-rdf4j" />
+        <module name="metreeca-birt" />
         <module name="metreeca-jse" />
         <module name="metreeca-jee" />
         <module name="metreeca-json" />
         <module name="metreeca-rest" />
         <module name="metreeca-xml" />
-        <module name="metreeca-open" />
         <module name="metreeca-rdf" />
         <module name="metreeca-gcp" />
       </profile>
@@ -20,6 +20,7 @@
     <bytecodeTargetLevel>
       <module name="mark-maven-plugin" target="1.8" />
       <module name="metreeca-back" target="1.8" />
+      <module name="metreeca-birt" target="1.8" />
       <module name="metreeca-core" target="1.8" />
       <module name="metreeca-feed" target="1.8" />
       <module name="metreeca-gate" target="1.8" />

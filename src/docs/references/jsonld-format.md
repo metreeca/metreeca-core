@@ -1,14 +1,21 @@
 ---
-title:		JSON-LD Serialization Reference
-excerpt:	JSON-LD serialization format grammar
+title:    JSON-LD Serialization Reference
 ---
 
-Metreeca/Link generates and consumes linked data using a compacted/framed [JSON-LD](https://json-ld.org) format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language.md#shapes).
+[comment]: <> (excerpt:	JSON-LD serialization format grammar)
 
-!!! note
-	This serialization format is intended to simplify front-end development by converting linked data descriptions to/from idiomatic JSON objects structured according to the conventions a JavaScript developer would expect from a typical REST/JSON API.
 
-JSON objects are deserialized to the corresponding RDF payload performing a depth-first visit of the JSON value structure. References to previously visited blank nodes and IRI references are represented as simplified *back-references* to the complete representation, omitting predicate values.
+Metreeca/Link generates and consumes linked data using a compacted/framed [JSON-LD](https://json-ld.org) format, which
+streamlines resource descriptions taking into account the constraints specified by a target linked
+data [shape](spec-language.md#shapes).
+
+!!! note This serialization format is intended to simplify front-end development by converting linked data descriptions
+to/from idiomatic JSON objects structured according to the conventions a JavaScript developer would expect from a typical
+REST/JSON API.
+
+JSON objects are deserialized to the corresponding RDF payload performing a depth-first visit of the JSON value
+structure. References to previously visited blank nodes and IRI references are represented as simplified *
+back-references* to the complete representation, omitting predicate values.
 
 	<rdf> ::= <iri>
 
@@ -103,9 +110,8 @@ array containing serialized property objects/subjects as value.
 <label> ::= <shape-defined label> | <system-inferred-label>
 ```
 
-Property labels are either defined in the target shape using
-the [label](../javadocs/com/metreeca/json/shapes/Meta.html#label-java.lang.String-) annotation or inferred by the system
-on the basis of the property IRI.
+Property labels are either explicitly in the [field](../javadocs/com/metreeca/json/shapes/Field.html) definition or
+inferred by the system on the basis of the field IRI.
 
 !!! warning JSON-LD keywords (i.e. object field names staring with `@`) are reserved for system use.
 

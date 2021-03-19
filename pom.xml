@@ -106,6 +106,8 @@
 		<module>metreeca-head</module>
 		<module>metreeca-back</module>
 
+		<module>metreeca-birt</module>
+
 	</modules>
 
 	<dependencyManagement>
@@ -483,6 +485,7 @@
 							<excludePackageNames> <!-- colon-separated patterns / multi line -->
 								:com.metreeca.gcp:com.metreeca.gcp.*
 								:com.metreeca.open:com.metreeca.open.*
+								:com.metreeca.birt:com.metreeca.birt.*
 							</excludePackageNames>
 
 						</configuration>

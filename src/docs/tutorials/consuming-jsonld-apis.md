@@ -1,52 +1,80 @@
 ---
-title:	        Consuming Model‑Driven REST/JSON-LD APIs
-excerpt:        Hands-on guided tour of model-driven lREST/JSON-LD APIs features
+title:    Consuming Model‑Driven REST/JSON-LD APIs
 ---
 
-This example-driven tutorial introduces the main client-facing features of the Metreeca/Link model-driven REST/JSON framework. Basic familiarity with [linked data](https://www.w3.org/standards/semanticweb/data) concepts and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
+[comment]: <> (excerpt:  Hands-on guided tour of model-driven lREST/JSON-LD APIs features)
 
-In the following sections you will learn how to consume REST APIs published with the framework, leveraging automatic model-driven faceted search, data validation and fine‑grained role‑based access control.
 
-In the tutorial we will work with the linked data server developed in the  [publishing tutorial](publishing-jsonld-apis.md), using a linked data version of the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for cities and countries. 
+This example-driven tutorial introduces the main client-facing features of the Metreeca/Link model-driven REST/JSON
+framework. Basic familiarity with [linked data](https://www.w3.org/standards/semanticweb/data) concepts
+and [REST](https://en.wikipedia.org/wiki/Representational_state_transfer) APIs is required.
 
-The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models: we will walk through the REST API interaction process focusing on the task of consuming the [Product](https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/terms#Product) catalog.
+In the following sections you will learn how to consume REST APIs published with the framework, leveraging automatic
+model-driven faceted search, data validation and fine‑grained role‑based access control.
 
-You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl` or `wget`.
+In the tutorial we will work with the linked data server developed in
+the  [publishing tutorial](publishing-jsonld-apis.md), using a linked data version of
+the [BIRT](http://www.eclipse.org/birt/phoenix/db/) sample dataset, cross-linked to [GeoNames](http://www.geonames.org/)
+entities for cities and countries.
 
-A Maven project with the code for the complete demo app is available on [GitHub](https://github.com/metreeca/demo): clone or [download](https://github.com/metreeca/demo/archive/master.zip) it to your workspace, open in your favorite IDE and launch a local instance of the server. If you are working with IntelliJ IDEA you may want to use the `Demo` pre-configured run configuration to deploy and update the local server instance.
+The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *
+order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models: we will walk through the REST
+API interaction process focusing on the task of consuming
+the [Product](https://demo.metreeca.com/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/birt/terms#Product)
+catalog.
+
+You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl`
+or `wget`.
+
+A Maven project with the code for the complete sample app is available
+on [GitHub](https://github.com/metreeca/link/tree/main/metreeca-birt): [download](https://downgit.github.io/#/home?
+url=https://github.com/metreeca/link/tree/main/metreeca-birt&fileName=metreeca%E2%A7%B8link%20sample)
+it to your workspace, open in your favorite IDE, compile and launch a local instance of the server.
 
 # Model-Driven APIs
 
-The demo linked data server is pre-configured with a small collection of read/write REST APIs able to drive a typical web-based interface like a user-facing [product catalog](https://demo.metreeca.com/apps/shop/).
-
-<p class="warning">The product catalog demo is hosted on a cloud service: it is not expected to provide production-level performance and may experience some delays during workspace initialization.</p>
+The sample linked data server is pre-configured with a small collection of read/write REST APIs able to drive a typical
+web-based interface like a user-facing [product catalog](https://demo.metreeca.com/birt/).
 
 | REST API                                 | Contents                     |
 | :--------------------------------------- | :--------------------------- |
-| [/product-lines/](https://demo.metreeca.com/product-lines/) | Product line faceted catalog |
-| [/product-lines/*](https://demo.metreeca.com/product-lines/classic-cars) | Product line details         |
-| [/products/](https://demo.metreeca.com/products/) | Product faceted catalog      |
-| [/products/*](https://demo.metreeca.com/products/S18_3140) | Product sheets               |
+| [/product-lines/](https://demo.metreeca.com/birt/product-lines/) | Product line faceted catalog |
+| [/product-lines/*](https://demo.metreeca.com/birt/product-lines/classic-cars) | Product line details         |
+| [/products/](https://demo.metreeca.com/birt/products/) | Product faceted catalog      |
+| [/products/*](https://demo.metreeca.com/birt/products/S18_3140) | Product sheets               |
 
-Even a simple application like this would usually require extensive back-end development activities in order to connect to the database and perform coordinated custom queries supporting data retrieval, faceted search, facet population, sorting, pagination and so on. User authorization, validation of updates and enforcing of consistency rules would as well require lenghty and error-prone custom back-end development.
+!!! warning "Sample Performance"
+Linked samples are hosted on a cloud service, are not expected to provide production-level performance and may experience
+some delays during workspace initialization.
 
-Metreeca/Link automates the whole process with a model-driven API engine that compiles high‑level declarative linked data models into read/write REST APIs immediately available for front-end app development, supporting all of the above-mentioned features without custom back-end coding.
+Even a simple application like this would usually require extensive back-end development activities in order to connect
+to the database and perform coordinated custom queries supporting data retrieval, faceted search, facet population,
+sorting, pagination and so on. User authorization, validation of updates and enforcing of consistency rules would as well
+require lenghty and error-prone custom back-end development.
 
-You may learn how to publish your own model-driven linked data APIs walking through the [linked data publishing tutorial](publishing-jsonld-apis.md).
+Metreeca/Link automates the whole process with a model-driven API engine that compiles high‑level declarative linked data
+models into read/write REST APIs immediately available for front-end app development, supporting all of the
+above-mentioned features without custom back-end coding.
+
+You may learn how to publish your own model-driven linked data APIs walking through
+the [linked data publishing tutorial](publishing-jsonld-apis.md).
 
 # Read Operations
 
-Linked data REST APIs published by Metreeca/Link API engine support controlled read access to  RDF contents managed by the underlying graph storage layer.
+Linked data REST APIs published by Metreeca/Link API engine support controlled read access to RDF contents managed by the
+underlying graph storage layer.
 
-User authorization and user-specific content generation are performed according to [role‑based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
+User authorization and user-specific content generation are performed according
+to [role‑based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API
+publishing process.
 
 ## Resources
 
-To retrieve the description of a published resource, as specified by the associated data model, just perform a `GET` operation on the URL identifying the resource.
+To retrieve the description of a published resource, as specified by the associated data model, just perform a `GET`
+operation on the URL identifying the resource.
 
 ```shell
-% curl --include \
-	"http://localhost:8080/products/S18_3140"
+% curl --include "http://localhost:8080/products/S18_3140"
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -68,14 +96,14 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-Metreeca/Link produces and accepts an idiomatic [compacted/framed](../references/jsonld-format.md) JSON-LD format, which streamlines resource descriptions taking into account the constraints described in the associated linked data models.
+Metreeca/Link produces and accepts an idiomatic [compacted/framed](../references/jsonld-format.md) JSON-LD format, which
+streamlines resource descriptions taking into account the constraints described in the associated linked data models.
 
 To include context information, specify the `application/ld+json` MIME type in the `Accept` HTTP request header.
 
 ```shell
-% curl --include \
-	--header "Accept: application/ld+json" \
-	"http://localhost:8080/products/S18_3140"
+% curl --include "http://localhost:8080/products/S18_3140" \
+	--header "Accept: application/ld+json" 
 	
 HTTP/1.1 200 
 Content-Type: application/ld+json;charset=UTF-8
@@ -100,19 +128,20 @@ Content-Type: application/ld+json;charset=UTF-8
 		⋮
 		
 		"stock": {
-            "@id": "https://demo.metreeca.com/terms#stock",
+            "@id": "https://demo.metreeca.com/birt/terms#stock",
             "@type": "http://www.w3.org/2001/XMLSchema#integer"
         }
     }
 }
 ```
 
-Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Reserved properties are included only if the request is properly authenticated.
+Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model driving the target
+REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user.
+Reserved properties are included only if the request is properly authenticated.
 
 ```shell
-% curl --include \
-	--header "Authorization: Bearer secret" \
-	"http://localhost:8080/products/S18_3140"
+% curl --include "http://localhost:8080/products/S18_3140" \
+	--header "Authorization: Bearer secret"
     
 HTTP/1.1 200  
 Content-Type: application/json;charset=UTF-8
@@ -130,11 +159,11 @@ Content-Type: application/json;charset=UTF-8
 
 ## Collections
 
-To retrieve the description of a published collections, as specified by the associated data model, perform a `GET` operation on the URL identifying the collection.
+To retrieve the description of a published collections, as specified by the associated data model, perform a `GET`
+operation on the URL identifying the collection.
 
 ```shell
-% curl --include \
-	"http://localhost:8080/products/"
+% curl --include "http://localhost:8080/products/"
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -164,39 +193,27 @@ Content-Type: application/json;charset=UTF-8
 }
 ```
 
-By default, collections descriptions include a digest description of each collection item, but a concise description of the collection itself may be retrieved using the standard LDP `Prefer` HTTP request header.
-
-```shell
-% curl --include \
-    --header 'Prefer: return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"' \
-    "http://localhost:8080/products/"
-    
-HTTP/1.1 200 
-Preference-Applied: return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"
-Content-Type: application/json;charset=UTF-8
-
-{
-    "id": "/products/",
-}
-```
-
 # Write Operations
 
-Linked data REST APIs published by Metreeca/Link API engine support controlled write access to contents managed by the underlying graph storage layer.
+Linked data REST APIs published by Metreeca/Link API engine support controlled write access to content managed by the
+underlying graph storage layer.
 
-User authorization and user-specific content validation are performed according to [role‑based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API publishing process.
+User authorization and user-specific content validation are performed according
+to [role‑based](../references/spec-language.md#parameters) rules integrated in the linked data model driving the API
+publishing process.
 
 ## Creating Resources
 
-New resources are created by submitting an description to the REST API of a writable collection using the `POST` HTTP method.
+New resources are created by submitting an description to the REST API of a writable collection using the `POST` HTTP
+method.
 
-Note that property values that may be inferred from the associated linked data model, like `rdf:type`, may be safely omitted.
+Note that property values that may be inferred from the associated linked data model, like `rdf:type`, may be safely
+omitted.
 
 ```shell
-% curl --include --request POST \
+% curl --include --request POST "http://localhost:8080/products/" \
     --header 'Authorization: Bearer secret' \
     --header 'Content-Type: application/json' \
-    "http://localhost:8080/products/" \
     --data @- <<EOF
 {
 	"type": "/terms#Product",
@@ -214,17 +231,19 @@ HTTP/2 201 Created
 Location: /products/S10_6
 ```
 
-Note that the `line` property is included in a shorthand form, as it is inferred to be a resource IRI from the associated linked data model.
+Note that the `line` property is included in a shorthand form, as it is inferred to be a resource IRI from the associated
+linked data model.
 
-The newly created resource is immediately available for retrieval at the URL returned in the `Location` HTTP response header.
+The newly created resource is immediately available for retrieval at the URL returned in the `Location` HTTP response
+header.
 
-Submitted data is automatically validated against the constraints specified in the linked data model driving the target REST API. Submiting, for instance, out of range price data would return an error and a structured error report.
+Submitted data is automatically validated against the constraints specified in the linked data model driving the target
+REST API. Submiting, for instance, out of range price data would return an error and a structured error report.
 
 ```shell
-% curl --include --request POST \
+% curl --include --request POST "http://localhost:8080/products/" \
     --header 'Authorization: Bearer secret' \
     --header 'Content-Type: application/json' \
-  "http://localhost:8080/products/" \
     --data @- <<EOF
 {
 	"type": "/terms#Product",
@@ -243,25 +262,26 @@ Location: http://localhost:8080/products/
 Content-Type: application/json;charset=UTF-8
 
 {
-    "price": {
+    "https://example.com/terms#buy": {
         "@errors": [
-            "<9999.0> is not strictly less than or equal to <1000.0>"
+            "-101.0 is not greater than or equal to 0.0"
         ]
     },
-    "buy": {
+    "https://example.com/terms#sell": {
         "@errors": [
-            "<-101.0> is not greater than <0.0>"
+            "9999.0 is not strictly less than 1000.0"
         ]
     }
-}       
+} 
 ```
 
-Submitted data is automatically matched against the allowed envelope specified in the linked data model driving the target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user. Submiting, for instance, buy price data without valid authorization headers would return an error.
+Submitted data is automatically matched against the allowed envelope specified in the linked data model driving the
+target REST API for the [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the current request user.
+Submiting, for instance, buy price data without valid authorization headers would return an error.
 
 ```shell
-% curl --include --request POST \
+% curl --include --request POST "http://localhost:8080/products/" \
     --header 'Content-Type: application/json' \
-   "http://localhost:8080/products/" \
     --data @- <<EOF
 {
 	"type": "/terms#Product",
@@ -276,19 +296,21 @@ Submitted data is automatically matched against the allowed envelope specified i
 EOF
 
 HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="https://example.com/"
 ```
 
 ## Updating Resources
 
-Existing writable RDF resources are updated by submitting an RDF description to their REST API using the `PUT` HTTP method.
+Existing writable RDF resources are updated by submitting an RDF description to their REST API using the `PUT` HTTP
+method.
 
-Note that  server-managed properties like `demo:code` and `demo:stock` are omitted, as they are inherited from the existing description.
+Note that server-managed properties like `demo:code` and `demo:stock` are omitted, as they are inherited from the
+existing description.
 
 ```shell
-% curl --include --request PUT \
+% curl --include --request PUT "http://localhost:8080/products/S18_3140" \
 	--header 'Authorization: Bearer secret' \
 	--header 'Content-Type: application/json' \
-	"http://localhost:8080/products/S18_3140" \
     --data @- <<EOF
 {
    	"type": "/terms#Product",
@@ -307,16 +329,16 @@ HTTP/2 204 No Content
 
 The updated resource is immediately available for retrieval at the existing URL.
 
-As in the case of resource creation, submitted data is automatically validated against constraints and roles specified in the linked data model driving the target REST API.
+As in the case of resource creation, submitted data is automatically validated against constraints and roles specified in
+the linked data model driving the target REST API.
 
 ## Deleting Resources
 
 Existing writable RDF resources are deleted using the `DELETE` HTTP method on their REST API.
 
 ```shell
-% curl --include --request DELETE \
-	--header 'Authorization: Bearer secret' \
-	"http://localhost:8080/products/S18_3140"
+% curl --include --request DELETE "http://localhost:8080/products/S18_3140" \
+	--header 'Authorization: Bearer secret'
 
 HTTP/2 204 No Content
 ```
@@ -325,20 +347,22 @@ The deleted resource is immediately no longer available for retrieval.
 
 # Faceted Search
 
-Metreeca/Link REST APIs engine supports model-driven faceted search and related facet-related queries without additional effort.
+Metreeca/Link REST APIs engine supports model-driven faceted search and related facet-related queries without additional
+effort.
 
-To retrieve a digest description of collection items matching a set of facet filters, perform a `GET` operation on the URL identifying the collection, appending a URL-encoded JSON query object [describing the filters](../references/faceted-search.md) to be applied.
+To retrieve a digest description of collection items matching a set of facet filters, perform a `GET` operation on the
+URL identifying the collection, appending a URL-encoded JSON query
+object [describing the filters](../references/faceted-search.md) to be applied.
 
 ```json
-{	
-  ">= price" : 100, 
-  "vendor": "Classic Metal Creations"
+{
+	">= price": 100,
+	"vendor": "Classic Metal Creations"
 }
 ```
 
 ```shell
-% curl --include \
-    'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations'
+% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations'
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -372,41 +396,39 @@ Note that collection descriptions are omitted from faceted search results.
 
 ## Sorting and Pagination
 
-Faceted search results may be sorted and paginated including [sorting criteria](../references/faceted-search.md#items-query) and [pagination limits](../references/faceted-search.md#items-query) in the JSON query object.
+Faceted search results may be sorted and paginated
+including [sorting criteria](../references/faceted-search.md#items-query)
+and [pagination limits](../references/faceted-search.md#items-query) in the JSON query object.
 
 ```json
 {
-  
-  ">= price" : 100, 
-  "vendor": "Classic Metal Creations",
-
-  "_order":"-price",
-  "_offset":0,
-  "_limit":10
-  
+	">= price": 100,
+	"vendor": "Classic Metal Creations",
+	"_order": "-price",
+	"_offset": 0,
+	"_limit": 10
 }
 ```
 
 ## Facet Stats and Options
 
-The faceted search engine supports also introspection queries for retrieving [facet stats](../references/faceted-search.md#stats-query)  and available [facet options](../references/faceted-search.md#items-query).
+The faceted search engine supports also introspection queries for
+retrieving [facet stats](../references/faceted-search.md#stats-query)  and
+available [facet options](../references/faceted-search.md#items-query).
 
-To retrieve datatype, count and range stats for a facet, taking into account applied filters, specify the target property path in the faceted search query object.
+To retrieve datatype, count and range stats for a facet, taking into account applied filters, specify the target property
+path in the faceted search query object.
 
 ```json
 {
-    
-	"_stats": "price"
-
-	">= price" : 100, 
-	"vendor": "Classic Metal Creations",
-  
+	"_stats": "price",
+	">= price": 100,
+	"vendor": "Classic Metal Creations"
 }
 ```
 
 ```shell
-% curl --include \
-    'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_stats=price'
+% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_stats=price'
 
 HTTP/2 200 OK
 Content-Type: application/json
@@ -427,22 +449,19 @@ Content-Type: application/json
 }
 ```
 
-To list available options and counts for a facet, taking into account applied filters, specify the target property path in the faceted search query object.
+To list available options and counts for a facet, taking into account applied filters, specify the target property path
+in the faceted search query object.
 
 ```json
 {
-	
-    "_terms": "line"
-    
-  	">= price" : 100, 
-  	"vendor": "Classic Metal Creations",
-  
+	"_terms": "line",
+	">= price": 100,
+	"vendor": "Classic Metal Creations"
 }
 ```
 
 ```shell
-% curl --include \
-    'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_terms=line'
+% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_terms=line'
 
 HTTP/2 200 OK
 Content-Type: application/json
@@ -470,3 +489,16 @@ Content-Type: application/json
 
 Labels and comments for the selected options are also retrieved to support facet visualization.
 
+# Localization
+
+Multi-lingual content retrieval is fully supported,
+with [optional](publishing-jsonld-apis.md#localization) [compact rendering](https://www.w3.org/TR/json-ld11/#language-indexing)
+.
+
+Retrieved localizations may be limited to a predefined set of language tags at query time using the `Accept-Language`
+HTTP header, like for instance:
+
+```http request
+GET http://localhost:8080/products/S18_3140
+Accept-Language: en, it, de
+```

@@ -1,11 +1,15 @@
 ---
-title:      Shape Specification Language Reference excerpt:    Shape-based data modelling language semantics and
-components
+title:      Shape Specification Language Reference
 ---
 
-Most framework services are driven by declarative linked data models defined using a [shape](#shapes)-based specification language.
+[comment]: <> (excerpt:    Shape-based data modelling language semantics and components)
 
-Models are [programmaticaly](../tutorials/publishing-jsonld-apis.md) built using a Java‑based DSL and can eventually automate a range of different tasks in the lifecycle of linked data REST APIs.
+
+Most framework services are driven by declarative linked data models defined using a [shape](#shapes)-based specification
+language.
+
+Models are [programmaticaly](../tutorials/publishing-jsonld-apis.md) built using a Java‑based DSL and can eventually
+automate a range of different tasks in the lifecycle of linked data REST APIs.
 
 | task              | shape role                                                   |
 | ----------------- | ------------------------------------------------------------ |
@@ -84,7 +88,7 @@ Composite shapes specifying logical combinations of shapes.
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [guard](../javadocs/com/metreeca/json/shapes/Guard.html)(axis, value, …) | the focus set is consistent with this shape only if the value of an externally assigned [axis variable](../javadocs/com/metreeca/json/Shape.html#redact-java.util.function.Function...-) is included in a given set of target values |
+| [guard](../javadocs/com/metreeca/json/shapes/Guard.html)(axis, value, …) | the focus set is consistent with this shape only if the value of an externally assigned [axis variable](../javadocs/com/metreeca/json/Shape.html#redact-java.lang.String-java.util.Collection-) is included in a given set of target values |
 | [when](../javadocs/com/metreeca/json/shapes/When.html)([test](../javadocs/com/metreeca/json/Shape.html),[pass](../javadocs/com/metreeca/json/Shape.html) [, [fail](../javadocs/com/metreeca/json/Shape.html)]) | the focus set is consistent either with a `pass` shape, if consistent also with a `test` shape, or with a `fail` shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
 | [and](../javadocs/com/metreeca/json/shapes/And.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with all shapes in a given target set |
 | [or](../javadocs/com/metreeca/json/shapes/Or.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
@@ -123,12 +127,12 @@ Parametric guards for the [task](../javadocs/com/metreeca/json/shapes/Guard.html
 
 | shorthand                                                    | HTTP/S method   | usage context                                                |
 | ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| [create](../javadocs/com/metreeca/json/shapes/Guard.html#create--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | POST            | resource creation                                            |
-| [relate](../javadocs/com/metreeca/json/shapes/Guard.html#relate--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | GET             | resource retrieval                                           |
-| [update](../javadocs/com/metreeca/json/shapes/Guard.html#update--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | PUT             | resource updating                                            |
-| [delete](../javadocs/com/metreeca/json/shapes/Guard.html#delete--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | DELETE          | resouce deletion                                             |
-| [client](../javadocs/com/metreeca/json/shapes/Guard.html#client--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
-| [server](../javadocs/com/metreeca/json/shapes/Guard.html#server--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
+| [create](../javadocs/com/metreeca/json/shapes/Guard.html#create-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | POST            | resource creation                                            |
+| [relate](../javadocs/com/metreeca/json/shapes/Guard.html#relate-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | GET             | resource retrieval                                           |
+| [update](../javadocs/com/metreeca/json/shapes/Guard.html#update-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | PUT             | resource updating                                            |
+| [delete](../javadocs/com/metreeca/json/shapes/Guard.html#delete-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | DELETE          | resouce deletion                                             |
+| [client](../javadocs/com/metreeca/json/shapes/Guard.html#client-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
+| [server](../javadocs/com/metreeca/json/shapes/Guard.html#server-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
 
 ## View Axis
 
@@ -136,8 +140,8 @@ Parametric guards for the [view](../javadocs/com/metreeca/json/shapes/Guard.html
 
 | shorthand                                                    | usage context                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [digest](../javadocs/com/metreeca/json/shapes/Guard.html#digest--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | short resource description, e.g. inside search result sets   |
-| [detail](../javadocs/com/metreeca/json/shapes/Guard.html#detail--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | detailed resource description, e.g. inside advanced resource utilities |
+| [digest](../javadocs/com/metreeca/json/shapes/Guard.html#digest-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | short resource description, e.g. inside search result sets   |
+| [detail](../javadocs/com/metreeca/json/shapes/Guard.html#detail-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | detailed resource description, e.g. inside advanced resource utilities |
 
 ## Mode Axis
 
@@ -145,5 +149,5 @@ Parametric guards for the [mode](../javadocs/com/metreeca/json/shapes/Guard.html
 
 | shorthand                                                    | usage pattern                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [convey](../javadocs/com/metreeca/json/shapes/Guard.html#convey--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when validating incoming data or extracting outgoing data |
-| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter--)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when selecting resources to be processed |
+| [convey](../javadocs/com/metreeca/json/shapes/Guard.html#convey-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when validating incoming data or extracting outgoing data |
+| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when selecting resources to be processed |
