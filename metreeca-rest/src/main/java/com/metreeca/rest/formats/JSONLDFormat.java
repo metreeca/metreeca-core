@@ -190,7 +190,15 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 								))
 						);
 
-					} catch ( final UnsupportedEncodingException|JsonException e ) {
+					} catch ( final JsonException e ) {
+
+						if ( e.getCause() instanceof IOException ) {
+							throw new UncheckedIOException((IOException)e.getCause());
+						}
+
+						return Left(status(BadRequest, e));
+
+					} catch ( final UnsupportedEncodingException e ) {
 
 						return Left(status(BadRequest, e));
 
