@@ -60,16 +60,15 @@ final class GraphStats extends GraphFacts {
 
 		final Shape filter=shape
 				.filter(resource)
-				.resolve(resource)
-				.label(this::label);
+				.resolve(resource); // .filter() may introduce focus values › resolve afterwards
 
 		final Shape convey=shape
 				.convey()
-				.resolve(resource)
-				.label(this::label);
+				.resolve(resource);
 
-		final Shape follow=path(convey, path);
-		final String hook=hook(follow, path);
+		final Shape select=and(filter, path(convey, path)).label(this::label); // requires path to exist in convey
+
+		final String hook=hook(select, path);
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
@@ -102,7 +101,7 @@ final class GraphStats extends GraphFacts {
 
 									space(where(
 
-											space(tree(and(filter, follow), true)),
+											space(tree(select, true)),
 
 											space(bind("type", is(
 													isBlank(var(hook)),

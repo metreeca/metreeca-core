@@ -29,8 +29,7 @@ import java.util.Collection;
 import java.util.function.Supplier;
 
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Values.item;
-import static com.metreeca.json.Values.term;
+import static com.metreeca.json.Values.*;
 import static com.metreeca.json.queries.Terms.terms;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -38,6 +37,7 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Link.link;
+import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.rdf4j.assets.GraphFactsTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.graph;
 
@@ -140,16 +140,17 @@ final class GraphTermsTest {
 		)));
 	}
 
+
 	@Nested final class AnchoringPaths {
 
 		@Test void testReportUnknownSteps() {
 			exec(() -> {
 
-				//assertThatIllegalArgumentException().isThrownBy(() -> query(terms(
-				//		field(term("country")),
-				//		singletonList(term("unknown")),
-				//		0, 0
-				//)));
+				assertThatIllegalArgumentException().isThrownBy(() -> query(terms(
+						field(term("country")),
+						singletonList(term("unknown")),
+						0, 0
+				)));
 
 				assertThatIllegalArgumentException().isThrownBy(() -> query(terms(
 						field(term("country")),
@@ -160,39 +161,91 @@ final class GraphTermsTest {
 			});
 		}
 
+		@Test void testReportFilteringSteps() {
+			exec(() -> assertThatIllegalArgumentException().isThrownBy(() -> query(terms(
+
+					and(
+							filter(field(term("country"))),
+							field(term("city"))
+					),
+
+					singletonList(term("country")),
+
+					0, 0
+			))));
+		}
+
+		@Test void testTraversingLink() {
+			exec(() -> assertThat(query(terms(
+
+					and(
+							filter(clazz(term("Alias"))),
+							link(OWL.SAMEAS, field(term("country")))
+					),
+
+					singletonList(term("country")),
+
+					0, 0
+
+			)).stream().filter(s -> !s.getPredicate().equals(RDFS.LABEL)).collect(toList())).isIsomorphicTo(graph(
+
+					"construct { \n"
+							+"\n"
+							+"\t<> :terms [\n"
+							+"\t\t:value ?value;\n"
+							+"\t\t:count ?count\n"
+							+"\t].\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t{ select (?country as ?value) (count(distinct ?alias) as ?count) {\n"
+							+"\n"
+							+"\t\t?alias a :Alias; owl:sameAs/:country ?country\n"
+							+"\n"
+							+"\t} group by ?country }\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
+		@Test void testFiltered() {
+			exec(() -> assertThat(query(terms(
+
+					and(
+							filter(clazz(term("Employee"))),
+							filter(field(term("seniority"), minInclusive(integer(3)))),
+							field(term("seniority"))
+					),
+
+					singletonList(term("seniority")),
+
+					0, 0
+
+			)).stream().filter(s -> !s.getPredicate().equals(RDFS.LABEL)).collect(toList())).isIsomorphicTo(graph(
+
+					"construct { \n"
+							+"\n"
+							+"\t<> :terms [\n"
+							+"\t\t:value ?value;\n"
+							+"\t\t:count ?count\n"
+							+"\t].\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\t{ select (?seniority as ?value) (count(distinct ?employee) as ?count) {\n"
+							+"\n"
+							+"\t\t?employee a :Employee; :seniority ?seniority filter (?seniority >= 3)\n"
+							+"\n"
+							+"\t} group by ?seniority }\n"
+							+"\n"
+							+"}"
+
+			)));
+
+		}
+
+
 	}
 
-	@Test void testAnchoringPathTraversingLink() {
-		exec(() -> assertThat(query(terms(
-
-				and(
-						filter(clazz(term("Alias"))),
-						link(OWL.SAMEAS, field(term("country")))
-				),
-
-				singletonList(term("country")),
-
-				0, 0
-
-		)).stream().filter(s -> !s.getPredicate().equals(RDFS.LABEL)).collect(toList())).isIsomorphicTo(graph(
-
-				"construct { \n"
-						+"\n"
-						+"\t<> :terms [\n"
-						+"\t\t:value ?value;\n"
-						+"\t\t:count ?count\n"
-						+"\t].\n"
-						+"\n"
-						+"} where {\n"
-						+"\n"
-						+"\t{ select (?country as ?value) (count(distinct ?alias) as ?count) {\n"
-						+"\n"
-						+"\t\t?alias a :Alias; owl:sameAs/:country ?country\n"
-						+"\n"
-						+"\t} group by ?country }\n"
-						+"\n"
-						+"}"
-
-		)));
-	}
 }

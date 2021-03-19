@@ -37,6 +37,7 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Link.link;
+import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.rdf4j.assets.GraphFactsTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.graph;
 
@@ -169,38 +170,96 @@ final class GraphStatsTest {
 			});
 		}
 
+		@Test void testReportFilteringSteps() {
+			exec(() -> assertThatIllegalArgumentException().isThrownBy(() -> query(stats(
+
+					and(
+							filter(field(term("country"))),
+							field(term("city"))
+					),
+
+					singletonList(term("country")),
+
+					0, 0
+			))));
+		}
+
+		@Test void testTraversingLink() {
+			exec(() -> assertThat(query(stats(
+
+					and(
+							filter(clazz(term("Alias"))),
+							link(OWL.SAMEAS, field(term("country")))
+					),
+
+					singletonList(term("country")),
+
+					0, 0
+
+			)).stream().filter(s -> !s.getPredicate().equals(RDFS.LABEL)).collect(toList())).isIsomorphicTo(graph(
+
+					"construct { \n"
+							+"\n"
+							+"\t<> :count ?count; :min ?min; :max ?max; :stats :iri.\n"
+							+"\t:iri :count ?count; :min ?min; :max ?max.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\tselect (count(distinct ?alias) as ?count) (min(?country) as ?min) (max(?country) as "
+							+"?max) "
+							+"{\n"
+							+"\n"
+							+"\t\t?alias a :Alias; owl:sameAs/:country ?country\n"
+							+"\n"
+							+"\t}\n"
+							+"\n"
+							+"}"
+
+			)));
+		}
+
+		@Test void testFiltered() {
+			exec(() -> assertThat(query(stats(
+
+					and(
+							filter(clazz(term("Employee"))),
+							filter(field(term("seniority"), minInclusive(integer(3)))),
+							field(term("seniority"))
+					),
+
+					singletonList(term("seniority")),
+
+					0, 0
+
+			)).stream().filter(s -> !s.getPredicate().equals(RDFS.LABEL)).collect(toList())).isIsomorphicTo(graph(
+
+					"construct { \n"
+							+"\n"
+							+"\t<> :count ?count; :min ?min; :max ?max; :stats xsd:integer.\n"
+							+"\txsd:integer :count ?count; :min ?min; :max ?max.\n"
+							+"\n"
+							+"} where {\n"
+							+"\n"
+							+"\tselect \n"
+							+"\n"
+							+"\t\t(count(distinct ?employee) as ?count)\n"
+							+"\t\t(min(?seniority) as ?min)\n"
+							+"\t\t(max(?seniority) as "
+							+"?max)\n"
+							+"\t\t\n"
+							+"\twhere "
+							+"{\n"
+							+"\n"
+							+"\t\t?employee a :Employee; :seniority ?seniority filter (?seniority >= 3)\n"
+							+"\n"
+							+"\t}\n"
+							+"\n"
+							+"}"
+
+			)));
+
+		}
+
 	}
 
-	@Test void testAnchoringPathTraversingLink() {
-		exec(() -> assertThat(query(stats(
-
-				and(
-						filter(clazz(term("Alias"))),
-						link(OWL.SAMEAS, field(term("country")))
-				),
-
-				singletonList(term("country")),
-
-				0, 0
-
-		)).stream().filter(s -> !s.getPredicate().equals(RDFS.LABEL)).collect(toList())).isIsomorphicTo(graph(
-
-				"construct { \n"
-						+"\n"
-						+"\t<> :count ?count; :min ?min; :max ?max; :stats :iri.\n"
-						+"\t:iri :count ?count; :min ?min; :max ?max.\n"
-						+"\n"
-						+"} where {\n"
-						+"\n"
-						+"\tselect (count(distinct ?alias) as ?count) (min(?country) as ?min) (max(?country) as ?max) "
-						+"{\n"
-						+"\n"
-						+"\t\t?alias a :Alias; owl:sameAs/:country ?country\n"
-						+"\n"
-						+"\t}\n"
-						+"\n"
-						+"}"
-
-		)));
-	}
 }
