@@ -16,9 +16,6 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.formats.InputFormat;
-import com.metreeca.rest.formats.TextFormat;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -26,11 +23,15 @@ import java.io.ByteArrayInputStream;
 import java.util.function.Function;
 
 import static com.metreeca.rest.MessageAssert.assertThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Collections.emptySet;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.TextFormat.text;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptySet;
 
 
 final class MessageTest {
@@ -116,10 +117,10 @@ final class MessageTest {
 		@Test void testBodyCaching() {
 
 			final Message<?> message=message()
-					.body(InputFormat.input(), () -> new ByteArrayInputStream("test".getBytes(UTF_8)));
+					.body(input(), () -> new ByteArrayInputStream("test".getBytes(UTF_8)));
 
 			final Function<Message<?>, String> accessor=m -> m
-					.body(TextFormat.text()).fold(error -> fail("missing test body"), value -> value);
+					.body(text()).fold(error -> fail("missing test body"), value -> value);
 
 			assertSame(accessor.apply(message), accessor.apply(message));
 		}

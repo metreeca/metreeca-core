@@ -54,7 +54,7 @@ public abstract class Message<T extends Message<T>> {
 
 	private final Map<Supplier<?>, Object> attributes=new LinkedHashMap<>();
 	private final Map<String, List<String>> headers=new LinkedHashMap<>();
-	private final Map<Format<?>, Object> bodies=new HashMap<>();
+	private final Map<Format<?>, Either<MessageException, ?>> bodies=new HashMap<>();
 
 
 	private T self() { return (T)this; }
@@ -487,16 +487,7 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null body");
 		}
 
-		final V cached=(V)bodies.get(format);
-
-		return cached != null ? Right(cached) : format.decode(this).map(value -> {
-
-			bodies.put(format, value);
-
-			return value;
-
-		});
-
+		return (Either<MessageException, V>)bodies.computeIfAbsent(format, key -> format.decode(this));
 	}
 
 	/**
@@ -523,7 +514,7 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		bodies.put(format, value);
+		bodies.put(format, Right(value));
 
 		return format.encode(self(), value);
 	}
@@ -551,15 +542,22 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null mapper");
 		}
 
-		return Optional
 
-				.ofNullable((V)bodies.computeIfPresent(format, (key, value) -> requireNonNull(
-						mapper.apply((V)value), "null mapper return value"
-				)))
+		Optional
 
-				.map(value -> format.encode(self(), value))
+				.ofNullable(bodies.computeIfPresent(format, (key, value) -> value.map(body -> requireNonNull(
 
-				.orElse(self());
+						mapper.apply((V)body), "null mapper return value"
+
+				))))
+
+				.ifPresent(result -> result.map(body ->
+
+						format.encode(self(), (V)body)
+
+				));
+
+		return self();
 	}
 
 
