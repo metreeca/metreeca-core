@@ -143,7 +143,8 @@ public final class Creator extends Delegator {
 
 			return handler.handle(request
 					.path(request.path()+name)
-					.map(jsonld(), model -> rewrite(target, source, model)));
+					.map(jsonld(), model -> rewrite(target, source, model))
+			);
 		};
 	}
 

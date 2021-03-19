@@ -66,7 +66,7 @@ public final class Updater extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(((Handler)engine::browse)
+		delegate(((Handler)engine::update)
 
 				.with(engine)
 				.with(throttler(Update, Detail))
