@@ -50,10 +50,17 @@ import static java.util.stream.Collectors.joining;
  */
 public final class Values {
 
+	private static final String IRIScheme="(?<schemeall>(?<scheme>[-+\\w]+):)";
+	private static final String IRIHost="(?<hostall>//(?<host>[^/?#]*))";
+	private static final String IRIQuery="(?<queryall>\\?(?<query>[^#]*))";
+	private static final String IRIFragment="(?<fragmentall>#(?<fragment>.*))";
+	private static final String IRIPath="(?<pathall>(?<path>[^?#]*)"+IRIQuery+"?"+IRIFragment+"?)";
+
+
 	/**
 	 * A pattern matching absolute IRIs.
 	 */
-	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[a-zA-Z][-+.a-zA-Z0-9]*:.+$");
+	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^"+IRIScheme+IRIHost+"?"+IRIPath+"$");
 
 	/**
 	 * A pattern matching IRI components.
@@ -61,15 +68,7 @@ public final class Values {
 	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
 	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
-	public static final Pattern IRIPattern=Pattern.compile("^"
-			+"(?<schemeall>(?<scheme>[^:/?#]+):)?"
-			+"(?<hostall>//(?<host>[^/?#]*))?"
-			+"(?<pathall>"
-			+"(?<path>[^?#]*)"
-			+"(?<queryall>\\?(?<query>[^#]*))?"
-			+"(?<fragmentall>#(?<fragment>.*))?"
-			+")$"
-	);
+	public static final Pattern IRIPattern=Pattern.compile("^"+IRIScheme+"?"+IRIHost+"?"+IRIPath+"$");
 
 
 	private static final Pattern NewlinePattern=Pattern.compile("\n");
