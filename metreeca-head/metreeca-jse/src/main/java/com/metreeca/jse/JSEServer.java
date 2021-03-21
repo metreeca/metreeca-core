@@ -21,15 +21,20 @@ import com.metreeca.rest.assets.Logger;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import org.eclipse.rdf4j.model.IRI;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.*;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 
+import static com.metreeca.json.Values.AbsoluteIRIPattern;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.rest.Request.HEAD;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Xtream.guarded;
@@ -37,7 +42,7 @@ import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
-import static java.util.Arrays.stream;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 
@@ -58,17 +63,37 @@ import static java.util.function.Function.identity;
  */
 public final class JSEServer {
 
-	private final String root="/"; // must end with slash
+	private InetSocketAddress address=new InetSocketAddress("localhost", 8080);
+
+	private String base="";
+	private String root="/";
 
 	private final int backlog=128;
 	private final int delay=0;
-
-	private InetSocketAddress address=new InetSocketAddress("localhost", 8080);
 
 	private final Context context=new Context();
 
 
 	private static Supplier<Handler> handler() { return () -> request -> request.reply(identity()); }
+
+
+	private static String normalize(final String path) {
+		return Optional.of(path)
+				.map(p -> p.startsWith("/") ? p : "/"+p)
+				.map(p -> p.endsWith("/") ? p : p+"/")
+				.orElse(path);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private String base(final String host) {
+		return base.isEmpty() ? format("http://%s%s", Optional.ofNullable(host).orElse("localhost"), root) : base;
+	}
+
+	private String path(final String path) {
+		return Optional.ofNullable(path).orElse("/").substring(root.length()-1);
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,29 +140,57 @@ public final class JSEServer {
 		return this;
 	}
 
+
 	/**
-	 * Configures subsystem logging level.
+	 * Configures the context path.
 	 *
-	 * @param level the loggin level to be configured
-	 * @param names fully-qualified names of packages/classes whose logging level is to be configured; empty for root
-	 *              logger
+	 * @param context the context path for the root resource of this server; if missing, leading and trailing slashes
+	 *                will be automatically added
 	 *
 	 * @return this server
 	 *
-	 * @throws NullPointerException if either {@code level} or {@code names} is null or {@code names} contains null
-	 *                              elements
+	 * @throws NullPointerException if {@code context} is null
 	 */
-	public JSEServer logging(final Logger.Level level, final String... names) {
+	public JSEServer context(final IRI context) {
 
-		if ( level == null ) {
-			throw new NullPointerException("null level");
+		if ( context == null ) {
+			throw new NullPointerException("null context");
 		}
 
-		if ( names == null || stream(names).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null names");
+		final Matcher matcher=AbsoluteIRIPattern.matcher(context.stringValue());
+
+		if ( !matcher.matches() ) {
+			throw new IllegalArgumentException(format("illegal context IRI %s", format(context)));
 		}
 
-		level.log(names);
+		final String scheme=matcher.group("schemeall");
+		final String host=matcher.group("hostall");
+		final String path=normalize(matcher.group("path"));
+
+		this.base=scheme+host+path;
+		this.root=path;
+
+		return this;
+	}
+
+	/**
+	 * Configures the context path.
+	 *
+	 * @param context the context path for the root resource of this server; if missing, leading and trailing slashes
+	 *                will be automatically added
+	 *
+	 * @return this server
+	 *
+	 * @throws NullPointerException if {@code context} is null
+	 */
+	public JSEServer context(final String context) {
+
+		if ( context == null ) {
+			throw new NullPointerException("null context");
+		}
+
+		this.base="";
+		this.root=normalize(context);
 
 		return this;
 	}
@@ -192,7 +245,7 @@ public final class JSEServer {
 
 			server.start();
 
-			logger.info(this, String.format("server listening at <http://%s:%d/>",
+			logger.info(this, format("server listening at <http://%s:%d/>",
 					address.getHostString(), address.getPort()
 			));
 
@@ -208,13 +261,10 @@ public final class JSEServer {
 
 		final URI uri=exchange.getRequestURI();
 
-		final String base=String.format("http://%s%s", exchange.getRequestHeaders().getFirst("Host"), root);
-		final String path=Optional.ofNullable(uri.getPath()).orElse("/").substring(root.length()-1);
-
 		return new Request()
 				.method(exchange.getRequestMethod())
-				.base(base)
-				.path(path)
+				.base(base(exchange.getRequestHeaders().getFirst("Host")))
+				.path(path(uri.getPath()))
 				.query(Optional.ofNullable(uri.getRawQuery()).orElse(""))
 				.headers(exchange.getRequestHeaders())
 				.body(input(), exchange::getRequestBody);
