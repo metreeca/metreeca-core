@@ -8,7 +8,7 @@ Its engine automatically converts high-level declarative JSON-LD models into ext
 
 Metreeca/Link is server and storage-agnostic and may be easily connected to your solution of choice.
 
-# Getting started
+# Getting Started
 
 1. Add the framework to your Maven configuration
 

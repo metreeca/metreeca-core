@@ -350,7 +350,7 @@ public final class Request extends Message<Request> {
 		}
 
 		if ( !base.endsWith("/") ) {
-			throw new IllegalArgumentException("missing trailing / in base IRI");
+			throw new IllegalArgumentException("missing trailing slash in base IRI");
 		}
 
 		this.base=base;
