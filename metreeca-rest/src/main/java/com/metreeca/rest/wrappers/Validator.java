@@ -18,13 +18,16 @@ package com.metreeca.rest.wrappers;
 
 import com.metreeca.rest.*;
 
-import javax.json.Json;
 import java.util.*;
 import java.util.function.Function;
 
+import javax.json.Json;
+
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnprocessableEntity;
+
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
 
@@ -49,6 +52,11 @@ public final class Validator implements Wrapper {
 	 * @throws NullPointerException if {@code rules} is null or contains null values
 	 */
 	@SafeVarargs public static Validator validator(final Function<Request, Collection<String>>... rules) {
+
+		if ( rules == null || stream(rules).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null rules");
+		}
+
 		return new Validator(asList(rules));
 	}
 
@@ -67,12 +75,8 @@ public final class Validator implements Wrapper {
 	 */
 	public static Validator validator(final Collection<Function<Request, Collection<String>>> rules) {
 
-		if ( rules == null ) {
+		if ( rules == null || rules.stream().anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null rules");
-		}
-
-		if ( rules.contains(null) ) {
-			throw new NullPointerException("null rule");
 		}
 
 		return new Validator(rules);
