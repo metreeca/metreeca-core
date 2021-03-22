@@ -25,6 +25,7 @@ import static com.metreeca.rest.Response.MethodNotAllowed;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.handlers.Publisher.publisher;
 import static com.metreeca.rest.handlers.Publisher.variants;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 final class PublisherTest {
@@ -48,7 +49,7 @@ final class PublisherTest {
 
 	}
 
-	@Test void testAcceptOnlyGETRequests() {
+	@Test void testRejectUnsafeRequestsRequests() {
 		publisher(getClass().getResource("/"))
 
 				.handle(new Request().method(POST))

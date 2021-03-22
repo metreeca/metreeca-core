@@ -16,7 +16,7 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.Format;
+import com.metreeca.rest.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -30,10 +30,11 @@ import java.util.stream.Stream;
 
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.NotFound;
-import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.Request.HEAD;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.handlers.Router.router;
+
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
@@ -170,10 +171,62 @@ public final class Publisher extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Publisher(final Path root) {
-		delegate(router().get(request -> variants(request.path())
+	private String fallback="";
 
-				.map(path -> root.getRoot().relativize(root.getFileSystem().getPath(path)))
+
+	private Publisher(final Path root) {
+		delegate(router()
+
+				.head(request -> handle(request, root))
+				.get(request -> handle(request, root))
+
+		);
+	}
+
+
+	/**
+	 * Configures the fallback path.
+	 *
+	 * @param path the path of the resource to be served for {@linkplain Request#route() route} requests that don't
+	 *                match
+	 *             any available resource path; ignored if empty
+	 *
+	 * @return this publisher
+	 *
+	 * @throws NullPointerException if {@code path} is null
+	 */
+	public Publisher fallback(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		this.fallback=path;
+
+		return this;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Future<Response> handle(final Request request, final Path root) {
+		return reply(request, root, request.path())
+
+				.orElseGet(() -> Optional.of(fallback)
+
+						.filter(path -> !path.isEmpty() && request.route())
+
+						.flatMap(path -> reply(request, root, path))
+
+						.orElseGet(() -> request.reply(status(NotFound)))
+
+				);
+	}
+
+	private Optional<Future<Response>> reply(final Request request, final Path root, final String path) {
+		return variants(path)
+
+				.map(variant -> root.getRoot().relativize(root.getFileSystem().getPath(variant)))
 				.map(root::resolve)
 				.map(Path::normalize) // prevent tree walking attacks
 
@@ -182,19 +235,29 @@ public final class Publisher extends Delegator {
 
 				.findFirst()
 
-				.map(file -> request.reply(function(response -> response.status(OK)
+				.map(file -> request.reply(function(response -> {
 
-						.header("Content-Type", Format.mime(file.getFileName().toString()))
-						.header("Content-Length", String.valueOf(Files.size(file)))
-						.header("ETag", format("\"%s\"", Files.getLastModifiedTime(file).toMillis()))
+					final String mime=Format.mime(file.getFileName().toString());
+					final String length=String.valueOf(Files.size(file));
+					final String etag=format("\"%s\"", Files.getLastModifiedTime(file).toMillis());
 
-						.body(output(), consumer(output -> Files.copy(file, output)))
+					return request.headers("If-None-Match").stream().anyMatch(etag::equals)
 
-				)))
+							? response.status(NotModified)
 
-				.orElseGet(() -> request.reply(status(NotFound)))
+							: request.method().equals(HEAD)
 
-		));
+							? response.status(OK)
+							.header("Content-Type", mime)
+							.header("ETag", etag)
+
+							: response.status(OK)
+							.header("Content-Type", mime)
+							.header("Content-Length", length)
+							.header("ETag", etag)
+							.body(output(), consumer(output -> Files.copy(file, output)));
+
+				})));
 	}
 
 

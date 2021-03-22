@@ -16,20 +16,7 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.assets.Loader;
-
 import java.util.function.Predicate;
-
-import static com.metreeca.json.Values.md5;
-import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Format.mime;
-import static com.metreeca.rest.Request.*;
-import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.assets.Loader.loader;
-import static com.metreeca.rest.formats.DataFormat.data;
-
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
 
 
 /**
@@ -97,68 +84,6 @@ import static java.util.Arrays.asList;
 		}
 
 		return request -> (test.test(request) ? pass : fail).handle(request);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a static fallback handler.
-	 *
-	 * @param path the path of the {@linkplain Loader shared resource} to be served as fallback content
-	 *
-	 * @return a new GET handler unconditionally serving the content of the shared resource retrieved from {@code path}
-	 * using the default {@linkplain Loader loader}.
-	 *
-	 * @throws NullPointerException if {@code path} is null
-	 */
-	public static Handler fallback(final String path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		final byte[] data=asset(loader())
-				.load(path)
-				.map(Xtream::data)
-				.orElseThrow(() -> new RuntimeException(format("missing <%s> resource", path)));
-
-		final String mime=mime(path);
-		final String length=String.valueOf(data.length);
-		final String etag=format("\"%s\"", md5(data));
-
-		return request -> request.reply(response -> {
-
-			final String method=request.method();
-
-			return (method.equals(GET) || method.equals(HEAD))
-					&& request.header("If-None-Match").filter(etag::equals).isPresent()
-
-					? response
-					.status(NotModified)
-
-					: method.equals(GET)
-
-					? response
-					.status(OK)
-					.header("Content-Type", mime)
-					.header("Content-Length", length)
-					.header("ETag", etag)
-					.body(data(), data)
-
-					: method.equals(HEAD)
-
-					? response
-					.status(OK)
-					.header("Content-Type", mime)
-					.header("Content-Length", length)
-					.header("ETag", etag)
-
-					: response
-					.status(method.equals(OPTIONS) ? OK : MethodNotAllowed)
-					.headers("Allow", asList(OPTIONS, HEAD, GET));
-
-		});
 	}
 
 
