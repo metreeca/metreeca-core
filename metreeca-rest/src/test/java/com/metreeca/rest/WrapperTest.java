@@ -23,7 +23,7 @@ import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.Response.Unauthorized;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.Wrapper.restricted;
+import static com.metreeca.rest.Wrapper.roles;
 
 
 final class WrapperTest {
@@ -46,19 +46,8 @@ final class WrapperTest {
 
 	@Nested final class Restricted {
 
-		@Test void testAcceptedPublic() {
-			exec(() -> restricted()
-
-					.wrap(handler())
-
-					.handle(request())
-
-					.accept(response -> assertThat(response).hasStatus(OK))
-			);
-		}
-
 		@Test void testAccepted() {
-			exec(() -> restricted("x", "y")
+			exec(() -> roles("x", "y")
 
 					.wrap(handler())
 
@@ -69,11 +58,22 @@ final class WrapperTest {
 		}
 
 		@Test void testRejected() {
-			exec(() -> restricted("x", "y")
+			exec(() -> roles("x", "y")
 
 					.wrap(handler())
 
 					.handle(request().roles("z"))
+
+					.accept(response -> assertThat(response).hasStatus(Unauthorized))
+			);
+		}
+
+		@Test void testRejectedEmpty() {
+			exec(() -> roles()
+
+					.wrap(handler())
+
+					.handle(request())
 
 					.accept(response -> assertThat(response).hasStatus(Unauthorized))
 			);
