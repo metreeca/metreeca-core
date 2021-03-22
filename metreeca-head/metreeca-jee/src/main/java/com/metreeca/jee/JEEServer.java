@@ -20,6 +20,7 @@ import com.metreeca.rest.*;
 import com.metreeca.rest.assets.Loader;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
@@ -144,7 +145,15 @@ public abstract class JEEServer implements Filter {
 				throw new NullPointerException("null path");
 			}
 
-			return Optional.ofNullable(context.getResourceAsStream(path));
+			try {
+
+				return Optional.ofNullable(context.getResource(path));
+
+			} catch ( final MalformedURLException e ) {
+
+				throw new IllegalArgumentException(e);
+
+			}
 
 		};
 	}
