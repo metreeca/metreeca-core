@@ -32,6 +32,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.metreeca.json.Values.AbsoluteIRIPattern;
 import static com.metreeca.json.Values.format;
@@ -63,7 +64,17 @@ import static java.util.function.Function.identity;
  */
 public final class JSEServer {
 
-	private InetSocketAddress address=new InetSocketAddress("localhost", 8080);
+	private static final String DefaultHost="localhost";
+	private static final int DefaultPort=8080;
+
+	private static final Pattern AddressPattern=Pattern.compile(
+			"(?<host>^|[-+._a-zA-Z0-9]*[-+._a-zA-Z][-+._a-zA-Z0-9]*)(?:^:?|:)(?<port>\\d{1,4}|$)"
+	);
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private InetSocketAddress address=new InetSocketAddress(DefaultHost, DefaultPort);
 
 	private String base="";
 	private String root="/";
@@ -88,7 +99,7 @@ public final class JSEServer {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String base(final String host) {
-		return base.isEmpty() ? format("http://%s%s", Optional.ofNullable(host).orElse("localhost"), root) : base;
+		return base.isEmpty() ? format("http://%s%s", Optional.ofNullable(host).orElse(DefaultHost), root) : base;
 	}
 
 	private String path(final String path) {
@@ -116,6 +127,46 @@ public final class JSEServer {
 		}
 
 		context.set(handler(), () -> requireNonNull(factory.apply(context), "null handler"));
+
+		return this;
+	}
+
+
+	/**
+	 * Configures the socket address.
+	 *
+	 * @param address the socket address to listen to; must match one of the following formats: {@code <host>:<port>},
+	 *                {@code <host>}, {@code <port>}
+	 *
+	 * @return this server
+	 *
+	 * @throws NullPointerException     if {@code address} is null
+	 * @throws IllegalArgumentException if {@code address} is malformed
+	 */
+	public JSEServer address(final String address) {
+
+		if ( address == null ) {
+			throw new NullPointerException("null address");
+		}
+
+		final Matcher matcher=AddressPattern.matcher(address);
+
+		if ( !matcher.matches() ) {
+			throw new IllegalArgumentException(String.format("malformed address <%s>", address));
+		}
+
+		final String host=Optional
+				.of(matcher.group("host"))
+				.filter(s -> !s.isEmpty())
+				.orElse(DefaultHost);
+
+		final int port=Optional
+				.of(matcher.group("port"))
+				.filter(s -> !s.isEmpty())
+				.map(Integer::valueOf)
+				.orElse(8080);
+
+		this.address=new InetSocketAddress(host, port);
 
 		return this;
 	}
