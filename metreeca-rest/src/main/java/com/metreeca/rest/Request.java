@@ -49,8 +49,9 @@ public final class Request extends Message<Request> {
 			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
-	private static final Pattern SchemePattern=Pattern.compile("[a-zA-Z][-+.a-zA-Z0-9]*:");
+	private static final Pattern SchemePattern=Pattern.compile("^[a-zA-Z][-+.a-zA-Z0-9]*:");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+	private static final Pattern FilePattern=Pattern.compile("\\.\\w+$");
 
 
 	public static Map<String, List<String>> search(final String query) {
@@ -176,16 +177,31 @@ public final class Request extends Message<Request> {
 	}
 
 	/**
-	 * Checks if request is interactive.
+	 * Checks if this request targets a browser route.
 	 *
-	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #GET} and the {@code Accept}
-	 * header includes a MIME type usually associated with an interactive browser-managed HTTP request (e.g. {@code
-	 * text/html}
+	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #safe() safe} and its {@code
+	 * Accept} header includes a MIME type usually associated with an interactive browser-managed HTTP request (e.g.
+	 * {@code text/html} and its {@link #path() path} doesn't contains a filename extension (e.g. {@code .html}); {@code
+	 * false}, otherwise
 	 */
-	public boolean interactive() {
-		return method.equals(GET) && headers("accept")
-				.stream()
-				.anyMatch(value -> HTMLPattern.matcher(value).find());
+	public boolean route() {
+		return safe() && (!FilePattern.matcher(path).find()
+				&& headers("Accept").stream().anyMatch(value -> HTMLPattern.matcher(value).find())
+		);
+	}
+
+	/**
+	 * Checks if this request targets a browser asset.
+	 *
+	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #safe() safe} and its {@code
+	 * Accept} header includes a MIME type usually associated with an interactive browser-managed HTTP request (e.g.
+	 * {@code text/html} or its {@link #path() path} contains a filename extension (e.g. {@code .html}); {@code false},
+	 * otherwise
+	 */
+	public boolean asset() {
+		return safe() && (FilePattern.matcher(path).find()
+				|| headers("Accept").stream().anyMatch(value -> HTMLPattern.matcher(value).find())
+		);
 	}
 
 
@@ -345,7 +361,7 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null base");
 		}
 
-		if ( !SchemePattern.matcher(base).lookingAt() ) {
+		if ( !SchemePattern.matcher(base).find() ) {
 			throw new IllegalArgumentException("not an absolute base IRI");
 		}
 
