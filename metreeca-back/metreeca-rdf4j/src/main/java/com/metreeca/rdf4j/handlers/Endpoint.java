@@ -46,8 +46,6 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 	private Set<Object> query=singleton(new Object()); // roles enabled for query operations (unmatchable by default)
 	private Set<Object> update=singleton(new Object()); // roles enabled for update operations (unmatchable by default)
 
-	private int timeout=60; // endpoint operations timeout [s]
-
 	private final Logger logger=asset(Logger.logger());
 
 
@@ -80,11 +78,6 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
 	protected Set<Object> update() {
 		return unmodifiableSet(update);
-	}
-
-
-	protected int timeout() {
-		return timeout;
 	}
 
 
@@ -192,29 +185,6 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 		}
 
 		this.update=new HashSet<>(roles);
-
-		return self();
-	}
-
-
-	/**
-	 * Configures timeout for endpoint requests.
-	 *
-	 * <p>By default configured to disable timeouts.</p>
-	 *
-	 * @param timeout the timeout for endpoint requests in seconds; 0 to disable timeouts
-	 *
-	 * @return this endpoint
-	 *
-	 * @throws IllegalArgumentException if {@code timeout} is less than 0
-	 */
-	public T timeout(final int timeout) {
-
-		if ( timeout < 0 ) {
-			throw new IllegalArgumentException("illegal timeout ["+timeout+"]");
-		}
-
-		this.timeout=timeout;
 
 		return self();
 	}

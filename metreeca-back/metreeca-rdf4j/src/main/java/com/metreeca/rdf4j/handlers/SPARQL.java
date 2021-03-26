@@ -28,10 +28,12 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.metreeca.rest.Format.mimes;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.Xtream.guarded;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 
@@ -60,11 +62,35 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private Consumer<Operation> options=operation -> {};
+
+
 	private SPARQL() {
 		delegate(Router.router()
 				.get(this::process)
 				.post(this::process)
 		);
+	}
+
+
+	/**
+	 * Configures the options for this endpoint.
+	 *
+	 * @param options an options configurator; takes as argument the SPARQL operation to be configured
+	 *
+	 * @return this endpoint
+	 *
+	 * @throws NullPointerException if {@code options} is null
+	 */
+	public SPARQL options(final Consumer<Operation> options) {
+
+		if ( options == null ) {
+			throw new NullPointerException("null options");
+		}
+
+		this.options=options;
+
+		return this;
 	}
 
 
@@ -147,11 +173,13 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		});
 	}
 
+
 	private Operation operation(final Request request, final RepositoryConnection connection) {
 
 		final Optional<String> query=request.parameter("query");
 		final Optional<String> update=request.parameter("update");
 		final Optional<String> infer=request.parameter("infer");
+		final Optional<String> timeout=request.parameter("timeout");
 
 		final Collection<String> basics=request.parameters("default-graph-uri");
 		final Collection<String> nameds=request.parameters("named-graph-uri");
@@ -168,8 +196,10 @@ public final class SPARQL extends Endpoint<SPARQL> {
 			nameds.stream().distinct().forEachOrdered(named -> dataset.addNamedGraph(factory.createIRI(named)));
 
 			operation.setDataset(dataset);
-			operation.setMaxExecutionTime(timeout());
+			operation.setMaxExecutionTime(timeout.map(guarded(Integer::valueOf)).filter(v -> v > 0).orElse(60));
 			operation.setIncludeInferred(infer.map(Boolean::parseBoolean).orElse(true));
+
+			options.accept(operation);
 
 		}
 
