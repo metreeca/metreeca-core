@@ -19,15 +19,15 @@ dataset, cross-linked to [GeoNames](http://www.geonames.org/) entities for citie
 The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *
 order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models: we will walk through the REST
 API development process focusing on the task of publishing
-the [Product](https://demo.metreeca.com/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/birt/terms#Product)
+the [Product](https://demo.metreeca.com/self/#endpoint=https://demo.metreeca.com/toys/sparql&collection=https://demo.metreeca.com/toys/terms#Product)
 catalog.
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl`
 or `wget`.
 
 A Maven project with the code for the complete sample app is available
-on [GitHub](https://github.com/metreeca/link/tree/main/metreeca-birt): [download](https://downgit.github.io/#/home?
-url=https://github.com/metreeca/link/tree/main/metreeca-birt&fileName=metreeca%E2%A7%B8link%20sample)
+on [GitHub](https://github.com/metreeca/link/tree/main/metreeca-toys): [download](https://downgit.github.io/#/home?
+url=https://github.com/metreeca/link/tree/main/metreeca-toys&fileName=metreeca%E2%A7%B8link%20sample)
 it to your workspace, open in your favorite IDE, compile and launch a local instance of the server.
 
 # Getting Started
@@ -152,7 +152,7 @@ HTTP/1.1 200
 
 The [context](../javadocs/?com/metreeca/rest/Context.html) argument handled to the app loader lambda manages the shared
 system-provided assets and can be used to customize them and to run app initialization tasks.
-Copy [BIRT.ttl](https://github.com/metreeca/link/tree/main/metreeca-birt/src/main/resources/com/metreeca/birt/BIRT.ttl)
+Copy [BIRT.ttl](https://github.com/metreeca/link/tree/main/metreeca-toys/src/main/resources/com/metreeca/birt/BIRT.ttl)
 to the `src/main/resources/` directory and extend the stub as follows:
 
 ```java
@@ -166,9 +166,9 @@ public final class Sample extends JEEServer {
 				.exec(() -> asset(graph()).exec(connection -> {
 					try {
 
-						connection.add(
-								Sample.class.getResourceAsStream("BIRT.ttl"),
-								"https://example.com/", RDFFormat.TURTLE
+			  connection.add(
+					  Sample.class.getResourceAsStream("Toys.ttl"),
+					  "https://example.com/", RDFFormat.TURTLE
 						);
 
 					} catch ( final IOException e ) {
@@ -196,7 +196,7 @@ method provides access to shared assets.
 Complex initialization tasks can be easily factored to a dedicated class:
 
 ```java
-public final class BIRT implements Runnable {
+public final class Toys implements Runnable {
 
 	public static final String Base="https://example.com/";
 	public static final String Namespace=Base+"terms#";
@@ -207,10 +207,10 @@ public final class BIRT implements Runnable {
 			if ( !connection.hasStatement(null, null, null, false) ) {
 				try {
 
-					connection.setNamespace("demo", Namespace);
-					connection.add(getClass().getResourceAsStream("BIRT.ttl"), Base, TURTLE);
+			connection.setNamespace("demo", Namespace);
+			connection.add(getClass().getResourceAsStream("Toys.ttl"), Base, TURTLE);
 
-				} catch ( final IOException e ) {
+		} catch ( final IOException e ) {
 					throw new UncheckedIOException(e);
 				}
 			}
@@ -227,11 +227,11 @@ public final class Sample extends JEEServer {
 	public Sample() {
 		delegate(context -> context
 
-				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+			.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 
-				.exec(new BIRT())
+			.exec(new Toys())
 
-				.get(() -> gateway()
+			.get(() -> gateway()
 
 						.wrap(request -> request.reply(status(OK)))
 
@@ -262,24 +262,24 @@ public final class Sample extends JEEServer {
 	public Sample() {
 		delegate(context -> context
 
-				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+			.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 
-				.exec(new BIRT())
+			.exec(new Toys())
 
-				.get(() -> gateway()
+			.get(() -> gateway()
 
-						.with(preprocessor(request -> request.base(BIRT.Base)))
+					.with(preprocessor(request -> request.base(Toys.Base)))
 
-						.wrap(router()
+					.wrap(router()
 
 								.path("/products/*", router()
 
 										.path("/", router().get(request -> request.reply(response -> response
 												.status(OK)
 												.body(rdf(), asset(graph()).exec(connection -> {
-													return stream(connection.getStatements(
-															null, RDF.TYPE, iri(BIRT.Namespace, "Product")
-													))
+							return stream(connection.getStatements(
+									null, RDF.TYPE, iri(Toys.Namespace, "Product")
+							))
 															.map(Statement::getSubject)
 															.map(p -> statement(
 																	iri(request.item()), LDP.CONTAINS, p)
@@ -362,15 +362,15 @@ public final class Sample extends JEEServer {
 	public Sample() {
 		delegate(context -> context
 
-				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+			.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 
-				.exec(new BIRT())
+			.exec(new Toys())
 
-				.get(() -> gateway()
+			.get(() -> gateway()
 
-						.with(preprocessor(request -> request.base(BIRT.Base)))
+					.with(preprocessor(request -> request.base(Toys.Base)))
 
-						.wrap(router()
+					.wrap(router()
 
 								.path("/products/*", new Products())
 
@@ -386,7 +386,7 @@ public final class Sample extends JEEServer {
 ```java
 public final class Products extends Delegator {
 
-	public static final IRI Product=iri(BIRT.Namespace, "Product");
+	public static final IRI Product=iri(Toys.Namespace, "Product");
 
 	public Products() {
 		delegate(router()
@@ -455,11 +455,11 @@ public final class Sample extends JEEServer {
 				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 +				.set(engine(), GraphEngine::new)
 
-				.exec(new BIRT())
+				.exec(new Toys())
 
 				.get(() -> gateway()
 
-						.with(preprocessor(request -> request.base(BIRT.Base)))
+						.with(preprocessor(request -> request.base(Toys.Base)))
 
 						.wrap(router()
 
@@ -546,33 +546,33 @@ Content-Type: application/json;charset=UTF-8
 We'll now refine the initial barebone model, exposing more properties and detailing properties roles and constraints.
 
 ```java
-public final class BIRT implements Runnable {
+public final class Toys implements Runnable {
 
 	public static final String Base="https://example.com/";
 	public static final String Namespace=Base+"terms#";
 
-	public static final IRI staff=birt("staff");
+	public static final IRI staff=toys("staff");
 
-	public static final IRI Order=birt("Order");
-	public static final IRI Product=birt("Product");
-	public static final IRI ProductLine=birt("ProductLine");
+	public static final IRI Order=toys("Order");
+	public static final IRI Product=toys("Product");
+	public static final IRI ProductLine=toys("ProductLine");
 
-	public static final IRI amount=birt("amount");
-	public static final IRI buy=birt("buy");
-	public static final IRI code=birt("code");
-	public static final IRI customer=birt("customer");
-	public static final IRI line=birt("line");
-	public static final IRI product=birt("product");
-	public static final IRI order=birt("order");
-	public static final IRI scale=birt("scale");
-	public static final IRI sell=birt("sell");
-	public static final IRI size=birt("size");
-	public static final IRI status=birt("status");
-	public static final IRI stock=birt("stock");
-	public static final IRI vendor=birt("vendor");
+	public static final IRI amount=toys("amount");
+	public static final IRI buy=toys("buy");
+	public static final IRI code=toys("code");
+	public static final IRI customer=toys("customer");
+	public static final IRI line=toys("line");
+	public static final IRI product=toys("product");
+	public static final IRI order=toys("order");
+	public static final IRI scale=toys("scale");
+	public static final IRI sell=toys("sell");
+	public static final IRI size=toys("size");
+	public static final IRI status=toys("status");
+	public static final IRI stock=toys("stock");
+	public static final IRI vendor=toys("vendor");
 
 
-	private static IRI birt(final String name) {
+	private static IRI toys(final String name) {
 		return iri(Namespace, name);
 	}
 
@@ -582,7 +582,7 @@ public final class BIRT implements Runnable {
 		asset(graph()).exec(connection -> {
 			try {
 
-				connection.add(BIRT.class.getResourceAsStream("BIRT.ttl"), Base, RDFFormat.TURTLE);
+				connection.add(Toys.class.getResourceAsStream("Toys.ttl"), Base, RDFFormat.TURTLE);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -597,46 +597,46 @@ public final class BIRT implements Runnable {
 public final class Products extends Delegator {
 
 	public Products() {
-		delegate(driver(or(relate(), role(BIRT.staff)).then(
+		delegate(driver(or(relate(), role(Toys.staff)).then(
 
-				filter(clazz(BIRT.Product)),
+				filter(clazz(Toys.Product)),
 
-				field(RDF.TYPE, exactly(BIRT.Product)),
+				field(RDF.TYPE, exactly(Toys.Product)),
 
 				field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
 				field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
 
-				server(field(BIRT.code, required())),
+				server(field(Toys.code, required())),
 
-				field(BIRT.line, required(), convey(clazz(BIRT.ProductLine)),
+				field(Toys.line, required(), convey(clazz(Toys.ProductLine)),
 
 						relate(field(RDFS.LABEL, required()))
 
 				),
 
-				field(BIRT.scale, required(),
+				field(Toys.scale, required(),
 						datatype(XSD.STRING),
 						pattern("1:[1-9][0-9]{1,2}")
 				),
 
-				field(BIRT.vendor, required(),
+				field(Toys.vendor, required(),
 						datatype(XSD.STRING),
 						maxLength(50)
 				),
 
-				field("price", BIRT.sell, required(),
+				field("price", Toys.sell, required(),
 						datatype(XSD.DECIMAL),
 						minExclusive(literal(decimal(0))),
 						maxExclusive(literal(decimal(1000)))
 				),
 
-				role(BIRT.staff).then(field(BIRT.buy, required(),
+				role(Toys.staff).then(field(Toys.buy, required(),
 						datatype(XSD.DECIMAL),
 						minInclusive(literal(decimal(0))),
 						maxInclusive(literal(decimal(1000)))
 				)),
 
-				server().then(field(BIRT.stock, required(),
+				server().then(field(Toys.stock, required(),
 						datatype(XSD.INTEGER),
 						minInclusive(literal(integer(0))),
 						maxExclusive(literal(integer(10_000)))
@@ -661,12 +661,12 @@ public final class Products extends Delegator {
 }
 ```
 
-The `filter` section states that this model describes a container whose member are the instances of the `birt:Product`
+The `filter` section states that this model describes a container whose member are the instances of the `toys:Product`
 class.
 
 The extended resource model makes use of a number of additional blocks to precisely define the expected shape of the RDF
 description of the member resources, for instance including `required` and `datatype` and `pattern` constraints to state
-that `rdfs:label`, `rdfs:comment`, `birt:code`, `birt:scale` and `birt:vendor` values are expected:
+that `rdfs:label`, `rdfs:comment`, `toys:code`, `toys:scale` and `toys:vendor` values are expected:
 
 - to occur exactly once for each resource;
 - to be RDF literals of `xsd:string` datatype;
@@ -721,25 +721,25 @@ Constraints specified outside parametric sections are unconditionally enabled.
 Parametric models support the definition of resource-level task/role-based access control rules.
 
 ```java
-or(relate(),role(BIRT.staff)).then(…)
+or(relate(),role(Toys.staff)).then(…)
 ```
 
 This guard states that the product catalog and the contained resources are accessible only if the request **either** has
-a `GET` method **or** is performed by a user in the `birt:staff` role.
+a `GET` method **or** is performed by a user in the `toys:staff` role.
 
 Parametric models support also the definition of fine-grained access control rules and role-dependent read/write resource
 views.
 
 ```java
-role(BIRT.staff).then(field(BIRT.buy,required(),
+role(Toys.staff).then(field(Toys.buy,required(),
 		datatype(XSD.DECIMAL),
 		minInclusive(literal(decimal(0))),
 		maxInclusive(literal(decimal(1000)))
 		))
 ```
 
-This `role` guard states that the `birt:buy` price will be visible only if the request is performed by a user in
-the `birt:staff` role.
+This `role` guard states that the `toys:buy` price will be visible only if the request is performed by a user in
+the `toys:staff` role.
 
 User roles are usually granted to requests by authentication/authorization wrappers, like in the following naive sample:
 
@@ -753,13 +753,13 @@ public final class Sample extends JEEServer {
 				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 				.set(engine(), GraphEngine::new)
 
-				.exec(new BIRT())
+				.exec(new Toys())
 
 				.get(() -> gateway()
 
-						.with(preprocessor(request -> request.base(BIRT.Base)))
+						.with(preprocessor(request -> request.base(Toys.Base)))
 
-+						.with(bearer("secret", BIRT.staff))
++						.with(bearer("secret", Toys.staff))
 
 						.wrap(router()
 
@@ -811,7 +811,7 @@ Content-Type: application/json;charset=UTF-8
 % curl --include --request DELETE \
     'http://localhost:8080/products/S18_4409'
     
-HTTP/1.1 403 Forbidden # << user not authenticated in the `birt:staff` role
+HTTP/1.1 403 Forbidden # << user not authenticated in the `toys:staff` role
 
 ```
 
@@ -823,14 +823,14 @@ We'll now complete the product catalog, adding:
 - postprocessing scripts for updating server-managed properties and perform other housekeeping tasks when resources are
   created or modified.
 
-Copy [ProductsCreate.ql](https://github.com/metreeca/link/tree/main/metreeca-birt/src/main/resources/com/metreeca/birt/ProductsCreate.ql)
+Copy [ProductsCreate.ql](https://github.com/metreeca/link/tree/main/metreeca-toys/src/main/resources/com/metreeca/toys/ProductsCreate.ql)
 to the `src/main/resources/` directory and extend `Products` as follows:
 
 ```diff
 public final class Products extends Delegator {
 
 	public Products() {
-		delegate(driver(or(relate(), role(BIRT.staff)).then(
+		delegate(driver(or(relate(), role(Toys.staff)).then(
 				
 				// …
 				
@@ -865,9 +865,9 @@ public final class ProductsSlug implements Function<Request, String> {
 		return graph.exec(connection -> {
 
 			final Value scale=request.body(jsonld()).get()
-					.flatMap(model -> new LinkedHashModel(model)
-							.filter(null, BIRT.scale, null)
-							.objects()
+			  .flatMap(model -> new LinkedHashModel(model)
+					  .filter(null, Toys.scale, null)
+					  .objects()
 							.stream()
 							.findFirst()
 					)
@@ -875,9 +875,9 @@ public final class ProductsSlug implements Function<Request, String> {
 
 			int serial=0;
 
-			try ( final RepositoryResult<Statement> matches=connection.getStatements(
-					null, BIRT.scale, scale
-			) ) {
+		try ( final RepositoryResult<Statement> matches=connection.getStatements(
+				null, Toys.scale, scale
+		) ) {
 				for (; matches.hasNext(); matches.next()) { ++serial; }
 			}
 
@@ -885,9 +885,9 @@ public final class ProductsSlug implements Function<Request, String> {
 
 			do {
 				code=String.format("S%s_%d", scale.stringValue().substring(2), serial);
-			} while ( connection.hasStatement(
-					null, BIRT.code, literal(code), true
-			) );
+	  } while ( connection.hasStatement(
+			  null, Toys.code, literal(code), true
+	  ) );
 
 			return code;
 
@@ -904,22 +904,22 @@ Real-world slug generators depending on shared state would take care that operat
 transactions in order to prevent the creation of duplicate identifiers.
 
 ```sparql
-prefix birt: <terms#>
+prefix toys: <terms#>
 
 prefix owl: <http://www.w3.org/2002/07/owl#>
 prefix xsd: <http://www.w3.org/2001/XMLSchema#>
 
 #### assign the unique scale-based product code generated by the slug function ####
 
-insert { $this birt:code $name } where {};
+insert { $this toys:code $name } where {};
 
 
 #### initialize stock #############################################################
 
-insert { $this birt:stock 0 } where {};
+insert { $this toys:stock 0 } where {};
 ```
 
-The *ProductsCreate.ql* SPARQL Update postprocessing script updates server-managed `birt:code` and `birt:stock`
+The *ProductsCreate.ql* SPARQL Update postprocessing script updates server-managed `toys:code` and `toys:stock`
 properties after a new product is added to the catalog.
 
 SPARQL Update postprocessing scripts are executed after the state-mutating HTTP request is successfully completed, with

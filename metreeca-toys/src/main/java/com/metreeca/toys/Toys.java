@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.birt;
+package com.metreeca.toys;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.rio.RDFFormat;
@@ -26,33 +26,33 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.rdf4j.assets.Graph.graph;
 import static com.metreeca.rest.Context.asset;
 
-public final class BIRT implements Runnable {
+public final class Toys implements Runnable {
 
 	public static final String Base="https://example.com/";
 	public static final String Namespace=Base+"terms#";
 
-	public static final IRI staff=birt("staff");
+	public static final IRI staff=toys("staff");
 
-	public static final IRI Order=birt("Order");
-	public static final IRI Product=birt("Product");
-	public static final IRI ProductLine=birt("ProductLine");
+	public static final IRI Order=toys("Order");
+	public static final IRI Product=toys("Product");
+	public static final IRI ProductLine=toys("ProductLine");
 
-	public static final IRI amount=birt("amount");
-	public static final IRI buy=birt("buy");
-	public static final IRI code=birt("code");
-	public static final IRI customer=birt("customer");
-	public static final IRI line=birt("line");
-	public static final IRI product=birt("product");
-	public static final IRI order=birt("order");
-	public static final IRI scale=birt("scale");
-	public static final IRI sell=birt("sell");
-	public static final IRI size=birt("size");
-	public static final IRI status=birt("status");
-	public static final IRI stock=birt("stock");
-	public static final IRI vendor=birt("vendor");
+	public static final IRI amount=toys("amount");
+	public static final IRI buy=toys("buy");
+	public static final IRI code=toys("code");
+	public static final IRI customer=toys("customer");
+	public static final IRI line=toys("line");
+	public static final IRI product=toys("product");
+	public static final IRI order=toys("order");
+	public static final IRI scale=toys("scale");
+	public static final IRI sell=toys("sell");
+	public static final IRI size=toys("size");
+	public static final IRI status=toys("status");
+	public static final IRI stock=toys("stock");
+	public static final IRI vendor=toys("vendor");
 
 
-	private static IRI birt(final String name) {
+	private static IRI toys(final String name) {
 		return iri(Namespace, name);
 	}
 
@@ -62,7 +62,7 @@ public final class BIRT implements Runnable {
 		asset(graph()).exec(connection -> {
 			try {
 
-				connection.add(BIRT.class.getResourceAsStream("com/metreeca/birt/BIRT.ttl"), Base, RDFFormat.TURTLE);
+				connection.add(Toys.class.getResourceAsStream("com/metreeca/toys/Toys.ttl"), Base, RDFFormat.TURTLE);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);

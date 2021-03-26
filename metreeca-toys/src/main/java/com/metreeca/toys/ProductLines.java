@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.birt;
+package com.metreeca.toys;
 
 import com.metreeca.rest.handlers.Delegator;
 
@@ -40,11 +40,11 @@ import static com.metreeca.rest.wrappers.Driver.driver;
 public final class ProductLines extends Delegator {
 
 	public ProductLines() {
-		delegate(driver(or(relate(), role(BIRT.staff)).then(
+		delegate(driver(or(relate(), role(Toys.staff)).then(
 
-				filter(clazz(BIRT.ProductLine)),
+				filter(clazz(Toys.ProductLine)),
 
-				field(RDF.TYPE, exactly(BIRT.ProductLine)),
+				field(RDF.TYPE, exactly(Toys.ProductLine)),
 
 				field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
 				field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(750)),
@@ -52,7 +52,7 @@ public final class ProductLines extends Delegator {
 				field(iri("http://schema.org/image"), optional()),
 
 				digest(
-						field(BIRT.size, required(), datatype(XSD.INTEGER))
+						field(Toys.size, required(), datatype(XSD.INTEGER))
 				)
 
 		)).wrap(router()

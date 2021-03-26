@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.birt;
+package com.metreeca.toys;
 
 import com.metreeca.rest.handlers.Delegator;
 
@@ -46,46 +46,46 @@ import static com.metreeca.rest.wrappers.Driver.driver;
 public final class Products extends Delegator {
 
 	public Products() {
-		delegate(driver(or(relate(), role(BIRT.staff)).then(
+		delegate(driver(or(relate(), role(Toys.staff)).then(
 
-				filter(clazz(BIRT.Product)),
+				filter(clazz(Toys.Product)),
 
-				field(RDF.TYPE, exactly(BIRT.Product)),
+				field(RDF.TYPE, exactly(Toys.Product)),
 
 				field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
 				field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
 
-				server(field(BIRT.code, required())),
+				server(field(Toys.code, required())),
 
-				field(BIRT.line, required(), convey(clazz(BIRT.ProductLine)),
+				field(Toys.line, required(), convey(clazz(Toys.ProductLine)),
 
 						relate(field(RDFS.LABEL, required()))
 
 				),
 
-				field(BIRT.scale, required(),
+				field(Toys.scale, required(),
 						datatype(XSD.STRING),
 						pattern("1:[1-9][0-9]{1,2}")
 				),
 
-				field(BIRT.vendor, required(),
+				field(Toys.vendor, required(),
 						datatype(XSD.STRING),
 						maxLength(50)
 				),
 
-				field("price", BIRT.sell, required(),
+				field("price", Toys.sell, required(),
 						datatype(XSD.DECIMAL),
 						minExclusive(literal(decimal(0))),
 						maxExclusive(literal(decimal(1000)))
 				),
 
-				role(BIRT.staff).then(field(BIRT.buy, required(),
+				role(Toys.staff).then(field(Toys.buy, required(),
 						datatype(XSD.DECIMAL),
 						minInclusive(literal(decimal(0))),
 						maxInclusive(literal(decimal(1000)))
 				)),
 
-				server().then(field(BIRT.stock, required(),
+				server().then(field(Toys.stock, required(),
 						datatype(XSD.INTEGER),
 						minInclusive(literal(integer(0))),
 						maxExclusive(literal(integer(10_000)))
@@ -96,7 +96,8 @@ public final class Products extends Delegator {
 				.path("/", router()
 						.get(browser())
 						.post(creator(new ProductsSlug())
-								.with(postprocessor(update(text(Products.class, "com/metreeca/birt/ProductsCreate.ql"))))
+								.with(postprocessor(update(text(Products.class,
+										"com/metreeca/toys/ProductsCreate.ql"))))
 						)
 				)
 

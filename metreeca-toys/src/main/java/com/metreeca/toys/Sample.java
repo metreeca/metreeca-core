@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.birt;
+package com.metreeca.toys;
 
 import com.metreeca.jee.JEEServer;
 import com.metreeca.rdf4j.assets.Graph;
@@ -49,13 +49,13 @@ public final class Sample extends JEEServer {
 						entry("@type", "type")
 				))
 
-				.exec(new BIRT())
+				.exec(new Toys())
 
 				.get(() -> gateway()
 
-						.with(preprocessor(request -> request.base(BIRT.Base)))
+						.with(preprocessor(request -> request.base(Toys.Base)))
 
-						.with(bearer("secret", BIRT.staff))
+						.with(bearer("secret", Toys.staff))
 
 						.wrap(router()
 

@@ -20,28 +20,28 @@ entities for cities and countries.
 The BIRT sample is a typical business database, containing tables such as *offices*, *customers*, *products*, *orders*, *
 order lines*, … for *Classic Models*, a fictional world-wide retailer of scale toy models: we will walk through the REST
 API interaction process focusing on the task of consuming
-the [Product](https://demo.metreeca.com/self/#endpoint=https://demo.metreeca.com/sparql&collection=https://demo.metreeca.com/birt/terms#Product)
+the [Product](https://demo.metreeca.com/self/#endpoint=https://demo.metreeca.com/toys/sparql&collection=https://demo.metreeca.com/toys/terms#Product)
 catalog.
 
 You may try out the examples using your favorite API testing tool or working from the command line with toos like `curl`
 or `wget`.
 
 A Maven project with the code for the complete sample app is available
-on [GitHub](https://github.com/metreeca/link/tree/main/metreeca-birt): [download](https://downgit.github.io/#/home?
-url=https://github.com/metreeca/link/tree/main/metreeca-birt&fileName=metreeca%E2%A7%B8link%20sample)
+on [GitHub](https://github.com/metreeca/link/tree/main/metreeca-toys): [download](https://downgit.github.io/#/home?
+url=https://github.com/metreeca/link/tree/main/metreeca-toys&fileName=metreeca%E2%A7%B8link%20sample)
 it to your workspace, open in your favorite IDE, compile and launch a local instance of the server.
 
 # Model-Driven APIs
 
 The sample linked data server is pre-configured with a small collection of read/write REST APIs able to drive a typical
-web-based interface like a user-facing [product catalog](https://demo.metreeca.com/birt/).
+web-based interface like a user-facing [product catalog](https://demo.metreeca.com/toys/).
 
 | REST API                                 | Contents                     |
 | :--------------------------------------- | :--------------------------- |
-| [/product-lines/](https://demo.metreeca.com/birt/product-lines/) | Product line faceted catalog |
-| [/product-lines/*](https://demo.metreeca.com/birt/product-lines/classic-cars) | Product line details         |
-| [/products/](https://demo.metreeca.com/birt/products/) | Product faceted catalog      |
-| [/products/*](https://demo.metreeca.com/birt/products/S18_3140) | Product sheets               |
+| [/product-lines/](https://demo.metreeca.com/toys/product-lines/) | Product line faceted catalog |
+| [/product-lines/*](https://demo.metreeca.com/toys/product-lines/classic-cars) | Product line details         |
+| [/products/](https://demo.metreeca.com/toys/products/) | Product faceted catalog      |
+| [/products/*](https://demo.metreeca.com/toys/products/S18_3140) | Product sheets               |
 
 !!! warning "Sample Performance"
 Linked samples are hosted on a cloud service, are not expected to provide production-level performance and may experience
@@ -128,7 +128,7 @@ Content-Type: application/ld+json;charset=UTF-8
 		⋮
 		
 		"stock": {
-            "@id": "https://demo.metreeca.com/birt/terms#stock",
+            "@id": "https://demo.metreeca.com/toys/terms#stock",
             "@type": "http://www.w3.org/2001/XMLSchema#integer"
         }
     }

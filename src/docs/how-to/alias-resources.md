@@ -9,9 +9,9 @@ The following samples present typical setups built on the same data used in the 
 ```java
 private Optional<String> byname(final RepositoryConnection connection, final String name) {
     return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
-            .map(Statement::getSubject)
-            .filter(resource -> connection.hasStatement(resource, RDF.TYPE, BIRT.Product, true))
-            .map(Value::stringValue)
+		.map(Statement::getSubject)
+		.filter(resource->connection.hasStatement(resource,RDF.TYPE,Toys.Product,true))
+		.map(Value::stringValue)
             .findFirst();
 }
 ```

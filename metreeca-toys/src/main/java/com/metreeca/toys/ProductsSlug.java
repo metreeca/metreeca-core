@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.birt;
+package com.metreeca.toys;
 
 import com.metreeca.rdf4j.assets.Graph;
 import com.metreeca.rest.Request;
@@ -41,7 +41,7 @@ public final class ProductsSlug implements Function<Request, String> {
 
 			final Value scale=request.body(jsonld()).get()
 					.flatMap(model -> new LinkedHashModel(model)
-							.filter(null, BIRT.scale, null)
+							.filter(null, Toys.scale, null)
 							.objects()
 							.stream()
 							.findFirst()
@@ -51,7 +51,7 @@ public final class ProductsSlug implements Function<Request, String> {
 			int serial=0;
 
 			try ( final RepositoryResult<Statement> matches=connection.getStatements(
-					null, BIRT.scale, scale
+					null, Toys.scale, scale
 			) ) {
 				for (; matches.hasNext(); matches.next()) { ++serial; }
 			}
@@ -61,7 +61,7 @@ public final class ProductsSlug implements Function<Request, String> {
 			do {
 				code=String.format("S%s_%d", scale.stringValue().substring(2), serial);
 			} while ( connection.hasStatement(
-					null, BIRT.code, literal(code), true
+					null, Toys.code, literal(code), true
 			) );
 
 			return code;
