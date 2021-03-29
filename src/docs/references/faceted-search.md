@@ -41,9 +41,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
         
         ⋮
         
-        "_order": <criterion> | [<criterion>,(<criterion>)*],
-        "_offset": <integer>,
-        "_limit": <integer>
+        ".order": <criterion> | [<criterion>,(<criterion>)*],
+        ".offset": <integer>,
+        ".limit": <integer>
         
     }
     
@@ -66,9 +66,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
         
         ⋮
     
-        "_terms": "<path>",
-        "_offset": <integer>,
-        "_limit": <integer>
+        ".terms": "<path>",
+        ".offset": <integer>,
+        ".limit": <integer>
     }
 
 ```
@@ -96,9 +96,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
     
     ⋮
 
-    "_stats": "<path>",
-    "_offset": <integer>,
-    "_limit": <integer>
+    ".stats": "<path>",
+    ".offset": <integer>,
+    ".limit": <integer>
 }
 ```
 

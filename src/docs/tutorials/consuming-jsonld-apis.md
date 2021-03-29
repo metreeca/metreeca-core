@@ -404,9 +404,9 @@ and [pagination limits](../references/faceted-search.md#items-query) in the JSON
 {
 	">= price": 100,
 	"vendor": "Classic Metal Creations",
-	"_order": "-price",
-	"_offset": 0,
-	"_limit": 10
+	".order": "-price",
+	".offset": 0,
+	".limit": 10
 }
 ```
 
@@ -421,14 +421,14 @@ path in the faceted search query object.
 
 ```json
 {
-	"_stats": "price",
+	".stats": "price",
 	">= price": 100,
 	"vendor": "Classic Metal Creations"
 }
 ```
 
 ```shell
-% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_stats=price'
+% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&.stats=price'
 
 HTTP/2 200 OK
 Content-Type: application/json
@@ -454,14 +454,14 @@ in the faceted search query object.
 
 ```json
 {
-	"_terms": "line",
+	".terms": "line",
 	">= price": 100,
 	"vendor": "Classic Metal Creations"
 }
 ```
 
 ```shell
-% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&_terms=line'
+% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&vendor=Classic+Metal+Creations&.terms=line'
 
 HTTP/2 200 OK
 Content-Type: application/json

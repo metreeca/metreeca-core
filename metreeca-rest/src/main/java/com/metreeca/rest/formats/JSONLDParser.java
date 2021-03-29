@@ -137,8 +137,8 @@ final class JSONLDParser {
 		final String key=field.getKey();
 		final List<String> values=field.getValue();
 
-		return key.equals("_terms") || key.equals("_stats") ? path(values)
-				: key.equals("_offset") || key.equals("_limit") ? integer(values)
+		return key.equals(".terms") || key.equals(".stats") ? path(values)
+				: key.equals(".offset") || key.equals(".limit") ? integer(values)
 				: strings(values);
 
 	}
@@ -183,7 +183,7 @@ final class JSONLDParser {
 	private Shape filter(final JsonObject query) {
 		return and(query.entrySet().stream()
 
-				.filter(entry -> !entry.getKey().startsWith("_")) // ignore reserved properties
+				.filter(entry -> !entry.getKey().startsWith(".")) // ignore reserved properties
 
 				.filter(entry -> !entry.getValue().equals(NULL))
 				.filter(entry -> !entry.getValue().equals(EMPTY_JSON_STRING))
@@ -285,22 +285,22 @@ final class JSONLDParser {
 
 
 	private List<IRI> terms(final JsonObject query) {
-		return Optional.ofNullable(query.get("_terms"))
+		return Optional.ofNullable(query.get(".terms"))
 
 				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonString ? (JsonString)v : error("_terms is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : error(".terms is not a string"))
 				.map(path -> path(path.getString(), shape))
 
 				.orElse(null);
 	}
 
 	private List<IRI> stats(final JsonObject query) {
-		return Optional.ofNullable(query.get("_stats"))
+		return Optional.ofNullable(query.get(".stats"))
 
 				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonString ? (JsonString)v : error("_stats is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : error(".stats is not a string"))
 				.map(path -> path(path.getString(), shape))
 
 				.orElse(null);
@@ -308,7 +308,7 @@ final class JSONLDParser {
 
 
 	private List<Order> order(final JsonObject query) {
-		return Optional.ofNullable(query.get("_order"))
+		return Optional.ofNullable(query.get(".order"))
 
 				.filter(v -> !v.equals(NULL))
 
@@ -320,13 +320,13 @@ final class JSONLDParser {
 	private List<Order> order(final JsonValue object) {
 		return object instanceof JsonString ? criteria((JsonString)object)
 				: object instanceof JsonArray ? criteria((JsonArray)object)
-				: error("_order is neither a string nor an array of strings");
+				: error(".order is neither a string nor an array of strings");
 	}
 
 
 	private List<Order> criteria(final JsonArray object) {
 		return object.stream()
-				.map(v -> v instanceof JsonString ? (JsonString)v : error("_order criterion is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : error(".order is not a string"))
 				.map(this::criterion)
 				.collect(toList());
 	}
@@ -348,7 +348,7 @@ final class JSONLDParser {
 
 
 	private int offset(final JsonObject query) {
-		return Optional.ofNullable(query.get("_offset"))
+		return Optional.ofNullable(query.get(".offset"))
 
 				.filter(v -> !v.equals(NULL))
 
@@ -358,10 +358,10 @@ final class JSONLDParser {
 
 						return v instanceof JsonNumber ? ((JsonNumber)v).intValue()
 								: v instanceof JsonString ? Integer.parseInt(((JsonString)v).getString())
-								: error("_offset is not a number");
+								: error(".offset is not a number");
 
 					} catch ( final NumberFormatException e ) {
-						return error("_offset is not a number");
+						return error(".offset is not a number");
 					}
 
 				})
@@ -372,7 +372,7 @@ final class JSONLDParser {
 	}
 
 	private int limit(final JsonObject query) {
-		return Optional.ofNullable(query.get("_limit"))
+		return Optional.ofNullable(query.get(".limit"))
 
 				.filter(v -> !v.equals(NULL))
 
@@ -382,10 +382,10 @@ final class JSONLDParser {
 
 						return v instanceof JsonNumber ? ((JsonNumber)v).intValue()
 								: v instanceof JsonString ? Integer.parseInt(((JsonString)v).getString())
-								: error("_limit is not a number");
+								: error(".limit is not a number");
 
 					} catch ( final NumberFormatException e ) {
-						return error("_limit is not a number");
+						return error(".limit is not a number");
 					}
 
 				})
@@ -400,6 +400,10 @@ final class JSONLDParser {
 
 	private List<IRI> path(final String path, final Shape shape) {
 
+		if ( path.startsWith(".") ) {
+			throw new JsonException(format("reserved path <%s>", path));
+		}
+
 		final List<String> steps=new ArrayList<>();
 
 		final String trimmed=path.trim();
@@ -413,7 +417,7 @@ final class JSONLDParser {
 		}
 
 		if ( last != trimmed.length() ) {
-			throw new JsonException("malformed path ["+trimmed+"]");
+			throw new JsonException(format("malformed path <%s>", trimmed));
 		}
 
 		return path(steps, shape).collect(toList());

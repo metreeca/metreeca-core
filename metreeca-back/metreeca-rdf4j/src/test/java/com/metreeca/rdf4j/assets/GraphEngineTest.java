@@ -220,7 +220,7 @@ final class GraphEngineTest {
 			exec(model(small()), () -> new GraphEngine()
 
 					.browse(request()
-							.query("_terms=office&_offset=1&_limit=3")
+							.query(".terms=office&.offset=1&.limit=3")
 					)
 
 					.accept(response -> assertThat(response)

@@ -164,7 +164,7 @@ final class JSONLDParserTest {
 
 			});
 
-			items("_order=%2Bfirst.rest&_offset=1&_limit=2", shape, items -> {
+			items(".order=%2Bfirst.rest&.offset=1&.limit=2", shape, items -> {
 
 				assertThat(items.orders()).containsExactly(increasing(RDF.FIRST, RDF.REST));
 				assertThat(items.offset()).isEqualTo(1L);
@@ -172,14 +172,14 @@ final class JSONLDParserTest {
 
 			});
 
-			terms("_terms=first.rest", shape, terms -> {
+			terms(".terms=first.rest", shape, terms -> {
 
 				assertThat(filtered(shape, and())).isEqualTo(terms.shape());
 				assertThat(terms.path()).containsExactly(RDF.FIRST, RDF.REST);
 
 			});
 
-			stats("_stats=first.rest", shape, stats -> {
+			stats(".stats=first.rest", shape, stats -> {
 
 				assertThat(filtered(shape, and())).isEqualTo(stats.shape());
 				assertThat(stats.path()).containsExactly(RDF.FIRST, RDF.REST);
@@ -193,30 +193,30 @@ final class JSONLDParserTest {
 	@Nested final class Paths {
 
 		@Test void testParseEmptyPath() {
-			stats("{ '_stats': '' }", shape, stats -> assertThat(stats.path())
+			stats("{ '.stats': '' }", shape, stats -> assertThat(stats.path())
 					.isEmpty()
 			);
 		}
 
 		@Test void testParseDirectSteps() {
-			stats("{ '_stats': 'first' }", first, stats -> assertThat(stats.path())
+			stats("{ '.stats': 'first' }", first, stats -> assertThat(stats.path())
 					.containsExactly(RDF.FIRST)
 			);
 		}
 
 		@Test void testParseInverseSteps() { // !!! inverse?
-			stats("{ '_stats': 'firstOf' }", field(inverse(RDF.FIRST)), stats -> assertThat(stats.path())
+			stats("{ '.stats': 'firstOf' }", field(inverse(RDF.FIRST)), stats -> assertThat(stats.path())
 					.containsExactly(inverse(RDF.FIRST))
 			);
 		}
 
 		@Test void testParseMultipleSteps() {
 
-			stats("{ '_stats': 'first.rest' }", field(RDF.FIRST, rest), stats -> assertThat(stats.path())
+			stats("{ '.stats': 'first.rest' }", field(RDF.FIRST, rest), stats -> assertThat(stats.path())
 					.containsExactly(RDF.FIRST, RDF.REST)
 			);
 
-			stats("{ '_stats': 'firstOf.rest' }", field(inverse(RDF.FIRST), rest),
+			stats("{ '.stats': 'firstOf.rest' }", field(inverse(RDF.FIRST), rest),
 					stats -> assertThat(stats.path())
 							.containsExactly(inverse(RDF.FIRST), RDF.REST)
 			);
@@ -225,40 +225,40 @@ final class JSONLDParserTest {
 
 		@Test void testParseSortingCriteria() {
 
-			items("{ '_order': '' }", shape, items -> assertThat(items.orders())
+			items("{ '.order': '' }", shape, items -> assertThat(items.orders())
 					.as("empty path")
 					.containsExactly(increasing())
 			);
 
-			items("{ '_order': '+' }", shape, items -> assertThat(items.orders())
+			items("{ '.order': '+' }", shape, items -> assertThat(items.orders())
 					.as("empty path increasing")
 					.containsExactly(increasing())
 			);
 
-			items("{ '_order': '-' }", shape, items -> assertThat(items.orders())
+			items("{ '.order': '-' }", shape, items -> assertThat(items.orders())
 					.as("empty path decreasing")
 					.containsExactly(decreasing())
 			);
 
-			items("{ '_order': 'first.rest' }", shape, items -> assertThat(items.orders())
+			items("{ '.order': 'first.rest' }", shape, items -> assertThat(items.orders())
 					.containsExactly(increasing(RDF.FIRST, RDF.REST))
 			);
 
-			items("{ '_order': '+first.rest' }", shape, items -> assertThat(items.orders())
+			items("{ '.order': '+first.rest' }", shape, items -> assertThat(items.orders())
 					.as("path increasing")
 					.containsExactly(increasing(RDF.FIRST, RDF.REST))
 			);
 
-			items("{ '_order': '-first.rest' }", shape, items -> assertThat(items.orders())
+			items("{ '.order': '-first.rest' }", shape, items -> assertThat(items.orders())
 					.as("path decreasing")
 					.containsExactly(decreasing(RDF.FIRST, RDF.REST)));
 
-			items("{ '_order': [] }", shape, items -> assertThat(items.orders()).
+			items("{ '.order': [] }", shape, items -> assertThat(items.orders()).
 					as("empty list")
 					.isEmpty()
 			);
 
-			items("{ '_order': ['+first', '-first.rest'] }", shape, items -> assertThat(items.orders())
+			items("{ '.order': ['+first', '-first.rest'] }", shape, items -> assertThat(items.orders())
 					.as("list")
 					.containsExactly(increasing(RDF.FIRST), decreasing(RDF.FIRST, RDF.REST))
 			);
@@ -268,7 +268,7 @@ final class JSONLDParserTest {
 
 		@Test void testTraverseLinkPaths() {
 
-			terms("{ '_terms' : 'first.rest' }", (
+			terms("{ '.terms' : 'first.rest' }", (
 
 					link(OWL.SAMEAS, field(RDF.FIRST, field(RDF.REST)))
 
@@ -278,7 +278,7 @@ final class JSONLDParserTest {
 
 			));
 
-			terms("{ '_terms' : 'first.rest' }", (
+			terms("{ '.terms' : 'first.rest' }", (
 
 					field(RDF.FIRST, link(OWL.SAMEAS, field(RDF.REST)))
 
@@ -288,7 +288,7 @@ final class JSONLDParserTest {
 
 			));
 
-			terms("{ '_terms' : 'first.rest' }", (
+			terms("{ '.terms' : 'first.rest' }", (
 
 					field(RDF.FIRST, field(RDF.REST, link(OWL.SAMEAS)))
 
@@ -342,21 +342,25 @@ final class JSONLDParserTest {
 
 
 		@Test void testReportMalformedPaths() {
-			assertThatThrownBy(() -> parse("{ '_order': '---' }", and())).isInstanceOf(JsonException.class);
+			assertThatThrownBy(() -> parse("{ '.order': '---' }", and())).isInstanceOf(JsonException.class);
+		}
+
+		@Test void testReportReservedPaths() {
+			assertThatThrownBy(() -> parse("{ '.order': '.reserved' }", and())).isInstanceOf(JsonException.class);
 		}
 
 		@Test void testReportReferencesOutsideShapeEnvelope() {
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-					terms("{ '_terms': 'nil' }", shape, items -> {})
+					terms("{ '.terms': 'nil' }", shape, items -> {})
 			);
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-					stats("{ '_stats': 'nil' }", shape, stats -> {})
+					stats("{ '.stats': 'nil' }", shape, stats -> {})
 			);
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-					items("{ '_order': 'nil' }", shape, items -> {})
+					items("{ '.order': 'nil' }", shape, items -> {})
 			);
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
@@ -368,7 +372,7 @@ final class JSONLDParserTest {
 			);
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-					items("{ '_order': '-nil' }", shape, items -> {})
+					items("{ '.order': '-nil' }", shape, items -> {})
 			);
 
 		}
@@ -376,15 +380,15 @@ final class JSONLDParserTest {
 		@Test void testReportReferencesForEmptyShape() {
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-					terms("{ '_terms': 'first' }", and(), items -> {})
+					terms("{ '.terms': 'first' }", and(), items -> {})
 			);
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-					stats("{ '_stats': 'first' }", and(), stats -> {})
+					stats("{ '.stats': 'first' }", and(), stats -> {})
 			);
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
-					items("{ '_order': 'nil' }", and(), items -> {})
+					items("{ '.order': 'nil' }", and(), items -> {})
 			);
 
 			assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(() ->
@@ -569,7 +573,7 @@ final class JSONLDParserTest {
 
 		@Test void testParseSliceLeniently() {
 
-			items("{ '_offset': '1', '_limit': '2' }", shape, items -> assertThat(items)
+			items("{ '.offset': '1', '.limit': '2' }", shape, items -> assertThat(items)
 					.isEqualTo(Items.items(shape, emptyList(), 1, 2))
 			);
 
@@ -587,7 +591,7 @@ final class JSONLDParserTest {
 							field(RDF.REST, any(literal("y"), literal("w z")))
 					))));
 
-			items("first=x&first.rest=y&_order=-first.rest&_order=first&_offset=1&_limit=2", shape, items -> {
+			items("first=x&first.rest=y&.order=-first.rest&.order=first&.offset=1&.limit=2", shape, items -> {
 
 				assertThat(items.orders())
 						.containsExactly(decreasing(RDF.FIRST, RDF.REST), increasing(RDF.FIRST));
@@ -609,7 +613,7 @@ final class JSONLDParserTest {
 
 		@Test void testParseItemsQuery() {
 
-			items("{ '_offset': 1, '_limit': 2 }", shape, items -> {
+			items("{ '.offset': 1, '.limit': 2 }", shape, items -> {
 
 				assertThat(items.shape()).as("shape").isEqualTo(filtered(shape, and()));
 				assertThat(items.offset()).as("offset").isEqualTo(1);
@@ -621,7 +625,7 @@ final class JSONLDParserTest {
 
 		@Test void testParseTermsQuery() {
 
-			terms("{ '_terms': 'first.rest', '_offset': 1, '_limit': 2 }", shape, terms -> {
+			terms("{ '.terms': 'first.rest', '.offset': 1, '.limit': 2 }", shape, terms -> {
 
 				assertThat(filtered(shape, and()))
 						.as("shape")
@@ -644,7 +648,7 @@ final class JSONLDParserTest {
 
 		@Test void testParseStatsQuery() {
 
-			stats("{ '_stats': 'first.rest', '_offset': 1, '_limit': 2 }", shape, stats -> {
+			stats("{ '.stats': 'first.rest', '.offset': 1, '.limit': 2 }", shape, stats -> {
 
 				assertThat(filtered(shape, and())).isEqualTo(stats.shape());
 
