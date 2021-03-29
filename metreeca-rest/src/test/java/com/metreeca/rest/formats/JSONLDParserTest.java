@@ -54,11 +54,10 @@ import static com.metreeca.json.shapes.MinLength.minLength;
 import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
-import static com.metreeca.rest.wrappers.Driver.back;
-import static com.metreeca.rest.wrappers.Driver.link;
 
 import static org.assertj.core.api.Assertions.*;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
 final class JSONLDParserTest {
@@ -528,24 +527,24 @@ final class JSONLDParserTest {
 		@Test void testParsePathFilters() {
 
 			items("{ '>= first.rest': 1 }", shape, items -> {
-				assertThat(items.shape())
-						.as("nested filter")
-						.isEqualTo(filtered(shape,
-								field(RDF.FIRST, field(RDF.REST, minInclusive(One)))));
+						assertThat(items.shape())
+								.as("nested filter")
+								.isEqualTo(filtered(shape,
+										field(RDF.FIRST, field(RDF.REST, minInclusive(One)))));
 					}
 			);
 
 			items("{ 'first.rest': 1 }", shape, items -> {
-				assertThat(items.shape())
-						.as("nested filter singleton shorthand")
-						.isEqualTo(filtered(shape, field(RDF.FIRST, field(RDF.REST, any(One)))));
+						assertThat(items.shape())
+								.as("nested filter singleton shorthand")
+								.isEqualTo(filtered(shape, field(RDF.FIRST, field(RDF.REST, any(One)))));
 					}
 			);
 
 			items("{ 'first.rest': [1, 10] }", shape, items -> {
-				assertThat(items.shape())
-						.as("nested filter multiple shorthand")
-						.isEqualTo(filtered(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))));
+						assertThat(items.shape())
+								.as("nested filter multiple shorthand")
+								.isEqualTo(filtered(shape, field(RDF.FIRST, field(RDF.REST, any(One, Ten)))));
 					}
 			);
 
@@ -565,6 +564,14 @@ final class JSONLDParserTest {
 			items("{ 'first': null }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
 			items("{ 'first': '' }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
 			items("{ 'first': [] }", shape, items -> assertThat(items.shape()).isEqualTo(shape));
+
+		}
+
+		@Test void testParseSliceLeniently() {
+
+			items("{ '_offset': '1', '_limit': '2' }", shape, items -> assertThat(items)
+					.isEqualTo(Items.items(shape, emptyList(), 1, 2))
+			);
 
 		}
 

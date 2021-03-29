@@ -352,8 +352,20 @@ final class JSONLDParser {
 
 				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : error("_offset not a number"))
-				.map(JsonNumber::intValue)
+				.map(v -> {
+
+					try {
+
+						return v instanceof JsonNumber ? ((JsonNumber)v).intValue()
+								: v instanceof JsonString ? Integer.parseInt(((JsonString)v).getString())
+								: error("_offset is not a number");
+
+					} catch ( final NumberFormatException e ) {
+						return error("_offset is not a number");
+					}
+
+				})
+
 				.map(v -> v >= 0 ? v : error("negative offset"))
 
 				.orElse(0);
@@ -364,8 +376,20 @@ final class JSONLDParser {
 
 				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : error("_limit is not a number"))
-				.map(JsonNumber::intValue)
+				.map(v -> {
+
+					try {
+
+						return v instanceof JsonNumber ? ((JsonNumber)v).intValue()
+								: v instanceof JsonString ? Integer.parseInt(((JsonString)v).getString())
+								: error("_limit is not a number");
+
+					} catch ( final NumberFormatException e ) {
+						return error("_limit is not a number");
+					}
+
+				})
+
 				.map(v -> v >= 0 ? v : error("negative limit"))
 
 				.orElse(0);
