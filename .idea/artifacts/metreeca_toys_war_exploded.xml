@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="exploded-war" name="metreeca-toys:war exploded">
-    <output-path>$PROJECT_DIR$/metreeca-toys/target/metreeca-toys-0.0.0-SNAPSHOT</output-path>
+    <output-path>$PROJECT_DIR$/metreeca-toys/target/metreeca-toys-0.55.0</output-path>
     <properties id="maven-jee-properties">
       <options>
         <exploded>true</exploded>
@@ -14,20 +14,20 @@
           <element id="module-output" name="metreeca-toys" />
         </element>
         <element id="directory" name="lib">
-          <element id="archive" name="metreeca-jee-0.0.0-SNAPSHOT.jar">
+          <element id="archive" name="metreeca-jee-0.55.0.jar">
             <element id="module-output" name="metreeca-jee" />
           </element>
-          <element id="archive" name="metreeca-rest-0.0.0-SNAPSHOT.jar">
+          <element id="archive" name="metreeca-rest-0.55.0.jar">
             <element id="module-output" name="metreeca-rest" />
           </element>
-          <element id="archive" name="metreeca-json-0.0.0-SNAPSHOT.jar">
+          <element id="archive" name="metreeca-json-0.55.0.jar">
             <element id="module-output" name="metreeca-json" />
           </element>
           <element id="library" level="project" name="Maven: org.glassfish:javax.json:1.1.4" />
-          <element id="archive" name="metreeca-rdf4j-0.0.0-SNAPSHOT.jar">
+          <element id="archive" name="metreeca-rdf4j-0.55.0.jar">
             <element id="module-output" name="metreeca-rdf4j" />
           </element>
-          <element id="archive" name="metreeca-rdf-0.0.0-SNAPSHOT.jar">
+          <element id="archive" name="metreeca-rdf-0.55.0.jar">
             <element id="module-output" name="metreeca-rdf" />
           </element>
           <element id="library" level="project" name="Maven: org.eclipse.rdf4j:rdf4j-rio-jsonld:3.6.1" />
@@ -84,7 +84,7 @@
         </element>
       </element>
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/metreeca-toys/target/metreeca-toys-0.0.0-SNAPSHOT/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/metreeca-toys/target/metreeca-toys-0.55.0/META-INF/MANIFEST.MF" />
       </element>
       <element id="javaee-facet-resources" facet="metreeca-toys/web/Web" />
     </root>

@@ -7,7 +7,7 @@
         <packaging>war</packaging>
       </options>
     </properties>
-    <root id="archive" name="metreeca-toys-0.0.0-SNAPSHOT.war">
+    <root id="archive" name="metreeca-toys-0.55.0.war">
       <element id="artifact" artifact-name="metreeca-toys:war exploded" />
     </root>
   </artifact>

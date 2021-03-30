@@ -24,11 +24,11 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>metreeca-head</artifactId>
-		<version>0.0.0-SNAPSHOT</version>
+		<version>0.55.0</version>
 	</parent>
 
 	<artifactId>metreeca-jse</artifactId>
-	<version>0.0.0-SNAPSHOT</version>
+	<version>0.55.0</version>
 
 	<name>Metreeca Java SE Server Connector</name>
 	<description>Connector kit for Jave SE internal HTTP server.</description>
