@@ -1,9 +1,11 @@
 ---
 ---
 
-Metreeca/Link is a lightweight Java framework enabling rapid development of model-driven REST/JSON APIs.
+Metreeca/Link is a model-driven Java framework for rapid REST/JSON-LD backend development.
 
-Its engine automatically converts high-level declarative JSON-LD models into extended REST APIs supporting CRUD operations, faceted search, data validation and fine‑grained role‑based access control, relieving back-end developers from low-level chores and completely shielding front‑end developers from linked data technicalities.
+Its engine automatically converts high-level declarative JSON-LD models into extended REST APIs supporting CRUD
+operations, faceted search, data validation and fine‑grained role‑based access control, relieving backend developers from
+low-level chores and completely shielding frontend developers from linked data technicalities.
 
 Metreeca/Link is server and storage-agnostic and may be easily connected to your solution of choice.
 
