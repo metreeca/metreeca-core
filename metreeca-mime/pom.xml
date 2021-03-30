@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl
+  Copyright © 2013-2021 Metreeca srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,15 +24,15 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>metreeca-link</artifactId>
-		<version>0.54.1</version>
+		<version>0.55.0</version>
 	</parent>
 
 	<artifactId>metreeca-mime</artifactId>
-	<version>0.54.1</version>
+	<version>0.55.0</version>
 	<packaging>pom</packaging>
 
-	<name>Metreeca Format Adapters</name>
-	<description>data formats adapter kits.</description>
+	<name>Metreeca Data Connectors</name>
+	<description>Data connector kits.</description>
 
 	<modules>
 

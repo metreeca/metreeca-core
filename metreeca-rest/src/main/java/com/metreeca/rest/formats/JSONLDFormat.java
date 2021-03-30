@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,39 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Query;
+import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Or;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
 
-import javax.json.JsonException;
-import javax.json.JsonObject;
+import java.io.*;
 import java.util.*;
 import java.util.function.Supplier;
 
+import javax.json.*;
+
+import static com.metreeca.json.Trace.trace;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.lang;
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.formats.JSONFormat.json;
+import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.formats.JSONLDScanner.scan;
+import static com.metreeca.rest.formats.OutputFormat.output;
+
+import static java.lang.String.format;
+import static java.util.Collections.singletonMap;
+import static java.util.stream.Collectors.toList;
+
+import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 
 /**
  * Model-driven JSON-LD message format.
@@ -77,6 +91,9 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	public static Supplier<Map<String, String>> keywords() {
 		return Collections::emptyMap;
 	}
+
+
+	private static final JsonWriterFactory JsonWriters=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,41 +139,6 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	}
 
 
-	public static Either<Trace, JsonObject> validate(final IRI focus, final Shape shape, final JsonObject object) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( object == null ) {
-			throw new NullPointerException("null object");
-		}
-
-		return new JSONLDValidator(focus, shape, asset(keywords())).validate(object);
-	}
-
-	public static JsonObject trim(final IRI focus, final Shape shape, final JsonObject object) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( object == null ) {
-			throw new NullPointerException("null object");
-		}
-
-		return new JSONLDTrimmer(focus, shape, asset(keywords())).trim(object).asJsonObject();
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private JSONLDFormat() {}
@@ -170,27 +152,59 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * missing or  matched by {@link JSONFormat#MIMEPattern}
 	 *
 	 * <p><strong>Warning</strong> / Decoding is completely driven by the {@code message}
-	 * {@linkplain JSONLDFormat#shape()
-	 * shape attribute}: embedded {@code @context} objects are ignored.</p>
+	 * {@linkplain JSONLDFormat#shape() shape attribute}: embedded {@code @context} objects are ignored.</p>
 	 */
 	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
-		return message.header("Content-Type").filter(JSONFormat.MIMEPattern.asPredicate().or(String::isEmpty))
+		return message
 
-				.map(type -> message.body(json()).flatMap(json -> { // parse possibly validated json
+				.header("Content-Type")
 
-					try {
+				.filter(JSONFormat.MIMEPattern.asPredicate().or(String::isEmpty))
 
-						return Right(new JSONLDDecoder(
+				.map(type -> message.body(input()).flatMap(source -> {
 
-								iri(message.item()),
-								message.attribute(shape()),
-								asset(keywords())
+					try (
+							final InputStream input=source.get();
+							final Reader reader=new InputStreamReader(input, message.charset());
+							final JsonReader jsonReader=Json.createReader(reader)
+					) {
 
-						).decode(json));
+						final IRI focus=iri(message.item());
+						final Shape shape=message.attribute(shape());
+						final Map<String, String> keywords=asset(keywords());
+
+						final Collection<Statement> model=new JSONLDDecoder(
+
+								focus,
+								shape,
+								keywords
+
+						).decode(jsonReader.readObject());
+
+						return scan(shape, focus, model).fold(
+								trace -> Left(status(UnprocessableEntity, trace.toJSON())),
+								value -> value.size() == model.size() ? Right(value) : Left(status(UnprocessableEntity,
+										trace(value.stream().filter(s -> !model.contains(s))
+												.map(s -> format("statement <%s> is out of shape envelop", format(s)))
+										).toJSON()
+								))
+						);
 
 					} catch ( final JsonException e ) {
 
+						if ( e.getCause() instanceof IOException ) {
+							throw new UncheckedIOException((IOException)e.getCause());
+						}
+
 						return Left(status(BadRequest, e));
+
+					} catch ( final UnsupportedEncodingException e ) {
+
+						return Left(status(BadRequest, e));
+
+					} catch ( final IOException e ) {
+
+						throw new UncheckedIOException(e);
 
 					}
 
@@ -202,25 +216,26 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	/**
 	 * Configures {@code message} {@code Content-Type} header to {@value JSONFormat#MIME}, unless already defined, and
 	 * encodes the JSON-LD model {@code value} into the output stream accepted by the {@code message}
-	 * {@link OutputFormat} body
+	 * {@link OutputFormat} body.
+	 *
+	 * <p>If the originating {@code message} {@linkplain Message#request() request} includes an {@code Accept-Language}
+	 * header, a suitably {@linkplain Shape#localize localized} version of the message shape is used in the conversion
+	 * process and only matching tagged literals from {@code value} are included in the response body.</p>
 	 *
 	 * <p><strong>Warning</strong> / {@code @context} objects generated from the {@code message}
-	 * {@linkplain JSONLDFormat#shape() shape attribute} are currently not embedded.</p>
+	 * {@linkplain JSONLDFormat#shape() shape attribute} are embedded only if {@code Content-Type} is {@value MIME}.</p>
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 
 		final String mime=message
 
-				// content-type explicitly defined by the handler
+				.header("Content-Type") // content-type explicitly defined by handler
 
-				.header("Content-Type")
-
-				.orElseGet(() -> types(message.request().header("Accept").orElse("")).stream()
+				.orElseGet(() -> mimes(message.request().header("Accept").orElse("")).stream()
 
 						// application/ld+json or application/json accepted?
 
-						.filter(type -> type.equals(MIME) || type.equals(JSONFormat.MIME))
-						.findFirst()
+						.filter(type -> type.equals(MIME) || type.equals(JSONFormat.MIME)).findFirst()
 
 						// default to application/json
 
@@ -228,18 +243,53 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 				);
 
+		final List<String> langs=message.request().langs();
+
 		return message
 
 				.header("~Content-Type", mime)
 
-				.body(json(), new JSONLDEncoder( // make json available for trimming
+				.body(output(), output -> {
+					try (
+							final Writer writer=new OutputStreamWriter(output, message.charset());
+							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
+					) {
 
-						iri(message.item()),
-						message.attribute(shape()),
-						asset(keywords()),
-						mime.equals(MIME) // include context objects for application/ld+json
+						final IRI focus=iri(message.item());
+						final Shape shape=message.attribute(shape());
+						final Map<String, String> keywords=asset(keywords());
 
-				).encode(value));
+						final Collection<Statement> model=scan(shape, focus, value).fold(trace -> {
+
+							asset(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
+
+							throw new RuntimeException("invalid JSON-LD payload");
+
+						});
+
+						jsonWriter.writeObject(new JSONLDEncoder(
+
+								focus,
+								shape.localize(langs),
+								keywords,
+								mime.equals(MIME) // include context objects for application/ld+json?
+
+						).encode(langs.isEmpty() || langs.contains("*") ? model : model.stream().filter(statement -> {
+
+							// retain only tagged literals with an accepted language
+
+							final String lang=lang(statement.getObject());
+
+							return lang == null || langs.contains(lang);
+
+						}).collect(toList())));
+
+					} catch ( final IOException e ) {
+
+						throw new UncheckedIOException(e);
+
+					}
+				});
 	}
 
 }

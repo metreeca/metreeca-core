@@ -1,6 +1,6 @@
 
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,13 @@
 package com.metreeca.rdf4j.assets;
 
 
-import com.metreeca.rest.Response;
+import com.metreeca.json.Values;
+import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
@@ -32,17 +33,18 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.ValuesTest.*;
-import static com.metreeca.rdf4j.assets.Graph.auto;
-import static com.metreeca.rdf4j.assets.Graph.graph;
+import static com.metreeca.json.ValuesTest.Prefixes;
+import static com.metreeca.json.ValuesTest.decode;
+import static com.metreeca.rest.Context.asset;
+
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.stream.Collectors.toList;
 
 
 public final class GraphTest {
@@ -53,19 +55,23 @@ public final class GraphTest {
 			.map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
 			.collect(joining("\n"));
 
+
+	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
+
+
 	private final Statement data=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
 
 
 	public static void exec(final Runnable... tasks) {
-		new com.metreeca.rest.Context()
-				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+		new Context()
+				.set(Graph.graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 				.exec(tasks)
 				.clear();
 	}
 
 
 	@Test void testConfigureRequest() {
-		exec(() -> assertThat(Graph.<com.metreeca.rest.Request>query(
+		exec(() -> assertThat(Graph.<Request>query(
 
 				sparql("\n"
 						+"construct { \n"
@@ -88,9 +94,9 @@ public final class GraphTest {
 
 				)
 
-						.apply(new com.metreeca.rest.Request()
+						.apply(new Request()
 
-										.method(com.metreeca.rest.Request.POST)
+										.method(Request.POST)
 										.base(Base)
 										.path("/test/request"),
 
@@ -122,7 +128,7 @@ public final class GraphTest {
 	}
 
 	@Test void testConfigureResponse() {
-		exec(() -> assertThat(Graph.<com.metreeca.rest.Response>query(
+		exec(() -> assertThat(Graph.<Response>query(
 
 				sparql("\n"
 						+"construct { \n"
@@ -146,14 +152,14 @@ public final class GraphTest {
 
 				)
 
-						.apply(new com.metreeca.rest.Response(new com.metreeca.rest.Request()
+						.apply(new Response(new Request()
 
-										.method(com.metreeca.rest.Request.POST)
+										.method(Request.POST)
 										.base(Base)
 										.path("/test/request"))
 
 										.status(Response.OK)
-										.header("Location", Base+"test/response"),
+										.header("Location", Root+"test/response"),
 
 								new LinkedHashModel(singleton(data))
 						)
@@ -184,59 +190,77 @@ public final class GraphTest {
 	}
 
 
-	@Test void testGenerateAutoIncrementingIds() {
-		exec(() -> {
-
-			final Function<com.metreeca.rest.Request, String> auto=auto();
-
-			final com.metreeca.rest.Request request=new com.metreeca.rest.Request().base(Base).path("/target/");
-
-			final String one=auto.apply(request);
-			final String two=auto.apply(request);
-
-			assertThat(one).isNotEqualTo(two);
-
-			final String item=request.item();
-			final String stem=item.substring(0, item.lastIndexOf('/')+1);
-
-			assertThat(model())
-					.doesNotHaveStatement(iri(stem, one), null, null)
-					.doesNotHaveStatement(iri(stem, two), null, null);
-
-		});
-	}
-
-
 	public static Model model(final Resource... contexts) {
-		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return export(connection, contexts); });
+		return asset(Graph.graph()).exec(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return construct(connection, sparql); });
+		return asset(Graph.graph()).exec(connection -> { return construct(connection, sparql); });
 	}
 
-	public static List<Map<String, Value>> tuples(final String sparql) {
-		return com.metreeca.rest.Context.asset(graph()).exec(connection -> { return select(connection, sparql); });
+	static List<Map<String, Value>> tuples(final String sparql) {
+		return asset(Graph.graph()).exec(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> com.metreeca.rest.Context.asset(graph()).exec(connection -> { connection.add(model, contexts); });
+		return () -> asset(Graph.graph()).exec(connection -> { connection.add(model, contexts); });
+	}
+
+	static List<Statement> localized(final Collection<Statement> model, final String... tags) {
+		return model.stream()
+
+				.flatMap(s -> Optional
+
+						.of(s.getObject())
+
+						.filter(o -> s.getPredicate().equals(RDFS.LABEL) || s.getPredicate().equals(RDFS.COMMENT))
+
+						.filter(Literal.class::isInstance)
+						.map(Literal.class::cast)
+
+						.filter(l -> l.getDatatype().equals(XSD.STRING))
+						.map(Literal::getLabel)
+
+						.map(l -> Arrays.stream(tags).map(lang -> statement(s.getSubject(), s.getPredicate(),
+								lang.isEmpty() ? literal(l) : literal(l, lang))
+						))
+
+						.orElseGet(() -> Stream.of(s))
+				)
+
+				.collect(toList());
 	}
 
 
 	//// Graph Operations /////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static String sparql(final String sparql) {
+	static Collection<Statement> graph(final String sparql) {
+		return model(sparql)
+
+				.stream()
+
+				// ;(stardog) statement from default context explicitly tagged // !!! review dependency
+
+				.map(statement -> StardogDefault.equals(statement.getContext()) ? statement(
+						statement.getSubject(),
+						statement.getPredicate(),
+						statement.getObject()
+				) : statement)
+
+				.collect(toList());
+	}
+
+	static String sparql(final String sparql) {
 		return SPARQLPrefixes+"\n\n"+sparql; // !!! avoid prefix clashes
 	}
 
 
-	public static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
+	static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
-					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
+					+Values.indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
 
 			final List<Map<String, Value>> tuples=new ArrayList<>();
 
@@ -260,16 +284,16 @@ public final class GraphTest {
 
 		} catch ( final MalformedQueryException e ) {
 
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+Values.indent(sparql));
 
 		}
 	}
 
-	public static Model construct(final RepositoryConnection connection, final String sparql) {
+	static Model construct(final RepositoryConnection connection, final String sparql) {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
-					+sparql.replace("\n", "\n\t")+(sparql.endsWith("\n") ? "" : "\n"));
+					+Values.indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
 
 			final Model model=new LinkedHashModel();
 
@@ -281,7 +305,7 @@ public final class GraphTest {
 
 		} catch ( final MalformedQueryException e ) {
 
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+sparql.replace("\n", "\n\t"));
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+Values.indent(sparql));
 
 		}
 	}

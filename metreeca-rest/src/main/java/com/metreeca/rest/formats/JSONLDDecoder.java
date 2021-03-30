@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import javax.json.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -33,14 +32,23 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import javax.json.*;
+
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static com.metreeca.json.shapes.Field.labels;
+
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toMap;
+
 import static javax.json.Json.createObjectBuilder;
 
 
+/**
+ * Shape-driven JSON-LD to RDF decoder.
+ *
+ * <p>Converts leniently compacted/framed JSON-LD descriptions to RDF models.</p>
+ */
 final class JSONLDDecoder {
 
 	private final IRI focus;
@@ -56,16 +64,16 @@ final class JSONLDDecoder {
 	JSONLDDecoder(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
-		this.shape=driver(shape);
+		this.shape=JSONLDInspector.driver(shape);
 
 		this.keywords=keywords;
 
 		this.base=URI.create(focus.stringValue());
 
-		final Map<String, String> aliases2keywords=keywords
+		final Map<String, String> labels2keywords=keywords
 				.entrySet().stream().collect(toMap(Entry::getValue, Entry::getKey));
 
-		this.resolver=alias -> aliases2keywords.getOrDefault(alias, alias);
+		this.resolver=label -> labels2keywords.getOrDefault(label, label);
 	}
 
 
@@ -86,8 +94,8 @@ final class JSONLDDecoder {
 			error("conflicting object identifiers: expected <%s>, declared <%s>", expected, declared);
 		}
 
-		final JsonObject object=keywords.containsKey("@id") ? // make sure the root object contains @id
-				json : createObjectBuilder(json).add("@id", expected).build();
+		final JsonObject object=keywords.containsKey("@id") ? json
+				: createObjectBuilder(json).add("@id", expected).build(); // make sure the root object contains @id
 
 		final Collection<Statement> model=new ArrayList<>();
 
@@ -99,9 +107,9 @@ final class JSONLDDecoder {
 
 	Stream<Entry<Value, Stream<Statement>>> values(final JsonValue value, final Shape shape) {
 
-		final boolean tagged=tagged(shape);
+		final boolean tagged=JSONLDInspector.tagged(shape);
 
-		final Set<String> langs=tagged ? langs(shape).orElseGet(Collections::emptySet) : emptySet();
+		final Set<String> langs=tagged ? JSONLDInspector.langs(shape).orElseGet(Collections::emptySet) : emptySet();
 		final String lang=langs.size() == 1 ? langs.iterator().next() : "";
 
 		if ( tagged && value instanceof JsonArray && !lang.isEmpty() ) {
@@ -161,13 +169,14 @@ final class JSONLDDecoder {
 				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
 				: (language != null) ? entry(literal(value, language), Stream.empty())
 
-				: entry(literal(value, datatype(shape).orElse(XSD.STRING)), Stream.empty());
+				: entry(literal(value, JSONLDInspector.datatype(shape).orElse(XSD.STRING)), Stream.empty());
 	}
 
 	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
-		final IRI type=datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
+		final IRI type=
+				JSONLDInspector.datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
 
 		final Value value=ResourceType.equals(type) ? resource(text)
 				: BNodeType.equals(type) ? bnode(text)
@@ -179,7 +188,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=datatype(shape).orElse(null);
+		final IRI datatype=JSONLDInspector.datatype(shape).orElse(null);
 
 		final Literal value
 
@@ -203,7 +212,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> resource(final JsonObject object, final Shape shape, final Resource focus) {
 
-		final Map<String, Field> fields=fields(shape, keywords);
+		final Map<String, Field> labels=labels(shape, keywords);
 
 		return entry(focus, object.entrySet().stream().flatMap(entry -> {
 
@@ -216,7 +225,7 @@ final class JSONLDDecoder {
 
 			} else if ( !label.startsWith("@") && !value.equals(JsonValue.NULL) ) {
 
-				final Field field=fields.get(label);
+				final Field field=labels.get(label);
 
 				if ( field == null ) {
 					return error("unknown property label <%s>", label);
@@ -224,13 +233,18 @@ final class JSONLDDecoder {
 
 				return values(value, field.shape()).flatMap(pair -> {
 
-					final IRI iri=field.name();
 					final Value target=pair.getKey();
 					final Stream<Statement> model=pair.getValue();
 
-					final Statement edge=direct(iri) ? statement(focus, iri, target)
-							: target instanceof Resource ? statement((Resource)target, inverse(iri), focus)
-							: error("target for inverse property is not a resource <%s: %s>", label, pair);
+					final Statement edge=traverse(field.iri(),
+
+							iri -> statement(focus, iri, target),
+
+							iri -> target instanceof Resource
+									? statement((Resource)target, iri, focus)
+									: error("target for inverse property is not a resource <%s: %s>", label, pair)
+
+					);
 
 					return Stream.concat(Stream.of(edge), model);
 

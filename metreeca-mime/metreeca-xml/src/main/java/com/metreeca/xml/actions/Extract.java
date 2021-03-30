@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.metreeca.xml.actions.XPath.XPath;
 import static java.util.Arrays.asList;
 import static java.util.Comparator.comparingDouble;
 
@@ -57,7 +56,7 @@ public final class Extract implements Function<Node, Optional<Node>> {
 
 					.of(annotate(root))
 
-					.flatMap(XPath(x -> x.nodes("//*")))
+					.flatMap(new XPath<>(x -> x.nodes("//*")))
 
 					.max(comparingDouble(value -> get(value, "echars", 0.0)))
 

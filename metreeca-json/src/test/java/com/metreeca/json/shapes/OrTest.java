@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +20,30 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Any.any;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.guard;
 import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
+import static com.metreeca.json.shapes.When.when;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 
 final class OrTest {
@@ -65,27 +68,31 @@ final class OrTest {
 		}
 
 		@Test void testCollapseDuplicates() {
-			assertThat(or(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(or(datatype(RDF.NIL),
-					minCount(1)));
+			assertThat(
+
+					or(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))
+
+			).isEqualTo(
+
+					or(datatype(RDF.NIL), minCount(1))
+
+			);
 		}
 
 		@Test void testPreserveOrder() {
-			assertThat(or(field(RDF.FIRST), field(RDF.REST)).map(new Shape.Probe<Collection<Shape>>() {
+			assertThat(or(
+
+					field(RDF.FIRST), field(RDF.REST)
+
+			).map(new Shape.Probe<Collection<Shape>>() {
 
 				@Override public Collection<Shape> probe(final Or or) { return or.shapes(); }
 
-			})).containsExactly(field(RDF.FIRST), field(RDF.REST));
-		}
+			})).containsExactly(
 
+					field(RDF.FIRST), field(RDF.REST)
 
-		@Test void testCollapseCompatibleAliases() {
-			assertThat(or(alias("alias"), alias("alias")))
-					.isEqualTo(alias("alias"));
-		}
-
-		@Test void testReportClashingAliases() {
-			assertThatThrownBy(() -> or(alias("this"), alias("that")))
-					.isInstanceOf(IllegalArgumentException.class);
+			);
 		}
 
 
@@ -131,8 +138,111 @@ final class OrTest {
 
 
 		@Test void testMergeCompatibleFields() {
-			assertThat(or(field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3))))
-					.isEqualTo(field(RDF.VALUE, or(minCount(1), maxCount(3))));
+			assertThat(or(
+
+					field(RDF.VALUE, minCount(1)),
+					field(RDF.VALUE, maxCount(3))
+
+			)).isEqualTo(
+
+					field(RDF.VALUE, or(minCount(1), maxCount(3)))
+
+			);
+		}
+
+		@Test void testDifferentiateInverseFields() {
+			assertThat(or(
+
+					field(RDF.VALUE),
+					field(Values.inverse(RDF.VALUE))
+
+			).map(new Shape.Probe<Collection<Shape>>() {
+
+				@Override public Collection<Shape> probe(final Or or) { return or.shapes(); }
+
+			})).containsExactly(
+
+					field(RDF.VALUE),
+					field(Values.inverse(RDF.VALUE))
+
+			);
+		}
+
+		@Test void testCollapseEqualFieldLabels() {
+			assertThat(or(
+
+					field("alias", RDF.VALUE),
+					field("alias", RDF.VALUE)
+
+			)).isEqualTo(
+
+					field("alias", RDF.VALUE)
+
+			);
+		}
+
+		@Test void testCollapseCompatibleFieldLabels() {
+			assertThat(or(
+
+					field(RDF.VALUE),
+					field("alias", RDF.VALUE)
+
+			)).isEqualTo(
+
+					field("alias", RDF.VALUE)
+
+			);
+		}
+
+		@Test void testReportClashingFieldLabels() {
+			assertThatIllegalArgumentException().isThrownBy(() -> or(
+
+					field("x", RDF.VALUE),
+					field("y", RDF.VALUE)
+
+			));
+		}
+
+
+		@Test void testMergeDirectLinks() {
+			assertThat(or(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(OWL.SAMEAS, maxCount(2))
+
+			)).isEqualTo(link(OWL.SAMEAS, or(minCount(1), maxCount(2))));
+		}
+
+		@Test void testMergeInverseLinks() {
+			assertThat(or(
+
+					link(inverse(OWL.SAMEAS), minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			)).isEqualTo(link(inverse(OWL.SAMEAS), or(minCount(1), maxCount(2))));
+		}
+
+		@Test void testReportConflictingLinks() {
+			assertThatIllegalArgumentException().isThrownBy(() -> or(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			));
+		}
+
+
+		@Test void testMergeCompatibleWhens() {
+			assertThat(or(
+
+					when(guard("axis", "value"), minCount(1)),
+					when(guard("axis", "value"), maxCount(3))
+
+			)).isEqualTo(
+
+					when(guard("axis", "value"), or(minCount(1), maxCount(3)))
+
+			);
 		}
 
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,19 @@ import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.Format.mimes;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
 import static com.metreeca.rest.formats.TextFormat.text;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 
 final class RDFFormatTest {
@@ -64,11 +66,11 @@ final class RDFFormatTest {
 
 			assertThat((Object)Binary)
 					.as("none matching")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("text/none")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("text/none")));
 
 			assertThat((Object)Turtle)
 					.as("single matching")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("text/turtle")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("text/turtle")));
 
 			assertThat((Object)Turtle)
 					.as("leading matching")
@@ -80,11 +82,11 @@ final class RDFFormatTest {
 
 			assertThat((Object)Binary)
 					.as("wildcard")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("*/*, text/plain;q=0.1")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("*/*, text/plain;q=0.1")));
 
 			assertThat((Object)Turtle)
 					.as("type pattern")
-					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, types("text/*, text/plain;q=0.1")));
+					.isSameAs(service(org.eclipse.rdf4j.rio.RDFFormat.BINARY, mimes("text/*, text/plain;q=0.1")));
 
 		}
 
@@ -95,7 +97,7 @@ final class RDFFormatTest {
 							StandardCharsets.UTF_8, "",
 							org.eclipse.rdf4j.rio.RDFFormat.NO_NAMESPACES, org.eclipse.rdf4j.rio.RDFFormat.NO_CONTEXTS,
 							org.eclipse.rdf4j.rio.RDFFormat.NO_RDF_STAR
-					), types("text/none"))
+					), mimes("text/none"))
 			);
 		}
 
@@ -172,12 +174,15 @@ final class RDFFormatTest {
 					.base("http://example.com/base/")
 					.path("/")
 
-					.reply(response -> response
-							.status(Response.OK)
-							.attribute(shape(), field(LDP.CONTAINS, datatype(Values.IRIType)))
-							.body(rdf(), singletonList(statement(
-									iri("http://example.com/base/"), LDP.CONTAINS, iri("http://example.com/base/x")
-							)))
+					.reply(response -> {
+								return response
+										.status(Response.OK)
+										.attribute(shape(), field(LDP.CONTAINS, datatype(Values.IRIType)))
+										.body(rdf(), singletonList(statement(
+												iri("http://example.com/base/"), LDP.CONTAINS, iri("http://example"
+														+ ".com/base/x")
+										)));
+							}
 					)
 
 					.accept(response -> assertThat(response)

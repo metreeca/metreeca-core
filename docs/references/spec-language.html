@@ -1,5 +1,5 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl
+  Copyright © 2013-2021 Metreeca srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -28,39 +28,24 @@
 	<body><input id="toggle" type="checkbox">
 		<nav>
 			<header>
-				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.54.1</span></a></span><label for="toggle"></label>
+				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.55.0</span></a></span><label for="toggle"></label>
 			</header>
 			<section><a class="title" onclick="document.querySelector('main').scrollTo(0, 0)">Shape Specification
-				Language Reference</a><h1><a href="#shapes">Shapes</a></h1><h2><a href="#annotations">Annotations</a>
-			</h2><h2><a href="#value-constraints">Value Constraints</a></h2><h2><a href="#set-constraints">Set
-				Constraints</a></h2><h2><a href="#structural-constraints">Structural Constraints</a></h2><h2>
-				<a href="#logical-constraints">Logical Constraints</a></h2><h1><a href="#parameters">Parameters</a></h1>
-				<h2><a href="#role-axis">Role Axis</a></h2><h2><a href="#task-axis">Task Axis</a></h2><h2>
-					<a href="#area-axis">Area Axis</a></h2><h2><a href="#mode-axis">Mode Axis</a></h2></section>
+				Language Reference</a><h1><a href="#shapes">Shapes</a></h1><h2><a href="#value-constraints">Value
+				Constraints</a></h2><h2><a href="#set-constraints">Set Constraints</a></h2><h2>
+				<a href="#structural-constraints">Structural Constraints</a></h2><h2><a href="#logical-constraints">Logical
+				Constraints</a></h2><h1><a href="#parameters">Parameters</a></h1><h2><a href="#role-axis">Role Axis</a>
+			</h2><h2><a href="#task-axis">Task Axis</a></h2><h2><a href="#view-axis">View Axis</a></h2><h2>
+				<a href="#mode-axis">Mode Axis</a></h2></section>
 		</nav>
 		<main>
 			<header>Shape Specification Language Reference</header>
-			<section>
-				<svg xmlns="http://www.w3.org/2000/svg" class="adm-hidden">
-					<symbol id="adm-note">
-						<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<g fill="currentColor">
-								<path d="m15.4 5h4.5v2.7h-4.5z" transform="matrix(-.7071 -.7071 .7071 -.7071 25.7188 23.288)"/>
-								<path d="m13.9 7 3.1 3.1-9.5 9.6-3.5.3.3-3.5z"/>
-							</g>
-						</svg>
-					</symbol>
-					<symbol id="adm-warning">
-						<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-							<path d="m3.1 18.5 8.1-14c.4-.7 1.4-.7 1.8 0l8.1 14c.4.7-.1 1.6-.9 1.6h-16.1c-.9 0-1.4-.9-1-1.6zm10.6-4.3c0-.1 0-.2 0-.2v-4.6c0-.4 0-.6 0-.6-.1-.1-.3-.2-.7-.3s-.7-.1-1-.1c-.1 0-.2 0-.3 0-.3.1-.5.2-.5.4v4.2s-.1.1-.2.4-.1.4 0 .5c.3.2.7.4 1.2.6s.9.3 1.2.3h.2c.2 0 .3-.2.3-.5-.2 0-.2-.1-.2-.1zm-.8 1.4c-.5-.2-.9-.2-1.2-.2s-.4.1-.5.4v.9c0 .2 0 .3-.1.4-.1.2-.2.3-.1.4s.5.3 1.2.5c.6.2 1 .2 1.1.2.2 0 .4-.1.4-.3s.1-.4.1-.7c0-.1 0-.3.1-.7 0-.3 0-.5 0-.5-.2-.1-.5-.2-1-.4z" fill="currentColor"/>
-						</svg>
-					</symbol>
-				</svg>
-				<p>Most framework services are driven by declarative linked data models defined using a
-					<a href="#shapes">shape</a>-based specification language.</p>
+			<section><p>Most framework services are driven by declarative linked data models defined using a
+				<a href="#shapes">shape</a>-based specification
+				language.</p>
 				<p>Models are <a href="../tutorials/publishing-jsonld-apis">programmaticaly</a> built using a Java‑based
-					DSL and can eventually automate a range of different tasks in the lifecycle of linked data REST APIs.
-				</p>
+					DSL and can eventually
+					automate a range of different tasks in the lifecycle of linked data REST APIs.</p>
 				<table>
 					<thead>
 						<tr>
@@ -107,17 +92,7 @@
 						</tr>
 					</tbody>
 				</table>
-				<div class="adm-block adm-note">
-					<div class="adm-heading">
-						<svg class="adm-icon">
-							<use xlink:href="#adm-note"/>
-						</svg>
-						<span>Note</span>
-					</div>
-					<div class="adm-body">
-						<p>Some of the described features aren't (yet ;-) supported by the framework.</p>
-					</div>
-				</div>
+				<p>!!! note Some of the described features aren't (yet ;-) supported by the framework.</p>
 				<h1 id="shapes">Shapes</h1>
 				<p>Linked data <a href="../javadocs/com/metreeca/json/Shape.html">shapes</a> define the expected
 					structure of RDF resource descriptions in terms of <strong>constraints</strong> imposed on members of
@@ -133,72 +108,9 @@
 					connected by <a href="#structural-constraints">structural constraints</a> may be recursively
 					validated. Validation results are reported as a structured
 					<a href="../javadocs/com/metreeca/json/Trace.html">focus validation trace</a>.</p>
-				<h2 id="annotations">Annotations</h2>
-				<p>Non-validating shapes documenting shape metadata, to be used for purposes such as shape redaction,
-					form building or predictable data encoding.</p>
-				<table>
-					<thead>
-						<tr>
-							<th>shape</th>
-							<th>value</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Meta.html">meta</a>(IRI, value, …)</td>
-							<td>the metadata property identified by the given tag is associated with the given value in
-								the enclosing shape
-							</td>
-						</tr>
-						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html">guard</a>(axis, value, …)</td>
-							<td>the focus set is consistent with this shape only if the value of an externally assigned
-								<a href="../javadocs/com/metreeca/json/Shape.html#redact-java.util.function.Function...-">axis
-									variable</a> is included in a given set of target values
-							</td>
-						</tr>
-					</tbody>
-				</table>
-				<p>Common metadata annotations are directly available as shorthand shapes.</p>
-				<table>
-					<thead>
-						<tr>
-							<th align="left">shorthand shape</th>
-							<th align="left">value</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td align="left">
-								<a href="../javadocs/com/metreeca/json/shapes/Meta.html#alias-java.lang.String-">alias</a>(&quot;alias&quot;)
-							</td>
-							<td align="left">an alternate property name for reporting values for the enclosing shape
-								(e.g. in the <a href="jsonld-format#properties">context</a> of JSON-LD serialization
-								results)
-							</td>
-						</tr>
-						<tr>
-							<td align="left"><a href="../javadocs/com/metreeca/json/shapes/Meta.html#label--">label</a>(&quot;label&quot;)
-							</td>
-							<td align="left">a human-readable textual label for the enclosing shape</td>
-						</tr>
-						<tr>
-							<td align="left">
-								<a href="../javadocs/com/metreeca/json/shapes/Meta.html#notes-java.lang.String-">notes</a>(&quot;notes&quot;)
-							</td>
-							<td align="left">a human-readable textual description of the enclosing shape</td>
-						</tr>
-						<tr>
-							<td align="left"><a href="../javadocs/com/metreeca/json/shapes/Meta.html#index-boolean-">index</a>(true|false)
-							</td>
-							<td align="left">an indexing hint: <code>true</code> if the value of the enclosing shape
-								should be indexed in the storage backed, <code>false</code> otherwise
-							</td>
-						</tr>
-					</tbody>
-				</table>
 				<h2 id="value-constraints">Value Constraints</h2>
-				<p>Primitive shapes specifying constraints to be individually met by each value in the focus set.</p>
+				<p>Primitive shapes specifying constraints to be individually satisfied by each value in the focus
+					set.</p>
 				<table>
 					<thead>
 						<tr>
@@ -310,7 +222,8 @@
 					</tbody>
 				</table>
 				<h2 id="set-constraints">Set Constraints</h2>
-				<p>Primitive shapes specifying constraints to be collectively met by the RDF terms in the focus set.</p>
+				<p>Primitive shapes specifying constraints to be collectively satisfied by the values in the focus
+					set.</p>
 				<table>
 					<thead>
 						<tr>
@@ -397,7 +310,8 @@
 					</tbody>
 				</table>
 				<h2 id="structural-constraints">Structural Constraints</h2>
-				<p>Composite shapes specifying constraints to be met by a derived focus set generated by a path.</p>
+				<p>Composite shapes specifying constraints to be satisfied by a derived focus set generated by a
+					path.</p>
 				<table>
 					<thead>
 						<tr>
@@ -407,18 +321,23 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td align="left">
-								<a href="../javadocs/com/metreeca/json/shapes/Field.html">field</a>(IRI, <a href="../javadocs/com/metreeca/json/Shape.html">shape</a>)
+							<td align="left"><a href="../javadocs/com/metreeca/json/shapes/Field.html">field</a>([&quot;label&quot;,
+								] IRI, <a href="../javadocs/com/metreeca/json/Shape.html">shape</a>, …)
 							</td>
-							<td align="left">the derived focus set generated by a single step path is consistent with a
-								given shape
+							<td align="left">the derived focus set generated by traversing a single step path is
+								consistent with a given set of shapes
+							</td>
+						</tr>
+						<tr>
+							<td align="left"><a href="../javadocs/com/metreeca/json/shapes/Link.html">link</a>(IRI,
+								<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>, …)
+							</td>
+							<td align="left">the derived focus set generated by virtually traversing a single step path
+								linking a resource alias to its target is consistent with a given set of shapes
 							</td>
 						</tr>
 					</tbody>
 				</table>
-				<p>Inverse path steps may be generated using the
-					<a href="../javadocs/com/metreeca/json/Values.html#inverse-org.eclipse.rdf4j.model.IRI-">Values.inverse(IRI)</a>
-					factory method.</p>
 				<h2 id="logical-constraints">Logical Constraints</h2>
 				<p>Composite shapes specifying logical combinations of shapes.</p>
 				<table>
@@ -430,16 +349,13 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td align="left">
-								<a href="../javadocs/com/metreeca/json/shapes/And.html">and</a>(<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>, …)
+							<td align="left"><a href="../javadocs/com/metreeca/json/shapes/Guard.html">guard</a>(axis,
+								value, …)
 							</td>
-							<td align="left">the focus set is consistent with all shapes in a given target set</td>
-						</tr>
-						<tr>
-							<td align="left">
-								<a href="../javadocs/com/metreeca/json/shapes/Or.html">or</a>(<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>, …)
-							</td>
-							<td align="left">the focus set is consistent with at least one shape in a given target set
+							<td align="left">the focus set is consistent with this shape only if the value of an
+								externally assigned
+								<a href="../javadocs/com/metreeca/json/Shape.html#redact-java.lang.String-java.util.Collection-">axis
+									variable</a> is included in a given set of target values
 							</td>
 						</tr>
 						<tr>
@@ -447,25 +363,29 @@
 								<a href="../javadocs/com/metreeca/json/shapes/When.html">when</a>(<a href="../javadocs/com/metreeca/json/Shape.html">test</a>,<a href="../javadocs/com/metreeca/json/Shape.html">pass</a>
 								[, <a href="../javadocs/com/metreeca/json/Shape.html">fail</a>])
 							</td>
-							<td align="left">the focus set is consistent either with a <em>pass</em> shape, if consistent
-								also with a <em>test</em> shape, or with a <em>fail</em> shape, otherwise; if omitted,
-								the <code>fail</code> shape defaults to <code>and()</code>, that is it's always meet
+							<td align="left">the focus set is consistent either with a <code>pass</code> shape, if
+								consistent also with a <code>test</code> shape, or with a <code>fail</code> shape,
+								otherwise; if omitted, the <code>fail</code> shape defaults to <code>and()</code>, that
+								is it's always meet
+							</td>
+						</tr>
+						<tr>
+							<td align="left">
+								<a href="../javadocs/com/metreeca/json/shapes/And.html">and</a>(<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…)
+							</td>
+							<td align="left">the focus set is consistent with all shapes in a given target set</td>
+						</tr>
+						<tr>
+							<td align="left">
+								<a href="../javadocs/com/metreeca/json/shapes/Or.html">or</a>(<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…)
+							</td>
+							<td align="left">the focus set is consistent with at least one shape in a given target set
 							</td>
 						</tr>
 					</tbody>
 				</table>
-				<div class="adm-block adm-warning">
-					<div class="adm-heading">
-						<svg class="adm-icon">
-							<use xlink:href="#adm-warning"/>
-						</svg>
-						<span>Warning</span>
-					</div>
-					<div class="adm-body">
-						<p>Test shapes for conditional constraints are currently limited to combinations of parametric
-							<code>guards</code> and logical operators.</p>
-					</div>
-				</div>
 				<h1 id="parameters">Parameters</h1>
 				<p>The combined use of conditional (<code>when</code>) and parametric (<code>guard</code>) constraints
 					supports the definition of <strong>parametric</strong> shapes, which specify different sets of
@@ -523,34 +443,52 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#create--">create</a>()</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#create-com.metreeca.json.Shape...-">create</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
 							<td>POST</td>
 							<td>resource creation</td>
 						</tr>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#relate--">relate</a>()</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#relate-com.metreeca.json.Shape...-">relate</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
 							<td>GET</td>
 							<td>resource retrieval</td>
 						</tr>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#update--">update</a>()</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#update-com.metreeca.json.Shape...-">update</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
 							<td>PUT</td>
 							<td>resource updating</td>
 						</tr>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#delete--">delete</a>()</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#delete-com.metreeca.json.Shape...-">delete</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
 							<td>DELETE</td>
 							<td>resouce deletion</td>
 						</tr>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#client--">client</a>()</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#client-com.metreeca.json.Shape...-">client</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
 							<td>POST+GET+DELETE</td>
 							<td>shorthand for client-managed data, specified at creation time, but not updated
 								afterwards
 							</td>
 						</tr>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#server--">server</a>()</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#server-com.metreeca.json.Shape...-">server</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
 							<td>GET+DELETE</td>
 							<td>shorthand for server-managed data, neither specified at creation time, nor updated
 								afterwards
@@ -558,9 +496,9 @@
 						</tr>
 					</tbody>
 				</table>
-				<h2 id="area-axis">Area Axis</h2>
+				<h2 id="view-axis">View Axis</h2>
 				<p>Parametric guards for the
-					<a href="../javadocs/com/metreeca/json/shapes/Guard.html#area-java.lang.Object...-">area</a> axis
+					<a href="../javadocs/com/metreeca/json/shapes/Guard.html#view-java.lang.Object...-">view</a> axis
 					selectively enable target shapes according to the usage context.</p>
 				<table>
 					<thead>
@@ -571,20 +509,18 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#target--">target</a>()</td>
-							<td>collection resource description</td>
-						</tr>
-						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#member--">member</a>()</td>
-							<td>collection member description (shorthand for digest+detail)</td>
-						</tr>
-						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#digest--">digest</a>()</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#digest-com.metreeca.json.Shape...-">digest</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
 							<td>short resource description, e.g. inside search result sets</td>
 						</tr>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#detail--">detail</a>()</td>
-							<td>full resource description</td>
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#detail-com.metreeca.json.Shape...-">detail</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
+							<td>detailed resource description, e.g. inside advanced resource utilities</td>
 						</tr>
 					</tbody>
 				</table>
@@ -601,21 +537,25 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#convey--">convey</a>()</td>
-							<td>target shapes are to be used only for validating incoming data or extracting outgoing
-								data and not for selecting existing resources to be processed
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#convey-com.metreeca.json.Shape...-">convey</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
+							</td>
+							<td>target shapes are to be considered only when validating incoming data or extracting
+								outgoing data
 							</td>
 						</tr>
 						<tr>
-							<td><a href="../javadocs/com/metreeca/json/shapes/Guard.html#filter--">filter</a>()</td>
-							<td>target shapes are to be used only for selecting existing resources to be processed and
-								not for validating incoming data or extracting outgoing data
+							<td>
+								<a href="../javadocs/com/metreeca/json/shapes/Guard.html#filter-com.metreeca.json.Shape...-">filter</a>([<a href="../javadocs/com/metreeca/json/Shape.html">shape</a>,
+								…])
 							</td>
+							<td>target shapes are to be considered only when selecting resources to be processed</td>
 						</tr>
 					</tbody>
 				</table>
 			</section>
-			<footer>© 2020 Metreeca srl. This work is licensed under the
+			<footer>© 2021 Metreeca srl. This work is licensed under the
 				<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA 4.0 License</a>
 			</footer>
 		</main>

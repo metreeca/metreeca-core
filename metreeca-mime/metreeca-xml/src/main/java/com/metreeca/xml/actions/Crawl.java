@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.rest.Request.HEAD;
-import static com.metreeca.rest.actions.Regex.Regex;
-import static com.metreeca.xml.actions.XPath.XPath;
 import static com.metreeca.xml.formats.HTMLFormat.html;
 import static java.lang.Runtime.getRuntime;
 
@@ -241,10 +239,10 @@ public final class Crawl implements Function<String, Stream<String>> {
 
 								.peek(node -> pages.put(page, true)) // successfully processed
 
-								.flatMap(XPath(p -> p.links("//html:a/@href")))
+								.flatMap(new XPath<>(p -> p.links("//html:a/@href")))
 
-								.map(Regex(r -> r.replace("#.*$", ""))) // remove anchor
-								.map(Regex(r -> r.replace("\\?.*$", ""))) // remove query // !!! ?
+								.map(new Regex<>(r -> r.replace("#.*$", ""))) // remove anchor
+								.map(new Regex<>(r1 -> r1.replace("\\?.*$", ""))) // remove query // !!! ?
 
 								.filter(link -> { // keep only nested resources
 									try {

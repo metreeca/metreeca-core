@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.metreeca.json.Shape;
 /**
  * Lexical maximum length constraint.
  *
- * <p>States that the length of the lexical representation of each term in the focus set is less than or equal to the
+ * <p>States that the length of the lexical representation of each value in the focus set is less than or equal to the
  * given maximum value.</p>
  */
 public final class MaxLength extends Shape {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,14 @@
 package com.metreeca.rest;
 
 
+import java.util.*;
 import java.util.function.*;
 
 import static com.metreeca.rest.Handler.handler;
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.Unauthorized;
+
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 
@@ -91,6 +96,8 @@ import static java.util.Objects.requireNonNull;
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Creates a pre-processing wrapper.
 	 *
@@ -112,33 +119,6 @@ import static java.util.Objects.requireNonNull;
 	}
 
 	/**
-	 * Creates a pre-processing body wrapper.
-	 *
-	 * @param <V>    the type of the request body to be pre-processed
-	 * @param format the format of the request body to be pre-processed
-	 * @param mapper the request body mapper; takes as argument a request and its {@code format} body and must return
-	 *               a non-null updated value
-	 *
-	 * @return a wrapper that pre-process request {@code format} bodies using {@code mapper}
-	 *
-	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
-	 */
-	public static <V> Wrapper preprocessor(
-			final Format<V> format, final BiFunction<? super Request, ? super V, V> mapper) {
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		return handler -> request ->
-				request.body(format).fold(request::reply, value -> handler.handle(
-						request.body(format, requireNonNull(mapper.apply(request, value), "null mapper return value"))
-						)
-				);
-	}
-
-
-	/**
 	 * Creates a  {@linkplain Response#success() successful} post-processing wrapper.
 	 *
 	 * @param mapper a response mapping function; must return a non-null value
@@ -154,9 +134,37 @@ import static java.util.Objects.requireNonNull;
 		}
 
 		return handler -> request -> handler.handle(request).map(response -> response.success()
-				? requireNonNull(mapper.apply(response), "null mapper return values")
+				? requireNonNull(mapper.apply(response), "null mapper return value")
 				: response
 		);
+	}
+
+
+	/**
+	 * Creates a pre-processing body wrapper.
+	 *
+	 * @param <V>    the type of the request body to be pre-processed
+	 * @param format the format of the request body to be pre-processed
+	 * @param mapper the request body mapper; takes as argument a request and its {@code format} body and must return a
+	 *               non-null updated value
+	 *
+	 * @return a wrapper that pre-process request {@code format} bodies using {@code mapper}
+	 *
+	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
+	 */
+	public static <V> Wrapper preprocessor(
+			final Format<V> format, final BiFunction<? super Request, ? super V, V> mapper
+	) {
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		return handler -> request ->
+				request.body(format).fold(request::reply, value -> handler.handle(
+						request.body(format, requireNonNull(mapper.apply(request, value), "null mapper return value"))
+						)
+				);
 	}
 
 	/**
@@ -165,14 +173,16 @@ import static java.util.Objects.requireNonNull;
 	 * @param <V>    the type of the response body to be post-processed
 	 * @param format the format of the response body to be post-processed
 	 * @param mapper the response body mapper; takes as argument a response and its {@code format} body and must
-	 *               return a non-null updated value
+	 *                  return a
+	 *               non-null updated value
 	 *
 	 * @return a wrapper that post-process successful response {@code format} bodies using {@code mapper}
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code mapper} is null
 	 */
 	public static <V> Wrapper postprocessor(
-			final Format<V> format, final BiFunction<? super Response, ? super V, V> mapper) {
+			final Format<V> format, final BiFunction<? super Response, ? super V, V> mapper
+	) {
 
 		if ( mapper == null ) {
 			throw new NullPointerException("null mapper");
@@ -182,8 +192,52 @@ import static java.util.Objects.requireNonNull;
 				response.success() ? response.body(format).fold(error -> { throw error; },
 						value -> response.body(format,
 								requireNonNull(mapper.apply(response, value), "null mapper return value")
-				)) : response
+						)) : response
 		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a role-based access controller.
+	 *
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
+	 *              wrapped handler
+	 *
+	 * @return a new role-based access controller rejecting all requests with no enabled user {@code roles} with
+	 * a {@link Response#Unauthorized} status code
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public static Wrapper roles(final Object... roles) {
+
+		if ( roles == null || Arrays.stream(roles).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		return roles(asList(roles));
+	}
+
+	/**
+	 * Creates a role-based access controller.
+	 *
+	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
+	 *              wrapped handler
+	 *
+	 * @return a new role-based access controller rejecting all requests with no enabled user {@code roles} with
+	 * a {@link Response#Unauthorized} status code
+	 *
+	 * @throws NullPointerException if {@code roles} is null or contains null values
+	 */
+	public static Wrapper roles(final Collection<Object> roles) {
+
+		if ( roles == null || roles.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null roles");
+		}
+
+		return handler -> request -> request.roles().stream().anyMatch(roles::contains)
+				? handler.handle(request) : request.reply(status(Unauthorized)); // !!! 404 under strict security
 	}
 
 

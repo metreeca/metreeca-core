@@ -1,15 +1,22 @@
 ---
 title:      REST Faceted Search Reference
-excerpt:    REST faceted search queries and serialization
 ---
 
-REST/JSON-LD APIs published with the Metreeca/Link framework support engine-managed faceted search capabilities, driven by structural and typing constraints specified in the underlying linked data model.
+[comment]: <> (excerpt:    REST faceted search queries and serialization)
+
+
+REST/JSON-LD APIs published with the Metreeca/Link framework support engine-managed faceted search capabilities, driven
+by structural and typing constraints specified in the underlying linked data model.
 
 # Queries
 
-[Queries](../javadocs/com/metreeca/json/Query.html) define what kind of results is expected from faceted searches on [readable](../tutorials/consuming-jsonld-apis.md#read-operations) linked data REST/JSON-LD APIs.
+[Queries](../javadocs/com/metreeca/json/Query.html) define what kind of results is expected from faceted searches
+on [readable](../tutorials/consuming-jsonld-apis.md#read-operations) linked data REST/JSON-LD APIs.
 
-JSON query serialization extends the idiomatic [JSON-LD](jsonld-format.md) format with query-specific objects for serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to all values appearing in filters, including [shorthands](jsonld-format.md#literals) for numeric values and literals with provable datatypes.
+JSON query serialization extends the idiomatic [JSON-LD](jsonld-format.md) format with query-specific objects for
+serializing facet [filters](#facet-filters) and property [paths](#property-paths). Standard JSON serialization applies to
+all values appearing in filters, including [shorthands](jsonld-format.md#literals) for numeric values and literals with
+provable datatypes.
 
 !!! warning
 	Work in progress… specs to be improved and detailed.
@@ -34,9 +41,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
         
         ⋮
         
-        "_order": <criterion> | [<criterion>,(<criterion>)*],
-        "_offset": <integer>,
-        "_limit": <integer>
+        ".order": <criterion> | [<criterion>,(<criterion>)*],
+        ".offset": <integer>,
+        ".limit": <integer>
         
     }
     
@@ -59,8 +66,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
         
         ⋮
     
-        "_terms": "<path>"
-    
+        ".terms": "<path>",
+        ".offset": <integer>,
+        ".limit": <integer>
     }
 
 ```
@@ -88,8 +96,9 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
     
     ⋮
 
-    "_stats": "<path>"
-    
+    ".stats": "<path>",
+    ".offset": <integer>,
+    ".limit": <integer>
 }
 ```
 
@@ -156,5 +165,5 @@ The second form supports idiomatic collection filtering (e.g. `http://example.co
 ## Property Paths
 
 ```
-<path> ::= (<alias> ('.' <alias>)*)?
+<path> ::= (<label> ('.' <label>)*)?
 ```

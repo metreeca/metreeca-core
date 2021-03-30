@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,30 +20,53 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
+import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.guard;
 import static com.metreeca.json.shapes.Lang.lang;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
+import static com.metreeca.json.shapes.When.when;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 
 final class AndTest {
+
+	//@Test void testOrdering() {
+	//	assertThat(and(
+	//
+	//			field(RDF.FIRST),
+	//			convey(field(RDF.VALUE)),
+	//			field(RDF.REST)
+	//
+	//	).map(new Shape.Probe<Collection<Shape>>() {
+	//
+	//		@Override public Collection<Shape> probe(final And and) { return and.shapes(); }
+	//
+	//	})).containsExactly(
+	//
+	//			field(RDF.FIRST),
+	//			convey(field(RDF.VALUE)),
+	//			field(RDF.REST)
+	//
+	//	);
+	//}
 
 	@Nested final class Optimization {
 
@@ -65,26 +88,24 @@ final class AndTest {
 		}
 
 		@Test void testCollapseDuplicates() {
-			assertThat(and(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(and(datatype(RDF.NIL), minCount(1)));
+			assertThat(and(datatype(RDF.NIL), datatype(RDF.NIL), minCount(1))).isEqualTo(and(datatype(RDF.NIL),
+					minCount(1)));
 		}
 
 		@Test void testPreserveOrder() {
-			assertThat(and(field(RDF.FIRST), field(RDF.REST)).map(new Shape.Probe<Collection<Shape>>() {
+			assertThat(and(
+
+					field(RDF.FIRST), field(RDF.REST)
+
+			).map(new Shape.Probe<Collection<Shape>>() {
 
 				@Override public Collection<Shape> probe(final And and) { return and.shapes(); }
 
-			})).containsExactly(field(RDF.FIRST), field(RDF.REST));
-		}
+			})).containsExactly(
 
+					field(RDF.FIRST), field(RDF.REST)
 
-		@Test void testCollapseCompatibleAliases() {
-			assertThat(and(alias("alias"), alias("alias")))
-					.isEqualTo(alias("alias"));
-		}
-
-		@Test void testReportClashingAliases() {
-			assertThatThrownBy(() -> and(alias("this"), alias("that")))
-					.isInstanceOf(IllegalArgumentException.class);
+			);
 		}
 
 
@@ -104,11 +125,25 @@ final class AndTest {
 		}
 
 		@Test void testOptimizeRange() {
+
 			assertThat(and(range(a, b), range(b, c))).isEqualTo(range(b));
+
+			assertThat(and(range(a, b), range())).isEqualTo(range(a, b));
+			assertThat(and(range(), range(b, c))).isEqualTo(range(b, c));
+
+			assertThatIllegalArgumentException().isThrownBy(() -> and(range(a), range(b)));
+
 		}
 
 		@Test void testOptimizeLang() {
+
 			assertThat(and(lang("en", "it"), lang("en", "fr"))).isEqualTo(lang("en"));
+
+			assertThat(and(lang(), lang("en", "fr"))).isEqualTo(lang("en", "fr"));
+			assertThat(and(lang("en", "it"), lang())).isEqualTo(lang("en", "it"));
+
+			assertThatIllegalArgumentException().isThrownBy(() -> and(lang("en"), lang("fr")));
+
 		}
 
 
@@ -130,8 +165,111 @@ final class AndTest {
 
 
 		@Test void testMergeCompatibleFields() {
-			assertThat(and(field(RDF.VALUE, minCount(1)), field(RDF.VALUE, maxCount(3))))
-					.isEqualTo(field(RDF.VALUE, and(minCount(1), maxCount(3))));
+			assertThat(and(
+
+					field(RDF.VALUE, minCount(1)),
+					field(RDF.VALUE, maxCount(3))
+
+			)).isEqualTo(
+
+					field(RDF.VALUE, and(minCount(1), maxCount(3)))
+
+			);
+		}
+
+		@Test void testDifferentiateInverseFields() {
+			assertThat(and(
+
+					field(RDF.VALUE),
+					field(inverse(RDF.VALUE))
+
+			).map(new Shape.Probe<Collection<Shape>>() {
+
+				@Override public Collection<Shape> probe(final And and) { return and.shapes(); }
+
+			})).containsExactly(
+
+					field(RDF.VALUE),
+					field(inverse(RDF.VALUE))
+
+			);
+		}
+
+		@Test void testCollapseEqualFieldLabels() {
+			assertThat(and(
+
+					field("alias", RDF.VALUE),
+					field("alias", RDF.VALUE)
+
+			)).isEqualTo(
+
+					field("alias", RDF.VALUE)
+
+			);
+		}
+
+		@Test void testCollapseCompatibleFieldLabels() {
+			assertThat(and(
+
+					field(RDF.VALUE),
+					field("alias", RDF.VALUE)
+
+			)).isEqualTo(
+
+					field("alias", RDF.VALUE)
+
+			);
+		}
+
+		@Test void testReportClashingFieldLabels() {
+			assertThatIllegalArgumentException().isThrownBy(() -> and(
+
+					field("x", RDF.VALUE),
+					field("y", RDF.VALUE)
+
+			));
+		}
+
+
+		@Test void testMergeDirectLinks() {
+			assertThat(and(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(OWL.SAMEAS, maxCount(2))
+
+			)).isEqualTo(link(OWL.SAMEAS, and(minCount(1), maxCount(2))));
+		}
+
+		@Test void testMergeInverseLinks() {
+			assertThat(and(
+
+					link(inverse(OWL.SAMEAS), minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			)).isEqualTo(link(inverse(OWL.SAMEAS), and(minCount(1), maxCount(2))));
+		}
+
+		@Test void testReportConflictingLinks() {
+			assertThatIllegalArgumentException().isThrownBy(() -> and(
+
+					link(OWL.SAMEAS, minCount(1)),
+					link(inverse(OWL.SAMEAS), maxCount(2))
+
+			));
+		}
+
+
+		@Test void testMergeCompatibleWhens() {
+			assertThat(and(
+
+					when(guard("axis", "value"), minCount(1)),
+					when(guard("axis", "value"), maxCount(3))
+
+			)).isEqualTo(
+
+					when(guard("axis", "value"), and(minCount(1), maxCount(3)))
+
+			);
 		}
 
 	}

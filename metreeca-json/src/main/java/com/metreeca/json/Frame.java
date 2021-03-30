@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.base.AbstractIRI;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
@@ -26,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
+
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
@@ -103,7 +105,7 @@ public final class Frame {
 			throw new NullPointerException("null path");
 		}
 
-		return test(path,
+		return traverse(path,
 
 				direct -> (focus, model) -> model.stream()
 						.filter(s -> focus.equals(s.getSubject()) && direct.equals(s.getPredicate()))
@@ -162,11 +164,6 @@ public final class Frame {
 		}
 
 		return (focus, model) -> paths.stream().flatMap(path -> path.apply(focus, model));
-	}
-
-
-	private static <V> V test(final IRI predicate, final Function<IRI, V> direct, final Function<IRI, V> inverse) {
-		return direct(predicate) ? direct.apply(predicate) : inverse.apply(inverse(predicate));
 	}
 
 
@@ -318,7 +315,7 @@ public final class Frame {
 				throw new NullPointerException("null value");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
 
 					direct -> {
 
@@ -377,7 +374,7 @@ public final class Frame {
 				throw new NullPointerException("null values");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
 
 					direct -> values.map(value -> {
 
@@ -417,7 +414,7 @@ public final class Frame {
 				throw new NullPointerException("null frame");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(this.frame.focus, Stream.concat(this.frame.model.stream(), traverse(path,
 
 					direct -> {
 
@@ -482,7 +479,7 @@ public final class Frame {
 				throw new NullPointerException("null frames");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), test(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
 
 					direct -> frames.flatMap(frame -> {
 
@@ -519,6 +516,54 @@ public final class Frame {
 					})
 
 			)).collect(toCollection(LinkedHashSet::new)));
+		}
+
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final class Inverse extends AbstractIRI {
+
+		private static final long serialVersionUID=7576383707001017160L;
+
+
+		private final String string;
+
+		private final String namespace;
+		private final String localname;
+
+
+		Inverse(final String namespace, final String localname) {
+
+			this.string=namespace+localname;
+
+			this.namespace=namespace;
+			this.localname=localname;
+		}
+
+
+		@Override public String stringValue() {
+			return string;
+		}
+
+		@Override public String getNamespace() {
+			return namespace;
+		}
+
+		@Override public String getLocalName() {
+			return localname;
+		}
+
+
+		@Override public boolean equals(final Object object) {
+			return object == this || object instanceof Inverse && super.equals(object);
+		}
+
+		@Override public int hashCode() { return -super.hashCode(); }
+
+		@Override public String toString() {
+			return "^"+super.toString();
 		}
 
 	}

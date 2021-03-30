@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,23 +29,21 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 
 final class ShapeInferencer extends Shape.Probe<Shape> {
 
-	@Override public Shape probe(final Shape shape) { return shape; }
-
-
-	@Override public Shape probe(final Meta meta) {
-		return meta.label().equals("hint") ? and(meta, datatype(ResourceType)) : meta;
-	}
+	private static final Shape IRIDatatype=datatype(IRIType);
+	private static final Shape ResourceDatatype=datatype(ResourceType);
 
 
 	@Override public Shape probe(final Datatype datatype) {
@@ -86,17 +84,29 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		return and(localized, datatype(RDF.LANGSTRING));
 	}
 
+	@Override public Shape probe(final Link link) {
+		return and(link(link.iri(), and(link.shape().map(this), ResourceDatatype)), ResourceDatatype);
+	}
 
 	@Override public Shape probe(final Field field) {
 
-		final IRI iri=field.name();
+		final String label=field.label();
+		final IRI iri=field.iri();
 		final Shape shape=field.shape().map(this);
 
-		return iri.equals(RDF.TYPE) ? and(field(iri, and(shape, datatype(IRIType))), datatype(ResourceType))
-				: direct(iri) ? and(field(iri, shape), datatype(ResourceType))
-				: field(iri, and(shape, datatype(ResourceType)));
+		return iri.equals(RDF.TYPE) ? and(field(label, iri, and(shape, IRIDatatype)), ResourceDatatype)
+				: direct(iri) ? and(field(label, iri, shape), ResourceDatatype)
+				: field(label, iri, and(shape, ResourceDatatype));
 	}
 
+
+	@Override public Shape probe(final When when) {
+		return when(
+				when.test().map(this),
+				when.pass().map(this),
+				when.fail().map(this)
+		);
+	}
 
 	@Override public Shape probe(final And and) {
 
@@ -106,6 +116,10 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 			@Override public Boolean probe(final Localized localized) {
 				return true;
+			}
+
+			@Override public Boolean probe(final Link link) {
+				return link.shape().map(this);
 			}
 
 			@Override public Boolean probe(final And and) {
@@ -122,6 +136,10 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 
 			@Override public Integer probe(final Lang lang) {
 				return lang.tags().size();
+			}
+
+			@Override public Integer probe(final Link link) {
+				return link.shape().map(this);
 			}
 
 			@Override public Integer probe(final And and) {
@@ -141,12 +159,7 @@ final class ShapeInferencer extends Shape.Probe<Shape> {
 		return or(or.shapes().stream().map(s -> s.map(this)).collect(toList()));
 	}
 
-	@Override public Shape probe(final When when) {
-		return when(
-				when.test().map(this),
-				when.pass().map(this),
-				when.fail().map(this)
-		);
-	}
+
+	@Override public Shape probe(final Shape shape) { return shape; }
 
 }

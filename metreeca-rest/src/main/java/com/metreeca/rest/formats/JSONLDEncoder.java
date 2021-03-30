@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
 import com.metreeca.json.shapes.Field;
+import com.metreeca.json.shapes.MaxCount;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import javax.json.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -32,15 +31,25 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 
+import javax.json.*;
+
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.formats.JSONLDCodec.*;
+import static com.metreeca.json.shapes.Field.labels;
+import static com.metreeca.rest.formats.JSONLDInspector.datatype;
+import static com.metreeca.rest.formats.JSONLDInspector.driver;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
+
 import static javax.json.Json.*;
 
 
+/**
+ * Shape-driven RDF to JSON-LD encoder.
+ *
+ * <p>Converts RDF models to strictly compacted/framed JSON-LD descriptions.</p>
+ */
 final class JSONLDEncoder {
 
 	private static final Collection<IRI> InternalTypes=new HashSet<>(asList(ValueType, ResourceType, LiteralType));
@@ -76,9 +85,7 @@ final class JSONLDEncoder {
 				)
 				.orElse("/");
 
-		final Map<String, String> keywords2aliases=keywords;
-
-		this.aliaser=keyword -> keywords2aliases.getOrDefault(keyword, keyword);
+		this.aliaser=keyword -> keywords.getOrDefault(keyword, keyword);
 	}
 
 
@@ -93,10 +100,6 @@ final class JSONLDEncoder {
 		return resource(focus, shape, model, resource -> false).asJsonObject();
 	}
 
-	JsonValue encode(final Value value) {
-		return value(value, shape, emptySet(), resource -> true);
-	}
-
 
 	//// Values ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -105,15 +108,17 @@ final class JSONLDEncoder {
 			final Collection<Statement> model, final Predicate<Resource> trail
 	) {
 
-		if ( tagged(shape) && values.stream().map(Values::lang).allMatch(Objects::nonNull) ) { // tagged literals
+		final int maxCount=MaxCount.maxCount(shape);
 
-			return taggeds(values, shape);
+		if ( JSONLDInspector.tagged(shape) ) { // tagged literals
 
-		} else if ( scalar(shape) && values.size() == 1 ) { // single subject
+			return taggeds(values, shape, maxCount == 1);
 
-			return value(values.iterator().next(), shape, model, trail);
+		} else if ( maxCount == 1 ) { // single value
 
-		} else { // multiple subjects
+			return value(values.iterator().next(), shape, model, trail); // values required to be not empty
+
+		} else { // multiple values
 
 			final JsonArrayBuilder array=createArrayBuilder();
 
@@ -132,7 +137,7 @@ final class JSONLDEncoder {
 
 		return value instanceof Resource ? resource((Resource)value, shape, model, trail)
 				: value instanceof Literal ? literal((Literal)value, shape)
-				: null;
+				: null; // unexpected
 
 	}
 
@@ -145,7 +150,7 @@ final class JSONLDEncoder {
 	) { // !!! refactor
 
 		final Object datatype=datatype(shape).orElse(null);
-		final Map<String, Field> fields=fields(shape, keywords);
+		final Map<String, Field> labels=labels(shape, keywords);
 
 		final boolean inlineable=IRIType.equals(datatype)
 				|| BNodeType.equals(datatype)
@@ -156,12 +161,12 @@ final class JSONLDEncoder {
 		if ( trail.test(resource) ) { // a back-reference to an enclosing copy of self -> omit fields
 
 			return inlineable
-					? Json.createValue(id)
+					? createValue(id)
 					: createObjectBuilder().add(aliaser.apply("@id"), id).build();
 
-		} else if ( inlineable && resource instanceof IRI && fields.isEmpty() ) { // inline proved leaf IRI
+		} else if ( inlineable && resource instanceof IRI && labels.isEmpty() ) { // inline proved leaf IRI
 
-			return Json.createValue(id);
+			return createValue(id);
 
 		} else {
 
@@ -179,24 +184,21 @@ final class JSONLDEncoder {
 
 			};
 
+			for (final Map.Entry<String, Field> entry : labels.entrySet()) {
 
-			for (final Map.Entry<String, Field> entry : fields.entrySet()) {
-
-				final String alias=entry.getKey();
+				final String label=entry.getKey();
 				final Field field=entry.getValue();
 
-				final IRI predicate=field.name();
 				final Shape nestedShape=field.shape();
 
-				final boolean direct=direct(predicate);
-
-				final Collection<? extends Value> values=direct
-						? objects(model, resource, predicate)
-						: subjects(model, resource, inverse(predicate));
+				final Collection<? extends Value> values=traverse(field.iri(),
+						iri -> objects(model, resource, iri),
+						iri -> subjects(model, resource, iri)
+				);
 
 				if ( !values.isEmpty() ) { // omit null value and empty arrays
 
-					object.add(alias, values(values, nestedShape, model, nestedTrail));
+					object.add(label, values(values, nestedShape, model, nestedTrail));
 
 				}
 
@@ -207,7 +209,7 @@ final class JSONLDEncoder {
 			}
 
 			if ( context ) {
-				context(resource.equals(focus) ? keywords : emptyMap(), fields).ifPresent(context ->
+				context(resource.equals(focus) ? keywords : emptyMap(), labels).ifPresent(context ->
 						object.add("@context", context)
 				);
 			}
@@ -231,52 +233,51 @@ final class JSONLDEncoder {
 
 			fields.forEach((alias, field) -> {
 
-				final IRI name=field.name();
+				final IRI iri=field.iri();
 				final Shape shape=field.shape();
 
-				final boolean direct=direct(name);
-				final String iri=name.stringValue();
 
 				final Optional<IRI> datatype=datatype(shape);
+
+				final String traverse=direct(iri) ? "@id" : "@reverse";
+				final String label=traverse(iri, Value::stringValue, Value::stringValue);
 
 				if ( datatype.filter(IRIType::equals).isPresent() ) {
 
 					context.add(alias, createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@type", "@id")
 					);
 
 				} else if ( datatype.filter(RDF.LANGSTRING::equals).isPresent() ) {
 
-					final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
+					final Set<String> langs=JSONLDInspector.langs(shape).orElseGet(Collections::emptySet);
 
 					context.add(alias, langs.size() == 1
 
 							? createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@language", langs.iterator().next())
 
 							: createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@container", "@language")
 					);
 
 				} else if ( datatype.filter(type -> !InternalTypes.contains(type)).isPresent() ) {
 
 					context.add(alias, createObjectBuilder()
-							.add(direct ? "@id" : "@reverse", iri)
+							.add(traverse, label)
 							.add("@type", datatype.get().stringValue())
 					);
 
-				} else if ( direct ) {
+				} else if ( direct(iri) ) {
 
-					context.add(alias, iri);
+					context.add(alias, label);
 
 				} else {
 
-					context.add(alias, createObjectBuilder()
-							.add("@reverse", iri)
-					);
+					context.add(alias, createObjectBuilder().add("@reverse", label));
 
 				}
 
@@ -315,15 +316,15 @@ final class JSONLDEncoder {
 	}
 
 	private JsonValue literal(final String value) {
-		return Json.createValue(value);
+		return createValue(value);
 	}
 
 	private JsonValue literal(final BigInteger value) {
-		return Json.createValue(value);
+		return createValue(value);
 	}
 
 	private JsonValue literal(final BigDecimal value) {
-		return Json.createValue(value);
+		return createValue(value);
 	}
 
 
@@ -344,33 +345,26 @@ final class JSONLDEncoder {
 
 	//// Tagged Literals //////////////////////////////////////////////////////////////////////////////////////////////
 
-	private JsonValue taggeds(final Collection<? extends Value> values, final Shape shape) {
+	private JsonValue taggeds(final Collection<? extends Value> values, final Shape shape, final boolean scalar) {
 
-		final boolean unique=localized(shape) || scalar(shape);
+		// !!! refactor
 
-		final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
+		final boolean localized=JSONLDInspector.localized(shape);
+		final Set<String> langs=JSONLDInspector.langs(shape).orElseGet(Collections::emptySet);
 
 		final Map<String, List<String>> langToStrings=values.stream()
-
-				.filter(Literal.class::isInstance)
-				.map(Literal.class::cast)
-
+				.map(Literal.class::cast) // datatype already checked by values()
 				.collect(groupingBy(
-						literal -> literal.getLanguage().orElse(""),
+						literal -> literal.getLanguage().orElse(""), // datatype already checked by values()
 						LinkedHashMap::new,
 						mapping(Value::stringValue, toList())
 				));
 
-		if ( langs.size() == 1 && langToStrings.keySet().equals(langs) ) { // known language
+		if ( langs.size() == 1 ) { // known language
 
-			final List<String> strings=langToStrings
-					.entrySet()
-					.stream()
-					.findFirst()
-					.map(Map.Entry::getValue)
-					.orElseGet(Collections::emptyList);
+			final List<String> strings=langToStrings.values().iterator().next(); // values required to be non empty
 
-			if ( unique && strings.size() == 1 ) { // single value
+			if ( localized || scalar ) { // single value
 
 				return createValue(strings.get(0));
 
@@ -386,10 +380,9 @@ final class JSONLDEncoder {
 
 			langToStrings.forEach((lang, strings) -> {
 
-				if ( unique && strings.size() == 1 ) { // single value
+				if ( localized || scalar ) { // single value
 
 					builder.add(lang, createValue(strings.get(0)));
-
 
 				} else { // multiple values
 

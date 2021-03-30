@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ public final class Trace {
 		final JsonObjectBuilder builder=Json.createObjectBuilder();
 
 		if ( !issues().isEmpty() ) {
-			builder.add("", Json.createArrayBuilder(issues));
+			builder.add("@errors", Json.createArrayBuilder(issues));
 		}
 
 		fields().forEach((label, nested) -> {

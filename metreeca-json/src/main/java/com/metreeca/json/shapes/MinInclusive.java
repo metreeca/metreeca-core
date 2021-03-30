@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static com.metreeca.json.Values.value;
 /**
  * Inclusive minimum value constraint.
  *
- * <p>States that each term in the focus set is greater than or equal to a given minimum value, according to <a
+ * <p>States that each value in the focus set is greater than or equal to a given minimum value, according to <a
  * href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules.</p>
  */
 public final class MinInclusive extends Shape {

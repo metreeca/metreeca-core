@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,35 @@
 package com.metreeca.rest.assets;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.queries.Stats;
+import com.metreeca.json.queries.Terms;
+import com.metreeca.json.shapes.Field;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.operators.Creator;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import javax.json.JsonObject;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.term;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
-import static com.metreeca.rest.Either.Left;
-import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.formats.JSONFormat.json;
-import static com.metreeca.rest.formats.JSONLDFormat.*;
+import static com.metreeca.rest.Response.Forbidden;
+import static com.metreeca.rest.Response.Unauthorized;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 
 
 /**
@@ -42,22 +53,63 @@ import static com.metreeca.rest.formats.JSONLDFormat.*;
  *
  * <p>Handles model-driven CRUD operations on resource managed by a specific storage backend.</p>
  *
- * <p>When acting as a wrapper, ensures that requests are handled within a storage transaction:</p>
- *
- * <ul>
- *
- *      <li>if a transaction is not already active on the underlying storage, begins one and commits it on successful
- *     handler completion;</li>
- *
- *      <li>if the handler throws an exception, rolls back the transaction and rethrows the exception;</li>
- *
- *      <li>in either case, no action is taken if the transaction was already terminated inside the handler.</li>
- *
- * </ul>
- *
- * <p>Falls back to plain handler execution if transactions are not supported by this engine.</p>
+ * <p>When acting as a wrapper, ensures that requests are handled on a single connection to the storage backend.</p>
  */
 public interface Engine extends Wrapper {
+
+	public static IRI terms=term("terms");
+	public static IRI stats=term("stats");
+
+	public static IRI value=term("value");
+	public static IRI count=term("count");
+
+	public static IRI min=term("min");
+	public static IRI max=term("max");
+
+	public static Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
+
+
+	public static Shape StatsShape(final Stats query) {
+
+		final Shape shape=query.shape();
+		final List<IRI> path=query.path();
+
+		final Stream<Field> fields=shape.redact(Mode, Convey).walk(path).map(Field::fields).orElseGet(Stream::empty);
+		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
+
+		return and(
+
+				field(count, required(), datatype(XSD.INTEGER)),
+				field(min, optional(), term),
+				field(max, optional(), term),
+
+				field(stats, multiple(),
+						field(count, required(), datatype(XSD.INTEGER)),
+						field(min, required(), term),
+						field(max, required(), term)
+				)
+
+		);
+	}
+
+	public static Shape TermsShape(final Terms query) {
+
+		final Shape shape=query.shape();
+		final List<IRI> path=query.path();
+
+		final Stream<Field> fields=shape.redact(Mode, Convey).walk(path).map(Field::fields).orElseGet(Stream::empty);
+		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
+
+		return and(
+				field(terms, multiple(),
+						field(value, required(), term),
+						field(count, required(), datatype(XSD.INTEGER))
+				)
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Retrieves the default engine factory.
@@ -75,88 +127,54 @@ public interface Engine extends Wrapper {
 	 * Creates a throttler wrapper.
 	 *
 	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
-	 * @param area the accepted values for the {@linkplain Guard#Area task} parametric axis
+	 * @param view the accepted values for the {@linkplain Guard#View task} parametric axis
 	 *
 	 * @return returns a wrapper performing role-based shape redaction and shape-based authorization
 	 */
-	public static Wrapper throttler(final Object task, final Object... area) { // !!! optimize/cache
+	public static Wrapper throttler(final Object task, final Object view) { // !!! optimize/cache
 		return handler -> request -> {
 
-			final Shape shape=request.attribute(shape());
+			final Shape shape=request.attribute(shape()) // visible taking into account task/area
 
-			final Shape baseline=shape.redact(  // visible to anyone taking into account task/area
-					retain(Role, true),
-					retain(Task, task),
-					retain(Area, area),
-					retain(Mode, Convey)
+					.redact(Task, task)
+					.redact(View, view)
+					.redact(Mode, Convey);
+
+			final Shape baseline=shape // visible to anyone
+
+					.redact(Role);
+
+			final Shape authorized=shape // visible to user
+
+					.redact(Role, request.roles());
+
+
+			final UnaryOperator<Request> incoming=message -> message.map(shape(), s -> s
+
+					.redact(Role, message.roles())
+					.redact(Task, task)
+					.redact(View, view)
+
+					.localize(message.request().langs())
+
 			);
 
-			final Shape authorized=shape.redact( // visible to user taking into account task/area
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(Area, area),
-					retain(Mode, Convey)
+			final UnaryOperator<Response> outgoing=message -> message.map(shape(), s -> s
+
+					.redact(Role, message.request().roles())
+					.redact(Task, task)
+					.redact(View, view)
+					.redact(Mode, Convey)
+
+					.localize(message.request().langs())
 
 			);
-
-			// request shape redactor
-
-			final UnaryOperator<Request> pre=message -> message.attribute(shape(), message.attribute(shape()).redact(
-
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(Area, area)
-
-			));
-
-			// response shape redactor
-
-			final UnaryOperator<Response> post=message -> message.attribute(shape(), message.attribute(shape()).redact(
-					retain(Role, request.roles()),
-					retain(Task, task),
-					retain(Area, area),
-					retain(Mode, Convey)
-			));
 
 			return baseline.empty() ? request.reply(status(Forbidden))
 					: authorized.empty() ? request.reply(status(Unauthorized))
-					: handler.handle(request.map(pre)).map(post);
+					: handler.handle(request.map(incoming)).map(outgoing);
 
 		};
-	}
-
-	/**
-	 * Creates a validator wrapper.
-	 *
-	 * @return returns a wrapper performing model-driven {@linkplain JSONLDFormat#validate(IRI, Shape, JsonObject)
-	 * validation} of request JSON-LD bodies
-	 */
-	public static Wrapper validator() {
-		return handler -> request -> request.body(json())
-
-				.flatMap(object -> validate(iri(request.item()), request.attribute(shape()), object).fold(
-						trace -> Left(status(UnprocessableEntity, trace.toJSON())),
-						model -> Right(handler.handle(request))
-				))
-
-				.fold(request::reply);
-	}
-
-	/**
-	 * Creates a trimmer wrapper.
-	 *
-	 * @return returns a wrapper performing engine-assisted {@linkplain JSONLDFormat#trim(IRI, Shape, JsonObject)
-	 * trimming} of {@linkplain Response#success() successful} response JSON-LD bodies
-	 */
-	public static Wrapper trimmer() {
-		return handler -> request -> handler.handle(request).map(response -> response.success()
-
-				? response.body(json())
-				.map(json -> response.body(json(), trim(iri(response.item()), response.attribute(shape()), json)))
-				.fold(response::map)
-
-				: response
-		);
 	}
 
 
@@ -165,7 +183,7 @@ public interface Engine extends Wrapper {
 	/**
 	 * Handles creation requests.
 	 *
-	 * <p>Handles creation requests on the linked data resource identified by the request {@linkplain Request#item()
+	 * <p>Handles creation requests of the linked data resource identified by the request {@linkplain Request#item()
 	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
 	 * {@linkplain JSONLDFormat#shape() shape}.</p>
 	 *
@@ -175,6 +193,9 @@ public interface Engine extends Wrapper {
 	 * request}
 	 *
 	 * @throws NullPointerException if {@code request} is null
+	 * @implSpec Concrete implementations must assume that {@link Request#path()} was already configured with a unique
+	 * identifier for the resource to be created and the {@linkplain JSONLDFormat JSON-LD} payload of the request
+	 * rewritten accordingly, for instance by an outer {@link Creator} handler
 	 */
 	public Future<Response> create(final Request request);
 
@@ -192,6 +213,21 @@ public interface Engine extends Wrapper {
 	 * @throws NullPointerException if {@code request} is null
 	 */
 	public Future<Response> relate(final Request request);
+
+	/**
+	 * Handles browsing requests.
+	 *
+	 * <p>Handles browsing requests on the linked data container identified by the request {@linkplain Request#item()
+	 * item} possibly using the message {@linkplain JSONLDFormat#shape() shape}.</p>
+	 *
+	 * @param request a browsing request for the managed linked data container
+	 *
+	 * @return a lazy response generated for the managed linked data container in reaction to the retrieval {@code
+	 * request}
+	 *
+	 * @throws NullPointerException if {@code request} is null
+	 */
+	public Future<Response> browse(final Request request);
 
 	/**
 	 * Handles updating requests.

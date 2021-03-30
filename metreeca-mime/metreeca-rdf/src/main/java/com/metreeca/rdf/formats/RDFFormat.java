@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ import java.util.function.Function;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
-import static com.metreeca.rest.Message.types;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
@@ -180,7 +179,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 			final String base=focus.stringValue();
 			final String type=message.header("Content-Type").orElse("");
 
-			final RDFParser parser=service(RDFParserRegistry.getInstance(), TURTLE, types(type)).getParser();
+			final RDFParser parser=service(RDFParserRegistry.getInstance(), TURTLE, mimes(type)).getParser();
 
 			customizer.accept(parser.getParserConfig());
 
@@ -247,7 +246,7 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
 
-		final List<String> types=types(message.request().header("Accept").orElse(""));
+		final List<String> types=mimes(message.request().header("Accept").orElse(""));
 
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
 		final RDFWriterFactory factory=service(registry, TURTLE, types);

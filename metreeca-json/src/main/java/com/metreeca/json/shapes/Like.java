@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,15 @@ public final class Like extends Shape {
 		return builder.append(")").toString();
 	}
 
+
+	public static Shape like(final String keywords) {
+
+		if ( keywords == null ) {
+			throw new NullPointerException("null keywords");
+		}
+
+		return new Like(keywords, false);
+	}
 
 	public static Shape like(final String keywords, final boolean stemming) {
 

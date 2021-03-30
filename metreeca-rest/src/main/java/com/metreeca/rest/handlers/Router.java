@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Request.*;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonMap;
 
 
 /**
@@ -110,7 +112,7 @@ public final class Router implements Handler {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<String, Function<Request, Optional<Future<Response>>>> routes=new LinkedHashMap<>();
-	private final Map<String, Handler> methods=new LinkedHashMap<>(singletonMap(Request.OPTIONS, this::options));
+	private final Map<String, Handler> methods=new LinkedHashMap<>();
 
 
 	private Router() {}
@@ -175,7 +177,7 @@ public final class Router implements Handler {
 	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Router options(final Handler handler) {
-		return method(Request.OPTIONS, handler);
+		return method(OPTIONS, handler);
 	}
 
 
@@ -189,7 +191,7 @@ public final class Router implements Handler {
 	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Router head(final Handler handler) {
-		return method(Request.HEAD, handler);
+		return method(HEAD, handler);
 	}
 
 	/**
@@ -202,7 +204,7 @@ public final class Router implements Handler {
 	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Router get(final Handler handler) {
-		return method(Request.GET, handler);
+		return method(GET, handler);
 	}
 
 
@@ -216,7 +218,7 @@ public final class Router implements Handler {
 	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Router post(final Handler handler) {
-		return method(Request.POST, handler);
+		return method(POST, handler);
 	}
 
 	/**
@@ -229,7 +231,7 @@ public final class Router implements Handler {
 	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Router put(final Handler handler) {
-		return method(Request.PUT, handler);
+		return method(PUT, handler);
 	}
 
 	/**
@@ -242,7 +244,7 @@ public final class Router implements Handler {
 	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Router patch(final Handler handler) {
-		return method(Request.PATCH, handler);
+		return method(PATCH, handler);
 	}
 
 	/**
@@ -255,7 +257,7 @@ public final class Router implements Handler {
 	 * @throws NullPointerException if {@code handler} is null
 	 */
 	public Router delete(final Handler handler) {
-		return method(Request.DELETE, handler);
+		return method(DELETE, handler);
 	}
 
 
@@ -279,8 +281,8 @@ public final class Router implements Handler {
 			throw new NullPointerException("null handler");
 		}
 
-		if ( method.equals(Request.GET) ) {
-			methods.putIfAbsent(Request.HEAD, this::head);
+		if ( method.equals(GET) ) {
+			methods.putIfAbsent(HEAD, this::head);
 		}
 
 		methods.put(method, handler);
@@ -302,13 +304,15 @@ public final class Router implements Handler {
 				.map(route -> route.apply(request))
 
 				.filter(Optional::isPresent)
-				.findFirst()
 				.map(Optional::get)
+				.findFirst()
 
-				.orElseGet(() -> Optional.ofNullable(methods.get(request.method()))
-						.orElse(this::unsupported)
-						.handle(request)
-				);
+				.orElseGet(() -> (
+
+						methods.isEmpty() ? status(NotFound)
+								: methods.getOrDefault(request.method(), this::options)
+
+				).handle(request));
 	}
 
 
@@ -373,22 +377,18 @@ public final class Router implements Handler {
 
 
 	private Future<Response> head(final Request request) {
-		return handle(request.method(Request.GET)).map(response -> response
-				.headers("Content-Lenght", emptyList())
+		return handle(request.method(GET)).map(response -> response
+				.headers("Content-Length", emptyList())
 				.body(output(), target -> {})
 		);
 	}
 
 	private Future<Response> options(final Request request) {
 		return request.reply(response -> response
-				.status(Response.OK)
-				.headers("Allow", methods.keySet()));
-	}
-
-	private Future<Response> unsupported(final Request request) {
-		return request.reply(response -> response
-				.status(Response.MethodNotAllowed)
-				.headers("Allow", methods.keySet()));
+				.status(request.method().equals(OPTIONS) ? OK : MethodNotAllowed)
+				.header("Allow", OPTIONS)
+				.headers("+Allow", methods.keySet())
+		);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Response;
+import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Router;
 
 import org.eclipse.rdf4j.model.ValueFactory;
@@ -28,10 +28,12 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.rio.*;
 
 import java.util.*;
+import java.util.function.Consumer;
 
-import static com.metreeca.rest.Message.types;
+import static com.metreeca.rest.Format.mimes;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.Xtream.guarded;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 
@@ -60,6 +62,9 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private Consumer<Operation> options=operation -> {};
+
+
 	private SPARQL() {
 		delegate(Router.router()
 				.get(this::process)
@@ -68,9 +73,30 @@ public final class SPARQL extends Endpoint<SPARQL> {
 	}
 
 
+	/**
+	 * Configures the options for this endpoint.
+	 *
+	 * @param options an options configurator; takes as argument the SPARQL operation to be configured
+	 *
+	 * @return this endpoint
+	 *
+	 * @throws NullPointerException if {@code options} is null
+	 */
+	public SPARQL options(final Consumer<Operation> options) {
+
+		if ( options == null ) {
+			throw new NullPointerException("null options");
+		}
+
+		this.options=options;
+
+		return this;
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request) {
+	private Future<Response> process(final Request request) {
 		return consumer -> graph().exec(connection -> {
 			try {
 
@@ -84,7 +110,7 @@ public final class SPARQL extends Endpoint<SPARQL> {
 						|| operation instanceof Update && !updatable(request.roles())
 				) {
 
-					request.reply(response -> response.status(com.metreeca.rest.Response.Unauthorized)).accept(consumer);
+					request.reply(response -> response.status(Unauthorized)).accept(consumer);
 
 				} else if ( operation instanceof BooleanQuery ) {
 
@@ -100,7 +126,28 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 				} else if ( operation instanceof Update ) {
 
-					process(request, (Update)operation).accept(consumer);
+					if ( connection.isActive() ) {
+
+						process(request, (Update)operation).accept(consumer);
+
+					} else {
+
+						try {
+
+							connection.begin();
+
+							process(request, (Update)operation).accept(consumer);
+
+							connection.commit();
+
+						} finally {
+
+							if ( connection.isActive() ) { connection.rollback(); }
+
+						}
+
+					}
+
 
 				} else {
 
@@ -126,11 +173,13 @@ public final class SPARQL extends Endpoint<SPARQL> {
 		});
 	}
 
-	private Operation operation(final com.metreeca.rest.Request request, final RepositoryConnection connection) {
+
+	private Operation operation(final Request request, final RepositoryConnection connection) {
 
 		final Optional<String> query=request.parameter("query");
 		final Optional<String> update=request.parameter("update");
 		final Optional<String> infer=request.parameter("infer");
+		final Optional<String> timeout=request.parameter("timeout");
 
 		final Collection<String> basics=request.parameters("default-graph-uri");
 		final Collection<String> nameds=request.parameters("named-graph-uri");
@@ -147,8 +196,10 @@ public final class SPARQL extends Endpoint<SPARQL> {
 			nameds.stream().distinct().forEachOrdered(named -> dataset.addNamedGraph(factory.createIRI(named)));
 
 			operation.setDataset(dataset);
-			operation.setMaxExecutionTime(timeout());
+			operation.setMaxExecutionTime(timeout.map(guarded(Integer::valueOf)).filter(v -> v > 0).orElse(60));
 			operation.setIncludeInferred(infer.map(Boolean::parseBoolean).orElse(true));
+
+			options.accept(operation);
 
 		}
 
@@ -159,31 +210,31 @@ public final class SPARQL extends Endpoint<SPARQL> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final BooleanQuery query) {
+	private Future<Response> process(final Request request, final BooleanQuery query) {
 
 		final boolean result=query.evaluate();
 
 		final String accept=request.header("Accept").orElse("");
 
 		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, mimes(accept));
 
-		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
+		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(output(), output -> factory.getWriter(output).handleBoolean(result))
+				.body(output(), output -> { factory.getWriter(output).handleBoolean(result); })
 		);
 	}
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final TupleQuery query) {
+	private Future<Response> process(final Request request, final TupleQuery query) {
 
 		final TupleQueryResult result=query.evaluate();
 
 		final String accept=request.header("Accept").orElse("");
 
 		final TupleQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, types(accept));
+				TupleQueryResultWriterRegistry.getInstance(), TupleQueryResultFormat.SPARQL, mimes(accept));
 
-		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
+		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getTupleQueryResultFormat().getDefaultMIMEType())
 				.body(output(), output -> {
 					try {
@@ -203,16 +254,16 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				}));
 	}
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final GraphQuery query) {
+	private Future<Response> process(final Request request, final GraphQuery query) {
 
 		final GraphQueryResult result=query.evaluate();
 
 		final String accept=request.header("Accept").orElse("");
 
 		final RDFWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, types(accept));
+				RDFWriterRegistry.getInstance(), RDFFormat.NTRIPLES, mimes(accept));
 
-		return request.reply(response -> response.status(com.metreeca.rest.Response.OK)
+		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getRDFFormat().getDefaultMIMEType())
 				.body(output(), output -> {
 
@@ -235,18 +286,18 @@ public final class SPARQL extends Endpoint<SPARQL> {
 				}));
 	}
 
-	private com.metreeca.rest.Future<com.metreeca.rest.Response> process(final com.metreeca.rest.Request request, final Update update) {
+	private Future<Response> process(final Request request, final Update update) {
 
 		update.execute();
 
 		final String accept=request.header("Accept").orElse("");
 
 		final BooleanQueryResultWriterFactory factory=com.metreeca.rdf.formats.RDFFormat.service(
-				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, types(accept));
+				BooleanQueryResultWriterRegistry.getInstance(), BooleanQueryResultFormat.SPARQL, mimes(accept));
 
-		return request.reply(response -> response.status(Response.OK)
+		return request.reply(response -> response.status(OK)
 				.header("Content-Type", factory.getBooleanQueryResultFormat().getDefaultMIMEType())
-				.body(output(), output -> factory.getWriter(output).handleBoolean(true))
+				.body(output(), output -> { factory.getWriter(output).handleBoolean(true); })
 		);
 	}
 

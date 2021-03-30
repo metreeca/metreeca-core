@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -25,10 +24,11 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.*;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
+
+import javax.json.*;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.optional;
@@ -40,24 +40,26 @@ import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
-import static com.metreeca.json.shapes.Meta.alias;
-import static com.metreeca.json.shapes.Meta.meta;
+import static com.metreeca.rest.Xtream.entry;
+import static com.metreeca.rest.Xtream.map;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptySet;
+
 import static javax.json.Json.*;
 import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class JSONLDDecoderTest {
 
-	private static final String base="http://example.com/";
+	private static final String base="app:/";
 
 	private final BNode a=bnode();
 	private final BNode b=bnode();
 
-	private final IRI w=iri(base, "w");
 	private final IRI x=iri(base, "x");
 	private final IRI y=iri(base, "y");
-	private final IRI z=iri(base, "z");
 
 
 	private Collection<Statement> decode(
@@ -69,7 +71,7 @@ final class JSONLDDecoderTest {
 	private Collection<Statement> decode(
 			final IRI focus, final Shape shape, final Map<String, String> keywords, final JsonObjectBuilder object
 	) {
-		return new JSONLDDecoder(focus, shape, keywords).decode(object.build());
+		return new JSONLDDecoder(focus, shape.expand(), keywords).decode(object.build());
 	}
 
 
@@ -84,7 +86,7 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testReportConflictingKeywords() {
-			assertThatThrownBy(() -> decode(x, meta("@id", "id"), createObjectBuilder()
+			assertThatThrownBy(() -> decode(x, and(), createObjectBuilder()
 
 					.add("id", "/x")
 					.add("@id", "/y")
@@ -93,11 +95,16 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testIgnoreNullFields() {
-			assertThat(decode(x, field(RDF.VALUE, and()), createObjectBuilder()
+			assertThat(decode(x, field(RDF.VALUE), createObjectBuilder()
 
 					.addNull("value")
 
-			)).isIsomorphicTo();
+			)).isIsomorphicTo(
+
+					emptySet()
+
+			);
+
 		}
 
 		@Test void testHandleArrays() {
@@ -113,6 +120,7 @@ final class JSONLDDecoderTest {
 
 					statement(x, RDF.VALUE, literal("x")),
 					statement(x, RDF.VALUE, literal("y"))
+
 			);
 		}
 
@@ -130,6 +138,7 @@ final class JSONLDDecoderTest {
 					.decode(createObjectBuilder().add("value", value).build())
 
 					.stream()
+
 					.filter(s -> s.getPredicate().equals(RDF.VALUE))
 					.findFirst()
 					.map(Statement::getObject)
@@ -225,7 +234,11 @@ final class JSONLDDecoderTest {
 
 					createObjectBuilder()
 
-			)).isIsomorphicTo();
+			)).isIsomorphicTo(
+
+					emptySet()
+
+			);
 		}
 
 		@Test void testAssumeFocusAsSubject() {
@@ -239,7 +252,9 @@ final class JSONLDDecoderTest {
 							)
 
 			)).isIsomorphicTo(
+
 					statement(x, RDF.VALUE, y)
+
 			);
 		}
 
@@ -285,9 +300,7 @@ final class JSONLDDecoderTest {
 			assertThat(decode(x,
 
 					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE,
-									field(RDF.VALUE, required())
-							)
+							field(RDF.VALUE, field(RDF.VALUE, required()))
 					)),
 
 					createObjectBuilder()
@@ -311,7 +324,7 @@ final class JSONLDDecoderTest {
 
 	}
 
-	@Nested final class Aliases {
+	@Nested final class Labels {
 
 		@Test void testDecodeAbsoluteFieldIRIs() {
 			assertThat(decode(x,
@@ -330,7 +343,7 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeDirectInferredAliases() {
+		@Test void testDecodeDirectInferredLabels() {
 			assertThat(decode(x,
 
 					field(RDF.VALUE, and(required())),
@@ -347,7 +360,7 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeInverseInferredAliases() {
+		@Test void testDecodeInverseInferredLabels() {
 			assertThat(decode(x,
 
 					field(inverse(RDF.VALUE), and(required())),
@@ -364,10 +377,10 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeDirectUserDefinedAliases() {
+		@Test void testDecodeDirectUserDefinedLabels() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(alias("alias"), required())),
+					field("alias", RDF.VALUE, required()),
 
 					createObjectBuilder()
 							.add("alias", createObjectBuilder()
@@ -381,10 +394,10 @@ final class JSONLDDecoderTest {
 			);
 		}
 
-		@Test void testDecodeInverseUserDefinedAliases() {
+		@Test void testDecodeInverseUserDefinedLabels() {
 			assertThat(decode(x,
 
-					field(inverse(RDF.VALUE), and(alias("alias"), required())),
+					field("alias", inverse(RDF.VALUE), required()),
 
 					createObjectBuilder()
 							.add("alias", createObjectBuilder()
@@ -399,17 +412,19 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Test void testReportCLashingAliases() {
-			assertThatThrownBy(() -> decode(x,
+		@Test void testReportCLashingLabels() {
+			assertThatThrownBy(() -> {
+				decode(x,
 
-					and(
-							field(iri("http://example.org/value"), and()),
-							field(iri("http://example.net/value"), and())
-					),
+						and(
+								field(iri("http://example.org/value"), and()),
+								field(iri("http://example.net/value"), and())
+						),
 
-					createObjectBuilder()
+						createObjectBuilder()
 
-			)).isInstanceOf(IllegalArgumentException.class);
+				);
+			}).isInstanceOf(IllegalArgumentException.class);
 		}
 
 
@@ -512,7 +527,7 @@ final class JSONLDDecoderTest {
 		@Test void testDecodeProvedTypedLiterals() {
 			assertThat(decode(x,
 
-					field(RDF.VALUE, and(required(), datatype(XSD.DATE))),
+					field(RDF.VALUE, required(), datatype(XSD.DATE)),
 
 					createObjectBuilder()
 
@@ -639,21 +654,21 @@ final class JSONLDDecoderTest {
 
 	@Nested final class Keywords {
 
-		@Test void testHandleKeywordAliases() {
+		@Test void testHandleKeywordLabels() {
 			assertThat(decode(x,
 
-					field(RDF.NIL),
+					field(RDF.FIRST),
 
-					Xtream.map(
-							Xtream.entry("@id", "id"),
-							Xtream.entry("@value", "value"),
-							Xtream.entry("@type", "type"),
-							Xtream.entry("@language", "language")
+					map(
+							entry("@id", "id"),
+							entry("@value", "value"),
+							entry("@type", "type"),
+							entry("@language", "language")
 					),
 
 					createObjectBuilder()
 							.add("id", "/x")
-							.add("nil", createArrayBuilder() // keyword alias overrides field alias
+							.add("first", createArrayBuilder() // keyword alias overrides field alias
 									.add(createObjectBuilder()
 											.add("value", "string")
 											.add("language", "en")
@@ -666,19 +681,23 @@ final class JSONLDDecoderTest {
 
 			)).isIsomorphicTo(
 
-					statement(x, RDF.NIL, literal("string", "en")),
-					statement(x, RDF.NIL, literal("2020-09-10", XSD.DATE))
+					statement(x, RDF.FIRST, literal("string", "en")),
+					statement(x, RDF.FIRST, literal("2020-09-10", XSD.DATE))
 
 			);
 		}
 
 		@Test void testIgnoreDuplicateKeywords() {
-			assertThat(decode(x, and(), Xtream.map(Xtream.entry("@id", "id")), createObjectBuilder()
+			assertThat(decode(x, and(), map(entry("@id", "id")), createObjectBuilder()
 
 					.add("id", "/x")
 					.add("@id", "/x")
 
-			)).isIsomorphicTo();
+			)).isIsomorphicTo(
+
+					emptySet()
+
+			);
 		}
 
 	}

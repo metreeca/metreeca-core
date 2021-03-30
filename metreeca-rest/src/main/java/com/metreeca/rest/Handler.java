@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,8 @@ import java.util.function.Predicate;
 	 * Creates a conditional handler.
 	 *
 	 * @param test the request predicate used to select the handler requests and responses are to be routed to
-	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true
-	 * } on
-	 *             the request
+	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true}
+	 *             on the request
 	 * @param fail the handler requests and responses are to be routed to when {@code test} evaluates to {@code false }
 	 *             on the request
 	 *

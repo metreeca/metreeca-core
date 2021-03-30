@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.handlers.Delegator;
 
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.Delete;
+import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Wrapper.wrapper;
 import static com.metreeca.rest.assets.Engine.engine;
 import static com.metreeca.rest.assets.Engine.throttler;
 
@@ -36,10 +36,9 @@ import static com.metreeca.rest.assets.Engine.throttler;
  *
  * <ul>
  *
- * <li>shape-based {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Guard#Delete} task and the {@linkplain Guard#Target} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
- * resources;</li>
+ * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
+ * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
+ * {@linkplain Guard#Delete} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#delete(Request) deletion}.</li>
  *
@@ -65,14 +64,12 @@ public final class Deleter extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(((Handler)engine::delete)
+		delegate(((Handler)engine::delete)
 
-				.with(wrapper(Request::collection,
-						throttler(Delete, Target),
-						throttler(Delete, Detail)
-				))
+				.with(engine)
+				.with(throttler(Delete, Detail))
 
-		));
+		);
 	}
 
 }

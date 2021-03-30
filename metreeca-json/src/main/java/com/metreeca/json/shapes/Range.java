@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,8 @@ import org.eclipse.rdf4j.model.Value;
 import java.util.*;
 
 import static com.metreeca.json.Values.format;
-import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.And.and;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
@@ -34,7 +35,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Range value constraint.
  *
- * <p>States that each term in the focus set is a member of the given set of target values.</p>
+ * <p>States that each value in the focus set is a member of the given set of target values.</p>
  */
 public final class Range extends Shape {
 
@@ -62,7 +63,7 @@ public final class Range extends Shape {
 			throw new NullPointerException("null values");
 		}
 
-		return values.isEmpty() ? or() : new Range(values);
+		return values.isEmpty() ? and() : new Range(values);
 	}
 
 
@@ -106,7 +107,7 @@ public final class Range extends Shape {
 
 	@Override public String toString() {
 		return "range("+values.stream()
-				.map(v -> format(v).replace("\n", "\n\t"))
+				.map(v -> Values.indent(format(v)))
 				.collect(joining(",\n\t", "\n\t", "\n"))
 				+")";
 	}

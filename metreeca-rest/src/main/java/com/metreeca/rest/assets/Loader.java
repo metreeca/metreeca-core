@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package com.metreeca.rest.assets;
 
-import java.io.InputStream;
+import java.net.URL;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 	 * Retrieves the default loader factory.
 	 *
 	 * @return the default loader factory, which retrieves system resources from the classpath through {@link
-	 * ClassLoader#getResourceAsStream(String)}
+	 * ClassLoader#getResource(String)}
 	 */
 	public static Supplier<Loader> loader() {
 		return () -> path -> {
@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 				throw new NullPointerException("null path");
 			}
 
-			return Optional.ofNullable(Loader.class.getClassLoader().getResourceAsStream(path));
+			return Optional.ofNullable(Loader.class.getClassLoader().getResource(path));
 		};
 	}
 
@@ -54,12 +54,12 @@ import java.util.function.Supplier;
 	 * @param path the path the system resource should be loaded from; path syntax is source dependent, but a
 	 *             filesystem-like slash-separated hierarchical structure is recommended
 	 *
-	 * @return an optional input stream for reading the required resource, if one is available at {@code path};  an
-	 * empty optional, otherwise
+	 * @return an optional URL for the required resource, if one is available at {@code path}; an empty optional,
+	 * otherwise
 	 *
 	 * @throws NullPointerException     if {@code path} is null
 	 * @throws IllegalArgumentException if {@code path} syntax is illegal according to source-specific rules
 	 */
-	public Optional<InputStream> load(final String path);
+	public Optional<URL> load(final String path);
 
 }

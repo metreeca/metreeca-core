@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import java.util.*;
+
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Lang.lang;
+
 
 /**
  * Language localization constraint.
@@ -26,7 +31,33 @@ import com.metreeca.json.Shape;
  */
 public final class Localized extends Shape {
 
-	public static Shape localized() { return new Localized(); }
+	// always include a lang() shape as a hook for Shape.localize(tags)
+
+	public static Shape localized(final String... tags) {
+
+		if ( tags == null || Arrays.stream(tags).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
+		}
+
+		if ( Arrays.stream(tags).anyMatch(String::isEmpty) ) {
+			throw new IllegalArgumentException("empty tags");
+		}
+
+		return and(new Localized(), lang(tags));
+	}
+
+	public static Shape localized(final Collection<String> tags) {
+
+		if ( tags == null || tags.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null tags");
+		}
+
+		if ( tags.stream().anyMatch(String::isEmpty) ) {
+			throw new IllegalArgumentException("empty tags");
+		}
+
+		return and(new Localized(), lang(tags));
+	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

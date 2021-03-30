@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 
 /**
- * Java EE Servlet adapter.
+ * Java EE Servlet connector.
  *
- * <p>Provides an adapter for deploying apps based on Metreeca/Link as web applications managed by a Servlet 3.1
+ * <p>Provides a connector for deploying apps based on Metreeca/Link as web applications managed by a Servlet 3.1
  * container.</p>
  */
 

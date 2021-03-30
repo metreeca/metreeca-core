@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import static java.lang.String.join;
  *
  * <p>Manages CORS HTTP requests.</p>
  *
- * <strong>Warning</strong> don't use in production / Provisional implementation with unsafe shortcuts/
+ * <p><strong>Warning</strong> Don't use in production / Provisional implementation with unsafe shortcuts.</p>
  *
  * @see <a href="https://fetch.spec.whatwg.org/#cors-protocol">Fetch - § 3.2 CORS protocol</a>
  * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS">Cross-Origin Resource Sharing (CORS) @ MDN</a>
@@ -73,7 +73,7 @@ public final class CORS implements Wrapper {
 						"X-Requested-With",
 						"Access-Control-Allow-Header",
 						"Access-Control-Request-Method",
-						"Access-Control-Request-Heade"
+						"Access-Control-Request-Header"
 				))
 
 		);

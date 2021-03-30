@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,28 @@
 package com.metreeca.rest.wrappers;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Field;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
+
+import java.util.Objects;
+
+import static com.metreeca.json.Values.inverse;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
+
+import static java.util.Arrays.stream;
 
 
 /**
  * Shape-based content driver.
  *
- * <p>Drives the lifecycle of linked data resources managed by wrapped handlers with a {@linkplain #driver(Shape...)
- * shape} model:
- *
- * <ul>
- *
- * <li>{@linkplain JSONLDFormat#shape() associates} the driving shape model to incoming requests;</li>
- *
- * </ul>
+ * <p>Drives the lifecycle of linked data resources managed by wrapped handlers {@linkplain JSONLDFormat#shape()
+ * associating} a {@linkplain #driver(Shape...) shape} to incoming requests</p>
  *
  * <p>Wrapped handlers are responsible for:</p>
  *
@@ -53,6 +58,14 @@ import static com.metreeca.json.shapes.And.and;
  */
 public final class Driver implements Wrapper {
 
+	public static final IRI Direct=OWL.SAMEAS;
+	public static final IRI Inverse=inverse(Direct);
+
+	private static final String Tag="__link__";
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Creates a content driver.
 	 *
@@ -63,7 +76,44 @@ public final class Driver implements Wrapper {
 	 * @throws NullPointerException if {@code shape} is null of ccntains null elements
 	 */
 	public static Driver driver(final Shape... shapes) {
+
+		if ( shapes == null || stream(shapes).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null shapes");
+		}
+
 		return new Driver(and(shapes));
+	}
+
+
+	/**
+	 * Creates a direct collapsible {@link OWL#SAMEAS owl:sameAs} field.
+	 *
+	 * @param shapes the field shapes
+	 *
+	 * @return a {@linkplain Field field} with a direct {@link OWL#SAMEAS owl:sameAs} IRI and the given {@code shapes};
+	 * connected nodes in the {@linkplain JSONLDFormat JSON-LD} response model will be collapsed to the subject node and
+	 * the link will be removed from the response shape
+	 *
+	 * @throws NullPointerException if {@code shapes} is null or contains null elements
+	 */
+	public static Shape link(final Shape... shapes) {
+		return field(Tag, Direct, shapes);
+	}
+
+	/**
+	 * Creates an inverse collapsible {@link OWL#SAMEAS owl:sameAs} field.
+	 *
+	 * @param shapes the field shapes
+	 *
+	 * @return a {@linkplain Field field} with an inverse {@link OWL#SAMEAS owl:sameAs} IRI and the given {@code
+	 * shapes};
+	 * connected nodes in the {@linkplain JSONLDFormat JSON-LD} response model will be collapsed to the subject node and
+	 * the link will be removed from the response shape
+	 *
+	 * @throws NullPointerException if {@code shapes} is null or contains null elements
+	 */
+	public static Shape back(final Shape... shapes) {
+		return field(Tag, Inverse, shapes);
 	}
 
 
@@ -82,10 +132,8 @@ public final class Driver implements Wrapper {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request.attribute(JSONLDFormat.shape(), shape));
+		return request -> handler.handle(request.attribute(shape(), shape));
 	}
 
 }

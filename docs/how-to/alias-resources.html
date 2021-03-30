@@ -1,5 +1,5 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl
+  Copyright © 2013-2021 Metreeca srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 	<body><input id="toggle" type="checkbox">
 		<nav>
 			<header>
-				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.54.1</span></a></span><label for="toggle"></label>
+				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.55.0</span></a></span><label for="toggle"></label>
 			</header>
 			<section><a class="title" onclick="document.querySelector('main').scrollTo(0, 0)">How To Alias Resources</a>
 				<h1><a href="#alternate-identifiers">Alternate Identifiers</a></h1><h2><a href="#independent-endpoints">Independent
@@ -46,9 +46,9 @@
 				</p>
 				<pre><code class="language-java">private Optional&lt;String&gt; byname(final RepositoryConnection connection, final String name) {
     return stream(connection.getStatements(null, RDFS.LABEL, literal(name)))
-            .map(Statement::getSubject)
-            .filter(resource -&gt; connection.hasStatement(resource, RDF.TYPE, BIRT.Product, true))
-            .map(Value::stringValue)
+		.map(Statement::getSubject)
+		.filter(resource-&gt;connection.hasStatement(resource,RDF.TYPE,Toys.Product,true))
+		.map(Value::stringValue)
             .findFirst();
 }
 </code></pre>
@@ -109,7 +109,7 @@ Location: http://localhost:8080/products/S72_3212
 Location: http://localhost:8080/products/?~label=Model+A
 </code></pre>
 			</section>
-			<footer>© 2020 Metreeca srl. This work is licensed under the
+			<footer>© 2021 Metreeca srl. This work is licensed under the
 				<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA 4.0 License</a>
 			</footer>
 		</main>

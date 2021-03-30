@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
+import com.metreeca.json.Values;
 
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
@@ -27,11 +28,6 @@ import static com.metreeca.json.shapes.Or.or;
  *
  * <p>States that the focus set is consistent either with a {@linkplain #pass() positive} shape, if consistent also
  * with a {@linkplain #test() test} shape, or with a {@linkplain #fail() negative} shape, otherwise.</p>
- *
- *
- * <p><strong>Warning</strong> / Test shapes are currently limited to non-filtering constraints, that is to parametric
- * {@linkplain Guard guards}, logical operators and annotations: full conditional shape matching will be evaluated for
- * future releases.</p>
  */
 public final class When extends Shape {
 
@@ -123,43 +119,10 @@ public final class When extends Shape {
 
 	@Override public String toString() {
 		return "when(\n\t"
-				+test.toString().replace("\n", "\n\t")+",\n\t"
-				+pass.toString().replace("\n", "\n\t")
-				+(fail.equals(and()) ? "" : ",\n\t"+fail.toString().replace("\n", "\n\t"))
+				+Values.indent(test.toString())+",\n\t"
+				+Values.indent(pass.toString())
+				+(fail.equals(and()) ? "" : ",\n\t"+Values.indent(fail.toString()))
 				+"\n)";
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class FilteringProbe extends Probe<Boolean> {
-
-		@Override public Boolean probe(final Shape shape) { return true; }
-
-
-		@Override public Boolean probe(final Meta meta) { return false; }
-
-		@Override public Boolean probe(final Guard guard) { return false; }
-
-
-		@Override public Boolean probe(final Field field) {
-			return field.shape().map(this);
-		}
-
-		@Override public Boolean probe(final And and) {
-			return and.shapes().stream().anyMatch(shape -> shape.map(this));
-		}
-
-		@Override public Boolean probe(final Or or) {
-			return or.shapes().stream().anyMatch(shape -> shape.map(this));
-		}
-
-		@Override public Boolean probe(final When when) {
-			return when.test().map(this)
-					|| when.pass().map(this)
-					|| when.fail().map(this);
-		}
-
 	}
 
 }

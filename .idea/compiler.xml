@@ -8,12 +8,13 @@
         <outputRelativeToContentRoot value="true" />
         <module name="metreeca-rdf4j" />
         <module name="metreeca-jse" />
+        <module name="metreeca-toys" />
         <module name="metreeca-jee" />
-        <module name="metreeca-rest" />
         <module name="metreeca-json" />
+        <module name="metreeca-rest" />
         <module name="metreeca-xml" />
-        <module name="metreeca-gcp" />
         <module name="metreeca-rdf" />
+        <module name="metreeca-gcp" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -29,9 +30,11 @@
       <module name="metreeca-json" target="1.8" />
       <module name="metreeca-link" target="1.8" />
       <module name="metreeca-mime" target="1.8" />
+      <module name="metreeca-open" target="1.8" />
       <module name="metreeca-rdf" target="1.8" />
       <module name="metreeca-rdf4j" target="1.8" />
       <module name="metreeca-rest" target="1.8" />
+      <module name="metreeca-toys" target="1.8" />
       <module name="metreeca-tree" target="1.8" />
       <module name="metreeca-xml" target="1.8" />
     </bytecodeTargetLevel>

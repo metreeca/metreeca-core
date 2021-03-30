@@ -3,7 +3,9 @@ com.metreeca.jse
 com.metreeca.json
 com.metreeca.json.queries
 com.metreeca.json.shapes
+com.metreeca.rdf.actions
 com.metreeca.rdf.formats
+com.metreeca.rdf4j
 com.metreeca.rdf4j.actions
 com.metreeca.rdf4j.assets
 com.metreeca.rdf4j.handlers

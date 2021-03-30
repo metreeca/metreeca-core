@@ -1,14 +1,21 @@
 ---
-title:		JSON-LD Serialization Reference
-excerpt:	JSON-LD serialization format grammar
+title:    JSON-LD Serialization Reference
 ---
 
-Metreeca/Link generates and consumes linked data using a compacted/framed [JSON-LD](https://json-ld.org) format, which streamlines resource descriptions taking into account the constraints specified by a target linked data [shape](spec-language.md#shapes).
+[comment]: <> (excerpt:	JSON-LD serialization format grammar)
 
-!!! note
-	This serialization format is intended to simplify front-end development by converting linked data descriptions to/from idiomatic JSON objects structured according to the conventions a JavaScript developer would expect from a typical REST/JSON API.
 
-JSON objects are deserialized to the corresponding RDF payload performing a depth-first visit of the JSON value structure. References to previously visited blank nodes and IRI references are represented as simplified *back-references* to the complete representation, omitting predicate values.
+Metreeca/Link generates and consumes linked data using a compacted/framed [JSON-LD](https://json-ld.org) format, which
+streamlines resource descriptions taking into account the constraints specified by a target linked
+data [shape](spec-language.md#shapes).
+
+!!! note This serialization format is intended to simplify front-end development by converting linked data descriptions
+to/from idiomatic JSON objects structured according to the conventions a JavaScript developer would expect from a typical
+REST/JSON API.
+
+JSON objects are deserialized to the corresponding RDF payload performing a depth-first visit of the JSON value
+structure. References to previously visited blank nodes and IRI references are represented as simplified *
+back-references* to the complete representation, omitting predicate values.
 
 	<rdf> ::= <iri>
 
@@ -93,25 +100,25 @@ When writing, local `<iri>` references are relativized as root-relative IRIs aga
 # Properties
 
 ```
-<property> ::= <alias>: [<value>(, <value>)*]
+<property> ::= <label>: [<value>(, <value>)*]
 ```
 
-Direct/inverse  resource property values are serialized as JSON object fields including the property *alias* as label and a JSON array containing serialized property objects/subjects as value.
+Direct/inverse resource property values are serialized as JSON object fields including the property *label* and a JSON
+array containing serialized property objects/subjects as value.
 
 ```
-<alias> ::= <shape-defined alias> | <system-inferred-alias>
+<label> ::= <shape-defined label> | <system-inferred-label>
 ```
 
-Poperty aliases are either defined in the target shape using the [alias](../javadocs/com/metreeca/json/shapes/Meta.html#alias-java.lang.String-) annotation or inferred by the system on the basis of the property IRI.
+Property labels are either explicitly in the [field](../javadocs/com/metreeca/json/shapes/Field.html) definition or
+inferred by the system on the basis of the field IRI.
 
-!!! warning
-	JSON-LD keywords (i.e. object field names staring with `@`) are reserved for system use.
+!!! warning JSON-LD keywords (i.e. object field names staring with `@`) are reserved for system use.
 
-!!! warning
-	Predicate IRIs with undefined or clashing aliases are reported as errors.
+!!! warning Predicate IRIs with undefined or clashing labels are reported as errors.
 
 ```
-<property> ::= <alias>: <value>
+<property> ::= <label>: <value>
 ```
 
 If  the property value may be proved to be non-repeatable, it may be included as a single JSON value, rather than a JSON array.

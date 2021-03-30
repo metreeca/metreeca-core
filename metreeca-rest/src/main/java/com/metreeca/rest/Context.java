@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.metreeca.rest;
 
 import com.metreeca.rest.assets.Logger;
-import com.metreeca.rest.formats.TextFormat;
 
 import java.io.*;
 import java.net.URL;
@@ -229,7 +228,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 		try ( final Reader reader=reader(master, resource) ) {
 
-			return TextFormat.text(reader);
+			return Xtream.text(reader);
 
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
@@ -261,7 +260,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 				final ByteArrayOutputStream output=new ByteArrayOutputStream()
 		) {
 
-			return Xtream.copy(output, input).toByteArray();
+			return Xtream.data(output, input).toByteArray();
 
 		} catch ( final IOException e ) {
 			throw new UncheckedIOException(e);
@@ -324,7 +323,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 	 *
 	 * @throws IllegalArgumentException if either {@code factory} or {@code delegate} is null
 	 */
-	public <T> T get(final Supplier<T> factory, final Supplier<T> delegate) {
+	public <T> T get(final Supplier<T> factory, final Supplier<? extends T> delegate) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null factory");

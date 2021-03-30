@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 806 537" width="806" height="537">
+	<defs>
+		<font-face font-family="Helvetica Neue" font-size="12" panose-1="2 0 4 3 0 0 0 2 0 4" units-per-em="1000"
+		           underline-position="-100" underline-thickness="50" slope="0" x-height="523" cap-height="721"
+		           ascent="966.9952" descent="-212.99744" font-weight="300">
+			<font-face-src>
+				<font-face-name name="HelveticaNeue-Light"/>
+			</font-face-src>
+		</font-face>
+		<font-face font-family=".Apple Symbols Fallback" font-size="12" panose-1="2 0 0 0 0 0 0 0 0 0"
+		           units-per-em="1000" underline-position="-73.24219" underline-thickness="48.828125" slope="0"
+		           x-height="392.57812" cap-height="546.3867" ascent="666.5039" descent="-250" font-weight="400">
+			<font-face-src>
+				<font-face-name name="AppleSymbols"/>
+			</font-face-src>
+		</font-face>
+		<font-face font-family="Helvetica Neue" font-size="9" panose-1="2 0 4 3 0 0 0 2 0 4" units-per-em="1000"
+		           underline-position="-100" underline-thickness="50" slope="0" x-height="523" cap-height="721"
+		           ascent="966.9952" descent="-212.99744" font-weight="300">
+			<font-face-src>
+				<font-face-name name="HelveticaNeue-Light"/>
+			</font-face-src>
+		</font-face>
+		<font-face font-family="Helvetica Neue" font-size="9" panose-1="2 0 5 3 0 0 0 9 0 4" units-per-em="1000"
+		           underline-position="-100" underline-thickness="50" slope="-1333.3333" x-height="517" cap-height="714"
+		           ascent="957.0007" descent="-212.99744" font-style="italic" font-weight="400">
+			<font-face-src>
+				<font-face-name name="HelveticaNeue-Italic"/>
+			</font-face-src>
+		</font-face>
+		<marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="StickArrow_Marker" stroke-linejoin="miter"
+		        stroke-miterlimit="10" viewBox="-1 -10 26 20" markerWidth="26" markerHeight="20" color="black">
+			<g>
+				<path d="M 24 0 L 0 0 M 0 -9 L 24 0 L 0 9" fill="none" stroke="currentColor" stroke-width="1"/>
+			</g>
+		</marker>
+	</defs>
+	<metadata>Produced by OmniGraffle 7.18.4\n2021-03-18 15:57:21 +0000</metadata>
+	<g id="operators" fill-opacity="1" stroke="none" fill="none" stroke-opacity="1" stroke-dasharray="none">
+		<title>operators</title>
+		<rect fill="white" x="0" y="0" width="806" height="537"/>
+		<g id="operators_Layer_1">
+			<title>Layer 1</title>
+			<g id="Graphic_11">
+				<path d="M 127.88976 109.80342 L 572.2677 109.80342 C 575.5814 109.80342 578.2677 112.48971 578.2677 115.80342 L 578.2677 394.2813 C 578.2677 397.595 575.5814 400.2813 572.2677 400.2813 L 127.88976 400.2813 C 124.57606 400.2813 121.88976 397.595 121.88976 394.2813 L 121.88976 115.80342 C 121.88976 112.48971 124.57606 109.80342 127.88976 109.80342 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(130.88976 115.80342)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Operator
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_9">
+				<path d="M 196.8129 347.61622 L 563.2381 347.61622 C 566.5518 347.61622 569.2381 350.3025 569.2381 353.61622 L 569.2381 371.38 C 569.2381 374.6937 566.5518 377.38 563.2381 377.38 L 196.8129 377.38 C 193.4992 377.38 190.8129 374.6937 190.8129 371.38 L 190.8129 353.61622 C 190.8129 350.3025 193.4992 347.61622 196.8129 347.61622 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(199.8129 353.61622)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Handler
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_10">
+				<path d="M 196.8129 285.1122 L 563.2381 285.1122 C 566.5518 285.1122 569.2381 287.7985 569.2381 291.1122 L 569.2381 335.64764 C 569.2381 338.96135 566.5518 341.64764 563.2381 341.64764 L 196.8129 341.64764 C 193.4992 341.64764 190.8129 338.96135 190.8129 335.64764 L 190.8129 291.1122 C 190.8129 287.7985 193.4992 285.1122 196.8129 285.1122 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(199.8129 291.1122)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Wrapper
+					</tspan>
+					<tspan font-family=".Apple Symbols Fallback" font-size="12" font-weight="400" fill="black" x="0"
+					       y="23.348083">⋮
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0"
+					       y="39.350037">Wrapper
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_13">
+				<text transform="translate(451.77085 356.8676)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="9">response
+						generation
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_16">
+				<text transform="translate(459.98104 301.4918)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="6856737e-19"
+					       y="9">virtual properties
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="10.0035"
+					       y="20.261063">side effects
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_17">
+				<path d="M 127.88976 77.0315 L 572.2677 77.0315 C 575.5814 77.0315 578.2677 79.71779 578.2677 83.0315 L 578.2677 100.79528 C 578.2677 104.10898 575.5814 106.79528 572.2677 106.79528 L 127.88976 106.79528 C 124.57606 106.79528 121.88976 104.10898 121.88976 100.79528 L 121.88976 83.0315 C 121.88976 79.71779 124.57606 77.0315 127.88976 77.0315 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(130.88976 83.0315)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Driver
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_36">
+				<text transform="translate(278.639 200.1396)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="23.6745" y="9">
+						shape splitting
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="20.261063">
+						shape-based authorisation
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="20.493"
+					       y="31.522125">shape redaction
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_37">
+				<path d="M 196.8129 192.7559 L 563.2381 192.7559 C 566.5518 192.7559 569.2381 195.4422 569.2381 198.7559 L 569.2381 235.30647 C 569.2381 238.62018 566.5518 241.30647 563.2381 241.30647 L 196.8129 241.30647 C 193.4992 241.30647 190.8129 238.62018 190.8129 235.30647 L 190.8129 198.7559 C 190.8129 195.4422 193.4992 192.7559 196.8129 192.7559 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(199.8129 198.7559)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Throttler
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_39">
+				<path d="M 196.8129 247.94688 L 563.2381 247.94688 C 566.5518 247.94688 569.2381 250.63317 569.2381 253.94688 L 569.2381 272.469 C 569.2381 275.7827 566.5518 278.469 563.2381 278.469 L 196.8129 278.469 C 193.4992 278.469 190.8129 275.7827 190.8129 272.469 L 190.8129 253.94688 C 190.8129 250.63317 193.4992 247.94688 196.8129 247.94688 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(199.8129 253.94688)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Decoder
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_40">
+				<path d="M 196.8129 155.92043 L 563.2381 155.92043 C 566.5518 155.92043 569.2381 158.60672 569.2381 161.92043 L 569.2381 179.6842 C 569.2381 182.99791 566.5518 185.6842 563.2381 185.6842 L 196.8129 185.6842 C 193.4992 185.6842 190.8129 182.99791 190.8129 179.6842 L 190.8129 161.92043 C 190.8129 158.60672 193.4992 155.92043 196.8129 155.92043 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(199.8129 161.92043)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Encoder
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_46">
+				<text transform="translate(282.0455 130.15179)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="6039613e-19"
+					       y="9">connection management
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_57">
+				<path d="M 591.35434 77.0315 L 678.3843 77.0315 C 681.69804 77.0315 684.3843 79.71779 684.3843 83.0315 L 684.3843 394.2813 C 684.3843 397.595 681.69804 400.2813 678.3843 400.2813 L 591.35434 400.2813 C 588.0406 400.2813 585.35434 397.595 585.35434 394.2813 L 585.35434 83.0315 C 585.35434 79.71779 588.0406 77.0315 591.35434 77.0315 Z"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(594.35434 83.0315)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Engine
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_70">
+				<text transform="translate(291.5158 86.28286)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="6536993e-19"
+					       y="9">shape configuration
+					</tspan>
+				</text>
+			</g>
+		</g>
+		<g id="operators_Layer_2">
+			<title>Layer 2</title>
+			<g id="Graphic_26">
+				<text transform="translate(278.126 307.12234)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="5755396e-19"
+					       y="9">server-managed properties
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_27">
+				<text transform="translate(286.0933 356.8676)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="9">shape
+						mode redaction
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_29">
+				<text transform="translate(268.883 255.53884)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="9">
+						shape-based payload validation
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_30">
+				<text transform="translate(431.81554 164.18484)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="9">
+						shape-based payload trimming
+					</tspan>
+				</text>
+			</g>
+			<g id="Line_44">
+				<path d="M 161.5748 432.15847 L 161.5748 170.80232 L 190.8129 170.80232" stroke="black"
+				      stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0" stroke-width=".25"/>
+			</g>
+			<g id="Graphic_49">
+				<text transform="translate(308.0503 32.346457)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Request
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_50">
+				<text transform="translate(465.28135 32.346457)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
+						Response
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_52">
+				<text transform="translate(460.80904 211.40066)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="9">shape
+						redaction
+					</tspan>
+				</text>
+			</g>
+			<g id="Graphic_56">
+				<path d="M 299.05512 457.36513 C 299.05512 449.33544 295.56312 448.342 270.05502 440.3954 L 269.78556 440.31316 C 244.14273 432.28347 243.87602 432.28347 217.55954 432.28347 C 182.51856 432.28347 24.094488 432.28347 24.094488 432.28347 L 24.094488 517.04746 L 299.05512 517.04746 L 299.05512 457.36513 Z"
+				      fill="white"/>
+				<path d="M 299.05512 457.36513 C 299.05512 449.33544 295.56312 448.342 270.05502 440.3954 L 269.78556 440.31316 C 244.14273 432.28347 243.87602 432.28347 217.55954 432.28347 C 182.51856 432.28347 24.094488 432.28347 24.094488 432.28347 L 24.094488 517.04746 L 299.05512 517.04746 L 299.05512 457.36513 Z M 299.05512 456.9515 C 299.05512 449.33544 298.78566 449.33544 243.87602 449.33544 L 243.87602 449.33544 C 243.87602 432.36654 243.87602 432.28347 219.1708 432.28347"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
+				<text transform="translate(29.09449 435.28347)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-style="italic" font-weight="400" fill="black"
+					       x="0" y="9">redaction/validation/trimming is performed on demand
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-style="italic" font-weight="400" fill="black"
+					       x="0" y="20.252">at the public boundary:
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-style="italic" font-weight="400" fill="black"
+					       x="0" y="31.503998">- engine CRUD methods don’t validate shape/payloads
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-style="italic" font-weight="400" fill="black"
+					       x="0" y="42.755997">- custom request wrappers may alter shapes and add extended
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-style="italic" font-weight="400" fill="black"
+					       x="0" y="54.007996">out-of-shape content to be stored
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-style="italic" font-weight="400" fill="black"
+					       x="0" y="65.259995">- custom response wrappers may alter shapes and add extended
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-style="italic" font-weight="400" fill="black"
+					       x="0" y="76.51199">out-of-shape content to be later trimmed to the effective shape
+					</tspan>
+				</text>
+			</g>
+			<g id="Line_60">
+				<line x1="569.2381" y1="362.4981" x2="606.9308" y2="362.4981" marker-end="url(#StickArrow_Marker)"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0"
+				      stroke-width=".25"/>
+			</g>
+			<g id="Graphic_61">
+				<text transform="translate(618.4443 339.976)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="2.2455" y="9">
+						create()
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="3.7485"
+					       y="20.261063">relate()
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="31.522125">
+						browse()
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x=".6705"
+					       y="42.78319">update()
+					</tspan>
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="2.502"
+					       y="54.04425">delete()
+					</tspan>
+				</text>
+			</g>
+			<g id="Line_64">
+				<path d="M 161.5748 432.15847 L 161.5748 217.03119 L 190.8129 217.03119" stroke="black"
+				      stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0" stroke-width=".25"/>
+			</g>
+			<g id="Line_65">
+				<path d="M 161.5748 432.15847 L 161.5748 263.20794 L 190.8129 263.20794" stroke="black"
+				      stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0" stroke-width=".25"/>
+			</g>
+			<g id="Graphic_67">
+				<text transform="translate(623.0298 130.15179)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="42632564e-21"
+					       y="9">wrap()
+					</tspan>
+				</text>
+			</g>
+			<g id="Line_71">
+				<path d="M 329.6083 51.69454 L 329.6083 59.79454 L 329.6083 70.1815" marker-end="url(#StickArrow_Marker)"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0"
+				      stroke-width=".25"/>
+			</g>
+			<g id="Line_72">
+				<path d="M 491.28535 77.0315 L 491.28535 59.79454 L 491.28535 58.54454"
+				      marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round"
+				      stroke-dasharray="1.0,1.0" stroke-width=".25"/>
+			</g>
+			<g id="Line_73">
+				<line x1="384.4085" y1="135.78232" x2="610.1798" y2="135.78232" marker-end="url(#StickArrow_Marker)"
+				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0"
+				      stroke-width=".25"/>
+			</g>
+		</g>
+	</g>
+</svg>

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import com.metreeca.json.Shape;
 /**
  * Lexical pattern constraint.
  *
- * <p>States that the lexical representation of each term in the focus set matches a given {@linkplain
+ * <p>States that the lexical representation of each value in the focus set matches a given {@linkplain
  * java.util.regex.Pattern regular expression}.</p>
  */
 public final class Pattern extends Shape {

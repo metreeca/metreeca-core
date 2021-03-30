@@ -1,5 +1,5 @@
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl
+  Copyright © 2013-2021 Metreeca srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
 	<body><input id="toggle" type="checkbox">
 		<nav>
 			<header>
-				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.54.1</span></a></span><label for="toggle"></label>
+				<span><a href="https://www.metreeca.com/">metreeca</a><a href="../index.html">link<span>v0.55.0</span></a></span><label for="toggle"></label>
 			</header>
 			<section><a class="title" onclick="document.querySelector('main').scrollTo(0, 0)">Consuming Model‑Driven
 				REST/JSON-LD APIs</a><h1><a href="#model-driven-apis">Model-Driven APIs</a></h1><h1>
@@ -37,43 +37,55 @@
 				<a href="#creating-resources">Creating Resources</a></h2><h2><a href="#updating-resources">Updating
 				Resources</a></h2><h2><a href="#deleting-resources">Deleting Resources</a></h2><h1>
 				<a href="#faceted-search">Faceted Search</a></h1><h2><a href="#sorting-and-pagination">Sorting and
-				Pagination</a></h2><h2><a href="#facet-stats-and-options">Facet Stats and Options</a></h2></section>
+				Pagination</a></h2><h2><a href="#facet-stats-and-options">Facet Stats and Options</a></h2><h1>
+				<a href="#localization">Localization</a></h1></section>
 		</nav>
 		<main>
 			<header>Consuming Model‑Driven REST/JSON-LD APIs</header>
-			<section><p>This example-driven tutorial introduces the main client-facing features of the Metreeca/Link
-				model-driven REST/JSON framework. Basic familiarity with
-				<a href="https://www.w3.org/standards/semanticweb/data" target="_blank">linked data</a> concepts and
-				<a href="https://en.wikipedia.org/wiki/Representational_state_transfer" target="_blank">REST</a> APIs is
-				required.</p>
+			<section>
+				<svg xmlns="http://www.w3.org/2000/svg" class="adm-hidden">
+					<symbol id="adm-warning">
+						<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+							<path d="m3.1 18.5 8.1-14c.4-.7 1.4-.7 1.8 0l8.1 14c.4.7-.1 1.6-.9 1.6h-16.1c-.9 0-1.4-.9-1-1.6zm10.6-4.3c0-.1 0-.2 0-.2v-4.6c0-.4 0-.6 0-.6-.1-.1-.3-.2-.7-.3s-.7-.1-1-.1c-.1 0-.2 0-.3 0-.3.1-.5.2-.5.4v4.2s-.1.1-.2.4-.1.4 0 .5c.3.2.7.4 1.2.6s.9.3 1.2.3h.2c.2 0 .3-.2.3-.5-.2 0-.2-.1-.2-.1zm-.8 1.4c-.5-.2-.9-.2-1.2-.2s-.4.1-.5.4v.9c0 .2 0 .3-.1.4-.1.2-.2.3-.1.4s.5.3 1.2.5c.6.2 1 .2 1.1.2.2 0 .4-.1.4-.3s.1-.4.1-.7c0-.1 0-.3.1-.7 0-.3 0-.5 0-.5-.2-.1-.5-.2-1-.4z" fill="currentColor"/>
+						</svg>
+					</symbol>
+				</svg>
+				<p>This example-driven tutorial introduces the main client-facing features of the Metreeca/Link
+					model-driven REST/JSON
+					framework. Basic familiarity with
+					<a href="https://www.w3.org/standards/semanticweb/data" target="_blank">linked data</a> concepts
+					and <a href="https://en.wikipedia.org/wiki/Representational_state_transfer" target="_blank">REST</a>
+					APIs is required.</p>
 				<p>In the following sections you will learn how to consume REST APIs published with the framework,
-					leveraging automatic model-driven faceted search, data validation and fine‑grained role‑based access
-					control.</p>
-				<p>In the tutorial we will work with the linked data server developed in the
-					<a href="publishing-jsonld-apis">publishing tutorial</a>, using a linked data version of the
-					<a href="http://www.eclipse.org/birt/phoenix/db/" target="_blank">BIRT</a> sample dataset,
-					cross-linked to <a href="http://www.geonames.org/" target="_blank">GeoNames</a> entities for cities
-					and countries.</p>
+					leveraging automatic
+					model-driven faceted search, data validation and fine‑grained role‑based access control.</p>
+				<p>In the tutorial we will work with the linked data server developed in
+					the <a href="publishing-jsonld-apis">publishing tutorial</a>, using a linked data version of
+					the <a href="http://www.eclipse.org/birt/phoenix/db/" target="_blank">BIRT</a> sample dataset,
+					cross-linked to <a href="http://www.geonames.org/" target="_blank">GeoNames</a>
+					entities for cities and countries.</p>
 				<p>The BIRT sample is a typical business database, containing tables such as <em>offices</em>, <em>customers</em>,
-					<em>products</em>, <em>orders</em>, <em>order lines</em>, … for <em>Classic Models</em>, a fictional
-					world-wide retailer of scale toy models: we will walk through the REST API interaction process
-					focusing on the task of consuming the
-					<a href="https://demo.metreeca.com/apps/self/#endpoint=https://demo.metreeca.com/sparql&amp;collection=https://demo.metreeca.com/terms#Product" target="_blank">Product</a>
+					<em>products</em>, <em>orders</em>, *
+					order lines*, … for <em>Classic Models</em>, a fictional world-wide retailer of scale toy models: we
+					will walk through the REST
+					API interaction process focusing on the task of consuming
+					the
+					<a href="https://demo.metreeca.com/self/#endpoint=https://demo.metreeca.com/toys/sparql&amp;collection=https://demo.metreeca.com/toys/terms#Product" target="_blank">Product</a>
 					catalog.</p>
 				<p>You may try out the examples using your favorite API testing tool or working from the command line
-					with toos like <code>curl</code> or <code>wget</code>.</p>
-				<p>A Maven project with the code for the complete demo app is available on
-					<a href="https://github.com/metreeca/demo" target="_blank">GitHub</a>: clone or
-					<a href="https://github.com/metreeca/demo/archive/master.zip" target="_blank">download</a> it to your
-					workspace, open in your favorite IDE and launch a local instance of the server. If you are working
-					with IntelliJ IDEA you may want to use the <code>Demo</code> pre-configured run configuration to
-					deploy and update the local server instance.</p>
+					with toos like <code>curl</code>
+					or <code>wget</code>.</p>
+				<p>A Maven project with the code for the complete sample app is available
+					on <a href="https://github.com/metreeca/link/tree/main/metreeca-toys" target="_blank">GitHub</a>:
+					[download](<a href="https://downgit.github.io/#/home">https://downgit.github.io/#/home</a>?
+					url=<a href="https://github.com/metreeca/link/tree/main/metreeca-toys&amp;fileName=metreeca%E2%A7%B8link%20sample">https://github.com/metreeca/link/tree/main/metreeca-toys&amp;fileName=metreeca%E2%A7%B8link%20sample</a>)
+					it to your workspace, open in your favorite IDE, compile and launch a local instance of the server.
+				</p>
 				<h1 id="model-driven-apis">Model-Driven APIs</h1>
-				<p>The demo linked data server is pre-configured with a small collection of read/write REST APIs able to
-					drive a typical web-based interface like a user-facing
-					<a href="https://demo.metreeca.com/apps/shop/" target="_blank">product catalog</a>.</p>
-				<p class="warning">The product catalog demo is hosted on a cloud service: it is not expected to provide
-					production-level performance and may experience some delays during workspace initialization.</p>
+				<p>The sample linked data server is pre-configured with a small collection of read/write REST APIs able
+					to drive a typical
+					web-based interface like a user-facing <a href="https://demo.metreeca.com/toys/" target="_blank">product
+						catalog</a>.</p>
 				<table>
 					<thead>
 						<tr>
@@ -83,49 +95,68 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td align="left"><a href="https://demo.metreeca.com/product-lines/" target="_blank">/product-lines/</a>
+							<td align="left"><a href="https://demo.metreeca.com/toys/product-lines/" target="_blank">/product-lines/</a>
 							</td>
 							<td align="left">Product line faceted catalog</td>
 						</tr>
 						<tr>
 							<td align="left">
-								<a href="https://demo.metreeca.com/product-lines/classic-cars" target="_blank">/product-lines/*</a>
+								<a href="https://demo.metreeca.com/toys/product-lines/classic-cars" target="_blank">/product-lines/*</a>
 							</td>
 							<td align="left">Product line details</td>
 						</tr>
 						<tr>
-							<td align="left"><a href="https://demo.metreeca.com/products/" target="_blank">/products/</a>
+							<td align="left"><a href="https://demo.metreeca.com/toys/products/" target="_blank">/products/</a>
 							</td>
 							<td align="left">Product faceted catalog</td>
 						</tr>
 						<tr>
-							<td align="left"><a href="https://demo.metreeca.com/products/S18_3140" target="_blank">/products/*</a>
+							<td align="left"><a href="https://demo.metreeca.com/toys/products/S18_3140" target="_blank">/products/*</a>
 							</td>
 							<td align="left">Product sheets</td>
 						</tr>
 					</tbody>
 				</table>
+				<div class="adm-block adm-warning">
+					<div class="adm-heading">
+						<svg class="adm-icon">
+							<use xlink:href="#adm-warning"/>
+						</svg>
+						<span>Sample Performance</span>
+					</div>
+					<div class="adm-body">
+						<p>Linked samples are hosted on a cloud service, are not expected to provide production-level
+							performance and may experience
+							some delays during workspace initialization.</p>
+					</div>
+				</div>
 				<p>Even a simple application like this would usually require extensive back-end development activities in
-					order to connect to the database and perform coordinated custom queries supporting data retrieval,
-					faceted search, facet population, sorting, pagination and so on. User authorization, validation of
-					updates and enforcing of consistency rules would as well require lenghty and error-prone custom
-					back-end development.</p>
+					order to connect
+					to the database and perform coordinated custom queries supporting data retrieval, faceted search,
+					facet population,
+					sorting, pagination and so on. User authorization, validation of updates and enforcing of consistency
+					rules would as well
+					require lenghty and error-prone custom back-end development.</p>
 				<p>Metreeca/Link automates the whole process with a model-driven API engine that compiles high‑level
-					declarative linked data models into read/write REST APIs immediately available for front-end app
-					development, supporting all of the above-mentioned features without custom back-end coding.</p>
-				<p>You may learn how to publish your own model-driven linked data APIs walking through the
-					<a href="publishing-jsonld-apis">linked data publishing tutorial</a>.</p>
+					declarative linked data
+					models into read/write REST APIs immediately available for front-end app development, supporting all
+					of the
+					above-mentioned features without custom back-end coding.</p>
+				<p>You may learn how to publish your own model-driven linked data APIs walking through
+					the <a href="publishing-jsonld-apis">linked data publishing tutorial</a>.</p>
 				<h1 id="read-operations">Read Operations</h1>
 				<p>Linked data REST APIs published by Metreeca/Link API engine support controlled read access to RDF
-					contents managed by the underlying graph storage layer.</p>
-				<p>User authorization and user-specific content generation are performed according to
-					<a href="../references/spec-language#parameters">role‑based</a> rules integrated in the linked data
-					model driving the API publishing process.</p>
+					contents managed by the
+					underlying graph storage layer.</p>
+				<p>User authorization and user-specific content generation are performed according
+					to <a href="../references/spec-language#parameters">role‑based</a> rules integrated in the linked
+					data model driving the API
+					publishing process.</p>
 				<h2 id="resources">Resources</h2>
 				<p>To retrieve the description of a published resource, as specified by the associated data model, just
-					perform a <code>GET</code> operation on the URL identifying the resource.</p>
-				<pre><code class="language-shell">% curl --include \
-	&quot;http://localhost:8080/products/S18_3140&quot;
+					perform a <code>GET</code>
+					operation on the URL identifying the resource.</p>
+				<pre><code class="language-shell">% curl --include &quot;http://localhost:8080/products/S18_3140&quot;
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -147,13 +178,13 @@ Content-Type: application/json;charset=UTF-8
 }
 </code></pre>
 				<p>Metreeca/Link produces and accepts an idiomatic
-					<a href="../references/jsonld-format">compacted/framed</a> JSON-LD format, which streamlines resource
-					descriptions taking into account the constraints described in the associated linked data models.</p>
+					<a href="../references/jsonld-format">compacted/framed</a> JSON-LD format, which
+					streamlines resource descriptions taking into account the constraints described in the associated
+					linked data models.</p>
 				<p>To include context information, specify the <code>application/ld+json</code> MIME type in the <code>Accept</code>
 					HTTP request header.</p>
-				<pre><code class="language-shell">% curl --include \
-	--header &quot;Accept: application/ld+json&quot; \
-	&quot;http://localhost:8080/products/S18_3140&quot;
+				<pre><code class="language-shell">% curl --include &quot;http://localhost:8080/products/S18_3140&quot; \
+	--header &quot;Accept: application/ld+json&quot; 
 	
 HTTP/1.1 200 
 Content-Type: application/ld+json;charset=UTF-8
@@ -178,19 +209,19 @@ Content-Type: application/ld+json;charset=UTF-8
 		⋮
 		
 		&quot;stock&quot;: {
-            &quot;@id&quot;: &quot;https://demo.metreeca.com/terms#stock&quot;,
+            &quot;@id&quot;: &quot;https://demo.metreeca.com/toys/terms#stock&quot;,
             &quot;@type&quot;: &quot;http://www.w3.org/2001/XMLSchema#integer&quot;
         }
     }
 }
 </code></pre>
 				<p>Retrieved data is automatically trimmed to the allowed envelope specified in the linked data model
-					driving the target REST API for the <a href="../javadocs/com/metreeca/rest/Request.html#roles--">roles</a>
-					enabled for the current request user. Reserved properties are included only if the request is
-					properly authenticated.</p>
-				<pre><code class="language-shell">% curl --include \
-	--header &quot;Authorization: Bearer secret&quot; \
-	&quot;http://localhost:8080/products/S18_3140&quot;
+					driving the target
+					REST API for the <a href="../javadocs/com/metreeca/rest/Request.html#roles--">roles</a> enabled for
+					the current request user.
+					Reserved properties are included only if the request is properly authenticated.</p>
+				<pre><code class="language-shell">% curl --include &quot;http://localhost:8080/products/S18_3140&quot; \
+	--header &quot;Authorization: Bearer secret&quot;
     
 HTTP/1.1 200  
 Content-Type: application/json;charset=UTF-8
@@ -207,9 +238,9 @@ Content-Type: application/json;charset=UTF-8
 </code></pre>
 				<h2 id="collections">Collections</h2>
 				<p>To retrieve the description of a published collections, as specified by the associated data model,
-					perform a <code>GET</code> operation on the URL identifying the collection.</p>
-				<pre><code class="language-shell">% curl --include \
-	&quot;http://localhost:8080/products/&quot;
+					perform a <code>GET</code>
+					operation on the URL identifying the collection.</p>
+				<pre><code class="language-shell">% curl --include &quot;http://localhost:8080/products/&quot;
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -238,36 +269,24 @@ Content-Type: application/json;charset=UTF-8
 	]
 }
 </code></pre>
-				<p>By default, collections descriptions include a digest description of each collection item, but a
-					concise description of the collection itself may be retrieved using the standard LDP
-					<code>Prefer</code> HTTP request header.</p>
-				<pre><code class="language-shell">% curl --include \
-    --header 'Prefer: return=representation; include=&quot;http://www.w3.org/ns/ldp#PreferMinimalContainer&quot;' \
-    &quot;http://localhost:8080/products/&quot;
-    
-HTTP/1.1 200 
-Preference-Applied: return=representation; include=&quot;http://www.w3.org/ns/ldp#PreferMinimalContainer&quot;
-Content-Type: application/json;charset=UTF-8
-
-{
-    &quot;id&quot;: &quot;/products/&quot;,
-}
-</code></pre>
 				<h1 id="write-operations">Write Operations</h1>
-				<p>Linked data REST APIs published by Metreeca/Link API engine support controlled write access to
-					contents managed by the underlying graph storage layer.</p>
-				<p>User authorization and user-specific content validation are performed according to
-					<a href="../references/spec-language#parameters">role‑based</a> rules integrated in the linked data
-					model driving the API publishing process.</p>
+				<p>Linked data REST APIs published by Metreeca/Link API engine support controlled write access to content
+					managed by the
+					underlying graph storage layer.</p>
+				<p>User authorization and user-specific content validation are performed according
+					to <a href="../references/spec-language#parameters">role‑based</a> rules integrated in the linked
+					data model driving the API
+					publishing process.</p>
 				<h2 id="creating-resources">Creating Resources</h2>
 				<p>New resources are created by submitting an description to the REST API of a writable collection using
-					the <code>POST</code> HTTP method.</p>
+					the <code>POST</code> HTTP
+					method.</p>
 				<p>Note that property values that may be inferred from the associated linked data model, like <code>rdf:type</code>,
-					may be safely omitted.</p>
-				<pre><code class="language-shell">% curl --include --request POST \
+					may be safely
+					omitted.</p>
+				<pre><code class="language-shell">% curl --include --request POST &quot;http://localhost:8080/products/&quot; \
     --header 'Authorization: Bearer secret' \
     --header 'Content-Type: application/json' \
-    &quot;http://localhost:8080/products/&quot; \
     --data @- &lt;&lt;EOF
 {
 	&quot;type&quot;: &quot;/terms#Product&quot;,
@@ -285,16 +304,18 @@ HTTP/2 201 Created
 Location: /products/S10_6
 </code></pre>
 				<p>Note that the <code>line</code> property is included in a shorthand form, as it is inferred to be a
-					resource IRI from the associated linked data model.</p>
+					resource IRI from the associated
+					linked data model.</p>
 				<p>The newly created resource is immediately available for retrieval at the URL returned in the <code>Location</code>
-					HTTP response header.</p>
+					HTTP response
+					header.</p>
 				<p>Submitted data is automatically validated against the constraints specified in the linked data model
-					driving the target REST API. Submiting, for instance, out of range price data would return an error
-					and a structured error report.</p>
-				<pre><code class="language-shell">% curl --include --request POST \
+					driving the target
+					REST API. Submiting, for instance, out of range price data would return an error and a structured
+					error report.</p>
+				<pre><code class="language-shell">% curl --include --request POST &quot;http://localhost:8080/products/&quot; \
     --header 'Authorization: Bearer secret' \
     --header 'Content-Type: application/json' \
-  &quot;http://localhost:8080/products/&quot; \
     --data @- &lt;&lt;EOF
 {
 	&quot;type&quot;: &quot;/terms#Product&quot;,
@@ -313,26 +334,26 @@ Location: http://localhost:8080/products/
 Content-Type: application/json;charset=UTF-8
 
 {
-    &quot;price&quot;: {
-        &quot;&quot;: [
-            &quot;&lt;9999.0&gt; is not strictly less than &lt;\&quot;1000.0\&quot;^^&lt;http://www.w3.org/2001/XMLSchema#decimal&gt;&gt;&quot;
+    &quot;https://example.com/terms#buy&quot;: {
+        &quot;@errors&quot;: [
+            &quot;-101.0 is not greater than or equal to 0.0&quot;
         ]
     },
-    &quot;buy&quot;: {
-        &quot;&quot;: [
-            &quot;&lt;-101.0&gt; is not greater than or equal to &lt;\&quot;0.0\&quot;^^&lt;http://www.w3.org/2001/XMLSchema#decimal&gt;&gt;&quot;
+    &quot;https://example.com/terms#sell&quot;: {
+        &quot;@errors&quot;: [
+            &quot;9999.0 is not strictly less than 1000.0&quot;
         ]
     }
-}       
+} 
 </code></pre>
 				<p>Submitted data is automatically matched against the allowed envelope specified in the linked data
-					model driving the target REST API for the
-					<a href="../javadocs/com/metreeca/rest/Request.html#roles--">roles</a> enabled for the current
-					request user. Submiting, for instance, buy price data without valid authorization headers would
-					return an error.</p>
-				<pre><code class="language-shell">% curl --include --request POST \
+					model driving the
+					target REST API for the <a href="../javadocs/com/metreeca/rest/Request.html#roles--">roles</a>
+					enabled for the current request user.
+					Submiting, for instance, buy price data without valid authorization headers would return an error.
+				</p>
+				<pre><code class="language-shell">% curl --include --request POST &quot;http://localhost:8080/products/&quot; \
     --header 'Content-Type: application/json' \
-   &quot;http://localhost:8080/products/&quot; \
     --data @- &lt;&lt;EOF
 {
 	&quot;type&quot;: &quot;/terms#Product&quot;,
@@ -347,16 +368,18 @@ Content-Type: application/json;charset=UTF-8
 EOF
 
 HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm=&quot;https://example.com/&quot;
 </code></pre>
 				<h2 id="updating-resources">Updating Resources</h2>
 				<p>Existing writable RDF resources are updated by submitting an RDF description to their REST API using
-					the <code>PUT</code> HTTP method.</p>
+					the <code>PUT</code> HTTP
+					method.</p>
 				<p>Note that server-managed properties like <code>demo:code</code> and <code>demo:stock</code> are
-					omitted, as they are inherited from the existing description.</p>
-				<pre><code class="language-shell">% curl --include --request PUT \
+					omitted, as they are inherited from the
+					existing description.</p>
+				<pre><code class="language-shell">% curl --include --request PUT &quot;http://localhost:8080/products/S18_3140&quot; \
 	--header 'Authorization: Bearer secret' \
 	--header 'Content-Type: application/json' \
-	&quot;http://localhost:8080/products/S18_3140&quot; \
     --data @- &lt;&lt;EOF
 {
    	&quot;type&quot;: &quot;/terms#Product&quot;,
@@ -374,30 +397,31 @@ HTTP/2 204 No Content
 </code></pre>
 				<p>The updated resource is immediately available for retrieval at the existing URL.</p>
 				<p>As in the case of resource creation, submitted data is automatically validated against constraints and
-					roles specified in the linked data model driving the target REST API.</p>
+					roles specified in
+					the linked data model driving the target REST API.</p>
 				<h2 id="deleting-resources">Deleting Resources</h2>
 				<p>Existing writable RDF resources are deleted using the <code>DELETE</code> HTTP method on their REST
 					API.</p>
-				<pre><code class="language-shell">% curl --include --request DELETE \
-	--header 'Authorization: Bearer secret' \
-	&quot;http://localhost:8080/products/S18_3140&quot;
+				<pre><code class="language-shell">% curl --include --request DELETE &quot;http://localhost:8080/products/S18_3140&quot; \
+	--header 'Authorization: Bearer secret'
 
 HTTP/2 204 No Content
 </code></pre>
 				<p>The deleted resource is immediately no longer available for retrieval.</p>
 				<h1 id="faceted-search">Faceted Search</h1>
 				<p>Metreeca/Link REST APIs engine supports model-driven faceted search and related facet-related queries
-					without additional effort.</p>
+					without additional
+					effort.</p>
 				<p>To retrieve a digest description of collection items matching a set of facet filters, perform a <code>GET</code>
-					operation on the URL identifying the collection, appending a URL-encoded JSON query object
-					<a href="../references/faceted-search">describing the filters</a> to be applied.</p>
+					operation on the
+					URL identifying the collection, appending a URL-encoded JSON query
+					object <a href="../references/faceted-search">describing the filters</a> to be applied.</p>
 				<pre><code class="language-json">{
-  &quot;&gt;= price&quot; : 100, 
-  &quot;vendor&quot;: &quot;Classic Metal Creations&quot;
+	&quot;&gt;= price&quot;: 100,
+	&quot;vendor&quot;: &quot;Classic Metal Creations&quot;
 }
 </code></pre>
-				<pre><code class="language-shell">% curl --include \
-    'http://localhost:8080/products/?%3E%3D+price=100&amp;vendor=Classic+Metal+Creations'
+				<pre><code class="language-shell">% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&amp;vendor=Classic+Metal+Creations'
     
 HTTP/1.1 200 
 Content-Type: application/json;charset=UTF-8
@@ -428,38 +452,32 @@ Content-Type: application/json;charset=UTF-8
 </code></pre>
 				<p>Note that collection descriptions are omitted from faceted search results.</p>
 				<h2 id="sorting-and-pagination">Sorting and Pagination</h2>
-				<p>Faceted search results may be sorted and paginated including
-					<a href="../references/faceted-search#items-query">sorting criteria</a> and
-					<a href="../references/faceted-search#items-query">pagination limits</a> in the JSON query object.
-				</p>
+				<p>Faceted search results may be sorted and paginated
+					including <a href="../references/faceted-search#items-query">sorting criteria</a>
+					and <a href="../references/faceted-search#items-query">pagination limits</a> in the JSON query
+					object.</p>
 				<pre><code class="language-json">{
-  
-  &quot;&gt;= price&quot; : 100, 
-  &quot;vendor&quot;: &quot;Classic Metal Creations&quot;,
-
-  &quot;_order&quot;:&quot;-price&quot;,
-  &quot;_offset&quot;:0,
-  &quot;_limit&quot;:10
-  
+	&quot;&gt;= price&quot;: 100,
+	&quot;vendor&quot;: &quot;Classic Metal Creations&quot;,
+	&quot;.order&quot;: &quot;-price&quot;,
+	&quot;.offset&quot;: 0,
+	&quot;.limit&quot;: 10
 }
 </code></pre>
 				<h2 id="facet-stats-and-options">Facet Stats and Options</h2>
-				<p>The faceted search engine supports also introspection queries for retrieving
-					<a href="../references/faceted-search#stats-query">facet stats</a> and available
-					<a href="../references/faceted-search#items-query">facet options</a>.</p>
+				<p>The faceted search engine supports also introspection queries for
+					retrieving <a href="../references/faceted-search#stats-query">facet stats</a> and
+					available <a href="../references/faceted-search#items-query">facet options</a>.</p>
 				<p>To retrieve datatype, count and range stats for a facet, taking into account applied filters, specify
-					the target property path in the faceted search query object.</p>
+					the target property
+					path in the faceted search query object.</p>
 				<pre><code class="language-json">{
-    
-	&quot;_stats&quot;: &quot;price&quot;
-
-	&quot;&gt;= price&quot; : 100, 
-	&quot;vendor&quot;: &quot;Classic Metal Creations&quot;,
-  
+	&quot;.stats&quot;: &quot;price&quot;,
+	&quot;&gt;= price&quot;: 100,
+	&quot;vendor&quot;: &quot;Classic Metal Creations&quot;
 }
 </code></pre>
-				<pre><code class="language-shell">% curl --include \
-    'http://localhost:8080/products/?%3E%3D+price=100&amp;vendor=Classic+Metal+Creations&amp;_stats=price'
+				<pre><code class="language-shell">% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&amp;vendor=Classic+Metal+Creations&amp;.stats=price'
 
 HTTP/2 200 OK
 Content-Type: application/json
@@ -480,18 +498,15 @@ Content-Type: application/json
 }
 </code></pre>
 				<p>To list available options and counts for a facet, taking into account applied filters, specify the
-					target property path in the faceted search query object.</p>
+					target property path
+					in the faceted search query object.</p>
 				<pre><code class="language-json">{
-	
-    &quot;_terms&quot;: &quot;line&quot;
-    
-  	&quot;&gt;= price&quot; : 100, 
-  	&quot;vendor&quot;: &quot;Classic Metal Creations&quot;,
-  
+	&quot;.terms&quot;: &quot;line&quot;,
+	&quot;&gt;= price&quot;: 100,
+	&quot;vendor&quot;: &quot;Classic Metal Creations&quot;
 }
 </code></pre>
-				<pre><code class="language-shell">% curl --include \
-    'http://localhost:8080/products/?%3E%3D+price=100&amp;vendor=Classic+Metal+Creations&amp;_terms=line'
+				<pre><code class="language-shell">% curl --include 'http://localhost:8080/products/?%3E%3D+price=100&amp;vendor=Classic+Metal+Creations&amp;.terms=line'
 
 HTTP/2 200 OK
 Content-Type: application/json
@@ -517,8 +532,19 @@ Content-Type: application/json
 }
 </code></pre>
 				<p>Labels and comments for the selected options are also retrieved to support facet visualization.</p>
+				<h1 id="localization">Localization</h1>
+				<p>Multi-lingual content retrieval is fully supported,
+					with <a href="publishing-jsonld-apis#localization">optional</a>
+					<a href="https://www.w3.org/TR/json-ld11/#language-indexing" target="_blank">compact rendering</a>
+					.</p>
+				<p>Retrieved localizations may be limited to a predefined set of language tags at query time using the
+					<code>Accept-Language</code>
+					HTTP header, like for instance:</p>
+				<pre><code class="language-http">GET http://localhost:8080/products/S18_3140
+Accept-Language: en, it, de
+</code></pre>
 			</section>
-			<footer>© 2020 Metreeca srl. This work is licensed under the
+			<footer>© 2021 Metreeca srl. This work is licensed under the
 				<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons BY-NC-SA 4.0 License</a>
 			</footer>
 		</main>

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,25 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-
-import org.eclipse.rdf4j.model.Value;
+import com.metreeca.json.Values;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.derives;
+import static com.metreeca.json.Values.direct;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.All.all;
-import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
 import static com.metreeca.json.shapes.MinCount.minCount;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.json.shapes.Range.range;
+import static com.metreeca.json.shapes.When.when;
+
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.Objects.requireNonNull;
@@ -74,9 +79,9 @@ public final class And extends Shape {
 
 				.flatMap(new Probe<Stream<Shape>>() {
 
-					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
-
 					@Override public Stream<Shape> probe(final And and) { return and.shapes().stream(); }
+
+					@Override public Stream<Shape> probe(final Shape shape) { return Stream.of(shape); }
 
 				})
 
@@ -105,8 +110,7 @@ public final class And extends Shape {
 	}
 
 	private static Stream<? extends Shape> merge(final Class<? extends Shape> clazz, final Stream<Shape> shapes) {
-		return clazz.equals(Meta.class) ? Meta.metas(shapes.map(Meta.class::cast))
-				: clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
+		return clazz.equals(Datatype.class) ? datatypes(shapes.map(Datatype.class::cast))
 				: clazz.equals(Range.class) ? ranges(shapes.map(Range.class::cast))
 				: clazz.equals(Lang.class) ? langs(shapes.map(Lang.class::cast))
 				: clazz.equals(MinCount.class) ? minCounts(shapes.map(MinCount.class::cast))
@@ -114,6 +118,8 @@ public final class And extends Shape {
 				: clazz.equals(All.class) ? alls(shapes.map(All.class::cast))
 				: clazz.equals(Localized.class) ? localizeds(shapes.map(Localized.class::cast))
 				: clazz.equals(Field.class) ? fields(shapes.map(Field.class::cast))
+				: clazz.equals(Link.class) ? links(shapes.map(Link.class::cast))
+				: clazz.equals(When.class) ? whens(shapes.map(When.class::cast))
 				: shapes;
 	}
 
@@ -129,21 +135,34 @@ public final class And extends Shape {
 	}
 
 	private static Stream<? extends Shape> ranges(final Stream<Range> ranges) {
+		return Stream.of(range(ranges
+				.map(Range::values)
+				.reduce((x, y) -> x.isEmpty() ? y : y.isEmpty() ? x : Optional
 
-		final List<Set<Value>> sets=ranges.map(Range::values).collect(toList());
+						.of(x.stream().filter(y::contains).collect(toCollection(LinkedHashSet::new)))
+						.filter(tags -> !tags.isEmpty())
 
-		return Stream.of(range(sets // value sets intersection
-				.stream()
-				.flatMap(Collection::stream)
-				.filter(value -> sets.stream().allMatch(set -> set.contains(value)))
-				.collect(toSet())
-		));
+						.orElseThrow(() -> new IllegalArgumentException(format(
+								"conflicting range value sets <%s> / <%s>", x, y
+						)))
+
+				)
+				.orElseGet(Collections::emptySet)));
 	}
 
 	private static Stream<? extends Shape> langs(final Stream<Lang> langs) {
 		return Stream.of(lang(langs
 				.map(Lang::tags)
-				.reduce((x, y) -> x.stream().filter(y::contains).collect(toCollection(LinkedHashSet::new)))
+				.reduce((x, y) -> x.isEmpty() ? y : y.isEmpty() ? x : Optional
+
+						.of(x.stream().filter(y::contains).collect(toCollection(LinkedHashSet::new)))
+						.filter(tags -> !tags.isEmpty())
+
+						.orElseThrow(() -> new IllegalArgumentException(format(
+								"conflicting language tag sets <%s> / <%s>", x, y
+						)))
+
+				)
 				.orElseGet(Collections::emptySet)));
 	}
 
@@ -168,14 +187,78 @@ public final class And extends Shape {
 	}
 
 	private static Stream<? extends Shape> fields(final Stream<Field> fields) {
-		return fields // group by name preserving order
+		return fields
 
-				.collect(toMap(Field::name, f -> Stream.of(f.shape()), Stream::concat, LinkedHashMap::new))
+				.collect(groupingBy(Field::iri, LinkedHashMap::new, reducing((x, y) -> new Field(
+
+						Field.label(x.label(), y.label()).orElseThrow(() -> new IllegalArgumentException(format(
+								"clashing labels <%s> / <%s> for field %s", x.label(), y.label(), format(x.iri())
+						))),
+
+						x.iri(),
+
+						and(x.shape(), y.shape())
+
+				))))
+
+				.values()
+				.stream()
+
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+
+				.map(field -> field.shape().equals(or()) ? and() : field);
+	}
+
+	private static Stream<? extends Shape> links(final Stream<Link> links) {
+		return links
+
+				.collect(groupingBy(Link::iri, LinkedHashMap::new, reducing((x, y) -> new Link(
+
+						x.iri(),
+
+						and(x.shape(), y.shape())
+
+				))))
+
+				.values()
+				.stream()
+
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+
+				.map(new Function<Link, Shape>() {
+
+					private final AtomicReference<Boolean> way=new AtomicReference<>();
+
+					@Override public Shape apply(final Link link) {
+						if ( link.shape().equals(or()) ) { return and(); } else {
+
+							final Boolean x=direct(link.iri());
+							final Boolean y=way.getAndSet(x);
+
+							if ( y != null && !y.equals(x) ) {
+								throw new IllegalArgumentException("both direct and inverse links specified");
+							}
+
+							return link;
+						}
+					}
+				});
+	}
+
+	private static Stream<? extends Shape> whens(final Stream<When> whens) {
+		return whens
+
+				.collect(groupingBy(When::test))
 
 				.entrySet()
 				.stream()
 
-				.map(entry -> field(entry.getKey(), and(entry.getValue())));
+				.map(entry -> when(entry.getKey(),
+						and(entry.getValue().stream().map(When::pass)),
+						and(entry.getValue().stream().map(When::fail))
+				));
 	}
 
 
@@ -219,7 +302,7 @@ public final class And extends Shape {
 
 	@Override public String toString() {
 		return "and("+(shapes.isEmpty() ? "" : shapes.stream()
-				.map(shape -> shape.toString().replace("\n", "\n\t"))
+				.map(shape -> Values.indent(shape.toString()))
 				.collect(joining(",\n\t", "\n\t", "\n"))
 		)+")";
 	}

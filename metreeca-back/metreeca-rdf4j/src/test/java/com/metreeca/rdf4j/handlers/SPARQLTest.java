@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.junit.jupiter.api.Test;
 
-import javax.json.JsonValue;
 import java.util.function.Consumer;
+
+import javax.json.JsonValue;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.statement;
@@ -33,12 +34,13 @@ import static com.metreeca.rdf4j.assets.GraphTest.exec;
 import static com.metreeca.rdf4j.assets.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 final class SPARQLTest {
@@ -59,7 +61,7 @@ final class SPARQLTest {
 	}
 
 	private SPARQL _public(final SPARQL endpoint) {
-		return endpoint.query();
+		return endpoint.query(emptySet());
 	}
 
 

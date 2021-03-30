@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package com.metreeca.rest;
 
-import javax.json.JsonObject;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
+import javax.json.JsonObject;
 
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.TextFormat.text;

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package com.metreeca.rest;
+
+import com.metreeca.json.Values;
 
 import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
@@ -47,8 +49,9 @@ public final class Request extends Message<Request> {
 			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
-	private static final Pattern SchemePattern=Pattern.compile("[a-zA-Z][-+.a-zA-Z0-9]*:");
+	private static final Pattern SchemePattern=Pattern.compile("^[a-zA-Z][-+.a-zA-Z0-9]*:");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+	private static final Pattern FilePattern=Pattern.compile("\\.\\w+$");
 
 
 	public static Map<String, List<String>> search(final String query) {
@@ -95,11 +98,11 @@ public final class Request extends Message<Request> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Object user=null;
+	private Object user;
 	private Set<Object> roles=emptySet();
 
 	private String method="";
-	private String base="app:/";
+	private String base=Values.Base;
 	private String path="/";
 	private String query="";
 
@@ -149,7 +152,7 @@ public final class Request extends Message<Request> {
 	}
 
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//// Checks ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Checks if this request is safe.
@@ -166,8 +169,7 @@ public final class Request extends Message<Request> {
 	 *
 	 * @return {@code true} if the {@link #path()} of this request includes a trailing slash; {@code false} otherwise
 	 *
-	 * @see
-	 * <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
+	 * @see <a href="https://www.w3.org/TR/ldp-bp/#include-a-trailing-slash-in-container-uris">Linked Data Platform Best
 	 * Practices and Guidelines - § 2.6 Include a trailing slash in container URIs</a>
 	 */
 	public boolean collection() {
@@ -175,16 +177,31 @@ public final class Request extends Message<Request> {
 	}
 
 	/**
-	 * Checks if request is interactive.
+	 * Checks if this request targets a browser route.
 	 *
-	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #GET} and the {@code Accept}
-	 * header includes a MIME type usually associated with an interactive browser-managed HTTP request
-	 * (e.g. {@code text /html}
+	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #safe() safe} and its {@code
+	 * Accept} header includes a MIME type usually associated with an interactive browser-managed HTTP request (e.g.
+	 * {@code text/html} and its {@link #path() path} doesn't contains a filename extension (e.g. {@code .html}); {@code
+	 * false}, otherwise
 	 */
-	public boolean interactive() {
-		return method.equals(GET) && headers("content-type")
-				.stream()
-				.anyMatch(value -> HTMLPattern.matcher(value).find());
+	public boolean route() {
+		return safe() && (!FilePattern.matcher(path).find()
+				&& headers("Accept").stream().anyMatch(value -> HTMLPattern.matcher(value).find())
+		);
+	}
+
+	/**
+	 * Checks if this request targets a browser asset.
+	 *
+	 * @return {@code true} if the {@linkplain #method() method} of this request is {@link #safe() safe} and its {@code
+	 * Accept} header includes a MIME type usually associated with an interactive browser-managed HTTP request (e.g.
+	 * {@code text/html} or its {@link #path() path} contains a filename extension (e.g. {@code .html}); {@code false},
+	 * otherwise
+	 */
+	public boolean asset() {
+		return safe() && (FilePattern.matcher(path).find()
+				|| headers("Accept").stream().anyMatch(value -> HTMLPattern.matcher(value).find())
+		);
 	}
 
 
@@ -336,8 +353,7 @@ public final class Request extends Message<Request> {
 	 * @return this request
 	 *
 	 * @throws NullPointerException     if {@code base} is null
-	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing
-	 *                                  slash
+	 * @throws IllegalArgumentException if {@code base} is not an absolute IRI or if it doesn't include a trailing slash
 	 */
 	public Request base(final String base) {
 
@@ -345,12 +361,12 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null base");
 		}
 
-		if ( !SchemePattern.matcher(base).lookingAt() ) {
+		if ( !SchemePattern.matcher(base).find() ) {
 			throw new IllegalArgumentException("not an absolute base IRI");
 		}
 
 		if ( !base.endsWith("/") ) {
-			throw new IllegalArgumentException("missing trailing / in base IRI");
+			throw new IllegalArgumentException("missing trailing slash in base IRI");
 		}
 
 		this.base=base;
@@ -372,8 +388,8 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the resource path of this request.
 	 *
-	 * @param path the resource path of this request, that is the absolute server path of the linked data resources
-	 *             this request refers to
+	 * @param path the resource path of this request, that is the absolute server path of the linked data resources this
+	 *             request refers to
 	 *
 	 * @return this request
 	 *
@@ -399,7 +415,7 @@ public final class Request extends Message<Request> {
 	/**
 	 * Retrieves the query of this request.
 	 *
-	 * @return the query this request
+	 * @return the query this request; doesn't include a leading question mark
 	 */
 	public String query() {
 		return query;
@@ -408,7 +424,7 @@ public final class Request extends Message<Request> {
 	/**
 	 * Configures the query of this request.
 	 *
-	 * @param query the query of this request
+	 * @param query the query of this request; doesn't include a leading question mark
 	 *
 	 * @return this request
 	 *
@@ -426,7 +442,32 @@ public final class Request extends Message<Request> {
 	}
 
 
+	/**
+	 * Retrieves the target resource of this request.
+	 *
+	 * @return the full URL of the target resource of this request, including {@link #base() base}, {@link #path() path}
+	 * and optional {@link #query() query}
+	 */
+	public String resource() {
+		return query.isEmpty() ? item() : item()+"?"+query;
+	}
+
+
 	//// Parameters ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves request accepted languages.
+	 *
+	 * @return a list of language tags included in the {@code Accept-Language} header of this request or an empty
+	 * list if
+	 * no such header is included; may include a wildcard tag ({@code *})
+	 */
+	public List<String> langs() {
+		return header("Accept-Language")
+				.map((Function<String, List<String>>)Format::langs)
+				.orElse(emptyList());
+	}
+
 
 	/**
 	 * Retrieves request query parameters.

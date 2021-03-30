@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import org.eclipse.rdf4j.model.IRI;
 
 import java.util.*;
 
-import static com.metreeca.json.Values.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
@@ -57,7 +56,7 @@ public final class Order {
 	private Order(final boolean inverse, final List<IRI> path) {
 
 		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null path or path step");
+			throw new NullPointerException("null path or path IRI");
 		}
 
 		this.inverse=inverse;
@@ -92,13 +91,11 @@ public final class Order {
 
 		final StringBuilder builder=new StringBuilder(20*path.size());
 
-		for (final IRI step : path) {
+		for (final IRI IRI : path) {
 
-			if ( builder.length() > 0 ) {
-				builder.append('/');
-			}
+			if ( builder.length() > 0 ) { builder.append('/'); }
 
-			builder.append(format(step));
+			builder.append(IRI);
 		}
 
 		return builder.insert(0, inverse ? "-" : "+").toString();

@@ -1,11 +1,15 @@
 ---
 title:      Shape Specification Language Reference
-excerpt:    Shape-based data modelling language semantics and components
 ---
 
-Most framework services are driven by declarative linked data models defined using a [shape](#shapes)-based specification language.
+[comment]: <> (excerpt:    Shape-based data modelling language semantics and components)
 
-Models are [programmaticaly](../tutorials/publishing-jsonld-apis.md) built using a Java‑based DSL and can eventually automate a range of different tasks in the lifecycle of linked data REST APIs.
+
+Most framework services are driven by declarative linked data models defined using a [shape](#shapes)-based specification
+language.
+
+Models are [programmaticaly](../tutorials/publishing-jsonld-apis.md) built using a Java‑based DSL and can eventually
+automate a range of different tasks in the lifecycle of linked data REST APIs.
 
 | task              | shape role                                                   |
 | ----------------- | ------------------------------------------------------------ |
@@ -15,12 +19,11 @@ Models are [programmaticaly](../tutorials/publishing-jsonld-apis.md) built using
 | API documentation | Human and machine readable docs for linked data REST APIs may be dynamically derived from associated linked data models and published as hypertexts and [OpenAPI](https://www.openapis.org)/[Swagger](https://swagger.io/specification/) specs |
 | data ingestion    | Data ingested from external data sources may be dynamically mapped to and validated against the linked data models associated with target graphs |
 
-!!! note
-	Some of the described features aren't (yet ;-) supported by the framework.
+!!! note Some of the described features aren't (yet ;-) supported by the framework.
 
 # Shapes
 
-Linked data [shapes](../javadocs/com/metreeca/json/Shape.html) define the expected structure of RDF resource descriptions in terms of **constraints** imposed on members of a **focus set** of JSON-LD values and on the  values of their properties.
+Linked data [shapes](../javadocs/com/metreeca/json/Shape.html) define the expected structure of RDF resource descriptions in terms of **constraints** imposed on members of a **focus set** of JSON-LD values and on the values of their properties.
 
 **Primitive** shapes specify declarative constraints to be meet by the focus set and its member values. **Composite** shapes recursively assemble other shapes into tree-structured complex constraints.
 
@@ -28,27 +31,9 @@ Linked data selection tasks identify the set of nodes in a graph whose descripti
 
 Linked data validation tasks verify that the description of an initial focus set is consistent with the constraints specified by a possibly composite shape. During the process, derived focus sets connected by [structural constraints](#structural-constraints) may be recursively validated. Validation results are reported as a structured [focus validation trace](../javadocs/com/metreeca/json/Trace.html).
 
-## Annotations
-
-Non-validating shapes documenting shape metadata, to be used for purposes such as shape redaction, form building or predictable data encoding.
-
-| shape                                                        | value                                                        |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [meta](../javadocs/com/metreeca/json/shapes/Meta.html)(IRI, value, …) | the metadata property identified by the given tag is associated with the given value in the enclosing shape |
-| [guard](../javadocs/com/metreeca/json/shapes/Guard.html)(axis, value, …) | the focus set is consistent with this shape only if the value of an externally assigned [axis variable](../javadocs/com/metreeca/json/Shape.html#redact-java.util.function.Function...-) is included in a given set of target values |
-
-Common metadata annotations are directly available as shorthand shapes.
-
-| shorthand shape                                              | value                                                        |
-| :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [alias](../javadocs/com/metreeca/json/shapes/Meta.html#alias-java.lang.String-)("alias") | an alternate property name for reporting values for the enclosing shape (e.g. in the [context](jsonld-format.md#properties) of JSON-LD serialization results) |
-| [label](../javadocs/com/metreeca/json/shapes/Meta.html#label--)("label") | a human-readable textual label  for the enclosing shape      |
-| [notes](../javadocs/com/metreeca/json/shapes/Meta.html#notes-java.lang.String-)("notes") | a human-readable textual description of the enclosing shape  |
-| [index](../javadocs/com/metreeca/json/shapes/Meta.html#index-boolean-)(true\|false) | an indexing hint: `true` if the value of the enclosing shape should be indexed in the storage backed, `false` otherwise |
-
 ## Value Constraints
 
-Primitive shapes specifying constraints to be individually met by each value in the focus set.
+Primitive shapes specifying constraints to be individually satisfied by each value in the focus set.
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
@@ -68,7 +53,7 @@ Primitive shapes specifying constraints to be individually met by each value in 
 
 ## Set Constraints
 
-Primitive shapes specifying constraints to be collectively met by the RDF terms in the focus set.
+Primitive shapes specifying constraints to be collectively satisfied by the values in the focus set.
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
@@ -90,13 +75,12 @@ Common combinations of set constraints are directly available as shorthand shape
 
 ## Structural Constraints
 
-Composite shapes specifying constraints to be met by a derived focus set generated by a path.
+Composite shapes specifying constraints to be satisfied by a derived focus set generated by a path.
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [field](../javadocs/com/metreeca/json/shapes/Field.html)(IRI, [shape](../javadocs/com/metreeca/json/Shape.html)) | the derived focus set generated by a single step path is consistent with a given shape |
-
-Inverse path steps may be generated using the [Values.inverse(IRI)](../javadocs/com/metreeca/json/Values.html#inverse-org.eclipse.rdf4j.model.IRI-) factory method.
+| [field](../javadocs/com/metreeca/json/shapes/Field.html)(["label", ] IRI, [shape](../javadocs/com/metreeca/json/Shape.html), …) | the derived focus set generated by traversing a single step path is consistent with a given set of shapes |
+| [link](../javadocs/com/metreeca/json/shapes/Link.html)(IRI, [shape](../javadocs/com/metreeca/json/Shape.html), …) | the derived focus set generated by virtually traversing a single step path linking a resource alias to its target is consistent with a given set of shapes |
 
 ## Logical Constraints
 
@@ -104,12 +88,10 @@ Composite shapes specifying logical combinations of shapes.
 
 | shape                                                        | constraint                                                   |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [and](../javadocs/com/metreeca/json/shapes/And.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with all shapes in a given target set |
-| [or](../javadocs/com/metreeca/json/shapes/Or.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
-| [when](../javadocs/com/metreeca/json/shapes/When.html)([test](../javadocs/com/metreeca/json/Shape.html),[pass](../javadocs/com/metreeca/json/Shape.html) [, [fail](../javadocs/com/metreeca/json/Shape.html)]) | the focus set is consistent either with a *pass* shape, if consistent also with a *test* shape, or with a *fail* shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
-
-!!! warning
-    Test shapes for conditional constraints are currently limited to combinations of parametric <code>guards</code> and logical operators.
+| [guard](../javadocs/com/metreeca/json/shapes/Guard.html)(axis, value, …) | the focus set is consistent with this shape only if the value of an externally assigned [axis variable](../javadocs/com/metreeca/json/Shape.html#redact-java.lang.String-java.util.Collection-) is included in a given set of target values |
+| [when](../javadocs/com/metreeca/json/shapes/When.html)([test](../javadocs/com/metreeca/json/Shape.html),[pass](../javadocs/com/metreeca/json/Shape.html) [, [fail](../javadocs/com/metreeca/json/Shape.html)]) | the focus set is consistent either with a `pass` shape, if consistent also with a `test` shape, or with a `fail` shape, otherwise; if omitted, the `fail` shape defaults to `and()`, that is it's always meet |
+| [and](../javadocs/com/metreeca/json/shapes/And.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with all shapes in a given target set |
+| [or](../javadocs/com/metreeca/json/shapes/Or.html)([shape](../javadocs/com/metreeca/json/Shape.html), …) | the focus set is consistent with at least one shape in a given target set |
 
 # Parameters
 
@@ -139,30 +121,27 @@ Parametric guards for the [role](../javadocs/com/metreeca/json/shapes/Guard.html
 |-------|-------------|
 |[role](../javadocs/com/metreeca/json/shapes/Guard.html#role-java.lang.Object...-)(value, …)| target shapes are to be considered only if the sets of [roles](../javadocs/com/metreeca/rest/Request.html#roles--) enabled for the user performing a request contains at least one of the given role values |
 
-
 ## Task Axis
 
 Parametric guards for the [task](../javadocs/com/metreeca/json/shapes/Guard.html#task-java.lang.Object...-) axis selectively enable target shapes according to the method of the HTTP/S operations performed on target linked data resources.
 
 | shorthand                                                    | HTTP/S method   | usage context                                                |
 | ------------------------------------------------------------ | --------------- | ------------------------------------------------------------ |
-| [create](../javadocs/com/metreeca/json/shapes/Guard.html#create--)() | POST            | resource creation                                            |
-| [relate](../javadocs/com/metreeca/json/shapes/Guard.html#relate--)() | GET             | resource retrieval                                           |
-| [update](../javadocs/com/metreeca/json/shapes/Guard.html#update--)() | PUT             | resource updating                                            |
-| [delete](../javadocs/com/metreeca/json/shapes/Guard.html#delete--)() | DELETE          | resouce deletion                                             |
-| [client](../javadocs/com/metreeca/json/shapes/Guard.html#client--)() | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
-| [server](../javadocs/com/metreeca/json/shapes/Guard.html#server--)() | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
+| [create](../javadocs/com/metreeca/json/shapes/Guard.html#create-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | POST            | resource creation                                            |
+| [relate](../javadocs/com/metreeca/json/shapes/Guard.html#relate-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | GET             | resource retrieval                                           |
+| [update](../javadocs/com/metreeca/json/shapes/Guard.html#update-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | PUT             | resource updating                                            |
+| [delete](../javadocs/com/metreeca/json/shapes/Guard.html#delete-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | DELETE          | resouce deletion                                             |
+| [client](../javadocs/com/metreeca/json/shapes/Guard.html#client-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | POST+GET+DELETE | shorthand for client-managed data, specified at creation time, but not updated afterwards |
+| [server](../javadocs/com/metreeca/json/shapes/Guard.html#server-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | GET+DELETE      | shorthand for server-managed data, neither specified at creation time, nor updated afterwards |
 
-## Area Axis
+## View Axis
 
-Parametric guards for the [area](../javadocs/com/metreeca/json/shapes/Guard.html#area-java.lang.Object...-) axis selectively enable target shapes according to the usage context.
+Parametric guards for the [view](../javadocs/com/metreeca/json/shapes/Guard.html#view-java.lang.Object...-) axis selectively enable target shapes according to the usage context.
 
-| shorthand                                                    | usage context                                               |
-| ------------------------------------------------------------ | ----------------------------------------------------------- |
-| [target](../javadocs/com/metreeca/json/shapes/Guard.html#target--)() | collection resource description                             |
-| [member](../javadocs/com/metreeca/json/shapes/Guard.html#member--)() | collection member description (shorthand for digest+detail) |
-| [digest](../javadocs/com/metreeca/json/shapes/Guard.html#digest--)() | short resource description, e.g. inside search result sets  |
-| [detail](../javadocs/com/metreeca/json/shapes/Guard.html#detail--)() | full resource description                                   |
+| shorthand                                                    | usage context                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [digest](../javadocs/com/metreeca/json/shapes/Guard.html#digest-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | short resource description, e.g. inside search result sets   |
+| [detail](../javadocs/com/metreeca/json/shapes/Guard.html#detail-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | detailed resource description, e.g. inside advanced resource utilities |
 
 ## Mode Axis
 
@@ -170,5 +149,5 @@ Parametric guards for the [mode](../javadocs/com/metreeca/json/shapes/Guard.html
 
 | shorthand                                                    | usage pattern                                                |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [convey](../javadocs/com/metreeca/json/shapes/Guard.html#convey--)() | target shapes are to be used only for validating incoming data or extracting outgoing data and not for selecting existing resources to be processed |
-| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter--)() | target shapes are to be used only for selecting existing resources to be processed and not for validating incoming data or extracting outgoing data |
+| [convey](../javadocs/com/metreeca/json/shapes/Guard.html#convey-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when validating incoming data or extracting outgoing data |
+| [filter](../javadocs/com/metreeca/json/shapes/Guard.html#filter-com.metreeca.json.Shape...-)([[shape](../javadocs/com/metreeca/json/Shape.html), …]) | target shapes are to be considered only when selecting resources to be processed |

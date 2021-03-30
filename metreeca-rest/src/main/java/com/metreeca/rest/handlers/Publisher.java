@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package com.metreeca.rest.handlers;
 
-import com.metreeca.rest.formats.DataFormat;
+import com.metreeca.rest.*;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.*;
-import java.nio.file.FileSystem;
 import java.nio.file.*;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.*;
 import java.util.regex.Matcher;
@@ -32,16 +30,13 @@ import java.util.stream.Stream;
 
 import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.NotFound;
-import static com.metreeca.rest.Response.OK;
+import static com.metreeca.rest.Request.HEAD;
+import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.handlers.Router.router;
+
 import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Collections.emptyMap;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.Locale.ROOT;
-import static java.util.stream.Collectors.toMap;
 
 /**
  * Static content publisher.
@@ -49,79 +44,6 @@ import static java.util.stream.Collectors.toMap;
 public final class Publisher extends Delegator {
 
 	private static final Pattern URLPattern=Pattern.compile("(.*/)?(\\.|[^/#]*)?(#[^/#]*)?$");
-
-
-	/**
-	 * MIME types by file extension.
-	 *
-	 * @see <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types">
-	 * Common MIME types @ MDN</a>
-	 */
-	private static final Map<String, String> MIMETypes=unmodifiableMap(Stream
-
-			.of(Publisher.class.getSimpleName()+".tsv")
-
-			.map(Publisher.class::getResourceAsStream)
-			.flatMap(stream -> new BufferedReader(new InputStreamReader(stream, UTF_8)).lines())
-
-			.filter(line -> !line.isEmpty())
-
-			.map(line -> {
-
-				final int tab=line.indexOf('\t');
-
-				return new SimpleImmutableEntry<>(line.substring(0, tab), line.substring(tab+1));
-
-			})
-
-			.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
-
-	);
-
-
-	/**
-	 * Extracts the basename of a path.
-	 *
-	 * @param path the path whose basename is to be extracted
-	 *
-	 * @return the portion of the {@code path} filename before the last dot character or the whole {@code  path}
-	 * filename if it doesn't include a dot character
-	 *
-	 * @throws NullPointerException if {@code path} is null
-	 */
-	public static String basename(final Path path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		final String name=path.getFileName().toString();
-		final int dot=name.lastIndexOf('.');
-
-		return dot >= 0 ? name.substring(0, dot) : name;
-	}
-
-	/**
-	 * Extracts the extension of a path.
-	 *
-	 * @param path the path whose extension is to be extracted
-	 *
-	 * @return the portion of the {@code path} filename after the last dot character or an empty string if the filename
-	 * doesn't include a dot character
-	 *
-	 * @throws NullPointerException if {@code path} is null
-	 */
-	public static String extension(final Path path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		final String name=path.getFileName().toString();
-		final int dot=name.lastIndexOf('.');
-
-		return dot >= 0 ? name.substring(dot).toLowerCase(ROOT) : "";
-	}
 
 
 	/**
@@ -249,11 +171,62 @@ public final class Publisher extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private String fallback="";
+
 
 	private Publisher(final Path root) {
-		delegate(router().get(request -> variants(request.path())
+		delegate(router()
 
-				.map(path -> root.getRoot().relativize(root.getFileSystem().getPath(path)))
+				.head(request -> handle(request, root))
+				.get(request -> handle(request, root))
+
+		);
+	}
+
+
+	/**
+	 * Configures the fallback path.
+	 *
+	 * @param path the path of the resource to be served for {@linkplain Request#route() route} requests that don't
+	 *                match
+	 *             any available resource path; ignored if empty
+	 *
+	 * @return this publisher
+	 *
+	 * @throws NullPointerException if {@code path} is null
+	 */
+	public Publisher fallback(final String path) {
+
+		if ( path == null ) {
+			throw new NullPointerException("null path");
+		}
+
+		this.fallback=path;
+
+		return this;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Future<Response> handle(final Request request, final Path root) {
+		return reply(request, root, request.path())
+
+				.orElseGet(() -> Optional.of(fallback)
+
+						.filter(path -> !path.isEmpty() && request.route())
+
+						.flatMap(path -> reply(request, root, path))
+
+						.orElseGet(() -> request.reply(status(NotFound)))
+
+				);
+	}
+
+	private Optional<Future<Response>> reply(final Request request, final Path root, final String path) {
+		return variants(path)
+
+				.map(variant -> root.getRoot().relativize(root.getFileSystem().getPath(variant)))
 				.map(root::resolve)
 				.map(Path::normalize) // prevent tree walking attacks
 
@@ -262,19 +235,29 @@ public final class Publisher extends Delegator {
 
 				.findFirst()
 
-				.map(file -> request.reply(function(response -> response.status(OK)
+				.map(file -> request.reply(function(response -> {
 
-						.header("Content-Type", MIMETypes.getOrDefault(extension(file), DataFormat.MIME))
-						.header("Content-Length", String.valueOf(Files.size(file)))
-						.header("ETag", format("\"%s\"", Files.getLastModifiedTime(file).toMillis()))
+					final String mime=Format.mime(file.getFileName().toString());
+					final String length=String.valueOf(Files.size(file));
+					final String etag=format("\"%s\"", Files.getLastModifiedTime(file).toMillis());
 
-						.body(output(), consumer(output -> Files.copy(file, output)))
+					return request.headers("If-None-Match").stream().anyMatch(etag::equals)
 
-				)))
+							? response.status(NotModified)
 
-				.orElseGet(() -> request.reply(status(NotFound)))
+							: request.method().equals(HEAD)
 
-		));
+							? response.status(OK)
+							.header("Content-Type", mime)
+							.header("ETag", etag)
+
+							: response.status(OK)
+							.header("Content-Type", mime)
+							.header("Content-Length", length)
+							.header("ETag", etag)
+							.body(output(), consumer(output -> Files.copy(file, output)));
+
+				})));
 	}
 
 

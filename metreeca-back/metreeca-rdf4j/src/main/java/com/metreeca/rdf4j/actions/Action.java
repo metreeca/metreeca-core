@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.metreeca.rdf4j.actions;
 
 import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.Context;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -27,19 +26,21 @@ import org.eclipse.rdf4j.query.impl.SimpleDataset;
 
 import java.util.*;
 
+import static com.metreeca.rest.Context.asset;
+
 
 /**
  * SPARQL-based processing action.
- * 
+ *
  * <p>Executes SPARQL queries/updates against a {@linkplain #graph(Graph) target graph}.</p>
  *
  * @param <T> the type of this action for fluent methods
  */
 public abstract class Action<T extends Action<T>> {
 
-    private Graph graph=Context.asset(Graph.graph());
+    private Graph graph=asset(Graph.graph());
 
-    private String base;
+	private String base;
     private Boolean inferred;
     private Integer timeout;
 

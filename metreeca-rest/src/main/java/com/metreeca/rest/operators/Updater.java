@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 
 package com.metreeca.rest.operators;
 
-import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
 import com.metreeca.rest.assets.Engine;
-import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.handlers.Delegator;
 
-import org.eclipse.rdf4j.model.IRI;
-
-import static com.metreeca.json.shapes.Guard.*;
+import static com.metreeca.json.shapes.Guard.Detail;
+import static com.metreeca.json.shapes.Guard.Update;
 import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Wrapper.wrapper;
-import static com.metreeca.rest.assets.Engine.*;
+import static com.metreeca.rest.assets.Engine.engine;
+import static com.metreeca.rest.assets.Engine.throttler;
 
 
 /**
@@ -40,13 +37,10 @@ import static com.metreeca.rest.assets.Engine.*;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Engine#throttler(Object, Object...) authorization}, considering shapes enabled by the
- * {@linkplain Guard#Update} task and the {@linkplain Guard#Target} area, when operating on
- * {@linkplain Request#collection() collections}, or the {@linkplain Guard#Detail} area, when operating on other
- * resources;</li>
+ * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
+ * {@linkplain Guard#Update} task and the {@linkplain Guard#Detail} view;</li>
  *
- * <li>engine-assisted request payload {@linkplain JSONLDFormat#validate(IRI, Shape, javax.json.JsonObject) validation
- * };</li>
+ * <li>shape-driven request payload validation;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#update(Request) updating}.</li>
  *
@@ -72,16 +66,12 @@ public final class Updater extends Delegator {
 
 		final Engine engine=asset(engine());
 
-		delegate(engine.wrap(((Handler)engine::update)
+		delegate(((Handler)engine::update)
 
-				.with(wrapper(Request::collection,
-						throttler(Update, Target),
-						throttler(Update, Detail)
-				))
+				.with(engine)
+				.with(throttler(Update, Detail))
 
-				.with(validator())
-
-		));
+		);
 	}
 
 }

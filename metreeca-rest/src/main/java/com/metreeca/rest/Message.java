@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import com.metreeca.rest.formats.MultipartFormat;
 
 import java.net.URI;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static java.lang.Float.parseFloat;
+import static com.metreeca.rest.Either.Right;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -49,54 +49,12 @@ public abstract class Message<T extends Message<T>> {
 			";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b"
 	);
 
-	private static final Pattern MimePattern=Pattern.compile(
-			"((?:[-+\\w]+|\\*)/(?:[-+\\w]+|\\*))(?:\\s*;\\s*q\\s*=\\s*(\\d*(?:\\.\\d+)?))?"
-	);
-
-
-	/**
-	 * Parses a MIME type list.
-	 *
-	 * @param types the MIME type list to be parsed
-	 *
-	 * @return a list of MIME types parsed from {@code types}, sorted by descending
-	 * <a href="https://developer.mozilla.org/en-US/docs/Glossary/quality_values">quality value</a>
-	 *
-	 * @throws NullPointerException if {@code types} is null
-	 */
-	public static List<String> types(final String types) {
-
-		if ( types == null ) {
-			throw new NullPointerException("null mime types");
-		}
-
-		final List<Map.Entry<String, Float>> entries=new ArrayList<>();
-
-		final Matcher matcher=MimePattern.matcher(types);
-
-		while ( matcher.find() ) {
-
-			final String media=matcher.group(1).toLowerCase(Locale.ROOT);
-			final String quality=matcher.group(2);
-
-			try {
-				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, quality == null ? 1 : parseFloat(quality)));
-			} catch ( final NumberFormatException ignored ) {
-				entries.add(new AbstractMap.SimpleImmutableEntry<>(media, 0f));
-			}
-		}
-
-		entries.sort((x, y) -> -Float.compare(x.getValue(), y.getValue()));
-
-		return entries.stream().map(Map.Entry::getKey).collect(toList());
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<Supplier<?>, Object> attributes=new LinkedHashMap<>();
 	private final Map<String, List<String>> headers=new LinkedHashMap<>();
-	private final Map<Format<?>, Object> bodies=new HashMap<>();
+	private final Map<Format<?>, Either<MessageException, ?>> bodies=new HashMap<>();
 
 
 	private T self() { return (T)this; }
@@ -149,8 +107,8 @@ public abstract class Message<T extends Message<T>> {
 	 * <p><strong>Warning</strong> / The {@code Accept-Charset} header or the originating request is
 	 * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Charset">ignored</a>.</p>
 	 *
-	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to {@code UTF-8} if
-	 * no charset is explicitly defined
+	 * @return the charset defined in the {@code Content-Type} header of this message, defaulting to {@code UTF-8} if no
+	 * charset is explicitly defined
 	 */
 	public String charset() {
 		return header("Content-Type")
@@ -166,8 +124,8 @@ public abstract class Message<T extends Message<T>> {
 	/**
 	 * Creates a message part.
 	 *
-	 * @param item the (possibly relative)) IRI identifying the {@linkplain #item() focus item} of the new message
-	 *             part; will be resolved against the message {@linkplain #item() item} IRI
+	 * @param item the (possibly relative)) IRI identifying the {@linkplain #item() focus item} of the new message part;
+	 *             will be resolved against the message {@linkplain #item() item} IRI
 	 *
 	 * @return a new message part with a focus item identified by {@code item} and the same {@linkplain #request()
 	 * originating request} as this message
@@ -239,46 +197,74 @@ public abstract class Message<T extends Message<T>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves a message attribute.
+	 * Retrieves message attribute.
 	 *
-	 * @param key the key for the attribute to be retrieved; must return a non-null default value for the attribute
-	 * @param <V> the type of the attribute to be retrieved
+	 * @param name the name for the attribute to be retrieved; must return a non-null default value for the attribute
+	 * @param <V>  the type of the attribute to be retrieved
 	 *
-	 * @return the value of message attribute associated with {@code key}
+	 * @return the value of message attribute associated with {@code name}
 	 *
-	 * @throws NullPointerException if {@code key} is null
+	 * @throws NullPointerException if {@code name} is null
 	 */
-	public <V> V attribute(final Supplier<V> key) {
+	public <V> V attribute(final Supplier<V> name) {
 
-		if ( key == null ) {
-			throw new NullPointerException("null key");
+		if ( name == null ) {
+			throw new NullPointerException("null name");
 		}
 
-		return (V)attributes.computeIfAbsent(key, _key -> requireNonNull(_key.get(), "null key value"));
+		return (V)attributes.computeIfAbsent(name, _key -> requireNonNull(_key.get(), "null name value"));
 	}
 
 	/**
-	 * Configures a message attribute.
+	 * Configures message attribute.
 	 *
-	 * @param key   the key for the attribute to be retrieved; must return a non-null default value for the attribute
-	 * @param value the attribute value to be associated with {@code key}
+	 * @param name  the name for the attribute to be configured; must return a non-null default value for the attribute
+	 * @param value the attribute value to be associated with {@code name}
 	 * @param <V>   the type of the attribute to be configured
 	 *
 	 * @return this message
 	 *
-	 * @throws NullPointerException if either {@code key} or {@code value} is null
+	 * @throws NullPointerException if either {@code name} or {@code value} is null
 	 */
-	public <V> T attribute(final Supplier<V> key, final V value) {
+	public <V> T attribute(final Supplier<V> name, final V value) {
 
-		if ( key == null ) {
-			throw new NullPointerException("null key");
+		if ( name == null ) {
+			throw new NullPointerException("null name");
 		}
 
 		if ( value == null ) {
 			throw new NullPointerException("null value");
 		}
 
-		attributes.put(key, value);
+		attributes.put(name, value);
+
+		return self();
+	}
+
+
+	/**
+	 * Updates message attribute.
+	 *
+	 * @param name   the name for the attribute to be updated; must return a non-null default value for the attribute
+	 * @param mapper a function mapping from the current to the updated value of the {@code name} attribute; must return
+	 *               a non-null value
+	 * @param <V>    the type of the attribute to be updated
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code value} is null
+	 */
+	public <V> T map(final Supplier<V> name, final UnaryOperator<V> mapper) {
+
+		if ( name == null ) {
+			throw new NullPointerException("null name");
+		}
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+		attributes.computeIfPresent(name, (key, value) -> mapper.apply((V)value));
 
 		return self();
 	}
@@ -355,8 +341,8 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures message header value.
 	 *
 	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
-	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header
-	 * {@code values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
+	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name  the name of the header whose value is to be configured
 	 * @param value the new value for {@code name}; empty values are ignored
@@ -428,8 +414,8 @@ public abstract class Message<T extends Message<T>> {
 	 * Configures message header values.
 	 *
 	 * <p>If {@code name} is prefixed with a tilde ({@code ~}), header {@code values} are set only if the header is not
-	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header
-	 * {@code values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
+	 * already defined; if {@code name} is {@code Set-Cookie} or is prefixed with a plus sign ({@code +}), header {@code
+	 * values} are appended to existing values; otherwise, header {@code values} overwrite existing values.</p>
 	 *
 	 * @param name   the name of the header whose values are to be configured
 	 * @param values a possibly empty collection of values; empty and duplicate values are ignored
@@ -490,8 +476,8 @@ public abstract class Message<T extends Message<T>> {
 	 * @param format the expected body format
 	 * @param <V>    the type of the body to be decoded
 	 *
-	 * @return either a message exception reporting a decoding issue or the message body
-	 * {@linkplain Format#decode(Message) decoded} by {@code format}
+	 * @return either a message exception reporting a decoding issue or the message body {@linkplain
+	 * Format#decode(Message) decoded} by {@code format}
 	 *
 	 * @throws NullPointerException if {@code format} is null
 	 */
@@ -501,16 +487,7 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null body");
 		}
 
-		final V cached=(V)bodies.get(format);
-
-		return cached != null ? Either.Right(cached) : format.decode(this).map(value -> {
-
-			bodies.put(format, value);
-
-			return value;
-
-		});
-
+		return (Either<MessageException, V>)bodies.computeIfAbsent(format, key -> format.decode(this));
 	}
 
 	/**
@@ -522,8 +499,8 @@ public abstract class Message<T extends Message<T>> {
 	 * @param value  the body to be encoded
 	 * @param <V>    the type of the body to be encoded
 	 *
-	 * @return this message with the {@code value} {@linkplain Format#encode(Message, Object) encoded} by {@code
-	 * format} as body
+	 * @return this message with the {@code value} {@linkplain Format#encode(Message, Object) encoded} by {@code format}
+	 * as body
 	 *
 	 * @throws NullPointerException if either {@code format} or {@code value} is null
 	 */
@@ -537,9 +514,50 @@ public abstract class Message<T extends Message<T>> {
 			throw new NullPointerException("null value");
 		}
 
-		bodies.put(format, value);
+		bodies.put(format, Right(value));
 
 		return format.encode(self(), value);
+	}
+
+
+	/**
+	 * Updates message body.
+	 *
+	 * @param format the body format
+	 * @param mapper a function mapping from the current to the updated value of the {@code format} body; must return a
+	 *               non-null value
+	 * @param <V>    the type of the body to be updated
+	 *
+	 * @return this message
+	 *
+	 * @throws NullPointerException if either {@code name} or {@code value} is null
+	 */
+	public <V> T map(final Format<? super V> format, final UnaryOperator<V> mapper) {
+
+		if ( format == null ) {
+			throw new NullPointerException("null format");
+		}
+
+		if ( mapper == null ) {
+			throw new NullPointerException("null mapper");
+		}
+
+
+		Optional
+
+				.ofNullable(bodies.computeIfPresent(format, (key, value) -> value.map(body -> requireNonNull(
+
+						mapper.apply((V)body), "null mapper return value"
+
+				))))
+
+				.ifPresent(result -> result.map(body ->
+
+						format.encode(self(), (V)body)
+
+				));
+
+		return self();
 	}
 
 

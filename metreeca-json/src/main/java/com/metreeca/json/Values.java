@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.impl.*;
+import org.eclipse.rdf4j.model.base.AbstractNamespace;
+import org.eclipse.rdf4j.model.base.AbstractValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import javax.xml.bind.DatatypeConverter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -29,30 +30,37 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.*;
-import java.time.temporal.*;
+import java.time.temporal.TemporalAccessor;
+import java.time.temporal.TemporalAmount;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.time.ZoneOffset.UTC;
-import static java.time.format.DateTimeFormatter.*;
 import static java.util.Locale.ROOT;
 import static java.util.UUID.nameUUIDFromBytes;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.joining;
 
 
 /**
- * RDF utilities.
+ * Value utilities.
  */
 public final class Values {
+
+	private static final String IRIScheme="(?<schemeall>(?<scheme>[-+\\w]+):)";
+	private static final String IRIHost="(?<hostall>//(?<host>[^/?#]*))";
+	private static final String IRIQuery="(?<queryall>\\?(?<query>[^#]*))";
+	private static final String IRIFragment="(?<fragmentall>#(?<fragment>.*))";
+	private static final String IRIPath="(?<pathall>(?<path>[^?#]*)"+IRIQuery+"?"+IRIFragment+"?)";
+
 
 	/**
 	 * A pattern matching absolute IRIs.
 	 */
-	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^[a-zA-Z][-+.a-zA-Z0-9]*:.+$");
+	public static final Pattern AbsoluteIRIPattern=Pattern.compile("^"+IRIScheme+IRIHost+"?"+IRIPath+"$");
 
 	/**
 	 * A pattern matching IRI components.
@@ -60,82 +68,20 @@ public final class Values {
 	 * @see <a href="https://tools.ietf.org/html/rfc3986#appendix-B">RFC 3986 Uniform Resource Identifier (URI): Generic
 	 * Syntax - Appendix B.  Parsing a URI Reference with a Regular Expression</a>
 	 */
-	public static final Pattern IRIPattern=Pattern.compile("^"
-			+"(?<schemeall>(?<scheme>[^:/?#]+):)?"
-			+"(?<hostall>//(?<host>[^/?#]*))?"
-			+"(?<pathall>"
-			+"(?<path>[^?#]*)"
-			+"(?<queryall>\\?(?<query>[^#]*))?"
-			+"(?<fragmentall>#(?<fragment>.*))?"
-			+")$"
-	);
+	public static final Pattern IRIPattern=Pattern.compile("^"+IRIScheme+"?"+IRIHost+"?"+IRIPath+"$");
 
 
-	private static final ValueFactory factory=SimpleValueFactory.getInstance(); // before constant initialization
+	private static final Pattern NewlinePattern=Pattern.compile("\n");
+
+
+	private static final ValueFactory factory=new AbstractValueFactory() {}; // before constant initialization
 	private static final Comparator<Value> comparator=new ValueComparator();
 
 	private static final ThreadLocal<DecimalFormat> exponential=ThreadLocal.withInitial(() ->
 			new DecimalFormat("0.0#########E0", DecimalFormatSymbols.getInstance(ROOT)) // ;( not thread-safe
 	);
 
-
-	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static String uuid() {
-		return randomUUID().toString();
-	}
-
-	public static String uuid(final String text) {
-		return text == null ? null : nameUUIDFromBytes(text.getBytes(UTF_8)).toString();
-	}
-
-
-	public static String md5() {
-
-		final byte[] bytes=new byte[16];
-
-		ThreadLocalRandom.current().nextBytes(bytes);
-
-		return DatatypeConverter
-				.printHexBinary(bytes)
-				.toLowerCase(ROOT);
-	}
-
-	public static String md5(final String text) {
-		try {
-
-			return text == null ? null : DatatypeConverter
-					.printHexBinary(MessageDigest.getInstance("MD5").digest(text.getBytes(UTF_8)))
-					.toLowerCase(ROOT);
-
-		} catch ( final NoSuchAlgorithmException unexpected ) {
-			throw new InternalError(unexpected);
-		}
-	}
-
-
-	public static BigInteger integer(final long value) {
-		return BigInteger.valueOf(value);
-	}
-
-	public static BigInteger integer(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? (BigInteger)value
-				: value instanceof BigDecimal ? ((BigDecimal)value).toBigInteger()
-				: BigInteger.valueOf(value.longValue());
-	}
-
-
-	public static BigDecimal decimal(final double value) {
-		return BigDecimal.valueOf(value);
-	}
-
-	public static BigDecimal decimal(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
-				: value instanceof BigDecimal ? (BigDecimal)value
-				: BigDecimal.valueOf(value.doubleValue());
-	}
+	private static final char[] HexDigits="0123456789abcdef".toCharArray();
 
 
 	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,13 +90,31 @@ public final class Values {
 	public static final Literal False=literal(false);
 
 
+	//// Internal Namespace ////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static final String Base="app:/";
+
+	public static final IRI Root=iri(Base);
+
+	public static final Namespace NS=namespace("", Base+"terms#");
+
+
+	public static IRI term(final String name) {
+		return name == null ? null : iri(NS.getName(), name);
+	}
+
+	public static IRI item(final String name) {
+		return name == null ? null : iri(Root, name);
+	}
+
+
 	//// Extended Datatypes ////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final IRI ValueType=iri("type:value"); // abstract datatype IRI for values
-	public static final IRI ResourceType=iri("type:resource"); // abstract datatype IRI for resources
-	public static final IRI BNodeType=iri("type:bnode"); // datatype IRI for blank nodes
-	public static final IRI IRIType=iri("type:iri"); // datatype IRI for IRI references
-	public static final IRI LiteralType=iri("type:literal"); // abstract datatype IRI for literals
+	public static final IRI ValueType=term("value"); // abstract datatype IRI for values
+	public static final IRI ResourceType=term("resource"); // abstract datatype IRI for resources
+	public static final IRI BNodeType=term("bnode"); // datatype IRI for blank nodes
+	public static final IRI IRIType=term("iri"); // datatype IRI for IRI references
+	public static final IRI LiteralType=term("literal"); // abstract datatype IRI for literals
 
 
 	public static boolean derives(final IRI upper, final IRI lower) {
@@ -168,6 +132,87 @@ public final class Values {
 
 	private static boolean literal(final IRI type) {
 		return type.equals(LiteralType) || !type.equals(ValueType) && !resource(type);
+	}
+
+
+	//// Inverse Predicates ////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * An IRI scheme for inverse predicates ({@value}).
+	 */
+	private static final String InverseScheme="inverse:";
+
+
+	/**
+	 * Checks predicate direction.
+	 *
+	 * @param predicate the IRI identifying the predicate
+	 *
+	 * @return {@code true} if {@code predicate} identifies a direct predicate; {@code false} if {@code predicate}
+	 * identifies an {@link #inverse(IRI) inverse} predicate
+	 *
+	 * @throws NullPointerException if {@code predicate} is null
+	 */
+	public static boolean direct(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return !predicate.stringValue().startsWith(InverseScheme);
+	}
+
+	/**
+	 * Creates an inverse predicate.
+	 *
+	 * @param predicate the IRI identifying the predicate
+	 *
+	 * @return the inverse version of {@code predicate}
+	 *
+	 * @throws NullPointerException if {@code predicate} is null
+	 */
+	public static IRI inverse(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		final String label=predicate.stringValue();
+
+		return label.startsWith(InverseScheme)
+				? iri(label.substring(InverseScheme.length()))
+				: iri(InverseScheme+label);
+	}
+
+	/**
+	 * Traverses a predicate.
+	 *
+	 * @param predicate the IRI identifying the predicate to be traversed
+	 * @param direct    a predicate mapper to be executed if {@code predicate} is {@link #direct(IRI) direct}
+	 * @param inverse   a predicate mapper to be executed if {@code predicate} is {@link #inverse(IRI) inverse}
+	 * @param <V>       the type of the value returned by predicate mappers
+	 *
+	 * @return the value returned by the predicate mapper selected according to the direction of {@code predicate}
+	 *
+	 * @throws NullPointerException if any argument is null
+	 */
+	public static <V> V traverse(final IRI predicate, final Function<IRI, V> direct, final Function<IRI, V> inverse) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( direct == null ) {
+			throw new NullPointerException("null direct");
+		}
+
+		if ( inverse == null ) {
+			throw new NullPointerException("null inverse");
+		}
+
+		return predicate.stringValue().startsWith(InverseScheme)
+				? inverse.apply(iri(predicate.stringValue().substring(InverseScheme.length())))
+				: direct.apply(predicate);
 	}
 
 
@@ -214,7 +259,13 @@ public final class Values {
 
 
 	public static Namespace namespace(final String prefix, final String name) {
-		return prefix == null || name == null ? null : new SimpleNamespace(prefix, name);
+		return prefix == null || name == null ? null : new AbstractNamespace() {
+
+			@Override public String getPrefix() { return prefix; }
+
+			@Override public String getName() { return name; }
+
+		};
 	}
 
 
@@ -243,8 +294,27 @@ public final class Values {
 	}
 
 
-	public static Value value(final Object value) {
-		return value instanceof URI || value instanceof URL ? iri(value.toString()) : literal(value);
+	public static Triple triple(
+			final Resource subject, final IRI predicate, final Value object
+	) {
+		return subject == null || predicate == null || object == null ? null
+				: factory.createTriple(subject, predicate, object);
+	}
+
+
+	public static Value value(final Object object) {
+		return object == null ? null
+
+				: object instanceof Value ? (Value)object
+
+				: object instanceof URI ? iri((URI)object)
+				: object instanceof URL ? iri((URL)object)
+
+				: literal(object);
+	}
+
+	private static <V extends Value> V value(final Class<?> type) {
+		throw new IllegalArgumentException(String.format("unsupported object type <%s>", type.getName()));
 	}
 
 
@@ -264,6 +334,17 @@ public final class Values {
 
 	public static IRI iri() {
 		return factory.createIRI("urn:uuid:", uuid());
+	}
+
+	public static IRI iri(final Object object) {
+		return object == null ? null
+
+				: object instanceof IRI ? (IRI)object
+
+				: object instanceof URI ? iri((URI)object)
+				: object instanceof URL ? iri((URL)object)
+
+				: value(object.getClass());
 	}
 
 	public static IRI iri(final URI uri) {
@@ -288,35 +369,29 @@ public final class Values {
 	}
 
 
-	public static IRI internal(final String name) {
-		return name == null ? null : factory.createIRI("app:/terms#", name);
+	public static Literal literal(final Object object) {
+		return object == null ? null
+
+				: object instanceof Literal ? (Literal)object
+
+				: object instanceof Boolean ? literal(((Boolean)object).booleanValue())
+
+				: object instanceof Byte ? literal(((Byte)object).byteValue())
+				: object instanceof Short ? literal(((Short)object).shortValue())
+				: object instanceof Integer ? literal(((Integer)object).intValue())
+				: object instanceof Long ? literal(((Long)object).longValue())
+				: object instanceof Float ? literal(((Float)object).floatValue())
+				: object instanceof Double ? literal(((Double)object).doubleValue())
+				: object instanceof BigInteger ? literal((BigInteger)object)
+				: object instanceof BigDecimal ? literal((BigDecimal)object)
+
+				: object instanceof TemporalAccessor ? literal((TemporalAccessor)object)
+				: object instanceof TemporalAmount ? literal((TemporalAmount)object)
+
+				: object instanceof byte[] ? literal((byte[])object)
+
+				: value(object.getClass());
 	}
-
-
-	public static Literal literal(final Object value) {
-		return value == null ? null
-
-				: value instanceof Boolean ? literal(((Boolean)value).booleanValue())
-
-				: value instanceof Byte ? literal(((Byte)value).byteValue())
-				: value instanceof Short ? literal(((Short)value).shortValue())
-				: value instanceof Integer ? literal(((Integer)value).intValue())
-				: value instanceof Long ? literal(((Long)value).longValue())
-				: value instanceof Float ? literal(((Float)value).floatValue())
-				: value instanceof Double ? literal(((Double)value).doubleValue())
-				: value instanceof BigInteger ? literal((BigInteger)value)
-				: value instanceof BigDecimal ? literal((BigDecimal)value)
-
-				: value instanceof Instant ? literal((Instant)value)
-				: value instanceof LocalDate ? literal((LocalDate)value)
-				: value instanceof LocalDateTime ? literal((LocalDateTime)value)
-				: value instanceof OffsetDateTime ? literal((OffsetDateTime)value)
-
-				: value instanceof byte[] ? literal((byte[])value)
-
-				: literal(value.getClass());
-	}
-
 
 	public static Literal literal(final boolean value) {
 		return factory.createLiteral(value);
@@ -359,51 +434,18 @@ public final class Values {
 	}
 
 
-	/**
-	 * Creates a date-instant literal for a specific instant.
-	 *
-	 * @param instant the instant to be converted
-	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second precision, if {@code instant
-	 * } is
-	 * not null; {@code null}, otherwise
-	 */
-	public static Literal literal(final Instant instant) {
-		return literal(instant, false);
+	public static Literal literal(final TemporalAccessor accessor) {
+		return accessor == null ? null : factory.createLiteral(accessor);
 	}
 
-	/**
-	 * Creates a date-instant literal for a specific instant.
-	 *
-	 * @param instant the instant to be converted
-	 * @param millis  if {@code true}, includes milliseconds in the literal textual representation
-	 *
-	 * @return an {@code xsd:dateTime} literal representing {@code instant} with second or millisecond precision as
-	 * specified by {@code millis}, if {@code instant} is not null; {@code null}, otherwise
-	 */
-	public static Literal literal(final Instant instant, final boolean millis) {
-		return instant == null ? null : literal(
-				ISO_DATE_TIME.format(instant.truncatedTo(millis ? ChronoUnit.MILLIS : ChronoUnit.SECONDS).atZone(UTC)),
-				XSD.DATETIME
-		);
-	}
-
-	public static Literal literal(final LocalDate value) {
-		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value.atStartOfDay()), XSD.DATETIME);
-	}
-
-	public static Literal literal(final LocalDateTime value) {
-		return value == null ? null : literal(ISO_LOCAL_DATE_TIME.format(value), XSD.DATETIME);
-	}
-
-	public static Literal literal(final OffsetDateTime value) {
-		return value == null ? null : literal(ISO_OFFSET_DATE_TIME.format(value), XSD.DATETIME);
+	public static Literal literal(final TemporalAmount amount) {
+		return amount == null ? null : factory.createLiteral(amount);
 	}
 
 
 	public static Literal literal(final byte[] value) {
-		return value == null ? null : factory.createLiteral("data:application/octet-stream;base64,"
-				+Base64.getEncoder().encodeToString(value), XSD.ANYURI);
+		return value == null ? null : factory.createLiteral(
+				"data:application/octet-stream;base64,"+Base64.getEncoder().encodeToString(value), XSD.ANYURI);
 	}
 
 
@@ -416,12 +458,11 @@ public final class Values {
 	}
 
 
-	private static Literal literal(final Class<?> type) {
-		throw new IllegalArgumentException(String.format("unsupported object type <%s>", type.getName()));
-	}
-
-
 	///// Converters //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Optional<IRI> iri(final Value value) {
+		return Optional.ofNullable(value).filter(IRI.class::isInstance).map(IRI.class::cast);
+	}
 
 	public static Optional<Literal> literal(final Value value) {
 		return Optional.ofNullable(value).filter(Literal.class::isInstance).map(Literal.class::cast);
@@ -429,143 +470,81 @@ public final class Values {
 
 
 	public static Optional<Boolean> _boolean(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_boolean);
+		return literal(value).map(Literal::booleanValue);
 	}
 
 
 	public static Optional<Integer> _int(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_int);
+		return literal(value).map(guard(Literal::intValue));
 	}
 
 	public static Optional<Long> _long(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_long);
+		return literal(value).map(guard(Literal::longValue));
 	}
 
 	public static Optional<Float> __float(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_float);
+		return literal(value).map(guard(Literal::floatValue));
 	}
 
 	public static Optional<Double> _double(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::_double);
+		return literal(value).map(guard(Literal::doubleValue));
 	}
 
 	public static Optional<BigInteger> integer(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::integer);
+		return literal(value).map(guard(Literal::integerValue));
 	}
 
 	public static Optional<BigDecimal> decimal(final Value value) {
-		return literal(value).map(Literal::stringValue).flatMap(Values::decimal);
+		return literal(value).map(guard(Literal::decimalValue));
 	}
+
+
+	public static Optional<TemporalAccessor> temporalAccessor(final Value value) {
+		return literal(value).map(guard(Literal::temporalAccessorValue));
+	}
+
+	public static Optional<TemporalAmount> temporalAmount(final Value value) {
+		return literal(value).map(guard(Literal::temporalAmountValue));
+	}
+
 
 	public static Optional<String> string(final Value value) {
 		return literal(value).map(Literal::stringValue);
 	}
 
 
-	public static Optional<Instant> instant(final Value value) {
-		return literal(value).flatMap(literal
+	private static <V, R> Function<V, R> guard(final Function<V, R> mapper) {
+		return v -> {
 
-				-> literal.getDatatype().equals(XSD.DATETIME) ? instant(literal.stringValue())
+			try { return mapper.apply(v); } catch ( final RuntimeException e ) { return null; }
 
-				// !!! support other temporal datatypes
-
-				: Optional.empty()
-
-		);
-	}
-
-	public static Optional<LocalDate> localDate(final Value value) {
-		return literal(value).flatMap(literal
-
-				-> literal.getDatatype().equals(XSD.DATETIME) ? localDate(literal.stringValue())
-
-				// !!! support other temporal datatypes
-
-				: Optional.empty()
-
-		);
-
-	}
-
-
-	//// Parsers ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Optional<Boolean> _boolean(final String string) {
-		return Optional.ofNullable(string).map(Boolean::parseBoolean);
-	}
-
-
-	public static Optional<Integer> _int(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Integer::parseInt);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<Long> _long(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Long::parseLong);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<Float> _float(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Float::parseFloat);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<Double> _double(final String string) {
-		try {
-			return Optional.ofNullable(string).map(Double::parseDouble);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<BigInteger> integer(final String string) {
-		try {
-			return Optional.ofNullable(string).map(BigInteger::new);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-	public static Optional<BigDecimal> decimal(final String string) {
-		try {
-			return Optional.ofNullable(string).map(BigDecimal::new);
-		} catch ( final NumberFormatException e ) {
-			return Optional.empty();
-		}
-	}
-
-
-	public static Optional<Instant> instant(final String string) {
-		return Optional.ofNullable(string)
-				.map(ISO_DATE_TIME::parse)
-				.map(accessor -> Instant.from(accessor.isSupported(ChronoField.INSTANT_SECONDS)
-						? Instant.from(accessor)
-						: LocalDateTime.from(accessor).atZone(ZoneId.systemDefault())
-				));
-	}
-
-	public static Optional<LocalDate> localDate(final String string) {
-		return Optional.ofNullable(string)
-				.map(ISO_LOCAL_DATE_TIME::parse)
-				.map(accessor -> accessor.query(TemporalQueries.localDate()));
+		};
 	}
 
 
 	//// Formatters ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+	public static String format(final Statement statement) {
+		return statement == null ? null : String.format("%s %s %s",
+				format(statement.getSubject()), format(statement.getPredicate()), format(statement.getObject())
+		);
+	}
+
+
+	public static String format(final List<IRI> path) {
+		return path == null ? null : path.stream().map(Values::format).collect(joining("/"));
+	}
+
+	public static String format(final Collection<? extends Value> values) {
+		return values == null ? null : values.stream().map(Values::format).collect(joining(", "));
+	}
+
+
 	public static String format(final Value value) {
 		return value == null ? null
 				: value instanceof BNode ? format((BNode)value)
 				: value instanceof IRI ? format((IRI)value)
+				: value instanceof Focus ? format((Focus)value)
 				: format((Literal)value);
 	}
 
@@ -573,14 +552,15 @@ public final class Values {
 		return bnode == null ? null : "_:"+bnode.getID();
 	}
 
-	public static String format(final IRI iri) {
-		if ( iri == null ) { return null; } else {
+	public static String format(final IRI iri) { // !!! relativize wrt to base
+		return iri == null ? null : traverse(iri,
+				direct -> direct.equals(RDF.TYPE) ? "a" : '<'+iri.stringValue()+'>',
+				inverse -> "^<"+inverse.stringValue()+'>'
+		);
+	}
 
-			final String role=direct(iri) ? "" : "^";
-			final String text=iri.stringValue();
-
-			return role+'<'+text+'>'; // !!! relativize wrt to base
-		}
+	public static String format(final Focus focus) {
+		return focus == null ? null : "{"+focus.stringValue()+"}";
 	}
 
 	public static String format(final Literal literal) {
@@ -597,24 +577,105 @@ public final class Values {
 						: type.equals(XSD.STRING) ? quote(literal.getLabel())
 
 						: literal.getLanguage()
-						.map(lang -> format(literal, lang))
-						.orElseGet(() -> format(literal, type));
+						.map(lang -> format(literal.getLabel(), lang))
+						.orElseGet(() -> format(literal.getLabel(), type));
 
 			} catch ( final IllegalArgumentException ignored ) {
 
-				return format(literal, type);
+				return format(literal.getLabel(), type);
 
 			}
 		}
 	}
 
 
-	private static String format(final Literal literal, final String lang) {
-		return quote(literal.getLabel())+'@'+lang;
+	private static String format(final CharSequence label, final String lang) {
+		return quote(label)+'@'+lang;
 	}
 
-	private static String format(final Literal literal, final IRI type) {
-		return quote(literal.getLabel())+"^^"+format(type);
+	private static String format(final CharSequence label, final IRI type) {
+		return quote(label)+"^^"+format(type);
+	}
+
+
+	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String uuid() {
+		return randomUUID().toString();
+	}
+
+	public static String uuid(final String text) {
+		return text == null ? null : uuid(text.getBytes(UTF_8));
+	}
+
+	public static String uuid(final byte[] data) {
+		return data == null ? null : nameUUIDFromBytes(data).toString();
+	}
+
+
+	public static String md5() {
+
+		final byte[] bytes=new byte[16];
+
+		ThreadLocalRandom.current().nextBytes(bytes);
+
+		return hex(bytes);
+	}
+
+	public static String md5(final String text) {
+		return text == null ? null : md5(text.getBytes(UTF_8));
+	}
+
+	public static String md5(final byte[] data) {
+		try {
+
+			return data == null ? null : hex(MessageDigest.getInstance("MD5").digest(data));
+
+		} catch ( final NoSuchAlgorithmException unexpected ) {
+			throw new InternalError(unexpected);
+		}
+	}
+
+
+	public static BigInteger integer(final long value) {
+		return BigInteger.valueOf(value);
+	}
+
+	public static BigInteger integer(final Number value) {
+		return value == null ? null
+				: value instanceof BigInteger ? (BigInteger)value
+				: value instanceof BigDecimal ? ((BigDecimal)value).toBigInteger()
+				: BigInteger.valueOf(value.longValue());
+	}
+
+
+	public static BigDecimal decimal(final double value) {
+		return BigDecimal.valueOf(value);
+	}
+
+	public static BigDecimal decimal(final Number value) {
+		return value == null ? null
+				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
+				: value instanceof BigDecimal ? (BigDecimal)value
+				: BigDecimal.valueOf(value.doubleValue());
+	}
+
+
+	public static String hex(final byte[] bytes) {
+		if ( bytes == null ) { return null; } else {
+
+			final char[] hex=new char[bytes.length*2];
+
+			for (int i=0, l=bytes.length; i < l; ++i) {
+
+				final int b=bytes[i]&0xFF;
+
+				hex[2*i]=HexDigits[b >>> 4];
+				hex[2*i+1]=HexDigits[b&0x0F];
+			}
+
+			return new String(hex);
+		}
 	}
 
 
@@ -656,55 +717,13 @@ public final class Values {
 		return builder.toString();
 	}
 
+	public static String indent(final CharSequence text) {
 
-	//// Inverse IRIs //////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Checks predicate direction.
-	 *
-	 * @param iri the IRI identifying the predicate
-	 *
-	 * @return {@code true} if {@code iri} is a direct predicate; {@code false} if {@code iri} is an {@link
-	 * #inverse(IRI)} predicate
-	 */
-	public static boolean direct(final IRI iri) {
-		return !(iri instanceof Inverse);
-	}
-
-	/**
-	 * Inverts the direction of a predicate.
-	 *
-	 * @param iri the IRI identifying the predicate
-	 *
-	 * @return null, if {@code iri} is null; an inverse predicate IRI identified by the textual value of {@code iri} ,
-	 * if {@code iri} is an {@linkplain #direct(IRI) predicate}; a direct predicate IRI identified by the textual
-	 * value of {@code iri}, otherwise
-	 */
-	public static IRI inverse(final IRI iri) {
-		return iri == null ? null
-				: iri instanceof Inverse ? factory.createIRI(iri.stringValue())
-				: new Inverse(iri.stringValue());
-	}
-
-
-	private static final class Inverse extends SimpleIRI {
-
-		private static final long serialVersionUID=7576383707001017160L;
-
-
-		private Inverse(final String value) { super(value); }
-
-
-		@Override public boolean equals(final Object object) {
-			return object == this || object instanceof Inverse && super.equals(object);
+		if ( text == null ) {
+			throw new NullPointerException("null text");
 		}
 
-		@Override public int hashCode() { return -super.hashCode(); }
-
-		@Override public String toString() {
-			return "^"+super.toString();
-		}
-
+		return NewlinePattern.matcher(text).replaceAll("\n\t");
 	}
 
 

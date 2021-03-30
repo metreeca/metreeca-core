@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.metreeca.rest.formats;
 
 import com.metreeca.json.Shape;
-import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -25,10 +24,12 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.json.JsonObject;
-import javax.json.JsonValue;
 import java.util.Map;
 
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+
+import static com.metreeca.json.Shape.optional;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
@@ -37,18 +38,24 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
-import static com.metreeca.json.shapes.Meta.alias;
 import static com.metreeca.json.shapes.Or.or;
 import static com.metreeca.rest.JSONAssert.assertThat;
+import static com.metreeca.rest.Xtream.entry;
+import static com.metreeca.rest.Xtream.map;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
+
 import static javax.json.Json.*;
 import static javax.json.JsonValue.EMPTY_JSON_OBJECT;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 final class JSONLDEncoderTest {
 
 	private static final String base="http://example.com/";
+
+	private static final IRI focus=iri(base);
 
 	private final IRI w=iri(base, "w");
 	private final IRI x=iri(base, "x");
@@ -63,7 +70,8 @@ final class JSONLDEncoderTest {
 	}
 
 	private JsonObject encode(
-			final IRI focus, final Shape shape, final Map<String, String> keywords, final Statement... model) {
+			final IRI focus, final Shape shape, final Map<String, String> keywords, final Statement... model
+	) {
 		return new JSONLDEncoder(focus, shape, keywords, false).encode(asList(model));
 	}
 
@@ -71,8 +79,8 @@ final class JSONLDEncoderTest {
 	@Nested final class Values {
 
 		private JsonValue encode(final Value value) {
-			return new JSONLDEncoder(iri(base), field(RDF.VALUE, Shape.optional()), emptyMap(), false)
-					.encode(singleton(statement(iri(base), RDF.VALUE, value))) // wrap value inside root object
+			return new JSONLDEncoder(focus, field(RDF.VALUE, optional()), emptyMap(), false)
+					.encode(singleton(statement(focus, RDF.VALUE, value))) // wrap value inside root object
 					.get("value"); // then unwrap
 		}
 
@@ -138,14 +146,6 @@ final class JSONLDEncoderTest {
 			assertThat(encode(literal("value", "en"))).isEqualTo(createObjectBuilder()
 					.add("@value", createValue("value"))
 					.add("@language", createValue("en"))
-			);
-		}
-
-
-		@Test void testMalformed() {
-			assertThat(encode(literal("none", XSD.BOOLEAN))).isEqualTo(createObjectBuilder()
-					.add("@value", createValue("none"))
-					.add("@type", createValue(XSD.BOOLEAN.toString()))
 			);
 		}
 
@@ -320,14 +320,14 @@ final class JSONLDEncoderTest {
 
 			)).isEqualTo(createObjectBuilder()
 					.add("@id", "/x")
-					.add("valueOf", "/y") // !!! valueOf?
+					.add("valueOf", "/y")
 			);
 		}
 
 		@Test void testAliasUserLabelledField() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, and(required(), alias("alias"))),
+					field("alias", RDF.VALUE, required()),
 
 					statement(x, RDF.VALUE, y)
 
@@ -343,7 +343,7 @@ final class JSONLDEncoderTest {
 			assertThat(encode(x,
 
 					field(RDF.VALUE, and(required(),
-							field(RDF.VALUE, and(required(), alias("alias")))
+							field("alias", RDF.VALUE, required())
 					)),
 
 					statement(x, RDF.VALUE, y),
@@ -360,7 +360,7 @@ final class JSONLDEncoderTest {
 			);
 		}
 
-		@Test void testHandleAliasClashes() {
+		@Test void testRejectAliasClashes() {
 			assertThatThrownBy(() -> encode(x,
 
 					and(
@@ -371,12 +371,14 @@ final class JSONLDEncoderTest {
 			)).isInstanceOf(IllegalArgumentException.class);
 		}
 
-		@Test void testIgnoreReservedAliases() {
-			assertThatThrownBy(() -> encode(x,
+		@Test void testRejectReservedAliases() {
+			assertThatThrownBy(() -> {
+				encode(x,
 
-					field(RDF.VALUE, alias("@id"))
+						field("@id", RDF.VALUE)
 
-			)).isInstanceOf(IllegalArgumentException.class);
+				);
+			}).isInstanceOf(IllegalArgumentException.class);
 		}
 
 	}
@@ -423,7 +425,7 @@ final class JSONLDEncoderTest {
 		@Test void testOmitMissingValues() {
 			assertThat(encode(x,
 
-					field(RDF.VALUE, Shape.optional())
+					field(RDF.VALUE, optional())
 
 			)).isEqualTo(createObjectBuilder()
 					.add("@id", "/x")
@@ -575,24 +577,51 @@ final class JSONLDEncoderTest {
 
 	@Nested final class Keywords {
 
+		@Test void testHandleType() {
+			assertThat(encode(x,
+
+					field(RDF.TYPE, required(), datatype(IRIType)),
+
+					statement(x, RDF.TYPE, y)
+
+			)).isEqualTo(createObjectBuilder()
+					.add("@id", "/x")
+					.add("@type", "/y")
+			);
+		}
+
+		@Test void testHandleAliasedType() {
+			assertThat(encode(x,
+
+					field(RDF.TYPE, required(), datatype(IRIType)),
+					map(entry("@id", "id"), entry("@type", "type")),
+
+					statement(x, RDF.TYPE, y)
+
+			)).isEqualTo(createObjectBuilder()
+					.add("id", "/x")
+					.add("type", "/y")
+			);
+		}
+
 		@Test void testHandleKeywordAliases() {
 			assertThat(encode(x,
 
-					field(RDF.NIL),
+					field(RDF.FIRST),
 
-					Xtream.map(
-							Xtream.entry("@id", "id"),
-							Xtream.entry("@value", "value"),
-							Xtream.entry("@type", "type"),
-							Xtream.entry("@language", "language")
+					map(
+							entry("@id", "id"),
+							entry("@value", "value"),
+							entry("@type", "type"),
+							entry("@language", "language")
 					),
 
-					statement(x, RDF.NIL, literal("string", "en")),
-					statement(x, RDF.NIL, literal("2020-09-10", XSD.DATE)))
+					statement(x, RDF.FIRST, literal("string", "en")),
+					statement(x, RDF.FIRST, literal("2020-09-10", XSD.DATE)))
 
 			).isEqualTo(createObjectBuilder()
 					.add("id", "/x")
-					.add("nil", createArrayBuilder() // keyword alias overrides field alias
+					.add("first", createArrayBuilder() // keyword alias overrides field alias
 							.add(createObjectBuilder()
 									.add("value", "string")
 									.add("language", "en")
@@ -618,6 +647,7 @@ final class JSONLDEncoderTest {
 			return context;
 		}
 
+
 		@Test void testDirectFields() {
 			assertThat(encode(field(RDF.VALUE)))
 					.hasField("value", RDF.VALUE.stringValue());
@@ -641,10 +671,10 @@ final class JSONLDEncoderTest {
 		}
 
 		@Test void testKnownDatatype() {
-			assertThat(encode(field(RDF.VALUE, datatype(RDF.NIL))))
+			assertThat(encode(field(RDF.VALUE, datatype(RDF.FIRST))))
 					.hasField("value", createObjectBuilder()
 							.add("@id", RDF.VALUE.stringValue())
-							.add("@type", RDF.NIL.stringValue())
+							.add("@type", RDF.FIRST.stringValue())
 					);
 		}
 

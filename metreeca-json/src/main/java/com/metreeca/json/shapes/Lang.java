@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import com.metreeca.json.Shape;
 
 import java.util.*;
 
-import static com.metreeca.json.shapes.Or.or;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 
@@ -28,8 +27,8 @@ import static java.util.Collections.unmodifiableSet;
 /**
  * Language value constraint.
  *
- * <p>States that each term in the focus set is a localized string with a language tag in the given set of target
- * values.</p>
+ * <p>States that each value in the focus set is a localized string, with a language tag possibly restricted to a
+ * given set of target values.</p>
  */
 public final class Lang extends Shape {
 
@@ -56,7 +55,7 @@ public final class Lang extends Shape {
 			throw new IllegalArgumentException("empty tags");
 		}
 
-		return tags.isEmpty() ? or() : new Lang(tags);
+		return new Lang(tags);
 	}
 
 

@@ -2,13 +2,15 @@
 
 # Metreeca/Link
 
-Metreeca/Link is a lightweight Java framework enabling rapid development of model-driven REST/JSON APIs.
+Metreeca/Link is a model-driven Java framework for rapid REST/JSON-LD backend development.
 
-Its engine automatically converts high-level declarative JSON-LD models into extended REST APIs supporting CRUD operations, faceted search, data validation and fine‑grained role‑based access control, relieving back-end developers from low-level chores and completely shielding front‑end developers from linked data technicalities.
+Its engine automatically converts high-level declarative JSON-LD models into extended REST APIs supporting CRUD
+operations, faceted search, data validation and fine‑grained role‑based access control, relieving backend developers from
+low-level chores and completely shielding frontend developers from linked data technicalities.
 
 Metreeca/Link is server and storage-agnostic and may be easily connected to your solution of choice.
 
-# Getting started
+# Getting Started
 
 1. Add the framework to your Maven configuration
 
@@ -31,12 +33,12 @@ Metreeca/Link is server and storage-agnostic and may be easily connected to your
 
     <dependencies>
 
-        <dependency> <!-- server adapter -->
+        <dependency> <!-- server connector -->
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-jse</artifactId>
         </dependency>
 
-        <dependency> <!-- backend adapter -->
+        <dependency> <!-- storage connector -->
             <groupId>com.metreeca</groupId>
             <artifactId>metreeca-rdf4j</artifactId>
         </dependency>
@@ -49,7 +51,7 @@ Metreeca/Link is server and storage-agnostic and may be easily connected to your
 2. Write your first server and launch it
 
 ```java
-import com.metreeca.jse.Server;
+import com.metreeca.jse.JSEServer;
 
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.formats.TextFormat.text;
@@ -57,13 +59,14 @@ import static com.metreeca.rest.formats.TextFormat.text;
 public final class Hello {
 
   public static void main(final String... args) {
-    new Server()
+    new JSEServer()
 
-        .handler(context -> request ->
+        .delegate(context -> request ->
             request.reply(response -> response
                 .status(OK)
                 .body(text(), "Hello world!")
-            ))
+            )
+        )
 
         .start();
   }

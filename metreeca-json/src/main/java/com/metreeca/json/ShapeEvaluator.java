@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,24 +24,10 @@ import static java.lang.Boolean.TRUE;
 
 final class ShapeEvaluator extends Shape.Probe<Boolean> {
 
-	@Override public Boolean probe(final Meta meta) {
-		return true;
+	@Override public Boolean probe(final Link link) {
+		return link.shape().map(this);
 	}
 
-
-	@Override public Boolean probe(final And and) {
-		return and.shapes().stream()
-				.filter(shape -> !(shape instanceof Meta))
-				.map(shape -> shape.map(this))
-				.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
-	}
-
-	@Override public Boolean probe(final Or or) {
-		return or.shapes().stream()
-				.filter(shape -> !(shape instanceof Meta))
-				.map(shape -> shape.map(this))
-				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
-	}
 
 	@Override public Boolean probe(final When when) {
 
@@ -56,9 +42,16 @@ final class ShapeEvaluator extends Shape.Probe<Boolean> {
 				: null;
 	}
 
+	@Override public Boolean probe(final And and) {
+		return and.shapes().stream()
+				.map(shape -> shape.map(this))
+				.reduce(true, (x, y) -> x == null || y == null ? null : x && y);
+	}
 
-	@Override public Boolean probe(final Shape shape) {
-		return null;
+	@Override public Boolean probe(final Or or) {
+		return or.shapes().stream()
+				.map(shape -> shape.map(this))
+				.reduce(false, (x, y) -> x == null || y == null ? null : x || y);
 	}
 
 }

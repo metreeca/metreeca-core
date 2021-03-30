@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 
 
 /**
- * Text generation.
+ * Template filling.
  *
  * <p>Maps input values to streams of strings generated from a textual {@linkplain #model(String) model} containing
  * the following variable placeholders and a set of {@linkplain #values(String, Function) expressions}, that is
@@ -91,7 +91,7 @@ public final class Fill<V> implements Function<V, Stream<String>> {
 	 *
 	 * @return this action
 	 *
-	 * @throws NullPointerException if either {@code name}
+	 * @throws NullPointerException if {@code name} is null
 	 */
 	public Fill<V> value(final String name) {
 

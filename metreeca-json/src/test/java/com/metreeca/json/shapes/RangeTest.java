@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Values.False;
 import static com.metreeca.json.Values.True;
-import static com.metreeca.json.shapes.Or.or;
+import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Range.range;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 final class RangeTest {
@@ -29,11 +31,11 @@ final class RangeTest {
 	@Nested final class Optimization {
 
 		@Test void testIgnoreEmptyValueSet() {
-			assertThat(Range.range()).isEqualTo(or());
+			assertThat(range()).isEqualTo(and());
 		}
 
 		@Test void testCollapseDuplicates() {
-			assertThat(Range.range(True, True, False)).isEqualTo(Range.range(True, False));
+			assertThat(range(True, True, False)).isEqualTo(range(True, False));
 		}
 
 	}

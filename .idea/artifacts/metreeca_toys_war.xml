@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="metreeca-toys:war">
+    <output-path>$PROJECT_DIR$/metreeca-toys/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>metreeca-toys</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="metreeca-toys-0.55.0.war">
+      <element id="artifact" artifact-name="metreeca-toys:war exploded" />
+    </root>
+  </artifact>
+</component>

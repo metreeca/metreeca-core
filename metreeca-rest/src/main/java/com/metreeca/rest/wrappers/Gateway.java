@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,10 @@ import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.Response.InternalServerError;
+import static com.metreeca.rest.assets.Logger.Level.*;
 import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.TextFormat.text;
+
 import static java.lang.String.format;
 import static java.util.function.Function.identity;
 
@@ -141,9 +143,9 @@ public final class Gateway implements Wrapper {
 		final int status=response.status();
 		final Throwable cause=response.cause().orElse(null);
 
-		final Logger.Level level=(status < 400) ? Logger.Level.Info
-				: (status < 500) ? Logger.Level.Warning
-				: Logger.Level.Error;
+		final Logger.Level level=(status < 400) ? info
+				: (status < 500) ? warning
+				: error;
 
 		logger.entry(level, this, () -> format("%s %s > %d", method, item, status), cause);
 

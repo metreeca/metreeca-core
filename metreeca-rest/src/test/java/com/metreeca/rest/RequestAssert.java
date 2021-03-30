@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package com.metreeca.rest;
 
 
-import com.metreeca.rest.formats.*;
+import com.metreeca.rest.formats.TextFormat;
 
 import org.assertj.core.api.Assertions;
 
@@ -25,6 +25,8 @@ import java.io.*;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.metreeca.rest.formats.InputFormat.input;
 
 import static java.util.function.Function.identity;
 
@@ -35,19 +37,20 @@ public final class RequestAssert extends MessageAssert<RequestAssert, Request> {
 
 		if ( request != null ) {
 
-			request.body(InputFormat.input(), (request.body(InputFormat.input()).fold(e -> Xtream::input, source -> { // cache input
+			request.map(input(), source -> { // cache input
 
 				try ( final InputStream stream=source.get() ) {
 
-					final byte[] data=DataFormat.data(stream);
+					final byte[] data=Xtream.data(stream);
 
 					return () -> new ByteArrayInputStream(data);
 
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
+				} catch ( final IOException e1 ) {
+					throw new UncheckedIOException(e1);
 				}
 
-			})));
+					}
+			);
 
 			final StringBuilder builder=new StringBuilder(2500);
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl
+  Copyright © 2013-2021 Metreeca srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>metreeca-head</artifactId>
-		<version>0.54.1</version>
+		<version>0.55.0</version>
 	</parent>
 
 	<artifactId>metreeca-jse</artifactId>
-	<version>0.54.1</version>
+	<version>0.55.0</version>
 
-	<name>Metreeca Java SE Adapter</name>
-	<description>Adapter kit for Jave SE internal HTTP server.</description>
+	<name>Metreeca Java SE Server Connector</name>
+	<description>Connector kit for Jave SE internal HTTP server.</description>
 
 	<dependencies>
 

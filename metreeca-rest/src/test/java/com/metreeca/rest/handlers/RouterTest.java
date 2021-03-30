@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
+import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.RequestAssert.assertThat;
 import static com.metreeca.rest.ResponseAssert.assertThat;
+import static com.metreeca.rest.handlers.Router.router;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 
@@ -50,37 +53,37 @@ final class RouterTest {
 
 			assertThatExceptionOfType(IllegalArgumentException.class)
 					.as("empty path")
-					.isThrownBy(() -> Router.router()
+					.isThrownBy(() -> router()
 							.path("", handler())
 					);
 
 			assertThatExceptionOfType(IllegalArgumentException.class)
 					.as("missing leading slash path")
-					.isThrownBy(() -> Router.router()
+					.isThrownBy(() -> router()
 							.path("path", handler())
 					);
 
 			assertThatExceptionOfType(IllegalArgumentException.class)
 					.as("malformed placeholder step")
-					.isThrownBy(() -> Router.router()
+					.isThrownBy(() -> router()
 							.path("/pa{}th", handler())
 					);
 
 			assertThatExceptionOfType(IllegalArgumentException.class)
 					.as("malformed prefix step")
-					.isThrownBy(() -> Router.router()
+					.isThrownBy(() -> router()
 							.path("/pa*th", handler())
 					);
 
 			assertThatExceptionOfType(IllegalArgumentException.class)
 					.as("inline prefix step")
-					.isThrownBy(() -> Router.router()
+					.isThrownBy(() -> router()
 							.path("/*/path", handler())
 					);
 
 			assertThatExceptionOfType(IllegalStateException.class)
 					.as("existing path")
-					.isThrownBy(() -> Router.router()
+					.isThrownBy(() -> router()
 							.path("/path", handler())
 							.path("/path", handler())
 					);
@@ -88,7 +91,7 @@ final class RouterTest {
 		}
 
 		@Test void testIgnoreUnknownPath() {
-			Router.router()
+			router()
 
 					.path("/path", handler())
 
@@ -96,6 +99,7 @@ final class RouterTest {
 
 					.accept(response -> assertThat(response)
 							.as("request ignored")
+							.hasStatus(Response.NotFound)
 							.doesNotHaveHeader("path")
 					);
 		}
@@ -103,7 +107,7 @@ final class RouterTest {
 
 		@Test void testMatchesLiteralPath() {
 
-			final Router router=Router.router().path("/path", handler());
+			final Router router=router().path("/path", handler());
 
 			router.handle(request("/path")).accept(response -> assertThat(response)
 					.hasHeader("path", "/path")
@@ -121,7 +125,7 @@ final class RouterTest {
 
 		@Test void testMatchesPlaceholderPath() {
 
-			final Router router=Router.router().path("/head/{id}/tail", handler());
+			final Router router=router().path("/head/{id}/tail", handler());
 
 			router.handle(request("/head/path/tail")).accept(response -> assertThat(response)
 					.hasHeader("path", "/head/path/tail")
@@ -139,17 +143,17 @@ final class RouterTest {
 
 		@Test void testSavePlaceholderValuesAsRequestParameters() {
 
-			Router.router().path("/{head}/{tail}", handler())
+			router().path("/{head}/{tail}", handler())
 					.handle(request("/one/two"))
-					.accept(response -> RequestAssert.assertThat(response.request())
+					.accept(response -> assertThat(response.request())
 							.as("placeholder values saved as parameters")
 							.hasParameter("head", "one")
 							.hasParameter("tail", "two")
 					);
 
-			Router.router().path("/{}/{}", handler())
+			router().path("/{}/{}", handler())
 					.handle(request("/one/two"))
-					.accept(response -> RequestAssert.assertThat(response.request())
+					.accept(response -> assertThat(response.request())
 							.has(new Condition<>(
 									request -> request.parameters().isEmpty(),
 									"empty placeholders ignored")
@@ -160,7 +164,7 @@ final class RouterTest {
 
 		@Test void testMatchesPrefixPath() {
 
-			final Router router=Router.router().path("/head/*", handler());
+			final Router router=router().path("/head/*", handler());
 
 			router.handle(request("/head/path")).accept(response -> assertThat(response)
 					.hasHeader("path", "/head/path")
@@ -179,7 +183,7 @@ final class RouterTest {
 
 		@Test void testPreferFirstMatch() {
 
-			final Router router=Router.router()
+			final Router router=router()
 
 					.path("/path", request -> request.reply(response -> response.status(100)))
 					.path("/*", request -> request.reply(response -> response.status(200)));
@@ -211,7 +215,7 @@ final class RouterTest {
 
 
 		@Test void testHandleOPTIONSByDefault() {
-			Router.router()
+			router()
 
 					.get(this::handler)
 
@@ -224,7 +228,7 @@ final class RouterTest {
 		}
 
 		@Test void testIncludeAllowHeaderOnUnsupportedMethods() {
-			Router.router()
+			router()
 
 					.get(this::handler)
 
@@ -237,7 +241,7 @@ final class RouterTest {
 		}
 
 		@Test void testHandleHEADByDefault() {
-			Router.router()
+			router()
 
 					.get(this::handler)
 
@@ -258,7 +262,9 @@ final class RouterTest {
 		}
 
 		@Test void testRejectHEADIfGetIsNotSupported() {
-			Router.router()
+			router()
+
+					.post(status(Response.Created))
 
 					.handle(new Request().method(Request.HEAD))
 

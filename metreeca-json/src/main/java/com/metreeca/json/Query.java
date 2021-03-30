@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,88 @@ package com.metreeca.json;
 
 import com.metreeca.json.queries.*;
 
+import org.eclipse.rdf4j.model.IRI;
+
+import java.util.*;
 import java.util.function.Function;
+
+import static java.lang.String.format;
+import static java.util.Collections.unmodifiableList;
 
 
 /**
  * Shape-driven linked data query.
  */
 public abstract class Query {
+
+	private final Shape shape;
+
+	private final List<IRI> path;
+	private final List<Order> orders;
+
+	private final int offset;
+	private final int limit;
+
+
+	protected Query(final Shape shape,
+			final List<IRI> path, final List<Order> orders,
+			final int offset, final int limit
+	) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null path or path IRI");
+		}
+
+		if ( orders == null ) {
+			throw new NullPointerException("null orders");
+		}
+
+		if ( offset < 0 ) {
+			throw new IllegalArgumentException("illegal offset <"+offset+">");
+		}
+
+		if ( limit < 0 ) {
+			throw new IllegalArgumentException("illegal limit <"+limit+">");
+		}
+
+		this.shape=shape;
+
+		this.path=new ArrayList<>(path);
+		this.orders=new ArrayList<>(orders);
+
+		this.offset=offset;
+		this.limit=limit;
+	}
+
+
+	public Shape shape() {
+		return shape;
+	}
+
+
+	public List<IRI> path() {
+		return unmodifiableList(path);
+	}
+
+	public List<Order> orders() {
+		return unmodifiableList(orders);
+	}
+
+
+	public int offset() {
+		return offset;
+	}
+
+	public int limit() {
+		return limit;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public abstract <V> V map(final Probe<V> probe);
 
@@ -40,6 +115,35 @@ public abstract class Query {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	@Override public boolean equals(final Object object) {
+		return this == object || getClass().equals(object.getClass())
+				&& shape.equals(((Query)object).shape)
+				&& path.equals(((Query)object).path)
+				&& orders.equals(((Query)object).orders)
+				&& offset == ((Query)object).offset
+				&& limit == ((Query)object).limit;
+	}
+
+	@Override public int hashCode() {
+		return shape.hashCode()
+				^path.hashCode()
+				^orders.hashCode()
+				^Integer.hashCode(offset)
+				^Integer.hashCode(limit);
+	}
+
+	@Override public String toString() {
+		return format(
+				"%s {\n\tshape: %s\n\tpath: %s\n\torder: %s\n\toffset: %d\n\tlimit: %d\n}",
+				getClass().getSimpleName().toLowerCase(Locale.ROOT),
+				Values.indent(shape.toString()),
+				path, orders, offset, limit
+		);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	/**
 	 * Query probe.
 	 *
@@ -49,7 +153,7 @@ public abstract class Query {
 	 */
 	public abstract static class Probe<V> implements Function<Query, V> {
 
-		@Override public V apply(final Query query) {
+		@Override public final V apply(final Query query) {
 			return query == null ? null : query.map(this);
 		}
 

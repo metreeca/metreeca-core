@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,26 +24,42 @@ import com.metreeca.json.shapes.*;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 
-import javax.json.*;
 import java.io.StringReader;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
+
+import javax.json.*;
 
 import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.And.and;
+import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Field.labels;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
-import static com.metreeca.rest.formats.JSONLDCodec.driver;
+import static com.metreeca.rest.formats.JSONLDInspector.driver;
+
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import static javax.json.JsonValue.EMPTY_JSON_ARRAY;
+import static javax.json.JsonValue.NULL;
+
+/**
+ * JSON-LD query parser.
+ */
 final class JSONLDParser {
+
+	private static final JsonString EMPTY_JSON_STRING=Json.createValue("");
 
 	private static final java.util.regex.Pattern StepPattern=java.util.regex.Pattern.compile("(?:^|\\.)(\\w+\\b)");
 
@@ -51,8 +67,6 @@ final class JSONLDParser {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Shape shape;
-	private final Map<String, String> keywords;
-
 	private final Shape baseline;
 
 	private final JSONLDDecoder decoder;
@@ -61,8 +75,6 @@ final class JSONLDParser {
 	JSONLDParser(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.shape=driver(shape);
-		this.keywords=keywords;
-
 		this.baseline=shape;
 
 		this.decoder=new JSONLDDecoder(focus, shape, keywords);
@@ -103,10 +115,10 @@ final class JSONLDParser {
 		final int offset=offset(json);
 		final int limit=limit(json);
 
-		final Shape filtered=and(baseline, Guard.filter().then(filter)); // filtering only >> don't include in results
+		final Shape filtered=and(baseline, Guard.filter(filter)); // filtering only >> don't include in results
 
-		return terms != null ? Terms.terms(filtered, terms)
-				: stats != null ? Stats.stats(filtered, stats)
+		return terms != null ? Terms.terms(filtered, terms, offset, limit)
+				: stats != null ? Stats.stats(filtered, stats, offset, limit)
 				: items(filtered, order, offset, limit);
 	}
 
@@ -125,8 +137,8 @@ final class JSONLDParser {
 		final String key=field.getKey();
 		final List<String> values=field.getValue();
 
-		return key.equals("_terms") || key.equals("_stats") ? path(values)
-				: key.equals("_offset") || key.equals("_limit") ? integer(values)
+		return key.equals(".terms") || key.equals(".stats") ? path(values)
+				: key.equals(".offset") || key.equals(".limit") ? integer(values)
 				: strings(values);
 
 	}
@@ -171,35 +183,38 @@ final class JSONLDParser {
 	private Shape filter(final JsonObject query) {
 		return and(query.entrySet().stream()
 
-				.filter(entry -> !entry.getKey().startsWith("_")) // ignore reserved properties
-				.filter(entry -> !entry.getValue().equals(JsonValue.NULL)) // ignore null properties
+				.filter(entry -> !entry.getKey().startsWith(".")) // ignore reserved properties
+
+				.filter(entry -> !entry.getValue().equals(NULL))
+				.filter(entry -> !entry.getValue().equals(EMPTY_JSON_STRING))
+				.filter(entry -> !entry.getValue().equals(EMPTY_JSON_ARRAY))
 
 				.map(entry -> { // longest matches first
 
 					final String key=entry.getKey();
 					final JsonValue value=entry.getValue();
 
-					return key.startsWith("^") ? filter(key.substring(1), value, shape, this::datatype)
-							: key.startsWith("@") ? filter(key.substring(1), value, shape, this::clazz)
-							: key.startsWith("%") ? filter(key.substring(1), value, shape, this::range)
+					return key.startsWith("^") ? filter(value, shape, key.substring(1), this::datatype)
+							: key.startsWith("@") ? filter(value, shape, key.substring(1), this::clazz)
+							: key.startsWith("%") ? filter(value, shape, key.substring(1), this::range)
 
-							: key.startsWith(">=") ? filter(key.substring(2), value, shape, this::minInclusive)
-							: key.startsWith("<=") ? filter(key.substring(2), value, shape, this::maxInclusive)
-							: key.startsWith(">") ? filter(key.substring(1), value, shape, this::minExclusive)
-							: key.startsWith("<") ? filter(key.substring(1), value, shape, this::maxExclusive)
+							: key.startsWith(">=") ? filter(value, shape, key.substring(2), this::minInclusive)
+							: key.startsWith("<=") ? filter(value, shape, key.substring(2), this::maxInclusive)
+							: key.startsWith(">") ? filter(value, shape, key.substring(1), this::minExclusive)
+							: key.startsWith("<") ? filter(value, shape, key.substring(1), this::maxExclusive)
 
-							: key.startsWith("$>") ? filter(key.substring(2), value, shape, this::minLength)
-							: key.startsWith("$<") ? filter(key.substring(2), value, shape, this::maxLength)
-							: key.startsWith("*") ? filter(key.substring(1), value, shape, this::pattern)
-							: key.startsWith("~") ? filter(key.substring(1), value, shape, this::like)
-							: key.startsWith("'") ? filter(key.substring(1), value, shape, this::stem)
+							: key.startsWith("$>") ? filter(value, shape, key.substring(2), this::minLength)
+							: key.startsWith("$<") ? filter(value, shape, key.substring(2), this::maxLength)
+							: key.startsWith("*") ? filter(value, shape, key.substring(1), this::pattern)
+							: key.startsWith("~") ? filter(value, shape, key.substring(1), this::like)
+							: key.startsWith("'") ? filter(value, shape, key.substring(1), this::stem)
 
-							: key.startsWith("#>") ? filter(key.substring(2), value, shape, this::minCount)
-							: key.startsWith("#<") ? filter(key.substring(2), value, shape, this::maxCount)
-							: key.startsWith("!") ? filter(key.substring(1), value, shape, this::all)
-							: key.startsWith("?") ? filter(key.substring(1), value, shape, this::any)
+							: key.startsWith("#>") ? filter(value, shape, key.substring(2), this::minCount)
+							: key.startsWith("#<") ? filter(value, shape, key.substring(2), this::maxCount)
+							: key.startsWith("!") ? filter(value, shape, key.substring(1), this::all)
+							: key.startsWith("?") ? filter(value, shape, key.substring(1), this::any)
 
-							: filter(key, value, shape, this::any);
+							: filter(value, shape, key, this::any);
 
 				})
 
@@ -208,47 +223,84 @@ final class JSONLDParser {
 	}
 
 
-	private Shape filter(final String path,
-			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper
+	private Shape filter(final JsonValue value, final Shape shape,
+			final String path, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
 	) {
-		return filter(steps(path, shape), value, shape, mapper);
+		return filter(value, shape, path(path, shape), mapper);
 	}
 
-	private Shape filter(final List<Field> path,
-			final JsonValue value, final Shape shape, final BiFunction<JsonValue, Shape, Shape> mapper
+	private Shape filter(final JsonValue value, final Shape shape,
+			final List<IRI> path, final BiFunction<? super JsonValue, ? super Shape, Shape> mapper
 	) {
-		if ( path.isEmpty() ) {
 
-			return mapper.apply(value, shape);
+		return Optional
 
-		} else {
+				.ofNullable(shape.map(new Shape.Probe<Shape>() {
 
-			final Field head=path.get(0);
-			final List<Field> tail=path.subList(1, path.size());
+					@Override public Shape probe(final Field field) {
+						return path.isEmpty() || !field.iri().equals(path.get(0)) ? null : Optional
+								.ofNullable(filter(value, field.shape(), path.subList(1, path.size()), mapper))
+								.map(s -> field(field.label(), field.iri(), s))
+								.orElse(null);
+					}
 
-			return Field.field(head.name(), filter(tail, value, head.shape(), mapper));
+					@Override public Shape probe(final Link link) {
+						return Optional
+								.ofNullable(filter(value, link.shape(), path, mapper))
+								.map(s -> link(link.iri(), s))
+								.orElse(null);
+					}
 
-		}
+
+					@Override public Shape probe(final When when) {
+						throw new UnsupportedOperationException(when.toString());
+					}
+
+					@Override public Shape probe(final And and) {
+						return probe(and.shapes().stream());
+					}
+
+					@Override public Shape probe(final Or or) {
+						return probe(or.shapes().stream());
+					}
+
+
+					private Shape probe(final Stream<Shape> shapes) {
+						return shapes.map(this).filter(Objects::nonNull).findFirst().orElse(null);
+					}
+
+				}))
+
+				.orElseGet(() -> {
+
+					if ( !path.isEmpty() ) {
+						throw new NoSuchElementException(format("unknown path step %s", format(path.get(0))));
+					}
+
+					return mapper.apply(value, shape);
+
+				});
+
 	}
 
 
 	private List<IRI> terms(final JsonObject query) {
-		return Optional.ofNullable(query.get("_terms"))
+		return Optional.ofNullable(query.get(".terms"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonString ? (JsonString)v : error("_terms is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : error(".terms is not a string"))
 				.map(path -> path(path.getString(), shape))
 
 				.orElse(null);
 	}
 
 	private List<IRI> stats(final JsonObject query) {
-		return Optional.ofNullable(query.get("_stats"))
+		return Optional.ofNullable(query.get(".stats"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonString ? (JsonString)v : error("_stats is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : error(".stats is not a string"))
 				.map(path -> path(path.getString(), shape))
 
 				.orElse(null);
@@ -256,9 +308,9 @@ final class JSONLDParser {
 
 
 	private List<Order> order(final JsonObject query) {
-		return Optional.ofNullable(query.get("_order"))
+		return Optional.ofNullable(query.get(".order"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
 				.map(this::order)
 
@@ -268,13 +320,13 @@ final class JSONLDParser {
 	private List<Order> order(final JsonValue object) {
 		return object instanceof JsonString ? criteria((JsonString)object)
 				: object instanceof JsonArray ? criteria((JsonArray)object)
-				: error("_order is neither a string nor an array of strings");
+				: error(".order is neither a string nor an array of strings");
 	}
 
 
 	private List<Order> criteria(final JsonArray object) {
 		return object.stream()
-				.map(v -> v instanceof JsonString ? (JsonString)v : error("_order criterion is not a string"))
+				.map(v -> v instanceof JsonString ? (JsonString)v : error(".order is not a string"))
 				.map(this::criterion)
 				.collect(toList());
 	}
@@ -296,24 +348,48 @@ final class JSONLDParser {
 
 
 	private int offset(final JsonObject query) {
-		return Optional.ofNullable(query.get("_offset"))
+		return Optional.ofNullable(query.get(".offset"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : error("_offset not a number"))
-				.map(JsonNumber::intValue)
+				.map(v -> {
+
+					try {
+
+						return v instanceof JsonNumber ? ((JsonNumber)v).intValue()
+								: v instanceof JsonString ? Integer.parseInt(((JsonString)v).getString())
+								: error(".offset is not a number");
+
+					} catch ( final NumberFormatException e ) {
+						return error(".offset is not a number");
+					}
+
+				})
+
 				.map(v -> v >= 0 ? v : error("negative offset"))
 
 				.orElse(0);
 	}
 
 	private int limit(final JsonObject query) {
-		return Optional.ofNullable(query.get("_limit"))
+		return Optional.ofNullable(query.get(".limit"))
 
-				.filter(v -> !v.equals(JsonValue.NULL))
+				.filter(v -> !v.equals(NULL))
 
-				.map(v -> v instanceof JsonNumber ? (JsonNumber)v : error("_limit is not a number"))
-				.map(JsonNumber::intValue)
+				.map(v -> {
+
+					try {
+
+						return v instanceof JsonNumber ? ((JsonNumber)v).intValue()
+								: v instanceof JsonString ? Integer.parseInt(((JsonString)v).getString())
+								: error(".limit is not a number");
+
+					} catch ( final NumberFormatException e ) {
+						return error(".limit is not a number");
+					}
+
+				})
+
 				.map(v -> v >= 0 ? v : error("negative limit"))
 
 				.orElse(0);
@@ -323,41 +399,44 @@ final class JSONLDParser {
 	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private List<IRI> path(final String path, final Shape shape) {
-		return steps(path, shape).stream().map(Field::name).collect(toList());
-	}
 
-	private List<Field> steps(final String path, final Shape shape) {
+		if ( path.startsWith(".") ) {
+			throw new JsonException(format("reserved path <%s>", path));
+		}
 
-		final List<Field> steps=new ArrayList<>();
+		final List<String> steps=new ArrayList<>();
 
 		final String trimmed=path.trim();
 		final Matcher matcher=StepPattern.matcher(trimmed);
 
 		int last=0;
-		Shape reference=shape;
 
 		while ( matcher.lookingAt() ) {
-
-			final Map<String, Field> fields=JSONLDCodec.fields(reference, keywords);
-
-			final String step=matcher.group(1);
-
-			final Field field=Optional
-					.ofNullable(fields.get(step))
-					.orElseThrow(() -> new NoSuchElementException("unknown path step <"+step+">"));
-
-			steps.add(field);
-			reference=field.shape();
-
+			steps.add(matcher.group(1));
 			matcher.region(last=matcher.end(), trimmed.length());
 		}
 
 		if ( last != trimmed.length() ) {
-			throw new JsonException("malformed path ["+trimmed+"]");
+			throw new JsonException(format("malformed path <%s>", trimmed));
 		}
 
-		return steps;
+		return path(steps, shape).collect(toList());
+	}
 
+	private Stream<IRI> path(final List<String> steps, final Shape shape) {
+		if ( steps.isEmpty() ) { return Stream.empty(); } else {
+
+			final String head=steps.get(0);
+			final List<String> tail=steps.subList(1, steps.size());
+
+			final Map<String, Field> labels=labels(shape);
+
+			return Optional.ofNullable(labels.get(head))
+
+					.map(field -> Stream.concat(Stream.of(field.iri()), path(tail, field.shape())))
+
+					.orElseThrow(() -> new NoSuchElementException(format("unknown path step <%s>", head)));
+		}
 	}
 
 
@@ -475,6 +554,8 @@ final class JSONLDParser {
 				: Any.any(values(value, shape));
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private <V> V error(final String message) {
 		throw new JsonException(message);

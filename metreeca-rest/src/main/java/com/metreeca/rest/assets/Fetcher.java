@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package com.metreeca.rest.assets;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.DataFormat;
-import com.metreeca.rest.formats.InputFormat;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -29,7 +28,12 @@ import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 
 import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Request.GET;
+import static com.metreeca.rest.Response.MethodNotAllowed;
+import static com.metreeca.rest.Xtream.data;
 import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.formats.InputFormat.input;
+
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
 import static java.lang.String.format;
@@ -65,14 +69,30 @@ import static java.util.stream.Collectors.toMap;
 
 
 		@Override public Response apply(final Request request) {
+			switch ( request.item().substring(0, max(0, request.item().indexOf(':'))) ) {
+
+				case "http":
+				case "https":
+
+					return http(request);
+
+				default:
+
+					return wild(request);
+
+			}
+		}
+
+
+		private Response http(final Request request) { // !!! refactor
 			try {
 
 				final String method=request.method();
-				final String item=request.item();
+				final String resource=request.resource();
 
-				logger.info(this, format("%s %s", method, item));
+				logger.info(this, format("%s %s", method, resource));
 
-				final HttpURLConnection connection=(HttpURLConnection)new URL(item).openConnection();
+				final HttpURLConnection connection=(HttpURLConnection)new URL(resource).openConnection();
 
 				connection.setRequestMethod(method);
 				connection.setDoOutput(method.equals(Request.POST) || method.equals(Request.PUT));
@@ -107,22 +127,24 @@ import static java.util.stream.Collectors.toMap;
 
 				if ( connection.getDoOutput() ) {
 
-					request.body(InputFormat.input()).fold(
+					request.body(input()).fold(
 
 							error -> {
 
-								logger.error(this, format("unable to open input stream for <%s>", item));
+								logger.error(this, format("unable to open input stream for <%s>", resource));
 
 								throw new RuntimeException(error.toString()); // !!!
 
-							}, target -> {
+							},
+
+							target -> {
 
 								try (
 										final InputStream input=target.get();
 										final OutputStream output=connection.getOutputStream()
 								) {
 
-									return Xtream.copy(output, input);
+									return data(output, input);
 
 								} catch ( final IOException e ) {
 
@@ -143,13 +165,14 @@ import static java.util.stream.Collectors.toMap;
 				return new Response(request)
 
 						.status(min(max(100, code), 599)) // harden against illegal codes
+						.message(Optional.ofNullable(connection.getResponseMessage()).orElse(""))
 
 						.headers(connection.getHeaderFields().entrySet().stream()
 								.filter(entry -> entry.getKey() != null) // ;( may use null to hold status line
 								.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
 						)
 
-						.body(InputFormat.input(), () -> {
+						.body(input(), () -> {
 							try {
 
 								return Optional
@@ -180,6 +203,42 @@ import static java.util.stream.Collectors.toMap;
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
+			}
+		}
+
+		private Response wild(final Request request) {
+
+			final String method=request.method();
+			final String resource=request.resource();
+
+			if ( method.equals(GET) ) {
+
+				logger.info(this, format("%s %s", method, resource));
+
+				return new Response(request)
+
+						.status(Response.OK)
+
+						.body(input(), () -> {
+							try {
+
+								final InputStream input=new URL(resource).openStream();
+
+								return resource.endsWith(".gz")
+										? new GZIPInputStream(input)
+										: input;
+
+							} catch ( final IOException e ) {
+								throw new UncheckedIOException(e);
+							}
+						});
+
+			} else {
+
+				return new Response(request)
+						.status(MethodNotAllowed)
+						.message(format("%s Method Not Allowed", method));
+
 			}
 		}
 
@@ -240,7 +299,7 @@ import static java.util.stream.Collectors.toMap;
 		@Override public Response apply(final Request request) {
 			return request.safe() ? cache.retrieve(
 
-					format("%s %s", request.method(), request.item()),
+					format("%s %s", request.method(), request.resource()),
 
 					input -> decode(request, input),
 					output -> encode(delegate.apply(request), output)
@@ -267,7 +326,7 @@ import static java.util.stream.Collectors.toMap;
 							serialized.writeObject(value);
 							serialized.flush();
 
-							return response.body(InputFormat.input(), () -> new ByteArrayInputStream(value));
+							return response.body(input(), () -> new ByteArrayInputStream(value));
 
 						} catch ( final IOException e ) {
 
@@ -291,7 +350,7 @@ import static java.util.stream.Collectors.toMap;
 				return new Response(request)
 						.status(status)
 						.headers(headers)
-						.body(InputFormat.input(), () -> new ByteArrayInputStream(body));
+						.body(input(), () -> new ByteArrayInputStream(body));
 
 			} catch ( final ClassNotFoundException unexpected ) {
 

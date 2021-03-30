@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public abstract class Delegator implements Handler {
 	 *
 	 * @return this delegator
 	 *
-	 * @throws NullPointerException     if {@code delegate} is null
+	 * @throws NullPointerException if {@code delegate} is null
 	 */
 	protected Delegator delegate(final Handler delegate) {
 

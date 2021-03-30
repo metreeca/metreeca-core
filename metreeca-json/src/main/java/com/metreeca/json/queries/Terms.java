@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,57 +16,25 @@
 
 package com.metreeca.json.queries;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 
 import org.eclipse.rdf4j.model.IRI;
 
-import java.util.*;
+import java.util.List;
 
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.emptyList;
 
 
 public final class Terms extends Query {
 
-	public static Terms terms(final Shape shape, final IRI... path) {
-		return new Terms(shape, asList(path));
+	public static Terms terms(final Shape shape, final List<IRI> path, final int offset, final int limit) {
+		return new Terms(shape, path, emptyList(), offset, limit);
 	}
-
-	public static Terms terms(final Shape shape, final List<IRI> path) {
-		return new Terms(shape, path);
-	}
-
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Shape shape;
-
-	private final List<IRI> path;
-
-
-	private Terms(final Shape shape, final List<IRI> path) {
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		if ( path == null || path.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null path or path step");
-		}
-
-		this.shape=shape;
-		this.path=new ArrayList<>(path);
-	}
-
-
-	public Shape shape() {
-		return shape;
-	}
-
-	public List<IRI> path() {
-		return unmodifiableList(path);
+	public Terms(final Shape shape, final List<IRI> path, final List<Order> orders, final int offset, final int limit) {
+		super(shape, path, orders, offset, limit);
 	}
 
 
@@ -79,26 +47,6 @@ public final class Terms extends Query {
 		}
 
 		return probe.probe(this);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public boolean equals(final Object object) {
-		return this == object || object instanceof Terms
-				&& shape.equals(((Terms)object).shape)
-				&& path.equals(((Terms)object).path);
-	}
-
-	@Override public int hashCode() {
-		return shape.hashCode()^path.hashCode();
-	}
-
-	@Override public String toString() {
-		return format(
-				"terms {\n\tshape: %s\n\tpath: %s\n}",
-				shape.toString().replace("\n", "\n\t"), path
-		);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013-2020 Metreeca srl
+ * Copyright © 2013-2021 Metreeca srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import com.metreeca.rest.*;
 import java.io.*;
 import java.util.regex.Pattern;
 
-import static com.metreeca.rest.Xtream.copy;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.lang.String.valueOf;
 
 
@@ -55,64 +55,20 @@ public final class DataFormat extends Format<byte[]> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static byte[] data(final InputStream input) {
-
-		if ( input == null ) {
-			throw new NullPointerException("null input");
-		}
-
-		try ( final ByteArrayOutputStream output=new ByteArrayOutputStream() ) {
-
-			return copy(output, input).toByteArray();
-
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
-		}
-	}
-
-	public static <O extends OutputStream> O data(final O output, final byte[] value) {
-
-		if ( output == null ) {
-			throw new NullPointerException("null output");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		try {
-
-			output.write(value);
-			output.flush();
-
-			return output;
-
-		} catch ( final IOException e ) {
-
-			throw new UncheckedIOException(e);
-
-		}
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private DataFormat() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Decodes the binary {@code message} body from the input stream supplied by the {@code message}
-	 * {@link InputFormat} body, if one is available
+	 * Decodes the binary {@code message} body from the input stream supplied by the {@code message} {@link InputFormat}
+	 * body, if one is available
 	 */
 	@Override public Either<MessageException, byte[]> decode(final Message<?> message) {
 		return message.body(input()).map(source -> {
 			try ( final InputStream input=source.get() ) {
 
-				return data(input);
+				return Xtream.data(input);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
@@ -121,8 +77,8 @@ public final class DataFormat extends Format<byte[]> {
 	}
 
 	/**
-	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes
-	 * the binary {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
+	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, and encodes the
+	 * binary {@code value} into the output stream accepted by the {@code message} {@link OutputFormat} body
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final byte... value) {
 		return message
@@ -130,7 +86,7 @@ public final class DataFormat extends Format<byte[]> {
 				.header("~Content-Type", MIME)
 				.header("~Content-Length", valueOf(value.length))
 
-				.body(output(), output -> data(output, value));
+				.body(output(), output -> { Xtream.data(output, value); });
 	}
 
 }

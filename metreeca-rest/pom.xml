@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  Copyright © 2013-2020 Metreeca srl
+  Copyright © 2013-2021 Metreeca srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -24,11 +24,11 @@
 	<parent>
 		<groupId>com.metreeca</groupId>
 		<artifactId>metreeca-link</artifactId>
-		<version>0.54.1</version>
+		<version>0.55.0</version>
 	</parent>
 
 	<artifactId>metreeca-rest</artifactId>
-	<version>0.54.1</version>
+	<version>0.55.0</version>
 
 	<name>Metreeca REST Publishing</name>
 	<description>A model-driven REST publishing framework.</description>
@@ -44,6 +44,26 @@
 			<groupId>com.metreeca</groupId>
 			<artifactId>metreeca-json</artifactId>
 			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- !!! ;( required by ModelAssert -->
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-model</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-turtle</artifactId>
 			<scope>test</scope>
 		</dependency>
 
