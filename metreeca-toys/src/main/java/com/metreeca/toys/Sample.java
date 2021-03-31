@@ -33,7 +33,7 @@ import static com.metreeca.rest.assets.Engine.engine;
 import static com.metreeca.rest.formats.JSONLDFormat.keywords;
 import static com.metreeca.rest.handlers.Router.router;
 import static com.metreeca.rest.wrappers.Bearer.bearer;
-import static com.metreeca.rest.wrappers.Gateway.gateway;
+import static com.metreeca.rest.wrappers.Server.server;
 
 @WebFilter(urlPatterns="/*")
 public final class Sample extends JEEServer {
@@ -51,7 +51,7 @@ public final class Sample extends JEEServer {
 
 				.exec(new Toys())
 
-				.get(() -> gateway()
+				.get(() -> server()
 
 						.with(preprocessor(request -> request.base(Toys.Base)))
 

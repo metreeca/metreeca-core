@@ -29,12 +29,13 @@ import java.util.*;
 import static com.metreeca.rest.Response.InternalServerError;
 import static com.metreeca.rest.Response.OK;
 import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.wrappers.Gateway.gateway;
+import static com.metreeca.rest.wrappers.Server.server;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 
-final class GatewayTest {
+final class ServerTest {
 
 	@Nested final class QueryParsing {
 
@@ -45,7 +46,7 @@ final class GatewayTest {
 
 
 		@Test void testPreprocessQueryParameters() {
-			new Context().get(Gateway::gateway)
+			new Context().get(Server::server)
 
 					.wrap(request -> {
 
@@ -66,7 +67,7 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessBodyParameters() {
-			new Context().get(Gateway::gateway)
+			new Context().get(Server::server)
 
 					.wrap(request -> {
 
@@ -88,7 +89,7 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessDontOverwriteExistingParameters() {
-			new Context().get(Gateway::gateway)
+			new Context().get(Server::server)
 
 					.wrap(request -> {
 
@@ -109,7 +110,7 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessQueryOnlyOnGET() {
-			new Context().get(Gateway::gateway)
+			new Context().get(Server::server)
 
 					.wrap(request -> {
 
@@ -127,7 +128,7 @@ final class GatewayTest {
 		}
 
 		@Test void testPreprocessBodyOnlyOnPOST() {
-			new Context().get(Gateway::gateway)
+			new Context().get(Server::server)
 
 					.wrap(request -> {
 
@@ -150,7 +151,7 @@ final class GatewayTest {
 	@Nested final class ErrorHandling {
 
 		@Test void testTrapStrayExceptions() {
-			new Context().exec(() -> gateway()
+			new Context().exec(() -> server()
 
 					.wrap((Request request) -> { throw new UnsupportedOperationException("stray"); })
 

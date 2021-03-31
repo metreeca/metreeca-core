@@ -122,10 +122,10 @@ Finally, define a minimal server stub like:
 public final class Sample extends JEEServer {
 
 	public Sample() {
-		delegate(context -> context.get(() ->
+	  delegate(context -> context.get(() ->
 
-				gateway().wrap(request -> request.reply(response ->
-						response.status(OK)
+			  server().wrap(request -> request.reply(response ->
+					  response.status(OK)
 				))
 
 		));
@@ -138,7 +138,7 @@ The stub configures the application to handle any resource using a
 barebone [handler](../javadocs/?com/metreeca/rest/Handler.html) always replying to
 incoming [requests](../javadocs/?com/metreeca/rest/Request.html) with
 a [response](../javadocs/?com/metreeca/rest/Response.html) including a `200` HTTP status code. The
-standard [Gateway](../javadocs/?com/metreeca/rest/wrappers/Gateway.html) wrapper provides default pre/postprocessing
+standard [Server](../javadocs/?com/metreeca/rest/wrappers/Server.html) wrapper provides default pre/postprocessing
 services and shared error handling.
 
 Compile and deploy the web app to your favorite servlet container and try your first request:
@@ -173,11 +173,11 @@ public final class Sample extends JEEServer {
 					} catch ( final IOException e ) {
 						throw new UncheckedIOException(e);
 					}
-				}))
+		}))
 
-				.get(() -> gateway()
+			.get(() -> server()
 
-						.wrap(request -> request.reply(status(OK)))
+					.wrap(request -> request.reply(status(OK)))
 
 				)
 		);
@@ -230,9 +230,9 @@ public final class Sample extends JEEServer {
 
 			.exec(new Toys())
 
-			.get(() -> gateway()
+			.get(() -> server()
 
-						.wrap(request -> request.reply(status(OK)))
+					.wrap(request -> request.reply(status(OK)))
 
 				)
 		);
@@ -265,7 +265,7 @@ public final class Sample extends JEEServer {
 
 			.exec(new Toys())
 
-			.get(() -> gateway()
+			.get(() -> server()
 
 					.with(preprocessor(request -> request.base(Toys.Base)))
 
@@ -365,7 +365,7 @@ public final class Sample extends JEEServer {
 
 			.exec(new Toys())
 
-			.get(() -> gateway()
+			.get(() -> server()
 
 					.with(preprocessor(request -> request.base(Toys.Base)))
 
@@ -456,7 +456,7 @@ public final class Sample extends JEEServer {
 
 				.exec(new Toys())
 
-				.get(() -> gateway()
+				.get(() -> server()
 
 						.with(preprocessor(request -> request.base(Toys.Base)))
 
@@ -754,7 +754,7 @@ public final class Sample extends JEEServer {
 
 				.exec(new Toys())
 
-				.get(() -> gateway()
+				.get(() -> server()
 
 						.with(preprocessor(request -> request.base(Toys.Base)))
 

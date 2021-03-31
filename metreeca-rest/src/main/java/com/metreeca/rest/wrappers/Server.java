@@ -36,24 +36,24 @@ import static java.util.function.Function.identity;
 
 
 /**
- * API gateway.
+ * API server.
  *
  * <p>Provides default resource pre/postprocessing and error handling; mainly intended as the outermost wrapper
  * returned by loaders.</p>
  */
-public final class Gateway implements Wrapper {
+public final class Server implements Wrapper {
 
 	private static final Pattern TextualPattern=Pattern.compile(TextFormat.MIMEPattern+"|"+JSONFormat.MIMEPattern);
 	private static final Pattern URLEncodedPattern=Pattern.compile("application/x-www-form-urlencoded\\b");
 
 
 	/**
-	 * Creates an API gateway.
+	 * Creates an API server.
 	 *
-	 * @return a new API gateway
+	 * @return a new API server
 	 */
-	public static Gateway gateway() {
-		return new Gateway();
+	public static Server server() {
+		return new Server();
 	}
 
 
@@ -61,7 +61,7 @@ public final class Gateway implements Wrapper {
 
 	private final Logger logger=asset(logger());
 
-	private Gateway() {}
+	private Server() {}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
