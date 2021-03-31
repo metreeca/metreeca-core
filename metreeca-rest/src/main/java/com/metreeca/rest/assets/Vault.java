@@ -16,8 +16,11 @@
 
 package com.metreeca.rest.assets;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 
 /**
@@ -30,11 +33,20 @@ import java.util.function.Supplier;
 	/**
 	 * Retrieves the default vault factory.
 	 *
-	 * @return the default vault factory, which retrieves parameters from {@linkplain System#getProperties() system
-	 * 		properties}
+	 * @return the default vault factory, which retrieves parameters either from {@linkplain System#getProperties()
+	 * system properties} or {@linkplain System#getenv() environment variables}, in that order
 	 */
 	public static Supplier<Vault> vault() {
-		return () -> id -> Optional.ofNullable(System.getProperty(id));
+		return () -> id -> Stream
+
+				.<UnaryOperator<String>>of(
+						System::getProperty,
+						System::getenv
+				)
+
+				.map(source -> source.apply(id))
+				.filter(Objects::nonNull)
+				.findFirst();
 	}
 
 
@@ -46,7 +58,7 @@ import java.util.function.Supplier;
 	 * @param id the unique identifier of the parameter to be retrieved
 	 *
 	 * @return an optional containing the value of the parameter identified by {@code id}, if one is present in the
-	 * 		vault; an empty optional, otherwise
+	 * vault; an empty optional, otherwise
 	 *
 	 * @throws NullPointerException if {@code id} is null
 	 */
