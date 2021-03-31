@@ -53,7 +53,7 @@ static { System.setProperty("com.sun.security.enableAIAcaIssuers", "true"); }
   - expand certification paths
   - download clicking icons at top right
 - for each missing certificate
-  - identifiy cert alias
+  - identify cert alias
   - copy missing certificates from chain to `public.crt`
 
 ```shell

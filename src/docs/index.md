@@ -40,8 +40,8 @@ Metreeca/Link is server and storage-agnostic and may be easily connected to your
 # Support
 
 - open an [issue](https://github.com/metreeca/link/issues) to report a problem or to suggest a new feature
-- post to [Stack Overflow](https://stackoverflow.com/questions/ask?tags=metreeca) using the `metreeca` tag to ask how-to questions
-- post to [groups.google.com/d/forum/metreeca](https://groups.google.com/d/forum/metreeca) to start open-ended discussions
+- start a [conversation](https://github.com/metreeca/link/discussions) to ask a how-to question or to share an open-ended
+  idea
 
 # License
 
