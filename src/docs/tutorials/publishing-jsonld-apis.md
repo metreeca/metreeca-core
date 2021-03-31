@@ -26,8 +26,7 @@ You may try out the examples using your favorite API testing tool or working fro
 or `wget`.
 
 A Maven project with the code for the complete sample app is available
-on [GitHub](https://github.com/metreeca/link/tree/main/metreeca-toys): [download](https://downgit.github.io/#/home?
-url=https://github.com/metreeca/link/tree/main/metreeca-toys&fileName=metreeca%E2%A7%B8link%20sample)
+on [GitHub](https://github.com/metreeca/link/tree/main/metreeca-toys): [download](https://downgit.github.io/#/home?url=https://github.com/metreeca/link/tree/main/metreeca-toys&fileName=metreeca%E2%A7%B8link%20sample)
 it to your workspace, open in your favorite IDE, compile and launch a local instance of the server.
 
 # Getting Started
