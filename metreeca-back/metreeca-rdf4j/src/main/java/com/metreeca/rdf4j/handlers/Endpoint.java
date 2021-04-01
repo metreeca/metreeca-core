@@ -150,6 +150,7 @@ public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 		return self();
 	}
 
+
 	/**
 	 * Configures the roles for update operations.
 	 *
