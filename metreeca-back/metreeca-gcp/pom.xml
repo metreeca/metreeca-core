@@ -37,7 +37,7 @@
 
 		<dependency>
 			<groupId>com.metreeca</groupId>
-			<artifactId>metreeca-rest</artifactId>
+			<artifactId>metreeca-jse</artifactId>
 		</dependency>
 
 		<dependency>

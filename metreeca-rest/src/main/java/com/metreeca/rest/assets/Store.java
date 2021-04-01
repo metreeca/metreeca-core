@@ -23,7 +23,9 @@ import java.nio.file.*;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Context.storage;
+
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.*;
 
@@ -87,7 +89,7 @@ public interface Store {
 	 */
 	public static class FileStore implements Store {
 
-		private final Path path=Context.asset(storage()).resolve("store");
+		private final Path path=asset(storage()).resolve("store");
 
 
 		@Override public InputStream read(final String id) throws IOException {

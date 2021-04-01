@@ -13,6 +13,7 @@
         <module name="metreeca-json" />
         <module name="metreeca-rest" />
         <module name="metreeca-xml" />
+        <module name="metreeca-open" />
         <module name="metreeca-rdf" />
         <module name="metreeca-gcp" />
       </profile>

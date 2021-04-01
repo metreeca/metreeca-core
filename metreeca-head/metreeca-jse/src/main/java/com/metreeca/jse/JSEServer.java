@@ -55,8 +55,7 @@ import static java.util.function.Function.identity;
  *
  * <ul>
  *
- * <li>initializes and cleans the {@linkplain Context context} managing shared assets required by resource handlers;
- * </li>
+ * <li>initializes and cleans the {@linkplain Context context} managing shared assets required by resource handlers;</li>
  *
  * <li>handles HTTP requests using a {@linkplain Handler handler} loaded from the context.</li>
  *
@@ -202,6 +201,28 @@ public final class JSEServer {
 	 *
 	 * @throws NullPointerException if {@code context} is null
 	 */
+	public JSEServer context(final String context) {
+
+		if ( context == null ) {
+			throw new NullPointerException("null context");
+		}
+
+		this.base="";
+		this.root=normalize(context);
+
+		return this;
+	}
+
+	/**
+	 * Configures the context path.
+	 *
+	 * @param context the context path for the root resource of this server; if missing, leading and trailing slashes
+	 *                will be automatically added
+	 *
+	 * @return this server
+	 *
+	 * @throws NullPointerException if {@code context} is null
+	 */
 	public JSEServer context(final IRI context) {
 
 		if ( context == null ) {
@@ -220,28 +241,6 @@ public final class JSEServer {
 
 		this.base=scheme+host+path;
 		this.root=path;
-
-		return this;
-	}
-
-	/**
-	 * Configures the context path.
-	 *
-	 * @param context the context path for the root resource of this server; if missing, leading and trailing slashes
-	 *                will be automatically added
-	 *
-	 * @return this server
-	 *
-	 * @throws NullPointerException if {@code context} is null
-	 */
-	public JSEServer context(final String context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		this.base="";
-		this.root=normalize(context);
 
 		return this;
 	}
