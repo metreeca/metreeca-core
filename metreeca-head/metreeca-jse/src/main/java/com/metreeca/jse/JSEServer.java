@@ -333,26 +333,40 @@ public final class JSEServer {
 					.filter(entry -> !entry.getKey().equalsIgnoreCase("Content-Length"))
 					.forEachOrdered(entry -> exchange.getResponseHeaders().put(entry.getKey(), entry.getValue()));
 
-			final long length=exchange.getRequestMethod().equals(HEAD) ? -1L : response
-					.header("Content-Length")
-					.map(guarded(Long::parseUnsignedLong))
-					.orElse(0L); // chunked transfer
+			response.body(output()).accept(
 
-			exchange.sendResponseHeaders(response.status(), length);
+					error -> {
+						try {
 
-			response.body(output()).accept(e -> {}, target -> {
-				try ( final OutputStream output=exchange.getResponseBody() ) {
+							final int status=error.getStatus() == 0  // undefined output body
+									? response.status()  // return response status
+									: error.getStatus(); // return error status
 
-					target.accept(output);
+							exchange.sendResponseHeaders(status, -1L); // no output
 
-				} catch ( final IOException e ) {
-					throw new UncheckedIOException(e);
-				}
-			});
+						} catch ( final IOException e ) {
+							throw new UncheckedIOException(e);
+						}
+					},
 
-		} catch ( final IOException e ) {
+					value -> {
+						try ( final OutputStream output=exchange.getResponseBody() ) {
 
-			throw new UncheckedIOException(e);
+							final long length=exchange.getRequestMethod().equals(HEAD) ? -1L : response
+									.header("Content-Length")
+									.map(guarded(Long::parseUnsignedLong))
+									.orElse(0L); // chunked transfer
+
+							exchange.sendResponseHeaders(response.status(), length);
+
+							value.accept(output);
+
+						} catch ( final IOException e ) {
+							throw new UncheckedIOException(e);
+						}
+					}
+
+			);
 
 		} finally {
 
