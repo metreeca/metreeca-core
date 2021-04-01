@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.metreeca.gcp.assets;
+package com.metreeca.gcp.services;
 
-import com.metreeca.rest.assets.Vault;
+import com.metreeca.rest.services.Vault;
 
 import com.google.api.gax.rpc.NotFoundException;
 import com.google.cloud.secretmanager.v1.*;

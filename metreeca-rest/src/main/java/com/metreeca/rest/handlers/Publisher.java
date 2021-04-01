@@ -28,10 +28,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Request.HEAD;
 import static com.metreeca.rest.Response.*;
+import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.formats.OutputFormat.output;
 import static com.metreeca.rest.handlers.Router.router;
 
@@ -134,10 +134,10 @@ public final class Publisher extends Delegator {
 			final String jar=path.substring(0, separator);
 			final String entry=path.substring(separator+1);
 
-			// load the filesystem from the asset manager to have it automatically closed
+			// load the filesystem from the service toolbox to have it automatically closed
 			// !!! won't handle multiple publishers from the same filesystem
 
-			final FileSystem filesystem=asset(supplier(() ->
+			final FileSystem filesystem=service(supplier(() ->
 					FileSystems.newFileSystem(URI.create(jar), emptyMap())
 			));
 

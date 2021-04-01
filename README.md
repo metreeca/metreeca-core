@@ -61,7 +61,7 @@ public final class Hello {
   public static void main(final String... args) {
     new JSEServer()
 
-        .delegate(context -> request ->
+        .delegate(toolbox -> request ->
             request.reply(response -> response
                 .status(OK)
                 .body(text(), "Hello world!")

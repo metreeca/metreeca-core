@@ -16,14 +16,15 @@
 
 package com.metreeca.rest.actions;
 
-import com.metreeca.rest.Context;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.services.Logger;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.function.Function;
+
+import static com.metreeca.rest.Toolbox.service;
 
 import static java.lang.String.format;
 
@@ -37,7 +38,7 @@ public final class Query implements Function<String, Optional<Request>> {
 
 	private final Function<Request, Request> customizer;
 
-	private final Logger logger=Context.asset(Logger.logger());
+	private final Logger logger=service(Logger.logger());
 
 
 	/**

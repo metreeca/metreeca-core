@@ -34,15 +34,15 @@ import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
-import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.assets.Logger.logger;
+import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONLDScanner.scan;
 import static com.metreeca.rest.formats.OutputFormat.output;
+import static com.metreeca.rest.services.Logger.logger;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
@@ -72,7 +72,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 
 	/**
-	 * Retrieves the default JSON-LD shape asset factory.
+	 * Retrieves the default JSON-LD shape service factory.
 	 *
 	 * @return the default shape factory, which returns an {@linkplain Or#or() empty disjunction}, that is a shape
 	 * the always fails to validate
@@ -82,9 +82,9 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	}
 
 	/**
-	 * Retrieves the default JSON-LD keywords asset factory.
+	 * Retrieves the default JSON-LD keywords service factory.
 	 *
-	 * <p>The keywords asset maps JSON-LD {@code @keywords} to user-defined aliases.</p>
+	 * <p>The keywords service maps JSON-LD {@code @keywords} to user-defined aliases.</p>
 	 *
 	 * @return the default keywords factory, which returns an empty map
 	 */
@@ -125,7 +125,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 		try {
 
-			return Right(new JSONLDParser(focus, shape, asset(keywords())).parse(query));
+			return Right(new JSONLDParser(focus, shape, service(keywords())).parse(query));
 
 		} catch ( final JsonException e ) {
 
@@ -171,7 +171,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 						final IRI focus=iri(message.item());
 						final Shape shape=message.attribute(shape());
-						final Map<String, String> keywords=asset(keywords());
+						final Map<String, String> keywords=service(keywords());
 
 						final Collection<Statement> model=new JSONLDDecoder(
 
@@ -257,11 +257,11 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 						final IRI focus=iri(message.item());
 						final Shape shape=message.attribute(shape());
-						final Map<String, String> keywords=asset(keywords());
+						final Map<String, String> keywords=service(keywords());
 
 						final Collection<Statement> model=scan(shape, focus, value).fold(trace -> {
 
-							asset(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
+							service(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
 
 							throw new RuntimeException("invalid JSON-LD payload");
 

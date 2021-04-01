@@ -30,8 +30,8 @@ import javax.json.JsonValue;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rdf4j.assets.GraphTest.exec;
-import static com.metreeca.rdf4j.assets.GraphTest.model;
+import static com.metreeca.rdf4j.services.GraphTest.exec;
+import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONFormat.json;
 

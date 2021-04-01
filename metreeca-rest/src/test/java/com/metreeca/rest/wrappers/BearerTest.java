@@ -27,7 +27,7 @@ import java.util.Optional;
 final class BearerTest {
 
 	private void exec(final Runnable... tasks) {
-		new Context().exec(tasks).clear();
+		new Toolbox().exec(tasks).clear();
 	}
 
 

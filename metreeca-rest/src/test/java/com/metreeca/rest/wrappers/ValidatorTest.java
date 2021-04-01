@@ -28,7 +28,7 @@ import static java.util.Collections.emptyList;
 final class ValidatorTest {
 
 	private void exec(final Runnable... tasks) {
-		new Context()
+		new Toolbox()
 				.exec(tasks)
 				.clear();
 	}

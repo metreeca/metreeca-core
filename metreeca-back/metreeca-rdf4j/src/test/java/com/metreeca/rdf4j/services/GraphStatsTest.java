@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
-import com.metreeca.json.Values;
-import com.metreeca.json.queries.Terms;
+import com.metreeca.json.queries.Stats;
 import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -30,7 +29,8 @@ import java.util.function.Supplier;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
-import static com.metreeca.json.queries.Terms.terms;
+import static com.metreeca.json.ValuesTest.decode;
+import static com.metreeca.json.queries.Stats.stats;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Clazz.clazz;
@@ -38,8 +38,8 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
-import static com.metreeca.rdf4j.assets.GraphFactsTest.exec;
-import static com.metreeca.rdf4j.assets.GraphTest.graph;
+import static com.metreeca.rdf4j.services.GraphFactsTest.exec;
+import static com.metreeca.rdf4j.services.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -48,7 +48,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
-final class GraphTermsTest {
+final class GraphStatsTest {
 
 	private static GraphFacts.Options options() {
 		return new GraphFacts.Options() {
@@ -58,50 +58,62 @@ final class GraphTermsTest {
 		};
 	}
 
-	private Collection<Statement> query(final Terms terms) {
-		return new GraphTerms(options()).process(Values.Root, terms);
+
+	private Collection<Statement> query(final Stats stats) {
+		return new GraphStats(options()).process(Root, stats);
 	}
 
 
 	@Test void testEmptyResultSet() {
-		exec(() -> {
-			assertThat(query(
+		exec(() -> assertThat(query(
 
-					terms(field(RDF.TYPE, all(RDF.NIL)), emptyList(), 0, 0)
+				stats(field(RDF.TYPE, all(RDF.NIL)), emptyList(), 0, 0)
 
-			)).isEmpty();
-		});
+		)).isIsomorphicTo(decode(
+
+				"<> :count 0 ."
+
+		)));
 	}
 
 	@Test void testEmptyProjection() {
 		exec(() -> assertThat(query(
 
-				terms(filter(clazz(term("Office"))), emptyList(), 0, 0)
+				stats(filter(clazz(term("Office"))), emptyList(), 0, 0)
 
 		)).isIsomorphicTo(Xtream.from(
 
 				graph("construct { \n"
 						+"\n"
-						+"\t<> :terms [\n"
-						+"\t\t:value ?office;\n"
-						+"\t\t:count 1\n"
-						+"\t].\n"
+						+"\t<> :count ?count; :min ?min; :max ?max;\n"
+						+"\n"
+						+"\t\t\t:stats :iri.\n"
+						+"\t\t\t\n"
+						+"\t:iri :count ?count; :min ?min; :max ?max.\n"
 						+"\n"
 						+"} where {\n"
 						+"\n"
-						+"\t?office a :Office;\n"
+						+"\tselect (count(?p) as ?count) (min(?p) as ?min) (max(?p) as ?max) {\n"
+						+"\n"
+						+"\t\t?p a :Office\n"
+						+"\n"
+						+"\t}\n"
 						+"\n"
 						+"}"
 				),
 
 				graph("construct { \n"
 						+"\n"
-						+"\t?office rdfs:label ?label.\n"
+						+"\t?min rdfs:label ?min_label.\n"
+						+"\t?max rdfs:label ?max_label.\n"
 						+"\n"
 						+"} where {\n"
 						+"\n"
-						+"\t?office a :Office; \n"
-						+"\t\trdfs:label ?label.\n"
+						+"\t{ select (min(?p) as ?min) (max(?p) as ?max) { ?p a :Office } }\n"+
+						"\n"
+						+"\t?min "
+						+"rdfs:label ?min_label.\n"
+						+"\t?max rdfs:label ?max_label.\n"
 						+"\n"
 						+"}"
 				)
@@ -110,7 +122,7 @@ final class GraphTermsTest {
 	}
 
 	@Test void testRootConstraints() {
-		exec(() -> assertThat(query(terms(
+		exec(() -> assertThat(query(stats(
 
 				and(all(item("employees/1370")), field(term("account"))),
 
@@ -122,37 +134,34 @@ final class GraphTermsTest {
 
 				"construct { \n"
 						+"\n"
-						+"\t<> :items [\n"
-						+"\t\t:value ?account;\n"
-						+"\t\t:count 1\n"
-						+"\t].\n"
-						+"\n"
-						+"\t?account rdfs:label ?label.\n"
+						+"\t<> \n"
+						+"\t\t:count ?count; :min ?min; :max ?max.\n"
 						+"\n"
 						+"} where {\n"
 						+"\n"
-						+"\t<employees/1370> :account ?account.\n"
+						+"\tselect (count(?account) as ?count) (min(?account) as ?min) (max(?account) as ?max) {\n"
 						+"\n"
-						+"\t?account rdfs:label ?label.\n"
+						+"\t\t<employees/1370> :account ?account\n"
+						+"\n"
+						+"\t}\n"
 						+"\n"
 						+"}"
 
 		)));
 	}
 
-
 	@Nested final class AnchoringPaths {
 
 		@Test void testReportUnknownSteps() {
 			exec(() -> {
 
-				assertThatIllegalArgumentException().isThrownBy(() -> query(terms(
+				assertThatIllegalArgumentException().isThrownBy(() -> query(stats(
 						field(term("country")),
 						singletonList(term("unknown")),
 						0, 0
 				)));
 
-				assertThatIllegalArgumentException().isThrownBy(() -> query(terms(
+				assertThatIllegalArgumentException().isThrownBy(() -> query(stats(
 						field(term("country")),
 						asList(term("country"), term("unknown")),
 						0, 0
@@ -162,7 +171,7 @@ final class GraphTermsTest {
 		}
 
 		@Test void testReportFilteringSteps() {
-			exec(() -> assertThatIllegalArgumentException().isThrownBy(() -> query(terms(
+			exec(() -> assertThatIllegalArgumentException().isThrownBy(() -> query(stats(
 
 					and(
 							filter(field(term("country"))),
@@ -176,7 +185,7 @@ final class GraphTermsTest {
 		}
 
 		@Test void testTraversingLink() {
-			exec(() -> assertThat(query(terms(
+			exec(() -> assertThat(query(stats(
 
 					and(
 							filter(clazz(term("Alias"))),
@@ -191,18 +200,18 @@ final class GraphTermsTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<> :terms [\n"
-							+"\t\t:value ?value;\n"
-							+"\t\t:count ?count\n"
-							+"\t].\n"
+							+"\t<> :count ?count; :min ?min; :max ?max; :stats :iri.\n"
+							+"\t:iri :count ?count; :min ?min; :max ?max.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\t{ select (?country as ?value) (count(distinct ?alias) as ?count) {\n"
+							+"\tselect (count(distinct ?alias) as ?count) (min(?country) as ?min) (max(?country) as "
+							+"?max) "
+							+"{\n"
 							+"\n"
 							+"\t\t?alias a :Alias; owl:sameAs/:country ?country\n"
 							+"\n"
-							+"\t} group by ?country }\n"
+							+"\t}\n"
 							+"\n"
 							+"}"
 
@@ -210,7 +219,7 @@ final class GraphTermsTest {
 		}
 
 		@Test void testFiltered() {
-			exec(() -> assertThat(query(terms(
+			exec(() -> assertThat(query(stats(
 
 					and(
 							filter(clazz(term("Employee"))),
@@ -226,25 +235,30 @@ final class GraphTermsTest {
 
 					"construct { \n"
 							+"\n"
-							+"\t<> :terms [\n"
-							+"\t\t:value ?value;\n"
-							+"\t\t:count ?count\n"
-							+"\t].\n"
+							+"\t<> :count ?count; :min ?min; :max ?max; :stats xsd:integer.\n"
+							+"\txsd:integer :count ?count; :min ?min; :max ?max.\n"
 							+"\n"
 							+"} where {\n"
 							+"\n"
-							+"\t{ select (?seniority as ?value) (count(distinct ?employee) as ?count) {\n"
+							+"\tselect \n"
+							+"\n"
+							+"\t\t(count(distinct ?employee) as ?count)\n"
+							+"\t\t(min(?seniority) as ?min)\n"
+							+"\t\t(max(?seniority) as "
+							+"?max)\n"
+							+"\t\t\n"
+							+"\twhere "
+							+"{\n"
 							+"\n"
 							+"\t\t?employee a :Employee; :seniority ?seniority filter (?seniority >= 3)\n"
 							+"\n"
-							+"\t} group by ?seniority }\n"
+							+"\t}\n"
 							+"\n"
 							+"}"
 
 			)));
 
 		}
-
 
 	}
 

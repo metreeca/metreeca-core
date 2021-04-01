@@ -19,13 +19,13 @@ package com.metreeca.rest.actions;
 
 import com.metreeca.rest.Request;
 import com.metreeca.rest.Response;
-import com.metreeca.rest.assets.Fetcher;
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.services.Fetcher;
+import com.metreeca.rest.services.Logger;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Toolbox.service;
 
 
 /**
@@ -37,10 +37,10 @@ public final class Fetch implements Function<Request, Optional<Response>> {
 
 	private Function<Request, Request> limit=new Limit<>(0);
 
-	private Fetcher fetcher=asset(Fetcher.fetcher());
+	private Fetcher fetcher=service(Fetcher.fetcher());
 
 
-	private final Logger logger=asset(Logger.logger());
+	private final Logger logger=service(Logger.logger());
 
 
 	/**

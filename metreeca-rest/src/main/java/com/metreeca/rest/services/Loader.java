@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rest.assets;
+package com.metreeca.rest.services;
 
 import java.net.URL;
 import java.util.Optional;

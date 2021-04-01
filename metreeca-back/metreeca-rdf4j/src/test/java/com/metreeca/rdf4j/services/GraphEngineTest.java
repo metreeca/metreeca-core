@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.*;
 import com.metreeca.rest.Request;
@@ -38,9 +38,9 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.MaxLength.maxLength;
 import static com.metreeca.json.shapes.Pattern.pattern;
-import static com.metreeca.rdf4j.assets.GraphFactsTest.EmployeeShape;
-import static com.metreeca.rdf4j.assets.GraphTest.exec;
-import static com.metreeca.rdf4j.assets.GraphTest.model;
+import static com.metreeca.rdf4j.services.GraphFactsTest.EmployeeShape;
+import static com.metreeca.rdf4j.services.GraphTest.exec;
+import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;

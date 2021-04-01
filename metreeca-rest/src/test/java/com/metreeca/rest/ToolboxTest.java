@@ -21,29 +21,31 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static com.metreeca.rest.Toolbox.service;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
-final class ContextTest {
+final class ToolboxTest {
 
     @Test void testReplacesToolsWithPlugins() {
 
-        final Context context=new Context();
+        final Toolbox toolbox=new Toolbox();
 
         final Supplier<Object> target=() -> "target";
         final Supplier<Object> plugin=() -> "plugin";
 
-        context.set(target, plugin);
+        toolbox.set(target, plugin);
 
-        assertThat(context.get(target))
+        assertThat(toolbox.get(target))
                 .isEqualTo(plugin.get());
 
     }
 
     @Test void testReleaseAutoCloseableResources() {
 
-        final Context context=new Context();
+        final Toolbox toolbox=new Toolbox();
 
         final class Resource implements AutoCloseable {
 
@@ -61,9 +63,9 @@ final class ContextTest {
 
         final Supplier<Resource> service=() -> new Resource();
 
-        final Resource resource=context.get(service);
+        final Resource resource=toolbox.get(service);
 
-        context.clear();
+        toolbox.clear();
 
         assertThat(resource.isClosed())
                 .isTrue();
@@ -72,7 +74,7 @@ final class ContextTest {
 
     @Test void testReleaseDependenciesAfterResource() {
 
-        final Context context=new Context();
+        final Toolbox toolbox=new Toolbox();
 
         final Collection<Object> released=new ArrayList<>();
 
@@ -88,7 +90,7 @@ final class ContextTest {
 
             @Override public AutoCloseable get() {
 
-                if ( dependency != null ) { Context.asset(dependency); }
+                if ( dependency != null ) { service(dependency); }
 
                 return this;
             }
@@ -103,8 +105,8 @@ final class ContextTest {
         final Step y=new Step(z);
         final Step x=new Step(y);
 
-        context.get(x); // load the terminal service with its dependencies
-        context.clear(); // release resources
+        toolbox.get(x); // load the terminal service with its dependencies
+        toolbox.clear(); // release resources
 
         assertThat(released)
                 .as("dependencies released after relying resources")
@@ -113,13 +115,13 @@ final class ContextTest {
 
     @Test void testPreventToolBindingIfAlreadyInUse() {
 
-        final Context context=new Context();
+        final Toolbox toolbox=new Toolbox();
         final Supplier<Object> service=Object::new;
 
         assertThatThrownBy(() -> {
 
-            context.get(service);
-            context.set(service, Object::new);
+            toolbox.get(service);
+            toolbox.set(service, Object::new);
 
         })
                 .isInstanceOf(IllegalStateException.class);
@@ -127,14 +129,14 @@ final class ContextTest {
 
     @Test void testTrapCircularDependencies() {
 
-        final Context context=new Context();
+        final Toolbox toolbox=new Toolbox();
         final Object delegate=new Object();
 
         assertThatThrownBy
 
-                (() -> context.get(new Supplier<Object>() {
+                (() -> toolbox.get(new Supplier<Object>() {
                     @Override public Object get() {
-                        return context.get(this);
+                        return toolbox.get(this);
                     }
                 }))
 
@@ -142,9 +144,9 @@ final class ContextTest {
 
         assertThat
 
-                (context.get(new Supplier<Object>() {
+                (toolbox.get(new Supplier<Object>() {
                     @Override public Object get() {
-                        return context.get(this, () -> delegate);
+                        return toolbox.get(this, () -> delegate);
                     }
                 }))
 
@@ -155,7 +157,7 @@ final class ContextTest {
 
     @Test void testHandleExceptionsInFactories() {
 
-        final Context context=new Context();
+        final Toolbox toolbox=new Toolbox();
 
         final Supplier<Object> service=() -> {
             throw new NoSuchElementException("missing resource");
@@ -163,7 +165,7 @@ final class ContextTest {
 
         assertThatThrownBy(() ->
 
-                context.get(service)
+                toolbox.get(service)
         )
                 .isInstanceOf(NoSuchElementException.class);
 

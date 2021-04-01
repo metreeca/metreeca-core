@@ -16,7 +16,7 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.services.Logger;
 
 import java.io.*;
 import java.net.URL;
@@ -31,13 +31,13 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 /**
- * Assets manager {thread-safe}.
+ * Service manager {thread-safe}.
  *
- * <p>Manages the lifecycle of shared assets.</p>
+ * <p>Manages the lifecycle of shared services.</p>
  */
-@SuppressWarnings("unchecked") public final class Context {
+@SuppressWarnings("unchecked") public final class Toolbox {
 
-	private static final ThreadLocal<Context> context=new ThreadLocal<>();
+	private static final ThreadLocal<Toolbox> scope=new ThreadLocal<>();
 
 
 	/**
@@ -52,44 +52,44 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 	/**
-	 * {@linkplain #get(Supplier) Retrieves} a shared assets from the current context.
+	 * {@linkplain #get(Supplier) Retrieves} a shared service from the current toolbox.
 	 *
-	 * @param factory the factory responsible for creating the required shared asset; must return a non-null and
+	 * @param factory the factory responsible for creating the required shared service; must return a non-null and
 	 *                thread-safe object
-	 * @param <T>     the type of the shared asset created by {@code factory}
+	 * @param <T>     the type of the shared service created by {@code factory}
 	 *
-	 * @return the shared asset created by {@code factory} or by its plugin replacement if one was {@linkplain
+	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is null
-	 * @throws IllegalStateException    if called outside an active context or a circular asset dependency is
+	 * @throws IllegalStateException    if called outside an active toolbox or a circular service dependency is
 	 *                                  detected
 	 */
-	public static <T> T asset(final Supplier<T> factory) {
+	public static <T> T service(final Supplier<T> factory) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null factory");
 		}
 
-		return context().get(factory);
+		return toolbox().get(factory);
 	}
 
 	/**
-	 * {@linkplain #get(Supplier, Supplier) Retrieves} a shared assert from the active context.
+	 * {@linkplain #get(Supplier, Supplier) Retrieves} a shared assert from the active toolbox.
 	 *
-	 * @param factory  the factory responsible for creating the required shared asset; must return a non-null and
+	 * @param factory  the factory responsible for creating the required shared service; must return a non-null and
 	 *                 thread-safe object
-	 * @param delegate the factory responsible for creating a fallback delegate asset if a circular asset
+	 * @param delegate the factory responsible for creating a fallback delegate service if a circular service
 	 *                 dependency is detected
-	 * @param <T>      the type of the shared asset created by {@code factory} and {@code delegate}
+	 * @param <T>      the type of the shared service created by {@code factory} and {@code delegate}
 	 *
-	 * @return the shared asset created by {@code factory} or by its plugin replacement if one was {@linkplain
+	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if either {@code factory} or {@code delegate} is null
-	 * @throws IllegalStateException    if called outside an active context
+	 * @throws IllegalStateException    if called outside an active toolbox
 	 */
-	public static <T> T asset(final Supplier<T> factory, final Supplier<T> delegate) {
+	public static <T> T service(final Supplier<T> factory, final Supplier<T> delegate) {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null factory");
@@ -99,19 +99,19 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 			throw new NullPointerException("null delegate");
 		}
 
-		return context().get(factory, delegate);
+		return toolbox().get(factory, delegate);
 	}
 
 
-	private static Context context() {
+	private static Toolbox toolbox() {
 
-		final Context context=Context.context.get();
+		final Toolbox toolbox=scope.get();
 
-		if ( context == null ) {
-			throw new IllegalStateException("not running inside an asset context");
+		if ( toolbox == null ) {
+			throw new IllegalStateException("not running inside a service toolbox");
 		}
 
-		return context;
+		return toolbox;
 	}
 
 
@@ -271,7 +271,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Map<Supplier<?>, Supplier<?>> factories=new HashMap<>();
-	private final Map<Supplier<?>, Object> assets=new LinkedHashMap<>(); // preserve initialization order
+	private final Map<Supplier<?>, Object> services=new LinkedHashMap<>(); // preserve initialization order
 
 	private final Object pending=new Object(); // placeholder for detecting circular dependencies
 
@@ -279,46 +279,46 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the shared asset created by a factory.
+	 * Retrieves the shared service created by a factory.
 	 *
-	 * <p>The new asset is cached so that further calls for the same factory are idempotent.</p>
+	 * <p>The new service is cached so that further calls for the same factory are idempotent.</p>
 	 *
-	 * <p>During object construction, nested shared asset dependencies may be retrieved from this context through
-	 * the static {@linkplain  #asset(Supplier) asset locator} method of the Context class. The context used by the
-	 * asset locator method is managed through a {@link ThreadLocal} variable, so it won't be available to object
+	 * <p>During object construction, nested shared service dependencies may be retrieved from this toolbox through
+	 * the static {@linkplain  #service(Supplier) service locator} method of the toolbox class. The toolbox used by the
+	 * service locator method is managed through a {@link ThreadLocal} variable, so it won't be available to object
 	 * constructors executed on a different thread.</p>
 	 *
-	 * @param factory the factory responsible for creating the required shared asset; must return a non-null and
+	 * @param factory the factory responsible for creating the required shared service; must return a non-null and
 	 *                thread-safe object
-	 * @param <T>     the type of the shared asset created by {@code factory}
+	 * @param <T>     the type of the shared service created by {@code factory}
 	 *
-	 * @return the shared asset created by {@code factory} or by its plugin replacement if one was {@linkplain
+	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if {@code factory} is null
-	 * @throws IllegalStateException    if a circular asset dependency is detected
+	 * @throws IllegalStateException    if a circular service dependency is detected
 	 */
 	public <T> T get(final Supplier<T> factory) {
-		return get(factory, () -> { throw new IllegalStateException("circular asset dependency ["+factory+"]"); });
+		return get(factory, () -> { throw new IllegalStateException("circular service dependency ["+factory+"]"); });
 	}
 
 	/**
-	 * Retrieves the shared asset created by a factory.
+	 * Retrieves the shared service created by a factory.
 	 *
-	 * <p>The new asset is cached so that further calls for the same factory are idempotent.</p>
+	 * <p>The new service is cached so that further calls for the same factory are idempotent.</p>
 	 *
-	 * <p>During object construction, nested shared asset dependencies may be retrieved from this context through
-	 * the static {@linkplain  #asset(Supplier) asset locator} method of the Context class. The context used by the
-	 * asset locator method is managed through a {@link ThreadLocal} variable, so it won't be available to object
+	 * <p>During object construction, nested shared service dependencies may be retrieved from this toolbox through
+	 * the static {@linkplain  #service(Supplier) service locator} method of the toolbox class. The toolbox used by the
+	 * service locator method is managed through a {@link ThreadLocal} variable, so it won't be available to object
 	 * constructors executed on a different thread.</p>
 	 *
-	 * @param factory  the factory responsible for creating the required shared asset; must return a non-null and
+	 * @param factory  the factory responsible for creating the required shared service; must return a non-null and
 	 *                 thread-safe object
-	 * @param delegate the factory responsible for creating a fallback delegate asset if a circular asset
+	 * @param delegate the factory responsible for creating a fallback delegate service if a circular service
 	 *                 dependency is detected
-	 * @param <T>      the type of the shared asset created by {@code factory} and {@code delegate}
+	 * @param <T>      the type of the shared service created by {@code factory} and {@code delegate}
 	 *
-	 * @return the shared asset created by {@code factory} or by its plugin replacement if one was {@linkplain
+	 * @return the shared service created by {@code factory} or by its plugin replacement if one was {@linkplain
 	 * #set(Supplier, Supplier) specified}
 	 *
 	 * @throws IllegalArgumentException if either {@code factory} or {@code delegate} is null
@@ -333,26 +333,26 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 			throw new NullPointerException("null delegate");
 		}
 
-		synchronized ( assets ) {
+		synchronized ( services ) {
 
-			final T cached=(T)assets.get(factory);
+			final T cached=(T)services.get(factory);
 
 			if ( pending.equals(cached) ) { return delegate.get(); } else {
 
-				return cached != null ? cached : context(() -> {
+				return cached != null ? cached : toolbox(() -> {
 					try {
 
-						assets.put(factory, pending); // mark factory as being acquired
+						services.put(factory, pending); // mark factory as being acquired
 
 						final T acquired=((Supplier<T>)factories.getOrDefault(factory, factory)).get();
 
-						assets.put(factory, acquired); // cache actual resource
+						services.put(factory, acquired); // cache actual resource
 
 						return acquired;
 
 					} catch ( final Throwable e ) {
 
-						assets.remove(factory); // roll back acquisition marker
+						services.remove(factory); // roll back acquisition marker
 
 						throw e;
 
@@ -364,21 +364,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 	}
 
 	/**
-	 * Replaces an asset factory with a plugin.
+	 * Replaces an service factory with a plugin.
 	 *
-	 * <p>Subsequent calls to {@link #get(Supplier)} using {@code factory} as key will return the shared asset
+	 * <p>Subsequent calls to {@link #get(Supplier)} using {@code factory} as key will return the shared service
 	 * created by {@code plugin}.</p>
 	 *
-	 * @param <T>     the type of the shared asset created by {@code factory}
+	 * @param <T>     the type of the shared service created by {@code factory}
 	 * @param factory the factory to be replaced
 	 * @param plugin  the replacing factory; must return a non-null and thread-safe object
 	 *
-	 * @return this context
+	 * @return this toolbox
 	 *
 	 * @throws IllegalArgumentException if either {@code factory} or {@code plugin} is null
-	 * @throws IllegalStateException    if {@code factory} asset was already retrieved
+	 * @throws IllegalStateException    if {@code factory} service was already retrieved
 	 */
-	public <T> Context set(final Supplier<T> factory, final Supplier<T> plugin) throws IllegalStateException {
+	public <T> Toolbox set(final Supplier<T> factory, final Supplier<T> plugin) throws IllegalStateException {
 
 		if ( factory == null ) {
 			throw new NullPointerException("null factory");
@@ -388,9 +388,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 			throw new NullPointerException("null plugin");
 		}
 
-		synchronized ( assets ) {
+		synchronized ( services ) {
 
-			if ( assets.containsKey(factory) ) {
+			if ( services.containsKey(factory) ) {
 				throw new IllegalStateException("factory already in use");
 			}
 
@@ -403,34 +403,34 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 
 	/**
-	 * Clears this context.
+	 * Clears this toolbox.
 	 *
-	 * <p>All {@linkplain #get(Supplier) cached} asset are purged. {@linkplain AutoCloseable Auto-closeable}
-	 * asset are closed in inverse creation order before purging.</p>
+	 * <p>All {@linkplain #get(Supplier) cached} service are purged. {@linkplain AutoCloseable Auto-closeable}
+	 * service are closed in inverse creation order before purging.</p>
 	 *
-	 * @return this context
+	 * @return this toolbox
 	 */
-	public Context clear() {
-		synchronized ( assets ) {
+	public Toolbox clear() {
+		synchronized ( services ) {
 			try {
 
-				final Logger logger=get(Logger.logger()); // !!! make sure logger is not released before other assets
+				final Logger logger=get(Logger.logger()); // !!! make sure logger is not released before other services
 
-				for (final Map.Entry<Supplier<?>, Object> entry : assets.entrySet()) {
+				for (final Map.Entry<Supplier<?>, Object> entry : services.entrySet()) {
 
 					final Supplier<Object> factory=(Supplier<Object>)entry.getKey();
-					final Object asset=entry.getValue();
+					final Object service=entry.getValue();
 
 					try {
 
-						if ( asset instanceof AutoCloseable ) {
-							((AutoCloseable)asset).close();
+						if ( service instanceof AutoCloseable ) {
+							((AutoCloseable)service).close();
 						}
 
 					} catch ( final Exception t ) {
 
 						logger.error(this,
-								format("error during asset deletion [%s/%s]", factory, asset), t);
+								format("error during service deletion [%s/%s]", factory, service), t);
 
 					}
 				}
@@ -440,7 +440,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 			} finally {
 
 				factories.clear();
-				assets.clear();
+				services.clear();
 
 			}
 		}
@@ -450,26 +450,26 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Executes a set of tasks using shared assets managed by this context.
+	 * Executes a set of tasks using shared services managed by this toolbox.
 	 *
-	 * <p>During task execution, shared asset may be retrieved from this context through the static {@linkplain
-	 * #asset(Supplier) asset locator} method of the Context class. The context used by the asset locator method is
+	 * <p>During task execution, shared service may be retrieved from this toolbox through the static {@linkplain
+	 * #service(Supplier) service locator} method of the toolbox class. The toolbox used by the service locator method is
 	 * managed through a {@link ThreadLocal} variable, so it won't be available to methods executed on a different
 	 * thread.</p>
 	 *
 	 * @param tasks the tasks to be executed
 	 *
-	 * @return this context
+	 * @return this toolbox
 	 *
 	 * @throws NullPointerException if {@code task} is null or contains null items
 	 */
-	public Context exec(final Runnable... tasks) {
+	public Toolbox exec(final Runnable... tasks) {
 
 		if ( tasks == null ) {
 			throw new NullPointerException("null tasks");
 		}
 
-		return context(() -> {
+		return toolbox(() -> {
 
 			for (final Runnable task : tasks) {
 
@@ -488,19 +488,19 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private <V> V context(final Supplier<V> task) {
+	private <V> V toolbox(final Supplier<V> task) {
 
-		final Context current=context.get();
+		final Toolbox current=scope.get();
 
 		try {
 
-			context.set(this);
+			scope.set(this);
 
 			return task.get();
 
 		} finally {
 
-			context.set(current);
+			scope.set(current);
 
 		}
 

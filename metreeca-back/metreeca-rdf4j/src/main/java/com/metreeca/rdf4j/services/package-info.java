@@ -15,7 +15,7 @@
  */
 
 /**
- * Basic shared assets.
+ * RDF4J SPARQL shared services.
  */
 
-package com.metreeca.rest.assets;
+package com.metreeca.rdf4j.services;

@@ -16,14 +16,14 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rdf4j.services.Graph;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.assets.Logger;
 import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.services.Logger;
 
 import java.util.*;
 
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Toolbox.service;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
@@ -41,12 +41,12 @@ import static java.util.Collections.*;
  */
 public abstract class Endpoint<T extends Endpoint<T>> extends Delegator {
 
-	private Graph graph=asset(Graph.graph());
+	private Graph graph=service(Graph.graph());
 
 	private Set<Object> query=singleton(new Object()); // roles enabled for query operations (unmatchable by default)
 	private Set<Object> update=singleton(new Object()); // roles enabled for update operations (unmatchable by default)
 
-	private final Logger logger=asset(Logger.logger());
+	private final Logger logger=service(Logger.logger());
 
 
 	@SuppressWarnings("unchecked") private T self() {

@@ -28,7 +28,7 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.json.shapes.MaxLength.maxLength;
 import static com.metreeca.json.shapes.Or.or;
-import static com.metreeca.rdf4j.assets.Graph.query;
+import static com.metreeca.rdf4j.services.Graph.query;
 import static com.metreeca.rest.Wrapper.postprocessor;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.handlers.Router.router;

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Scribe;
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.services.Logger;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -60,12 +60,12 @@ import static com.metreeca.rdf4j.SPARQLScribe.strstarts;
 import static com.metreeca.rdf4j.SPARQLScribe.union;
 import static com.metreeca.rdf4j.SPARQLScribe.values;
 import static com.metreeca.rdf4j.SPARQLScribe.var;
-import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
-import static com.metreeca.rest.assets.Logger.logger;
-import static com.metreeca.rest.assets.Logger.time;
+import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.services.Logger.logger;
+import static com.metreeca.rest.services.Logger.time;
 
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
@@ -110,7 +110,7 @@ abstract class GraphFacts {
 
 	private int label=1; // the next label available for tagging (0 reserved for the root node)
 
-	private final Logger logger=asset(logger());
+	private final Logger logger=service(logger());
 
 
 	GraphFacts(final Options options) {

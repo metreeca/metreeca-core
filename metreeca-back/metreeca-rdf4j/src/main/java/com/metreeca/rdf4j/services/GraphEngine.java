@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.*;
-import com.metreeca.rdf4j.assets.GraphFacts.Options;
+import com.metreeca.rdf4j.services.GraphFacts.Options;
 import com.metreeca.rest.*;
-import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -38,14 +38,14 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.Convey;
 import static com.metreeca.json.shapes.Guard.Mode;
-import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rdf4j.services.Graph.graph;
+import static com.metreeca.rdf4j.services.Graph.txn;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.assets.Engine.StatsShape;
-import static com.metreeca.rest.assets.Engine.TermsShape;
+import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.formats.JSONLDFormat.*;
+import static com.metreeca.rest.services.Engine.StatsShape;
+import static com.metreeca.rest.services.Engine.TermsShape;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
@@ -73,7 +73,7 @@ public final class GraphEngine implements Engine {
 
 	private final Map<Supplier<?>, Object> options=new LinkedHashMap<>();
 
-	private final Graph graph=asset(graph());
+	private final Graph graph=service(graph());
 
 
 	/**

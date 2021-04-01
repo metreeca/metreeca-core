@@ -30,7 +30,7 @@ import static com.metreeca.rest.ResponseAssert.assertThat;
 final class AliaserTest {
 
 	private void exec(final Runnable... tasks) {
-		new Context()
+		new Toolbox()
 				.exec(tasks)
 				.clear();
 	}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rest.assets;
+package com.metreeca.rest.services;
 
 
 import java.io.*;
@@ -25,7 +25,7 @@ import java.util.logging.*;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.assets.Logger.Level.*;
+import static com.metreeca.rest.services.Logger.Level.*;
 
 import static java.util.Arrays.stream;
 

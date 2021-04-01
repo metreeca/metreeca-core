@@ -18,10 +18,10 @@ package com.metreeca.open.actions;
 
 import com.metreeca.json.Values;
 import com.metreeca.rdf4j.actions.*;
-import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rdf4j.services.Graph;
 import com.metreeca.rest.Xtream;
 import com.metreeca.rest.actions.Fill;
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.services.Logger;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.*;
@@ -37,16 +37,18 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.open.actions.Wikidata.ITEM;
 import static com.metreeca.open.actions.Wikidata.point;
-import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Logger.logger;
-import static com.metreeca.rest.assets.Logger.time;
+import static com.metreeca.rdf4j.services.Graph.graph;
+import static com.metreeca.rdf4j.services.Graph.txn;
+import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.services.Logger.logger;
+import static com.metreeca.rest.services.Logger.time;
+
+import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.rdf4j.common.iteration.Iterations.stream;
 
 public final class WikidataMirror implements Consumer<Stream<String>>, Function<Stream<String>, Stream<Resource>> {
 
@@ -79,10 +81,10 @@ public final class WikidataMirror implements Consumer<Stream<String>>, Function<
 
 	private UnaryOperator<IRI> rewriter=UnaryOperator.identity();
 
-	private final Graph source=asset(Wikidata::Graph);
-	private final Graph target=asset(graph());
+	private final Graph source=service(Wikidata::Graph);
+	private final Graph target=service(graph());
 
-	private final Logger logger=asset(logger());
+	private final Logger logger=service(logger());
 
 
 	public WikidataMirror item(final String item) {
@@ -349,7 +351,7 @@ public final class WikidataMirror implements Consumer<Stream<String>>, Function<
 					private final AtomicInteger count=new AtomicInteger();
 
 					@Override public void accept(final Collection<?> batch) {
-						asset(logger()).info(WikidataMirror.this, String.format("syncing items <%,d>/<%,d>",
+						service(logger()).info(WikidataMirror.this, String.format("syncing items <%,d>/<%,d>",
 								batch.size(),
 								count.addAndGet(batch.size())
 						));

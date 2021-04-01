@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Order;
 import com.metreeca.json.Shape;
@@ -33,10 +33,10 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
-import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rdf4j.assets.GraphEngine.items;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rdf4j.services.Graph.graph;
+import static com.metreeca.rdf4j.services.GraphEngine.items;
 import static com.metreeca.rest.Scribe.*;
+import static com.metreeca.rest.Toolbox.service;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
@@ -46,7 +46,7 @@ final class GraphItems extends GraphFacts {
 
 	private final Options options=options();
 
-	private final Graph graph=asset(graph());
+	private final Graph graph=service(graph());
 
 
 	GraphItems(final Options options) {

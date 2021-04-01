@@ -18,7 +18,7 @@ package com.metreeca.rdf4j.handlers;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
-import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rdf4j.services.Graph;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 
@@ -38,7 +38,7 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.rdf.formats.RDFFormat.rdf;
-import static com.metreeca.rdf4j.assets.Graph.txn;
+import static com.metreeca.rdf4j.services.Graph.txn;
 import static com.metreeca.rest.Format.mimes;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.BadRequest;

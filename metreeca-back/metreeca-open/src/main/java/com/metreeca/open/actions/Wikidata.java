@@ -17,7 +17,7 @@
 package com.metreeca.open.actions;
 
 import com.metreeca.json.Frame;
-import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rdf4j.services.Graph;
 import com.metreeca.rest.Xtream;
 import com.metreeca.rest.actions.*;
 import com.metreeca.rest.formats.JSONFormat;
@@ -28,17 +28,19 @@ import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.SKOS;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
-import javax.json.*;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.json.*;
+
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.rest.formats.JSONFormat.json;
+
 import static java.lang.Double.parseDouble;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;

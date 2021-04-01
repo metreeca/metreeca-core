@@ -24,9 +24,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Context.input;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Toolbox.input;
 import static com.metreeca.rest.Xtream.entry;
 
 import static java.lang.Float.parseFloat;

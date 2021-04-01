@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Terms;
-import com.metreeca.rest.assets.Engine;
+import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
@@ -31,17 +31,17 @@ import java.util.*;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
-import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
+import static com.metreeca.rest.Toolbox.service;
 
 final class GraphTerms extends GraphFacts {
 
 	private final Options options=options();
 
-	private final Graph graph=asset(graph());
+	private final Graph graph=service(graph());
 
 
 	GraphTerms(final Options options) {

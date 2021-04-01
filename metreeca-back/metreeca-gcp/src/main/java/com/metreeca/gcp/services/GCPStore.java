@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.metreeca.gcp.assets;
+package com.metreeca.gcp.services;
 
-import com.metreeca.rest.assets.Store;
+import com.metreeca.rest.services.Store;
 
 import com.google.cloud.storage.*;
 

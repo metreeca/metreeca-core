@@ -59,7 +59,7 @@ final class JSONLDFormatTest {
 
 
 	private void exec(final Runnable task) {
-		new Context().exec(task).clear();
+		new Toolbox().exec(task).clear();
 	}
 
 
@@ -204,7 +204,7 @@ final class JSONLDFormatTest {
 		}
 
 		@Test void testGenerateJSONLDContextObjects() {
-			new Context()
+			new Toolbox()
 
 					.set(keywords(), () -> singletonMap("@id", "id"))
 

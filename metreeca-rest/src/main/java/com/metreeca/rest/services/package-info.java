@@ -15,7 +15,7 @@
  */
 
 /**
- * Google Cloud Platform shared assets.
+ * Basic shared services.
  */
 
-package com.metreeca.gcp.assets;
+package com.metreeca.rest.services;

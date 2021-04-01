@@ -19,14 +19,14 @@ package com.metreeca.rest.operators;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.Handler;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.services.Engine;
 
 import static com.metreeca.json.shapes.Guard.Delete;
 import static com.metreeca.json.shapes.Guard.Detail;
-import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Engine.engine;
-import static com.metreeca.rest.assets.Engine.throttler;
+import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.services.Engine.engine;
+import static com.metreeca.rest.services.Engine.throttler;
 
 
 /**
@@ -62,7 +62,7 @@ public final class Deleter extends Delegator {
 
 	private Deleter() {
 
-		final Engine engine=asset(engine());
+		final Engine engine=service(engine());
 
 		delegate(((Handler)engine::delete)
 

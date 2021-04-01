@@ -19,8 +19,8 @@ package com.metreeca.rest.operators;
 
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
-import com.metreeca.rest.assets.Engine;
 import com.metreeca.rest.handlers.Delegator;
+import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.*;
 
@@ -32,11 +32,11 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.Xtream.encode;
-import static com.metreeca.rest.assets.Engine.engine;
-import static com.metreeca.rest.assets.Engine.throttler;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
+import static com.metreeca.rest.services.Engine.engine;
+import static com.metreeca.rest.services.Engine.throttler;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
@@ -118,7 +118,7 @@ public final class Creator extends Delegator {
 
 	private Creator(final Function<Request, String> slug) {
 
-		final Engine engine=asset(engine());
+		final Engine engine=service(engine());
 
 		delegate(wrapper(slug).wrap(engine::create) // immediately around handler after custom wrappers
 

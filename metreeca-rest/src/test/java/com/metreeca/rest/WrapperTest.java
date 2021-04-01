@@ -29,7 +29,7 @@ import static com.metreeca.rest.Wrapper.roles;
 final class WrapperTest {
 
 	private void exec(final Runnable... tasks) {
-		new Context()
+		new Toolbox()
 				.exec(tasks)
 				.clear();
 	}

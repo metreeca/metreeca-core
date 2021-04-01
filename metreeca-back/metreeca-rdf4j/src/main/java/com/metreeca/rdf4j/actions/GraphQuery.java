@@ -16,8 +16,8 @@
 
 package com.metreeca.rdf4j.actions;
 
-import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rdf4j.services.Graph;
+import com.metreeca.rest.services.Logger;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.query.Operation;
@@ -25,11 +25,13 @@ import org.eclipse.rdf4j.query.Operation;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Logger.time;
-import static java.lang.String.format;
+import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.services.Logger.time;
+
 import static org.eclipse.rdf4j.common.iteration.Iterations.asList;
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
+
+import static java.lang.String.format;
 
 
 /**
@@ -39,7 +41,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  */
 public final class GraphQuery extends Action<GraphQuery> implements Function<String, Stream<Statement>> {
 
-	private final Logger logger=asset(Logger.logger());
+	private final Logger logger=service(Logger.logger());
 
 
     /**

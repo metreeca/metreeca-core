@@ -16,7 +16,7 @@
 
 package com.metreeca.rdf4j.handlers;
 
-import com.metreeca.rdf4j.assets.Graph;
+import com.metreeca.rdf4j.services.Graph;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.ValueFactory;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
@@ -42,8 +42,8 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Link.link;
-import static com.metreeca.rdf4j.assets.GraphFactsTest.exec;
-import static com.metreeca.rdf4j.assets.GraphTest.tuples;
+import static com.metreeca.rdf4j.services.GraphFactsTest.exec;
+import static com.metreeca.rdf4j.services.GraphTest.tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

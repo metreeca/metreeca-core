@@ -16,18 +16,20 @@
 
 package com.metreeca.rdf4j.actions;
 
-import com.metreeca.rdf4j.assets.Graph;
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rdf4j.services.Graph;
+import com.metreeca.rest.services.Logger;
 
 import org.eclipse.rdf4j.query.Operation;
 
 import java.util.function.Consumer;
 
-import static com.metreeca.rdf4j.assets.Graph.txn;
-import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.assets.Logger.time;
-import static java.lang.String.format;
+import static com.metreeca.rdf4j.services.Graph.txn;
+import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.services.Logger.time;
+
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
+
+import static java.lang.String.format;
 
 /**
  * SPARQL update action.
@@ -36,7 +38,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
  */
 public final class Update extends Action<Update> implements Consumer<String> {
 
-	private final Logger logger=asset(Logger.logger());
+	private final Logger logger=service(Logger.logger());
 
 
     /**

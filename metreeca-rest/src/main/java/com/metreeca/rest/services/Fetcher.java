@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rest.assets;
+package com.metreeca.rest.services;
 
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.DataFormat;
@@ -27,12 +27,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.zip.GZIPInputStream;
 
-import static com.metreeca.rest.Context.asset;
 import static com.metreeca.rest.Request.GET;
 import static com.metreeca.rest.Response.MethodNotAllowed;
+import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.Xtream.data;
-import static com.metreeca.rest.assets.Logger.logger;
 import static com.metreeca.rest.formats.InputFormat.input;
+import static com.metreeca.rest.services.Logger.logger;
 
 import static java.lang.Integer.max;
 import static java.lang.Integer.min;
@@ -65,7 +65,7 @@ import static java.util.stream.Collectors.toMap;
 	 */
 	public static class URLFetcher implements Fetcher {
 
-		private final Logger logger=asset(logger());
+		private final Logger logger=service(logger());
 
 
 		@Override public Response apply(final Request request) {
@@ -251,8 +251,8 @@ import static java.util.stream.Collectors.toMap;
 	 */
 	public static final class CacheFetcher implements Fetcher { // !!! check caching headers
 
-		private Fetcher delegate=asset(fetcher(), fetcher());
-		private Cache cache=asset(Cache.cache());
+		private Fetcher delegate=service(fetcher(), fetcher());
+		private Cache cache=service(Cache.cache());
 
 
 		/**

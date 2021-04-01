@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Shape;
 
@@ -56,13 +56,13 @@ import static com.metreeca.json.shapes.Pattern.pattern;
 import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
-import static com.metreeca.rdf4j.assets.Graph.graph;
-import static com.metreeca.rdf4j.assets.GraphFacts.value;
-import static com.metreeca.rdf4j.assets.GraphFacts.*;
-import static com.metreeca.rdf4j.assets.GraphTest.graph;
-import static com.metreeca.rdf4j.assets.GraphTest.localized;
-import static com.metreeca.rdf4j.assets.GraphTest.model;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rdf4j.services.Graph.graph;
+import static com.metreeca.rdf4j.services.GraphFacts.value;
+import static com.metreeca.rdf4j.services.GraphFacts.*;
+import static com.metreeca.rdf4j.services.GraphTest.graph;
+import static com.metreeca.rdf4j.services.GraphTest.localized;
+import static com.metreeca.rdf4j.services.GraphTest.model;
+import static com.metreeca.rest.Toolbox.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -119,7 +119,7 @@ final class GraphFactsTest {
 	}
 
 	private Collection<Statement> query(final IRI root, final Shape shape) {
-		return asset(graph()).exec(connection -> {
+		return service(graph()).exec(connection -> {
 			return new GraphItems(options()).process(root, items(shape))
 
 					.stream()

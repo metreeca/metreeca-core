@@ -15,7 +15,7 @@
  */
 
 /**
- * RDF4J SPARQL shared assets.
+ * Google Cloud Platform shared services.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.gcp.services;

@@ -17,10 +17,12 @@
 package com.metreeca.rest.actions;
 
 import com.metreeca.rest.*;
-import com.metreeca.rest.assets.Logger;
+import com.metreeca.rest.services.Logger;
 
 import java.util.Optional;
 import java.util.function.Function;
+
+import static com.metreeca.rest.Toolbox.service;
 
 
 /**
@@ -34,7 +36,7 @@ public final class Parse<R> implements Function<Message<?>, Optional<R>> {
 
 	private final Format<R> format;
 
-	private final Logger logger=Context.asset(Logger.logger());
+	private final Logger logger=service(Logger.logger());
 
 
 	/**

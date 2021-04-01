@@ -51,7 +51,7 @@ import static java.util.Collections.singletonList;
 final class RDFFormatTest {
 
 	private void exec(final Runnable... tasks) {
-		new Context().exec(tasks).clear();
+		new Toolbox().exec(tasks).clear();
 	}
 
 

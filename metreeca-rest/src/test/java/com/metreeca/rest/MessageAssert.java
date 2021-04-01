@@ -16,9 +16,9 @@
 
 package com.metreeca.rest;
 
-import com.metreeca.rest.assets.Logger;
 import com.metreeca.rest.formats.DataFormat;
 import com.metreeca.rest.formats.TextFormat;
+import com.metreeca.rest.services.Logger;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;

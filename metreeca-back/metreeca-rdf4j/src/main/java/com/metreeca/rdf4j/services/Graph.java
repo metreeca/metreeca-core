@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 import com.metreeca.rest.*;
 
@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.function.*;
 
 import static com.metreeca.json.Values.*;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Toolbox.service;
 
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
@@ -44,14 +44,14 @@ import static java.time.temporal.ChronoUnit.MILLIS;
  * <p>Manages task execution on an RDF {@linkplain Repository repository}.</p>
  *
  * <p>Nested task executions on the same graph store from the same thread will share the same connection to the backing
- * RDF repository through a {@link ThreadLocal} context variable.</p>
+ * RDF repository through a {@link ThreadLocal} scope variable.</p>
  */
 public final class Graph implements AutoCloseable {
 
 	/**
 	 * Retrieves the default graph factory.
 	 *
-	 * @return the default graph factory, which throws an exception reporting the asset as undefined
+	 * @return the default graph factory, which throws an exception reporting the service as undefined
 	 */
 	public static Supplier<Graph> graph() {
 		return () -> { throw new IllegalStateException("undefined graph service"); };
@@ -87,7 +87,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null customizers");
 		}
 
-		final Graph graph=asset(graph());
+		final Graph graph=service(graph());
 
 		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.exec(connection -> {
 
@@ -130,7 +130,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null customizers");
 		}
 
-		final Graph graph=asset(graph());
+		final Graph graph=service(graph());
 
 		return update.isEmpty() ? message -> message : message -> graph.exec(txn(connection -> {
 
@@ -306,7 +306,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null supplier");
 		}
 
-		final Graph graph=asset(graph());
+		final Graph graph=service(graph());
 
 		return () -> graph.exec(supplier::apply);
 	}
@@ -329,7 +329,7 @@ public final class Graph implements AutoCloseable {
 			throw new NullPointerException("null function");
 		}
 
-		final Graph graph=asset(graph());
+		final Graph graph=service(graph());
 
 		return v -> graph.exec(connection -> { return function.apply(connection, v); });
 	}
@@ -432,7 +432,7 @@ public final class Graph implements AutoCloseable {
 
 	private Repository repository;
 
-	private final ThreadLocal<RepositoryConnection> context=new ThreadLocal<>();
+	private final ThreadLocal<RepositoryConnection> scope=new ThreadLocal<>();
 
 
 	/**
@@ -523,7 +523,7 @@ public final class Graph implements AutoCloseable {
 			throw new IllegalStateException("closed graph store");
 		}
 
-		final RepositoryConnection shared=context.get();
+		final RepositoryConnection shared=scope.get();
 
 		if ( shared != null ) {
 
@@ -535,13 +535,13 @@ public final class Graph implements AutoCloseable {
 
 			try ( final RepositoryConnection connection=repository.getConnection() ) {
 
-				context.set(connection);
+				scope.set(connection);
 
 				return task.apply(connection);
 
 			} finally {
 
-				context.remove();
+				scope.remove();
 
 			}
 

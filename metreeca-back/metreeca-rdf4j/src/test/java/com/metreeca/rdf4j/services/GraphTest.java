@@ -15,10 +15,9 @@
  * limitations under the License.
  */
 
-package com.metreeca.rdf4j.assets;
+package com.metreeca.rdf4j.services;
 
 
-import com.metreeca.json.Values;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
@@ -40,7 +39,7 @@ import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.Prefixes;
 import static com.metreeca.json.ValuesTest.decode;
-import static com.metreeca.rest.Context.asset;
+import static com.metreeca.rest.Toolbox.service;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
@@ -63,7 +62,7 @@ public final class GraphTest {
 
 
 	public static void exec(final Runnable... tasks) {
-		new Context()
+		new Toolbox()
 				.set(Graph.graph(), () -> new Graph(new SailRepository(new MemoryStore())))
 				.exec(tasks)
 				.clear();
@@ -191,20 +190,20 @@ public final class GraphTest {
 
 
 	public static Model model(final Resource... contexts) {
-		return asset(Graph.graph()).exec(connection -> { return export(connection, contexts); });
+		return service(Graph.graph()).exec(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return asset(Graph.graph()).exec(connection -> { return construct(connection, sparql); });
+		return service(Graph.graph()).exec(connection -> { return construct(connection, sparql); });
 	}
 
 	static List<Map<String, Value>> tuples(final String sparql) {
-		return asset(Graph.graph()).exec(connection -> { return select(connection, sparql); });
+		return service(Graph.graph()).exec(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> asset(Graph.graph()).exec(connection -> { connection.add(model, contexts); });
+		return () -> service(Graph.graph()).exec(connection -> { connection.add(model, contexts); });
 	}
 
 	static List<Statement> localized(final Collection<Statement> model, final String... tags) {
@@ -260,7 +259,7 @@ public final class GraphTest {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
-					+Values.indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
+					+indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
 
 			final List<Map<String, Value>> tuples=new ArrayList<>();
 
@@ -284,7 +283,7 @@ public final class GraphTest {
 
 		} catch ( final MalformedQueryException e ) {
 
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+Values.indent(sparql));
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+indent(sparql));
 
 		}
 	}
@@ -293,7 +292,7 @@ public final class GraphTest {
 		try {
 
 			logger.info("evaluating SPARQL query\n\n\t"
-					+Values.indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
+					+indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
 
 			final Model model=new LinkedHashModel();
 
@@ -305,7 +304,7 @@ public final class GraphTest {
 
 		} catch ( final MalformedQueryException e ) {
 
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+Values.indent(sparql));
+			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+indent(sparql));
 
 		}
 	}

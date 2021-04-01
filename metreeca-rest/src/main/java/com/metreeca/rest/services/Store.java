@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.metreeca.rest.assets;
+package com.metreeca.rest.services;
 
-import com.metreeca.rest.Context;
+import com.metreeca.rest.Toolbox;
 
 import java.io.*;
 import java.nio.file.*;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import static com.metreeca.rest.Context.asset;
-import static com.metreeca.rest.Context.storage;
+import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Toolbox.storage;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.nio.file.StandardOpenOption.*;
@@ -85,11 +85,11 @@ public interface Store {
 	/**
 	 * Storage blob store.
 	 *
-	 * <p>Stores data blobs in the {@code store} folder of the system file {@linkplain Context#storage storage}.</p>
+	 * <p>Stores data blobs in the {@code store} folder of the system file {@linkplain Toolbox#storage storage}.</p>
 	 */
 	public static class FileStore implements Store {
 
-		private final Path path=asset(storage()).resolve("store");
+		private final Path path=service(storage()).resolve("store");
 
 
 		@Override public InputStream read(final String id) throws IOException {
