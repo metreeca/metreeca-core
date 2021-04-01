@@ -18,6 +18,7 @@ package com.metreeca.rest;
 
 import java.util.Optional;
 import java.util.function.UnaryOperator;
+
 import javax.json.JsonObject;
 
 import static com.metreeca.rest.formats.JSONFormat.json;
@@ -64,7 +65,8 @@ public final class MessageException extends RuntimeException implements Handler,
 	 * Creates a shorthand response generator.
 	 *
 	 * @param status  the response status code
-	 * @param details the human readable response details
+	 * @param details the human readable response details; the {@code {@\}} placeholder is replaced with the focus
+	 *                {@linkplain Request#item() item} IRI of the originating request
 	 *
 	 * @return a shorthand response generator for {@code status} and {@code details}
 	 *
@@ -166,7 +168,8 @@ public final class MessageException extends RuntimeException implements Handler,
 		super(String.format("%3d %s", status, details));
 
 		this.status=status;
-		this.report=response -> redirect(status) ? response.status(status).header("Location", details)
+		this.report=response -> redirect(status) ? response.status(status).header("Location", details.replace("{@}",
+				response.request().item()))
 				: status < 500 ? response.status(status).body(text(), details)
 				: response.status(status).cause(new Exception(details));
 	}
