@@ -1,8 +1,10 @@
 # Changed
 
-- REST / Renamed Gateway wrapper to Server
+- REST / Renamed `Gateway` wrapper to `Server`
 
 # Added
+
+- REST / Added `Handler.route()/asset()` conditional handler factories
 
 # Improved
 

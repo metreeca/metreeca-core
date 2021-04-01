@@ -24,6 +24,8 @@ import javax.json.JsonObject;
 import static com.metreeca.rest.formats.JSONFormat.json;
 import static com.metreeca.rest.formats.TextFormat.text;
 
+import static java.lang.String.format;
+
 /**
  * Message exception.
  *
@@ -139,6 +141,10 @@ public final class MessageException extends RuntimeException implements Handler,
 		return status == 201 || status >= 301 && status <= 303 || status >= 307 && status <= 308;
 	}
 
+	private static String fill(final String details, final Response response) {
+		return details.replace("{@}", response.request().item());
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -149,7 +155,7 @@ public final class MessageException extends RuntimeException implements Handler,
 
 	private MessageException() {
 
-		super(String.format("%3d", 0));
+		super(format("%3d", 0));
 
 		this.status=0;
 		this.report=response -> response;
@@ -157,7 +163,7 @@ public final class MessageException extends RuntimeException implements Handler,
 
 	private MessageException(final int status) {
 
-		super(String.format("%3d", status));
+		super(format("%3d", status));
 
 		this.status=status;
 		this.report=response -> response.status(status);
@@ -165,18 +171,18 @@ public final class MessageException extends RuntimeException implements Handler,
 
 	private MessageException(final int status, final String details) {
 
-		super(String.format("%3d %s", status, details));
+		super(format("%3d %s", status, details));
 
 		this.status=status;
-		this.report=response -> redirect(status) ? response.status(status).header("Location", details.replace("{@}",
-				response.request().item()))
+		this.report=response
+				-> redirect(status) ? response.status(status).header("Location", fill(details, response))
 				: status < 500 ? response.status(status).body(text(), details)
 				: response.status(status).cause(new Exception(details));
 	}
 
 	private MessageException(final int status, final JsonObject details) {
 
-		super(String.format("%3d %s", status, details));
+		super(format("%3d %s", status, details));
 
 		this.status=status;
 		this.report=response -> status < 500
@@ -186,7 +192,7 @@ public final class MessageException extends RuntimeException implements Handler,
 
 	private MessageException(final int status, final Throwable cause) {
 
-		super(String.format("%3d %s", status, cause), cause);
+		super(format("%3d %s", status, cause), cause);
 
 		final String message=Optional.ofNullable(cause.getMessage()).orElseGet(cause::toString);
 

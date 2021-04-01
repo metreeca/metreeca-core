@@ -46,8 +46,7 @@ import static java.util.Objects.requireNonNull;
 	 *             true} on the request
 	 *
 	 * @return a conditional wrapper that routes requests and responses through the {@code pass} handler if the {@code
-	 * test} predicate evaluates to {@code true} on the request or to a dummy wrapper
-	 * otherwise
+	 * test} predicate evaluates to {@code true} on the request or to a dummy wrapper otherwise
 	 *
 	 * @throws NullPointerException if either {@code test} or {@code pass} is null
 	 */
@@ -205,8 +204,8 @@ import static java.util.Objects.requireNonNull;
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
 	 *              wrapped handler
 	 *
-	 * @return a new role-based access controller rejecting all requests with no enabled user {@code roles} with
-	 * a {@link Response#Unauthorized} status code
+	 * @return a role-based access controller rejecting all requests with no enabled user {@code roles} with a {@link
+	 * Response#Unauthorized} status code
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */
@@ -225,8 +224,8 @@ import static java.util.Objects.requireNonNull;
 	 * @param roles the user {@linkplain Request#roles(Object...) roles} enabled to perform the action managed by the
 	 *              wrapped handler
 	 *
-	 * @return a new role-based access controller rejecting all requests with no enabled user {@code roles} with
-	 * a {@link Response#Unauthorized} status code
+	 * @return a role-based access controller rejecting all requests with no enabled user {@code roles} with a {@link
+	 * Response#Unauthorized} status code
 	 *
 	 * @throws NullPointerException if {@code roles} is null or contains null values
 	 */

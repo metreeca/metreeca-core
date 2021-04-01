@@ -34,7 +34,7 @@ import java.util.function.Predicate;
 	 *
 	 * @param test the request predicate used to decide if requests and responses are to be routed to the handler
 	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true
-	 *             } on
+	 * } on
 	 *             the request
 	 *
 	 * @return a conditional handler that routes requests and responses to the {@code pass} handler if the {@code test}
@@ -59,8 +59,8 @@ import java.util.function.Predicate;
 	 * Creates a conditional handler.
 	 *
 	 * @param test the request predicate used to select the handler requests and responses are to be routed to
-	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true}
-	 *             on the request
+	 * @param pass the handler requests and responses are to be routed to when {@code test} evaluates to {@code true} on
+	 *             the request
 	 * @param fail the handler requests and responses are to be routed to when {@code test} evaluates to {@code false }
 	 *             on the request
 	 *
@@ -84,6 +84,55 @@ import java.util.function.Predicate;
 		}
 
 		return request -> (test.test(request) ? pass : fail).handle(request);
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Creates a browser route handler.
+	 *
+	 * @param route   the handler for browser {@linkplain Request#route() route} requests
+	 * @param handler the default handler
+	 *
+	 * @return a handler forwarding all browser route requests to {@code route} and other request to {@code handler}
+	 *
+	 * @throws NullPointerException if either {@code route} or {@code handler} is null
+	 */
+	public static Handler route(final Handler route, final Handler handler) {
+
+		if ( route == null ) {
+			throw new NullPointerException("null route handler");
+		}
+
+		if ( handler == null ) {
+			throw new NullPointerException("null default handler");
+		}
+
+		return handler(Request::route, route, handler);
+	}
+
+	/**
+	 * Creates a browser asset handler.
+	 *
+	 * @param asset   the handler for browser {@linkplain Request#asset() asset} requests
+	 * @param handler the default handler
+	 *
+	 * @return a handler forwarding all browser asset requests to {@code asset} and other request to {@code handler}
+	 *
+	 * @throws NullPointerException if either {@code route} or {@code handler} is null
+	 */
+	public static Handler asset(final Handler asset, final Handler handler) {
+
+		if ( asset == null ) {
+			throw new NullPointerException("null asset handler");
+		}
+
+		if ( handler == null ) {
+			throw new NullPointerException("null default handler");
+		}
+
+		return handler(Request::asset, asset, handler);
 	}
 
 
