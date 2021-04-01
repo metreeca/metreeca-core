@@ -69,6 +69,10 @@ public final class GCPVault implements Vault, AutoCloseable {
 			throw new NullPointerException("null id");
 		}
 
+		if ( id.isEmpty() ) {
+			throw new IllegalArgumentException("empty perameter id");
+		}
+
 		final AccessSecretVersionRequest request=AccessSecretVersionRequest.newBuilder()
 				.setName(SecretVersionName.of(Project, id, "latest").toString())
 				.build();

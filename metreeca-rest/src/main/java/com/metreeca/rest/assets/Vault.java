@@ -37,16 +37,23 @@ import java.util.stream.Stream;
 	 * system properties} or {@linkplain System#getenv() environment variables}, in that order
 	 */
 	public static Supplier<Vault> vault() {
-		return () -> id -> Stream
+		return () -> id -> {
 
-				.<UnaryOperator<String>>of(
-						System::getProperty,
-						System::getenv
-				)
+			if ( id.isEmpty() ) {
+				throw new IllegalArgumentException("empty perameter id");
+			}
 
-				.map(source -> source.apply(id))
-				.filter(Objects::nonNull)
-				.findFirst();
+			return Stream
+
+					.<UnaryOperator<String>>of(
+							System::getProperty,
+							System::getenv
+					)
+
+					.map(source -> source.apply(id))
+					.filter(Objects::nonNull)
+					.findFirst();
+		};
 	}
 
 
@@ -60,7 +67,8 @@ import java.util.stream.Stream;
 	 * @return an optional containing the value of the parameter identified by {@code id}, if one is present in the
 	 * vault; an empty optional, otherwise
 	 *
-	 * @throws NullPointerException if {@code id} is null
+	 * @throws NullPointerException     if {@code id} is null
+	 * @throws IllegalArgumentException if {@code id} is empty
 	 */
 	public Optional<String> get(final String id);
 
