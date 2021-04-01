@@ -26,8 +26,7 @@ import org.eclipse.rdf4j.model.IRI;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,8 +43,10 @@ import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Java SE HTTP server connector.
@@ -76,7 +77,7 @@ public final class JSEServer {
 	private InetSocketAddress address=new InetSocketAddress(DefaultHost, DefaultPort);
 
 	private String base="";
-	private String root="/";
+	private String path="/";
 
 	private final int backlog=128;
 	private final int delay=0;
@@ -98,11 +99,11 @@ public final class JSEServer {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private String base(final String host) {
-		return base.isEmpty() ? format("http://%s%s", Optional.ofNullable(host).orElse(DefaultHost), root) : base;
+		return base.isEmpty() ? format("http://%s%s", Optional.ofNullable(host).orElse(DefaultHost), path) : base;
 	}
 
 	private String path(final String path) {
-		return Optional.ofNullable(path).orElse("/").substring(root.length()-1);
+		return Optional.ofNullable(path).orElse("/").substring(this.path.length()-1);
 	}
 
 
@@ -208,7 +209,7 @@ public final class JSEServer {
 		}
 
 		this.base="";
-		this.root=normalize(context);
+		this.path=normalize(context);
 
 		return this;
 	}
@@ -240,7 +241,7 @@ public final class JSEServer {
 		final String path=normalize(matcher.group("path"));
 
 		this.base=scheme+host+path;
-		this.root=path;
+		this.path=path;
 
 		return this;
 	}
@@ -258,7 +259,7 @@ public final class JSEServer {
 
 			server.setExecutor(Executors.newCachedThreadPool());
 
-			server.createContext(root, exchange -> {
+			server.createContext(path, exchange -> {
 				try {
 
 					context.exec(() -> handler.handle(request(exchange))
@@ -295,8 +296,8 @@ public final class JSEServer {
 
 			server.start();
 
-			logger.info(this, format("server listening at <http://%s:%d/>",
-					address.getHostString(), address.getPort()
+			logger.info(this, format("server listening at <http://%s:%d%s>",
+					address.getHostString(), address.getPort(), path
 			));
 
 		} catch ( final IOException e ) {
@@ -316,7 +317,10 @@ public final class JSEServer {
 				.base(base(exchange.getRequestHeaders().getFirst("Host")))
 				.path(path(uri.getPath()))
 				.query(Optional.ofNullable(uri.getRawQuery()).orElse(""))
-				.headers(exchange.getRequestHeaders())
+				.headers(exchange.getRequestHeaders().entrySet().stream() // ;( possibly null header names…
+						.filter(entry -> nonNull(entry.getKey()) && nonNull(entry.getValue()))
+						.collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
+				)
 				.body(input(), exchange::getRequestBody);
 	}
 

@@ -36,6 +36,7 @@ import static com.metreeca.rest.formats.OutputFormat.output;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.list;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 import static java.util.function.Function.identity;
 
@@ -201,7 +202,13 @@ public abstract class JEEServer implements Filter {
 				.query(query != null ? query : "");
 
 		for (final Map.Entry<String, String[]> parameter : http.getParameterMap().entrySet()) {
-			request.parameters(parameter.getKey(), asList(parameter.getValue()));
+
+			final String key=parameter.getKey();
+			final String[] value=parameter.getValue();
+
+			if ( nonNull(key) && nonNull(value) ) { // ;( possibly null header names…
+				request.parameters(key, asList(value));
+			}
 		}
 
 		for (final String name : list(http.getHeaderNames())) {
