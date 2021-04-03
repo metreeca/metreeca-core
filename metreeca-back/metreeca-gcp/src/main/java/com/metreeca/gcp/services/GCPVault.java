@@ -18,12 +18,15 @@ package com.metreeca.gcp.services;
 
 import com.metreeca.rest.services.Vault;
 
-import com.google.api.gax.rpc.NotFoundException;
 import com.google.cloud.secretmanager.v1.*;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Optional;
+
+import static com.metreeca.gcp.GCPServer.project;
+
+import static java.util.stream.StreamSupport.stream;
 
 
 /**
@@ -37,14 +40,6 @@ import java.util.Optional;
  * @see <a href="https://cloud.google.com/secret-manager/docs">Google Cloud Plaform - Secret Manager</a>
  */
 public final class GCPVault implements Vault, AutoCloseable {
-
-	/**
-	 * The GCP project identifier.
-	 */
-	private static final String Project=System.getenv("GOOGLE_CLOUD_PROJECT");
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final SecretManagerServiceClient client;
 
@@ -70,18 +65,20 @@ public final class GCPVault implements Vault, AutoCloseable {
 		}
 
 		if ( id.isEmpty() ) {
-			throw new IllegalArgumentException("empty perameter id");
+			throw new IllegalArgumentException("empty parameter id");
 		}
 
-		final AccessSecretVersionRequest request=AccessSecretVersionRequest.newBuilder()
-				.setName(SecretVersionName.of(Project, id, "latest").toString())
-				.build();
+		final Iterable<Secret> secrets=client.listSecrets(ProjectName.of(project())).iterateAll();
 
-		try {
+		if ( stream(secrets.spliterator(), false).anyMatch(secret -> secret.getName().equals(id)) ) {
+
+			final AccessSecretVersionRequest request=AccessSecretVersionRequest.newBuilder()
+					.setName(SecretVersionName.of(project(), id, "latest").toString())
+					.build();
 
 			return Optional.of(client.accessSecretVersion(request).getPayload().getData().toStringUtf8());
 
-		} catch ( final NotFoundException e ) {
+		} else {
 
 			return Optional.empty();
 
