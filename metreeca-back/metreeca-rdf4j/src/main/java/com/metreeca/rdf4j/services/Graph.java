@@ -48,6 +48,9 @@ import static java.time.temporal.ChronoUnit.MILLIS;
  */
 public final class Graph implements AutoCloseable {
 
+	private static final ThreadLocal<RepositoryConnection> scope=new ThreadLocal<>();
+
+
 	/**
 	 * Retrieves the default graph factory.
 	 *
@@ -431,8 +434,6 @@ public final class Graph implements AutoCloseable {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Repository repository;
-
-	private final ThreadLocal<RepositoryConnection> scope=new ThreadLocal<>();
 
 
 	/**
