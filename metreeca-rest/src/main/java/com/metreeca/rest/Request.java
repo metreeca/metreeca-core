@@ -25,6 +25,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static com.metreeca.json.Values.AbsoluteIRIPattern;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 
@@ -49,7 +51,6 @@ public final class Request extends Message<Request> {
 			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
-	private static final Pattern SchemePattern=Pattern.compile("^[a-zA-Z][-+.a-zA-Z0-9]*:");
 	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
 	private static final Pattern FilePattern=Pattern.compile("\\.\\w+$");
 
@@ -361,7 +362,7 @@ public final class Request extends Message<Request> {
 			throw new NullPointerException("null base");
 		}
 
-		if ( !SchemePattern.matcher(base).find() ) {
+		if ( !AbsoluteIRIPattern.matcher(base).matches() ) {
 			throw new IllegalArgumentException("not an absolute base IRI");
 		}
 
