@@ -52,21 +52,21 @@ public final class GCPServer {
 
 
 	/**
-	 * Checks if running in the production environment
-	 *
-	 * @return {@code true} if running in the production environment; {@code false}, otherwise
-	 */
-	public static boolean production() {
-		return !project().isEmpty();
-	}
-
-	/**
 	 * Checks if running in the development environment
 	 *
 	 * @return {@code true} if running in the development environment; {@code false}, otherwise
 	 */
 	public static boolean development() {
-		return !production();
+		return project().equals(UnknownProject);
+	}
+
+	/**
+	 * Checks if running in the production environment
+	 *
+	 * @return {@code true} if running in the production environment; {@code false}, otherwise
+	 */
+	public static boolean production() {
+		return !development();
 	}
 
 

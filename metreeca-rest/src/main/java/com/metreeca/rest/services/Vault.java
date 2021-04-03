@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 		return () -> id -> {
 
 			if ( id.isEmpty() ) {
-				throw new IllegalArgumentException("empty perameter id");
+				throw new IllegalArgumentException("empty parameter id");
 			}
 
 			return Stream
