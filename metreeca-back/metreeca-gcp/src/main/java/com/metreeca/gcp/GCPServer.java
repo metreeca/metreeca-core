@@ -19,7 +19,8 @@ package com.metreeca.gcp;
 import com.metreeca.gcp.services.GCPStore;
 import com.metreeca.gcp.services.GCPVault;
 import com.metreeca.jse.JSEServer;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Handler;
+import com.metreeca.rest.Toolbox;
 
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -88,13 +89,22 @@ public final class GCPServer {
 
 
 	/**
-	 * Creates a cron wrapper.
+	 * Restricts access to a cron handler.
 	 *
-	 * @return a wrapper rejecting with a {@link Response#Forbidden Forbidden} status code all request not issued by the
-	 * Google App Engine cron service
+	 * @param handler the cron handler
+	 *
+	 * @return an access control handler restricting {@code handler} to requests issued by the Google App Engine cron
+	 * service
+	 *
+	 * @throws NullPointerException if {@code handler} is null
 	 */
-	public static Wrapper cron() {
-		return handler -> request -> request.headers("X-Appengine-Cron").contains("true")
+	public static Handler cron(final Handler handler) {
+
+		if ( handler == null ) {
+			throw new NullPointerException("null handler");
+		}
+
+		return request -> request.headers("X-Appengine-Cron").contains("true")
 				? handler.handle(request)
 				: request.reply(status(Forbidden));
 	}

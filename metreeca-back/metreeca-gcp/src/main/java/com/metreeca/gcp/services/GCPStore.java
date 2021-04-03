@@ -104,7 +104,7 @@ public final class GCPStore implements Store {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public InputStream read(final String bucket, final String object) throws IOException {
+	private InputStream read(final String bucket, final String object) throws IOException {
 
 		if ( bucket == null ) {
 			throw new NullPointerException("null bucket");
@@ -129,7 +129,7 @@ public final class GCPStore implements Store {
 		}
 	}
 
-	public OutputStream write(final String bucket, final String object) throws IOException {
+	private OutputStream write(final String bucket, final String object) throws IOException {
 
 		if ( bucket == null ) {
 			throw new NullPointerException("null bucket");
