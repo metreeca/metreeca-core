@@ -21,8 +21,6 @@ import com.metreeca.gcp.services.GCPVault;
 import com.metreeca.jse.JSEServer;
 import com.metreeca.rest.*;
 
-import org.eclipse.rdf4j.model.IRI;
-
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.Function;
@@ -125,18 +123,6 @@ public final class GCPServer {
 
 		return this;
 	}
-
-	public GCPServer context(final IRI context) {
-
-		if ( context == null ) {
-			throw new NullPointerException("null context");
-		}
-
-		delegate.context(context);
-
-		return this;
-	}
-
 
 	public GCPServer delegate(final Function<Toolbox, Handler> factory) {
 

@@ -1,8 +1,9 @@
-# Changed
+# Broken ;-(
 
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF
   statement context, JSON-LD context, web app context, web app asset, …)
 - REST / Renamed `Gateway` wrapper to `Server`
+- JSE / Merge `JSE.context(String/IRI)` setters to simplify API
 
 # Added
 

@@ -60,22 +60,26 @@ import static java.util.function.Function.identity;
  */
 public abstract class JEEServer implements Filter {
 
-	private final Toolbox toolbox=new Toolbox();
+	private static Supplier<Handler> delegate() { return () -> request -> request.reply(identity()); }
 
-	private final Supplier<Handler> handler() { return () -> request -> request.reply(identity()); }
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private final Toolbox toolbox=new Toolbox();
 
 
 	/**
-	 * Configures the delegate handler.
+	 * Configures the delegate handler factory.
 	 *
-	 * @param factory a handler factory; takes as argument a shared service manager (which may configured with
-	 *                   additional
-	 *                application-specific services as a side effect) and must return a non-null handler to be used as
-	 *                entry point for serving requests
+	 * @param factory the delegate handler factory; takes as argument a shared service manager (which may configured
+	 *                   with
+	 *                additional application-specific services as a side effect) and must return a non-null handler
+	 *                to be
+	 *                used as entry point for serving requests
 	 *
 	 * @return this server
 	 *
-	 * @throws NullPointerException if {@code factory} is null or returns null values
+	 * @throws NullPointerException if {@code factory} is null or returns a null value
 	 */
 	protected JEEServer delegate(final Function<Toolbox, Handler> factory) {
 
@@ -83,7 +87,7 @@ public abstract class JEEServer implements Filter {
 			throw new NullPointerException("null factory");
 		}
 
-		toolbox.set(handler(), () -> requireNonNull(factory.apply(toolbox), "null handler"));
+		toolbox.set(delegate(), () -> requireNonNull(factory.apply(toolbox), "null handler"));
 
 		return this;
 	}
@@ -102,7 +106,7 @@ public abstract class JEEServer implements Filter {
 					.set(Toolbox.storage(), () -> storage(context))
 					.set(Loader.loader(), () -> loader(context))
 
-					.get(handler()); // force handler loading during filter initialization
+					.get(delegate()); // force handler loading during filter initialization
 
 		} catch ( final Throwable t ) {
 
@@ -169,7 +173,7 @@ public abstract class JEEServer implements Filter {
 
 		try {
 
-			toolbox.exec(() -> toolbox.get(handler())
+			toolbox.exec(() -> toolbox.get(delegate())
 					.handle(request((HttpServletRequest)request))
 					.accept(_response -> response((HttpServletResponse)response, _response))
 			);
