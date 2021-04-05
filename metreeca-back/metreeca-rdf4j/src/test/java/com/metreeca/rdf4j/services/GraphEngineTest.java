@@ -16,17 +16,17 @@
 
 package com.metreeca.rdf4j.services;
 
-import com.metreeca.json.*;
+import com.metreeca.json.Shape;
+import com.metreeca.json.ValueAssert;
 import com.metreeca.rest.Request;
-import com.metreeca.rest.Response;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.decode;
@@ -45,6 +45,8 @@ import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.ResponseAssert.assertThat;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.formats.JSONLDFormat.shape;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 final class GraphEngineTest {
 
@@ -87,14 +89,14 @@ final class GraphEngineTest {
 								.orElse(null);
 
 						assertThat(response)
-								.hasStatus(com.metreeca.rest.Response.Created)
+								.hasStatus(Created)
 								.doesNotHaveBody();
 
 						ValueAssert.assertThat(location)
 								.as("resource created with supplied slug")
 								.isEqualTo(item("employees/slug"));
 
-						ModelAssert.assertThat(model())
+						assertThat(model())
 								.as("resource description stored into the graph")
 								.hasSubset(
 										statement(location, RDF.TYPE, term("Employee")),
@@ -115,9 +117,9 @@ final class GraphEngineTest {
 				new GraphEngine().create(request()).accept(response -> {
 
 					assertThat(response)
-							.hasStatus(com.metreeca.rest.Response.InternalServerError);
+							.hasStatus(InternalServerError);
 
-					ModelAssert.assertThat(model())
+					assertThat(model())
 							.as("graph unchanged")
 							.isIsomorphicTo(snapshot);
 
@@ -145,10 +147,10 @@ final class GraphEngineTest {
 
 					.accept(response -> assertThat(response)
 
-							.hasStatus(Response.OK).hasAttribute(shape(),
-									shape -> Assertions.assertThat(shape).isNotEqualTo(and()))
+							.hasStatus(OK).hasAttribute(shape(),
+									shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> ModelAssert.assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 									.as("items retrieved")
 									.isSubsetOf(model(
 											"construct where { <employees/1370> ?p ?o }"
@@ -173,14 +175,14 @@ final class GraphEngineTest {
 		@Test void testBrowse() {
 			exec(model(small()), () -> new GraphEngine()
 
-					.browse(request())
+					.relate(request())
 
 					.accept(response -> assertThat(response)
 
 							.hasStatus(OK)
-							.hasAttribute(shape(), shape -> Assertions.assertThat(shape).isNotEqualTo(and()))
+							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> ModelAssert.assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 									.hasStatement(iri(response.item()), Shape.Contains, null)
 									.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
 											+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"
@@ -193,16 +195,16 @@ final class GraphEngineTest {
 		@Test void testBrowseFiltered() {
 			exec(model(small()), () -> new GraphEngine()
 
-					.browse(request()
+					.relate(request()
 							.query("title=Sales+Rep")
 					)
 
 					.accept(response -> assertThat(response)
 
 							.hasStatus(OK)
-							.hasAttribute(shape(), shape -> Assertions.assertThat(shape).isNotEqualTo(and()))
+							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> ModelAssert.assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 
 									.hasSubset(model(""
 											+"construct { ?e :title ?t; :seniority ?seniority }\n"
@@ -210,7 +212,7 @@ final class GraphEngineTest {
 									))
 
 									.as("only resources matching filter included")
-									.doesNotHaveStatement(null, Values.term("title"), literal("President"))
+									.doesNotHaveStatement(null, term("title"), literal("President"))
 							)
 					)
 			);
@@ -219,16 +221,16 @@ final class GraphEngineTest {
 		@Test void testSliceTermsQueries() {
 			exec(model(small()), () -> new GraphEngine()
 
-					.browse(request()
+					.relate(request()
 							.query(".terms=office&.offset=1&.limit=3")
 					)
 
 					.accept(response -> assertThat(response)
 
 							.hasStatus(OK)
-							.hasAttribute(shape(), shape -> Assertions.assertThat(shape).isNotEqualTo(and()))
+							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> ModelAssert.assertThat(rdf)
+							.hasBody(jsonld(), rdf -> assertThat(rdf)
 
 									.isIsomorphicTo(model(""
 											+"construct { \n"
@@ -282,7 +284,7 @@ final class GraphEngineTest {
 								.hasStatus(NoContent)
 								.doesNotHaveBody();
 
-						ModelAssert.assertThat(model())
+						assertThat(model())
 
 								.as("updated values inserted")
 								.hasSubset(decode("</employees/1370>"
@@ -352,10 +354,10 @@ final class GraphEngineTest {
 								.hasStatus(NoContent)
 								.doesNotHaveBody();
 
-						ModelAssert.assertThat(model("construct where { <employees/1370> ?p ?o }"))
+						assertThat(model("construct where { <employees/1370> ?p ?o }"))
 								.isEmpty();
 
-						ModelAssert.assertThat(model("construct where { ?s a :Employee; ?p ?o. }"))
+						assertThat(model("construct where { ?s a :Employee; ?p ?o. }"))
 								.isNotEmpty();
 
 					}));

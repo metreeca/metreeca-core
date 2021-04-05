@@ -264,13 +264,13 @@ public abstract class Shape {
 	 *
 	 * @throws NullPointerException if {@code anchor} is null
 	 */
-	public Shape filter(final Value anchor) {
+	public Shape filter(final IRI anchor) {
 
 		if ( anchor == null ) {
 			throw new NullPointerException("null anchor");
 		}
 
-		return map(new ShapePruner(true)).map(shape -> anchor.isIRI() && anchor.stringValue().endsWith("/")
+		return map(new ShapePruner(true)).map(shape -> anchor.stringValue().endsWith("/")
 
 				// container: connect to the anchor using ldp:contains, unless otherwise specified in the shape
 

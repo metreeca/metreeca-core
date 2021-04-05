@@ -36,7 +36,6 @@ import static com.metreeca.rdf4j.services.Graph.update;
 import static com.metreeca.rest.Toolbox.text;
 import static com.metreeca.rest.Wrapper.postprocessor;
 import static com.metreeca.rest.handlers.Router.router;
-import static com.metreeca.rest.operators.Browser.browser;
 import static com.metreeca.rest.operators.Creator.creator;
 import static com.metreeca.rest.operators.Deleter.deleter;
 import static com.metreeca.rest.operators.Relator.relator;
@@ -94,7 +93,7 @@ public final class Products extends Delegator {
 		)).wrap(router()
 
 				.path("/", router()
-						.get(browser())
+						.get(relator())
 						.post(creator(new ProductsSlug())
 								.with(postprocessor(update(text(Products.class,
 										"com/metreeca/toys/ProductsCreate.ql"))))

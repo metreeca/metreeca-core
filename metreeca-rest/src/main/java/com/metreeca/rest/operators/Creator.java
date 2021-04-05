@@ -61,7 +61,7 @@ import static java.util.stream.Collectors.toList;
  *
  * </ul>
  *
- * <p>All operations are executed inside a single {@linkplain Engine engine transaction}.</p>
+ * <p>All operations are executed inside a single {@linkplain Engine#transaction() engine transaction}.</p>
  */
 public final class Creator extends Delegator {
 

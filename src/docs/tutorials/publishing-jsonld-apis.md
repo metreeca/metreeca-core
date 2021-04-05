@@ -438,8 +438,7 @@ request [focus item](../javadocs/?com/metreeca/rest/Request.html#item--).
 
 | actor                                                        | action                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [Relator](../javadocs/?com/metreeca/rest/handlers/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target resource |
-| [Browser](../javadocs/?com/metreeca/rest/handlers/Browser.html) | container browsing / retrieves the digest RDF description of the contained resources; supports extended [faceted search](consuming-jsonld-apis.md#faceted-search), sorting and pagination |
+| [Relator](../javadocs/?com/metreeca/rest/handlers/Relator.html) | resource retrieval / retrieves the detailed RDF description of the target resource; supports extended collection [faceted search](consuming-jsonld-apis.md#faceted-search), sorting and pagination |
 | [Creator](../javadocs/?com/metreeca/rest/handlers/Creator.html) | container resource creation / uploads the detailed RDF description of a new resource to be inserted into the target container |
 | [Updater](../javadocs/?com/metreeca/rest/handlers/Updater.html) | resource updating / updates the detailed RDF description of the target resource |
 | [Deleter](../javadocs/?com/metreeca/rest/handlers/Deleter.html) | resource deletion / deletes the detailed RDF description of the target resource |
@@ -497,9 +496,9 @@ public final class Products extends Delegator {
 
 		).wrap(router()
 
-				.path("/", router()
-						.get(browser())
-						.post(creator())
+			.path("/", router()
+					.get(relator())
+					.post(creator())
 				)
 
 				.path("/*", router()
@@ -643,9 +642,9 @@ public final class Products extends Delegator {
 
 		)).wrap(router()
 
-				.path("/", router()
-						.get(browser())
-						.post(creator())
+			.path("/", router()
+					.get(relator())
+					.post(creator())
 				)
 
 				.path("/*", router()
@@ -836,7 +835,7 @@ public final class Products extends Delegator {
 		)).wrap(router()
 
 				.path("/", router()
-						.get(browser())
+						.get(relator())
 +						.post(creator(new ProductsSlug())
 +								.with(postprocessor(update(text(Products.class, "ProductsCreate.ql"))))
 +						)

@@ -45,7 +45,7 @@ import static com.metreeca.rest.services.Engine.engine;
  *
  * </ul>
  *
- * <p>All operations are executed inside a single {@linkplain Engine engine transaction}.</p>
+ * <p>All operations are executed inside a single {@linkplain Engine#transaction() engine transaction}.</p>
  */
 public final class Updater extends Delegator {
 

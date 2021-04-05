@@ -30,11 +30,10 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 
+import static com.metreeca.json.Shape.Contains;
 import static com.metreeca.json.Values.IRIPattern;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.shapes.All.all;
-import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.Convey;
 import static com.metreeca.json.shapes.Guard.Mode;
@@ -219,7 +218,26 @@ public final class GraphEngine implements Engine {
 	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
 	 * focus item}.</p>
 	 *
-	 * <p>If the shared {@linkplain  Graph graph} actually contains a resource matching the request focus item IRI:</p>
+	 *
+	 * <p>If the focus item is a {@linkplain Request#collection() collection}:</p>
+	 *
+	 * <ul>
+	 *
+	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
+	 *
+	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
+	 *
+	 * <li>the response {@link JSONLDFormat JSON-LD} body contains a description of member linked data resources
+	 * retrieved from the shared {@linkplain  Graph graph} according to the filtering constraints in the request shape
+	 * and matching the response shape; the IRI of the target container is connected to the IRIs of the member
+	 * resources using the {@link Shape#Contains ldp:contains} property;</li>
+	 *
+	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
+	 *
+	 * </ul>
+	 *
+	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request focus
+	 * item IRI:</p>
 	 *
 	 * <ul>
 	 *
@@ -254,66 +272,24 @@ public final class GraphEngine implements Engine {
 			throw new NullPointerException("null request");
 		}
 
+		final boolean collection=request.collection();
+
 		final IRI item=iri(request.item());
-		final Shape shape=and(all(item), request.attribute(shape()));
+		final Shape shape=request.attribute(shape());
 
 		return query(item, shape, request.query()).fold(request::reply, query ->
 				request.reply(response -> Optional
 
 						.of(query.map(new QueryProbe(item, this::get)))
 
-						.filter(model -> !model.isEmpty())
+						.filter(model -> collection || !model.isEmpty()) // collections are virtual
 
 						.map(model -> response.status(OK)
-								.attribute(shape(), query.map(new ShapeProbe(false)))
+								.attribute(shape(), query.map(new ShapeProbe(collection)))
 								.body(jsonld(), model)
 						)
 
 						.orElseGet(() -> response.status(NotFound)) // !!! 410 Gone if previously known
-				)
-		);
-	}
-
-	/**
-	 * Browses a linked data container.
-	 *
-	 * <p>Handles browsing requests on the linked data container identified by the request {@linkplain Request#item()
-	 * focus item}:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
-	 *
-	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
-	 *
-	 * <li>the response {@link JSONLDFormat JSON-LD} body contains a description of member linked data resources
-	 * retrieved from the shared {@linkplain  Graph graph} according to the filtering constraints in the request shape
-	 * and matching the response shape; the IRI of the target container is connected to the IRIs of the member
-	 * resources using the {@link Shape#Contains ldp:contains} property;</li>
-	 *
-	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * @param request the request to be handled
-	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	@Override public Future<Response> browse(final Request request) {
-
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
-
-		final IRI item=iri(request.item());
-		final Shape shape=request.attribute(shape());
-
-		return query(item, shape, request.query()).fold(request::reply, query ->
-				request.reply(response -> response.status(OK) // containers are virtual and respond always with 200 OK
-						.attribute(shape(), query.map(new ShapeProbe(true)))
-						.body(jsonld(), query.map(new QueryProbe(item, this::get)))
 				)
 		);
 	}
@@ -484,20 +460,16 @@ public final class GraphEngine implements Engine {
 
 	private static final class ShapeProbe extends Query.Probe<Shape> {
 
-		private final boolean container;
+		private final boolean collection;
 
 
-		private ShapeProbe(final boolean container) {
-			this.container=container;
+		private ShapeProbe(final boolean collection) {
+			this.collection=collection;
 		}
 
 
 		@Override public Shape probe(final Items items) { // !!! add Shape.Contains if items.path is not empty
-			return (container ?
-
-					field(Shape.Contains, items.shape()) : items.shape()
-
-			).redact(Mode, Convey); // remove filters
+			return (collection ? field(Contains, items.shape()) : items.shape()).redact(Mode, Convey); // remove filters
 		}
 
 		@Override public Shape probe(final Stats stats) {

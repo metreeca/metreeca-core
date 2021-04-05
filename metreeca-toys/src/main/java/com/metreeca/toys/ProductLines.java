@@ -32,7 +32,6 @@ import static com.metreeca.rdf4j.services.Graph.query;
 import static com.metreeca.rest.Wrapper.postprocessor;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.handlers.Router.router;
-import static com.metreeca.rest.operators.Browser.browser;
 import static com.metreeca.rest.operators.Relator.relator;
 import static com.metreeca.rest.wrappers.Driver.driver;
 
@@ -58,7 +57,7 @@ public final class ProductLines extends Delegator {
 		)).wrap(router()
 
 				.path("/", router()
-						.get(browser()
+						.get(relator()
 								.with(postprocessor(jsonld(), query(""
 										+"prefix : <terms#>\n"
 										+"\n"
