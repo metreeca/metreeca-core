@@ -16,6 +16,7 @@
 
 package com.metreeca.rest.services;
 
+import com.metreeca.json.Query;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
@@ -29,7 +30,8 @@ import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -52,10 +54,8 @@ import static java.util.Collections.unmodifiableSet;
  * Model-driven storage engine.
  *
  * <p>Handles model-driven CRUD operations on resource managed by a specific storage backend.</p>
- *
- * <p>When acting as a wrapper, ensures that requests are handled on a single connection to the storage backend.</p>
  */
-public interface Engine extends Wrapper {
+public interface Engine {
 
 	public static IRI terms=term("terms");
 	public static IRI stats=term("stats");
@@ -91,22 +91,18 @@ public interface Engine extends Wrapper {
 			throw new NullPointerException("null query");
 		}
 
-		final Shape shape=query.shape();
-		final List<IRI> path=query.path();
-
-		final Stream<Field> fields=shape.redact(Mode, Convey).walk(path).map(Field::fields).orElseGet(Stream::empty);
-		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
+		final Shape resource=ValueShape(query);
 
 		return and(
 
 				field(count, required(), datatype(XSD.INTEGER)),
-				field(min, optional(), term),
-				field(max, optional(), term),
+				field(min, optional(), resource),
+				field(max, optional(), resource),
 
-				field(Engine.stats, multiple(),
+				field(stats, multiple(),
 						field(count, required(), datatype(XSD.INTEGER)),
-						field(min, required(), term),
-						field(max, required(), term)
+						field(min, required(), resource),
+						field(max, required(), resource)
 				)
 
 		);
@@ -128,18 +124,38 @@ public interface Engine extends Wrapper {
 			throw new NullPointerException("null query");
 		}
 
-		final Shape shape=query.shape();
-		final List<IRI> path=query.path();
-
-		final Stream<Field> fields=shape.redact(Mode, Convey).walk(path).map(Field::fields).orElseGet(Stream::empty);
-		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
+		final Shape resource=ValueShape(query);
 
 		return and(
-				field(Engine.terms, multiple(),
-						field(value, required(), term),
+				field(terms, multiple(),
+						field(value, required(), resource),
 						field(count, required(), datatype(XSD.INTEGER))
 				)
 		);
+	}
+
+
+	/**
+	 * Generates the value shape for a query.
+	 *
+	 * @param query the reference query
+	 *
+	 * @return a value shape incorporating resource {@linkplain #Annotations annotations} extracted from {@code query}
+	 *
+	 * @throws NullPointerException if {@code query} is null
+	 */
+	public static Shape ValueShape(final Query query) {
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
+
+		return and(query.shape()
+				.redact(Mode, Convey)
+				.walk(query.path())
+				.map(Field::fields)
+				.orElseGet(Stream::empty)
+				.filter(field -> Annotations.contains(field.iri())));
 	}
 
 
@@ -158,14 +174,27 @@ public interface Engine extends Wrapper {
 	//// Wrappers //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
+	 * Creates a transaction wrapper.
+	 *
+	 * @return a wrapper ensuring that requests are handled within a single transaction on the storage backend
+	 *
+	 * @implNote the default implementation returns a dummy wrapper with no actual effects
+	 */
+	public default Wrapper transaction() {
+		return handler -> handler;
+	}
+
+	/**
 	 * Creates a throttler wrapper.
 	 *
 	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
 	 * @param view the accepted values for the {@linkplain Guard#View task} parametric axis
 	 *
-	 * @return returns a wrapper performing role-based shape redaction and shape-based authorization
+	 * @return a wrapper performing role-based shape redaction and shape-based authorization
+	 *
+	 * @throws NullPointerException if either {@code task} or {@code view} is null
 	 */
-	public static Wrapper throttler(final Object task, final Object view) { // !!! optimize/cache
+	public default Wrapper throttler(final Object task, final Object view) { // !!! optimize/cache
 		return handler -> request -> {
 
 			final Shape shape=request.attribute(shape()) // visible taking into account task/area

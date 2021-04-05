@@ -26,7 +26,6 @@ import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.json.shapes.Guard.Relate;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.services.Engine.engine;
-import static com.metreeca.rest.services.Engine.throttler;
 
 
 /**
@@ -68,8 +67,8 @@ public final class Relator extends Delegator {
 
 		delegate(((Handler)engine::relate)
 
-				.with(engine)
-				.with(throttler(Relate, Detail))
+				.with(engine.transaction())
+				.with(engine.throttler(Relate, Detail))
 
 		);
 	}

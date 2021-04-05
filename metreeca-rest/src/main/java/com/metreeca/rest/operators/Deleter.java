@@ -26,7 +26,6 @@ import static com.metreeca.json.shapes.Guard.Delete;
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.services.Engine.engine;
-import static com.metreeca.rest.services.Engine.throttler;
 
 
 /**
@@ -66,8 +65,8 @@ public final class Deleter extends Delegator {
 
 		delegate(((Handler)engine::delete)
 
-				.with(engine)
-				.with(throttler(Delete, Detail))
+				.with(engine.transaction())
+				.with(engine.throttler(Delete, Detail))
 
 		);
 	}

@@ -26,7 +26,6 @@ import static com.metreeca.json.shapes.Guard.Digest;
 import static com.metreeca.json.shapes.Guard.Relate;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.services.Engine.engine;
-import static com.metreeca.rest.services.Engine.throttler;
 
 
 /**
@@ -68,8 +67,8 @@ public final class Browser extends Delegator {
 
 		delegate(((Handler)engine::browse)
 
-				.with(engine)
-				.with(throttler(Relate, Digest))
+				.with(engine.transaction())
+				.with(engine.throttler(Relate, Digest))
 
 		);
 	}

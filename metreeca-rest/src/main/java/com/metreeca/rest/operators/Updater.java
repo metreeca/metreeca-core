@@ -26,7 +26,6 @@ import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.json.shapes.Guard.Update;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.services.Engine.engine;
-import static com.metreeca.rest.services.Engine.throttler;
 
 
 /**
@@ -68,8 +67,8 @@ public final class Updater extends Delegator {
 
 		delegate(((Handler)engine::update)
 
-				.with(engine)
-				.with(throttler(Update, Detail))
+				.with(engine.transaction())
+				.with(engine.throttler(Update, Detail))
 
 		);
 	}

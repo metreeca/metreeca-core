@@ -36,7 +36,6 @@ import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.Xtream.encode;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.services.Engine.engine;
-import static com.metreeca.rest.services.Engine.throttler;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.UUID.randomUUID;
@@ -122,8 +121,8 @@ public final class Creator extends Delegator {
 
 		delegate(wrapper(slug).wrap(engine::create) // immediately around handler after custom wrappers
 
-				.with(engine)
-				.with(throttler(Create, Detail))
+				.with(engine.transaction())
+				.with(engine.throttler(Create, Detail))
 
 		);
 	}

@@ -128,13 +128,8 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	@Override public Handler wrap(final Handler handler) {
-
-		if ( handler == null ) {
-			throw new NullPointerException("null task");
-		}
-
-		return request -> consumer -> graph.exec(txn(connection -> {
+	@Override public Wrapper transaction() {
+		return handler -> request -> consumer -> graph.exec(txn(connection -> {
 			handler.handle(request).accept(consumer);
 		}));
 	}
