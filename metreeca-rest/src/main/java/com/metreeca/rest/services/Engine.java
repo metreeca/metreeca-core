@@ -66,10 +66,30 @@ public interface Engine extends Wrapper {
 	public static IRI min=term("min");
 	public static IRI max=term("max");
 
+
+	/**
+	 * Resource annotation properties.
+	 *
+	 * <p>RDF properties for human-readable resource annotations (e.g. {@code rdf:label}, {@code rdfs:comment}, …).</p>
+	 */
 	public static Set<IRI> Annotations=unmodifiableSet(new HashSet<>(asList(RDFS.LABEL, RDFS.COMMENT)));
 
 
+	/**
+	 * Generates the response shape for a stats query.
+	 *
+	 * @param query the reference stats query
+	 *
+	 * @return a stats response shape incorporating resource {@linkplain #Annotations annotations} extracted from {@code
+	 * query}
+	 *
+	 * @throws NullPointerException if {@code query} is null
+	 */
 	public static Shape StatsShape(final Stats query) {
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
 
 		final Shape shape=query.shape();
 		final List<IRI> path=query.path();
@@ -83,7 +103,7 @@ public interface Engine extends Wrapper {
 				field(min, optional(), term),
 				field(max, optional(), term),
 
-				field(stats, multiple(),
+				field(Engine.stats, multiple(),
 						field(count, required(), datatype(XSD.INTEGER)),
 						field(min, required(), term),
 						field(max, required(), term)
@@ -92,7 +112,21 @@ public interface Engine extends Wrapper {
 		);
 	}
 
+	/**
+	 * Generates the response shape for a terms query.
+	 *
+	 * @param query the reference terms query
+	 *
+	 * @return a terms response shape incorporating resource {@linkplain #Annotations annotations} extracted from {@code
+	 * query}
+	 *
+	 * @throws NullPointerException if {@code query} is null
+	 */
 	public static Shape TermsShape(final Terms query) {
+
+		if ( query == null ) {
+			throw new NullPointerException("null query");
+		}
 
 		final Shape shape=query.shape();
 		final List<IRI> path=query.path();
@@ -101,7 +135,7 @@ public interface Engine extends Wrapper {
 		final Shape term=and(fields.filter(field -> Annotations.contains(field.iri())));
 
 		return and(
-				field(terms, multiple(),
+				field(Engine.terms, multiple(),
 						field(value, required(), term),
 						field(count, required(), datatype(XSD.INTEGER))
 				)
