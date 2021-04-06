@@ -69,14 +69,6 @@ final class FrameTest {
 			);
 		}
 
-
-		@Test void testReportLiteralSubjectsForDirectFields() {
-			assertThatIllegalArgumentException()
-					.isThrownBy(() -> {
-						frame(literal(1)).set(RDF.VALUE).value(x);
-					});
-		}
-
 		@Test void testReportLiteralObjectsForInverseFields() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> {

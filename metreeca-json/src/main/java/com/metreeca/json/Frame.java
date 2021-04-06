@@ -52,7 +52,7 @@ public final class Frame {
 	);
 
 
-	public static Frame frame(final Value focus) {
+	public static Frame frame(final IRI focus) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -61,7 +61,7 @@ public final class Frame {
 		return new Frame(focus, emptySet());
 	}
 
-	public static Frame frame(final Value focus, final Collection<Statement> model) {
+	public static Frame frame(final IRI focus, final Collection<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -100,13 +100,13 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Value focus;
+	private final IRI focus;
 	private final Set<Statement> model;
 
 
-	private Frame(final Value focus, final Set<Statement> model) {
+	private Frame(final IRI focus, final Set<Statement> model) {
 		this.focus=focus;
-		this.model=model;
+		this.model=unmodifiableSet(model);
 	}
 
 
@@ -119,12 +119,12 @@ public final class Frame {
 	}
 
 
-	public Value focus() {
+	public IRI focus() {
 		return focus;
 	}
 
 	public Set<Statement> model() {
-		return unmodifiableSet(model);
+		return model;
 	}
 
 
@@ -267,7 +267,7 @@ public final class Frame {
 		}
 
 		public Stream<Frame> frames() {
-			return values.stream().map(value -> new Frame(value, model));
+			return values.stream().filter(Value::isIRI).map(value -> new Frame((IRI)value, model));
 		}
 
 	}
@@ -452,15 +452,7 @@ public final class Frame {
 
 			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
 
-					direct -> {
-
-						if ( !(frame.focus instanceof Resource) ) {
-							throw new IllegalArgumentException("literal focus value for direct predicate");
-						}
-
-						return Stream.of(statement((Resource)frame.focus, direct, value));
-
-					},
+					direct -> Stream.of(statement(frame.focus, direct, value)),
 
 					inverse -> {
 
@@ -516,11 +508,7 @@ public final class Frame {
 							throw new NullPointerException("null values");
 						}
 
-						if ( !(frame.focus instanceof Resource) ) {
-							throw new IllegalArgumentException("literal focus value for direct field");
-						}
-
-						return statement((Resource)frame.focus, predicate, value);
+						return statement(frame.focus, predicate, value);
 
 					}),
 
@@ -548,33 +536,17 @@ public final class Frame {
 				throw new NullPointerException("null value");
 			}
 
-			return new Frame(this.frame.focus, Stream.concat(this.frame.model.stream(), traverse(predicate,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
 
-					direct -> {
+					direct -> Stream.concat(
+							Stream.of(statement(frame.focus, direct, value.focus)),
+							value.model.stream()
+					),
 
-						if ( !(this.frame.focus instanceof Resource) ) {
-							throw new IllegalArgumentException("literal focus value for direct predicate");
-						}
-
-						return Stream.concat(
-								Stream.of(statement((Resource)this.frame.focus, direct, value.focus)),
-								value.model.stream()
-						);
-
-					},
-
-					inverse -> {
-
-						if ( !(value.focus instanceof Resource) ) {
-							throw new IllegalArgumentException("literal focus value for inverse predicate");
-						}
-
-						return Stream.concat(
-								Stream.of(statement((Resource)value.focus, inverse, this.frame.focus)),
-								value.model.stream()
-						);
-
-					}
+					inverse -> Stream.concat(
+							Stream.of(statement(value.focus, inverse, frame.focus)),
+							value.model.stream()
+					)
 
 			)).collect(toCollection(LinkedHashSet::new)));
 		}
@@ -585,7 +557,7 @@ public final class Frame {
 				throw new NullPointerException("null value");
 			}
 
-			return value.map(this::frame).orElse(this.frame);
+			return value.map(this::frame).orElse(frame);
 		}
 
 		public Frame frames(final Frame... values) {
@@ -620,12 +592,8 @@ public final class Frame {
 							throw new NullPointerException("null values");
 						}
 
-						if ( !(this.frame.focus instanceof Resource) ) {
-							throw new IllegalArgumentException("literal focus value for direct field");
-						}
-
 						return Stream.concat(
-								Stream.of(statement((Resource)this.frame.focus, direct, frame.focus)),
+								Stream.of(statement(this.frame.focus, direct, frame.focus)),
 								frame.model.stream()
 						);
 
@@ -637,12 +605,8 @@ public final class Frame {
 							throw new NullPointerException("null values");
 						}
 
-						if ( !(frame.focus instanceof Resource) ) {
-							throw new IllegalArgumentException("literal focus value for inverse field");
-						}
-
 						return Stream.concat(
-								Stream.of(statement((Resource)frame.focus, inverse, this.frame.focus)),
+								Stream.of(statement(frame.focus, inverse, this.frame.focus)),
 								frame.model.stream()
 						);
 

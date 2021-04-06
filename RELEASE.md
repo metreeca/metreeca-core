@@ -1,5 +1,6 @@
 # Broken ;-(
 
+- JSON / Restricted `Frame.focus()` to `IRI` values
 - JSON / Migrated `Frame` API to focus `Shift` operators
 - REST / Migrated `JSONLDFormat` to `Frame` payload to improve usability
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF
@@ -19,7 +20,8 @@
 
 - REST / Added request IRI placeholder to `status(code, details)` response generator method
 - REST / Extended the default secret `vault()` implementation to retrieve parameters also from environment variables
-- REST / Hardened `Vault.get()` method against empty parameter identifiers
-- Head / Hardened `JSEServer` and `JEEServer` against empty header names
 
 # Fixed
+
+- REST / Hardened `Vault.get()` method against empty parameter identifiers
+- Head / Hardened `JSEServer` and `JEEServer` against empty header names
