@@ -22,6 +22,8 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -109,11 +111,11 @@ public final class Frame {
 
 
 	public Optional<String> label() {
-		return get(Labels).value(Values::string);
+		return get(Labels).string();
 	}
 
 	public Optional<String> notes() {
-		return get(Notes).value(Values::string);
+		return get(Notes).string();
 	}
 
 
@@ -160,13 +162,13 @@ public final class Frame {
 		return new Reader(shift.apply(singleton(focus), model).collect(toCollection(LinkedHashSet::new)), model);
 	}
 
-	public Writer set(final IRI path) {
+	public Writer set(final IRI predicate) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return new Writer(this, path);
+		return new Writer(this, predicate);
 	}
 
 
@@ -196,9 +198,46 @@ public final class Frame {
 		}
 
 
+		public Optional<Boolean> _boolean() {
+			return value(Values::_boolean);
+		}
+
+
+		public Optional<BigInteger> integer() {
+			return value(Values::integer);
+		}
+
+		public Stream<BigInteger> integers() {
+			return values(Values::integer);
+		}
+
+
+		public Optional<BigDecimal> decimal() {
+			return value(Values::decimal);
+		}
+
+		public Stream<BigDecimal> decimals() {
+			return values(Values::decimal);
+		}
+
+
+		public Optional<String> string() {
+			return value(Values::string);
+		}
+
+		public Stream<String> strings() {
+			return values(Values::string);
+		}
+
+
 		public Optional<Value> value() {
 			return values().findFirst();
 		}
+
+		public Stream<Value> values() {
+			return values.stream();
+		}
+
 
 		public <V> Optional<V> value(final Function<Value, Optional<V>> mapper) {
 
@@ -206,12 +245,7 @@ public final class Frame {
 				throw new NullPointerException("null mapper");
 			}
 
-			return values(mapper).findFirst();
-		}
-
-
-		public Stream<Value> values() {
-			return values.stream();
+			return values().findFirst().flatMap(mapper);
 		}
 
 		public <V> Stream<V> values(final Function<Value, Optional<V>> mapper) {
@@ -244,12 +278,169 @@ public final class Frame {
 	public static final class Writer {
 
 		private final Frame frame;
-		private final IRI path;
+		private final IRI predicate;
 
 
-		private Writer(final Frame frame, final IRI path) {
+		private Writer(final Frame frame, final IRI predicate) {
 			this.frame=frame;
-			this.path=path;
+			this.predicate=predicate;
+		}
+
+
+		public Frame _boolean(final Boolean value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value(literal(value));
+		}
+
+		public Frame _boolean(final Optional<Boolean> value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value(value.map(Values::literal));
+		}
+
+
+		public Frame decimal(final BigDecimal value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value(literal(value));
+		}
+
+		public Frame decimal(final Optional<BigDecimal> value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value(value.map(Values::literal));
+		}
+
+		public Frame decimals(final BigDecimal... values) {
+
+			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(Arrays.stream(values).map(Values::literal));
+		}
+
+		public Frame decimals(final Collection<BigDecimal> values) {
+
+			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(values.stream().map(Values::literal));
+		}
+
+		public Frame decimals(final Stream<BigDecimal> values) {
+
+			if ( values == null ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(values.map(Values::literal));
+		}
+
+
+		public Frame integer(final BigInteger value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value(literal(value));
+		}
+
+		public Frame integer(final Optional<BigInteger> values) {
+
+			if ( values == null ) {
+				throw new NullPointerException("null values");
+			}
+
+			return value(values.map(Values::literal));
+		}
+
+		public Frame integers(final BigInteger... values) {
+
+			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(Arrays.stream(values).map(Values::literal));
+		}
+
+		public Frame integers(final Collection<BigInteger> values) {
+
+			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(values.stream().map(Values::literal));
+		}
+
+		public Frame integers(final Stream<BigInteger> values) {
+
+			if ( values == null ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(values.map(Values::literal));
+		}
+
+
+		public Frame string(final String value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value(literal(value));
+		}
+
+		public Frame string(final Optional<String> value) {
+
+			if ( value == null ) {
+				throw new NullPointerException("null value");
+			}
+
+			return value(value.map(Values::literal));
+		}
+
+		public Frame strings(final String... values) {
+
+			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(Arrays.stream(values).map(Values::literal));
+		}
+
+		public Frame strings(final Collection<String> values) {
+
+			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(values.stream().map(Values::literal));
+		}
+
+		public Frame strings(final Stream<String> values) {
+
+			if ( values == null ) {
+				throw new NullPointerException("null values");
+			}
+
+			return values(values.map(Values::literal));
 		}
 
 
@@ -259,7 +450,7 @@ public final class Frame {
 				throw new NullPointerException("null value");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
 
 					direct -> {
 
@@ -293,7 +484,6 @@ public final class Frame {
 			return value.map(this::value).orElse(frame);
 		}
 
-
 		public Frame values(final Value... values) {
 
 			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
@@ -318,7 +508,7 @@ public final class Frame {
 				throw new NullPointerException("null values");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
 
 					direct -> values.map(value -> {
 
@@ -330,7 +520,7 @@ public final class Frame {
 							throw new IllegalArgumentException("literal focus value for direct field");
 						}
 
-						return statement((Resource)frame.focus, path, value);
+						return statement((Resource)frame.focus, predicate, value);
 
 					}),
 
@@ -352,13 +542,13 @@ public final class Frame {
 		}
 
 
-		public Frame frame(final Frame frame) {
+		public Frame frame(final Frame value) {
 
-			if ( frame == null ) {
-				throw new NullPointerException("null frame");
+			if ( value == null ) {
+				throw new NullPointerException("null value");
 			}
 
-			return new Frame(this.frame.focus, Stream.concat(this.frame.model.stream(), traverse(path,
+			return new Frame(this.frame.focus, Stream.concat(this.frame.model.stream(), traverse(predicate,
 
 					direct -> {
 
@@ -367,21 +557,21 @@ public final class Frame {
 						}
 
 						return Stream.concat(
-								Stream.of(statement((Resource)this.frame.focus, direct, frame.focus)),
-								frame.model.stream()
+								Stream.of(statement((Resource)this.frame.focus, direct, value.focus)),
+								value.model.stream()
 						);
 
 					},
 
 					inverse -> {
 
-						if ( !(frame.focus instanceof Resource) ) {
+						if ( !(value.focus instanceof Resource) ) {
 							throw new IllegalArgumentException("literal focus value for inverse predicate");
 						}
 
 						return Stream.concat(
-								Stream.of(statement((Resource)frame.focus, inverse, this.frame.focus)),
-								frame.model.stream()
+								Stream.of(statement((Resource)value.focus, inverse, this.frame.focus)),
+								value.model.stream()
 						);
 
 					}
@@ -389,46 +579,45 @@ public final class Frame {
 			)).collect(toCollection(LinkedHashSet::new)));
 		}
 
-		public Frame frame(final Optional<Frame> frame) {
+		public Frame frame(final Optional<Frame> value) {
 
-			if ( frame == null ) {
-				throw new NullPointerException("null frame");
+			if ( value == null ) {
+				throw new NullPointerException("null value");
 			}
 
-			return frame.map(this::frame).orElse(this.frame);
+			return value.map(this::frame).orElse(this.frame);
 		}
 
+		public Frame frames(final Frame... values) {
 
-		public Frame frames(final Frame... frames) {
-
-			if ( frames == null || Arrays.stream(frames).anyMatch(Objects::isNull) ) {
+			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
 				throw new NullPointerException("null values");
 			}
 
-			return frames.length == 0 ? frame : frames(Arrays.stream(frames));
+			return values.length == 0 ? frame : frames(Arrays.stream(values));
 		}
 
-		public Frame frames(final Collection<Frame> frames) {
+		public Frame frames(final Collection<Frame> values) {
 
-			if ( frames == null || frames.stream().anyMatch(Objects::isNull) ) {
+			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 				throw new NullPointerException("null values");
 			}
 
-			return frames.isEmpty() ? frame : frames(frames.stream());
+			return values.isEmpty() ? frame : frames(values.stream());
 		}
 
-		public Frame frames(final Stream<Frame> frames) {
+		public Frame frames(final Stream<Frame> values) {
 
-			if ( frames == null ) {
-				throw new NullPointerException("null frames");
+			if ( values == null ) {
+				throw new NullPointerException("null values");
 			}
 
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(path,
+			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
 
-					direct -> frames.flatMap(frame -> {
+					direct -> values.flatMap(frame -> {
 
 						if ( frame == null ) {
-							throw new NullPointerException("null frames");
+							throw new NullPointerException("null values");
 						}
 
 						if ( !(this.frame.focus instanceof Resource) ) {
@@ -442,10 +631,10 @@ public final class Frame {
 
 					}),
 
-					inverse -> frames.flatMap(frame -> {
+					inverse -> values.flatMap(frame -> {
 
 						if ( frame == null ) {
-							throw new NullPointerException("null frames");
+							throw new NullPointerException("null values");
 						}
 
 						if ( !(frame.focus instanceof Resource) ) {
@@ -463,6 +652,5 @@ public final class Frame {
 		}
 
 	}
-
 
 }

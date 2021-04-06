@@ -499,17 +499,17 @@ public final class Values {
 	}
 
 
+	public static Optional<String> string(final Value value) {
+		return literal(value).map(Literal::stringValue);
+	}
+
+
 	public static Optional<TemporalAccessor> temporalAccessor(final Value value) {
 		return literal(value).map(guard(Literal::temporalAccessorValue));
 	}
 
 	public static Optional<TemporalAmount> temporalAmount(final Value value) {
 		return literal(value).map(guard(Literal::temporalAmountValue));
-	}
-
-
-	public static Optional<String> string(final Value value) {
-		return literal(value).map(Literal::stringValue);
 	}
 
 

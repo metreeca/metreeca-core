@@ -1,6 +1,6 @@
 # Broken ;-(
 
-- JSON / Overhaul `Frame` API to migrate it to focus `Shift` operators
+- JSON / Migrated `Frame` API to focus `Shift` operators
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF
   statement context, JSON-LD context, web app context, web app asset, …)
 - REST / Merged `Engine.browse()/relate()` methods and removed `Browser` handler
@@ -10,6 +10,7 @@
 
 # Added
 
+- JSON / Extended `Frame` API with typed getters/setters
 - JSON / Lay down focus `Shift` operators (predicate paths, value mappings, aggregates, …)
 - REST / Added `Handler.route()/asset()` conditional handler factories
 
