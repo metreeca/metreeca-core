@@ -17,7 +17,6 @@
 package com.metreeca.json;
 
 import org.eclipse.rdf4j.model.*;
-import org.eclipse.rdf4j.model.base.AbstractIRI;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
@@ -33,21 +32,18 @@ import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Graph frame.
+ * Linked data frame.
  *
- * <p>Describes a subgraph centered on a set of focus values.</p>
+ * <p>Describes a linked data graph centered on a focus value.</p>
  */
 public final class Frame {
 
-	private static final IRI SchemaName=iri("http://schema.org/", "name");
-	private static final IRI SchemaDescription=iri("http://schema.org/", "description");
-
 	private static final BiFunction<Value, Collection<Statement>, Stream<Value>> Labels=alt(
-			RDFS.LABEL, DC.TITLE, SchemaName
+			RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name")
 	);
 
 	private static final BiFunction<Value, Collection<Statement>, Stream<Value>> Notes=alt(
-			RDFS.COMMENT, DC.DESCRIPTION, SchemaDescription
+			RDFS.COMMENT, DC.DESCRIPTION, iri("http://schema.org/", "description")
 	);
 
 
@@ -204,7 +200,7 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Getter get(final IRI path) {
+	public Reader get(final IRI path) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
@@ -213,22 +209,22 @@ public final class Frame {
 		return get(seq(path));
 	}
 
-	public Getter get(final BiFunction<? super Value, ? super Collection<Statement>, Stream<Value>> path) {
+	public Reader get(final BiFunction<? super Value, ? super Collection<Statement>, Stream<Value>> path) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
 		}
 
-		return new Getter(path.apply(focus, model).collect(toCollection(LinkedHashSet::new)), model);
+		return new Reader(path.apply(focus, model).collect(toCollection(LinkedHashSet::new)), model);
 	}
 
-	public Setter set(final IRI path) {
+	public Writer set(final IRI path) {
 
 		if ( path == null ) {
 			throw new NullPointerException("null path");
 		}
 
-		return new Setter(this, path);
+		return new Writer(this, path);
 	}
 
 
@@ -243,13 +239,16 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static final class Getter {
+	/**
+	 * Frame read operations.
+	 */
+	public static final class Reader {
 
 		private final Set<Value> values;
 		private final Set<Statement> model;
 
 
-		private Getter(final Set<Value> values, final Set<Statement> model) {
+		private Reader(final Set<Value> values, final Set<Statement> model) {
 			this.values=values;
 			this.model=model;
 		}
@@ -297,13 +296,16 @@ public final class Frame {
 
 	}
 
-	public static final class Setter {
+	/**
+	 * Frame write operations.
+	 */
+	public static final class Writer {
 
 		private final Frame frame;
 		private final IRI path;
 
 
-		private Setter(final Frame frame, final IRI path) {
+		private Writer(final Frame frame, final IRI path) {
 			this.frame=frame;
 			this.path=path;
 		}
@@ -516,54 +518,6 @@ public final class Frame {
 					})
 
 			)).collect(toCollection(LinkedHashSet::new)));
-		}
-
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private static final class Inverse extends AbstractIRI {
-
-		private static final long serialVersionUID=7576383707001017160L;
-
-
-		private final String string;
-
-		private final String namespace;
-		private final String localname;
-
-
-		Inverse(final String namespace, final String localname) {
-
-			this.string=namespace+localname;
-
-			this.namespace=namespace;
-			this.localname=localname;
-		}
-
-
-		@Override public String stringValue() {
-			return string;
-		}
-
-		@Override public String getNamespace() {
-			return namespace;
-		}
-
-		@Override public String getLocalName() {
-			return localname;
-		}
-
-
-		@Override public boolean equals(final Object object) {
-			return object == this || object instanceof Inverse && super.equals(object);
-		}
-
-		@Override public int hashCode() { return -super.hashCode(); }
-
-		@Override public String toString() {
-			return "^"+super.toString();
 		}
 
 	}
