@@ -160,11 +160,11 @@ public abstract class Query {
 
 		//// Queries ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-		public abstract V probe(final Items items);
+		public V probe(final Items items) { return probe((Query)items); }
 
-		public abstract V probe(final Terms terms);
+		public V probe(final Terms terms) { return probe((Query)terms); }
 
-		public abstract V probe(final Stats stats);
+		public V probe(final Stats stats) { return probe((Query)stats); }
 
 
 		//// Fallback //////////////////////////////////////////////////////////////////////////////////////////////////
