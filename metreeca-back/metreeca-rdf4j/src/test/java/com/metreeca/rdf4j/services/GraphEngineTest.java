@@ -26,6 +26,7 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
@@ -67,13 +68,13 @@ final class GraphEngineTest {
 			return new Request()
 					.base(Base)
 					.path("/employees/slug")
-					.body(jsonld(), decode("</employees/slug>"
+					.body(jsonld(), frame(iri(Base, "/employees/slug"), decode("</employees/slug>"
 							+" :forename 'Tino' ;"
 							+" :surname 'Faussone' ;"
 							+" :email 'tfaussone@classicmodelcars.com' ;"
 							+" :title 'Sales Rep' ;"
 							+" :seniority 1 ."
-					)).attribute(shape(), Employee);
+					))).attribute(shape(), Employee);
 		}
 
 
@@ -150,7 +151,7 @@ final class GraphEngineTest {
 							.hasStatus(OK).hasAttribute(shape(),
 									shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), frame -> assertThat(frame.model())
 									.as("items retrieved")
 									.isSubsetOf(model(
 											"construct where { <employees/1370> ?p ?o }"
@@ -182,7 +183,7 @@ final class GraphEngineTest {
 							.hasStatus(OK)
 							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), frame -> assertThat(frame.model())
 									.hasStatement(iri(response.item()), Shape.Contains, null)
 									.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
 											+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"
@@ -204,7 +205,7 @@ final class GraphEngineTest {
 							.hasStatus(OK)
 							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), frame -> assertThat(frame.model())
 
 									.hasSubset(model(""
 											+"construct { ?e :title ?t; :seniority ?seniority }\n"
@@ -230,7 +231,7 @@ final class GraphEngineTest {
 							.hasStatus(OK)
 							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
 
-							.hasBody(jsonld(), rdf -> assertThat(rdf)
+							.hasBody(jsonld(), frame -> assertThat(frame.model())
 
 									.isIsomorphicTo(model(""
 											+"construct { \n"
@@ -269,13 +270,13 @@ final class GraphEngineTest {
 									field(term("title"), required()),
 									field(term("seniority"), required())
 							))
-							.body(jsonld(), decode("</employees/1370>"
+							.body(jsonld(), frame(iri(Base, "/employees/1370"), decode("</employees/1370>"
 									+":forename 'Tino';"
 									+":surname 'Faussone';"
 									+":email 'tfaussone@example.com';"
 									+":title 'Sales Rep' ;"
 									+":seniority 5 ." // outside salesman envelope
-							))
+							)))
 					)
 
 					.accept(response -> {
@@ -310,7 +311,7 @@ final class GraphEngineTest {
 					.update(new Request()
 							.base(Base)
 							.path("/employees/9999")
-							.body(jsonld(), decode(""))
+							.body(jsonld(), frame(iri(Base, "/employees/9999"), decode("")))
 					)
 
 					.accept(response -> assertThat(response)

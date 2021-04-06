@@ -496,9 +496,9 @@ public final class Products extends Delegator {
 
 		).wrap(router()
 
-			.path("/", router()
-					.get(relator())
-					.post(creator())
+				.path("/", router()
+						.get(relator())
+						.post(creator())
 				)
 
 				.path("/*", router()
@@ -632,29 +632,29 @@ public final class Products extends Delegator {
 						datatype(XSD.DECIMAL),
 						minInclusive(literal(decimal(0))),
 						maxInclusive(literal(decimal(1000)))
-				)),
+		)),
 
-				server().then(field(Toys.stock, required(),
-						datatype(XSD.INTEGER),
-						minInclusive(literal(integer(0))),
-						maxExclusive(literal(integer(10_000)))
-				))
+			server().then(field(Toys.stock, required(),
+					datatype(XSD.INTEGER),
+					minInclusive(literal(integer(0))),
+					maxExclusive(literal(integer(10_000)))
+			))
 
-		)).wrap(router()
+	)).wrap(router()
 
 			.path("/", router()
 					.get(relator())
 					.post(creator())
-				)
+			)
 
-				.path("/*", router()
-						.get(relator())
-						.put(updater())
-						.delete(deleter())
-				)
+			.path("/*", router()
+					.get(relator())
+					.put(updater())
+					.delete(deleter())
+			)
 
-		));
-	}
+	));
+  }
 
 }
 ```
@@ -862,14 +862,9 @@ public final class ProductsSlug implements Function<Request, String> {
 	public String apply(final Request request) {
 		return graph.exec(connection -> {
 
-			final Value scale=request.body(jsonld()).get()
-					.flatMap(model -> new LinkedHashModel(model)
-							.filter(null, Toys.scale, null)
-							.objects()
-							.stream()
-							.findFirst()
-					)
-					.orElse(literal("1:1"));
+		final Value scale=request.body(jsonld()).get()
+				.flatMap(frame -> frame.get(Toys.scale).value())
+				.orElse(literal("1:1"));
 
 			int serial=0;
 

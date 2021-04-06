@@ -21,7 +21,6 @@ import com.metreeca.rest.Request;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 
 import java.util.function.Function;
@@ -40,12 +39,7 @@ public final class ProductsSlug implements Function<Request, String> {
 		return graph.exec(connection -> {
 
 			final Value scale=request.body(jsonld()).get()
-					.flatMap(model -> new LinkedHashModel(model)
-							.filter(null, Toys.scale, null)
-							.objects()
-							.stream()
-							.findFirst()
-					)
+					.flatMap(frame -> frame.get(Toys.scale).value())
 					.orElse(literal("1:1"));
 
 			int serial=0;

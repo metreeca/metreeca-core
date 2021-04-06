@@ -16,8 +16,7 @@
 
 package com.metreeca.rest.formats;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.json.shapes.Or;
 import com.metreeca.rest.*;
 
@@ -30,6 +29,7 @@ import java.util.function.Supplier;
 
 import javax.json.*;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
@@ -53,7 +53,7 @@ import static javax.json.stream.JsonGenerator.PRETTY_PRINTING;
 /**
  * Model-driven JSON-LD message format.
  */
-public final class JSONLDFormat extends Format<Collection<Statement>> {
+public final class JSONLDFormat extends Format<Frame> {
 
 	/**
 	 * The default MIME type for JSON-LD messages ({@value}).
@@ -74,8 +74,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	/**
 	 * Retrieves the default JSON-LD shape service factory.
 	 *
-	 * @return the default shape factory, which returns an {@linkplain Or#or() empty disjunction}, that is a shape
-	 * the always fails to validate
+	 * @return the default shape factory, which returns an {@linkplain Or#or() empty disjunction}, that is a shape the
+	 * always fails to validate
 	 */
 	public static Supplier<Shape> shape() {
 		return Or::or;
@@ -148,13 +148,14 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 	/**
 	 * Decodes the JSON-LD {@code message} body from the input stream supplied by the {@code message}
-	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is either
-	 * missing or  matched by {@link JSONFormat#MIMEPattern}
+	 * {@link InputFormat}
+	 * body, if one is available and the {@code message} {@code Content-Type} header is either missing or  matched by
+	 * {@link JSONFormat#MIMEPattern}
 	 *
 	 * <p><strong>Warning</strong> / Decoding is completely driven by the {@code message}
 	 * {@linkplain JSONLDFormat#shape() shape attribute}: embedded {@code @context} objects are ignored.</p>
 	 */
-	@Override public Either<MessageException, Collection<Statement>> decode(final Message<?> message) {
+	@Override public Either<MessageException, Frame> decode(final Message<?> message) {
 		return message
 
 				.header("Content-Type")
@@ -182,12 +183,19 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 						).decode(jsonReader.readObject());
 
 						return scan(shape, focus, model).fold(
+
 								trace -> Left(status(UnprocessableEntity, trace.toJSON())),
-								value -> value.size() == model.size() ? Right(value) : Left(status(UnprocessableEntity,
+
+								value -> value.size() == model.size()
+
+										? Right(frame(focus, value))
+
+										: Left(status(UnprocessableEntity,
 										trace(value.stream().filter(s -> !model.contains(s))
 												.map(s -> format("statement <%s> is out of shape envelop", format(s)))
 										).toJSON()
 								))
+
 						);
 
 					} catch ( final JsonException e ) {
@@ -215,8 +223,8 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 
 	/**
 	 * Configures {@code message} {@code Content-Type} header to {@value JSONFormat#MIME}, unless already defined, and
-	 * encodes the JSON-LD model {@code value} into the output stream accepted by the {@code message}
-	 * {@link OutputFormat} body.
+	 * encodes the JSON-LD model {@code value} into the output stream accepted by the {@code message} {@link
+	 * OutputFormat} body.
 	 *
 	 * <p>If the originating {@code message} {@linkplain Message#request() request} includes an {@code Accept-Language}
 	 * header, a suitably {@linkplain Shape#localize localized} version of the message shape is used in the conversion
@@ -225,7 +233,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 	 * <p><strong>Warning</strong> / {@code @context} objects generated from the {@code message}
 	 * {@linkplain JSONLDFormat#shape() shape attribute} are embedded only if {@code Content-Type} is {@value MIME}.</p>
 	 */
-	@Override public <M extends Message<M>> M encode(final M message, final Collection<Statement> value) {
+	@Override public <M extends Message<M>> M encode(final M message, final Frame value) {
 
 		final String mime=message
 
@@ -259,7 +267,7 @@ public final class JSONLDFormat extends Format<Collection<Statement>> {
 						final Shape shape=message.attribute(shape());
 						final Map<String, String> keywords=service(keywords());
 
-						final Collection<Statement> model=scan(shape, focus, value).fold(trace -> {
+						final Collection<Statement> model=scan(shape, focus, value.model()).fold(trace -> {
 
 							service(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
 

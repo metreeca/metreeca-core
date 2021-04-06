@@ -30,6 +30,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Shape.Contains;
 import static com.metreeca.json.Values.IRIPattern;
 import static com.metreeca.json.Values.format;
@@ -178,7 +179,7 @@ public final class GraphEngine implements Engine {
 		final IRI item=iri(request.item());
 		final Shape shape=request.attribute(shape());
 
-		return request.body(jsonld()).fold(request::reply, model ->
+		return request.body(jsonld()).fold(request::reply, frame ->
 				request.reply(response -> graph.exec(txn(connection -> {
 
 					final boolean clashing=connection.hasStatement(item, null, null, true)
@@ -193,7 +194,7 @@ public final class GraphEngine implements Engine {
 					} else { // store model
 
 						connection.add(shape.outline(item));
-						connection.add(model);
+						connection.add(frame.model());
 
 						final String location=item.stringValue();
 
@@ -286,7 +287,7 @@ public final class GraphEngine implements Engine {
 
 						.map(model -> response.status(OK)
 								.attribute(shape(), query.map(new ShapeProbe(collection)))
-								.body(jsonld(), model)
+								.body(jsonld(), frame(item, model))
 						)
 
 						.orElseGet(() -> response.status(NotFound)) // !!! 410 Gone if previously known
@@ -339,7 +340,7 @@ public final class GraphEngine implements Engine {
 		final IRI item=iri(request.item());
 		final Shape shape=request.attribute(shape());
 
-		return request.body(jsonld()).fold(request::reply, model ->
+		return request.body(jsonld()).fold(request::reply, frame ->
 				request.reply(response -> graph.exec(txn(connection -> {
 
 					return Optional
@@ -351,7 +352,7 @@ public final class GraphEngine implements Engine {
 							.map(current -> {
 
 								connection.remove(current);
-								connection.add(model);
+								connection.add(frame.model());
 
 								return response.status(NoContent);
 

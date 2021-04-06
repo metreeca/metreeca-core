@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Guard.Create;
@@ -142,7 +143,7 @@ public final class Creator extends Delegator {
 
 			return handler.handle(request
 					.path(request.path()+name)
-					.map(jsonld(), model -> rewrite(target, source, model))
+					.map(jsonld(), frame -> frame(target, rewrite(target, source, frame.model())))
 			);
 		};
 	}

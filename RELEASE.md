@@ -1,6 +1,7 @@
 # Broken ;-(
 
 - JSON / Migrated `Frame` API to focus `Shift` operators
+- REST / Migrated `JSONLDFormat` to `Frame` payload to improve usability
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF
   statement context, JSON-LD context, web app context, web app asset, …)
 - REST / Merged `Engine.browse()/relate()` methods and removed `Browser` handler
