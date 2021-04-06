@@ -35,7 +35,7 @@ import static com.metreeca.rest.services.Vault.vault;
 import static java.lang.String.format;
 
 /**
- * Google CLoud Platform server connector.
+ * Google Cloud Platform server connector.
  *
  * <p>Delegates a {@link JSEServer} pre-configured with Google Cloud Platform {@linkplain com.metreeca.gcp.services
  * services}.</p>

@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Datastore" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="com.metreeca.gcp.GCPTest" />
+    <module name="metreeca-gcp" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
