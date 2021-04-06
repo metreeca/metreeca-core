@@ -16,20 +16,23 @@
 
 package com.metreeca.json;
 
+import com.metreeca.json.shifts.Path;
+
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shifts.Alt.alt;
+import static com.metreeca.json.shifts.Seq.seq;
+import static com.metreeca.json.shifts.Step.step;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Linked data frame.
@@ -38,11 +41,11 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Frame {
 
-	private static final BiFunction<Value, Collection<Statement>, Stream<Value>> Labels=alt(
+	private static final Path Labels=alt(
 			RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name")
 	);
 
-	private static final BiFunction<Value, Collection<Statement>, Stream<Value>> Notes=alt(
+	private static final Path Notes=alt(
 			RDFS.COMMENT, DC.DESCRIPTION, iri("http://schema.org/", "description")
 	);
 
@@ -93,76 +96,6 @@ public final class Frame {
 	}
 
 
-	//// Paths /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static BiFunction<Value, Collection<Statement>, Stream<Value>> seq(final IRI path) {
-
-		if ( path == null ) {
-			throw new NullPointerException("null path");
-		}
-
-		return traverse(path,
-
-				direct -> (focus, model) -> model.stream()
-						.filter(s -> focus.equals(s.getSubject()) && direct.equals(s.getPredicate()))
-						.map(Statement::getObject),
-
-				inverse -> (focus, model) -> model.stream()
-						.filter(s -> inverse.equals(s.getPredicate()) && focus.equals(s.getObject()))
-						.map(Statement::getSubject)
-
-		);
-	}
-
-	public static BiFunction<Value, Collection<Statement>, Stream<Value>> seq(final IRI... path) {
-
-		if ( path == null || Arrays.stream(path).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null path");
-		}
-
-		return seq(Arrays.stream(path).map(Frame::seq).collect(toList()));
-	}
-
-	public static BiFunction<Value, Collection<Statement>, Stream<Value>> seq(
-			final Collection<BiFunction<Value, Collection<Statement>, Stream<Value>>> paths) {
-
-		if ( paths == null || paths.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null paths");
-		}
-
-		return (focus, model) -> {
-
-			Stream<Value> values=Stream.of(focus);
-
-			for (final BiFunction<Value, Collection<Statement>, Stream<Value>> path : paths) {
-				values=values.flatMap(value -> path.apply(value, model));
-			}
-
-			return values;
-		};
-	}
-
-
-	public static BiFunction<Value, Collection<Statement>, Stream<Value>> alt(final IRI... paths) {
-
-		if ( paths == null || Arrays.stream(paths).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null paths");
-		}
-
-		return alt(Arrays.stream(paths).map(Frame::seq).collect(toList()));
-	}
-
-	public static BiFunction<Value, Collection<Statement>, Stream<Value>> alt(
-			final Collection<BiFunction<Value, Collection<Statement>, Stream<Value>>> paths) {
-
-		if ( paths == null || paths.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null paths");
-		}
-
-		return (focus, model) -> paths.stream().flatMap(path -> path.apply(focus, model));
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private final Value focus;
@@ -200,22 +133,31 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Reader get(final IRI path) {
+	public Reader get(final IRI step) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
+		if ( step == null ) {
+			throw new NullPointerException("null step");
 		}
 
-		return get(seq(path));
+		return get(step(step));
 	}
 
-	public Reader get(final BiFunction<? super Value, ? super Collection<Statement>, Stream<Value>> path) {
+	public Reader get(final IRI... steps) {
 
-		if ( path == null ) {
-			throw new NullPointerException("null path");
+		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null steps");
 		}
 
-		return new Reader(path.apply(focus, model).collect(toCollection(LinkedHashSet::new)), model);
+		return get(seq(steps));
+	}
+
+	public Reader get(final Shift shift) {
+
+		if ( shift == null ) {
+			throw new NullPointerException("null shift");
+		}
+
+		return new Reader(shift.apply(singleton(focus), model).collect(toCollection(LinkedHashSet::new)), model);
 	}
 
 	public Writer set(final IRI path) {
@@ -521,5 +463,6 @@ public final class Frame {
 		}
 
 	}
+
 
 }

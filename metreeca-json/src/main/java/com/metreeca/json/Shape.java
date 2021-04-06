@@ -37,6 +37,7 @@ import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.When.when;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toSet;
 
 
@@ -114,7 +115,7 @@ public abstract class Shape {
 	 */
 	public Set<Statement> outline(final Value... focus) {
 
-		if ( focus == null || Arrays.stream(focus).anyMatch(Objects::isNull) ) {
+		if ( focus == null || stream(focus).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null focus");
 		}
 
@@ -145,7 +146,7 @@ public abstract class Shape {
 	 */
 	public Shape localize(final String... tags) {
 
-		if ( tags == null || Arrays.stream(tags).anyMatch(Objects::isNull) ) {
+		if ( tags == null || stream(tags).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null tags");
 		}
 
@@ -210,7 +211,7 @@ public abstract class Shape {
 			throw new NullPointerException("null axis");
 		}
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+		if ( values == null || stream(values).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
 
@@ -335,7 +336,7 @@ public abstract class Shape {
 	 */
 	public final Shape then(final Shape... shapes) {
 
-		if ( shapes == null || Arrays.stream(shapes).anyMatch(Objects::isNull) ) {
+		if ( shapes == null || stream(shapes).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null shapes");
 		}
 
