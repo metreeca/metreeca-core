@@ -229,11 +229,12 @@
 
 			<!-- Test Harness -->
 
-			<dependency> <!-- https://search.maven.org/artifact/org.junit.jupiter/junit-jupiter-engine -->
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
+			<dependency>  <!-- https://search.maven.org/artifact/org.junit.jupiter/junit-bom -->
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
 				<version>5.7.1</version>
-				<scope>test</scope>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 			<dependency> <!-- https://search.maven.org/artifact/org.assertj/assertj-core -->
@@ -252,7 +253,7 @@
 
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
+			<artifactId>junit-jupiter-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 
