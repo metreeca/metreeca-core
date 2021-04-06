@@ -37,8 +37,8 @@
 			</g>
 		</marker>
 	</defs>
-	<metadata>Produced by OmniGraffle 7.18.4\n2021-03-18 15:57:21 +0000</metadata>
-	<g id="operators" fill-opacity="1" stroke="none" fill="none" stroke-opacity="1" stroke-dasharray="none">
+	<metadata>Produced by OmniGraffle 7.18.5\n2021-04-06 21:01:01 +0000</metadata>
+	<g id="operators" stroke="none" stroke-dasharray="none" stroke-opacity="1" fill-opacity="1" fill="none">
 		<title>operators</title>
 		<rect fill="white" x="0" y="0" width="806" height="537"/>
 		<g id="operators_Layer_1">
@@ -120,7 +120,7 @@
 				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width=".25"/>
 				<text transform="translate(199.8129 198.7559)" fill="black">
 					<tspan font-family="Helvetica Neue" font-size="12" font-weight="300" fill="black" x="0" y="12">
-						Throttler
+						Keeper
 					</tspan>
 				</text>
 			</g>
@@ -256,21 +256,18 @@
 				      stroke-width=".25"/>
 			</g>
 			<g id="Graphic_61">
-				<text transform="translate(618.4443 339.976)" fill="black">
-					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="2.2455" y="9">
+				<text transform="translate(619.1148 339.976)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="1.575" y="9">
 						create()
 					</tspan>
-					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="3.7485"
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="3.078"
 					       y="20.261063">relate()
 					</tspan>
 					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="31.522125">
-						browse()
+						update()
 					</tspan>
-					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x=".6705"
-					       y="42.78319">update()
-					</tspan>
-					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="2.502"
-					       y="54.04425">delete()
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="1.8315"
+					       y="42.78319">delete()
 					</tspan>
 				</text>
 			</g>
@@ -283,9 +280,9 @@
 				      stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0" stroke-width=".25"/>
 			</g>
 			<g id="Graphic_67">
-				<text transform="translate(623.0298 130.15179)" fill="black">
-					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="42632564e-21"
-					       y="9">wrap()
+				<text transform="translate(611.28034 130.15179)" fill="black">
+					<tspan font-family="Helvetica Neue" font-size="9" font-weight="300" fill="black" x="0" y="9">
+						transaction()
 					</tspan>
 				</text>
 			</g>
@@ -300,7 +297,7 @@
 				      stroke-dasharray="1.0,1.0" stroke-width=".25"/>
 			</g>
 			<g id="Line_73">
-				<line x1="384.4085" y1="135.78232" x2="610.1798" y2="135.78232" marker-end="url(#StickArrow_Marker)"
+				<line x1="384.4085" y1="135.78232" x2="598.43034" y2="135.78232" marker-end="url(#StickArrow_Marker)"
 				      stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1.0,1.0"
 				      stroke-width=".25"/>
 			</g>

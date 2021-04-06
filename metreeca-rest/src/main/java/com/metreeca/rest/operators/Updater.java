@@ -17,14 +17,14 @@
 package com.metreeca.rest.operators;
 
 import com.metreeca.json.shapes.Guard;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
+import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.services.Engine;
 
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.json.shapes.Guard.Update;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Wrapper.keeper;
 import static com.metreeca.rest.services.Engine.engine;
 
 
@@ -36,7 +36,7 @@ import static com.metreeca.rest.services.Engine.engine;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
+ * {@linkplain Wrapper#keeper(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Update} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>shape-driven request payload validation;</li>
@@ -68,7 +68,7 @@ public final class Updater extends Delegator {
 		delegate(((Handler)engine::update)
 
 				.with(engine.transaction())
-				.with(engine.throttler(Update, Detail))
+				.with(keeper(Update, Detail))
 
 		);
 	}

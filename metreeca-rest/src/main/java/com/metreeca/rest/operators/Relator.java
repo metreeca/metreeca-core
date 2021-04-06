@@ -17,14 +17,14 @@
 package com.metreeca.rest.operators;
 
 import com.metreeca.json.shapes.Guard;
-import com.metreeca.rest.Handler;
-import com.metreeca.rest.Request;
+import com.metreeca.rest.*;
 import com.metreeca.rest.handlers.Delegator;
 import com.metreeca.rest.services.Engine;
 
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.json.shapes.Guard.Relate;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Wrapper.keeper;
 import static com.metreeca.rest.services.Engine.engine;
 
 
@@ -36,7 +36,7 @@ import static com.metreeca.rest.services.Engine.engine;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
+ * {@linkplain Wrapper#keeper(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Relate} task and {@linkplain Guard#Detail} view;</li>
  *
  * <li>engine assisted resource {@linkplain Engine#relate(Request) retrieval};</li>
@@ -68,7 +68,7 @@ public final class Relator extends Delegator {
 		delegate(((Handler)engine::relate)
 
 				.with(engine.transaction())
-				.with(engine.throttler(Relate, Detail))
+				.with(keeper(Relate, Detail))
 
 		);
 	}

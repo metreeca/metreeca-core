@@ -34,6 +34,7 @@ import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Wrapper.keeper;
 import static com.metreeca.rest.Xtream.encode;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
 import static com.metreeca.rest.services.Engine.engine;
@@ -51,7 +52,7 @@ import static java.util.stream.Collectors.toList;
  * <ul>
  *
  * <li>{@linkplain Guard#Role role}-based request shape redaction and shape-based
- * {@linkplain Engine#throttler(Object, Object) authorization}, considering shapes enabled by the
+ * {@linkplain Wrapper#keeper(Object, Object) authorization}, considering shapes enabled by the
  * {@linkplain Guard#Create} task and the {@linkplain Guard#Detail} view;</li>
  *
  * <li>shape-driven request payload validation;</li>
@@ -123,7 +124,7 @@ public final class Creator extends Delegator {
 		delegate(wrapper(slug).wrap(engine::create) // immediately around handler after custom wrappers
 
 				.with(engine.transaction())
-				.with(engine.throttler(Create, Detail))
+				.with(keeper(Create, Detail))
 
 		);
 	}

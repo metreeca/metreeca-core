@@ -21,7 +21,6 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
 import com.metreeca.rest.operators.Creator;
@@ -33,7 +32,6 @@ import org.eclipse.rdf4j.model.vocabulary.XSD;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.term;
@@ -41,10 +39,6 @@ import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.Forbidden;
-import static com.metreeca.rest.Response.Unauthorized;
-import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
@@ -177,68 +171,8 @@ public interface Engine {
 	 * Creates a transaction wrapper.
 	 *
 	 * @return a wrapper ensuring that requests are handled within a single transaction on the storage backend
-	 *
-	 * @implNote the default implementation returns a dummy wrapper with no actual effects
 	 */
-	public default Wrapper transaction() {
-		return handler -> handler;
-	}
-
-	/**
-	 * Creates a throttler wrapper.
-	 *
-	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
-	 * @param view the accepted values for the {@linkplain Guard#View task} parametric axis
-	 *
-	 * @return a wrapper performing role-based shape redaction and shape-based authorization
-	 *
-	 * @throws NullPointerException if either {@code task} or {@code view} is null
-	 */
-	public default Wrapper throttler(final Object task, final Object view) { // !!! optimize/cache
-		return handler -> request -> {
-
-			final Shape shape=request.attribute(shape()) // visible taking into account task/area
-
-					.redact(Task, task)
-					.redact(View, view)
-					.redact(Mode, Convey);
-
-			final Shape baseline=shape // visible to anyone
-
-					.redact(Role);
-
-			final Shape authorized=shape // visible to user
-
-					.redact(Role, request.roles());
-
-
-			final UnaryOperator<Request> incoming=message -> message.map(shape(), s -> s
-
-					.redact(Role, message.roles())
-					.redact(Task, task)
-					.redact(View, view)
-
-					.localize(message.request().langs())
-
-			);
-
-			final UnaryOperator<Response> outgoing=message -> message.map(shape(), s -> s
-
-					.redact(Role, message.request().roles())
-					.redact(Task, task)
-					.redact(View, view)
-					.redact(Mode, Convey)
-
-					.localize(message.request().langs())
-
-			);
-
-			return baseline.empty() ? request.reply(status(Forbidden))
-					: authorized.empty() ? request.reply(status(Unauthorized))
-					: handler.handle(request.map(incoming)).map(outgoing);
-
-		};
-	}
+	public Wrapper transaction();
 
 
 	//// CRUD Operations ///////////////////////////////////////////////////////////////////////////////////////////////

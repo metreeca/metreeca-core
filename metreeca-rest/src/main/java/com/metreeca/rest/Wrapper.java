@@ -17,12 +17,18 @@
 package com.metreeca.rest;
 
 
+import com.metreeca.json.Shape;
+import com.metreeca.json.shapes.Guard;
+
 import java.util.*;
 import java.util.function.*;
 
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Handler.handler;
 import static com.metreeca.rest.MessageException.status;
+import static com.metreeca.rest.Response.Forbidden;
 import static com.metreeca.rest.Response.Unauthorized;
+import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -237,6 +243,63 @@ import static java.util.Objects.requireNonNull;
 
 		return handler -> request -> request.roles().stream().anyMatch(roles::contains)
 				? handler.handle(request) : request.reply(status(Unauthorized)); // !!! 404 under strict security
+	}
+
+
+	/**
+	 * Creates a shape-based access controller.
+	 *
+	 * @param task the accepted value for the {@linkplain Guard#Task task} parametric axis
+	 * @param view the accepted values for the {@linkplain Guard#View task} parametric axis
+	 *
+	 * @return a wrapper performing role-based shape redaction and shape-based authorization
+	 *
+	 * @throws NullPointerException if either {@code task} or {@code view} is null
+	 */
+	public static Wrapper keeper(final Object task, final Object view) {
+		return handler -> request -> {
+
+			final Shape shape=request.attribute(shape()) // visible taking into account task/area
+
+					.redact(Task, task)
+					.redact(View, view)
+					.redact(Mode, Convey);
+
+			final Shape baseline=shape // visible to anyone
+
+					.redact(Role);
+
+			final Shape authorized=shape // visible to user
+
+					.redact(Role, request.roles());
+
+
+			final UnaryOperator<Request> incoming=message -> message.map(shape(), s -> s
+
+					.redact(Role, message.roles())
+					.redact(Task, task)
+					.redact(View, view)
+
+					.localize(message.request().langs())
+
+			);
+
+			final UnaryOperator<Response> outgoing=message -> message.map(shape(), s -> s
+
+					.redact(Role, message.request().roles())
+					.redact(Task, task)
+					.redact(View, view)
+					.redact(Mode, Convey)
+
+					.localize(message.request().langs())
+
+			);
+
+			return baseline.empty() ? request.reply(status(Forbidden))
+					: authorized.empty() ? request.reply(status(Unauthorized))
+					: handler.handle(request.map(incoming)).map(outgoing);
+
+		};
 	}
 
 
