@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.toCollection;
 /**
  * Linked data frame.
  *
- * <p>Describes a linked data graph centered on a focus value.</p>
+ * <p>Describes a linked data graph centered on a focus resource.</p>
  */
 public final class Frame {
 
@@ -119,6 +119,11 @@ public final class Frame {
 	}
 
 
+	/**
+	 * Retrieves the frame focus.
+	 *
+	 * @return theIRI of the frame focus resource.
+	 */
 	public IRI focus() {
 		return focus;
 	}
@@ -306,95 +311,95 @@ public final class Frame {
 		}
 
 
-		public Frame decimal(final BigDecimal value) {
+		public Frame decimal(final Number value) {
 
 			if ( value == null ) {
 				throw new NullPointerException("null value");
 			}
 
-			return value(literal(value));
+			return value(literal(Values.decimal(value)));
 		}
 
-		public Frame decimal(final Optional<BigDecimal> value) {
+		public Frame decimal(final Optional<Number> value) {
 
 			if ( value == null ) {
 				throw new NullPointerException("null value");
 			}
 
-			return value(value.map(Values::literal));
+			return value(value.map(Values::decimal).map(Values::literal));
 		}
 
-		public Frame decimals(final BigDecimal... values) {
+		public Frame decimals(final Number... values) {
 
 			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
 				throw new NullPointerException("null values");
 			}
 
-			return values(Arrays.stream(values).map(Values::literal));
+			return decimals(Arrays.stream(values));
 		}
 
-		public Frame decimals(final Collection<BigDecimal> values) {
+		public Frame decimals(final Collection<Number> values) {
 
 			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 				throw new NullPointerException("null values");
 			}
 
-			return values(values.stream().map(Values::literal));
+			return decimals(values.stream());
 		}
 
-		public Frame decimals(final Stream<BigDecimal> values) {
+		public Frame decimals(final Stream<Number> values) {
 
 			if ( values == null ) {
 				throw new NullPointerException("null values");
 			}
 
-			return values(values.map(Values::literal));
+			return values(values.map(Values::decimal).map(Values::literal));
 		}
 
 
-		public Frame integer(final BigInteger value) {
+		public Frame integer(final Number value) {
 
 			if ( value == null ) {
 				throw new NullPointerException("null value");
 			}
 
-			return value(literal(value));
+			return value(literal(Values.integer(value)));
 		}
 
-		public Frame integer(final Optional<BigInteger> values) {
+		public Frame integer(final Optional<Number> values) {
 
 			if ( values == null ) {
 				throw new NullPointerException("null values");
 			}
 
-			return value(values.map(Values::literal));
+			return value(values.map(Values::integer).map(Values::literal));
 		}
 
-		public Frame integers(final BigInteger... values) {
+		public Frame integers(final Number... values) {
 
 			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
 				throw new NullPointerException("null values");
 			}
 
-			return values(Arrays.stream(values).map(Values::literal));
+			return integers(Arrays.stream(values));
 		}
 
-		public Frame integers(final Collection<BigInteger> values) {
+		public Frame integers(final Collection<Number> values) {
 
 			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
 				throw new NullPointerException("null values");
 			}
 
-			return values(values.stream().map(Values::literal));
+			return integers(values.stream());
 		}
 
-		public Frame integers(final Stream<BigInteger> values) {
+		public Frame integers(final Stream<Number> values) {
 
 			if ( values == null ) {
 				throw new NullPointerException("null values");
 			}
 
-			return values(values.map(Values::literal));
+			return values(values.map(Values::integer).map(Values::literal));
 		}
 
 
@@ -422,7 +427,7 @@ public final class Frame {
 				throw new NullPointerException("null values");
 			}
 
-			return values(Arrays.stream(values).map(Values::literal));
+			return strings(Arrays.stream(values));
 		}
 
 		public Frame strings(final Collection<String> values) {
@@ -431,7 +436,7 @@ public final class Frame {
 				throw new NullPointerException("null values");
 			}
 
-			return values(values.stream().map(Values::literal));
+			return strings(values.stream());
 		}
 
 		public Frame strings(final Stream<String> values) {
