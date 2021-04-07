@@ -97,8 +97,6 @@ import static com.metreeca.rest.services.Engine.*;
  * <li>a {@value Response#NotFound} status code;</li>
  *
  * </ul>
- *
- * <p>All operations are executed inside a single {@linkplain Engine#transaction() engine transaction}.</p>
  */
 public final class Relator extends Delegator {
 
@@ -118,15 +116,10 @@ public final class Relator extends Delegator {
 
 
 	private Relator() {
-		delegate(relate()
-
-				.with(engine.transaction())
-				.with(wrapper(Request::collection,
-						keeper(Relate, Digest),
-						keeper(Relate, Detail)
-				))
-
-		);
+		delegate(relate().with(wrapper(Request::collection,
+				keeper(Relate, Digest),
+				keeper(Relate, Detail)
+		)));
 	}
 
 

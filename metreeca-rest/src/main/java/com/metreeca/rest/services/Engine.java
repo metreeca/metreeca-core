@@ -20,7 +20,6 @@ import com.metreeca.json.*;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.operators.Creator;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -159,16 +158,6 @@ public interface Engine {
 	public static Supplier<Engine> engine() {
 		return () -> { throw new IllegalStateException("undefined engine service"); };
 	}
-
-
-	//// Wrappers //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Creates a transaction wrapper.
-	 *
-	 * @return a wrapper ensuring that requests are handled within a single transaction on the storage backend
-	 */
-	public Wrapper transaction();
 
 
 	//// CRUD Operations ///////////////////////////////////////////////////////////////////////////////////////////////

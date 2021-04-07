@@ -74,9 +74,6 @@ import static com.metreeca.rest.services.Engine.engine;
  * <li>a {@value Response#NotFound} status code.</li>
  *
  * </ul>
- *
- *
- * <p>All operations are executed inside a single {@linkplain Engine#transaction() engine transaction}.</p>
  */
 public final class Deleter extends Delegator {
 
@@ -96,12 +93,8 @@ public final class Deleter extends Delegator {
 
 
 	private Deleter() {
-
-		delegate(delete()
-
-				.with(engine.transaction())
-				.with(keeper(Delete, Detail))
-
+		delegate(delete().with(
+				keeper(Delete, Detail))
 		);
 	}
 

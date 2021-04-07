@@ -91,8 +91,6 @@ import static java.util.stream.Collectors.toList;
  * <li>a {@code Location} HTTP response header advertising the IRI of the newly created resource.</li>
  *
  * </ul>
- *
- * <p>All operations are executed inside a single {@linkplain Engine#transaction() engine transaction}.</p>
  */
 public final class Creator extends Delegator {
 
@@ -114,12 +112,9 @@ public final class Creator extends Delegator {
 
 
 	private Creator() {
-		delegate(rewrite().wrap(create()) // rewrite immediately before handler after custom wrappers
-
-				.with(engine.transaction())
-				.with(keeper(Create, Detail))
-
-		);
+		delegate(rewrite().wrap(create()).with( // rewrite immediately before handler, after custom wrappers
+				keeper(Create, Detail)
+		));
 	}
 
 

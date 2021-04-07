@@ -8,7 +8,7 @@
 - REST / Merged `Engine.browse()/relate()` methods and removed `Browser` handler
 - REST / Migrated `Creator` slug generator configuration fomr constructor to setter method
 - REST / Factored request handling code to CRUD handlers and simplified `Engine` API
-- REST / Migrated engine transaction mgmt to the dedicated `Engine.transaction())` method
+- REST / Removed transaction mgmt from `Engine` API
 - REST / Migrated shape-based access control from `Engine.throttler()` to `Wrapper.keeper()`
 - REST / Renamed `Gateway` wrapper to `Server`
 - JSE / Merge `JSE.context(String/IRI)` setters to simplify API

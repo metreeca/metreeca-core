@@ -75,8 +75,6 @@ import static com.metreeca.rest.services.Engine.engine;
  * <li>a {@value Response#NotFound} status code.</li>
  *
  * </ul>
- *
- * <p>All operations are executed inside a single {@linkplain Engine#transaction() engine transaction}.</p>
  */
 public final class Updater extends Delegator {
 
@@ -96,13 +94,9 @@ public final class Updater extends Delegator {
 
 
 	private Updater() {
-
-		delegate(update()
-
-				.with(engine.transaction())
-				.with(keeper(Update, Detail))
-
-		);
+		delegate(update().with(
+				keeper(Update, Detail)
+		));
 	}
 
 

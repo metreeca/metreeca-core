@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.json.*;
 import com.metreeca.json.queries.*;
 import com.metreeca.rdf4j.services.GraphFacts.Options;
-import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
@@ -108,15 +107,6 @@ public final class GraphEngine implements Engine {
 		options.put(option, value);
 
 		return this;
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public Wrapper transaction() {
-		return handler -> request -> consumer -> graph.exec(txn(connection -> {
-			handler.handle(request).accept(consumer);
-		}));
 	}
 
 

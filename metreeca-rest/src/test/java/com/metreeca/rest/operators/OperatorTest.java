@@ -18,7 +18,6 @@ package com.metreeca.rest.operators;
 
 import com.metreeca.json.*;
 import com.metreeca.rest.Toolbox;
-import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.services.Engine;
 
 import java.util.Optional;
@@ -51,10 +50,6 @@ final class OperatorTest {
 			this.success=success;
 		}
 
-
-		@Override public Wrapper transaction() {
-			return handler -> handler;
-		}
 
 		@Override public Optional<Frame> create(final Frame frame, final Shape shape) {
 			return Optional.of(frame).filter(success);
