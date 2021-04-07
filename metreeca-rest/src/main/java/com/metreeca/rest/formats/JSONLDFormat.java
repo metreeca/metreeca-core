@@ -30,8 +30,6 @@ import java.util.function.Supplier;
 import javax.json.*;
 
 import static com.metreeca.json.Frame.frame;
-import static com.metreeca.json.Trace.trace;
-import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
 import static com.metreeca.rest.Either.Left;
@@ -186,15 +184,7 @@ public final class JSONLDFormat extends Format<Frame> {
 
 								trace -> Left(status(UnprocessableEntity, trace.toJSON())),
 
-								value -> value.size() == model.size()
-
-										? Right(frame(focus, value))
-
-										: Left(status(UnprocessableEntity,
-										trace(value.stream().filter(s -> !model.contains(s))
-												.map(s -> format("statement <%s> is out of shape envelop", format(s)))
-										).toJSON()
-								))
+								value -> Right(frame(focus, model)) // use model to include inferred statements
 
 						);
 

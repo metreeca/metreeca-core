@@ -36,6 +36,7 @@ import javax.json.*;
 
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.Field.labels;
+import static com.metreeca.rest.formats.JSONLDInspector.driver;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -53,6 +54,7 @@ final class JSONLDDecoder {
 
 	private final IRI focus;
 	private final Shape shape;
+	private final Set<Statement> model;
 
 	private final Map<String, String> keywords;
 
@@ -64,7 +66,8 @@ final class JSONLDDecoder {
 	JSONLDDecoder(final IRI focus, final Shape shape, final Map<String, String> keywords) {
 
 		this.focus=focus;
-		this.shape=JSONLDInspector.driver(shape);
+		this.shape=driver(shape);
+		this.model=shape.outline(focus);
 
 		this.keywords=keywords;
 
@@ -97,7 +100,7 @@ final class JSONLDDecoder {
 		final JsonObject object=keywords.containsKey("@id") ? json
 				: createObjectBuilder(json).add("@id", expected).build(); // make sure the root object contains @id
 
-		final Collection<Statement> model=new ArrayList<>();
+		final Collection<Statement> model=new ArrayList<>(this.model); // include inferred statements
 
 		value(object, shape).getValue().forEachOrdered(model::add);
 

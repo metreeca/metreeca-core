@@ -35,9 +35,11 @@ import static com.metreeca.json.Shape.optional;
 import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.ValueAssert.assertThat;
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
+import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.rest.Xtream.entry;
@@ -412,25 +414,48 @@ final class JSONLDDecoderTest {
 		}
 
 
-		@Test void testReportCLashingLabels() {
-			assertThatThrownBy(() -> {
-				decode(x,
+		@Test void testReportUnknownLabels() {
+			assertThatThrownBy(() -> decode(x,
 
-						and(
-								field(iri("http://example.org/value"), and()),
-								field(iri("http://example.net/value"), and())
-						),
+					field(RDF.VALUE),
 
-						createObjectBuilder()
+					createObjectBuilder()
+							.add("unknown", createValue(""))
 
-				);
-			}).isInstanceOf(IllegalArgumentException.class);
+			)).isInstanceOf(JsonException.class); // client error
+		}
+
+		@Test void testReportClashingLabels() {
+			assertThatThrownBy(() -> decode(x,
+
+					and(
+							field(iri("http://example.org/value"), and()),
+							field(iri("http://example.net/value"), and())
+					),
+
+					createObjectBuilder()
+
+			)).isInstanceOf(IllegalArgumentException.class); // server error
 		}
 
 
 	}
 
 	@Nested final class Shapes {
+
+		@Test void testIncludeInferredStatements() {
+			assertThat(decode(x,
+
+					filter(field(RDF.TYPE, all(y))),
+
+					createObjectBuilder()
+
+			)).isIsomorphicTo(
+
+					statement(x, RDF.TYPE, y)
+
+			);
+		}
 
 		@Test void testDecodeProvedResources() {
 			assertThat(decode(x,

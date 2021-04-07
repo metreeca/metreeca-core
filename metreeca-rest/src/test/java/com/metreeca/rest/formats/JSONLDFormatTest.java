@@ -94,18 +94,6 @@ final class JSONLDFormatTest {
 			);
 		}
 
-		@Test void test() {
-			exec(() -> request("{ \"direct\": 1, \"other\": 2 }")
-
-					.map(this::response)
-
-					.accept(response -> assertThat(response)
-							.hasStatus(BadRequest)
-					)
-			);
-		}
-
-
 		@Test void testReportInvalidPayload() {
 			exec(() -> request("{}")
 
