@@ -17,8 +17,7 @@
 package com.metreeca.rest.services;
 
 import com.metreeca.json.*;
-import com.metreeca.json.queries.Stats;
-import com.metreeca.json.queries.Terms;
+import com.metreeca.json.queries.*;
 import com.metreeca.json.shapes.Field;
 import com.metreeca.rest.operators.Creator;
 
@@ -149,6 +148,17 @@ public interface Engine {
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Retrieves the item query retrieval limit option.
+	 *
+	 * @return an option for configuring the maximum number of resources returned by {@linkplain Items items queries},
+	 * with a default value of {@code 1000}
+	 */
+	public static Supplier<Integer> items() {
+		return () -> 1_000;
+	}
+
 
 	/**
 	 * Retrieves the default engine factory.

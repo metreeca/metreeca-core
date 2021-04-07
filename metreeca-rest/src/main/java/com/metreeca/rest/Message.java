@@ -20,7 +20,8 @@ import com.metreeca.rest.formats.MultipartFormat;
 
 import java.net.URI;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -42,8 +43,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @param <T> the self-bounded message type supporting fluent setters
  */
-@SuppressWarnings("unchecked")
-public abstract class Message<T extends Message<T>> {
+public abstract class Message<T extends Message<T>> extends Setup<T> {
 
 	private static final Pattern CharsetPattern=Pattern.compile(
 			";\\s*charset\\s*=\\s*(?<charset>[-\\w]+)\\b"
@@ -52,12 +52,8 @@ public abstract class Message<T extends Message<T>> {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Map<Supplier<?>, Object> attributes=new LinkedHashMap<>();
 	private final Map<String, List<String>> headers=new LinkedHashMap<>();
 	private final Map<Format<?>, Either<MessageException, ?>> bodies=new HashMap<>();
-
-
-	private T self() { return (T)this; }
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,82 +185,6 @@ public abstract class Message<T extends Message<T>> {
 
 		bodies.clear();
 		bodies.putAll(message.bodies);
-
-		return self();
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves message attribute.
-	 *
-	 * @param name the name for the attribute to be retrieved; must return a non-null default value for the attribute
-	 * @param <V>  the type of the attribute to be retrieved
-	 *
-	 * @return the value of message attribute associated with {@code name}
-	 *
-	 * @throws NullPointerException if {@code name} is null
-	 */
-	public <V> V attribute(final Supplier<V> name) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		return (V)attributes.computeIfAbsent(name, _key -> requireNonNull(_key.get(), "null name value"));
-	}
-
-	/**
-	 * Configures message attribute.
-	 *
-	 * @param name  the name for the attribute to be configured; must return a non-null default value for the attribute
-	 * @param value the attribute value to be associated with {@code name}
-	 * @param <V>   the type of the attribute to be configured
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code value} is null
-	 */
-	public <V> T attribute(final Supplier<V> name, final V value) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( value == null ) {
-			throw new NullPointerException("null value");
-		}
-
-		attributes.put(name, value);
-
-		return self();
-	}
-
-
-	/**
-	 * Updates message attribute.
-	 *
-	 * @param name   the name for the attribute to be updated; must return a non-null default value for the attribute
-	 * @param mapper a function mapping from the current to the updated value of the {@code name} attribute; must return
-	 *               a non-null value
-	 * @param <V>    the type of the attribute to be updated
-	 *
-	 * @return this message
-	 *
-	 * @throws NullPointerException if either {@code name} or {@code value} is null
-	 */
-	public <V> T map(final Supplier<V> name, final UnaryOperator<V> mapper) {
-
-		if ( name == null ) {
-			throw new NullPointerException("null name");
-		}
-
-		if ( mapper == null ) {
-			throw new NullPointerException("null mapper");
-		}
-
-		attributes.computeIfPresent(name, (key, value) -> mapper.apply((V)value));
 
 		return self();
 	}

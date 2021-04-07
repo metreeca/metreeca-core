@@ -18,6 +18,7 @@ package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
+import com.metreeca.rest.Config;
 import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.*;
@@ -41,13 +42,11 @@ import static com.metreeca.rest.Toolbox.service;
 
 final class GraphStats extends GraphFacts {
 
-	private final Options options=options();
-
 	private final Graph graph=service(graph());
 
 
-	GraphStats(final Options options) {
-		super(options);
+	GraphStats(final Config config) {
+		super(config);
 	}
 
 

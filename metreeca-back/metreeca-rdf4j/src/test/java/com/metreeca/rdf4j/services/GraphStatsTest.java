@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.queries.Stats;
+import com.metreeca.rest.Config;
 import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -50,8 +51,8 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphStatsTest {
 
-	private static GraphFacts.Options options() {
-		return new GraphFacts.Options() {
+	private static Config options() {
+		return new Config() {
 			@Override public <V> V get(final Supplier<V> option) {
 				return option.get();
 			}

@@ -259,7 +259,7 @@ import static java.util.Objects.requireNonNull;
 	public static Wrapper keeper(final Object task, final Object view) {
 		return handler -> request -> {
 
-			final Shape shape=request.attribute(shape()) // visible taking into account task/area
+			final Shape shape=request.get(shape()) // visible taking into account task/area
 
 					.redact(Task, task)
 					.redact(View, view)

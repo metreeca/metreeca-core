@@ -32,6 +32,7 @@ import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Request.*;
 import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static java.util.Collections.emptyList;
 
 
@@ -349,7 +350,7 @@ public final class Router implements Handler {
 
 		return request -> {
 
-			final String head=request.attribute(RoutingPrefix);
+			final String head=request.get(RoutingPrefix);
 			final String tail=request.path().substring(head.length());
 
 			return Optional.of(pattern.matcher(tail))
@@ -366,7 +367,7 @@ public final class Router implements Handler {
 							}
 						});
 
-						return request.attribute(RoutingPrefix, head+matcher.group(1));
+						return request.set(RoutingPrefix, head+matcher.group(1));
 
 					})
 

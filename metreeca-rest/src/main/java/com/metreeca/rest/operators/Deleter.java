@@ -103,7 +103,7 @@ public final class Deleter extends Delegator {
 		return request -> {
 
 			final IRI item=iri(request.item());
-			final Shape shape=request.attribute(shape());
+			final Shape shape=request.get(shape());
 
 			return engine.delete(frame(item), shape)
 

@@ -19,6 +19,7 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rest.Config;
 import com.metreeca.rest.Scribe;
 import com.metreeca.rest.services.Logger;
 
@@ -99,27 +100,22 @@ abstract class GraphFacts {
 	}
 
 
-	@FunctionalInterface static interface Options {
-		<V> V get(final Supplier<V> option);
-	}
-
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Options options;
+	private final Config config;
 
 	private int label=1; // the next label available for tagging (0 reserved for the root node)
 
 	private final Logger logger=service(logger());
 
 
-	GraphFacts(final Options options) {
-		this.options=options;
+	GraphFacts(final Config config) {
+		this.config=config;
 	}
 
 
-	Options options() {
-		return options;
+	Config config() {
+		return config;
 	}
 
 

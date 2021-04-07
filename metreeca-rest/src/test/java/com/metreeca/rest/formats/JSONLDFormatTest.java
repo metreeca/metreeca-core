@@ -70,7 +70,7 @@ final class JSONLDFormatTest {
 
 					.header("Content-Type", MIME)
 
-					.attribute(shape(), field(direct, required()))
+					.set(shape(), field(direct, required()))
 
 					.body(input(), () -> new ByteArrayInputStream(json.getBytes(UTF_8)));
 		}
@@ -78,7 +78,7 @@ final class JSONLDFormatTest {
 		private Future<Response> response(final Request request) {
 			return request.reply(response -> request.body(jsonld()).fold(
 					response::map,
-					model -> response.status(OK).attribute(shape(), request.attribute(shape())).body(jsonld(), model)
+					model -> response.status(OK).set(shape(), request.get(shape())).body(jsonld(), model)
 			));
 		}
 
@@ -121,7 +121,7 @@ final class JSONLDFormatTest {
 
 			return response.status(OK)
 
-					.attribute(shape(), and(
+					.set(shape(), and(
 
 							field(direct, required(),
 									field(nested, required())
@@ -265,7 +265,7 @@ final class JSONLDFormatTest {
 
 						return response.status(OK)
 
-								.attribute(shape(), field(direct, localized()))
+								.set(shape(), field(direct, localized()))
 
 								.body(jsonld(), frame(item, asList(
 

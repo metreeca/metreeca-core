@@ -43,8 +43,8 @@ import static java.time.temporal.ChronoUnit.MILLIS;
  *
  * <p>Manages task execution on an RDF {@linkplain Repository repository}.</p>
  *
- * <p>Nested task executions on the same graph store from the same thread will share the same connection to the backing
- * RDF repository through a {@link ThreadLocal} scope variable.</p>
+ * <p>Nested task executions on the same thread will share the same connection to the backing RDF repository through a
+ * {@link ThreadLocal} scope variable.</p>
  */
 public final class Graph implements AutoCloseable {
 
@@ -228,8 +228,8 @@ public final class Graph implements AutoCloseable {
 	 * @param <M>         the type of the target message for the new filter
 	 *
 	 * @return a message filter executing the SPARQL graph {@code query} on target messages with {@linkplain
-	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom
-	 * configurations; returns the input model extended with the statements returned by {@code query}
+	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations; returns the
+	 * input model extended with the statements returned by {@code query}
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
@@ -269,9 +269,7 @@ public final class Graph implements AutoCloseable {
 	 * @param <M>         the type of the target message for the new filter
 	 *
 	 * @return a housekeeping task executing the SPARQL {@code update} script on target messages with {@linkplain
-	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom
-	 * configurations;
-	 * returns the
+	 * #configure(Message, Operation, BiConsumer[]) standard bindings} and optional custom configurations; returns the
 	 * input message without altering it
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
@@ -493,8 +491,7 @@ public final class Graph implements AutoCloseable {
 	 * successful task completion; if the task throws an exception, the transaction is rolled back and the exception
 	 * rethrown; in either case,  no action is taken if the transaction was already terminated inside the task.</p>
 	 *
-	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
-	 *             store
+	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph store
 	 *
 	 * @return this graph store
 	 *
@@ -522,8 +519,7 @@ public final class Graph implements AutoCloseable {
 	 * successful task completion; if the task throws an exception, the transaction is rolled back and the exception
 	 * rethrown; in either case no action is taken if the transaction was already closed inside the task.</p>
 	 *
-	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph
-	 *             store
+	 * @param task the task to be executed; takes as argument a connection to the backing repository of this graph store
 	 * @param <V>  the type of the value returned by {@code task}
 	 *
 	 * @return the value returned by {@code task}

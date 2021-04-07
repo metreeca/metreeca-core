@@ -189,7 +189,7 @@ public final class Creator extends Delegator {
 		return request -> {
 
 			final IRI item=iri(request.item());
-			final Shape shape=request.attribute(shape());
+			final Shape shape=request.get(shape());
 
 			return request.body(jsonld()).fold(request::reply, frame -> engine.create(frame, shape)
 

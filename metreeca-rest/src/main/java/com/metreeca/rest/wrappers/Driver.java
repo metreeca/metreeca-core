@@ -133,7 +133,7 @@ public final class Driver implements Wrapper {
 
 
 	@Override public Handler wrap(final Handler handler) {
-		return request -> handler.handle(request.attribute(shape(), shape));
+		return request -> handler.handle(request.set(shape(), shape));
 	}
 
 }

@@ -17,6 +17,7 @@
 package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Shape;
+import com.metreeca.rest.Config;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Statement;
@@ -100,8 +101,8 @@ final class GraphFactsTest {
 
 	);
 
-	private static Options options() {
-		return new Options() {
+	private static Config options() {
+		return new Config() {
 			@Override public <V> V get(final Supplier<V> option) {
 				return option.get();
 			}

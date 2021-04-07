@@ -129,7 +129,7 @@ public final class Relator extends Delegator {
 			final boolean collection=request.collection();
 
 			final IRI item=iri(request.item());
-			final Shape shape=request.attribute(shape());
+			final Shape shape=request.get(shape());
 
 			return query(item, shape, request.query()).fold(request::reply, query ->
 					request.reply(response -> engine.relate(frame(item), query)
@@ -137,7 +137,7 @@ public final class Relator extends Delegator {
 							.filter(frame -> collection || !frame.model().isEmpty()) // collections are virtual
 
 							.map(frame -> response.status(OK)
-									.attribute(shape(), query.map(new ShapeProbe(collection)))
+									.set(shape(), query.map(new ShapeProbe(collection)))
 									.body(jsonld(), frame)
 							)
 

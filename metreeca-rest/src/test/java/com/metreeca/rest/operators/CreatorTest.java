@@ -58,7 +58,7 @@ final class CreatorTest {
 				() -> creator()
 
 						.handle(new Request()
-								.attribute(shape(), shape)
+								.set(shape(), shape)
 								.body(jsonld(), frame(focus)
 										.set(RDF.VALUE).value(focus)
 								)
@@ -77,7 +77,7 @@ final class CreatorTest {
 		assertThatIllegalStateException().isThrownBy(() -> exec(frame -> false, () -> creator()
 
 				.handle(new Request()
-						.attribute(shape(), shape)
+						.set(shape(), shape)
 						.body(jsonld(), frame(item("/")))
 				)
 

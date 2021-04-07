@@ -130,7 +130,7 @@ public final class Graphs extends Endpoint<Graphs> {
 				});
 
 				request.reply(response -> response.status(Response.OK)
-						.attribute(JSONLDFormat.shape(), GraphsShape)
+						.set(JSONLDFormat.shape(), GraphsShape)
 						.body(rdf(), model)
 				).accept(consumer);
 

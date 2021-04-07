@@ -20,6 +20,7 @@ import com.metreeca.json.Order;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
+import com.metreeca.rest.Config;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
@@ -34,9 +35,9 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.services.Graph.graph;
-import static com.metreeca.rdf4j.services.GraphEngine.items;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.services.Engine.items;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
@@ -44,13 +45,13 @@ import static java.util.stream.Collectors.toList;
 
 final class GraphItems extends GraphFacts {
 
-	private final Options options=options();
+	private final Config config=config();
 
 	private final Graph graph=service(graph());
 
 
-	GraphItems(final Options options) {
-		super(options);
+	GraphItems(final Config config) {
+		super(config);
 	}
 
 
@@ -110,7 +111,7 @@ final class GraphItems extends GraphFacts {
 									))),
 
 									offset(offset),
-									limit(limit, options.get(items()))
+									limit(limit, config.get(items()))
 
 							)),
 

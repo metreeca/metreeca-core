@@ -5,6 +5,7 @@
 - REST / Migrated `JSONLDFormat` to `Frame` payload to improve usability
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF
   statement context, JSON-LD context, web app context, web app asset, …)
+- REST / Factored configurable option mgmt to `Setup`
 - REST / Merged `Engine.browse()/relate()` methods and removed `Browser` handler
 - REST / Migrated `Creator` slug generator configuration fomr constructor to setter method
 - REST / Factored request handling code to CRUD handlers and simplified `Engine` API

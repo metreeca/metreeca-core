@@ -80,7 +80,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 
 		isNotNull();
 
-		assertions.accept(actual.attribute(factory));
+		assertions.accept(actual.get(factory));
 
 		return myself;
 	}

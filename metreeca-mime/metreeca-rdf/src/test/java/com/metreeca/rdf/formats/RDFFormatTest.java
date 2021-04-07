@@ -177,7 +177,7 @@ final class RDFFormatTest {
 					.reply(response -> {
 								return response
 										.status(Response.OK)
-										.attribute(shape(), field(LDP.CONTAINS, datatype(Values.IRIType)))
+										.set(shape(), field(LDP.CONTAINS, datatype(Values.IRIType)))
 										.body(rdf(), singletonList(statement(
 												iri("http://example.com/base/"), LDP.CONTAINS, iri("http://example"
 														+ ".com/base/x")

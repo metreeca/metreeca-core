@@ -169,7 +169,7 @@ public final class JSONLDFormat extends Format<Frame> {
 					) {
 
 						final IRI focus=iri(message.item());
-						final Shape shape=message.attribute(shape());
+						final Shape shape=message.get(shape());
 						final Map<String, String> keywords=service(keywords());
 
 						final Collection<Statement> model=new JSONLDDecoder(
@@ -254,7 +254,7 @@ public final class JSONLDFormat extends Format<Frame> {
 					) {
 
 						final IRI focus=iri(message.item());
-						final Shape shape=message.attribute(shape());
+						final Shape shape=message.get(shape());
 						final Map<String, String> keywords=service(keywords());
 
 						final Collection<Statement> model=scan(shape, focus, value.model()).fold(trace -> {

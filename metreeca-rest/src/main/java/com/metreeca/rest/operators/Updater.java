@@ -103,7 +103,7 @@ public final class Updater extends Delegator {
 	private Handler update() {
 		return request -> {
 
-			final Shape shape=request.attribute(shape());
+			final Shape shape=request.get(shape());
 
 			return request.body(jsonld()).fold(request::reply, frame -> engine.update(frame, shape)
 
