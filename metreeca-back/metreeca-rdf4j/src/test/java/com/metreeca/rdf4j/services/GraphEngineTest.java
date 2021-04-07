@@ -16,115 +16,111 @@
 
 package com.metreeca.rdf4j.services;
 
+import com.metreeca.json.Frame;
 import com.metreeca.json.Shape;
-import com.metreeca.json.ValueAssert;
-import com.metreeca.rest.Request;
+import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.vocabulary.*;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.ModelAssert.assertThat;
-import static com.metreeca.json.Shape.required;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.json.ValuesTest.small;
+import static com.metreeca.json.queries.Items.items;
+import static com.metreeca.json.queries.Terms.terms;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
-import static com.metreeca.json.shapes.Datatype.datatype;
+import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
-import static com.metreeca.json.shapes.MaxLength.maxLength;
-import static com.metreeca.json.shapes.Pattern.pattern;
-import static com.metreeca.rdf4j.services.GraphFactsTest.EmployeeShape;
 import static com.metreeca.rdf4j.services.GraphTest.exec;
 import static com.metreeca.rdf4j.services.GraphTest.model;
-import static com.metreeca.rest.Response.*;
-import static com.metreeca.rest.ResponseAssert.assertThat;
-import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
-import static com.metreeca.rest.formats.JSONLDFormat.shape;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static java.util.Collections.singletonList;
+
 final class GraphEngineTest {
+
+	private static final IRI Employee=term("Employee");
+
+	private static final IRI code=term("code");
+	private static final IRI forename=term("forename");
+	private static final IRI surname=term("surname");
+	private static final IRI email=term("email");
+	private static final IRI title=term("title");
+	private static final IRI office=term("office");
+	private static final IRI seniority=term("seniority");
+	private static final IRI supervisor=term("supervisor");
+	private static final IRI subordinate=term("subordinate");
+
+
+	private final Frame collection=frame(item("/employees/"));
+	private final Frame resource=frame(item("/employees/1370"));
+
+	private final Shape shape=and(
+
+			filter(clazz(Employee)),
+
+			field(RDF.TYPE),
+			field(RDFS.LABEL),
+			field(RDFS.COMMENT),
+
+			field(code),
+			field(forename),
+			field(surname),
+			field(email),
+			field(title),
+			field(office),
+			field(seniority),
+			field(supervisor),
+			field(subordinate)
+
+	);
+
+	private final Frame delta=frame(resource.focus())
+			.set(forename).string("Tino")
+			.set(surname).string("Faussone")
+			.set(email).string("tfaussone@classicmodelcars.com")
+			.set(title).string("tfaussone@classicmodelcars.com")
+			.set(seniority).integer(1);
+
 
 	@Nested final class Create {
 
-		private final Shape Employee=and(
-				filter(field(RDF.TYPE, all(term("Employee")))),
-				field(RDFS.LABEL, required(), datatype(XSD.STRING)),
-				field(term("code"), required(), datatype(XSD.STRING), pattern("\\d+")),
-				field(term("forename"), required(), datatype(XSD.STRING), maxLength(80)),
-				field(term("surname"), required(), datatype(XSD.STRING), maxLength(80)),
-				field(term("email"), required(), datatype(XSD.STRING), maxLength(80)),
-				field(term("title"), required(), datatype(XSD.STRING), maxLength(80))
-
-		);
-
-		private Request request() {
-			return new Request()
-					.base(Base)
-					.path("/employees/slug")
-					.body(jsonld(), frame(iri(Base, "/employees/slug"), decode("</employees/slug>"
-							+" :forename 'Tino' ;"
-							+" :surname 'Faussone' ;"
-							+" :email 'tfaussone@classicmodelcars.com' ;"
-							+" :title 'Sales Rep' ;"
-							+" :seniority 1 ."
-					))).attribute(shape(), Employee);
-		}
-
-
 		@Test void testCreate() {
-			exec(() -> new GraphEngine()
+			exec(() -> assertThat(new GraphEngine()
 
-					.create(request())
+					.create(delta, shape)
 
-					.accept(response -> {
-
-						final IRI location=response.header("Location")
-								.map(path -> iri(response.request().base(), path)) // resolve root-relative location
-								.orElse(null);
-
-						assertThat(response)
-								.hasStatus(Created)
-								.doesNotHaveBody();
-
-						ValueAssert.assertThat(location)
-								.as("resource created with supplied slug")
-								.isEqualTo(item("employees/slug"));
-
-						assertThat(model())
-								.as("resource description stored into the graph")
-								.hasSubset(
-										statement(location, RDF.TYPE, term("Employee")),
-										statement(location, term("forename"), literal("Tino")),
-										statement(location, term("surname"), literal("Faussone"))
-								);
-
-					}));
+			).hasValueSatisfying(frame -> assertThat(model())
+					.as("resource description stored into the graph")
+					.hasSubset(frame.model())
+			));
 		}
 
 		@Test void testConflictingSlug() {
 			exec(() -> {
 
-				new GraphEngine().create(request()).accept(response -> {});
+				final Engine engine=new GraphEngine();
+
+				engine.create(delta, shape);
 
 				final Model snapshot=model();
 
-				new GraphEngine().create(request()).accept(response -> {
+				assertThat(engine.create(delta, shape))
+						.as("clash reported")
+						.isEmpty();
 
-					assertThat(response)
-							.hasStatus(InternalServerError);
-
-					assertThat(model())
-							.as("graph unchanged")
-							.isIsomorphicTo(snapshot);
-
-				});
+				assertThat(model())
+						.as("graph unchanged")
+						.isIsomorphicTo(snapshot);
 
 			});
 		}
@@ -133,193 +129,103 @@ final class GraphEngineTest {
 
 	@Nested final class Relate {
 
-		private Request request() {
-			return new Request()
-					.base(Base)
-					.path("/employees/1370")
-					.attribute(shape(), EmployeeShape);
-		}
-
-
 		@Test void testRelate() {
-			exec(model(small()), () -> new GraphEngine()
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.relate(request())
+					.relate(resource, items(shape))
 
-					.accept(response -> assertThat(response)
-
-							.hasStatus(OK).hasAttribute(shape(),
-									shape -> assertThat(shape).isNotEqualTo(and()))
-
-							.hasBody(jsonld(), frame -> assertThat(frame.model())
-									.as("items retrieved")
-									.isSubsetOf(model(
-											"construct where { <employees/1370> ?p ?o }"
-									))
-							)
-					)
-			);
-		}
-
-	}
-
-	@Nested final class Browse {
-
-		private Request request() {
-			return new Request()
-					.base(Base)
-					.path("/employees/")
-					.attribute(shape(), EmployeeShape);
+			).hasValueSatisfying(frame -> assertThat(frame.model())
+					.as("items retrieved")
+					.isSubsetOf(model(
+							"construct where { <employees/1370> ?p ?o }"
+					))
+			));
 		}
 
 
 		@Test void testBrowse() {
-			exec(model(small()), () -> new GraphEngine()
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.relate(request())
+					.relate(collection, items(shape))
 
-					.accept(response -> assertThat(response)
-
-							.hasStatus(OK)
-							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
-
-							.hasBody(jsonld(), frame -> assertThat(frame.model())
-									.hasStatement(iri(response.item()), Shape.Contains, null)
-									.hasSubset(model("construct { ?e rdfs:label ?label; :seniority ?seniority }\n"
-											+"where { ?e a :Employee; rdfs:label ?label; :seniority ?seniority }"
-									))
-							)
-					)
-			);
+			).hasValueSatisfying(frame -> assertThat(frame.model())
+					.hasStatement(collection.focus(), Shape.Contains, null)
+					.hasSubset(model("construct { ?e :email ?email; :seniority ?seniority }\n"
+							+"where { ?e a :Employee; :email ?email; :seniority ?seniority }"
+					))
+			));
 		}
 
 		@Test void testBrowseFiltered() {
-			exec(model(small()), () -> new GraphEngine()
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.relate(request()
-							.query("title=Sales+Rep")
-					)
+					.relate(collection, items(and(shape, filter(field(title, all(literal("Sales Rep")))))))
 
-					.accept(response -> assertThat(response)
+			).hasValueSatisfying(frame -> assertThat(frame.model())
 
-							.hasStatus(OK)
-							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
+					.hasSubset(model(""
+							+"construct { ?e :title ?t; :seniority ?seniority }\n"
+							+"where { ?e a :Employee; :title ?t, 'Sales Rep'; :seniority ?seniority }"
+					))
 
-							.hasBody(jsonld(), frame -> assertThat(frame.model())
-
-									.hasSubset(model(""
-											+"construct { ?e :title ?t; :seniority ?seniority }\n"
-											+"where { ?e a :Employee; :title ?t, 'Sales Rep'; :seniority ?seniority }"
-									))
-
-									.as("only resources matching filter included")
-									.doesNotHaveStatement(null, term("title"), literal("President"))
-							)
-					)
-			);
+					.as("only resources matching filter included")
+					.doesNotHaveStatement(null, term("title"), literal("President"))
+			));
 		}
 
 		@Test void testSliceTermsQueries() {
-			exec(model(small()), () -> new GraphEngine()
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.relate(request()
-							.query(".terms=office&.offset=1&.limit=3")
-					)
+					.relate(collection, terms(shape, singletonList(office), 1, 3))
 
-					.accept(response -> assertThat(response)
+			).hasValueSatisfying(frame -> assertThat(frame.model())
 
-							.hasStatus(OK)
-							.hasAttribute(shape(), shape -> assertThat(shape).isNotEqualTo(and()))
+					.isIsomorphicTo(model(""
+							+"construct { \n"
+							+"\n"
+							+"\t<employees/> :terms [:value ?o; :count ?c]. \n"
+							+"\t?o rdfs:label ?l\n"
+							+"\n"
+							+"} where { { select ?o ?l (count(?e) as ?c) {\n"
+							+"\n"
+							+"\t?e a :Employee; :office ?o.\n"
+							+"\t?o rdfs:label ?l.\n"
+							+"\n"
+							+"} group by ?o ?l order by desc(?c) offset 1 limit 3 } }"
+					))
 
-							.hasBody(jsonld(), frame -> assertThat(frame.model())
-
-									.isIsomorphicTo(model(""
-											+"construct { \n"
-											+"\n"
-											+"\t<employees/> :terms [:value ?o; :count ?c]. \n"
-											+"\t?o rdfs:label ?l\n"
-											+"\n"
-											+"} where { { select ?o ?l (count(?e) as ?c) {\n"
-											+"\n"
-											+"\t?e a :Employee; :office ?o.\n"
-											+"\t?o rdfs:label ?l.\n"
-											+"\n"
-											+"} group by ?o ?l order by desc(?c) offset 1 limit 3 } }"
-									))
-
-							)
-					)
-			);
+			));
 		}
-
 
 	}
 
 	@Nested final class Update {
 
 		@Test void testUpdate() {
-			exec(model(small()), () -> new GraphEngine()
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.update(new Request()
-							.base(Base)
-							.path("/employees/1370")
-							.attribute(shape(), and(
-									field(term("forename"), required()),
-									field(term("surname"), required()),
-									field(term("email"), required()),
-									field(term("title"), required()),
-									field(term("seniority"), required())
-							))
-							.body(jsonld(), frame(iri(Base, "/employees/1370"), decode("</employees/1370>"
-									+":forename 'Tino';"
-									+":surname 'Faussone';"
-									+":email 'tfaussone@example.com';"
-									+":title 'Sales Rep' ;"
-									+":seniority 5 ." // outside salesman envelope
-							)))
-					)
+					.update(delta, shape)
 
-					.accept(response -> {
+			).hasValueSatisfying(frame -> assertThat(model())
 
-						assertThat(response)
-								.hasStatus(NoContent)
-								.doesNotHaveBody();
+					.as("updated values inserted")
+					.hasSubset(frame.model())
 
-						assertThat(model())
+					.as("previous values removed")
+					.doesNotHaveSubset(decode("</employees/1370>"
+							+":forename 'Gerard';"
+							+":surname 'Hernandez'."
+					))
 
-								.as("updated values inserted")
-								.hasSubset(decode("</employees/1370>"
-										+":forename 'Tino';"
-										+":surname 'Faussone';"
-										+":email 'tfaussone@example.com';"
-										+":title 'Sales Rep' ;"
-										+":seniority 5 ."
-								))
-
-								.as("previous values removed")
-								.doesNotHaveSubset(decode("</employees/1370>"
-										+":forename 'Gerard';"
-										+":surname 'Hernandez'."
-								));
-
-					}));
+			));
 		}
 
-		@Test void testReportMissing() {
-			exec(() -> new GraphEngine()
+		@Test void testReportUnknown() {
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.update(new Request()
-							.base(Base)
-							.path("/employees/9999")
-							.body(jsonld(), frame(iri(Base, "/employees/9999"), decode("")))
-					)
+					.update(frame(item("/employees//unknown")), shape)
 
-					.accept(response -> assertThat(response)
-							.hasStatus(NotFound)
-							.doesNotHaveBody()
-					)
-			);
-
+			).isEmpty());
 		}
 
 	}
@@ -327,55 +233,24 @@ final class GraphEngineTest {
 	@Nested final class Delete {
 
 		@Test void testDelete() {
-			exec(model(small()), () -> new GraphEngine()
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.delete(new Request()
-							.base(Base)
-							.path("/employees/1370")
-							.attribute(shape(), and(
+					.delete(resource, shape)
 
-									field(RDF.TYPE),
-									field(RDFS.LABEL),
+			).hasValueSatisfying(frame -> {
 
-									field(term("forename")),
-									field(term("surname")),
-									field(term("email")),
-									field(term("title")),
-									field(term("code")),
-									field(term("office")),
-									field(term("seniority")),
-									field(term("supervisor")),
-									field(term("subordinate"))
-							))
-					)
+				assertThat(model("construct where { <employees/1370> ?p ?o }")).isEmpty();
+				assertThat(model("construct where { ?s a :Employee; ?p ?o. }")).isNotEmpty();
 
-					.accept(response -> {
-
-						assertThat(response)
-								.hasStatus(NoContent)
-								.doesNotHaveBody();
-
-						assertThat(model("construct where { <employees/1370> ?p ?o }"))
-								.isEmpty();
-
-						assertThat(model("construct where { ?s a :Employee; ?p ?o. }"))
-								.isNotEmpty();
-
-					}));
+			}));
 		}
 
 		@Test void testReportUnknown() {
-			exec(() -> new GraphEngine()
+			exec(model(small()), () -> assertThat(new GraphEngine()
 
-					.delete(new Request()
-							.path("/unknown")
-					)
+					.delete(frame(item("/employees//unknown")), shape)
 
-					.accept(response -> assertThat(response)
-							.hasStatus(NotFound)
-							.doesNotHaveBody()
-					)
-			);
+			).isEmpty());
 		}
 
 	}

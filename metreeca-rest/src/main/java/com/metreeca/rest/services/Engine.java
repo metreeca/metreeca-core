@@ -16,21 +16,18 @@
 
 package com.metreeca.rest.services;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.json.shapes.Field;
-import com.metreeca.rest.*;
-import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.operators.Creator;
 
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.XSD;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -152,7 +149,6 @@ public interface Engine {
 				.filter(field -> Annotations.contains(field.iri())));
 	}
 
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
@@ -180,66 +176,59 @@ public interface Engine {
 	/**
 	 * Handles creation requests.
 	 *
-	 * <p>Handles creation requests of the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
-	 * {@linkplain JSONLDFormat#shape() shape}.</p>
+	 * @param frame a frame describing the linked data resource to be created
+	 * @param shape a shape describing the {@code frame} {@link Frame#model() model}
 	 *
-	 * @param request a creation request for the managed linked data resource
+	 * @return an optional containing {@code frame}, possibly extended with server managed properties, if the frame
+	 * {@linkplain Frame#focus() focus} IRI was not already present in the storage backend; an empty optional, otherwise
 	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to the creation {@code
-	 * request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 * @implSpec Concrete implementations must assume that {@link Request#path()} was already configured with a unique
-	 * identifier for the resource to be created and the {@linkplain JSONLDFormat JSON-LD} payload of the request
-	 * rewritten accordingly, for instance by an outer {@link Creator} handler
+	 * @throws NullPointerException if either {@code frame} or {@code shape} is null
+	 * @implSpec Concrete implementations must assume that {@code frame} was already configured with a unique focus IRI
+	 * for the resource to be created and its model rewritten accordingly, for instance by an outer {@link Creator}
+	 * handler
 	 */
-	public Future<Response> create(final Request request);
+	public Optional<Frame> create(final Frame frame, final Shape shape);
 
 	/**
 	 * Handles retrieval requests.
 	 *
-	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using the message {@linkplain JSONLDFormat#shape() shape}.</p>
+	 * @param frame a frame focused on the linked data resource to be retrieved
+	 * @param query a query describing the expected response model
 	 *
-	 * @param request a retrieval request for the managed linked data resource
+	 * @return an optional containing a frame describing the {@code frame} focus, possibly filtered according to {@code
+	 * query}, if the storage backend contained a matching linked data resource; an empty optional, otherwise
 	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to the retrieval {@code
-	 * request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
+	 * @throws NullPointerException if either {@code item} or {@code query} is null
 	 */
-	public Future<Response> relate(final Request request);
+	public Optional<Frame> relate(final Frame frame, final Query query);
 
 	/**
 	 * Handles updating requests.
 	 *
-	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using an engine-specific request {@linkplain Message#body(Format) payload} and the message
-	 * {@linkplain JSONLDFormat#shape() shape}.</p>
+	 * @param frame a frame describing the linked data resource to be updated
+	 * @param shape a shape describing the {@code frame} {@link Frame#model() model}
 	 *
-	 * @param request an updating request for the managed linked data resource
+	 * @return an optional containing {@code frame}, possibly extended with server managed properties, if the frame
+	 * {@linkplain Frame#focus() focus} IRI was already present in the storage backend; an empty optional, otherwise
 	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to the updating {@code
-	 * request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
+	 * @throws NullPointerException if either {@code frame} or {@code shape} is null
 	 */
-	public Future<Response> update(final Request request);
+	public Optional<Frame> update(final Frame frame, final Shape shape);
 
 	/**
 	 * Handles deletion requests.
 	 *
-	 * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item} possibly using  the message {@linkplain JSONLDFormat#shape() shape}.</p>
+	 * @param frame a frame focused on the linked data resource to be deleted
+	 * @param shape a shape describing the {@code frame} model to be deleted
 	 *
-	 * @param request a deletion request for the managed linked data resource
+	 * @return an optional containing a frame describing the deleted {@code frame}, if it was present in the storage
+	 * backend; an empty optional, otherwise
 	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to the deletion {@code
-	 * request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
+	 * @throws NullPointerException if either {@code frame} or {@code shape} is null
+	 * @implSpec If the deleted model is not readily available, concrete implementations may return a frame with an
+	 * empty
+	 * model
 	 */
-	public Future<Response> delete(final Request request);
+	public Optional<Frame> delete(final Frame frame, Shape shape);
 
 }

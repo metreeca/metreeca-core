@@ -16,38 +16,23 @@
 
 package com.metreeca.rdf4j.services;
 
-import com.metreeca.json.Query;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.json.queries.*;
 import com.metreeca.rdf4j.services.GraphFacts.Options;
-import com.metreeca.rest.*;
-import com.metreeca.rest.formats.JSONLDFormat;
+import com.metreeca.rest.Wrapper;
 import com.metreeca.rest.services.Engine;
 
-import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Statement;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
 
 import static com.metreeca.json.Frame.frame;
-import static com.metreeca.json.Shape.Contains;
-import static com.metreeca.json.Values.IRIPattern;
-import static com.metreeca.json.Values.format;
-import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.Convey;
-import static com.metreeca.json.shapes.Guard.Mode;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rdf4j.services.Graph.txn;
-import static com.metreeca.rest.MessageException.status;
-import static com.metreeca.rest.Response.*;
 import static com.metreeca.rest.Toolbox.service;
-import static com.metreeca.rest.formats.JSONLDFormat.*;
-import static com.metreeca.rest.services.Engine.StatsShape;
-import static com.metreeca.rest.services.Engine.TermsShape;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 
@@ -137,295 +122,74 @@ public final class GraphEngine implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Creates a linked data resource.
-	 *
-	 * <p>Handles creation requests on the linked data container identified by the request {@linkplain Request#item()
-	 * focus item}:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
-	 *
-	 * <li>the request {@link JSONLDFormat JSON-LD} body is expected to contain a description of the resource to be
-	 * created matching the shape using the request {@linkplain Request#item() item} as subject;</li>
-	 *
-	 * <li>the resource to be created is assigned a unique IRI based on the stem of the the request IRI and the value
-	 * of the {@code Slug} request header, if one is found, or a random id, otherwise;</li>
-	 *
-	 * <li>the request body is rewritten to the assigned IRI and stored into the shared {@linkplain Graph graph};</li>
-	 *
-	 * <li>the target container identified by the request item is connected to the newly created resource as
-	 * {@linkplain Shape#outline(Value...) outlined} in the filtering constraints in the request shape;</li>
-	 *
-	 * <li>the operation is completed with a {@value Response#Created} status code;</li>
-	 *
-	 * <li>the IRI of the newly created resource is advertised through the {@code Location} HTTP response header.</li>
-	 *
-	 * </ul>
-	 *
-	 * @param request the request to be handled
-	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	@Override public Future<Response> create(final Request request) {
+	@Override public Optional<Frame> create(final Frame frame, final Shape shape) {
+		return graph.exec(txn(connection -> {
 
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
+			return Optional.of(frame.focus())
 
-		final IRI item=iri(request.item());
-		final Shape shape=request.attribute(shape());
+					.filter(item
+							-> !connection.hasStatement(item, null, null, true)
+							&& !connection.hasStatement(null, null, item, true)
+					)
 
-		return request.body(jsonld()).fold(request::reply, frame ->
-				request.reply(response -> graph.exec(txn(connection -> {
+					.map(item -> {
 
-					final boolean clashing=connection.hasStatement(item, null, null, true)
-							|| connection.hasStatement(null, null, item, true);
-
-					if ( clashing ) { // report clash
-
-						return response.map(status(InternalServerError,
-								new IllegalStateException(format("clashing resource identifier %s", format(item)))
-						));
-
-					} else { // store model
-
-						connection.add(shape.outline(item));
 						connection.add(frame.model());
 
-						final String location=item.stringValue();
+						return frame;
 
-						return response.status(Created)
-								.header("Location", Optional // root-relative to support relocation
-										.of(item.stringValue())
-										.map(IRIPattern::matcher)
-										.filter(Matcher::matches)
-										.map(matcher -> matcher.group("pathall"))
-										.orElse(location)
-								);
+					});
 
-					}
-
-				})))
-		);
+		}));
 	}
 
-	/**
-	 * Retrieves a linked data resource.
-	 *
-	 * <p>Handles retrieval requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * focus item}.</p>
-	 *
-	 *
-	 * <p>If the focus item is a {@linkplain Request#collection() collection}:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
-	 *
-	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
-	 *
-	 * <li>the response {@link JSONLDFormat JSON-LD} body contains a description of member linked data resources
-	 * retrieved from the shared {@linkplain  Graph graph} according to the filtering constraints in the request shape
-	 * and matching the response shape; the IRI of the target container is connected to the IRIs of the member
-	 * resources using the {@link Shape#Contains ldp:contains} property;</li>
-	 *
-	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * <p>Otherwise, if the shared {@linkplain  Graph graph} actually contains a resource matching the request focus
-	 * item IRI:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
-	 *
-	 * <li>the response includes the derived shape actually used in the retrieval process;</li>
-	 *
-	 * <li>the response {@link JSONLDFormat JSON-LD} body contains a description of the request item retrieved from the
-	 * shared {@linkplain  Graph graph} and matching the response shape;</li>
-	 *
-	 * <li>the operation is completed with a {@value Response#OK} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * <p>Otherwise:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the operation is reported as unsuccessful with a {@value Response#NotFound} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * @param request the request to be handled
-	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	@Override public Future<Response> relate(final Request request) {
+	@Override public Optional<Frame> relate(final Frame frame, final Query query) {
+		return Optional
 
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
+				.of(query.map(new QueryProbe(frame.focus(), this::get)))
 
-		final boolean collection=request.collection();
-
-		final IRI item=iri(request.item());
-		final Shape shape=request.attribute(shape());
-
-		return query(item, shape, request.query()).fold(request::reply, query ->
-				request.reply(response -> Optional
-
-						.of(query.map(new QueryProbe(item, this::get)))
-
-						.filter(model -> collection || !model.isEmpty()) // collections are virtual
-
-						.map(model -> response.status(OK)
-								.attribute(shape(), query.map(new ShapeProbe(collection)))
-								.body(jsonld(), frame(item, model))
-						)
-
-						.orElseGet(() -> response.status(NotFound)) // !!! 410 Gone if previously known
-				)
-		);
+				.map(model -> frame(frame.focus(), model));
 	}
 
-	/**
-	 * Updates a linked data resource.
-	 *
-	 * <p>Handles updating requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item}.</p>
-	 *
-	 * <p>If the shared {@linkplain  Graph graph} actually contains a resource matching the request focus item IRI:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
-	 *
-	 * <li>the request {@link JSONLDFormat JSON-LD} body is expected to contain a description of the resource to be
-	 * updated matching by the shape;</li>
-	 *
-	 * <li>the existing description of the resource matching the request shape is replaced in the shared
-	 * {@linkplain Graph graph} with the request body;</li>
-	 *
-	 * <li>the operation is completed with a {@value Response#NoContent} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * <p>Otherwise:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the operation is reported with a {@value Response#NotFound} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * @param request the request to be handled
-	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	@Override public Future<Response> update(final Request request) {
-
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
-
-		final IRI item=iri(request.item());
-		final Shape shape=request.attribute(shape());
-
-		return request.body(jsonld()).fold(request::reply, frame ->
-				request.reply(response -> graph.exec(txn(connection -> {
-
-					return Optional
-
-							.of(Items.items(shape).map(new QueryProbe(item, this::get)))
-
-							.filter(current -> !current.isEmpty())
-
-							.map(current -> {
-
-								connection.remove(current);
-								connection.add(frame.model());
-
-								return response.status(NoContent);
-
-							})
-
-							.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
-
-				})))
-		);
-	}
-
-	/**
-	 * Deletes a linked data resource.
-	 *
-	 * <p>Handles deletion requests on the linked data resource identified by the request {@linkplain Request#item()
-	 * item}.</p>
-	 *
-	 * <p>If the shared {@linkplain  Graph graph} actually contains a resource matching the request focus item IRI:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the request is expected to include a resource {@linkplain JSONLDFormat#shape() shape};</li>
-	 *
-	 * <li>the existing description of the resource matching the request shape is removed from the shared
-	 * {@linkplain Graph graph};</li>
-	 *
-	 * <li>the operation is completed with a {@value Response#NoContent} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * <p>Otherwise:</p>
-	 *
-	 * <ul>
-	 *
-	 * <li>the operation is reported with a {@value Response#NotFound} status code.</li>
-	 *
-	 * </ul>
-	 *
-	 * @param request the request to be handled
-	 *
-	 * @return a lazy response generated for the managed linked data resource in reaction to {@code request}
-	 *
-	 * @throws NullPointerException if {@code request} is null
-	 */
-	@Override public Future<Response> delete(final Request request) {
-
-		if ( request == null ) {
-			throw new NullPointerException("null request");
-		}
-
-		final IRI item=iri(request.item());
-		final Shape shape=request.attribute(shape());
-
-		return request.reply(response -> graph.exec(txn(connection -> {
+	@Override public Optional<Frame> update(final Frame frame, final Shape shape) {
+		return graph.exec(txn(connection -> {
 
 			return Optional
 
-					.of(Items.items(shape).map(new QueryProbe(item, this::get)))
+					.of(Items.items(shape).map(new QueryProbe(frame.focus(), this::get)))
 
-					.filter(current -> !current.isEmpty())
+					.filter(model -> !model.isEmpty())
 
-					.map(current -> {
+					.map(model -> {
 
-						connection.remove(shape.outline(item));
-						connection.remove(current);
+						connection.remove(model);
+						connection.add(frame.model());
 
-						return response.status(NoContent);
+						return frame;
 
-					})
+					});
 
-					.orElseGet(() -> response.status(NotFound)); // !!! 410 Gone if previously known
+		}));
+	}
 
-		})));
+	@Override public Optional<Frame> delete(final Frame frame, final Shape shape) {
+		return graph.exec(txn(connection -> {
+
+			return Optional
+
+					.of(Items.items(shape).map(new QueryProbe(frame.focus(), this::get)))
+
+					.filter(model -> !model.isEmpty())
+
+					.map(model -> {
+
+						connection.remove(model);
+
+						return frame(frame.focus(), model);
+
+					});
+
+		}));
 	}
 
 
@@ -455,30 +219,6 @@ public final class GraphEngine implements Engine {
 
 		@Override public Collection<Statement> probe(final Stats stats) {
 			return new GraphStats(options).process(resource, stats);
-		}
-
-	}
-
-	private static final class ShapeProbe extends Query.Probe<Shape> {
-
-		private final boolean collection;
-
-
-		private ShapeProbe(final boolean collection) {
-			this.collection=collection;
-		}
-
-
-		@Override public Shape probe(final Items items) { // !!! add Shape.Contains if items.path is not empty
-			return (collection ? field(Contains, items.shape()) : items.shape()).redact(Mode, Convey); // remove filters
-		}
-
-		@Override public Shape probe(final Stats stats) {
-			return StatsShape(stats);
-		}
-
-		@Override public Shape probe(final Terms terms) {
-			return TermsShape(terms);
 		}
 
 	}

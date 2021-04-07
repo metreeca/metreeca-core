@@ -15,6 +15,6 @@
  */
 
 /**
- * Model-driven CRUD operators.
+ * Model-driven CRUD handlers.
  */
 package com.metreeca.rest.operators;

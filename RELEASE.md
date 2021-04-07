@@ -6,6 +6,7 @@
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF
   statement context, JSON-LD context, web app context, web app asset, …)
 - REST / Merged `Engine.browse()/relate()` methods and removed `Browser` handler
+- REST / Factored request handling code to CRUD handlers and simplified `Engine` API
 - REST / Migrated engine transaction mgmt to the dedicated `Engine.transaction())` method
 - REST / Migrated shape-based access control from `Engine.throttler()` to `Wrapper.keeper()`
 - REST / Renamed `Gateway` wrapper to `Server`
