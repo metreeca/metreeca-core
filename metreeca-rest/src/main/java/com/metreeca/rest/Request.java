@@ -102,7 +102,7 @@ public final class Request extends Message<Request> {
 	private Object user;
 	private Set<Object> roles=emptySet();
 
-	private String method="";
+	private String method=GET;
 	private String base=Values.Base;
 	private String path="/";
 	private String query="";

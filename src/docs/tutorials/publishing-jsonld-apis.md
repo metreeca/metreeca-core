@@ -624,15 +624,15 @@ public final class Products extends Delegator {
 
 				field("price", Toys.sell, required(),
 						datatype(XSD.DECIMAL),
-						minExclusive(literal(decimal(0))),
-						maxExclusive(literal(decimal(1000)))
-				),
+				minExclusive(literal(decimal(0))),
+				maxExclusive(literal(decimal(1000)))
+		),
 
-				role(Toys.staff).then(field(Toys.buy, required(),
-						datatype(XSD.DECIMAL),
-						minInclusive(literal(decimal(0))),
-						maxInclusive(literal(decimal(1000)))
-		)),
+			role(Toys.staff).then(field(Toys.buy, required(),
+					datatype(XSD.DECIMAL),
+					minInclusive(literal(decimal(0))),
+					maxInclusive(literal(decimal(1000)))
+			)),
 
 			server().then(field(Toys.stock, required(),
 					datatype(XSD.INTEGER),
@@ -836,7 +836,8 @@ public final class Products extends Delegator {
 
 				.path("/", router()
 						.get(relator())
-+						.post(creator(new ProductsSlug())
++						.post(creator()
++								.slug(new ProductsSlug())
 +								.with(postprocessor(update(text(Products.class, "ProductsCreate.ql"))))
 +						)
 				)
@@ -862,9 +863,9 @@ public final class ProductsSlug implements Function<Request, String> {
 	public String apply(final Request request) {
 		return graph.exec(connection -> {
 
-		final Value scale=request.body(jsonld()).get()
-				.flatMap(frame -> frame.get(Toys.scale).value())
-				.orElse(literal("1:1"));
+			final Value scale=request.body(jsonld()).get()
+					.flatMap(frame -> frame.get(Toys.scale).value())
+					.orElse(literal("1:1"));
 
 			int serial=0;
 

@@ -94,9 +94,9 @@ public final class Products extends Delegator {
 
 				.path("/", router()
 						.get(relator())
-						.post(creator(new ProductsSlug())
-								.with(postprocessor(update(text(Products.class,
-										"com/metreeca/toys/ProductsCreate.ql"))))
+						.post(creator()
+								.slug(new ProductsSlug())
+								.with(postprocessor(update(text(Products.class, "ProductsCreate.ql"))))
 						)
 				)
 

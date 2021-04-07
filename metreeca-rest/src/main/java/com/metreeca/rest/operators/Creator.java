@@ -37,6 +37,7 @@ import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.IRIPattern;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.md5;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
@@ -50,7 +51,6 @@ import static com.metreeca.rest.services.Engine.engine;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 
 
@@ -102,52 +102,19 @@ public final class Creator extends Delegator {
 	 * @return a new resource creator
 	 */
 	public static Creator creator() {
-		return creator(request -> randomUUID().toString());
-	}
-
-	/**
-	 * Creates a resource creator.
-	 *
-	 * @param slug a function mapping from the creation request to the identifier to be assigned to the newly created
-	 *             resource; must return a non-null non-clashing value
-	 *
-	 * @return a new resource creator
-	 *
-	 * @throws NullPointerException if {@code slug} is null or returns null values
-	 */
-	public static Creator creator(final Function<Request, String> slug) {
-
-		if ( slug == null ) {
-			throw new NullPointerException("null slug");
-		}
-
-		return new Creator(slug);
-	}
-
-	/**
-	 * Creates a resource creator.
-	 *
-	 * @param slug a function mapping from the creation request and its {@linkplain JSONLDFormat JSON-LD} payload to the
-	 *             identifier to be assigned to the newly created resource; must return a non-null non-clashing value
-	 *
-	 * @return a new resource creator
-	 *
-	 * @throws NullPointerException if {@code slug} is null or returns null values
-	 */
-	public static <T> Creator creator(final BiFunction<? super Request, ? super Frame, String> slug) {
-		return new Creator(request -> request.body(jsonld()).fold(error -> "", value -> slug.apply(request, value)));
+		return new Creator();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	private Function<Request, String> slug=request -> md5();
+
 	private final Engine engine=service(engine());
 
 
-	private Creator(final Function<Request, String> slug) {
-		delegate(wrapper(slug) // immediately around handler after custom wrappers
-
-				.wrap(create())
+	private Creator() {
+		delegate(rewrite().wrap(create()) // rewrite immediately before handler after custom wrappers
 
 				.with(engine.transaction())
 				.with(keeper(Create, Detail))
@@ -155,6 +122,73 @@ public final class Creator extends Delegator {
 		);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Configures the slug generator.
+	 *
+	 * @param slug a function mapping from the creation request to the identifier to be assigned to the newly created
+	 *             resource; must return a non-null non-clashing value
+	 *
+	 * @return this creator handler
+	 *
+	 * @throws NullPointerException if {@code slug} is null or returns null values
+	 */
+	public Creator slug(final Function<Request, String> slug) {
+
+		if ( slug == null ) {
+			throw new NullPointerException("null slug");
+		}
+
+		this.slug=slug;
+
+		return this;
+	}
+
+	/**
+	 * Configures the slug generator.
+	 *
+	 * @param slug a function mapping from the creation request and its {@linkplain JSONLDFormat JSON-LD} payload to the
+	 *             identifier to be assigned to the newly created resource; must return a non-null non-clashing value
+	 *
+	 * @return this creator handler
+	 *
+	 * @throws NullPointerException if {@code slug} is null or returns null values
+	 */
+	public Creator slug(final BiFunction<? super Request, ? super Frame, String> slug) {
+
+		if ( slug == null ) {
+			throw new NullPointerException("null slug");
+		}
+
+		this.slug=request -> slug.apply(request, request.body(jsonld()).fold(
+				error -> frame(iri(request.item())),
+				value -> value
+		));
+
+		return this;
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private Wrapper rewrite() {
+		return handler -> request -> {
+
+			final String name=encode( // encode slug as IRI path component
+					requireNonNull(slug.apply(request), "null resource name")
+			);
+
+			final IRI source=iri(request.item());
+			final IRI target=iri(source, name);
+
+			return handler.handle(request
+					.path(request.path()+name)
+					.map(jsonld(), frame -> frame(target, rewrite(target, source, frame.model())))
+			);
+		};
+	}
 
 	private Handler create() {
 		return request -> {
@@ -182,26 +216,6 @@ public final class Creator extends Delegator {
 
 			);
 
-		};
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	private Wrapper wrapper(final Function<Request, String> slug) {
-		return handler -> request -> {
-
-			final String name=encode( // encode slug as IRI path component
-					requireNonNull(slug.apply(request), "null resource name")
-			);
-
-			final IRI source=iri(request.item());
-			final IRI target=iri(source, name);
-
-			return handler.handle(request
-					.path(request.path()+name)
-					.map(jsonld(), frame -> frame(target, rewrite(target, source, frame.model())))
-			);
 		};
 	}
 
