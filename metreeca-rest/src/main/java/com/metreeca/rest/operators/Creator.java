@@ -28,16 +28,14 @@ import com.metreeca.rest.services.Engine;
 import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.regex.Matcher;
 
 import static com.metreeca.json.Frame.frame;
-import static com.metreeca.json.Values.IRIPattern;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.md5;
+import static com.metreeca.json.Values.path;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
@@ -196,13 +194,7 @@ public final class Creator extends Delegator {
 					.map(Frame::focus)
 
 					.map(iri -> request.reply(response -> response.status(Created)
-							.header("Location", Optional // root-relative to support relocation
-									.of(iri.stringValue())
-									.map(IRIPattern::matcher)
-									.filter(Matcher::matches)
-									.map(matcher -> matcher.group("pathall"))
-									.orElse(iri.stringValue())
-							)
+							.header("Location", path(iri.stringValue())) // root-relative to support relocation
 					))
 
 					.orElseThrow(() ->

@@ -29,7 +29,6 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 
 import javax.json.*;
 
@@ -76,14 +75,7 @@ final class JSONLDEncoder {
 		this.keywords=keywords;
 		this.context=context;
 
-		this.root=Optional.of(focus.stringValue())
-				.map(IRIPattern::matcher)
-				.filter(Matcher::matches)
-				.map(matcher -> Optional.ofNullable(matcher.group("schemeall")).orElse("")
-						+Optional.ofNullable(matcher.group("hostall")).orElse("")
-						+"/"
-				)
-				.orElse("/");
+		this.root=root(focus.stringValue());
 
 		this.aliaser=keyword -> keywords.getOrDefault(keyword, keyword);
 	}

@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -697,6 +698,37 @@ public final class Values {
 
 
 	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String root(final String iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return Optional.of(iri)
+				.map(IRIPattern::matcher)
+				.filter(Matcher::matches)
+				.map(matcher -> Optional.ofNullable(matcher.group("schemeall")).orElse("")
+						+Optional.ofNullable(matcher.group("hostall")).orElse("")
+						+"/"
+				)
+				.orElse(iri);
+	}
+
+	public static String path(final String iri) {
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return Optional
+				.of(iri)
+				.map(IRIPattern::matcher)
+				.filter(Matcher::matches)
+				.map(matcher -> matcher.group("pathall"))
+				.orElse(iri);
+	}
+
 
 	public static String uuid() {
 		return randomUUID().toString();
