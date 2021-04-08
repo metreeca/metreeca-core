@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.metreeca.gcp;
+package com.metreeca.gcp.services;
 
-import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 
 import java.io.IOException;
@@ -27,8 +26,9 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
+import static java.util.Arrays.stream;
 
-public final class GCPTest {
+public final class DatastoreTest {
 
 	private static final String TestProject="metreeca-gcp-test";
 
@@ -75,11 +75,7 @@ public final class GCPTest {
 		}
 	}
 
-	public static boolean datastore(final Consumer<Datastore> task) {
-
-		if ( task == null ) {
-			throw new NullPointerException("null task");
-		}
+	public static void datastore(final Consumer<DatastoreOptions>... tasks) {
 
 		final DatastoreOptions options=DatastoreOptions.newBuilder()
 				.setProjectId(TestProject)
@@ -92,19 +88,22 @@ public final class GCPTest {
 			final HttpURLConnection connection=(HttpURLConnection)reset.openConnection();
 
 			connection.setRequestMethod("POST");
+			connection.setDoOutput(true);
 			connection.connect();
 
-			task.accept(options.getService());
+			connection.getResponseCode();
 
-			return true;
+			Thread.sleep(100);
+
+			stream(tasks).forEach(task -> task.accept(options));
 
 		} catch ( final ConnectException e ) { // start test datastore and retry
 
-			final boolean status=datastore();
+			if ( datastore() ) {
+				stream(tasks).forEach(task -> task.accept(options));
+			}
 
-			if ( status ) { task.accept(options.getService()); }
-
-			return status;
+		} catch ( final InterruptedException ignored ) {
 
 		} catch ( final IOException e ) {
 
@@ -113,5 +112,10 @@ public final class GCPTest {
 		}
 
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private DatastoreTest() {}
 
 }
