@@ -22,10 +22,7 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.DC;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.metreeca.json.Values.*;
@@ -41,10 +38,7 @@ import static java.util.stream.Collectors.toCollection;
  *
  * <p>Describes a linked data graph centered on a focus resource.</p>
  */
-public final class Frame implements Value {
-
-	private static final long serialVersionUID=2535592245877560931L;
-
+public final class Frame {
 
 	private static final Path Labels=alt(
 			RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name")
@@ -114,11 +108,11 @@ public final class Frame implements Value {
 
 
 	public Optional<String> label() {
-		return get(Labels).string();
+		return string(get(Labels));
 	}
 
 	public Optional<String> notes() {
-		return get(Notes).string();
+		return string(get(Notes));
 	}
 
 
@@ -143,7 +137,7 @@ public final class Frame implements Value {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Reader get(final IRI step) {
+	public Stream<Value> get(final IRI step) {
 
 		if ( step == null ) {
 			throw new NullPointerException("null step");
@@ -152,7 +146,7 @@ public final class Frame implements Value {
 		return get(step(step));
 	}
 
-	public Reader get(final IRI... steps) {
+	public Stream<Value> get(final IRI... steps) {
 
 		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null steps");
@@ -161,31 +155,135 @@ public final class Frame implements Value {
 		return get(seq(steps));
 	}
 
-	public Reader get(final Shift shift) {
+	public Stream<Value> get(final Shift shift) {
 
 		if ( shift == null ) {
 			throw new NullPointerException("null shift");
 		}
 
-		return new Reader(shift.apply(singleton(focus), model).collect(toCollection(LinkedHashSet::new)), model);
+		return shift.apply(singleton(focus), model);
 	}
 
-	public Writer set(final IRI predicate) {
+
+	public Frame add(final IRI predicate, final Object value) {
 
 		if ( predicate == null ) {
 			throw new NullPointerException("null predicate");
 		}
 
-		return new Writer(this, predicate);
+		return value == null ? this : add(predicate, Stream.of(value));
+	}
+
+	public Frame add(final IRI predicate, final Optional<?> value) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( value == null ) {
+			throw new NullPointerException("null value");
+		}
+
+		return value.map(object -> add(predicate, Stream.of(object))).orElse(this);
+	}
+
+	public Frame add(final IRI predicate, final Object... values) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values.length == 0 ? this : add(predicate, Arrays.stream(values));
+	}
+
+	public Frame add(final IRI predicate, final Collection<?> values) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values.isEmpty() ? this : add(predicate, values.stream());
+	}
+
+	public Frame add(final IRI predicate, final Stream<?> values) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return new Frame(focus, Stream.concat(model.stream(), values
+
+				.filter(Objects::nonNull)
+				.map(Values::promote)
+
+				.flatMap(value -> traverse(predicate,
+
+						direct -> {
+
+							if ( value instanceof Frame ) {
+
+								return Stream.concat(
+										link(focus, direct, ((Frame)value).focus),
+										((Frame)value).model.stream()
+								);
+
+							} else {
+
+								return link(focus, predicate, value(value));
+
+							}
+
+						},
+
+						inverse -> {
+
+							if ( value instanceof Frame ) {
+
+								return Stream.concat(
+										link(((Frame)value).focus, inverse, focus),
+										((Frame)value).model.stream()
+								);
+
+							} else {
+
+								return link(value(value), inverse, focus);
+
+							}
+
+						}
+
+				))
+
+		).collect(toCollection(LinkedHashSet::new)));
+	}
+
+
+	private Stream<Statement> link(final Value subject, final IRI predicate, final Value object) {
+		if ( subject instanceof Resource ) {
+
+			return Stream.of(statement((Resource)subject, predicate, object));
+
+		} else {
+
+			throw new IllegalArgumentException("literal value for inverse field");
+
+		}
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	@Override public String stringValue() {
-		return focus.stringValue();
-	}
-
 
 	@Override public boolean equals(final Object object) {
 		return this == object || focus.equals(object);
@@ -199,443 +297,6 @@ public final class Frame implements Value {
 		return format(focus)
 				+label().map(l -> " : "+l).orElse("")
 				+notes().map(l -> " / "+l).orElse("");
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Frame read operations.
-	 */
-	public static final class Reader {
-
-		private final Set<Value> values;
-		private final Set<Statement> model;
-
-
-		private Reader(final Set<Value> values, final Set<Statement> model) {
-			this.values=values;
-			this.model=model;
-		}
-
-
-		public Optional<Boolean> _boolean() {
-			return value(Values::_boolean);
-		}
-
-
-		public Optional<BigInteger> integer() {
-			return value(Values::integer);
-		}
-
-		public Stream<BigInteger> integers() {
-			return values(Values::integer);
-		}
-
-
-		public Optional<BigDecimal> decimal() {
-			return value(Values::decimal);
-		}
-
-		public Stream<BigDecimal> decimals() {
-			return values(Values::decimal);
-		}
-
-
-		public Optional<String> string() {
-			return value(Values::string);
-		}
-
-		public Stream<String> strings() {
-			return values(Values::string);
-		}
-
-
-		public Optional<Value> value() {
-			return values().findFirst();
-		}
-
-		public Stream<Value> values() {
-			return values.stream();
-		}
-
-
-		public <V> Optional<V> value(final Function<Value, Optional<V>> mapper) {
-
-			if ( mapper == null ) {
-				throw new NullPointerException("null mapper");
-			}
-
-			return values().findFirst().flatMap(mapper);
-		}
-
-		public <V> Stream<V> values(final Function<Value, Optional<V>> mapper) {
-
-			if ( mapper == null ) {
-				throw new NullPointerException("null mapper");
-			}
-
-			return values.stream()
-					.map(mapper)
-					.map(Objects::requireNonNull)
-					.filter(Optional::isPresent)
-					.map(Optional::get);
-		}
-
-
-		public Optional<Frame> frame() {
-			return frames().findFirst();
-		}
-
-		public Stream<Frame> frames() {
-			return values.stream().filter(Value::isIRI).map(value -> new Frame((IRI)value, model));
-		}
-
-	}
-
-	/**
-	 * Frame write operations.
-	 */
-	public static final class Writer {
-
-		private final Frame frame;
-		private final IRI predicate;
-
-
-		private Writer(final Frame frame, final IRI predicate) {
-			this.frame=frame;
-			this.predicate=predicate;
-		}
-
-
-		public Frame _boolean(final Boolean value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value(literal(value));
-		}
-
-		public Frame _boolean(final Optional<Boolean> value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value(value.map(Values::literal));
-		}
-
-
-		public Frame decimal(final Number value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value(literal(Values.decimal(value)));
-		}
-
-		public Frame decimal(final Optional<Number> value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value(value.map(Values::decimal).map(Values::literal));
-		}
-
-		public Frame decimals(final Number... values) {
-
-			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return decimals(Arrays.stream(values));
-		}
-
-		public Frame decimals(final Collection<Number> values) {
-
-			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return decimals(values.stream());
-		}
-
-		public Frame decimals(final Stream<Number> values) {
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			return values(values.map(Values::decimal).map(Values::literal));
-		}
-
-
-		public Frame integer(final Number value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value(literal(Values.integer(value)));
-		}
-
-		public Frame integer(final Optional<Number> values) {
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			return value(values.map(Values::integer).map(Values::literal));
-		}
-
-		public Frame integers(final Number... values) {
-
-			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return integers(Arrays.stream(values));
-		}
-
-		public Frame integers(final Collection<Number> values) {
-
-			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return integers(values.stream());
-		}
-
-		public Frame integers(final Stream<Number> values) {
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			return values(values.map(Values::integer).map(Values::literal));
-		}
-
-
-		public Frame string(final String value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value(literal(value));
-		}
-
-		public Frame string(final Optional<String> value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value(value.map(Values::literal));
-		}
-
-		public Frame strings(final String... values) {
-
-			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return strings(Arrays.stream(values));
-		}
-
-		public Frame strings(final Collection<String> values) {
-
-			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return strings(values.stream());
-		}
-
-		public Frame strings(final Stream<String> values) {
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			return values(values.map(Values::literal));
-		}
-
-
-		public Frame value(final Value value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
-
-					direct -> Stream.of(statement(frame.focus, direct, value)),
-
-					inverse -> {
-
-						if ( !(value instanceof Resource) ) {
-							throw new IllegalArgumentException("literal value for inverse predicate");
-						}
-
-						return Stream.of(statement((Resource)value, inverse, frame.focus));
-
-					}
-
-			)).collect(toCollection(LinkedHashSet::new)));
-		}
-
-		public Frame value(final Optional<? extends Value> value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value.map(this::value).orElse(frame);
-		}
-
-		public Frame values(final Value... values) {
-
-			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return values.length == 0 ? frame : values(Arrays.stream(values));
-		}
-
-		public Frame values(final Collection<? extends Value> values) {
-
-			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return values.isEmpty() ? frame : values(values.stream());
-		}
-
-		public Frame values(final Stream<? extends Value> values) {
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
-
-					direct -> values.map(value -> {
-
-						if ( value == null ) {
-							throw new NullPointerException("null values");
-						}
-
-						return statement(frame.focus, predicate, value);
-
-					}),
-
-					inverse -> values.map(value -> {
-
-						if ( value == null ) {
-							throw new NullPointerException("null values");
-						}
-
-						if ( !(value instanceof Resource) ) {
-							throw new IllegalArgumentException("literal value for inverse field");
-						}
-
-						return statement((Resource)value, inverse, frame.focus);
-
-					})
-
-			)).collect(toCollection(LinkedHashSet::new)));
-		}
-
-
-		public Frame frame(final Frame value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
-
-					direct -> Stream.concat(
-							Stream.of(statement(frame.focus, direct, value.focus)),
-							value.model.stream()
-					),
-
-					inverse -> Stream.concat(
-							Stream.of(statement(value.focus, inverse, frame.focus)),
-							value.model.stream()
-					)
-
-			)).collect(toCollection(LinkedHashSet::new)));
-		}
-
-		public Frame frame(final Optional<Frame> value) {
-
-			if ( value == null ) {
-				throw new NullPointerException("null value");
-			}
-
-			return value.map(this::frame).orElse(frame);
-		}
-
-		public Frame frames(final Frame... values) {
-
-			if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return values.length == 0 ? frame : frames(Arrays.stream(values));
-		}
-
-		public Frame frames(final Collection<Frame> values) {
-
-			if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-				throw new NullPointerException("null values");
-			}
-
-			return values.isEmpty() ? frame : frames(values.stream());
-		}
-
-		public Frame frames(final Stream<Frame> values) {
-
-			if ( values == null ) {
-				throw new NullPointerException("null values");
-			}
-
-			return new Frame(frame.focus, Stream.concat(frame.model.stream(), traverse(predicate,
-
-					direct -> values.flatMap(frame -> {
-
-						if ( frame == null ) {
-							throw new NullPointerException("null values");
-						}
-
-						return Stream.concat(
-								Stream.of(statement(this.frame.focus, direct, frame.focus)),
-								frame.model.stream()
-						);
-
-					}),
-
-					inverse -> values.flatMap(frame -> {
-
-						if ( frame == null ) {
-							throw new NullPointerException("null values");
-						}
-
-						return Stream.concat(
-								Stream.of(statement(frame.focus, inverse, this.frame.focus)),
-								frame.model.stream()
-						);
-
-					})
-
-			)).collect(toCollection(LinkedHashSet::new)));
-		}
-
 	}
 
 }

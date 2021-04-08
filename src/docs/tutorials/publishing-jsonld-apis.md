@@ -614,19 +614,19 @@ public final class Products extends Delegator {
 
 				field(Toys.scale, required(),
 						datatype(XSD.STRING),
-						pattern("1:[1-9][0-9]{1,2}")
-				),
-
-				field(Toys.vendor, required(),
-						datatype(XSD.STRING),
-						maxLength(50)
-				),
-
-				field("price", Toys.sell, required(),
-						datatype(XSD.DECIMAL),
-				minExclusive(literal(decimal(0))),
-				maxExclusive(literal(decimal(1000)))
+				pattern("1:[1-9][0-9]{1,2}")
 		),
+
+			field(Toys.vendor, required(),
+					datatype(XSD.STRING),
+					maxLength(50)
+			),
+
+			field("price", Toys.sell, required(),
+					datatype(XSD.DECIMAL),
+					minExclusive(literal(decimal(0))),
+					maxExclusive(literal(decimal(1000)))
+			),
 
 			role(Toys.staff).then(field(Toys.buy, required(),
 					datatype(XSD.DECIMAL),
@@ -863,9 +863,9 @@ public final class ProductsSlug implements Function<Request, String> {
 	public String apply(final Request request) {
 		return graph.exec(connection -> {
 
-			final Value scale=request.body(jsonld()).get()
-					.flatMap(frame -> frame.get(Toys.scale).value())
-					.orElse(literal("1:1"));
+		final Value scale=request.body(jsonld()).get()
+				.flatMap(frame -> value(frame.get(Toys.scale)))
+				.orElse(literal("1:1"));
 
 			int serial=0;
 

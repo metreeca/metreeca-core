@@ -1,6 +1,7 @@
 # Broken ;-(
 
-- JSON / Restricted `Frame.focus()` to `IRI` values
+- JSON / Simplified and generalized `Frame` API
+- JSON / Restricted `Frame.focus()` to `Resource` values
 - JSON / Migrated `Frame` API to focus `Shift` operators
 - REST / Migrated `JSONLDFormat` to `Frame` payload to improve usability
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF

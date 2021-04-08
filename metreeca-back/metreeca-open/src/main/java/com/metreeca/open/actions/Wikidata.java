@@ -38,7 +38,6 @@ import javax.json.*;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.Values.literal;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 import static java.lang.Double.parseDouble;
@@ -129,8 +128,8 @@ public final class Wikidata implements Function<String, Xtream<Frame>> {
 
 	private Frame match(final JsonObject match) {
 		return frame(iri(match.getString("concepturi")))
-				.set(RDFS.LABEL).value(literal(string(match.get("label"))))
-				.set(RDFS.COMMENT).value(literal(string(match.get("description"))));
+				.add(RDFS.LABEL, string(match.get("label")))
+				.add(RDFS.COMMENT, string(match.get("description")));
 	}
 
 	private String string(final JsonValue value) {

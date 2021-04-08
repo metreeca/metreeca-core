@@ -24,12 +24,12 @@ import com.metreeca.rest.formats.JSONFormat;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 
-import javax.json.*;
 import java.util.function.Function;
+
+import javax.json.*;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.iri;
-import static com.metreeca.json.Values.literal;
 import static com.metreeca.rest.formats.JSONFormat.json;
 
 
@@ -73,10 +73,9 @@ public final class DBpedia implements Function<String, Xtream<Frame>> {
 
 	private Frame result(final JsonObject result) {
 		return frame(iri(result.getString("uri")))
-
-				.set(RDFS.LABEL).value(literal(string(result.get("label"))))
-				.set(RDFS.COMMENT).value(literal(string(result.get("description"))))
-				.set(RDF.TYPE).values(result.getJsonArray("classes").stream().map(clazz ->
+				.add(RDFS.LABEL, string(result.get("label")))
+				.add(RDFS.COMMENT, string(result.get("description")))
+				.add(RDF.TYPE, result.getJsonArray("classes").stream().map(clazz ->
 						iri(clazz.asJsonObject().getString("uri"))
 				));
 	}

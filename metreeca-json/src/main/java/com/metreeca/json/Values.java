@@ -37,6 +37,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Locale.ROOT;
@@ -313,10 +314,6 @@ public final class Values {
 				: literal(object);
 	}
 
-	private static <V extends Value> V value(final Class<?> type) {
-		throw new IllegalArgumentException(String.format("unsupported object type <%s>", type.getName()));
-	}
-
 
 	public static BNode bnode() {
 		return factory.createBNode();
@@ -344,7 +341,7 @@ public final class Values {
 				: object instanceof URI ? iri((URI)object)
 				: object instanceof URL ? iri((URL)object)
 
-				: value(object.getClass());
+				: unsupported(object.getClass());
 	}
 
 	public static IRI iri(final URI uri) {
@@ -385,12 +382,14 @@ public final class Values {
 				: object instanceof BigInteger ? literal((BigInteger)object)
 				: object instanceof BigDecimal ? literal((BigDecimal)object)
 
+				: object instanceof String ? literal((String)object)
+
 				: object instanceof TemporalAccessor ? literal((TemporalAccessor)object)
 				: object instanceof TemporalAmount ? literal((TemporalAmount)object)
 
 				: object instanceof byte[] ? literal((byte[])object)
 
-				: value(object.getClass());
+				: unsupported(object.getClass());
 	}
 
 	public static Literal literal(final boolean value) {
@@ -458,7 +457,98 @@ public final class Values {
 	}
 
 
+	private static <V extends Value> V unsupported(final Class<?> type) {
+		throw new UnsupportedOperationException(String.format("unsupported object type <%s>", type.getName()));
+	}
+
+
 	///// Converters //////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Optional<Value> value(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values.filter(Objects::nonNull).findFirst();
+	}
+
+	public static Stream<Value> values(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values.filter(Objects::nonNull);
+	}
+
+
+	public static Optional<Boolean> _boolean(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return value(values).flatMap(Values::_boolean);
+	}
+
+
+	public static Optional<BigInteger> integer(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return value(values).flatMap(Values::integer);
+	}
+
+	public static Stream<BigInteger> integers(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values(values).map(Values::integer).flatMap(Values::stream);
+	}
+
+
+	public static Optional<BigDecimal> decimal(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return value(values).flatMap(Values::decimal);
+	}
+
+	public static Stream<BigDecimal> decimals(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values(values).map(Values::decimal).flatMap(Values::stream);
+	}
+
+
+	public static Optional<String> string(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return value(values).flatMap(Values::string);
+	}
+
+	public static Stream<String> strings(final Stream<Value> values) {
+
+		if ( values == null ) {
+			throw new NullPointerException("null values");
+		}
+
+		return values(values).map(Values::string).flatMap(Values::stream);
+	}
+
 
 	public static Optional<IRI> iri(final Value value) {
 		return Optional.ofNullable(value).filter(IRI.class::isInstance).map(IRI.class::cast);
@@ -513,6 +603,10 @@ public final class Values {
 	}
 
 
+	private static <V> Stream<V> stream(final Optional<V> optional) {
+		return optional.map(Stream::of).orElseGet(Stream::empty);
+	}
+
 	private static <V, R> Function<V, R> guard(final Function<V, R> mapper) {
 		return v -> {
 
@@ -542,7 +636,6 @@ public final class Values {
 
 	public static String format(final Value value) {
 		return value == null ? null
-				: value instanceof Frame ? format((Frame)value)
 				: value instanceof Focus ? format((Focus)value)
 				: value instanceof BNode ? format((BNode)value)
 				: value instanceof IRI ? format((IRI)value)
@@ -663,6 +756,17 @@ public final class Values {
 				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
 				: value instanceof BigDecimal ? (BigDecimal)value
 				: BigDecimal.valueOf(value.doubleValue());
+	}
+
+
+	public static Object promote(final Object object) {
+		return object == null ? null
+
+				: object instanceof BigDecimal || object instanceof BigInteger ? object
+				: object instanceof Double || object instanceof Float ? decimal((Number)object)
+				: object instanceof Number ? integer((Number)object)
+
+				: object;
 	}
 
 

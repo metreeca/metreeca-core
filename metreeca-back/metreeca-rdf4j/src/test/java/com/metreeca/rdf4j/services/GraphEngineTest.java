@@ -84,12 +84,12 @@ final class GraphEngineTest {
 
 	);
 
-	private final Frame delta=frame(resource.focus())
-			.set(forename).string("Tino")
-			.set(surname).string("Faussone")
-			.set(email).string("tfaussone@classicmodelcars.com")
-			.set(title).string("tfaussone@classicmodelcars.com")
-			.set(seniority).integer(1);
+	private final Frame delta=resource
+			.add(forename, "Tino")
+			.add(surname, "Faussone")
+			.add(email, "tfaussone@classicmodelcars.com")
+			.add(title, "Sales Rep")
+			.add(seniority, 1);
 
 
 	@Nested final class Create {

@@ -26,6 +26,7 @@ import org.eclipse.rdf4j.repository.RepositoryResult;
 import java.util.function.Function;
 
 import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.value;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.formats.JSONLDFormat.jsonld;
@@ -39,7 +40,7 @@ public final class ProductsSlug implements Function<Request, String> {
 		return graph.exec(connection -> {
 
 			final Value scale=request.body(jsonld()).get()
-					.flatMap(frame -> frame.get(Toys.scale).value())
+					.flatMap(frame -> value(frame.get(Toys.scale)))
 					.orElse(literal("1:1"));
 
 			int serial=0;

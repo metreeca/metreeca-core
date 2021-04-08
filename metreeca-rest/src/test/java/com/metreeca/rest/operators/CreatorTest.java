@@ -49,7 +49,7 @@ final class CreatorTest {
 				frame -> {
 
 					assertThat(frame.focus()).as("generated unique iri").isNotEqualTo(focus);
-					assertThat(frame.get(RDF.VALUE).value()).as("rewritten body").hasValue(frame.focus());
+					assertThat(frame.get(RDF.VALUE)).as("rewritten body").containsExactly(frame.focus());
 
 					return true;
 
@@ -60,7 +60,7 @@ final class CreatorTest {
 						.handle(new Request()
 								.set(shape(), shape)
 								.body(jsonld(), frame(focus)
-										.set(RDF.VALUE).value(focus)
+										.add(RDF.VALUE, focus)
 								)
 						)
 
