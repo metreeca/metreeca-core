@@ -18,7 +18,7 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
-import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
@@ -40,10 +40,10 @@ import static java.util.stream.Collectors.toCollection;
 
 final class ShapeResolver extends Shape.Probe<Shape> {
 
-	private final IRI base;
+	private final Resource base;
 
 
-	ShapeResolver(final IRI base) {
+	ShapeResolver(final Resource base) {
 		this.base=base;
 	}
 

@@ -22,7 +22,7 @@ import com.metreeca.rest.Config;
 import com.metreeca.rest.Setup;
 import com.metreeca.rest.services.Engine;
 
-import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Statement;
 
 import java.util.Collection;
@@ -123,10 +123,10 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	private static final class QueryProbe extends Query.Probe<Collection<Statement>> {
 
 		private final Config config;
-		private final IRI resource;
+		private final Resource resource;
 
 
-		QueryProbe(final Config config, final IRI resource) {
+		QueryProbe(final Config config, final Resource resource) {
 			this.config=config;
 			this.resource=resource;
 		}

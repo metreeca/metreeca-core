@@ -265,13 +265,13 @@ public abstract class Shape {
 	 *
 	 * @throws NullPointerException if {@code anchor} is null
 	 */
-	public Shape filter(final IRI anchor) {
+	public Shape filter(final Resource anchor) {
 
 		if ( anchor == null ) {
 			throw new NullPointerException("null anchor");
 		}
 
-		return map(new ShapePruner(true)).map(shape -> anchor.stringValue().endsWith("/")
+		return map(new ShapePruner(true)).map(shape -> anchor.isIRI() && anchor.stringValue().endsWith("/")
 
 				// container: connect to the anchor using ldp:contains, unless otherwise specified in the shape
 
@@ -306,15 +306,14 @@ public abstract class Shape {
 	/**
 	 * Resolve focus values in this shape.
 	 *
-	 * @param base the base IRI focus values should be resolved against
+	 * @param base the base resource {@linkplain Focus focus} values should be resolved against
 	 *
-	 * @return a copy of this shape where {@linkplain Focus focus} values are replaced by absolute IRIs by resolving
-	 * them
-	 * against {@code base}
+	 * @return a copy of this shape where focus values are replaced by absolute IRIs by resolving them against {@code
+	 * base}
 	 *
 	 * @throws IllegalArgumentException if {@code base} is null
 	 */
-	public Shape resolve(final IRI base) {
+	public Shape resolve(final Resource base) {
 
 		if ( base == null ) {
 			throw new NullPointerException("null base");

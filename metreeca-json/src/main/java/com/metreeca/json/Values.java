@@ -542,10 +542,19 @@ public final class Values {
 
 	public static String format(final Value value) {
 		return value == null ? null
+				: value instanceof Frame ? format((Frame)value)
+				: value instanceof Focus ? format((Focus)value)
 				: value instanceof BNode ? format((BNode)value)
 				: value instanceof IRI ? format((IRI)value)
-				: value instanceof Focus ? format((Focus)value)
 				: format((Literal)value);
+	}
+
+	public static String format(final Frame frame) {
+		return frame == null ? null : frame.toString();
+	}
+
+	public static String format(final Focus focus) {
+		return focus == null ? null : "{"+focus.stringValue()+"}";
 	}
 
 	public static String format(final BNode bnode) {
@@ -557,10 +566,6 @@ public final class Values {
 				direct -> direct.equals(RDF.TYPE) ? "a" : '<'+iri.stringValue()+'>',
 				inverse -> "^<"+inverse.stringValue()+'>'
 		);
-	}
-
-	public static String format(final Focus focus) {
-		return focus == null ? null : "{"+focus.stringValue()+"}";
 	}
 
 	public static String format(final Literal literal) {

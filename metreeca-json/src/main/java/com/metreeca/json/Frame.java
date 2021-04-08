@@ -41,7 +41,10 @@ import static java.util.stream.Collectors.toCollection;
  *
  * <p>Describes a linked data graph centered on a focus resource.</p>
  */
-public final class Frame {
+public final class Frame implements Value {
+
+	private static final long serialVersionUID=2535592245877560931L;
+
 
 	private static final Path Labels=alt(
 			RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name")
@@ -52,7 +55,7 @@ public final class Frame {
 	);
 
 
-	public static Frame frame(final IRI focus) {
+	public static Frame frame(final Resource focus) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -61,7 +64,7 @@ public final class Frame {
 		return new Frame(focus, emptySet());
 	}
 
-	public static Frame frame(final IRI focus, final Collection<Statement> model) {
+	public static Frame frame(final Resource focus, final Collection<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -100,11 +103,11 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final IRI focus;
+	private final Resource focus;
 	private final Set<Statement> model;
 
 
-	private Frame(final IRI focus, final Set<Statement> model) {
+	private Frame(final Resource focus, final Set<Statement> model) {
 		this.focus=focus;
 		this.model=unmodifiableSet(model);
 	}
@@ -124,7 +127,7 @@ public final class Frame {
 	 *
 	 * @return theIRI of the frame focus resource.
 	 */
-	public IRI focus() {
+	public Resource focus() {
 		return focus;
 	}
 
@@ -178,6 +181,19 @@ public final class Frame {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	@Override public String stringValue() {
+		return focus.stringValue();
+	}
+
+
+	@Override public boolean equals(final Object object) {
+		return this == object || focus.equals(object);
+	}
+
+	@Override public int hashCode() {
+		return focus.hashCode();
+	}
 
 	@Override public String toString() {
 		return format(focus)

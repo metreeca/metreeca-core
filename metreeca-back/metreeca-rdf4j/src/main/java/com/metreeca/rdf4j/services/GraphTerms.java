@@ -48,7 +48,7 @@ final class GraphTerms extends GraphFacts {
 	}
 
 
-	Collection<Statement> process(final IRI resource, final Terms terms) {
+	Collection<Statement> process(final Resource resource, final Terms terms) {
 
 		final Shape shape=terms.shape();
 		final List<IRI> path=terms.path();

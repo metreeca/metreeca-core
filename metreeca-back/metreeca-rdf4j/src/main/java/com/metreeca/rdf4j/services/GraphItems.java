@@ -55,7 +55,7 @@ final class GraphItems extends GraphFacts {
 	}
 
 
-	Collection<Statement> process(final IRI resource, final Items items) {
+	Collection<Statement> process(final Resource resource, final Items items) {
 
 		final Shape shape=items.shape();
 		final List<Order> orders=items.orders();

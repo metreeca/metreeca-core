@@ -50,7 +50,7 @@ final class GraphStats extends GraphFacts {
 	}
 
 
-	Collection<Statement> process(final IRI resource, final Stats stats) {
+	Collection<Statement> process(final Resource resource, final Stats stats) {
 
 		final Shape shape=stats.shape();
 		final List<IRI> path=stats.path();

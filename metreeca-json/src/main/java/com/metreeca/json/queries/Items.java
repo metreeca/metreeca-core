@@ -42,8 +42,7 @@ public final class Items extends Query {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Items(final Shape shape, final List<IRI> path, final List<Order> orders, final int offset,
-			final int limit) {
+	public Items(final Shape shape, final List<IRI> path, final List<Order> orders, final int offset, final int limit) {
 		super(shape, path, orders, offset, limit);
 	}
 
