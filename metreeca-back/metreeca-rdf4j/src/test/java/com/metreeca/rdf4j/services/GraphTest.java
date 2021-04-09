@@ -18,6 +18,7 @@
 package com.metreeca.rdf4j.services;
 
 
+import com.metreeca.json.Frame;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
@@ -35,6 +36,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.Prefixes;
@@ -42,7 +44,6 @@ import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.Xtream.task;
 
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -59,7 +60,7 @@ public final class GraphTest {
 	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
 
 
-	private final Statement data=statement(RDF.NIL, RDF.VALUE, RDF.FIRST);
+	private final Frame data=frame(RDF.NIL).add(RDF.VALUE, RDF.FIRST);
 
 
 	public static void exec(final Runnable... tasks) {
@@ -93,15 +94,15 @@ public final class GraphTest {
 				(request, query) -> query.setBinding("custom", literal(123))
 
 				)
-
 						.apply(new Request()
 
 										.method(Request.POST)
 										.base(Base)
 										.path("/test/request"),
 
-								new LinkedHashModel(singleton(data))
-						)
+								data
+
+						).model()
 				)
 
 						.as("bindings configured")
@@ -122,7 +123,7 @@ public final class GraphTest {
 						.hasStatement(item("test/request"), term("custom"), literal(123))
 
 						.as("existing statements forwarded")
-						.hasSubset(data)
+						.hasSubset(data.model())
 
 		);
 	}
@@ -161,8 +162,9 @@ public final class GraphTest {
 										.status(Response.OK)
 										.header("Location", Root+"test/response"),
 
-								new LinkedHashModel(singleton(data))
-						)
+								data
+
+						).model()
 				)
 
 						.as("bindings configured")
@@ -177,14 +179,14 @@ public final class GraphTest {
 								+"\t:code 200.\n"
 						))
 
-						.as("timestamp configured")
-						.hasStatement(item("test/response"), term("time"), null)
+				.as("timestamp configured")
+				.hasStatement(item("test/response"), term("time"), null)
 
-						.as("custom settings applied")
-						.hasStatement(item("test/response"), term("custom"), literal(123))
+				.as("custom settings applied")
+				.hasStatement(item("test/response"), term("custom"), literal(123))
 
-						.as("existing statements forwarded")
-						.hasSubset(data)
+				.as("existing statements forwarded")
+				.hasSubset(data.model())
 
 		);
 	}

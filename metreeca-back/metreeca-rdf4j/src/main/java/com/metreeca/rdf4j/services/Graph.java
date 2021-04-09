@@ -16,6 +16,7 @@
 
 package com.metreeca.rdf4j.services;
 
+import com.metreeca.json.Frame;
 import com.metreeca.rest.*;
 
 import org.eclipse.rdf4j.model.*;
@@ -79,7 +80,7 @@ public final class Graph implements AutoCloseable {
 	}
 
 
-	//// SPARQL Operations /////////////////////////////////////////////////////////////////////////////////////////////
+	//// SPARQL Processors /////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * Creates a SPARQL query message filter.
@@ -95,7 +96,7 @@ public final class Graph implements AutoCloseable {
 	 *
 	 * @throws NullPointerException if any argument is null or if {@code customizers} contains null values
 	 */
-	@SafeVarargs public static <M extends Message<M>> BiFunction<M, Collection<Statement>, Collection<Statement>> query(
+	@SafeVarargs public static <M extends Message<M>> BiFunction<M, Frame, Frame> query(
 			final String query, final BiConsumer<M, GraphQuery>... customizers
 	) {
 
@@ -109,15 +110,17 @@ public final class Graph implements AutoCloseable {
 
 		final Graph graph=service(graph());
 
-		return query.isEmpty() ? (message, model) -> model : (message, model) -> graph.query(connection -> {
+		return query.isEmpty() ? (message, frame) -> frame : (message, frame) -> graph.query(connection -> {
+
+			final ArrayList<Statement> delta=new ArrayList<>();
 
 			configure(
 					message, connection.prepareGraphQuery(SPARQL, query, message.request().base()), customizers
 			).evaluate(
-					new StatementCollector(model)
+					new StatementCollector(delta)
 			);
 
-			return model;
+			return frame.add(delta);
 
 		});
 	}
