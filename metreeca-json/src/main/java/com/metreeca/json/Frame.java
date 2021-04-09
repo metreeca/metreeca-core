@@ -318,21 +318,22 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	@Override public boolean equals(final Object object) {
-		return this == object || focus.equals(object);
+		return this == object || object instanceof Frame
+				&& focus.equals(((Frame)object).focus)
+				&& model.equals(((Frame)object).model);
 	}
 
 	@Override public int hashCode() {
-		return focus.hashCode();
+		return focus.hashCode()
+				^model.hashCode();
 	}
 
 	@Override public String toString() {
 		return format(focus)
 				+label().map(l -> " : "+l).orElse("")
-				+notes().map(l -> " / "+l).orElse("");
+				+notes().map(l -> " / "+l).orElse("")
+				+(model.isEmpty() ? "" : " { … }");
 	}
 
 }
