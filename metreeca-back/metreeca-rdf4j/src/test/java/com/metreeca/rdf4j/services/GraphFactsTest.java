@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import static com.metreeca.json.Focus.focus;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.ValuesTest.localize;
 import static com.metreeca.json.ValuesTest.small;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.shapes.All.all;
@@ -62,7 +63,6 @@ import static com.metreeca.rdf4j.services.GraphFacts.root;
 import static com.metreeca.rdf4j.services.GraphFacts.value;
 import static com.metreeca.rdf4j.services.GraphFacts.*;
 import static com.metreeca.rdf4j.services.GraphTest.graph;
-import static com.metreeca.rdf4j.services.GraphTest.localized;
 import static com.metreeca.rdf4j.services.GraphTest.model;
 import static com.metreeca.rest.Toolbox.service;
 
@@ -96,7 +96,7 @@ final class GraphFactsTest {
 
 
 	static void exec(final Runnable task) {
-		GraphTest.exec(model(localized(small(), "", "en", "it")), task);
+		GraphTest.exec(model(localize(small(), "", "en", "it")), task);
 	}
 
 
@@ -105,22 +105,21 @@ final class GraphFactsTest {
 	}
 
 	private Collection<Statement> query(final Resource root, final Shape shape) {
-		return service(graph()).query(connection -> {
-			return new GraphItems(options()).process(root, items(shape))
+		return service(graph()).query(connection -> new GraphItems(options()).process(root, items(shape))
 
-					.stream()
+				.stream()
 
-					// ;(virtuoso) counts reported as xsd:int // !!! review dependency
+				// ;(virtuoso) counts reported as xsd:int // !!! review dependency
 
-					.map(statement -> type(statement.getObject()).equals(XSD.INT) ? statement(
-							statement.getSubject(),
-							statement.getPredicate(),
-							literal(integer(statement.getObject()).orElse(BigInteger.ZERO)),
-							statement.getContext()
-					) : statement)
+				.map(statement -> type(statement.getObject()).equals(XSD.INT) ? statement(
+						statement.getSubject(),
+						statement.getPredicate(),
+						literal(integer(statement.getObject()).orElse(BigInteger.ZERO)),
+						statement.getContext()
+				) : statement)
 
-					.collect(toList());
-		});
+				.collect(toList())
+		);
 	}
 
 

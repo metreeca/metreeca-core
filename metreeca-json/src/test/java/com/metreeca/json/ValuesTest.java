@@ -25,18 +25,19 @@ import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
 import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+
+import static com.metreeca.json.Values.literal;
+import static com.metreeca.json.Values.statement;
 
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.FINE;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 
 public final class ValuesTest {
@@ -100,6 +101,32 @@ public final class ValuesTest {
 				throw new UncheckedIOException(e);
 			}
 		});
+	}
+
+
+	public static Model localize(final Collection<Statement> model, final String... tags) {
+		return model.stream()
+
+				.flatMap(s -> Optional
+
+						.of(s.getObject())
+
+						.filter(o -> s.getPredicate().equals(RDFS.LABEL) || s.getPredicate().equals(RDFS.COMMENT))
+
+						.filter(Literal.class::isInstance)
+						.map(Literal.class::cast)
+
+						.filter(l -> l.getDatatype().equals(XSD.STRING))
+						.map(Literal::getLabel)
+
+						.map(l -> Arrays.stream(tags).map(lang -> statement(s.getSubject(), s.getPredicate(),
+								lang.isEmpty() ? literal(l) : literal(l, lang))
+						))
+
+						.orElseGet(() -> Stream.of(s))
+				)
+
+				.collect(toCollection(LinkedHashModel::new));
 	}
 
 
