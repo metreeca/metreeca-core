@@ -19,8 +19,7 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.Config;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -86,24 +85,8 @@ final class GraphFactsTest {
 	private static final IRI x=iri("test:x");
 	private static final IRI y=iri("test:y");
 
-	static final Shape EmployeeShape=and(
 
-			filter(field(RDF.TYPE, term("Employee"))),
-
-			field(RDFS.LABEL),
-
-			field(term("forename")),
-			field(term("surname")),
-			field(term("email")),
-			field(term("title")),
-			field(term("code")),
-			field(term("seniority")),
-			field(term("office")),
-			field(term("supervisor"))
-
-	);
-
-	private static Config options() {
+	static Config options() {
 		return new Config() {
 			@Override public <V> V get(final Supplier<V> option) {
 				return option.get();
@@ -121,7 +104,7 @@ final class GraphFactsTest {
 		return query(Root, shape);
 	}
 
-	private Collection<Statement> query(final IRI root, final Shape shape) {
+	private Collection<Statement> query(final Resource root, final Shape shape) {
 		return service(graph()).query(connection -> {
 			return new GraphItems(options()).process(root, items(shape))
 

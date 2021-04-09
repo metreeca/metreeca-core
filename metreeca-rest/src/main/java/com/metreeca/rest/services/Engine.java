@@ -46,6 +46,33 @@ import static java.util.Collections.unmodifiableSet;
  */
 public interface Engine {
 
+	/**
+	 * The default items fetch limit.
+	 */
+	public int ItemsLimit=1_000;
+
+	/**
+	 * Retrieves the items fetch limit ({@value #ItemsLimit}).
+	 *
+	 * @return the maximum number of resources returned by {@linkplain Items items queries}
+	 */
+	public static int ItemsLimit() {
+		return ItemsLimit;
+	}
+
+
+	/**
+	 * Retrieves the default engine factory.
+	 *
+	 * @return the default engine factory, which throws an exception reporting the service as undefined
+	 */
+	public static Supplier<Engine> engine() {
+		return () -> { throw new IllegalStateException("undefined engine service"); };
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static IRI terms=term("terms");
 	public static IRI stats=term("stats");
 
@@ -145,28 +172,6 @@ public interface Engine {
 				.map(Field::fields)
 				.orElseGet(Stream::empty)
 				.filter(field -> Annotations.contains(field.iri())));
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Retrieves the item query retrieval limit option.
-	 *
-	 * @return an option for configuring the maximum number of resources returned by {@linkplain Items items queries},
-	 * with a default value of {@code 1000}
-	 */
-	public static Supplier<Integer> items() {
-		return () -> 1_000;
-	}
-
-
-	/**
-	 * Retrieves the default engine factory.
-	 *
-	 * @return the default engine factory, which throws an exception reporting the service as undefined
-	 */
-	public static Supplier<Engine> engine() {
-		return () -> { throw new IllegalStateException("undefined engine service"); };
 	}
 
 

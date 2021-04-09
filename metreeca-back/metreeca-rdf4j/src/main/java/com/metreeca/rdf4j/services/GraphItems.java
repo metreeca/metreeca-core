@@ -21,6 +21,7 @@ import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Config;
+import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
@@ -38,7 +39,6 @@ import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.Xtream.task;
-import static com.metreeca.rest.services.Engine.items;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
@@ -112,7 +112,7 @@ final class GraphItems extends GraphFacts {
 									))),
 
 									offset(offset),
-									limit(limit, config.get(items()))
+									limit(limit, config.get(Engine::ItemsLimit))
 
 							)),
 

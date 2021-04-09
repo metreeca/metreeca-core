@@ -18,7 +18,6 @@ package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Values;
 import com.metreeca.json.queries.Terms;
-import com.metreeca.rest.Config;
 import com.metreeca.rest.Xtream;
 
 import org.eclipse.rdf4j.model.Statement;
@@ -27,7 +26,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.function.Supplier;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
@@ -40,6 +38,7 @@ import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static com.metreeca.rdf4j.services.GraphFactsTest.exec;
+import static com.metreeca.rdf4j.services.GraphFactsTest.options;
 import static com.metreeca.rdf4j.services.GraphTest.graph;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -50,14 +49,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 final class GraphTermsTest {
-
-	private static Config options() {
-		return new Config() {
-			@Override public <V> V get(final Supplier<V> option) {
-				return option.get();
-			}
-		};
-	}
 
 	private Collection<Statement> query(final Terms terms) {
 		return new GraphTerms(options()).process(Values.Root, terms);

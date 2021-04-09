@@ -36,8 +36,7 @@ import static com.metreeca.rest.Toolbox.service;
 /**
  * Model-driven graph engine.
  *
- * <p>Manages graph transactions and handles model-driven CRUD actions on linked data resources stored in the shared
- * {@linkplain Graph graph}.</p>
+ * <p>Handles model-driven CRUD operations on linked data resources stored in the shared {@linkplain Graph graph}.</p>
  */
 public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 

@@ -19,7 +19,6 @@ package com.metreeca.rdf4j.services;
 import com.metreeca.json.Shape;
 import com.metreeca.json.Values;
 import com.metreeca.json.queries.Items;
-import com.metreeca.rest.Config;
 
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
@@ -29,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Order.decreasing;
@@ -44,6 +42,7 @@ import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
 import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.rdf4j.services.GraphFactsTest.exec;
+import static com.metreeca.rdf4j.services.GraphFactsTest.options;
 import static com.metreeca.rdf4j.services.GraphTest.tuples;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,15 +52,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 final class GraphItemsTest {
-
-	private static Config options() {
-		return new Config() {
-			@Override public <V> V get(final Supplier<V> option) {
-				return option.get();
-			}
-		};
-	}
-
 
 	private Collection<Statement> query(final Items items) {
 		return new GraphItems(options()).process(Root, items);
