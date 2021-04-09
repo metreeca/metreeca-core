@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Xtream.task;
 
 
 /**
@@ -63,13 +64,9 @@ public final class Datastore {
 
 		final Datastore datastore=service(datastore());
 
-		return handler -> request -> consumer -> datastore.update(connection -> {
-
-			handler.handle(request).accept(consumer);
-
-			return datastore;
-
-		});
+		return handler -> request -> consumer -> datastore.update(task(connection ->
+				handler.handle(request).accept(consumer)
+		));
 	}
 
 

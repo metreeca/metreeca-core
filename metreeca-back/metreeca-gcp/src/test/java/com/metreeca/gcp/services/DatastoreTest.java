@@ -16,6 +16,8 @@
 
 package com.metreeca.gcp.services;
 
+import com.metreeca.rest.Toolbox;
+
 import com.google.cloud.datastore.DatastoreOptions;
 
 import java.io.IOException;
@@ -23,10 +25,10 @@ import java.io.UncheckedIOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.*;
 import java.util.Optional;
-import java.util.function.Consumer;
+
+import static com.metreeca.gcp.services.Datastore.datastore;
 
 import static java.lang.String.format;
-import static java.util.Arrays.stream;
 
 public final class DatastoreTest {
 
@@ -36,13 +38,13 @@ public final class DatastoreTest {
 
 
 	public static void main(final String... args) {
-		datastore();
+		run();
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public static boolean datastore() {
+	public static boolean run() {
 		try {
 
 			final String command="gcloud beta emulators datastore start"
@@ -75,7 +77,7 @@ public final class DatastoreTest {
 		}
 	}
 
-	public static void datastore(final Consumer<DatastoreOptions>... tasks) {
+	public static void exec(final Runnable... tasks) {
 
 		final DatastoreOptions options=DatastoreOptions.newBuilder()
 				.setProjectId(TestProject)
@@ -95,12 +97,12 @@ public final class DatastoreTest {
 
 			Thread.sleep(100);
 
-			stream(tasks).forEach(task -> task.accept(options));
+			new Toolbox().set(datastore(), () -> new Datastore(options)).exec(tasks).clear();
 
 		} catch ( final ConnectException e ) { // start test datastore and retry
 
-			if ( datastore() ) {
-				stream(tasks).forEach(task -> task.accept(options));
+			if ( run() ) {
+				new Toolbox().set(datastore(), () -> new Datastore(options)).exec(tasks).clear();
 			}
 
 		} catch ( final InterruptedException ignored ) {

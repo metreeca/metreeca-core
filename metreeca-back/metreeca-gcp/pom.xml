@@ -56,6 +56,20 @@
 			<artifactId>google-cloud-datastore</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-json</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.rdf4j</groupId>
+			<artifactId>rdf4j-rio-turtle</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 </project>

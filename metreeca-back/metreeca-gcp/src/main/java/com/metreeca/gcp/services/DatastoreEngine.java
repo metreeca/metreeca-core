@@ -17,6 +17,7 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.json.*;
+import com.metreeca.rest.Setup;
 import com.metreeca.rest.services.Engine;
 
 import java.util.Optional;
@@ -25,10 +26,10 @@ import java.util.Optional;
 /**
  * Model-driven Google Cloud Datastore engine.
  *
- * <p>Manages datastore transactions and handles model-driven CRUD actions on linked data resources stored in the shared
- * {@linkplain Datastore datastore}.</p>
+ * <p>Handles model-driven CRUD operations on linked data resources stored in the shared {@linkplain Datastore
+ * datastore}.</p>
  */
-public final class DatastoreEngine implements Engine {
+public final class DatastoreEngine extends Setup<DatastoreEngine> implements Engine {
 
 	@Override public Optional<Frame> create(final Frame frame, final Shape shape) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
