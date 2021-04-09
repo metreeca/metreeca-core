@@ -128,8 +128,8 @@ public final class Wikidata implements Function<String, Xtream<Frame>> {
 
 	private Frame match(final JsonObject match) {
 		return frame(iri(match.getString("concepturi")))
-				.add(RDFS.LABEL, string(match.get("label")))
-				.add(RDFS.COMMENT, string(match.get("description")));
+				.string(RDFS.LABEL, string(match.get("label")))
+				.string(RDFS.COMMENT, string(match.get("description")));
 	}
 
 	private String string(final JsonValue value) {

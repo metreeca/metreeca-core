@@ -21,7 +21,6 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.Value;
 
 import static com.metreeca.json.Values.format;
-import static com.metreeca.json.Values.value;
 
 
 /**
@@ -31,15 +30,6 @@ import static com.metreeca.json.Values.value;
  * href="https://www.w3.org/TR/2013/REC-sparql11-query-20130321/#modOrderBy">SPARQL ordering</a> rules.</p>
  */
 public final class MaxExclusive extends Shape {
-
-	public static Shape maxExclusive(final Object limit) {
-
-		if ( limit == null ) {
-			throw new NullPointerException("null limit");
-		}
-
-		return new MaxExclusive(value(limit));
-	}
 
 	public static Shape maxExclusive(final Value limit) {
 

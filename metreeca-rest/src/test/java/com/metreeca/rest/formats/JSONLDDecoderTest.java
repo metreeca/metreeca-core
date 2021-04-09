@@ -180,11 +180,11 @@ final class JSONLDDecoderTest {
 		}
 
 		@Test void testInteger() {
-			assertThat(decode(createValue(1))).isEqualTo(literal(integer(1)));
+			assertThat(decode(createValue(1))).isEqualTo(literal(1));
 		}
 
 		@Test void testDecimal() {
-			assertThat(decode(createValue(1.0))).isEqualTo(literal(decimal(1.0)));
+			assertThat(decode(createValue(1.0))).isEqualTo(literal(1.0));
 		}
 
 
@@ -592,7 +592,7 @@ final class JSONLDDecoderTest {
 
 			)).isIsomorphicTo(
 
-					statement(x, RDF.VALUE, literal(1.0))
+					statement(x, RDF.VALUE, literal(1.0, false))
 
 			);
 		}

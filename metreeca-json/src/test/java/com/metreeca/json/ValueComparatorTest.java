@@ -30,8 +30,10 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import static com.metreeca.json.Values.*;
-import static java.time.ZoneOffset.UTC;
+
 import static org.assertj.core.api.Assertions.assertThat;
+
+import static java.time.ZoneOffset.UTC;
 
 
 final class ValueComparatorTest {
@@ -115,7 +117,7 @@ final class ValueComparatorTest {
 				literal(3),
 				literal(4L),
 				literal(5.0f),
-				literal(6.0d),
+				literal(6.0d, false),
 				literal(BigInteger.valueOf(7)),
 				literal(BigDecimal.valueOf(8)),
 		};
@@ -133,12 +135,12 @@ final class ValueComparatorTest {
 		assertThat(compare(literal(0.0f), literal(Float.POSITIVE_INFINITY))).isLessThan(0);
 		assertThat(compare(literal(Float.NEGATIVE_INFINITY), literal(Float.POSITIVE_INFINITY))).isLessThan(0);
 
-		assertThat(compare(literal(Double.NaN), literal(Double.NaN))).isEqualTo(0);
-		assertThat(compare(literal(0.0d), literal(Double.NaN))).isLessThan(0);
-		assertThat(compare(literal(Double.NaN), literal(0.0d))).isGreaterThan(0);
-		assertThat(compare(literal(Double.NEGATIVE_INFINITY), literal(0.0d))).isLessThan(0);
-		assertThat(compare(literal(0.0d), literal(Double.POSITIVE_INFINITY))).isLessThan(0);
-		assertThat(compare(literal(Double.NEGATIVE_INFINITY), literal(Double.POSITIVE_INFINITY))).isLessThan(0);
+		assertThat(compare(literal(Double.NaN, false), literal(Double.NaN, false))).isEqualTo(0);
+		assertThat(compare(literal(0.0d, false), literal(Double.NaN, false))).isLessThan(0);
+		assertThat(compare(literal(Double.NaN, false), literal(0.0d, false))).isGreaterThan(0);
+		assertThat(compare(literal(Double.NEGATIVE_INFINITY, false), literal(0.0d, false))).isLessThan(0);
+		assertThat(compare(literal(0.0d, false), literal(Double.POSITIVE_INFINITY, false))).isLessThan(0);
+		assertThat(compare(literal(Double.NEGATIVE_INFINITY, false), literal(Double.POSITIVE_INFINITY, false))).isLessThan(0);
 
 		assertThat(compare(literal(1), literal("malformed", XSD.INTEGER))).isLessThan(0);
 		assertThat(compare(literal("malformed", XSD.INTEGER), literal(1))).isGreaterThan(0);

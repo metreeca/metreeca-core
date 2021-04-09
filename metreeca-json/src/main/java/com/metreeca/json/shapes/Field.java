@@ -27,7 +27,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Or.or;
 
@@ -70,33 +69,6 @@ public final class Field extends Shape {
 		return field("", iri, and(shapes));
 	}
 
-	public static Shape field(final IRI iri, final Object... values) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		if ( values == null || stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		return field("", iri, all(values));
-	}
-
-	public static Shape field(final IRI iri, final Shape shape) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
-
-		return field("", iri, shape);
-	}
-
-
 	public static Shape field(final String label, final IRI iri, final Shape... shapes) {
 
 		if ( label == null ) {
@@ -115,43 +87,7 @@ public final class Field extends Shape {
 			throw new NullPointerException("null shapes");
 		}
 
-		return field(label, iri, and(shapes));
-	}
-
-	public static Shape field(final String label, final IRI iri, final Object... values) {
-
-		if ( label == null ) {
-			throw new NullPointerException("null label");
-		}
-
-		if ( !(label.isEmpty() || LabelPattern.matcher(label).matches()) ) {
-			throw new IllegalArgumentException(format("malformed label <%s>", label));
-		}
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		if ( values == null || stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		return field(label, iri, all(values));
-	}
-
-	public static Shape field(final String label, final IRI iri, final Shape shape) {
-
-		if ( label == null ) {
-			throw new NullPointerException("null label");
-		}
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		if ( shape == null ) {
-			throw new NullPointerException("null shape");
-		}
+		final Shape shape=and(shapes);
 
 		return shape.equals(or()) ? and() : new Field(label, iri, shape);
 	}

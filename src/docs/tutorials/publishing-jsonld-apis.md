@@ -602,20 +602,20 @@ public final class Products extends Delegator {
 				field(RDF.TYPE, exactly(Toys.Product)),
 
 				field(RDFS.LABEL, required(), datatype(XSD.STRING), maxLength(50)),
-				field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
+			field(RDFS.COMMENT, required(), datatype(XSD.STRING), maxLength(500)),
 
-				server(field(Toys.code, required())),
+			server(field(Toys.code, required())),
 
-				field(Toys.line, required(), convey(clazz(Toys.ProductLine)),
+			field(Toys.line, required(), convey(clazz(Toys.ProductLine)),
 
-						relate(field(RDFS.LABEL, required()))
+					relate(field(RDFS.LABEL, required()))
 
-				),
+			),
 
-				field(Toys.scale, required(),
-						datatype(XSD.STRING),
-				pattern("1:[1-9][0-9]{1,2}")
-		),
+			field(Toys.scale, required(),
+					datatype(XSD.STRING),
+					pattern("1:[1-9][0-9]{1,2}")
+			),
 
 			field(Toys.vendor, required(),
 					datatype(XSD.STRING),
@@ -624,20 +624,20 @@ public final class Products extends Delegator {
 
 			field("price", Toys.sell, required(),
 					datatype(XSD.DECIMAL),
-					minExclusive(literal(decimal(0))),
-					maxExclusive(literal(decimal(1000)))
+					minExclusive(literal(0.0)),
+					maxExclusive(literal(1_000.0))
 			),
 
 			role(Toys.staff).then(field(Toys.buy, required(),
 					datatype(XSD.DECIMAL),
-					minInclusive(literal(decimal(0))),
-					maxInclusive(literal(decimal(1000)))
+					minInclusive(literal(0.0)),
+					maxInclusive(literal(1_000.0))
 			)),
 
 			server().then(field(Toys.stock, required(),
 					datatype(XSD.INTEGER),
-					minInclusive(literal(integer(0))),
-					maxExclusive(literal(integer(10_000)))
+					minInclusive(literal(0)),
+					maxExclusive(literal(10_000))
 			))
 
 	)).wrap(router()
@@ -731,8 +731,8 @@ views.
 ```java
 role(Toys.staff).then(field(Toys.buy,required(),
 		datatype(XSD.DECIMAL),
-		minInclusive(literal(decimal(0))),
-		maxInclusive(literal(decimal(1000)))
+		minInclusive(literal(0.0)),
+		maxInclusive(literal(1_000.0))
 		))
 ```
 
@@ -863,9 +863,10 @@ public final class ProductsSlug implements Function<Request, String> {
 	public String apply(final Request request) {
 		return graph.exec(connection -> {
 
-		final Value scale=request.body(jsonld()).get()
-				.flatMap(frame -> value(frame.get(Toys.scale)))
-				.orElse(literal("1:1"));
+			final Value scale=literal(request.body(jsonld()).get()
+					.flatMap(frame -> frame.string(Toys.scale))
+					.orElse("1:1")
+			);
 
 			int serial=0;
 

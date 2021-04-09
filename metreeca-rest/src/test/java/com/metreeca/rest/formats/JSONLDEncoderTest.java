@@ -113,22 +113,22 @@ final class JSONLDEncoderTest {
 		}
 
 		@Test void testInteger() {
-			assertThat(encode(literal(integer(1)))).isEqualTo(createValue(integer(1)));
+			assertThat(encode(literal(1))).isEqualTo(createValue(1));
 		}
 
 		@Test void testDecimal() {
-			assertThat(encode(literal(decimal(1)))).isEqualTo(createValue(decimal(1)));
+			assertThat(encode(literal(1.0))).isEqualTo(createValue(1.0));
 		}
 
 		@Test void testInt() {
-			assertThat(encode(literal(1))).isEqualTo(createObjectBuilder()
+			assertThat(encode(literal(1, true))).isEqualTo(createObjectBuilder()
 					.add("@value", createValue("1"))
 					.add("@type", createValue(XSD.INT.stringValue()))
 			);
 		}
 
 		@Test void testDouble() {
-			assertThat(encode(literal(1.0))).isEqualTo(createObjectBuilder()
+			assertThat(encode(literal(1.0, true))).isEqualTo(createObjectBuilder()
 					.add("@value", createValue("1.0"))
 					.add("@type", createValue(XSD.DOUBLE.stringValue()))
 			);

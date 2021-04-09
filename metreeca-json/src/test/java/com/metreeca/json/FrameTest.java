@@ -44,21 +44,21 @@ final class FrameTest {
 		@Test void testHandleDirectAndInverseFields() {
 
 			final Frame frame=frame(x)
-					.add(RDF.VALUE, y)
-					.add(inverse(RDF.VALUE), z);
+					.value(RDF.VALUE, y)
+					.value(inverse(RDF.VALUE), z);
 
-			assertThat(frame.get(RDF.VALUE)).containsExactly(y);
-			assertThat(frame.get(inverse(RDF.VALUE))).containsExactly(z);
+			assertThat(frame.values(RDF.VALUE)).containsExactly(y);
+			assertThat(frame.values(inverse(RDF.VALUE))).containsExactly(z);
 		}
 
 		@Test void testHandleNestedFrames() {
 
 			final Frame frame=frame(w)
-					.add(RDF.VALUE, x)
-					.add(RDF.VALUE, frame(y)
-							.add(RDF.VALUE, w)
+					.value(RDF.VALUE, x)
+					.frame(RDF.VALUE, frame(y)
+							.value(RDF.VALUE, w)
 					)
-					.add(RDF.VALUE, z);
+					.value(RDF.VALUE, z);
 
 			assertThat(frame.model()).isIsomorphicTo(
 					statement(w, RDF.VALUE, x),
@@ -71,7 +71,7 @@ final class FrameTest {
 		@Test void testReportLiteralObjectsForInverseFields() {
 			assertThatIllegalArgumentException()
 					.isThrownBy(() -> {
-						frame(x).add(inverse(RDF.VALUE), literal(1));
+						frame(x).value(inverse(RDF.VALUE), literal(1));
 					});
 		}
 
@@ -131,23 +131,25 @@ final class FrameTest {
 		}
 
 		@Test void testImportRecursiveModels() {
-			assertThat(
+			assertThat((
 
 					frame(x, asList(
 
 							statement(x, RDF.VALUE, y),
 							statement(y, RDF.VALUE, x)
 
-					)).get(seq(RDF.VALUE, RDF.VALUE, RDF.VALUE))
+					)).values(seq(
+							RDF.VALUE, RDF.VALUE, RDF.VALUE
+					))
 
-			).containsExactly(y);
+			)).containsExactly(y);
 		}
 	}
 
 	@Nested final class Exporting {
 
 		@Test void testExportDirectStatements() {
-			assertThat(frame(x).add(RDF.VALUE, y)
+			assertThat(frame(x).value(RDF.VALUE, y)
 
 					.model()
 
@@ -159,7 +161,7 @@ final class FrameTest {
 		}
 
 		@Test void testExportInverseStatements() {
-			assertThat(frame(x).add(inverse(RDF.VALUE), y)
+			assertThat(frame(x).value(inverse(RDF.VALUE), y)
 
 					.model()
 
@@ -173,8 +175,8 @@ final class FrameTest {
 		@Test void testExportTransitiveStatements() {
 			assertThat(frame(x)
 
-					.add(RDF.FIRST, frame(y)
-							.add(RDF.REST, z)
+					.frame(RDF.FIRST, frame(y)
+							.value(RDF.REST, z)
 					)
 
 					.model()

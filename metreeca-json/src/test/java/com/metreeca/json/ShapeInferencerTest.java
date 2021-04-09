@@ -65,17 +65,17 @@ final class ShapeInferencerTest {
 
 	@Test void testRange() {
 
-		final Shape heterogeneous=range(literal(1), literal(2.0));
+		final Shape heterogeneous=range(literal(1, true), literal(2.0, true));
 
 		assertThat(expand(heterogeneous))
 				.as("maximum focus size is equal to the size of the allowed value set")
 				.isEqualTo(and(heterogeneous, maxCount(2)));
 
-		final Shape inUniform=range(literal(1), literal(2));
+		final Shape uniform=range(literal(1), literal(2));
 
-		assertThat(expand(inUniform))
+		assertThat(expand(uniform))
 				.as("if unique, focus values share the datatype of the allowed value set")
-				.isEqualTo(and(inUniform, and(maxCount(2), datatype(XSD.INT))));
+				.isEqualTo(and(uniform, and(maxCount(2), datatype(XSD.INTEGER))));
 
 	}
 

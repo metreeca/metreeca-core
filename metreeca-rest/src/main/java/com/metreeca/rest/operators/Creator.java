@@ -193,8 +193,8 @@ public final class Creator extends Delegator {
 
 					.map(Frame::focus)
 
-					.map(iri -> request.reply(response -> response.status(Created)
-							.header("Location", path(iri.stringValue())) // root-relative to support relocation
+					.map(focus -> request.reply(response -> response.status(Created)
+							.header("Location", path(focus)) // root-relative to support relocation
 					))
 
 					.orElseThrow(() ->

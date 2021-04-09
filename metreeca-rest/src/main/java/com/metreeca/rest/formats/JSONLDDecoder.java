@@ -198,7 +198,7 @@ final class JSONLDDecoder {
 				=XSD.DECIMAL.equals(datatype) ? Values.literal(number.bigDecimalValue())
 				: XSD.INTEGER.equals(datatype) ? Values.literal(number.bigIntegerValue())
 
-				: XSD.DOUBLE.equals(datatype) ? Values.literal(number.numberValue().doubleValue())
+				: XSD.DOUBLE.equals(datatype) ? Values.literal(number.numberValue().doubleValue(), false)
 				: XSD.FLOAT.equals(datatype) ? Values.literal(number.numberValue().floatValue())
 
 				: XSD.LONG.equals(datatype) ? Values.literal(number.numberValue().longValue())

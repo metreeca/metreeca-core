@@ -214,7 +214,7 @@ final class GraphStatsTest {
 
 					and(
 							filter(clazz(term("Employee"))),
-							filter(field(term("seniority"), minInclusive(integer(3)))),
+							filter(field(term("seniority"), minInclusive(literal(3)))),
 							field(term("seniority"))
 					),
 

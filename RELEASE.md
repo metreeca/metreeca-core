@@ -3,6 +3,7 @@
 - JSON / Simplified and generalized `Frame` API
 - JSON / Restricted `Frame.focus()` to `Resource` values
 - JSON / Migrated `Frame` API to focus `Shift` operators
+- JSON / Reorganized and extended `Values` converter methods
 - REST / Migrated `JSONLDFormat` to `Frame` payload to improve usability
 - REST / Renamed `Context.asset()` to `Toolbox.service()` to avoid widespread conflicts with other concepts (RDF
   statement context, JSON-LD context, web app context, web app asset, …)

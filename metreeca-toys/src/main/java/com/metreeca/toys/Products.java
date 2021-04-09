@@ -20,7 +20,7 @@ import com.metreeca.rest.handlers.Delegator;
 
 import org.eclipse.rdf4j.model.vocabulary.*;
 
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.literal;
 import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
@@ -74,20 +74,20 @@ public final class Products extends Delegator {
 
 				field("price", Toys.sell, required(),
 						datatype(XSD.DECIMAL),
-						minExclusive(literal(decimal(0))),
-						maxExclusive(literal(decimal(1000)))
+						minExclusive(literal(0.0)),
+						maxExclusive(literal(1000.0))
 				),
 
 				role(Toys.staff).then(field(Toys.buy, required(),
 						datatype(XSD.DECIMAL),
-						minInclusive(literal(decimal(0))),
-						maxInclusive(literal(decimal(1000)))
+						minInclusive(literal(0.0)),
+						maxInclusive(literal(1000.0))
 				)),
 
 				server().then(field(Toys.stock, required(),
 						datatype(XSD.INTEGER),
-						minInclusive(literal(integer(0))),
-						maxExclusive(literal(integer(10_000)))
+						minInclusive(literal(0)),
+						maxExclusive(literal(10_000))
 				))
 
 		)).wrap(router()

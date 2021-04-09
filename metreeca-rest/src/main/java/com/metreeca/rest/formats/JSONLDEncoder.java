@@ -75,7 +75,7 @@ final class JSONLDEncoder {
 		this.keywords=keywords;
 		this.context=context;
 
-		this.root=root(focus.stringValue());
+		this.root=root(focus);
 
 		this.aliaser=keyword -> keywords.getOrDefault(keyword, keyword);
 	}

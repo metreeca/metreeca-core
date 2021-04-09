@@ -30,7 +30,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.*;
 
-import static com.metreeca.json.Values.*;
+import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.Values.literal;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.Xtream.task;
 
@@ -120,7 +121,7 @@ public final class Graph implements AutoCloseable {
 					new StatementCollector(delta)
 			);
 
-			return frame.add(delta);
+			return frame.statements(delta);
 
 		});
 	}
@@ -298,7 +299,7 @@ public final class Graph implements AutoCloseable {
 		);
 
 		if ( message instanceof Response ) {
-			operation.setBinding("code", literal(integer(((Response)message).status())));
+			operation.setBinding("code", literal(((Response)message).status()));
 		}
 
 		for (final BiConsumer<M, O> customizer : customizers) {

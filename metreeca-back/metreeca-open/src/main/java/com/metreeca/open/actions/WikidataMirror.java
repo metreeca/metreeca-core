@@ -452,10 +452,8 @@ public final class WikidataMirror implements Consumer<Stream<String>>, Function<
 								final Resource resource=rewrite(statement.getSubject());
 
 								return Stream.of(
-
 										statement(resource, WGS84.LAT, literal(point.getKey())),
 										statement(resource, WGS84.LONG, literal(point.getValue()))
-
 								);
 							})
 

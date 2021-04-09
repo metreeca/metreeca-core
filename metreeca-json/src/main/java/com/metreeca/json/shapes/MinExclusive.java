@@ -21,7 +21,6 @@ import com.metreeca.json.Shape;
 import org.eclipse.rdf4j.model.Value;
 
 import static com.metreeca.json.Values.format;
-import static com.metreeca.json.Values.value;
 
 
 /**
@@ -32,14 +31,6 @@ import static com.metreeca.json.Values.value;
  */
 public final class MinExclusive extends Shape {
 
-	public static Shape minExclusive(final Object limit) {
-
-		if ( limit == null ) {
-			throw new NullPointerException("null limit");
-		}
-
-		return new MinExclusive(value(limit));
-	}
 
 	public static Shape minExclusive(final Value limit) {
 

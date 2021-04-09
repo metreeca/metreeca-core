@@ -59,7 +59,7 @@ public final class GraphTest {
 	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
 
 
-	private final Frame data=frame(RDF.NIL).add(RDF.VALUE, RDF.FIRST);
+	private final Frame data=frame(RDF.NIL).value(RDF.VALUE, RDF.FIRST);
 
 
 	public static void exec(final Runnable... tasks) {

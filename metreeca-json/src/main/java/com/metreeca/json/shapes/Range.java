@@ -27,9 +27,9 @@ import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.And.and;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 
 /**
@@ -39,18 +39,9 @@ import static java.util.stream.Collectors.toList;
  */
 public final class Range extends Shape {
 
-	public static Shape range(final Object... values) {
-
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		return range(Arrays.stream(values).map(Values::value).collect(toList()));
-	}
-
 	public static Shape range(final Value... values) {
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+		if ( values == null || stream(values).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
 

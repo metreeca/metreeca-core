@@ -28,8 +28,10 @@ import static com.metreeca.json.Values.format;
 import static com.metreeca.json.shapes.And.and;
 
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -39,18 +41,9 @@ import static java.util.stream.Collectors.*;
  */
 public final class All extends Shape {
 
-	public static Shape all(final Object... values) {
-
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		return all(Arrays.stream(values).map(Values::value).collect(toList()));
-	}
-
 	public static Shape all(final Value... values) {
 
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
+		if ( values == null || stream(values).anyMatch(Objects::isNull) ) {
 			throw new NullPointerException("null values");
 		}
 

@@ -30,7 +30,8 @@ import static com.metreeca.json.shapes.And.and;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toSet;
 
 
 /**
@@ -39,15 +40,6 @@ import static java.util.stream.Collectors.*;
  * <p>States that the focus set includes at least one value from a given set of target values.</p>
  */
 public final class Any extends Shape {
-
-	public static Shape any(final Object... values) {
-
-		if ( values == null || Arrays.stream(values).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		return any(Arrays.stream(values).map(Values::value).collect(toList()));
-	}
 
 	public static Shape any(final Value... values) {
 

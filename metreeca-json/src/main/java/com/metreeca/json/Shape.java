@@ -275,7 +275,7 @@ public abstract class Shape {
 
 				// container: connect to the anchor using ldp:contains, unless otherwise specified in the shape
 
-				? shape.empty() ? and(field(inverse(Contains), focus()), shape) : shape
+				? shape.empty() ? and(field(inverse(Contains), all(focus())), shape) : shape
 
 				// resource: constraint to the anchor
 

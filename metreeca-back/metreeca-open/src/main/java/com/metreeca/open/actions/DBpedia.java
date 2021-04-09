@@ -73,9 +73,9 @@ public final class DBpedia implements Function<String, Xtream<Frame>> {
 
 	private Frame result(final JsonObject result) {
 		return frame(iri(result.getString("uri")))
-				.add(RDFS.LABEL, string(result.get("label")))
-				.add(RDFS.COMMENT, string(result.get("description")))
-				.add(RDF.TYPE, result.getJsonArray("classes").stream().map(clazz ->
+				.string(RDFS.LABEL, string(result.get("label")))
+				.string(RDFS.COMMENT, string(result.get("description")))
+				.values(RDF.TYPE, result.getJsonArray("classes").stream().map(clazz ->
 						iri(clazz.asJsonObject().getString("uri"))
 				));
 	}

@@ -60,7 +60,6 @@ import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rdf4j.services.GraphFacts.path;
 import static com.metreeca.rdf4j.services.GraphFacts.root;
-import static com.metreeca.rdf4j.services.GraphFacts.value;
 import static com.metreeca.rdf4j.services.GraphFacts.*;
 import static com.metreeca.rdf4j.services.GraphTest.graph;
 import static com.metreeca.rdf4j.services.GraphTest.model;
@@ -166,7 +165,7 @@ final class GraphFactsTest {
 		exec(() -> assertThat(query(and(
 
 				filter(clazz(term("Employee"))),
-				field(term("seniority"), minInclusive(integer(10)))
+				field(term("seniority"), minInclusive(literal(10)))
 
 		))).isIsomorphicTo(graph(
 
@@ -189,7 +188,7 @@ final class GraphFactsTest {
 
 		@Test void testResolveReferencesToTarget() {
 			exec(() -> assertThat(query(item("/employees-basic/"), and(
-					filter(field(inverse(LDP.CONTAINS), focus())),
+					filter(field(inverse(LDP.CONTAINS), all(focus()))),
 					convey(field(RDFS.LABEL))
 			))).isIsomorphicTo(graph(
 
@@ -253,7 +252,7 @@ final class GraphFactsTest {
 
 
 		@Test void testMinExclusiveConstraint() {
-			exec(() -> assertThat(query(field(term("seniority"), filter(minExclusive(literal(integer(3))))))).isIsomorphicTo(graph(
+			exec(() -> assertThat(query(field(term("seniority"), filter(minExclusive(literal(3)))))).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -270,7 +269,7 @@ final class GraphFactsTest {
 		}
 
 		@Test void testMaxExclusiveConstraint() {
-			exec(() -> assertThat(query(field(term("seniority"), filter(maxExclusive(literal(integer(3))))))).isIsomorphicTo(graph(
+			exec(() -> assertThat(query(field(term("seniority"), filter(maxExclusive(literal(3)))))).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -287,7 +286,7 @@ final class GraphFactsTest {
 		}
 
 		@Test void testMinInclusiveConstraint() {
-			exec(() -> assertThat(query(field(term("seniority"), filter(minInclusive(literal(integer(3))))))).isIsomorphicTo(graph(
+			exec(() -> assertThat(query(field(term("seniority"), filter(minInclusive(literal(3)))))).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -304,7 +303,7 @@ final class GraphFactsTest {
 		}
 
 		@Test void testMaxInclusiveConstraint() {
-			exec(() -> assertThat(query(field(term("seniority"), filter(maxInclusive(literal(integer(3))))))).isIsomorphicTo(graph(
+			exec(() -> assertThat(query(field(term("seniority"), filter(maxInclusive(literal(3)))))).isIsomorphicTo(graph(
 
 					"construct { \n"
 							+"\n"
@@ -614,7 +613,7 @@ final class GraphFactsTest {
 		@Test void testLinkFieldFilters() {
 			exec(() -> assertThat(query(
 
-					link(OWL.SAMEAS, filter(field(RDF.TYPE, term("Office"))))
+					link(OWL.SAMEAS, filter(field(RDF.TYPE, all(term("Office")))))
 
 			)).isIsomorphicTo(graph(
 

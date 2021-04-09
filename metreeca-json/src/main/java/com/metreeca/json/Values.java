@@ -38,7 +38,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Locale.ROOT;
@@ -236,6 +235,30 @@ public final class Values {
 	}
 
 
+	public static String root(final Resource resource) {
+		return Optional.ofNullable(resource)
+				.filter(Value::isIRI)
+				.map(Value::stringValue)
+				.map(IRIPattern::matcher)
+				.filter(Matcher::matches)
+				.map(matcher -> Optional.ofNullable(matcher.group("schemeall")).orElse("")
+						+Optional.ofNullable(matcher.group("hostall")).orElse("")
+						+"/"
+				)
+				.orElse(Base);
+	}
+
+	public static String path(final Resource resource) {
+		return Optional.ofNullable(resource)
+				.filter(Value::isIRI)
+				.map(Value::stringValue)
+				.map(IRIPattern::matcher)
+				.filter(Matcher::matches)
+				.map(matcher -> matcher.group("pathall"))
+				.orElse("/");
+	}
+
+
 	public static String text(final Value value) {
 		return value == null ? null : value.stringValue();
 	}
@@ -250,6 +273,63 @@ public final class Values {
 
 	public static String lang(final Value value) {
 		return value instanceof Literal ? ((Literal)value).getLanguage().orElse(null) : null;
+	}
+
+
+	//// Identifiers ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static String uuid() {
+		return randomUUID().toString();
+	}
+
+	public static String uuid(final String text) {
+		return text == null ? null : uuid(text.getBytes(UTF_8));
+	}
+
+	public static String uuid(final byte[] data) {
+		return data == null ? null : nameUUIDFromBytes(data).toString();
+	}
+
+
+	public static String md5() {
+
+		final byte[] bytes=new byte[16];
+
+		ThreadLocalRandom.current().nextBytes(bytes);
+
+		return hex(bytes);
+	}
+
+	public static String md5(final String text) {
+		return text == null ? null : md5(text.getBytes(UTF_8));
+	}
+
+	public static String md5(final byte[] data) {
+		try {
+
+			return data == null ? null : hex(MessageDigest.getInstance("MD5").digest(data));
+
+		} catch ( final NoSuchAlgorithmException unexpected ) {
+			throw new InternalError(unexpected);
+		}
+	}
+
+
+	public static String hex(final byte[] bytes) {
+		if ( bytes == null ) { return null; } else {
+
+			final char[] hex=new char[bytes.length*2];
+
+			for (int i=0, l=bytes.length; i < l; ++i) {
+
+				final int b=bytes[i]&0xFF;
+
+				hex[2*i]=HexDigits[b >>> 4];
+				hex[2*i+1]=HexDigits[b&0x0F];
+			}
+
+			return new String(hex);
+		}
 	}
 
 
@@ -304,18 +384,6 @@ public final class Values {
 	}
 
 
-	public static Value value(final Object object) {
-		return object == null ? null
-
-				: object instanceof Value ? (Value)object
-
-				: object instanceof URI ? iri((URI)object)
-				: object instanceof URL ? iri((URL)object)
-
-				: literal(object);
-	}
-
-
 	public static BNode bnode() {
 		return factory.createBNode();
 	}
@@ -332,17 +400,6 @@ public final class Values {
 
 	public static IRI iri() {
 		return factory.createIRI("urn:uuid:", uuid());
-	}
-
-	public static IRI iri(final Object object) {
-		return object == null ? null
-
-				: object instanceof IRI ? (IRI)object
-
-				: object instanceof URI ? iri((URI)object)
-				: object instanceof URL ? iri((URL)object)
-
-				: unsupported(object.getClass());
 	}
 
 	public static IRI iri(final URI uri) {
@@ -367,58 +424,80 @@ public final class Values {
 	}
 
 
-	public static Literal literal(final Object object) {
-		return object == null ? null
-
-				: object instanceof Literal ? (Literal)object
-
-				: object instanceof Boolean ? literal(((Boolean)object).booleanValue())
-
-				: object instanceof Byte ? literal(((Byte)object).byteValue())
-				: object instanceof Short ? literal(((Short)object).shortValue())
-				: object instanceof Integer ? literal(((Integer)object).intValue())
-				: object instanceof Long ? literal(((Long)object).longValue())
-				: object instanceof Float ? literal(((Float)object).floatValue())
-				: object instanceof Double ? literal(((Double)object).doubleValue())
-				: object instanceof BigInteger ? literal((BigInteger)object)
-				: object instanceof BigDecimal ? literal((BigDecimal)object)
-
-				: object instanceof String ? literal((String)object)
-
-				: object instanceof TemporalAccessor ? literal((TemporalAccessor)object)
-				: object instanceof TemporalAmount ? literal((TemporalAmount)object)
-
-				: object instanceof byte[] ? literal((byte[])object)
-
-				: unsupported(object.getClass());
-	}
-
 	public static Literal literal(final boolean value) {
 		return factory.createLiteral(value);
 	}
 
+
+	public static Literal literal(final Number value) {
+		return literal(value, false);
+	}
+
+	public static Literal literal(final Number value, final boolean strict) {
+		return value == null ? null
+
+				: value instanceof Byte ? literal(value.byteValue(), strict)
+				: value instanceof Short ? literal(value.shortValue(), strict)
+				: value instanceof Integer ? literal(value.intValue(), strict)
+				: value instanceof Long ? literal(value.longValue(), strict)
+
+				: value instanceof Float ? literal(value.floatValue(), strict)
+				: value instanceof Double ? literal(value.doubleValue(), strict)
+
+				: value instanceof BigInteger ? literal((BigInteger)value)
+				: value instanceof BigDecimal ? literal((BigDecimal)value)
+
+				: null;
+	}
+
 	public static Literal literal(final byte value) {
-		return factory.createLiteral(value);
+		return literal(value, false);
+	}
+
+	public static Literal literal(final byte value, final boolean strict) {
+		return strict ? factory.createLiteral(value) : factory.createLiteral(BigInteger.valueOf(value));
 	}
 
 	public static Literal literal(final short value) {
-		return factory.createLiteral(value);
+		return literal(value, false);
+	}
+
+	public static Literal literal(final short value, final boolean strict) {
+		return strict ? factory.createLiteral(value) : factory.createLiteral(BigInteger.valueOf(value));
 	}
 
 	public static Literal literal(final int value) {
-		return factory.createLiteral(value);
+		return literal(value, false);
+	}
+
+	public static Literal literal(final int value, final boolean strict) {
+		return strict ? factory.createLiteral(value) : factory.createLiteral(BigInteger.valueOf(value));
 	}
 
 	public static Literal literal(final long value) {
-		return factory.createLiteral(value);
+		return literal(value, false);
+	}
+
+	public static Literal literal(final long value, final boolean strict) {
+		return strict ? factory.createLiteral(value) : factory.createLiteral(BigInteger.valueOf(value));
 	}
 
 	public static Literal literal(final float value) {
-		return factory.createLiteral(value);
+		return literal(value, false);
+	}
+
+	public static Literal literal(final float value, final boolean strict) {
+		return strict || Float.isInfinite(value) || Float.isNaN(value) ?
+				factory.createLiteral(value) : factory.createLiteral(BigDecimal.valueOf(value));
 	}
 
 	public static Literal literal(final double value) {
-		return factory.createLiteral(value);
+		return literal(value, false);
+	}
+
+	public static Literal literal(final double value, final boolean strict) {
+		return strict || Double.isInfinite(value) || Double.isNaN(value) ?
+				factory.createLiteral(value) : factory.createLiteral(BigDecimal.valueOf(value));
 	}
 
 	public static Literal literal(final BigInteger value) {
@@ -428,6 +507,7 @@ public final class Values {
 	public static Literal literal(final BigDecimal value) {
 		return value == null ? null : factory.createLiteral(value);
 	}
+
 
 	public static Literal literal(final String value) {
 		return value == null ? null : factory.createLiteral(value);
@@ -458,128 +538,29 @@ public final class Values {
 	}
 
 
-	private static <V extends Value> V unsupported(final Class<?> type) {
-		throw new UnsupportedOperationException(String.format("unsupported object type <%s>", type.getName()));
+	//// Converters ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public static Optional<Resource> resource(final Value value) {
+		return Optional.ofNullable(value).filter(Value::isResource).map(Resource.class::cast);
 	}
 
-
-	///// Converters //////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Optional<Value> value(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return values.filter(Objects::nonNull).findFirst();
+	public static Optional<BNode> bnode(final Value value) {
+		return Optional.ofNullable(value).filter(Value::isBNode).map(BNode.class::cast);
 	}
-
-	public static Stream<Value> values(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return values.filter(Objects::nonNull);
-	}
-
-
-	public static Optional<Boolean> _boolean(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return value(values).flatMap(Values::_boolean);
-	}
-
-
-	public static Optional<BigInteger> integer(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return value(values).flatMap(Values::integer);
-	}
-
-	public static Stream<BigInteger> integers(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return values(values).map(Values::integer).flatMap(Values::stream);
-	}
-
-
-	public static Optional<BigDecimal> decimal(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return value(values).flatMap(Values::decimal);
-	}
-
-	public static Stream<BigDecimal> decimals(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return values(values).map(Values::decimal).flatMap(Values::stream);
-	}
-
-
-	public static Optional<String> string(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return value(values).flatMap(Values::string);
-	}
-
-	public static Stream<String> strings(final Stream<Value> values) {
-
-		if ( values == null ) {
-			throw new NullPointerException("null values");
-		}
-
-		return values(values).map(Values::string).flatMap(Values::stream);
-	}
-
 
 	public static Optional<IRI> iri(final Value value) {
-		return Optional.ofNullable(value).filter(IRI.class::isInstance).map(IRI.class::cast);
+		return Optional.ofNullable(value).filter(Value::isIRI).map(IRI.class::cast);
 	}
 
 	public static Optional<Literal> literal(final Value value) {
-		return Optional.ofNullable(value).filter(Literal.class::isInstance).map(Literal.class::cast);
+		return Optional.ofNullable(value).filter(Value::isLiteral).map(Literal.class::cast);
 	}
 
 
-	public static Optional<Boolean> _boolean(final Value value) {
-		return literal(value).map(Literal::booleanValue);
+	public static Optional<Boolean> bool(final Value value) {
+		return literal(value).map(guard(Literal::booleanValue));
 	}
 
-
-	public static Optional<Integer> _int(final Value value) {
-		return literal(value).map(guard(Literal::intValue));
-	}
-
-	public static Optional<Long> _long(final Value value) {
-		return literal(value).map(guard(Literal::longValue));
-	}
-
-	public static Optional<Float> __float(final Value value) {
-		return literal(value).map(guard(Literal::floatValue));
-	}
-
-	public static Optional<Double> _double(final Value value) {
-		return literal(value).map(guard(Literal::doubleValue));
-	}
 
 	public static Optional<BigInteger> integer(final Value value) {
 		return literal(value).map(guard(Literal::integerValue));
@@ -591,7 +572,7 @@ public final class Values {
 
 
 	public static Optional<String> string(final Value value) {
-		return literal(value).map(Literal::stringValue);
+		return literal(value).map(guard(Literal::stringValue));
 	}
 
 
@@ -603,10 +584,6 @@ public final class Values {
 		return literal(value).map(guard(Literal::temporalAmountValue));
 	}
 
-
-	private static <V> Stream<V> stream(final Optional<V> optional) {
-		return optional.map(Stream::of).orElseGet(Stream::empty);
-	}
 
 	private static <V, R> Function<V, R> guard(final Function<V, R> mapper) {
 		return v -> {
@@ -670,152 +647,22 @@ public final class Values {
 			try {
 
 				return type.equals(XSD.BOOLEAN) ? String.valueOf(literal.booleanValue())
+
 						: type.equals(XSD.INTEGER) ? String.valueOf(literal.integerValue())
 						: type.equals(XSD.DECIMAL) ? literal.decimalValue().toPlainString()
+
 						: type.equals(XSD.DOUBLE) ? exponential.get().format(literal.doubleValue())
 						: type.equals(XSD.STRING) ? quote(literal.getLabel())
 
 						: literal.getLanguage()
-						.map(lang -> format(literal.getLabel(), lang))
-						.orElseGet(() -> format(literal.getLabel(), type));
+						.map(lang -> quote(literal.getLabel())+'@'+lang)
+						.orElseGet(() -> quote(literal.getLabel())+"^^"+format(type));
 
 			} catch ( final IllegalArgumentException ignored ) {
 
-				return format(literal.getLabel(), type);
+				return quote(literal.getLabel())+"^^"+format(type);
 
 			}
-		}
-	}
-
-
-	private static String format(final CharSequence label, final String lang) {
-		return quote(label)+'@'+lang;
-	}
-
-	private static String format(final CharSequence label, final IRI type) {
-		return quote(label)+"^^"+format(type);
-	}
-
-
-	//// Helpers ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static String root(final String iri) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		return Optional.of(iri)
-				.map(IRIPattern::matcher)
-				.filter(Matcher::matches)
-				.map(matcher -> Optional.ofNullable(matcher.group("schemeall")).orElse("")
-						+Optional.ofNullable(matcher.group("hostall")).orElse("")
-						+"/"
-				)
-				.orElse(iri);
-	}
-
-	public static String path(final String iri) {
-
-		if ( iri == null ) {
-			throw new NullPointerException("null iri");
-		}
-
-		return Optional
-				.of(iri)
-				.map(IRIPattern::matcher)
-				.filter(Matcher::matches)
-				.map(matcher -> matcher.group("pathall"))
-				.orElse(iri);
-	}
-
-
-	public static String uuid() {
-		return randomUUID().toString();
-	}
-
-	public static String uuid(final String text) {
-		return text == null ? null : uuid(text.getBytes(UTF_8));
-	}
-
-	public static String uuid(final byte[] data) {
-		return data == null ? null : nameUUIDFromBytes(data).toString();
-	}
-
-
-	public static String md5() {
-
-		final byte[] bytes=new byte[16];
-
-		ThreadLocalRandom.current().nextBytes(bytes);
-
-		return hex(bytes);
-	}
-
-	public static String md5(final String text) {
-		return text == null ? null : md5(text.getBytes(UTF_8));
-	}
-
-	public static String md5(final byte[] data) {
-		try {
-
-			return data == null ? null : hex(MessageDigest.getInstance("MD5").digest(data));
-
-		} catch ( final NoSuchAlgorithmException unexpected ) {
-			throw new InternalError(unexpected);
-		}
-	}
-
-
-	public static BigInteger integer(final long value) {
-		return BigInteger.valueOf(value);
-	}
-
-	public static BigInteger integer(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? (BigInteger)value
-				: value instanceof BigDecimal ? ((BigDecimal)value).toBigInteger()
-				: BigInteger.valueOf(value.longValue());
-	}
-
-
-	public static BigDecimal decimal(final double value) {
-		return BigDecimal.valueOf(value);
-	}
-
-	public static BigDecimal decimal(final Number value) {
-		return value == null ? null
-				: value instanceof BigInteger ? new BigDecimal((BigInteger)value)
-				: value instanceof BigDecimal ? (BigDecimal)value
-				: BigDecimal.valueOf(value.doubleValue());
-	}
-
-
-	public static Object promote(final Object object) {
-		return object == null ? null
-
-				: object instanceof BigDecimal || object instanceof BigInteger ? object
-				: object instanceof Double || object instanceof Float ? decimal((Number)object)
-				: object instanceof Number ? integer((Number)object)
-
-				: object;
-	}
-
-
-	public static String hex(final byte[] bytes) {
-		if ( bytes == null ) { return null; } else {
-
-			final char[] hex=new char[bytes.length*2];
-
-			for (int i=0, l=bytes.length; i < l; ++i) {
-
-				final int b=bytes[i]&0xFF;
-
-				hex[2*i]=HexDigits[b >>> 4];
-				hex[2*i+1]=HexDigits[b&0x0F];
-			}
-
-			return new String(hex);
 		}
 	}
 

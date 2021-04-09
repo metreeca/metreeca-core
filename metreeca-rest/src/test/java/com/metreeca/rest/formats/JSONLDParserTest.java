@@ -64,8 +64,8 @@ final class JSONLDParserTest {
 
 	private static final IRI x=item("x");
 
-	private static final Value One=literal(integer(1));
-	private static final Value Ten=literal(integer(10));
+	private static final Value One=literal(1);
+	private static final Value Ten=literal(10);
 
 	private static final Shape first=field(RDF.FIRST);
 	private static final Shape rest=field(RDF.REST);
@@ -268,31 +268,22 @@ final class JSONLDParserTest {
 
 		@Test void testTraverseLinkPaths() {
 
-			terms("{ '.terms' : 'first.rest' }", (
-
-					link(OWL.SAMEAS, field(RDF.FIRST, field(RDF.REST)))
-
-			), terms -> assertThat(terms.path()).containsExactly(
+			terms("{ '.terms' : 'first.rest' }", link(OWL.SAMEAS, field(RDF.FIRST, field(RDF.REST))),
+					terms -> assertThat(terms.path()).containsExactly(
 
 					RDF.FIRST, RDF.REST
 
 			));
 
-			terms("{ '.terms' : 'first.rest' }", (
-
-					field(RDF.FIRST, link(OWL.SAMEAS, field(RDF.REST)))
-
-			), terms -> assertThat(terms.path()).containsExactly(
+			terms("{ '.terms' : 'first.rest' }", field(RDF.FIRST, link(OWL.SAMEAS, field(RDF.REST))),
+					terms -> assertThat(terms.path()).containsExactly(
 
 					RDF.FIRST, RDF.REST
 
 			));
 
-			terms("{ '.terms' : 'first.rest' }", (
-
-					field(RDF.FIRST, field(RDF.REST, link(OWL.SAMEAS)))
-
-			), terms -> assertThat(terms.path()).containsExactly(
+			terms("{ '.terms' : 'first.rest' }", field(RDF.FIRST, field(RDF.REST, link(OWL.SAMEAS))),
+					terms -> assertThat(terms.path()).containsExactly(
 
 					RDF.FIRST, RDF.REST
 
@@ -302,11 +293,8 @@ final class JSONLDParserTest {
 
 		@Test void testTraverseLinkFilters() {
 
-			items("{ 'first.rest': 'any' }", (
-
-					link(OWL.SAMEAS, field(RDF.FIRST, field(RDF.REST)))
-
-			), items -> assertThat(items.shape()).isEqualTo(filtered(
+			items("{ 'first.rest': 'any' }", link(OWL.SAMEAS, field(RDF.FIRST, field(RDF.REST))),
+					items -> assertThat(items.shape()).isEqualTo(filtered(
 
 					link(OWL.SAMEAS, field(RDF.FIRST, field(RDF.REST))),
 
@@ -314,11 +302,8 @@ final class JSONLDParserTest {
 
 			)));
 
-			items("{ 'first.rest': 'any' }", (
-
-					field(RDF.FIRST, link(OWL.SAMEAS, field(RDF.REST)))
-
-			), items -> assertThat(items.shape()).isEqualTo(filtered(
+			items("{ 'first.rest': 'any' }", field(RDF.FIRST, link(OWL.SAMEAS, field(RDF.REST))),
+					items -> assertThat(items.shape()).isEqualTo(filtered(
 
 					field(RDF.FIRST, link(OWL.SAMEAS, field(RDF.REST))),
 
@@ -326,11 +311,9 @@ final class JSONLDParserTest {
 
 			)));
 
-			items("{ 'first.rest': 'any' }", (
-
-					field(RDF.FIRST, field(RDF.REST, link(OWL.SAMEAS))) // link implies Resource object
-
-			), items -> assertThat(items.shape()).isEqualTo(filtered(
+			// link implies Resource object
+			items("{ 'first.rest': 'any' }", field(RDF.FIRST, field(RDF.REST, link(OWL.SAMEAS))),
+					items -> assertThat(items.shape()).isEqualTo(filtered(
 
 					field(RDF.FIRST, field(RDF.REST, link(OWL.SAMEAS))),
 
