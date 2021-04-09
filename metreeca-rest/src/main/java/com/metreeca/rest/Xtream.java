@@ -176,14 +176,40 @@ public final class Xtream<T> implements Stream<T> {
 
 
 	/**
+	 * Converts a consumer into a function.
+	 *
+	 * @param consumer the consumer to be converted
+	 * @param <V>      the type of the value accepted by {@code consumer}
+	 * @param <R>      the type returned by the generated function
+	 *
+	 * @return a function forwarding its input value to {@code supplier} and returning a null value
+	 *
+	 * @throws NullPointerException if consumer is null
+	 */
+	public static <V, R> Function<V, R> task(final Consumer<V> consumer) {
+
+		if ( consumer == null ) {
+			throw new NullPointerException("null consumer");
+		}
+
+		return value -> {
+
+			consumer.accept(value);
+
+			return null;
+
+		};
+	}
+
+	/**
 	 * Creates a guarded function.
 	 *
 	 * @param function the function to be wrapped
 	 * @param <V>      the type of the {@code function} input value
 	 * @param <R>      the type of the {@code function} return value
 	 *
-	 * @return a function that returns the value produced by applying {@code function} to its input value, if it is
-	 * not null and no exception is thrown in the process, or {@code null}, otherwise
+	 * @return a function returning the value produced by applying {@code function} to its input value, if the input
+	 * value is not null and no exception is thrown in the process, or {@code null}, otherwise
 	 *
 	 * @throws NullPointerException if {@code function} is null
 	 */
@@ -193,10 +219,10 @@ public final class Xtream<T> implements Stream<T> {
 			throw new NullPointerException("null function");
 		}
 
-		return v -> {
+		return value -> {
 			try {
 
-				return v == null ? null : function.apply(v);
+				return value == null ? null : function.apply(value);
 
 			} catch ( final RuntimeException e ) {
 
@@ -207,16 +233,15 @@ public final class Xtream<T> implements Stream<T> {
 
 	}
 
-
 	/**
-	 * Creates an autoclosing function.
+	 * Creates an autocloseable function.
 	 *
 	 * @param function the function to be wrapped
 	 * @param <V>      the type of the {@code function} input value
 	 * @param <R>      the type of the {@code function} return value
 	 *
-	 * @return a function that returns the value produced by applying {@code function} to its input value, closing
-	 * it after processing
+	 * @return a function returning the value produced by applying {@code function} to its input value and closing it
+	 * after processing
 	 *
 	 * @throws NullPointerException if {@code function} is null
 	 */
@@ -226,9 +251,9 @@ public final class Xtream<T> implements Stream<T> {
 			throw new NullPointerException("null function");
 		}
 
-		return v -> {
+		return value -> {
 
-			try ( final V c=v ) {
+			try ( final V c=value ) {
 
 				return function.apply(c);
 
@@ -598,7 +623,8 @@ public final class Xtream<T> implements Stream<T> {
 	 * Removes incompatible elements.
 	 *
 	 * @param clash a binary predicate returning {@code true} if its arguments are mutually incompatible or {@code
-	 *              false} otherwise
+	 * false}
+	 *              otherwise
 	 *
 	 * @return an extended stream produced by removing from this extended stream all elements not compatible with
 	 * previously processed elements according to {@code clash}
@@ -633,7 +659,8 @@ public final class Xtream<T> implements Stream<T> {
 	 *
 	 * @return an extended stream produced by applying {@code classifier} to each element of this extended stream and
 	 * returning a stream of entries mapping each grouping key returned by {@code classifier} to the list of the
-	 * elements matching the grouping key
+	 * elements
+	 * matching the grouping key
 	 *
 	 * @throws NullPointerException if {@code classifier} is null
 	 */
@@ -655,8 +682,8 @@ public final class Xtream<T> implements Stream<T> {
 	 * @param <V>        the type of the value returned by the {@code downstream} collector
 	 *
 	 * @return an extended stream produced by applying {@code classifier} to each element of this extended stream and
-	 * returning a stream of entries mapping each grouping key returned by {@code classifier} to the value produced
-	 * by collection the stream of the elements matching the grouping key using the {@code downstream} collector
+	 * returning a stream of entries mapping each grouping key returned by {@code classifier} to the value produced by
+	 * collection the stream of the elements matching the grouping key using the {@code downstream} collector
 	 *
 	 * @throws NullPointerException if either {@code classifier} or {@code downstream} is null
 	 */
@@ -701,7 +728,8 @@ public final class Xtream<T> implements Stream<T> {
 	 * @param <C>       the type of the collected element
 	 *
 	 * @return an extended stream containing a single element produced by collecting the elements of this extended
-	 * stream using {@code collector}
+	 * stream
+	 * using {@code collector}
 	 *
 	 * @throws NullPointerException if {@code collector} is null
 	 */
@@ -720,9 +748,9 @@ public final class Xtream<T> implements Stream<T> {
 	 *
 	 * @param mapper a function mapping elements to streams of elements of the same type
 	 *
-	 * @return an extended stream produced by recursively applying {@code mapper} to this extended stream and
-	 * expanding it with the elements of the returned streams until no new elements are generated; null returned
-	 * streams are considered to be empty
+	 * @return an extended stream produced by recursively applying {@code mapper} to this extended stream and expanding
+	 * it with the elements of the returned streams until no new elements are generated; null returned streams are
+	 * considered to be empty
 	 *
 	 * @throws NullPointerException if {@code mapper} is {@code null}
 	 */
@@ -763,8 +791,9 @@ public final class Xtream<T> implements Stream<T> {
 	 * @param mapper a function mapping elements to streams of elements of the same type
 	 *
 	 * @return an extended stream produced by iteratively applying {@code mapper} this this extended stream and
-	 * replacing it with with the elements of the returned streams until {@code steps} cycles are performed; null
-	 * returned streams are considered to be empty
+	 * replacing
+	 * it with with the elements of the returned streams until {@code steps} cycles are performed; null returned streams
+	 * are considered to be empty
 	 *
 	 * @throws IllegalArgumentException if {@code steps} is negative
 	 * @throws NullPointerException     if {@code mapper} is {@code null}
@@ -796,7 +825,8 @@ public final class Xtream<T> implements Stream<T> {
 	 * @param <R>    the type of the elements of the extended stream returned by {@code mapper}
 	 *
 	 * @return an extended stream produced by applying {@code mapper} to this extended stream or an empty extended
-	 * stream if {@code mapper} returns a null value
+	 * stream
+	 * if {@code mapper} returns a null value
 	 *
 	 * @throws NullPointerException if {@code mapper} is {@code null}
 	 */
