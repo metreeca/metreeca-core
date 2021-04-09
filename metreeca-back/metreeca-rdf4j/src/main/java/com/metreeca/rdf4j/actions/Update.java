@@ -23,7 +23,6 @@ import org.eclipse.rdf4j.query.Operation;
 
 import java.util.function.Consumer;
 
-import static com.metreeca.rdf4j.services.Graph.txn;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.services.Logger.time;
 
@@ -41,26 +40,24 @@ public final class Update extends Action<Update> implements Consumer<String> {
 	private final Logger logger=service(Logger.logger());
 
 
-    /**
-     * Executes a SPARQL tuple query.
-     *
-     * @param update the update to be executed against the {@linkplain #graph(Graph) target graph} after
-     * {@linkplain #configure(Operation) configuring} it; null or empty queries are silently ignored
-     */
-    @Override public void accept(final String update) {
-        if ( update != null && !update.isEmpty() ) {
-	        graph().exec(txn(connection -> {
-		        time(() ->
+	/**
+	 * Executes a SPARQL tuple query.
+	 *
+	 * @param update the update to be executed against the {@linkplain #graph(Graph) target graph} after {@linkplain
+	 *               #configure(Operation) configuring} it; null or empty queries are silently ignored
+	 */
+	@Override public void accept(final String update) {
+		if ( update != null && !update.isEmpty() ) {
+			graph().update(connection -> time(() ->
 
-				        configure(connection.prepareUpdate(SPARQL, update, base())).execute()
+					configure(connection.prepareUpdate(SPARQL, update, base())).execute()
 
-		        ).apply(t ->
+			).apply(t ->
 
-				        logger.info(this, format("executed in <%,d> ms", t))
+					logger.info(this, format("executed in <%,d> ms", t))
 
-		        );
-	        }));
-        }
-    }
+			));
+		}
+	}
 
 }

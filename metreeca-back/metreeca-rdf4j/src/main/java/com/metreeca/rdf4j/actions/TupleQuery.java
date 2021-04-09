@@ -52,17 +52,15 @@ public final class TupleQuery extends Action<TupleQuery> implements Function<Str
 	 * target graph} after {@linkplain #configure(Operation) configuring} it; null or empty queries are silently ignored
 	 */
 	@Override public Stream<BindingSet> apply(final String query) {
-		return query == null || query.isEmpty() ? Stream.empty() : graph().exec(connection -> {
-			return time(() -> // bindings must be retrieved inside txn
+		return query == null || query.isEmpty() ? Stream.empty() : graph().query(connection -> time(() ->
 
-					asList(configure(connection.prepareTupleQuery(SPARQL, query, base())).evaluate()).parallelStream()
+				asList(configure(connection.prepareTupleQuery(SPARQL, query, base())).evaluate()).parallelStream()
 
-			).apply((t, v) ->
+		).apply((t, v) ->
 
-					logger.info(this, format("executed in <%,d> ms", t))
+				logger.info(this, format("executed in <%,d> ms", t))
 
-			);
-		});
+		));
 	}
 
 }

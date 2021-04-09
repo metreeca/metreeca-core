@@ -30,7 +30,6 @@ import java.util.Optional;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.rdf4j.services.Graph.graph;
-import static com.metreeca.rdf4j.services.Graph.txn;
 import static com.metreeca.rest.Toolbox.service;
 
 
@@ -48,24 +47,21 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Frame> create(final Frame frame, final Shape shape) {
-		return graph.exec(txn(connection -> {
+		return graph.update(connection -> Optional.of(frame.focus())
 
-			return Optional.of(frame.focus())
+				.filter(item
+						-> !connection.hasStatement(item, null, null, true)
+						&& !connection.hasStatement(null, null, item, true)
+				)
 
-					.filter(item
-							-> !connection.hasStatement(item, null, null, true)
-							&& !connection.hasStatement(null, null, item, true)
-					)
+				.map(item -> {
 
-					.map(item -> {
+					connection.add(frame.model());
 
-						connection.add(frame.model());
+					return frame;
 
-						return frame;
-
-					});
-
-		}));
+				})
+		);
 	}
 
 	@Override public Optional<Frame> relate(final Frame frame, final Query query) {
@@ -77,44 +73,38 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	}
 
 	@Override public Optional<Frame> update(final Frame frame, final Shape shape) {
-		return graph.exec(txn(connection -> {
+		return graph.update(connection -> Optional
 
-			return Optional
+				.of(Items.items(shape).map(new QueryProbe(this, frame.focus())))
 
-					.of(Items.items(shape).map(new QueryProbe(this, frame.focus())))
+				.filter(model -> !model.isEmpty())
 
-					.filter(model -> !model.isEmpty())
+				.map(model -> {
 
-					.map(model -> {
+					connection.remove(model);
+					connection.add(frame.model());
 
-						connection.remove(model);
-						connection.add(frame.model());
+					return frame;
 
-						return frame;
-
-					});
-
-		}));
+				})
+		);
 	}
 
 	@Override public Optional<Frame> delete(final Frame frame, final Shape shape) {
-		return graph.exec(txn(connection -> {
+		return graph.update(connection -> Optional
 
-			return Optional
+				.of(Items.items(shape).map(new QueryProbe(this, frame.focus())))
 
-					.of(Items.items(shape).map(new QueryProbe(this, frame.focus())))
+				.filter(model -> !model.isEmpty())
 
-					.filter(model -> !model.isEmpty())
+				.map(model -> {
 
-					.map(model -> {
+					connection.remove(model);
 
-						connection.remove(model);
+					return frame(frame.focus(), model);
 
-						return frame(frame.focus(), model);
-
-					});
-
-		}));
+				})
+		);
 	}
 
 

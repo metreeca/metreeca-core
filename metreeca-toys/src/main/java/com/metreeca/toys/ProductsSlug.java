@@ -37,7 +37,7 @@ public final class ProductsSlug implements Function<Request, String> {
 
 	@Override
 	public String apply(final Request request) {
-		return graph.exec(connection -> {
+		return graph.query(connection -> {
 
 			final Value scale=request.body(jsonld()).get()
 					.flatMap(frame -> value(frame.get(Toys.scale)))

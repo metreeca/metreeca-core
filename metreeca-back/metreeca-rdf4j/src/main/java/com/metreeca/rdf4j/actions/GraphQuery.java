@@ -53,17 +53,15 @@ public final class GraphQuery extends Action<GraphQuery> implements Function<Str
      * target graph} after {@linkplain #configure(Operation) configuring} it; null or empty queries are silently ignored
      */
     @Override public Stream<Statement> apply(final String query) {
-        return query == null || query.isEmpty() ? Stream.empty() : graph().exec(connection -> {
-            return time(() -> // statements must be retrieved inside txn
+        return query == null || query.isEmpty() ? Stream.empty() : graph().query(connection -> time(() ->
 
-                    asList(configure(connection.prepareGraphQuery(SPARQL, query, base())).evaluate()).parallelStream()
+		        asList(configure(connection.prepareGraphQuery(SPARQL, query, base())).evaluate()).parallelStream()
 
-            ).apply((t, v) ->
+        ).apply((t, v) ->
 
-		            logger.info(this, format("executed in <%,d> ms", t))
+		        logger.info(this, format("executed in <%,d> ms", t))
 
-            );
-        });
+        ));
     }
 
 }

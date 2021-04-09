@@ -39,6 +39,7 @@ import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Xtream.task;
 
 final class GraphStats extends GraphFacts {
 
@@ -76,7 +77,7 @@ final class GraphStats extends GraphFacts {
 		final Collection<Value> mins=new ArrayList<>();
 		final Collection<Value> maxs=new ArrayList<>();
 
-		evaluate(() -> graph.exec(connection -> {
+		evaluate(() -> graph.query(task(connection -> {
 			connection.prepareTupleQuery(compile(() -> code(list(
 
 					comment("stats query"),
@@ -188,7 +189,7 @@ final class GraphStats extends GraphFacts {
 				}
 
 			});
-		}));
+		})));
 
 		model.add(statement(resource, Engine.count, literal(counts.values().stream()
 				.reduce(BigInteger.ZERO, BigInteger::add)

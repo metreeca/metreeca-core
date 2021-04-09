@@ -14,6 +14,7 @@
 - REST / Migrated shape-based access control from `Engine.throttler()` to `Wrapper.keeper()`
 - REST / Renamed `Gateway` wrapper to `Server`
 - JSE / Merge `JSE.context(String/IRI)` setters to simplify API
+- RDF4J / Simplified txn mgtm `Graph` API
 
 # Added
 

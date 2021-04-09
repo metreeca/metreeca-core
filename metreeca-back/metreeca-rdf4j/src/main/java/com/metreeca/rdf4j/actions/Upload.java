@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import static com.metreeca.rdf4j.services.Graph.txn;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.services.Logger.time;
@@ -124,31 +123,29 @@ public final class Upload implements Consumer<Collection<Statement>> {
     @Override public void accept(final Collection<Statement> statements) {
         if ( statements != null && !statements.isEmpty() ) {
 
-            final String contexts=this.contexts.length == 0 ? "default context" : Arrays.stream(this.contexts)
-                    .map(Value::stringValue)
-                    .collect(joining(", "));
+	        final String contexts=this.contexts.length == 0 ? "default context" : Arrays.stream(this.contexts)
+			        .map(Value::stringValue)
+			        .collect(joining(", "));
 
-	        graph.exec(txn(connection -> {
-		        time(() -> {
+	        graph.update(connection -> time(() -> {
 
-			        if ( clear.getAndSet(false) ) {
+		        if ( clear.getAndSet(false) ) {
 
-				        connection.clear(this.contexts);
+			        connection.clear(this.contexts);
 
-				        logger.info(this, format(
-						        "cleared <%s>", contexts
-				        ));
-			        }
+			        logger.info(this, format(
+					        "cleared <%s>", contexts
+			        ));
+		        }
 
-			        if ( !statements.isEmpty() ) {
-				        connection.add(statements, this.contexts);
-			        }
+		        if ( !statements.isEmpty() ) {
+			        connection.add(statements, this.contexts);
+		        }
 
-		        }).apply(t -> logger.info(this, format(
-				        "uploaded <%,d / %,d> statements to <%s> in <%,d> ms",
-				        statements.size(), count.addAndGet(statements.size()), contexts, t
-		        )));
-	        }));
+	        }).apply(t -> logger.info(this, format(
+			        "uploaded <%,d / %,d> statements to <%s> in <%,d> ms",
+			        statements.size(), count.addAndGet(statements.size()), contexts, t
+	        ))));
 
         }
     }

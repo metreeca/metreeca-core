@@ -25,6 +25,7 @@ import java.io.UncheckedIOException;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Xtream.task;
 
 public final class Toys implements Runnable {
 
@@ -59,15 +60,15 @@ public final class Toys implements Runnable {
 
 	@Override
 	public void run() {
-		service(graph()).exec(connection -> {
+		service(graph()).update(task(connection -> {
 			try {
 
-				connection.add(Toys.class.getResourceAsStream("com/metreeca/toys/Toys.ttl"), Base, RDFFormat.TURTLE);
+				connection.add(Toys.class.getResourceAsStream("Toys.ttl"), Base, RDFFormat.TURTLE);
 
 			} catch ( final IOException e ) {
 				throw new UncheckedIOException(e);
 			}
-		});
+		}));
 	}
 
 }

@@ -38,8 +38,8 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.open.actions.Wikidata.ITEM;
 import static com.metreeca.open.actions.Wikidata.point;
 import static com.metreeca.rdf4j.services.Graph.graph;
-import static com.metreeca.rdf4j.services.Graph.txn;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Xtream.task;
 import static com.metreeca.rest.services.Logger.logger;
 import static com.metreeca.rest.services.Logger.time;
 
@@ -406,7 +406,7 @@ public final class WikidataMirror implements Consumer<Stream<String>>, Function<
 	 * @param updates a stream of wikidata item updates
 	 */
 	private void load(final Xtream<Collection<Statement>> updates) {
-		updates.sequential().forEach(update -> target.exec(txn(connection -> { // inside a single txn
+		updates.sequential().forEach(update -> target.update(task(connection -> { // inside a single txn
 
 			Xtream.from(update)
 
@@ -484,23 +484,22 @@ public final class WikidataMirror implements Consumer<Stream<String>>, Function<
 
 		time(() -> {
 
-			target.exec(connection -> {
-				stream(connection.getStatements(null, RDF.TYPE, ITEM, contexts))
+			target.update(task(connection -> stream(connection.getStatements(null, RDF.TYPE, ITEM, contexts))
 
-						.map(Statement::getSubject)
+					.map(Statement::getSubject)
 
-						.filter(alive.negate())
+					.filter(alive.negate())
 
-						.peek(resource -> reaped.incrementAndGet())
+					.peek(resource -> reaped.incrementAndGet())
 
-						// !!! remove symmetric concise bounded description?
+					// !!! remove symmetric concise bounded description?
 
-						.forEach(resource -> {
-							connection.remove(resource, null, null, contexts);
-							connection.remove(null, null, resource, contexts);
-						});
+					.forEach(resource -> {
+						connection.remove(resource, null, null, contexts);
+						connection.remove(null, null, resource, contexts);
+					})
 
-			});
+			));
 
 		}).apply(t ->
 

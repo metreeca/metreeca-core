@@ -37,6 +37,7 @@ import static com.metreeca.rest.Scribe.indent;
 import static com.metreeca.rest.Scribe.text;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Xtream.task;
 
 final class GraphTerms extends GraphFacts {
 
@@ -69,7 +70,7 @@ final class GraphTerms extends GraphFacts {
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
-		evaluate(() -> graph.exec(connection -> {
+		evaluate(() -> graph.query(task(connection -> {
 			connection.prepareTupleQuery(compile(() -> code(list(
 
 					comment("terms query"),
@@ -134,7 +135,7 @@ final class GraphTerms extends GraphFacts {
 
 				}
 			});
-		}));
+		})));
 
 		return model;
 	}

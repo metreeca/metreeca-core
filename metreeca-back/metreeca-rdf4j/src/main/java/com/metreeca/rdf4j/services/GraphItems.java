@@ -37,6 +37,7 @@ import static com.metreeca.rdf4j.SPARQLScribe.*;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Scribe.*;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Xtream.task;
 import static com.metreeca.rest.services.Engine.items;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
@@ -77,7 +78,7 @@ final class GraphItems extends GraphFacts {
 
 		final Collection<Statement> model=new LinkedHashSet<>();
 
-		evaluate(() -> graph.exec(connection -> {
+		evaluate(() -> graph.query(task(connection -> {
 			connection.prepareTupleQuery(compile(() -> code(list(
 
 					comment("items query"),
@@ -155,7 +156,7 @@ final class GraphItems extends GraphFacts {
 				}
 
 			});
-		}));
+		})));
 
 		return model;
 	}

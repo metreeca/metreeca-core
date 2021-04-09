@@ -40,6 +40,7 @@ import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.Prefixes;
 import static com.metreeca.json.ValuesTest.decode;
 import static com.metreeca.rest.Toolbox.service;
+import static com.metreeca.rest.Xtream.task;
 
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
@@ -190,20 +191,20 @@ public final class GraphTest {
 
 
 	public static Model model(final Resource... contexts) {
-		return service(Graph.graph()).exec(connection -> { return export(connection, contexts); });
+		return service(Graph.graph()).query(connection -> { return export(connection, contexts); });
 	}
 
 	public static Model model(final String sparql) {
-		return service(Graph.graph()).exec(connection -> { return construct(connection, sparql); });
+		return service(Graph.graph()).query(connection -> { return construct(connection, sparql); });
 	}
 
 	static List<Map<String, Value>> tuples(final String sparql) {
-		return service(Graph.graph()).exec(connection -> { return select(connection, sparql); });
+		return service(Graph.graph()).query(connection -> { return select(connection, sparql); });
 	}
 
 
 	public static Runnable model(final Iterable<Statement> model, final Resource... contexts) {
-		return () -> service(Graph.graph()).exec(connection -> { connection.add(model, contexts); });
+		return () -> service(Graph.graph()).update(task(connection -> connection.add(model, contexts)));
 	}
 
 	static List<Statement> localized(final Collection<Statement> model, final String... tags) {

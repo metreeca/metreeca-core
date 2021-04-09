@@ -58,6 +58,8 @@ import static com.metreeca.json.shapes.Range.range;
 import static com.metreeca.json.shapes.Stem.stem;
 import static com.metreeca.json.shapes.When.when;
 import static com.metreeca.rdf4j.services.Graph.graph;
+import static com.metreeca.rdf4j.services.GraphFacts.path;
+import static com.metreeca.rdf4j.services.GraphFacts.root;
 import static com.metreeca.rdf4j.services.GraphFacts.value;
 import static com.metreeca.rdf4j.services.GraphFacts.*;
 import static com.metreeca.rdf4j.services.GraphTest.graph;
@@ -120,7 +122,7 @@ final class GraphFactsTest {
 	}
 
 	private Collection<Statement> query(final IRI root, final Shape shape) {
-		return service(graph()).exec(connection -> {
+		return service(graph()).query(connection -> {
 			return new GraphItems(options()).process(root, items(shape))
 
 					.stream()
