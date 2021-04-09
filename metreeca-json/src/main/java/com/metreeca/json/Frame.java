@@ -32,6 +32,7 @@ import static com.metreeca.json.shifts.Step.step;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Linked data frame.
@@ -68,30 +69,41 @@ public final class Frame {
 			throw new NullPointerException("null model or model statement");
 		}
 
-		final Set<Statement> statements=new LinkedHashSet<>();
+		return new Frame(focus, merge(focus, emptySet(), model));
+	}
 
-		final Collection<Value> visited=new HashSet<>();
-		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
+
+	private static Set<Statement> merge(
+			final Resource focus, final Set<Statement> model, final Iterable<Statement> delta
+	) {
+
+		final Set<Statement> merged=new LinkedHashSet<>(model);
+
+		final Collection<Resource> visited=new HashSet<>();
+		final Queue<Resource> pending=new ArrayDeque<>(singleton(focus));
 
 		while ( !pending.isEmpty() ) {
 
-			final Value value=pending.poll();
+			final Resource value=pending.poll();
 
 			if ( visited.add(value) ) {
-				model.forEach(s -> {
+				delta.forEach(s -> {
 					if ( value.equals(s.getSubject()) || value.equals(s.getObject()) ) {
 
 						pending.add(s.getSubject());
 						pending.add(s.getPredicate());
-						pending.add(s.getObject());
 
-						statements.add(s);
+						if ( s.getObject().isResource() ) {
+							pending.add((Resource)s.getObject());
+						}
+
+						merged.add(s);
 					}
 				});
 			}
 		}
 
-		return new Frame(focus, statements);
+		return merged;
 	}
 
 
@@ -130,8 +142,29 @@ public final class Frame {
 	}
 
 
-	public Stream<Statement> stream() {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Stream<Statement> get() {
 		return model.stream();
+	}
+
+
+	public Frame add(final Statement... statements) {
+
+		if ( statements == null || Arrays.stream(statements).anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null statements");
+		}
+
+		return new Frame(focus, merge(focus, model, Arrays.stream(statements).collect(toList())));
+	}
+
+	public Frame add(final Collection<Statement> statements) {
+
+		if ( statements == null || statements.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null statements");
+		}
+
+		return new Frame(focus, merge(focus, model, statements));
 	}
 
 
@@ -281,6 +314,9 @@ public final class Frame {
 
 		}
 	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
