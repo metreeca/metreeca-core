@@ -53,7 +53,7 @@ final class GraphsTest {
 
 	private Model catalog() {
 		return new LinkedHashModel(asList(
-				statement(Root, RDF.VALUE, RDF.NIL),
+				statement(iri(Base), RDF.VALUE, RDF.NIL),
 				statement(RDF.NIL, RDF.TYPE, VOID.DATASET)
 		));
 	}
@@ -92,7 +92,7 @@ final class GraphsTest {
 
 
 	private Graphs endpoint() {
-		return Graphs.graphs().query(Root).update(Root);
+		return Graphs.graphs().query(iri(Base)).update(iri(Base));
 	}
 
 	private Request request() {
@@ -114,7 +114,7 @@ final class GraphsTest {
 	}
 
 	private Request authenticated(final Request request) {
-		return request.roles(Root);
+		return request.roles(iri(Base));
 	}
 
 

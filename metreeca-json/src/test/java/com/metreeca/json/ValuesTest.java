@@ -88,7 +88,7 @@ public final class ValuesTest {
 			parser.parse(new StringReader(Prefixes.entrySet().stream()
 					.map(entry -> format("@prefix %s: <%s> .", entry.getKey(), entry.getValue()))
 					.collect(joining("\n",
-							format("@base <%s> .\n\n", Values.Root),
+							format("@base <%s> .\n\n", Values.iri(Values.Base)),
 							format("%s\n\n", turtle)
 					))
 			));

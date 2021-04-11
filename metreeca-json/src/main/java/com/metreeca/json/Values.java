@@ -95,8 +95,6 @@ public final class Values {
 
 	public static final String Base="app:/";
 
-	public static final IRI Root=iri(Base);
-
 	public static final Namespace NS=namespace("", Base+"terms#");
 
 
@@ -105,7 +103,7 @@ public final class Values {
 	}
 
 	public static IRI item(final String name) {
-		return name == null ? null : iri(Root, name);
+		return name == null ? null : iri(Base, name);
 	}
 
 
