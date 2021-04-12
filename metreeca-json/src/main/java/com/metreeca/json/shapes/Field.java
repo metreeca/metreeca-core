@@ -158,7 +158,6 @@ public final class Field extends Shape {
 			throw new NullPointerException("null keywords");
 		}
 
-
 		return fields(shape).collect(toMap(
 
 				field -> {
