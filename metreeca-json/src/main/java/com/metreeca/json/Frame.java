@@ -34,6 +34,7 @@ import static com.metreeca.json.shifts.Seq.seq;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.concat;
 
 /**
  * Linked data frame.
@@ -76,16 +77,17 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static Stream<Statement> link(final Value subject, final IRI predicate, final Value object) {
-		if ( subject instanceof Resource ) {
+	private static Stream<Statement> link(final Object subject, final IRI predicate, final Object object) {
 
-			return Stream.of(statement((Resource)subject, predicate, object));
-
-		} else {
-
-			throw new IllegalArgumentException("literal value for inverse field");
-
+		if ( !(subject instanceof Resource) ) {
+			throw new IllegalArgumentException("subject is not a resource");
 		}
+
+		if ( !(object instanceof Value) ) {
+			throw new IllegalArgumentException("object is not a value");
+		}
+
+		return Stream.of(statement((Resource)subject, predicate, ((Value)object)));
 	}
 
 	private static Set<Statement> merge(
@@ -185,13 +187,13 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<Boolean> bool(final IRI... steps) {
+	public Optional<Boolean> bool(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return bool(seq(steps));
+		return bool(seq(predicate));
 	}
 
 	public Optional<Boolean> bool(final Shift shift) {
@@ -210,7 +212,7 @@ public final class Frame {
 			throw new NullPointerException("null predicate");
 		}
 
-		return bool == null ? this : value(predicate, literal(bool));
+		return bool == null ? this : value(predicate, Values.literal(bool));
 	}
 
 	public Frame bool(final IRI predicate, final Optional<Boolean> bool) {
@@ -223,19 +225,19 @@ public final class Frame {
 			throw new NullPointerException("null bool");
 		}
 
-		return bool.map(object -> value(predicate, literal(object))).orElse(this);
+		return bool.map(object -> value(predicate, Values.literal(object))).orElse(this);
 	}
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<BigInteger> integer(final IRI... steps) {
+	public Optional<BigInteger> integer(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return integer(seq(steps));
+		return integer(seq(predicate));
 	}
 
 	public Optional<BigInteger> integer(final Shift shift) {
@@ -248,13 +250,13 @@ public final class Frame {
 	}
 
 
-	public Stream<BigInteger> integers(final IRI... steps) {
+	public Stream<BigInteger> integers(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return integers(seq(steps));
+		return integers(seq(predicate));
 	}
 
 	public Stream<BigInteger> integers(final Shift shift) {
@@ -338,13 +340,13 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<BigDecimal> decimal(final IRI... steps) {
+	public Optional<BigDecimal> decimal(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return decimal(seq(steps));
+		return decimal(seq(predicate));
 	}
 
 	public Optional<BigDecimal> decimal(final Shift shift) {
@@ -357,13 +359,13 @@ public final class Frame {
 	}
 
 
-	public Stream<BigDecimal> decimals(final IRI... steps) {
+	public Stream<BigDecimal> decimals(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return decimals(seq(steps));
+		return decimals(seq(predicate));
 	}
 
 	public Stream<BigDecimal> decimals(final Shift shift) {
@@ -448,13 +450,13 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<String> string(final IRI... steps) {
+	public Optional<String> string(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return string(seq(steps));
+		return string(seq(predicate));
 	}
 
 	public Optional<String> string(final Shift shift) {
@@ -467,13 +469,13 @@ public final class Frame {
 	}
 
 
-	public Stream<String> strings(final IRI... steps) {
+	public Stream<String> strings(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return strings(seq(steps));
+		return strings(seq(predicate));
 	}
 
 	public Stream<String> strings(final Shift shift) {
@@ -551,13 +553,125 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<Value> value(final IRI... steps) {
+	public Optional<Literal> literal(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return value(seq(steps));
+		return literal(seq(predicate));
+	}
+
+	public Optional<Literal> literal(final Shift shift) {
+
+		if ( shift == null ) {
+			throw new NullPointerException("null shift");
+		}
+
+		return literals(shift).findFirst();
+	}
+
+
+	public Stream<Literal> literals(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return literals(seq(predicate));
+	}
+
+	public Stream<Literal> literals(final Shift shift) {
+
+		if ( shift == null ) {
+			throw new NullPointerException("null shift");
+		}
+
+		return shift.apply(singleton(focus), model)
+				.filter(Value::isLiteral)
+				.map(Literal.class::cast);
+	}
+
+
+	public Frame literal(final IRI predicate, final Literal literal) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return literal == null ? this : literals(predicate, Stream.of(literal));
+	}
+
+	public Frame literal(final IRI predicate, final Optional<? extends Literal> literal) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( literal == null ) {
+			throw new NullPointerException("null literal");
+		}
+
+		return literal.map(object -> literals(predicate, Stream.of(object))).orElse(this);
+	}
+
+
+	public Frame literals(final IRI predicate, final Literal... literals) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( literals == null ) {
+			throw new NullPointerException("null literals");
+		}
+
+		return literals.length == 0 ? this : literals(predicate, Arrays.stream(literals));
+	}
+
+	public Frame literals(final IRI predicate, final Collection<? extends Literal> literals) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( literals == null ) {
+			throw new NullPointerException("null literals");
+		}
+
+		return literals.isEmpty() ? this : literals(predicate, literals.stream());
+	}
+
+	public Frame literals(final IRI predicate, final Stream<? extends Literal> literals) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( literals == null ) {
+			throw new NullPointerException("null literals");
+		}
+
+		return new Frame(focus, concat(model.stream(), literals.filter(Objects::nonNull)
+
+				.flatMap(literal -> traverse(predicate,
+						direct -> link(focus, direct, literal),
+						inverse -> link(literal, inverse, focus)
+				))
+
+		).collect(toCollection(LinkedHashSet::new)));
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Optional<Value> value(final IRI predicate) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		return value(seq(predicate));
 	}
 
 	public Optional<Value> value(final Shift shift) {
@@ -570,13 +684,13 @@ public final class Frame {
 	}
 
 
-	public Stream<Value> values(final IRI... steps) {
+	public Stream<Value> values(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return values(seq(steps));
+		return values(seq(predicate));
 	}
 
 	public Stream<Value> values(final Shift shift) {
@@ -648,7 +762,7 @@ public final class Frame {
 			throw new NullPointerException("null values");
 		}
 
-		return new Frame(focus, Stream.concat(model.stream(), values.filter(Objects::nonNull)
+		return new Frame(focus, concat(model.stream(), values.filter(Objects::nonNull)
 
 				.flatMap(value -> traverse(predicate,
 						direct -> link(focus, direct, value),
@@ -661,13 +775,13 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<Frame> frame(final IRI... steps) {
+	public Optional<Frame> frame(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return frame(seq(steps));
+		return frame(seq(predicate));
 	}
 
 	public Optional<Frame> frame(final Shift shift) {
@@ -680,13 +794,13 @@ public final class Frame {
 	}
 
 
-	public Stream<Frame> frames(final IRI... steps) {
+	public Stream<Frame> frames(final IRI predicate) {
 
-		if ( steps == null || Arrays.stream(steps).anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null steps");
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
 		}
 
-		return frames(seq(steps));
+		return frames(seq(predicate));
 	}
 
 	public Stream<Frame> frames(final Shift shift) {
@@ -760,11 +874,41 @@ public final class Frame {
 			throw new NullPointerException("null frames");
 		}
 
-		return new Frame(focus, Stream.concat(model.stream(), frames.filter(Objects::nonNull)
+		return new Frame(focus, concat(model.stream(), frames.filter(Objects::nonNull)
 
 				.flatMap(frame -> traverse(predicate,
-						direct -> Stream.concat(link(focus, direct, frame.focus), frame.model.stream()),
-						inverse -> Stream.concat(link(frame.focus, inverse, focus), frame.model.stream())
+						direct -> concat(link(focus, direct, frame.focus), frame.model.stream()),
+						inverse -> concat(link(frame.focus, inverse, focus), frame.model.stream())
+				))
+
+		).collect(toCollection(LinkedHashSet::new)));
+	}
+
+
+	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	public Frame objects(final IRI predicate, final Stream<Object> objects) {
+
+		if ( predicate == null ) {
+			throw new NullPointerException("null predicate");
+		}
+
+		if ( objects == null ) {
+			throw new NullPointerException("null objects");
+		}
+
+		return new Frame(focus, concat(model.stream(), objects.filter(Objects::nonNull)
+
+				.flatMap(object -> traverse(predicate,
+
+						direct -> object instanceof Frame
+								? concat(link(focus, direct, ((Frame)object).focus), ((Frame)object).model.stream())
+								: link(focus, direct, object),
+
+						inverse -> object instanceof Frame
+								? concat(link(((Frame)object).focus, inverse, focus), ((Frame)object).model.stream())
+								: link(object, inverse, focus)
+
 				))
 
 		).collect(toCollection(LinkedHashSet::new)));
