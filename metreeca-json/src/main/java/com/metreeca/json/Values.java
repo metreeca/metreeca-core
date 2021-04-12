@@ -125,12 +125,12 @@ public final class Values {
 	}
 
 
-	private static boolean resource(final IRI type) {
-		return type.equals(ResourceType) || type.equals(BNodeType) || type.equals(IRIType);
+	public static boolean resource(final IRI type) {
+		return ResourceType.equals(type) || BNodeType.equals(type) || IRIType.equals(type);
 	}
 
-	private static boolean literal(final IRI type) {
-		return type.equals(LiteralType) || !type.equals(ValueType) && !resource(type);
+	public static boolean literal(final IRI type) {
+		return LiteralType.equals(type) || !ValueType.equals(type) && !resource(type);
 	}
 
 
