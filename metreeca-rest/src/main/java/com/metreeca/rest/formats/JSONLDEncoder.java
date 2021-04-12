@@ -33,9 +33,12 @@ import java.util.function.Predicate;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.labels;
-import static com.metreeca.rest.formats.JSONLDInspector.datatype;
-import static com.metreeca.rest.formats.JSONLDInspector.driver;
+import static com.metreeca.json.shapes.Lang.langs;
+import static com.metreeca.json.shapes.Lang.tagged;
+import static com.metreeca.json.shapes.Localized.localized;
+import static com.metreeca.rest.formats.JSONLDFormat.driver;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
@@ -102,7 +105,7 @@ final class JSONLDEncoder {
 
 		final int maxCount=MaxCount.maxCount(shape);
 
-		if ( JSONLDInspector.tagged(shape) ) { // tagged literals
+		if ( tagged(shape) ) { // tagged literals
 
 			return taggeds(values, shape, maxCount == 1);
 
@@ -243,7 +246,7 @@ final class JSONLDEncoder {
 
 				} else if ( datatype.filter(RDF.LANGSTRING::equals).isPresent() ) {
 
-					final Set<String> langs=JSONLDInspector.langs(shape).orElseGet(Collections::emptySet);
+					final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
 
 					context.add(alias, langs.size() == 1
 
@@ -341,8 +344,8 @@ final class JSONLDEncoder {
 
 		// !!! refactor
 
-		final boolean localized=JSONLDInspector.localized(shape);
-		final Set<String> langs=JSONLDInspector.langs(shape).orElseGet(Collections::emptySet);
+		final boolean localized=localized(shape);
+		final Set<String> langs=langs(shape).orElseGet(Collections::emptySet);
 
 		final Map<String, List<String>> langToStrings=values.stream()
 				.map(Literal.class::cast) // datatype already checked by values()

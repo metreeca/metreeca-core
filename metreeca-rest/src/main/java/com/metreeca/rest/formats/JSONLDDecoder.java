@@ -35,8 +35,11 @@ import java.util.stream.Stream;
 import javax.json.*;
 
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.labels;
-import static com.metreeca.rest.formats.JSONLDInspector.driver;
+import static com.metreeca.json.shapes.Lang.langs;
+import static com.metreeca.json.shapes.Lang.tagged;
+import static com.metreeca.rest.formats.JSONLDFormat.driver;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptySet;
@@ -110,9 +113,9 @@ final class JSONLDDecoder {
 
 	Stream<Entry<Value, Stream<Statement>>> values(final JsonValue value, final Shape shape) {
 
-		final boolean tagged=JSONLDInspector.tagged(shape);
+		final boolean tagged=tagged(shape);
 
-		final Set<String> langs=tagged ? JSONLDInspector.langs(shape).orElseGet(Collections::emptySet) : emptySet();
+		final Set<String> langs=tagged ? langs(shape).orElseGet(Collections::emptySet) : emptySet();
 		final String lang=langs.size() == 1 ? langs.iterator().next() : "";
 
 		if ( tagged && value instanceof JsonArray && !lang.isEmpty() ) {
@@ -172,14 +175,13 @@ final class JSONLDDecoder {
 				: (type != null) ? entry(literal(value, iri(type)), Stream.empty())
 				: (language != null) ? entry(literal(value, language), Stream.empty())
 
-				: entry(literal(value, JSONLDInspector.datatype(shape).orElse(XSD.STRING)), Stream.empty());
+				: entry(literal(value, datatype(shape).orElse(XSD.STRING)), Stream.empty());
 	}
 
 	private Entry<Value, Stream<Statement>> value(final JsonString string, final Shape shape) {
 
 		final String text=string.getString();
-		final IRI type=
-				JSONLDInspector.datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
+		final IRI type=datatype(shape).filter(IRI.class::isInstance).map(IRI.class::cast).orElse(XSD.STRING);
 
 		final Value value=ResourceType.equals(type) ? resource(text)
 				: BNodeType.equals(type) ? bnode(text)
@@ -191,7 +193,7 @@ final class JSONLDDecoder {
 
 	private Entry<Value, Stream<Statement>> value(final JsonNumber number, final Shape shape) {
 
-		final IRI datatype=JSONLDInspector.datatype(shape).orElse(null);
+		final IRI datatype=datatype(shape).orElse(null);
 
 		final Literal value
 

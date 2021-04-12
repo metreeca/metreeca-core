@@ -32,6 +32,7 @@ import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
+import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
@@ -91,11 +92,6 @@ public final class JSONLDFormat extends Format<Frame> {
 	}
 
 
-	private static final JsonWriterFactory JsonWriters=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	/**
 	 * Decodes a shape-based query.
 	 *
@@ -134,6 +130,23 @@ public final class JSONLDFormat extends Format<Frame> {
 			return Left(status(UnprocessableEntity, e));
 
 		}
+	}
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static final JsonWriterFactory JsonWriters=Json.createWriterFactory(singletonMap(PRETTY_PRINTING, true));
+
+
+	static Shape driver(final Shape shape) { // !!! caching
+		return shape
+
+				.redact(Role)
+				.redact(Task)
+				.redact(View)
+				.redact(Mode, Convey) // remove internal filtering shapes
+
+				.expand(); // add inferred constraints to drive json shorthands
 	}
 
 

@@ -18,6 +18,8 @@ package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -56,6 +58,29 @@ public final class Lang extends Shape {
 		}
 
 		return new Lang(tags);
+	}
+
+
+	public static boolean tagged(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Datatype.typed(shape, RDF.LANGSTRING) || langs(shape).isPresent();
+	}
+
+	public static Optional<Set<String>> langs(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Optional.ofNullable(shape.map(new _Inspector<Set<String>>() {
+
+			@Override public Set<String> probe(final Lang lang) { return lang.tags(); }
+
+		}));
 	}
 
 

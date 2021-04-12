@@ -20,6 +20,8 @@ import com.metreeca.json.Shape;
 
 import org.eclipse.rdf4j.model.IRI;
 
+import java.util.Optional;
+
 import static com.metreeca.json.Values.format;
 
 
@@ -46,6 +48,33 @@ public final class Datatype extends Shape {
 		}
 
 		return new Datatype(iri);
+	}
+
+
+	public static boolean typed(final Shape shape, final IRI iri) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		if ( iri == null ) {
+			throw new NullPointerException("null iri");
+		}
+
+		return datatype(shape).filter(iri::equals).isPresent();
+	}
+
+	public static Optional<IRI> datatype(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Optional.ofNullable(shape.map(new _Inspector<IRI>() {
+
+			@Override public IRI probe(final Datatype datatype) { return datatype.iri(); }
+
+		}));
 	}
 
 

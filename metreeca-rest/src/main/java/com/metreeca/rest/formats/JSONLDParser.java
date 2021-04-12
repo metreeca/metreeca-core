@@ -43,7 +43,7 @@ import static com.metreeca.json.shapes.Field.labels;
 import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.rest.Request.search;
 import static com.metreeca.rest.Xtream.decode;
-import static com.metreeca.rest.formats.JSONLDInspector.driver;
+import static com.metreeca.rest.formats.JSONLDFormat.driver;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;

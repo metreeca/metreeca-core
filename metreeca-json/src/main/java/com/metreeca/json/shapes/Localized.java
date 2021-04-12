@@ -60,6 +60,20 @@ public final class Localized extends Shape {
 	}
 
 
+	public static boolean localized(final Shape shape) {
+
+		if ( shape == null ) {
+			throw new NullPointerException("null shape");
+		}
+
+		return Optional.ofNullable(shape.map(new _Inspector<Object>() {
+
+			@Override public Object probe(final Localized localized) { return localized; }
+
+		})).isPresent();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	private Localized() {}
