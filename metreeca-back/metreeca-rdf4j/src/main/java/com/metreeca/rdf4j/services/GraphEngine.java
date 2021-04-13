@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.json.Frame.frame;
+import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Toolbox.service;
 
@@ -48,9 +49,8 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	@Override public Optional<Frame> create(final Frame frame, final Shape shape) {
 		return graph.update(connection -> Optional.of(frame.focus())
 
-				.filter(item
-						-> !connection.hasStatement(item, null, null, true)
-						&& !connection.hasStatement(null, null, item, true)
+				.filter(item ->
+						!connection.hasStatement(item, null, null, true)
 				)
 
 				.map(item -> {
@@ -74,7 +74,7 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	@Override public Optional<Frame> update(final Frame frame, final Shape shape) {
 		return graph.update(connection -> Optional
 
-				.of(Items.items(shape).map(new QueryProbe(this, frame.focus())))
+				.of(items(shape).map(new QueryProbe(this, frame.focus())))
 
 				.filter(model -> !model.isEmpty())
 
@@ -92,7 +92,7 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	@Override public Optional<Frame> delete(final Frame frame, final Shape shape) {
 		return graph.update(connection -> Optional
 
-				.of(Items.items(shape).map(new QueryProbe(this, frame.focus())))
+				.of(items(shape).map(new QueryProbe(this, frame.focus())))
 
 				.filter(model -> !model.isEmpty())
 
