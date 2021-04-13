@@ -47,38 +47,39 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 
-public final class GraphTest {
+ public final class GraphTest {
 
-	private static final Logger logger=Logger.getLogger(GraphTest.class.getName());
+	 private static final Logger logger=Logger.getLogger(GraphTest.class.getName());
 
-	private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
-			.map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
-			.collect(joining("\n"));
-
-
-	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
+	 private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
+			 .map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
+			 .collect(joining("\n"));
 
 
-	private final Frame data=frame(RDF.NIL).value(RDF.VALUE, RDF.FIRST);
+	 private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
+
+	 private static final Frame data=frame(RDF.NIL).value(RDF.VALUE, RDF.FIRST);
 
 
-	public static void exec(final Runnable... tasks) {
-		new Toolbox()
-				.set(Graph.graph(), () -> new Graph(new SailRepository(new MemoryStore())))
-				.exec(tasks)
-				.clear();
-	}
+	 public static void exec(final Runnable... tasks) {
+		 new Toolbox()
+				 .set(Graph.graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+				 .exec(tasks)
+				 .clear();
+	 }
 
 
-	@Test void testConfigureRequest() {
-		exec(() -> assertThat(Graph.<Request>query(
+	 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-				sparql("\n"
-						+"construct { \n"
-						+"\n"
-						+"\t?this\n"
-						+"\t\t:time $time;\n"
-						+"\t\t:stem $stem;\n"
+	 @Test void testConfigureRequest() {
+		 exec(() -> assertThat(Graph.<Request>query(
+
+				 sparql("\n"
+						 +"construct { \n"
+						 +"\n"
+						 +"\t?this\n"
+						 +"\t\t:time $time;\n"
+						 +"\t\t:stem $stem;\n"
 						+"\t\t:name $name;\n"
 						+"\t\t:task $task;\n"
 						+"\t\t:base $base;\n"

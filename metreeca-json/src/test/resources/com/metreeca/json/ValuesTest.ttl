@@ -160,7 +160,7 @@
 	:email "ghernande@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1102> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 <employees/1166> a :Employee ;
 	rdfs:label "Leslie Thompson" ;
@@ -170,7 +170,7 @@
 	:email "lthompson@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1143> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1611> a :Employee ;
 	rdfs:label "Andy Fixter" ;
@@ -180,7 +180,7 @@
 	:email "afixter@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1088> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1504> a :Employee ;
 	rdfs:label "Barry Jones" ;
@@ -190,7 +190,7 @@
 	:email "bjones@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1102> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1165> a :Employee ;
 	rdfs:label "Leslie Jennings" ;
@@ -200,7 +200,7 @@
 	:email "ljennings@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1143> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1323> a :Employee ;
 	rdfs:label "George Vanauf" ;
@@ -210,7 +210,7 @@
 	:email "gvanauf@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1143> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1401> a :Employee ;
 	rdfs:label "Pamela Castillo" ;
@@ -220,7 +220,7 @@
 	:email "pcastillo@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1102> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 <employees/1337> a :Employee ;
 	rdfs:label "Loui Bondur" ;
@@ -230,7 +230,7 @@
 	:email "lbondur@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1102> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1621> a :Employee ;
 	rdfs:label "Mami Nishi" ;
@@ -241,7 +241,7 @@
 	:title "Sales Rep" ;
 	:supervisor <employees/1056> ;
 	:subordinate <employees/1625> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 <employees/1286> a :Employee ;
 	rdfs:label "Foon Yue Tseng" ;
@@ -251,7 +251,7 @@
 	:email "ftseng@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1143> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1216> a :Employee ;
 	rdfs:label "Steve Patterson" ;
@@ -261,7 +261,7 @@
 	:email "spatterson@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1143> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 <employees/1612> a :Employee ;
 	rdfs:label "Peter Marsh" ;
@@ -271,7 +271,7 @@
 	:email "pmarsh@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1088> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1188> a :Employee ;
 	rdfs:label "Julie Firrelli" ;
@@ -281,7 +281,7 @@
 	:email "jfirrelli@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1143> ;
-	:seniority "1"^^xsd:integer .
+	:seniority 1 .
 
 <employees/1501> a :Employee ;
 	rdfs:label "Larry Bott" ;
@@ -291,7 +291,7 @@
 	:email "lbott@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1102> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 <employees/1702> a :Employee ;
 	rdfs:label "Martin Gerard" ;
@@ -301,7 +301,7 @@
 	:email "mgerard@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1102> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 <employees/1002> a :Employee ;
 	rdfs:label "Diane Murphy" ;
@@ -311,7 +311,7 @@
 	:email "dmurphy@example.com" ;
 	:title "President" ;
 	:subordinate <employees/1056> , <employees/1076> ;
-	:seniority "5"^^xsd:integer .
+	:seniority 5 .
 
 <employees/1056> a :Employee ;
 	rdfs:label "Mary Patterson" ;
@@ -322,7 +322,7 @@
 	:title "VP Sales" ;
 	:supervisor <employees/1002> ;
 	:subordinate <employees/1621> , <employees/1088> , <employees/1102> , <employees/1143> ;
-	:seniority "4"^^xsd:integer .
+	:seniority 4 .
 
 <employees/1076> a :Employee ;
 	rdfs:label "Jeff Firrelli" ;
@@ -332,7 +332,7 @@
 	:email "jfirrelli@example.com" ;
 	:title "VP Marketing" ;
 	:supervisor <employees/1002> ;
-	:seniority "4"^^xsd:integer .
+	:seniority 4 .
 
 <employees/1088> a :Employee ;
 	rdfs:label "William Patterson" ;
@@ -343,7 +343,7 @@
 	:title "Sales Manager (APAC)" ;
 	:supervisor <employees/1056> ;
 	:subordinate <employees/1611> , <employees/1612> , <employees/1619> ;
-	:seniority "3"^^xsd:integer .
+	:seniority 3 .
 
 <employees/1102> a :Employee ;
 	rdfs:label "Gerard Bondur" ;
@@ -354,7 +354,7 @@
 	:title "Sale Manager (EMEA)" ;
 	:supervisor <employees/1056> ;
 	:subordinate <employees/1370> , <employees/1504> , <employees/1401> , <employees/1337> , <employees/1501> , <employees/1702> ;
-	:seniority "4"^^xsd:integer .
+	:seniority 4 .
 
 <employees/1143> a :Employee ;
 	rdfs:label "Anthony Bow" ;
@@ -365,7 +365,7 @@
 	:title "Sales Manager (NA)" ;
 	:supervisor <employees/1056> ;
 	:subordinate <employees/1166> , <employees/1165> , <employees/1323> , <employees/1286> , <employees/1216> , <employees/1188> ;
-	:seniority "3"^^xsd:integer .
+	:seniority 3 .
 
 <employees/1619> a :Employee ;
 	rdfs:label "Tom King" ;
@@ -375,7 +375,7 @@
 	:email "tking@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1088> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 <employees/1625> a :Employee ;
 	rdfs:label "Yoshimi Kato" ;
@@ -385,7 +385,7 @@
 	:email "ykato@example.com" ;
 	:title "Sales Rep" ;
 	:supervisor <employees/1621> ;
-	:seniority "2"^^xsd:integer .
+	:seniority 2 .
 
 
 #### Locations #########################################################################################################

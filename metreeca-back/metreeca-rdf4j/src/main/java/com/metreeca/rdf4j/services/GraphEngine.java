@@ -121,8 +121,6 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 		}
 
 
-		////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 		@Override public Collection<Statement> probe(final Items items) {
 			return new GraphItems(config).process(resource, items);
 		}
