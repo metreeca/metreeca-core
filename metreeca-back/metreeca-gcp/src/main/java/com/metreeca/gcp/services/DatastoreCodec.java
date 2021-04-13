@@ -52,7 +52,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.*;
 
-final class DatastoreCodec {
+final class DatastoreCodec { // !!! review/refactor
 
 	private static final String Context="Context";
 	private static final String Resource="Resource";
