@@ -18,7 +18,6 @@ package com.metreeca.json;
 
 import com.metreeca.json.shapes.*;
 
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
@@ -40,17 +39,17 @@ import static java.util.stream.Collectors.toCollection;
 
 final class ShapeResolver extends Shape.Probe<Shape> {
 
-	private final Resource base;
+	private final Value focus;
 
 
-	ShapeResolver(final Resource base) {
-		this.base=base;
+	ShapeResolver(final Value focus) {
+		this.focus=focus;
 	}
 
 
 	private Value value(final Value value) {
 		return value instanceof Focus
-				? ((Focus)value).resolve(base)
+				? ((Focus)value).resolve(focus)
 				: value;
 	}
 

@@ -17,8 +17,7 @@
 package com.metreeca.rest.operators;
 
 
-import com.metreeca.json.Frame;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.json.shapes.Guard;
 import com.metreeca.rest.*;
 import com.metreeca.rest.formats.JSONLDFormat;
@@ -28,6 +27,7 @@ import com.metreeca.rest.services.Engine;
 import org.eclipse.rdf4j.model.*;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -35,7 +35,6 @@ import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.md5;
-import static com.metreeca.json.Values.path;
 import static com.metreeca.json.Values.statement;
 import static com.metreeca.json.shapes.Guard.Create;
 import static com.metreeca.json.shapes.Guard.Detail;
@@ -193,9 +192,13 @@ public final class Creator extends Delegator {
 
 					.map(Frame::focus)
 
-					.map(focus -> request.reply(response -> response.status(Created)
-							.header("Location", path(focus)) // root-relative to support relocation
-					))
+					.map(focus -> request.reply(response -> response.status(Created).header("Location", Optional
+							.of(focus)
+							.filter(Value::isIRI)
+							.map(IRI.class::cast)
+							.map(Values::path) // root-relative to support relocation
+							.orElse(focus.stringValue())
+					)))
 
 					.orElseThrow(() ->
 							new IllegalStateException(format("existing resource identifier %s", format(item)))

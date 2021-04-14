@@ -53,159 +53,162 @@ final class GraphStats extends GraphFacts {
 	}
 
 
-	Frame process(final Resource resource, final Stats stats) {
+	Frame process(final Value focus, final Stats stats) {
+		if ( focus.isResource() ) {
 
-		final Shape shape=stats.shape();
-		final List<IRI> path=stats.path();
-		final int offset=stats.offset();
-		final int limit=stats.limit();
+			final Shape shape=stats.shape();
+			final List<IRI> path=stats.path();
+			final int offset=stats.offset();
+			final int limit=stats.limit();
 
-		final Shape filter=shape
-				.filter(resource)
-				.resolve(resource); // .filter() may introduce focus values › resolve afterwards
+			final Shape filter=shape
+					.filter(focus)
+					.resolve(focus); // .filter() may introduce focus values › resolve afterwards
 
-		final Shape convey=shape
-				.convey()
-				.resolve(resource);
+			final Shape convey=shape
+					.convey()
+					.resolve(focus);
 
-		final Shape select=and(filter, path(convey, path)).label(this::label); // requires path to exist in convey
+			final Shape select=and(filter, path(convey, path)).label(this::label); // requires path to exist in convey
 
-		final String hook=hook(select, path);
+			final String hook=hook(select, path);
 
-		final Collection<Statement> model=new LinkedHashSet<>();
+			final Collection<Statement> model=new LinkedHashSet<>();
 
-		final Map<Value, BigInteger> counts=new HashMap<>();
+			final Map<Value, BigInteger> counts=new HashMap<>();
 
-		final Collection<Value> mins=new ArrayList<>();
-		final Collection<Value> maxs=new ArrayList<>();
+			final Collection<Value> mins=new ArrayList<>();
+			final Collection<Value> maxs=new ArrayList<>();
 
-		evaluate(() -> graph.query(task(connection -> {
-			connection.prepareTupleQuery(compile(() -> code(list(
+			evaluate(() -> graph.query(task(connection -> {
+				connection.prepareTupleQuery(compile(() -> code(list(
 
-					comment("stats query"),
+						comment("stats query"),
 
-					prefix(NS),
-					prefix(OWL.NS),
-					prefix(RDFS.NS),
+						prefix(NS),
+						prefix(OWL.NS),
+						prefix(RDFS.NS),
 
-					space(select(), where(
+						space(select(), where(
 
-							space(block(
+								space(block(
 
-									space(select(space(indent(
+										space(select(space(indent(
 
-											var("type"),
-											as("min", min(var(hook))),
-											as("max", max(var(hook))),
-											as("count", count(true, var(hook)))
+												var("type"),
+												as("min", min(var(hook))),
+												as("max", max(var(hook))),
+												as("count", count(true, var(hook)))
 
-									)))),
+										)))),
 
-									space(where(
+										space(where(
 
-											space(tree(select, true)),
+												space(tree(select, true)),
 
-											space(bind("type", is(
-													isBlank(var(hook)),
-													text(":bnode"),
-													is(
-															isIRI(var(hook)),
-															text(":iri"),
-															datatype(var(hook))
-													)
-											)))
+												space(bind("type", is(
+														isBlank(var(hook)),
+														text(":bnode"),
+														is(
+																isIRI(var(hook)),
+																text(":iri"),
+																datatype(var(hook))
+														)
+												)))
 
-											// !!! sampling w/ options.stats()
+												// !!! sampling w/ options.stats()
 
-									)),
+										)),
 
-									space(
-											line(group(var("type"))),
-											line(having(gt(count(true, var(hook)), text(0)))),
-											line(order(desc(var("count")), var("type"))),
-											line(offset(offset)),
-											line(limit(limit))
-									)
+										space(
+												line(group(var("type"))),
+												line(having(gt(count(true, var(hook)), text(0)))),
+												line(order(desc(var("count")), var("type"))),
+												line(offset(offset)),
+												line(limit(limit))
+										)
 
-							)),
+								)),
 
-							space(
-									line(optional(edge(var("type"), "rdfs:label", var("type_label")))),
-									line(optional(edge(var("type"), "rdfs:comment", var("type_notes"))))
-							),
+								space(
+										line(optional(edge(var("type"), "rdfs:label", var("type_label")))),
+										line(optional(edge(var("type"), "rdfs:comment", var("type_notes"))))
+								),
 
-							space(
-									line(optional(edge(var("min"), "rdfs:label", var("min_label")))),
-									line(optional(edge(var("min"), "rdfs:comment", var("min_notes"))))
-							),
+								space(
+										line(optional(edge(var("min"), "rdfs:label", var("min_label")))),
+										line(optional(edge(var("min"), "rdfs:comment", var("min_notes"))))
+								),
 
-							space(
-									line(optional(edge(var("max"), "rdfs:label", var("max_label")))),
-									line(optional(edge(var("max"), "rdfs:comment", var("max_notes"))))
-							)
+								space(
+										line(optional(edge(var("max"), "rdfs:label", var("max_label")))),
+										line(optional(edge(var("max"), "rdfs:comment", var("max_notes"))))
+								)
 
-					))
+						))
 
-			)))).evaluate(new AbstractTupleQueryResultHandler() {
+				)))).evaluate(new AbstractTupleQueryResultHandler() {
 
-				@Override public void handleSolution(final BindingSet bindings) {
+					@Override public void handleSolution(final BindingSet bindings) {
 
-					final Resource type=(Resource)bindings.getValue("type");
+						final Resource type=(Resource)bindings.getValue("type");
 
-					final Value type_label=bindings.getValue("type_label");
-					final Value type_notes=bindings.getValue("type_notes");
+						final Value type_label=bindings.getValue("type_label");
+						final Value type_notes=bindings.getValue("type_notes");
 
-					final Value min=bindings.getValue("min");
-					final Value max=bindings.getValue("max");
+						final Value min=bindings.getValue("min");
+						final Value max=bindings.getValue("max");
 
-					final Value min_label=bindings.getValue("min_label");
-					final Value min_notes=bindings.getValue("min_notes");
+						final Value min_label=bindings.getValue("min_label");
+						final Value min_notes=bindings.getValue("min_notes");
 
-					final Value max_label=bindings.getValue("max_label");
-					final Value max_notes=bindings.getValue("max_notes");
+						final Value max_label=bindings.getValue("max_label");
+						final Value max_notes=bindings.getValue("max_notes");
 
-					// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
+						// ;(virtuoso) counts are returned as xsd:int… cast to stay consistent
 
-					final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
+						final BigInteger count=integer(bindings.getValue("count")).orElse(BigInteger.ZERO);
 
-					model.add(statement(resource, Engine.stats, type));
-					model.add(statement(type, Engine.count, literal(count)));
+						model.add(statement((Resource)focus, Engine.stats, type));
+						model.add(statement(type, Engine.count, literal(count)));
 
-					if ( type_label != null ) { model.add(statement(type, RDFS.LABEL, type_label)); }
-					if ( type_notes != null ) { model.add(statement(type, RDFS.COMMENT, type_notes)); }
+						if ( type_label != null ) { model.add(statement(type, RDFS.LABEL, type_label)); }
+						if ( type_notes != null ) { model.add(statement(type, RDFS.COMMENT, type_notes)); }
 
-					if ( min != null ) { model.add(statement(type, Engine.min, min)); }
-					if ( max != null ) { model.add(statement(type, Engine.max, max)); }
+						if ( min != null ) { model.add(statement(type, Engine.min, min)); }
+						if ( max != null ) { model.add(statement(type, Engine.max, max)); }
 
-					if ( min_label != null ) { model.add(statement((Resource)min, RDFS.LABEL, min_label)); }
-					if ( min_notes != null ) { model.add(statement((Resource)min, RDFS.COMMENT, min_notes)); }
+						if ( min_label != null ) { model.add(statement((Resource)min, RDFS.LABEL, min_label)); }
+						if ( min_notes != null ) { model.add(statement((Resource)min, RDFS.COMMENT, min_notes)); }
 
-					if ( max_label != null ) { model.add(statement((Resource)max, RDFS.LABEL, max_label)); }
-					if ( max_notes != null ) { model.add(statement((Resource)max, RDFS.COMMENT, max_notes)); }
+						if ( max_label != null ) { model.add(statement((Resource)max, RDFS.LABEL, max_label)); }
+						if ( max_notes != null ) { model.add(statement((Resource)max, RDFS.COMMENT, max_notes)); }
 
-					counts.putIfAbsent(type, count);
+						counts.putIfAbsent(type, count);
 
-					if ( min != null ) { mins.add(min); }
-					if ( max != null ) { maxs.add(max); }
+						if ( min != null ) { mins.add(min); }
+						if ( max != null ) { maxs.add(max); }
 
-				}
+					}
 
-			});
-		})));
+				});
+			})));
 
-		model.add(statement(resource, Engine.count, literal(counts.values().stream()
-				.reduce(BigInteger.ZERO, BigInteger::add)
-		)));
+			model.add(statement((Resource)focus, Engine.count, literal(counts.values().stream()
+					.reduce(BigInteger.ZERO, BigInteger::add)
+			)));
 
-		mins.stream()
-				.reduce((x, y) -> compare(x, y) < 0 ? x : y)
-				.ifPresent(min -> model.add(statement(resource, Engine.min, min)));
+			mins.stream()
+					.reduce((x, y) -> compare(x, y) < 0 ? x : y)
+					.ifPresent(min -> model.add(statement((Resource)focus, Engine.min, min)));
 
-		maxs.stream()
-				.reduce((x, y) -> compare(x, y) > 0 ? x : y)
-				.ifPresent(max -> model.add(statement(resource, Engine.max, max)));
+			maxs.stream()
+					.reduce((x, y) -> compare(x, y) > 0 ? x : y)
+					.ifPresent(max -> model.add(statement((Resource)focus, Engine.max, max)));
 
-		return frame(resource, model);
+			return frame(focus, model);
+
+		} else { return frame(focus); }
 	}
 
 }

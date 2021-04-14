@@ -39,7 +39,7 @@ import static java.util.stream.Stream.concat;
 /**
  * Linked data frame.
  *
- * <p>Describes a linked data graph centered on a focus resource.</p>
+ * <p>Describes a linked data graph centered on a focus value.</p>
  */
 public final class Frame {
 
@@ -59,7 +59,7 @@ public final class Frame {
 	);
 
 
-	public static Frame frame(final Resource focus) {
+	public static Frame frame(final Value focus) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -68,7 +68,7 @@ public final class Frame {
 		return new Frame(focus, emptySet());
 	}
 
-	public static Frame frame(final Resource focus, final Collection<Statement> model) {
+	public static Frame frame(final Value focus, final Collection<Statement> model) {
 
 		if ( focus == null ) {
 			throw new NullPointerException("null focus");
@@ -98,17 +98,17 @@ public final class Frame {
 	}
 
 	private static Set<Statement> merge(
-			final Resource focus, final Set<Statement> model, final Iterable<Statement> delta
+			final Value focus, final Set<Statement> model, final Iterable<Statement> delta
 	) {
 
 		final Set<Statement> merged=new LinkedHashSet<>(model);
 
-		final Collection<Resource> visited=new HashSet<>();
-		final Queue<Resource> pending=new ArrayDeque<>(singleton(focus));
+		final Collection<Value> visited=new HashSet<>();
+		final Queue<Value> pending=new ArrayDeque<>(singleton(focus));
 
 		while ( !pending.isEmpty() ) {
 
-			final Resource value=pending.poll();
+			final Value value=pending.poll();
 
 			if ( visited.add(value) ) {
 				delta.forEach(s -> {
@@ -133,11 +133,11 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private final Resource focus;
+	private final Value focus;
 	private final Set<Statement> model;
 
 
-	private Frame(final Resource focus, final Set<Statement> model) {
+	private Frame(final Value focus, final Set<Statement> model) {
 		this.focus=focus;
 		this.model=unmodifiableSet(model);
 	}
@@ -162,7 +162,7 @@ public final class Frame {
 	 *
 	 * @return theIRI of the frame focus resource.
 	 */
-	public Resource focus() {
+	public Value focus() {
 		return focus;
 	}
 

@@ -16,7 +16,6 @@
 
 package com.metreeca.json;
 
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.Value;
 
 import java.net.URI;
@@ -87,17 +86,17 @@ public final class Focus implements Value {
 	/**
 	 * Resolves this focus value.
 	 *
-	 * @param base the target resource for a shape-driven operation
+	 * @param focus the target value for a shape-driven operation
 	 *
-	 * @return the resource obtained by resolving this focus value against {@code base}
+	 * @return the value obtained by resolving this focus value against {@code focus}
 	 *
-	 * @throws NullPointerException     if {@code base} is {@code null}
-	 * @throws IllegalArgumentException if {@code base} is malformed
+	 * @throws NullPointerException     if {@code focus} is {@code null}
+	 * @throws IllegalArgumentException if {@code focus} is malformed
 	 */
-	public Resource resolve(final Resource base) {
-		return !base.isIRI() || relative.isEmpty() ? base
-				: relative.endsWith("/") ? iri(resolve(base.stringValue()))
-				: iri(convert(resolve(base.stringValue())));
+	public Value resolve(final Value focus) {
+		return !focus.isIRI() || relative.isEmpty() ? focus
+				: relative.endsWith("/") ? iri(resolve(focus.stringValue()))
+				: iri(convert(resolve(focus.stringValue())));
 	}
 
 

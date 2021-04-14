@@ -235,9 +235,8 @@ public final class Values {
 	}
 
 
-	public static String root(final Resource resource) {
+	public static String root(final IRI resource) {
 		return Optional.ofNullable(resource)
-				.filter(Value::isIRI)
 				.map(Value::stringValue)
 				.map(IRIPattern::matcher)
 				.filter(Matcher::matches)
@@ -248,9 +247,8 @@ public final class Values {
 				.orElse(Base);
 	}
 
-	public static String path(final Resource resource) {
+	public static String path(final IRI resource) {
 		return Optional.ofNullable(resource)
-				.filter(Value::isIRI)
 				.map(Value::stringValue)
 				.map(IRIPattern::matcher)
 				.filter(Matcher::matches)

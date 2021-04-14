@@ -57,7 +57,7 @@ final class GraphItems extends GraphFacts {
 	}
 
 
-	Frame process(final Resource resource, final Items items) {
+	Frame process(final Value focus, final Items items) {
 
 		final Shape shape=items.shape();
 		final List<Order> orders=items.orders();
@@ -65,13 +65,13 @@ final class GraphItems extends GraphFacts {
 		final int limit=items.limit();
 
 		final Shape filter=shape
-				.filter(resource)
-				.resolve(resource)
+				.filter(focus)
+				.resolve(focus)
 				.label(this::label);
 
 		final Shape convey=shape
 				.convey()
-				.resolve(resource)
+				.resolve(focus)
 				.label(this::label);
 
 		final Shape follow=and(orders.stream().map(Order::path).map(path -> path(convey, path)));
@@ -129,12 +129,12 @@ final class GraphItems extends GraphFacts {
 
 					if ( match != null ) {
 
-						if ( !match.equals(resource) ) {
-							models.compute(resource, (key, value) -> {
+						if ( focus.isResource() && !match.equals(focus) ) {
+							models.compute(focus, (key, value) -> {
 
 								final Collection<Statement> model=value != null ? value : new LinkedHashSet<>();
 
-								model.add(statement(resource, Shape.Contains, match));
+								model.add(statement((Resource)focus, Shape.Contains, match));
 
 								return model;
 
@@ -175,21 +175,11 @@ final class GraphItems extends GraphFacts {
 			});
 		})));
 
-		return frame(resource, models.getOrDefault(resource, emptySet()))
+		return frame(focus, models.getOrDefault(focus, emptySet()))
 
 				.objects(Shape.Contains, models.entrySet().stream()
-
-						.filter(entry -> !entry.getKey().equals(resource))
-
-						.map(entry -> {
-
-							final Value focus=entry.getKey();
-							final Collection<Statement> model=entry.getValue();
-
-							return focus.isResource() ? frame((Resource)focus, model) : focus;
-
-						})
-
+						.filter(entry -> !entry.getKey().equals(focus))
+						.map(entry -> frame(entry.getKey(), entry.getValue()))
 				);
 	}
 

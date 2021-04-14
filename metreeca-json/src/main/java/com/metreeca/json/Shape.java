@@ -257,15 +257,14 @@ public abstract class Shape {
 	/**
 	 * Extracts the filtering form of this shape.
 	 *
-	 * @param anchor a target resource filtering matches will be linked to
+	 * @param anchor a target value filtering matches will be linked to
 	 *
 	 * @return a copy of this shape where constraint shapes are retained only inside {@linkplain Guard#filter(Shape...)
-	 * filtering} {@linkplain #then(Shape...) conditional} shapes, extended to link matches to the {@code anchor}
-	 * resource
+	 * filtering} {@linkplain #then(Shape...) conditional} shapes, extended to link matches to the {@code anchor} value
 	 *
 	 * @throws NullPointerException if {@code anchor} is null
 	 */
-	public Shape filter(final Resource anchor) {
+	public Shape filter(final Value anchor) {
 
 		if ( anchor == null ) {
 			throw new NullPointerException("null anchor");
@@ -306,20 +305,20 @@ public abstract class Shape {
 	/**
 	 * Resolve focus values in this shape.
 	 *
-	 * @param base the base resource {@linkplain Focus focus} values should be resolved against
+	 * @param focus the value {@linkplain Focus focus} values should be resolved against
 	 *
-	 * @return a copy of this shape where focus values are replaced by absolute IRIs by resolving them against {@code
-	 * base}
+	 * @return a copy of this shape where focus values are replaced with the value obtained by resolving them against
+	 * {@code focus}
 	 *
-	 * @throws IllegalArgumentException if {@code base} is null
+	 * @throws IllegalArgumentException if {@code focus} is null
 	 */
-	public Shape resolve(final Resource base) {
+	public Shape resolve(final Value focus) {
 
-		if ( base == null ) {
-			throw new NullPointerException("null base");
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
 		}
 
-		return map(new ShapeResolver(base));
+		return map(new ShapeResolver(focus));
 	}
 
 

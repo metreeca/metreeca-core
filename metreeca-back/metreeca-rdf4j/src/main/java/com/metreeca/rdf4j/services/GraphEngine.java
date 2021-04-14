@@ -23,6 +23,7 @@ import com.metreeca.rest.Setup;
 import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.Optional;
 
@@ -46,9 +47,9 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	@Override public Optional<Frame> create(final Frame frame, final Shape shape) {
 		return graph.update(connection -> Optional.of(frame.focus())
 
-				.filter(item ->
-						!connection.hasStatement(item, null, null, true)
-				)
+				.filter(item -> !(item.isResource()
+						&& connection.hasStatement((Resource)item, null, null, true)
+				))
 
 				.map(item -> {
 
@@ -105,25 +106,25 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	private static final class QueryProbe extends Query.Probe<Frame> {
 
 		private final Config config;
-		private final Resource resource;
+		private final Value focus;
 
 
-		QueryProbe(final Config config, final Resource resource) {
+		QueryProbe(final Config config, final Value focus) {
 			this.config=config;
-			this.resource=resource;
+			this.focus=focus;
 		}
 
 
 		@Override public Frame probe(final Items items) {
-			return new GraphItems(config).process(resource, items);
+			return new GraphItems(config).process(focus, items);
 		}
 
 		@Override public Frame probe(final Terms terms) {
-			return new GraphTerms(config).process(resource, terms);
+			return new GraphTerms(config).process(focus, terms);
 		}
 
 		@Override public Frame probe(final Stats stats) {
-			return new GraphStats(config).process(resource, stats);
+			return new GraphStats(config).process(focus, stats);
 		}
 
 	}
