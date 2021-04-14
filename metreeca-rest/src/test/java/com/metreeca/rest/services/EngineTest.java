@@ -47,7 +47,8 @@ import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
+import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.stream.Collectors.*;
@@ -612,10 +613,7 @@ public abstract class EngineTest {
 				assertThat(engine().delete(frame(resource), EmployeeShape).map(Frame::focus)).hasValue(resource);
 
 				assertThat(engine().relate(frame(container), items(EmployeeShape))).isNotEmpty();
-
-				// in order to support vitual containers, related responds with an empty frame for unknown resources
-
-				assertThat(engine().relate(frame(resource), items(EmployeeShape)).map(frame -> frame.model().collect(toSet()))).hasValue(emptySet());
+				assertThat(engine().relate(frame(resource), items(EmployeeShape))).isEmpty();
 
 			});
 		}
@@ -638,26 +636,35 @@ public abstract class EngineTest {
 
 	@Nested final class RelateItems {
 
-		@Test void testResource() {
-			exec(dataset(), () -> assertThat(engine().relate(frame(resource), items(
+		@Test void testRelateResource() {
+			exec(dataset(), () -> assertThat(engine().relate(
 
-					EmployeeShape
+					frame(resource), items(EmployeeShape)
 
-			))).hasValue(resources.stream()
+			)).hasValue(resources.stream()
 					.filter(frame -> frame.focus().equals(resource))
 					.findFirst()
 					.orElse(null)
 			));
 		}
 
-		@Test void testContainer() {
-			exec(dataset(), () -> assertThat(
+		@Test void testRelateContainer() {
+			exec(dataset(), () -> assertThat(engine().relate(
 
-					engine().relate(frame(container), items(EmployeeShape))
+					frame(container), items(EmployeeShape)
 
-			).hasValue(frame(container).frames(Contains, resources.stream()
+			)).hasValue(frame(container).frames(Contains, resources.stream()
 					.filter(frame -> frame.value(RDF.TYPE).filter(Employee::equals).isPresent())
 			)));
+		}
+
+
+		@Test void testReportUnknown() {
+			exec(() -> assertThat(engine().relate(
+
+					frame(iri(container, "/unknown")), items(EmployeeShape)
+
+			)).isEmpty());
 		}
 
 
@@ -666,9 +673,7 @@ public abstract class EngineTest {
 
 					and()
 
-			))).hasValueSatisfying(frame -> assertThat(frame)
-					.isEmpty()
-			));
+			))).isEmpty());
 		}
 
 		@Test void testEmptyResultSet() {
@@ -676,9 +681,7 @@ public abstract class EngineTest {
 
 					field(RDF.TYPE, filter(all(RDF.NIL)))
 
-			))).hasValueSatisfying(frame -> assertThat(frame)
-					.isEmpty()
-			));
+			))).isEmpty());
 		}
 
 		@Test void testEmptyProjection() {

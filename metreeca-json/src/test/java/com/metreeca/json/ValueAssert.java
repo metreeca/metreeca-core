@@ -46,17 +46,4 @@ public final class ValueAssert extends AbstractAssert<ValueAssert, Value> {
 		));
 	}
 
-	public ValueAssert hasNamespace(final String namespace) {
-
-		if ( namespace == null ) {
-			throw new NullPointerException("null namespace");
-		}
-
-		return isIRI().satisfies(new Condition<>(
-				value -> ((IRI)value).getNamespace().equals(namespace),
-				"expected <%s> to be in the <%s> namespace",
-				Values.format(actual), namespace
-		));
-	}
-
 }

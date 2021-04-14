@@ -17,7 +17,6 @@
 package com.metreeca.json.shapes;
 
 import com.metreeca.json.Shape;
-import com.metreeca.json.Values;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,6 +26,7 @@ import java.util.stream.Stream;
 import static com.metreeca.json.Values.derives;
 import static com.metreeca.json.Values.direct;
 import static com.metreeca.json.Values.format;
+import static com.metreeca.json.Values.indent;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.Lang.lang;
 import static com.metreeca.json.shapes.MaxCount.maxCount;
@@ -302,7 +302,7 @@ public final class And extends Shape {
 
 	@Override public String toString() {
 		return "and("+(shapes.isEmpty() ? "" : shapes.stream()
-				.map(shape -> Values.indent(shape.toString()))
+				.map(shape -> indent(shape.toString()))
 				.collect(joining(",\n\t", "\n\t", "\n"))
 		)+")";
 	}

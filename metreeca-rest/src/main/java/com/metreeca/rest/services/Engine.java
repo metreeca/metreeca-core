@@ -181,7 +181,7 @@ public interface Engine {
 	 * Handles creation requests.
 	 *
 	 * @param frame a frame describing the linked data resource to be created
-	 * @param shape a shape describing the {@code frame} {@link Frame#model() model}
+	 * @param shape a shape describing the {@code frame} linked data model
 	 *
 	 * @return an optional containing {@code frame}, possibly extended with server managed properties, if the frame
 	 * {@linkplain Frame#focus() focus} IRI was not already present in the storage backend; an empty optional, otherwise
@@ -210,7 +210,7 @@ public interface Engine {
 	 * Handles updating requests.
 	 *
 	 * @param frame a frame describing the linked data resource to be updated
-	 * @param shape a shape describing the {@code frame} {@link Frame#model() model}
+	 * @param shape a shape describing the {@code frame} linked data model
 	 *
 	 * @return an optional containing {@code frame}, possibly extended with server managed properties, if the frame
 	 * {@linkplain Frame#focus() focus} IRI was already present in the storage backend; an empty optional, otherwise

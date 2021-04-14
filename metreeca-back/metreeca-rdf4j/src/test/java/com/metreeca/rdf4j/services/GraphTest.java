@@ -73,7 +73,9 @@ public final class GraphTest {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Test void testConfigureRequest() {
-		exec(() -> assertThat(Graph
+		exec(() -> assertThat(
+
+				Frame.model(Graph
 
 						.<Request>query(
 
@@ -108,14 +110,12 @@ public final class GraphTest {
 								frame(iri(Base, "/test/request"))
 										.value(RDF.VALUE, RDF.NIL)
 
-						)
+						)).collect(toList())
 
-						.model().collect(toList())
+		)
 
-				)
-
-						.as("bindings configured")
-						.hasSubset(decode("\n"
+				.as("bindings configured")
+				.hasSubset(decode("\n"
 								+"<test/request>\n"
 								+"\t:stem <test/>;\n"
 								+"\t:name 'request';\n"
@@ -138,50 +138,51 @@ public final class GraphTest {
 	}
 
 	@Test void testConfigureResponse() {
-		exec(() -> assertThat(Graph
+		exec(() ->
+						assertThat(Frame.model(Graph
 
-						.<Response>query(
+								.<Response>query(
 
-								sparql("\n"
-										+"construct { \n"
-										+"\n"
-										+"\t?this\n"
-										+"\t\t:time $time;\n"
-										+"\t\t:stem $stem;\n"
-										+"\t\t:name $name;\n"
-										+"\t\t:task $task;\n"
-										+"\t\t:base $base;\n"
-										+"\t\t:item $item;\n"
-										+"\t\t:user $user;\n"
-										+"\t\t:code $code;\n"
-										+"\t\t:custom $custom.\n"
-										+"\n"
-										+"} where {}\n"
-								),
+										sparql("\n"
+												+"construct { \n"
+												+"\n"
+												+"\t?this\n"
+												+"\t\t:time $time;\n"
+												+"\t\t:stem $stem;\n"
+												+"\t\t:name $name;\n"
+								+"\t\t:task $task;\n"
+								+"\t\t:base $base;\n"
+								+"\t\t:item $item;\n"
+								+"\t\t:user $user;\n"
+								+"\t\t:code $code;\n"
+								+"\t\t:custom $custom.\n"
+								+"\n"
+								+"} where {}\n"
+						),
 
-								(request, query) -> query.setBinding("custom", literal(123))
+						(request, query) -> query.setBinding("custom", literal(123))
 
-						)
-
-						.apply(
-
-								new Response(new Request()
-
-										.method(Request.POST)
-										.base(Base)
-										.path("/test/request"))
-
-										.status(Response.OK)
-										.header("Location", Root+"test/response"),
-
-								frame(iri(Base, "/test/request"))
-										.value(RDF.VALUE, RDF.NIL)
-
-						).model().collect(toList())
 				)
 
-						.as("bindings configured")
-						.hasSubset(decode("\n"
+				.apply(
+
+						new Response(new Request()
+
+								.method(Request.POST)
+								.base(Base)
+								.path("/test/request"))
+
+								.status(Response.OK)
+								.header("Location", Root+"test/response"),
+
+						frame(iri(Base, "/test/request"))
+								.value(RDF.VALUE, RDF.NIL)
+
+				)).collect(toList())
+		)
+
+				.as("bindings configured")
+				.hasSubset(decode("\n"
 								+"<test/response>\n"
 								+"\t:stem <test/>;\n"
 								+"\t:name 'response';\n"

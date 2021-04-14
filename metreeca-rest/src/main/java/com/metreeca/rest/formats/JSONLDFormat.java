@@ -20,8 +20,7 @@ import com.metreeca.json.*;
 import com.metreeca.json.shapes.Or;
 import com.metreeca.rest.*;
 
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.*;
 
 import java.io.*;
 import java.util.*;
@@ -30,6 +29,8 @@ import java.util.function.Supplier;
 import javax.json.*;
 
 import static com.metreeca.json.Frame.frame;
+import static com.metreeca.json.Frame.model;
+import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
 import static com.metreeca.rest.Either.Left;
@@ -225,6 +226,15 @@ public final class JSONLDFormat extends Format<Frame> {
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Frame value) {
 
+		final String item=message.item();
+		final Value focus=value.focus();
+
+		if ( !focus.isIRI() || !focus.stringValue().equals(item) ) {
+			throw new IllegalArgumentException(format(
+					"message item <%s> and frame focus %s don't match", item, format(focus)
+			));
+		}
+
 		final String mime=message
 
 				.header("Content-Type") // content-type explicitly defined by handler
@@ -253,22 +263,21 @@ public final class JSONLDFormat extends Format<Frame> {
 							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
 					) {
 
-						final IRI focus=iri(message.item());
 						final Shape shape=message.get(shape());
 						final Map<String, String> keywords=service(keywords());
 
 						final Collection<Statement> model=
-								scan(shape, focus, value.model().collect(toList())).fold(trace -> {
+								scan(shape, value.focus(), model(value).collect(toList())).fold(trace -> {
 
-							service(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
+									service(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
 
-							throw new RuntimeException("invalid JSON-LD payload");
+									throw new RuntimeException("invalid JSON-LD payload");
 
-						});
+								});
 
 						jsonWriter.writeObject(new JSONLDEncoder(
 
-								focus,
+								iri(item),
 								shape.localize(langs),
 								keywords,
 								mime.equals(MIME) // include context objects for application/ld+json?

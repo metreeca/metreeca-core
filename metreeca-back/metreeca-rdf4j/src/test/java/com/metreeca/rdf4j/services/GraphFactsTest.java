@@ -16,6 +16,7 @@
 
 package com.metreeca.rdf4j.services;
 
+import com.metreeca.json.Frame;
 import com.metreeca.json.Shape;
 import com.metreeca.rest.Config;
 
@@ -104,9 +105,7 @@ final class GraphFactsTest {
 	}
 
 	private Collection<Statement> query(final Resource root, final Shape shape) {
-		return service(graph()).query(connection -> new GraphItems(options()).process(root, items(shape))
-
-				.model()
+		return service(graph()).query(connection -> Frame.model(new GraphItems(options()).process(root, items(shape)))
 
 				// ;(virtuoso) counts reported as xsd:int // !!! review dependency
 

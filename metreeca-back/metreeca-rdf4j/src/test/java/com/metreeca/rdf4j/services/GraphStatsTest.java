@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.ValuesTest.decode;
@@ -51,7 +52,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphStatsTest {
 
 	private Collection<Statement> query(final Stats stats) {
-		return new GraphStats(options()).process(Root, stats).model().collect(toList());
+		return model(new GraphStats(options()).process(Root, stats)).collect(toList());
 	}
 
 

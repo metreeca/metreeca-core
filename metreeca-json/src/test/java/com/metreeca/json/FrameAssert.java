@@ -23,6 +23,7 @@ import org.eclipse.rdf4j.model.util.Models;
 
 import java.util.List;
 
+import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.Values.indent;
 import static com.metreeca.json.ValuesTest.encode;
 
@@ -50,8 +51,7 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 		isNotNull();
 
 		if ( !actual.empty() ) {
-			failWithMessage("expected frame to be empty but was <\n%s\n>",
-					indent(encode(actual.model().collect(toList()))));
+			failWithMessage("expected frame to be empty but was <\n%s\n>", actual.format());
 		}
 
 		return this;
@@ -77,8 +77,8 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 
 		isNotNull();
 
-		final List<Statement> a=actual.model().collect(toList());
-		final List<Statement> f=frame.model().collect(toList());
+		final List<Statement> a=model(actual).collect(toList());
+		final List<Statement> f=model(frame).collect(toList());
 
 		if ( !Models.isomorphic(a, f) ) {
 			failWithMessage(

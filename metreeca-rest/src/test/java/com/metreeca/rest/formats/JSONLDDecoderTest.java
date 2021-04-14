@@ -33,7 +33,6 @@ import javax.json.*;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Shape.optional;
 import static com.metreeca.json.Shape.required;
-import static com.metreeca.json.ValueAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -45,6 +44,7 @@ import static com.metreeca.json.shapes.Localized.localized;
 import static com.metreeca.rest.Xtream.entry;
 import static com.metreeca.rest.Xtream.map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static java.util.Collections.emptyMap;

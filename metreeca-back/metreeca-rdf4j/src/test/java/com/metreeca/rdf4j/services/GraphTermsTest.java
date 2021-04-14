@@ -16,7 +16,6 @@
 
 package com.metreeca.rdf4j.services;
 
-import com.metreeca.json.Values;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.rest.Xtream;
 
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
+import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.ModelAssert.assertThat;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.queries.Terms.terms;
@@ -51,7 +51,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphTermsTest {
 
 	private Collection<Statement> query(final Terms terms) {
-		return new GraphTerms(options()).process(Values.Root, terms).model().collect(toList());
+		return model(new GraphTerms(options()).process(Root, terms)).collect(toList());
 	}
 
 
