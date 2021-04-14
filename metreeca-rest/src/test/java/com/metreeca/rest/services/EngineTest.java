@@ -24,7 +24,12 @@ import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.FrameAssert.assertThat;
@@ -45,12 +50,13 @@ import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.*;
 import static java.util.Comparator.comparing;
 import static java.util.Map.Entry.comparingByKey;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
 public abstract class EngineTest {
@@ -79,6 +85,7 @@ public abstract class EngineTest {
 	protected static final IRI office=term("office");
 	protected static final IRI supervisor=term("supervisor");
 	protected static final IRI subordinate=term("subordinate");
+	protected static final IRI unknown=term("unknown");
 
 
 	protected static final Shape EmployeeShape=and(
@@ -542,7 +549,7 @@ public abstract class EngineTest {
 		};
 	}
 
-	private Optional<Frame> snapshot() {
+	protected Optional<Frame> snapshot() {
 		return engine().relate(frame(container), items(EmployeeShape));
 	}
 
@@ -811,6 +818,174 @@ public abstract class EngineTest {
 
 	@Nested final class RelateTerms {
 
+		private Frame query(
+				final Frame frame, final Function<Frame, Stream<Value>> mapper
+		) {
+			return query(frame, mapper, 0, 0);
+		}
+
+		private Frame query(
+				final Frame frame, final Function<Frame, Stream<Value>> mapper,
+				final int offset, final int limit
+		) {
+
+			final Predicate<Frame> filter=f -> f.value(RDF.TYPE).filter(Employee::equals).isPresent();
+
+			final Map<Value, Frame> index=resources.stream().filter(filter).collect(toMap(
+					Frame::focus, f -> frame(f.focus()).string(RDFS.LABEL, f.label())
+			));
+
+			return frame.frames(Engine.terms, resources.stream()
+
+					.filter(filter)
+					.flatMap(mapper)
+
+					.collect(groupingBy(identity(), counting()))
+					.entrySet().stream()
+
+					.sorted(Map.Entry.<Value, Long>comparingByValue().reversed()
+							.thenComparing(comparingByKey(Values::compare))
+					)
+
+					.skip(offset)
+					.limit(limit == 0 ? Long.MAX_VALUE : limit)
+
+					.map(entry -> new SimpleImmutableEntry<>(
+							index.getOrDefault(entry.getKey(), frame(entry.getKey())),
+							entry.getValue()
+					))
+
+					.map(entry -> frame(bnode())
+							.frame(Engine.value, entry.getKey())
+							.integer(Engine.count, entry.getValue())
+					)
+
+			);
+		}
+
+
+		@Test void testEmptyResultSet() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
+
+					field(RDF.TYPE, filter(all(RDF.NIL))), emptyList(), 0, 0
+
+			))).isEmpty());
+		}
+
+		@Test void testEmptyProjection() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
+
+					filter(clazz(Employee)), emptyList(), 0, 0
+
+			))).hasValueSatisfying(frame -> assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), f -> Stream.of(f.focus()), 0, 0))
+
+			));
+		}
+
+
+		@Test void testFiltered() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
+
+					and(
+							filter(clazz(Employee)),
+							filter(field(seniority, minInclusive(literal(3)))),
+							field(seniority)
+					),
+
+					singletonList(seniority),
+
+					0, 0
+
+			))).hasValueSatisfying(frame -> assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), f -> Optional.of(f)
+							.filter(v -> v.integer(seniority)
+									.filter(s -> s.compareTo(BigInteger.valueOf(3)) >= 0)
+									.isPresent()
+							)
+							.map(v -> v.values(seniority))
+							.orElseGet(Stream::empty)
+					))
+
+			));
+
+		}
+
+		@Test void testRootFiltered() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
+
+					and(filter(all(item("employees/1143"))), field(subordinate)), // !!!
+
+					singletonList(subordinate),
+
+					0, 0
+
+			))).hasValueSatisfying(frame -> assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), f -> Optional.of(f)
+							.filter(v -> v.focus().equals(item("employees/1143"))) // !!!
+							.map(v -> v.values(subordinate))
+							.orElseGet(Stream::empty)
+					))
+
+			));
+		}
+
+		@Test void testTraversingLink() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
+
+					and(
+							filter(clazz(term("Alias"))),
+							link(OWL.SAMEAS, field(supervisor))
+					),
+
+					singletonList(supervisor),
+
+					0, 0
+
+			))).hasValueSatisfying(frame -> assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), v -> v.values(supervisor)))
+
+			));
+		}
+
+
+		@Test void testReportUnknownSteps() {
+			exec(() -> {
+
+				assertThatIllegalArgumentException().isThrownBy(() -> engine().relate(frame(container), terms(
+						field(office),
+						singletonList(unknown),
+						0, 0
+				)));
+
+				assertThatIllegalArgumentException().isThrownBy(() -> engine().relate(frame(container), terms(
+						field(office),
+						asList(office, unknown),
+						0, 0
+				)));
+
+			});
+		}
+
+		@Test void testReportFilteringSteps() {
+			exec(() -> assertThatIllegalArgumentException().isThrownBy(() -> engine().relate(frame(container), terms(
+
+					and(
+							filter(field(office)),
+							field(seniority)
+					),
+
+					singletonList(office),
+
+					0, 0
+			))));
+		}
+
+
 		@Test void testSlice() {
 			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
 
@@ -818,26 +993,11 @@ public abstract class EngineTest {
 
 			))).hasValueSatisfying(frame -> assertThat(frame)
 
-					.isIsomorphicTo(frame(container).frames(Engine.terms, resources.stream()
+					.isIsomorphicTo(query(frame(container), f -> f.values(title), 1, 3))
 
-							.filter(f -> f.value(RDF.TYPE).filter(Employee::equals).isPresent())
-
-							.collect(groupingBy(f -> f.string(title).orElse(""), counting()))
-							.entrySet().stream()
-
-							.sorted(Map.Entry.<String, Long>comparingByValue().reversed().thenComparing(comparingByKey()))
-
-							.skip(1)
-							.limit(3)
-
-							.map(entry -> frame(bnode())
-									.string(Engine.value, entry.getKey())
-									.integer(Engine.count, entry.getValue())
-							)
-
-					))
 			));
 		}
+
 
 	}
 

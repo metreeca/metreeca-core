@@ -75,8 +75,7 @@ import static java.util.stream.Collectors.toMap;
  *
  * <li>rewrites the request body to the assigned IRI and stores it with the assistance of the shared linked data
  * {@linkplain Engine#create(Frame, Shape) engine}; the target collection identified by the request focus item is
- * connected to the newly created resource as {@linkplain Shape#outline(Value...) outlined} in the filtering
- * constraints in the request shape.</li>
+ * connected to the newly created resource according to the filtering constraints in the request shape.</li>
  *
  * </ul>
  *
