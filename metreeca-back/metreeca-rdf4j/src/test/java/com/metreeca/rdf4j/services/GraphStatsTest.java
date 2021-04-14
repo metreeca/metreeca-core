@@ -51,7 +51,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphStatsTest {
 
 	private Collection<Statement> query(final Stats stats) {
-		return new GraphStats(options()).process(Root, stats).model();
+		return new GraphStats(options()).process(Root, stats).model().collect(toList());
 	}
 
 

@@ -134,7 +134,7 @@ public final class Relator extends Delegator {
 			return query(item, shape, request.query()).fold(request::reply, query ->
 					request.reply(response -> engine.relate(frame(item), query)
 
-							.filter(frame -> collection || !frame.model().isEmpty()) // collections are virtual
+							.filter(frame -> collection || !frame.empty()) // collections are virtual
 
 							.map(frame -> response.status(OK)
 									.set(shape(), query.map(new ShapeProbe(collection)))

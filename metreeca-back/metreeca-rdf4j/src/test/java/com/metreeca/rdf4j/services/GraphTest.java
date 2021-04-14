@@ -25,14 +25,15 @@ import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
-import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import static com.metreeca.json.Frame.frame;
@@ -47,62 +48,70 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 
- public final class GraphTest {
+public final class GraphTest {
 
-	 private static final Logger logger=Logger.getLogger(GraphTest.class.getName());
+	private static final Logger logger=Logger.getLogger(GraphTest.class.getName());
 
-	 private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
-			 .map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
-			 .collect(joining("\n"));
-
-
-	 private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
-
-	 private static final Frame data=frame(RDF.NIL).value(RDF.VALUE, RDF.FIRST);
+	private static final String SPARQLPrefixes=Prefixes.entrySet().stream()
+			.map(entry -> "prefix "+entry.getKey()+": <"+entry.getValue()+">")
+			.collect(joining("\n"));
 
 
-	 public static void exec(final Runnable... tasks) {
-		 new Toolbox()
-				 .set(Graph.graph(), () -> new Graph(new SailRepository(new MemoryStore())))
-				 .exec(tasks)
-				 .clear();
-	 }
+	private static final IRI StardogDefault=iri("tag:stardog:api:context:default");
+
+	private static final Frame data=frame(RDF.NIL).value(RDF.VALUE, RDF.FIRST);
 
 
-	 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public static void exec(final Runnable... tasks) {
+		new Toolbox()
+				.set(Graph.graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+				.exec(tasks)
+				.clear();
+	}
 
-	 @Test void testConfigureRequest() {
-		 exec(() -> assertThat(Graph.<Request>query(
 
-				 sparql("\n"
-						 +"construct { \n"
-						 +"\n"
-						 +"\t?this\n"
-						 +"\t\t:time $time;\n"
-						 +"\t\t:stem $stem;\n"
-						+"\t\t:name $name;\n"
-						+"\t\t:task $task;\n"
-						+"\t\t:base $base;\n"
-						+"\t\t:item $item;\n"
-						+"\t\t:user $user;\n"
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-						+"\t\t:custom $custom.\n"
-						+"\n"
-						+"} where {}\n"
-				),
+	@Test void testConfigureRequest() {
+		exec(() -> assertThat(Graph
 
-				(request, query) -> query.setBinding("custom", literal(123))
+						.<Request>query(
 
-				)
-						.apply(new Request()
+								sparql("\n"
+										+"construct { \n"
+										+"\n"
+										+"\t?this\n"
+										+"\t\t:time $time;\n"
+										+"\t\t:stem $stem;\n"
+										+"\t\t:name $name;\n"
+										+"\t\t:task $task;\n"
+										+"\t\t:base $base;\n"
+										+"\t\t:item $item;\n"
+										+"\t\t:user $user;\n"
+										+"\t\t:custom $custom.\n"
+										+"\n"
+										+"} where {}\n"
+								),
+
+								(request, query) -> query.setBinding("custom", literal(123))
+
+						)
+
+						.apply(
+
+								new Request()
 
 										.method(Request.POST)
 										.base(Base)
 										.path("/test/request"),
 
-								data
+								frame(iri(Base, "/test/request"))
+										.value(RDF.VALUE, RDF.NIL)
 
-						).model()
+						)
+
+						.model().collect(toList())
+
 				)
 
 						.as("bindings configured")
@@ -123,37 +132,40 @@ import static java.util.stream.Collectors.toList;
 						.hasStatement(item("test/request"), term("custom"), literal(123))
 
 						.as("existing statements forwarded")
-						.hasSubset(data.model())
+						.hasSubset(statement(iri(Base, "/test/request"), RDF.VALUE, RDF.NIL))
 
 		);
 	}
 
 	@Test void testConfigureResponse() {
-		exec(() -> assertThat(Graph.<Response>query(
+		exec(() -> assertThat(Graph
 
-				sparql("\n"
-						+"construct { \n"
-						+"\n"
-						+"\t?this\n"
-						+"\t\t:time $time;\n"
-						+"\t\t:stem $stem;\n"
-						+"\t\t:name $name;\n"
-						+"\t\t:task $task;\n"
-						+"\t\t:base $base;\n"
-						+"\t\t:item $item;\n"
-						+"\t\t:user $user;\n"
-						+"\t\t:code $code;\n"
+						.<Response>query(
 
-						+"\t\t:custom $custom.\n"
-						+"\n"
-						+"} where {}\n"
-				),
+								sparql("\n"
+										+"construct { \n"
+										+"\n"
+										+"\t?this\n"
+										+"\t\t:time $time;\n"
+										+"\t\t:stem $stem;\n"
+										+"\t\t:name $name;\n"
+										+"\t\t:task $task;\n"
+										+"\t\t:base $base;\n"
+										+"\t\t:item $item;\n"
+										+"\t\t:user $user;\n"
+										+"\t\t:code $code;\n"
+										+"\t\t:custom $custom.\n"
+										+"\n"
+										+"} where {}\n"
+								),
 
-				(request, query) -> query.setBinding("custom", literal(123))
+								(request, query) -> query.setBinding("custom", literal(123))
 
-				)
+						)
 
-						.apply(new Response(new Request()
+						.apply(
+
+								new Response(new Request()
 
 										.method(Request.POST)
 										.base(Base)
@@ -162,9 +174,10 @@ import static java.util.stream.Collectors.toList;
 										.status(Response.OK)
 										.header("Location", Root+"test/response"),
 
-								data
+								frame(iri(Base, "/test/request"))
+										.value(RDF.VALUE, RDF.NIL)
 
-						).model()
+						).model().collect(toList())
 				)
 
 						.as("bindings configured")
@@ -186,11 +199,13 @@ import static java.util.stream.Collectors.toList;
 				.hasStatement(item("test/response"), term("custom"), literal(123))
 
 				.as("existing statements forwarded")
-				.hasSubset(data.model())
+				.hasSubset(statement(iri(Base, "/test/request"), RDF.VALUE, RDF.NIL))
 
 		);
 	}
 
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public static Model model(final Resource... contexts) {
 		return service(Graph.graph()).query(connection -> { return export(connection, contexts); });
@@ -198,10 +213,6 @@ import static java.util.stream.Collectors.toList;
 
 	public static Model model(final String sparql) {
 		return service(Graph.graph()).query(connection -> { return construct(connection, sparql); });
-	}
-
-	static List<Map<String, Value>> tuples(final String sparql) {
-		return service(Graph.graph()).query(connection -> { return select(connection, sparql); });
 	}
 
 
@@ -233,39 +244,6 @@ import static java.util.stream.Collectors.toList;
 	}
 
 
-	static List<Map<String, Value>> select(final RepositoryConnection connection, final String sparql) {
-		try {
-
-			logger.info("evaluating SPARQL query\n\n\t"
-					+indent(sparql)+(sparql.endsWith("\n") ? "" : "\n"));
-
-			final List<Map<String, Value>> tuples=new ArrayList<>();
-
-			connection
-					.prepareTupleQuery(QueryLanguage.SPARQL, sparql(sparql), Base)
-					.evaluate(new AbstractTupleQueryResultHandler() {
-						@Override public void handleSolution(final BindingSet bindings) {
-
-							final Map<String, Value> tuple=new LinkedHashMap<>();
-
-							for (final Binding binding : bindings) {
-								tuple.put(binding.getName(), binding.getValue());
-							}
-
-							tuples.add(tuple);
-
-						}
-					});
-
-			return tuples;
-
-		} catch ( final MalformedQueryException e ) {
-
-			throw new MalformedQueryException(e.getMessage()+"----\n\n\t"+indent(sparql));
-
-		}
-	}
-
 	static Model construct(final RepositoryConnection connection, final String sparql) {
 		try {
 
@@ -286,7 +264,6 @@ import static java.util.stream.Collectors.toList;
 
 		}
 	}
-
 
 	public static Model export(final RepositoryConnection connection, final Resource... contexts) {
 

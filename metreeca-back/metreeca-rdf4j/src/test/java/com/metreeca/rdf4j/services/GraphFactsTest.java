@@ -106,7 +106,7 @@ final class GraphFactsTest {
 	private Collection<Statement> query(final Resource root, final Shape shape) {
 		return service(graph()).query(connection -> new GraphItems(options()).process(root, items(shape))
 
-				.statements()
+				.model()
 
 				// ;(virtuoso) counts reported as xsd:int // !!! review dependency
 

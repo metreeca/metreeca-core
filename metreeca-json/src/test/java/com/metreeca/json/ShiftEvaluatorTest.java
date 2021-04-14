@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shifts.Alt.alt;
 import static com.metreeca.json.shifts.Seq.seq;
@@ -30,7 +31,6 @@ import static com.metreeca.json.shifts.Seq.seq;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toCollection;
 
 final class ShiftEvaluatorTest {
@@ -44,7 +44,7 @@ final class ShiftEvaluatorTest {
 
 
 	private Set<Value> apply(final Shift shift) {
-		return shift.map(new ShiftEvaluator(singleton(x), asList(
+		return shift.map(new ShiftEvaluator(frame(x, asList(
 
 				statement(x, p, y),
 				statement(y, p, literal(1)),
@@ -54,7 +54,7 @@ final class ShiftEvaluatorTest {
 				statement(z, p, literal(3)),
 				statement(z, q, literal(4))
 
-		))).collect(toCollection(LinkedHashSet::new));
+		)))).map(Frame::focus).collect(toCollection(LinkedHashSet::new));
 	}
 
 

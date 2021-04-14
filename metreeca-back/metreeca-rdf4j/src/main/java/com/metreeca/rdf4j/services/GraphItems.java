@@ -129,42 +129,32 @@ final class GraphItems extends GraphFacts {
 
 					if ( match != null ) {
 
-						if ( focus.isResource() && !match.equals(focus) ) {
-							models.compute(focus, (key, value) -> {
+						models.compute(match, (key, value) -> {
 
-								final Collection<Statement> model=value != null ? value : new LinkedHashSet<>();
+							final Collection<Statement> model=value != null ? value : new LinkedHashSet<>();
 
-								model.add(statement((Resource)focus, Shape.Contains, match));
+							template.forEach(statement -> {
 
-								return model;
+								final Resource subject=statement.getSubject();
+								final Value object=statement.getObject();
+
+								final Value source=subject instanceof BNode
+										? bindings.getValue(principal(((BNode)subject).getID(),
+										bindings.getBindingNames()))
+										: subject;
+
+								final Value target=object instanceof BNode
+										? bindings.getValue(principal(((BNode)object).getID(),
+										bindings.getBindingNames()))
+										: object;
+
+								if ( source instanceof Resource && target != null ) {
+									model.add(statement((Resource)source, statement.getPredicate(), target));
+								}
 
 							});
-						}
 
-						template.forEach(statement -> {
-
-							final Resource subject=statement.getSubject();
-							final Value object=statement.getObject();
-
-							final Value source=subject instanceof BNode
-									? bindings.getValue(principal(((BNode)subject).getID(), bindings.getBindingNames()))
-									: subject;
-
-							final Value target=object instanceof BNode
-									? bindings.getValue(principal(((BNode)object).getID(), bindings.getBindingNames()))
-									: object;
-
-							if ( source instanceof Resource && target != null ) {
-								models.compute(match, (key, value) -> {
-
-									final Collection<Statement> model=value != null ? value : new LinkedHashSet<>();
-
-									model.add(statement((Resource)source, statement.getPredicate(), target));
-
-									return model;
-
-								});
-							}
+							return model;
 
 						});
 

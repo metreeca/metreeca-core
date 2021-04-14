@@ -16,10 +16,10 @@
 
 package com.metreeca.rest.services;
 
-import com.metreeca.json.Frame;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.*;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +28,8 @@ import java.util.*;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.FrameAssert.assertThat;
+import static com.metreeca.json.Order.decreasing;
+import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.queries.Items.items;
@@ -38,6 +40,7 @@ import static com.metreeca.json.shapes.Clazz.clazz;
 import static com.metreeca.json.shapes.Datatype.datatype;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.filter;
+import static com.metreeca.json.shapes.Link.link;
 import static com.metreeca.json.shapes.MaxInclusive.maxInclusive;
 import static com.metreeca.json.shapes.MinInclusive.minInclusive;
 
@@ -45,9 +48,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
+import static java.util.Comparator.comparing;
 import static java.util.Map.Entry.comparingByKey;
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.*;
 
 public abstract class EngineTest {
 
@@ -612,7 +615,7 @@ public abstract class EngineTest {
 
 				// in order to support vitual containers, related responds with an empty frame for unknown resources
 
-				assertThat(engine().relate(frame(resource), items(EmployeeShape)).map(Frame::model)).hasValue(emptySet());
+				assertThat(engine().relate(frame(resource), items(EmployeeShape)).map(frame -> frame.model().collect(toSet()))).hasValue(emptySet());
 
 			});
 		}
@@ -698,6 +701,107 @@ public abstract class EngineTest {
 			))).hasValue(frame(container).frames(Contains, resources.stream()
 					.filter(frame -> frame.string(title).filter("Sales Rep"::equals).isPresent())
 			)));
+		}
+
+
+		@Test void testSortingDefault() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
+
+					EmployeeShape
+
+			)).map(frame ->
+
+					frame.frames(Contains).collect(toList())
+
+			)).hasValue(resources.stream()
+					.filter(frame -> frame.value(RDF.TYPE).filter(Employee::equals).isPresent())
+					.sorted(comparing(Frame::focus, Values::compare))
+					.collect(toList())
+			));
+		}
+
+		@Test void testSortingCustomOnItem() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
+
+					EmployeeShape, singletonList(decreasing())
+
+			)).map(frame ->
+
+					frame.frames(Contains).collect(toList())
+
+			)).hasValue(resources.stream()
+					.filter(frame -> frame.value(RDF.TYPE).filter(Employee::equals).isPresent())
+					.sorted(comparing(Frame::focus, Values::compare).reversed())
+					.collect(toList())
+			));
+		}
+
+		@Test void testSortingCustomIncreasing() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
+
+					EmployeeShape, singletonList(increasing(RDFS.LABEL))
+
+			)).map(frame ->
+
+					frame.frames(Contains).collect(toList())
+
+			)).hasValue(resources.stream()
+					.filter(frame -> frame.value(RDF.TYPE).filter(Employee::equals).isPresent())
+					.sorted(comparing(frame -> frame.string(RDFS.LABEL).orElse("")))
+					.collect(toList())
+			));
+		}
+
+		@Test void testSortingCustomDecreasing() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
+
+					EmployeeShape, singletonList(decreasing(RDFS.LABEL))
+
+			)).map(frame ->
+
+					frame.frames(Contains).collect(toList())
+
+			)).hasValue(resources.stream()
+					.filter(frame -> frame.value(RDF.TYPE).filter(Employee::equals).isPresent())
+					.sorted(Comparator.<Frame, String>comparing(frame -> frame.string(RDFS.LABEL).orElse("")).reversed())
+					.collect(toList())
+			));
+		}
+
+		@Test void testSortingCustomMultiple() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
+
+					EmployeeShape, asList(increasing(office), increasing(RDFS.LABEL))
+
+			)).map(frame ->
+
+					frame.frames(Contains).collect(toList())
+
+			)).hasValue(resources.stream()
+					.filter(frame -> frame.value(RDF.TYPE).filter(Employee::equals).isPresent())
+					.sorted(Comparator
+							.<Frame, Value>comparing(frame -> frame.value(office).orElse(null), Values::compare)
+							.thenComparing(frame -> frame.string(RDFS.LABEL).orElse(""))
+					)
+					.collect(toList())
+			));
+		}
+
+		@Test void testSortingWithLinks() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
+
+					and(filter(clazz(Alias)), link(OWL.SAMEAS, field(code))), singletonList(decreasing(code))
+
+			)).map(frame ->
+
+					frame.frames(Contains).map(f -> frame(f.focus())).collect(toList())
+
+			)).hasValue(resources.stream()
+					.filter(frame -> frame.value(RDF.TYPE).filter(Alias::equals).isPresent())
+					.sorted(comparing(Frame::focus, Values::compare).reversed())
+					.map(frame -> frame(frame.focus()))
+					.collect(toList())
+			));
 		}
 
 	}

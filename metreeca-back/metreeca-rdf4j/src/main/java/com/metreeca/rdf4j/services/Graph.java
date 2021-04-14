@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.*;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.rest.Toolbox.service;
@@ -39,6 +40,7 @@ import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.MILLIS;
+import static java.util.stream.Collectors.toCollection;
 
 
 /**
@@ -113,15 +115,15 @@ public final class Graph implements AutoCloseable {
 
 		return query.isEmpty() ? (message, frame) -> frame : (message, frame) -> graph.query(connection -> {
 
-			final ArrayList<Statement> delta=new ArrayList<>();
+			final ArrayList<Statement> model=frame.model().collect(toCollection(ArrayList::new));
 
 			configure(
 					message, connection.prepareGraphQuery(SPARQL, query, message.request().base()), customizers
 			).evaluate(
-					new StatementCollector(delta)
+					new StatementCollector(model)
 			);
 
-			return frame.statements(delta);
+			return frame(frame.focus(), model);
 
 		});
 	}

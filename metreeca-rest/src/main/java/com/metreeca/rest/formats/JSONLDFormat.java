@@ -257,7 +257,8 @@ public final class JSONLDFormat extends Format<Frame> {
 						final Shape shape=message.get(shape());
 						final Map<String, String> keywords=service(keywords());
 
-						final Collection<Statement> model=scan(shape, focus, value.model()).fold(trace -> {
+						final Collection<Statement> model=
+								scan(shape, focus, value.model().collect(toList())).fold(trace -> {
 
 							service(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
 

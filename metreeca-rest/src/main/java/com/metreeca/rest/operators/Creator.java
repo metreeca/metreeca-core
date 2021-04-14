@@ -26,10 +26,10 @@ import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.*;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.format;
@@ -177,7 +177,7 @@ public final class Creator extends Delegator {
 
 			return handler.handle(request
 					.path(request.path()+name)
-					.map(jsonld(), frame -> frame(target, rewrite(target, source, frame.model())))
+					.map(jsonld(), frame -> frame(target, rewrite(target, source, frame.model()).collect(toList())))
 			);
 		};
 	}
@@ -212,8 +212,8 @@ public final class Creator extends Delegator {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Collection<Statement> rewrite(final IRI target, final IRI source, final Collection<Statement> model) {
-		return model.stream().map(statement -> rewrite(target, source, statement)).collect(toList());
+	private Stream<Statement> rewrite(final IRI target, final IRI source, final Stream<Statement> model) {
+		return model.map(statement -> rewrite(target, source, statement));
 	}
 
 	private Statement rewrite(final IRI target, final IRI source, final Statement statement) {

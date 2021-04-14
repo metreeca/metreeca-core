@@ -18,60 +18,42 @@ package com.metreeca.json;
 
 import com.metreeca.json.shifts.*;
 
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.metreeca.json.Values.traverse;
+import static java.util.function.Function.identity;
 
-import static java.util.stream.Collectors.toCollection;
+public final class ShiftEvaluator extends Shift.Probe<Stream<Frame>> {
 
-public final class ShiftEvaluator extends Shift.Probe<Stream<Value>> {
-
-	private final Collection<Value> values;
-	private final Collection<Statement> statements;
+	private final Frame frame;
 
 
-	ShiftEvaluator(final Collection<Value> values, final Collection<Statement> statements) {
-		this.values=values;
-		this.statements=statements;
+	ShiftEvaluator(final Frame frame) {
+		this.frame=frame;
 	}
 
 
-	@Override public Stream<Value> probe(final Step step) {
-		return traverse(step.iri(),
-
-				direct -> statements.stream()
-						.filter(s -> values.contains(s.getSubject()) && direct.equals(s.getPredicate()))
-						.map(Statement::getObject),
-
-				inverse -> statements.stream()
-						.filter(s -> inverse.equals(s.getPredicate()) && values.contains(s.getObject()))
-						.map(Statement::getSubject)
-
-		);
+	@Override public Stream<Frame> probe(final Step step) {
+		return frame.frames(step.iri());
 	}
 
-	@Override public Stream<Value> probe(final Seq seq) {
+	@Override public Stream<Frame> probe(final Seq seq) {
 
-		Collection<Value> focus=values;
+		Function<Stream<Frame>, Stream<Frame>> pipe=identity();
 
 		for (final Path path : seq.paths()) {
-			focus=path.map(new ShiftEvaluator(focus, statements)).collect(toCollection(LinkedHashSet::new));
+			pipe=pipe.andThen(frames -> frames.flatMap(frame1 -> path.map(new ShiftEvaluator(frame1))));
 		}
 
-		return focus.stream();
+		return pipe.apply(Stream.of(frame));
 	}
 
-	@Override public Stream<Value> probe(final Alt alt) {
-		return alt.paths().stream().flatMap(path -> path.map(new ShiftEvaluator(values, statements)));
+	@Override public Stream<Frame> probe(final Alt alt) {
+		return alt.paths().stream().flatMap(path -> path.map(this));
 	}
 
 
-	@Override public Stream<Value> probe(final Shift shift) {
+	@Override public Stream<Frame> probe(final Shift shift) {
 		throw new UnsupportedOperationException(shift.toString());
 	}
 

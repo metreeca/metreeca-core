@@ -17,11 +17,16 @@
 package com.metreeca.json;
 
 import org.assertj.core.api.AbstractAssert;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.util.Models;
 
+import java.util.List;
+
 import static com.metreeca.json.Values.indent;
 import static com.metreeca.json.ValuesTest.encode;
+
+import static java.util.stream.Collectors.toList;
 
 
 public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
@@ -44,8 +49,9 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 
 		isNotNull();
 
-		if ( !actual.model().isEmpty() ) {
-			failWithMessage("expected frame to be empty but was <\n%s\n>", indent(encode(actual.model())));
+		if ( !actual.empty() ) {
+			failWithMessage("expected frame to be empty but was <\n%s\n>",
+					indent(encode(actual.model().collect(toList()))));
 		}
 
 		return this;
@@ -55,7 +61,7 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 
 		isNotNull();
 
-		if ( actual.model().isEmpty() ) {
+		if ( !actual.empty() ) {
 			failWithMessage("expected frame not to be empty");
 		}
 
@@ -71,10 +77,13 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 
 		isNotNull();
 
-		if ( !Models.isomorphic(actual.model(), frame.model()) ) {
+		final List<Statement> a=actual.model().collect(toList());
+		final List<Statement> f=frame.model().collect(toList());
+
+		if ( !Models.isomorphic(a, f) ) {
 			failWithMessage(
 					"expected frame <\n%s\n> to be isomorphic to <\n%s\n>",
-					indent(encode(new TreeModel(actual.model()))), indent(encode(new TreeModel(frame.model())))
+					indent(encode(new TreeModel(a))), indent(encode(new TreeModel(f)))
 			);
 		}
 

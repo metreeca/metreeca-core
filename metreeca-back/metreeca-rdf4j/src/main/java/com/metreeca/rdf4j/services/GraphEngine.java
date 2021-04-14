@@ -22,8 +22,7 @@ import com.metreeca.rest.Config;
 import com.metreeca.rest.Setup;
 import com.metreeca.rest.services.Engine;
 
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.*;
 
 import java.util.Optional;
 
@@ -42,6 +41,11 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	private final Graph graph=service(graph());
 
 
+	private Iterable<Statement> statements(final Frame frame) {
+		return () -> frame.model().iterator();
+	}
+
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	@Override public Optional<Frame> create(final Frame frame, final Shape shape) {
@@ -53,7 +57,7 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 
 				.map(item -> {
 
-					connection.add(frame.model());
+					connection.add(statements(frame));
 
 					return frame;
 
@@ -74,8 +78,8 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 
 				.map(current -> {
 
-					connection.remove(current.model());
-					connection.add(frame.model());
+					connection.remove(statements(current));
+					connection.add(statements(frame));
 
 					return frame;
 
@@ -92,7 +96,7 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 
 				.map(current -> {
 
-					connection.remove(current.model());
+					connection.remove(statements(current));
 
 					return current;
 
