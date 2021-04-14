@@ -51,33 +51,33 @@ import static java.util.stream.Collectors.groupingBy;
 
 public abstract class EngineTest {
 
-	private static final IRI base=iri("http://example.com/");
-	private static final IRI term=item("/terms/");
+	protected static final IRI base=iri("http://example.com/");
+	protected static final IRI term=item("/terms/");
 
-	private static IRI item(final String name) {
+	protected static IRI item(final String name) {
 		return iri(base, name);
 	}
 
-	private static IRI term(final String name) {
+	protected static IRI term(final String name) {
 		return iri(term, name);
 	}
 
 
-	private static final IRI Alias=item("Alias");
-	private static final IRI Employee=item("Employee");
+	protected static final IRI Alias=term("Alias");
+	protected static final IRI Employee=term("Employee");
 
-	private static final IRI code=term("code");
-	private static final IRI forename=term("forename");
-	private static final IRI surname=term("surname");
-	private static final IRI email=term("email");
-	private static final IRI title=term("title");
-	private static final IRI seniority=term("seniority");
-	private static final IRI office=term("office");
-	private static final IRI supervisor=term("supervisor");
-	private static final IRI subordinate=term("subordinate");
+	protected static final IRI code=term("code");
+	protected static final IRI forename=term("forename");
+	protected static final IRI surname=term("surname");
+	protected static final IRI email=term("email");
+	protected static final IRI title=term("title");
+	protected static final IRI seniority=term("seniority");
+	protected static final IRI office=term("office");
+	protected static final IRI supervisor=term("supervisor");
+	protected static final IRI subordinate=term("subordinate");
 
 
-	private static final Shape EmployeeShape=and(
+	protected static final Shape EmployeeShape=and(
 
 			filter(clazz(Employee)),
 
@@ -104,10 +104,10 @@ public abstract class EngineTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final IRI container=item("/employees/");
-	private static final IRI resource=iri(container, "/1370");
+	protected static final IRI container=item("/employees/");
+	protected static final IRI resource=iri(container, "/1370");
 
-	private static final Frame delta=frame(resource) // !!! merge original frame
+	protected static final Frame delta=frame(resource) // !!! merge original frame
 			.value(RDF.TYPE, Employee)
 			.string(forename, "Tino")
 			.string(surname, "Faussone")
@@ -115,7 +115,7 @@ public abstract class EngineTest {
 			.string(title, "Sales Rep")
 			.integer(seniority, 1);
 
-	private static final Collection<Frame> resources=unmodifiableList(asList(
+	protected static final Collection<Frame> resources=unmodifiableList(asList(
 
 			frame(item("/aliases/1002"))
 					.value(RDF.TYPE, Alias)
@@ -528,7 +528,7 @@ public abstract class EngineTest {
 	protected abstract void exec(final Runnable... tasks);
 
 
-	private Runnable dataset() {
+	protected Runnable dataset() {
 		return () -> {
 
 			final Engine engine=engine();
@@ -636,11 +636,11 @@ public abstract class EngineTest {
 	@Nested final class RelateItems {
 
 		@Test void testResource() {
-			exec(dataset(), () -> assertThat(
+			exec(dataset(), () -> assertThat(engine().relate(frame(resource), items(
 
-					engine().relate(frame(resource), items(EmployeeShape))
+					EmployeeShape
 
-			).hasValue(resources.stream()
+			))).hasValue(resources.stream()
 					.filter(frame -> frame.focus().equals(resource))
 					.findFirst()
 					.orElse(null)
@@ -658,14 +658,44 @@ public abstract class EngineTest {
 		}
 
 
+		@Test void testEmptyShape() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(resource), items(
+
+					and()
+
+			))).hasValueSatisfying(frame -> assertThat(frame)
+					.isEmpty()
+			));
+		}
+
+		@Test void testEmptyResultSet() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(resource), items(
+
+					field(RDF.TYPE, filter(all(RDF.NIL)))
+
+			))).hasValueSatisfying(frame -> assertThat(frame)
+					.isEmpty()
+			));
+		}
+
+		@Test void testEmptyProjection() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
+
+					filter(clazz(term("Employee")))
+
+			))).hasValue(frame(container).frames(Contains, resources.stream()
+					.filter(frame -> frame.value(RDF.TYPE).filter(Employee::equals).isPresent())
+					.map(frame -> frame(frame.focus()))
+			)));
+		}
+
+
 		@Test void testFilter() {
-			exec(dataset(), () -> assertThat(
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), items(
 
-					engine().relate(frame(container), items(and(EmployeeShape,
-							filter(field(title, all(literal("Sales Rep"))))
-					)))
+					and(EmployeeShape, filter(field(title, all(literal("Sales Rep")))))
 
-			).hasValue(frame(container).frames(Contains, resources.stream()
+			))).hasValue(frame(container).frames(Contains, resources.stream()
 					.filter(frame -> frame.string(title).filter("Sales Rep"::equals).isPresent())
 			)));
 		}
@@ -675,11 +705,11 @@ public abstract class EngineTest {
 	@Nested final class RelateTerms {
 
 		@Test void testSlice() {
-			exec(dataset(), () -> assertThat(
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
 
-					engine().relate(frame(container), terms(EmployeeShape, singletonList(title), 1, 3))
+					EmployeeShape, singletonList(title), 1, 3
 
-			).hasValueSatisfying(frame -> assertThat(frame)
+			))).hasValueSatisfying(frame -> assertThat(frame)
 
 					.isIsomorphicTo(frame(container).frames(Engine.terms, resources.stream()
 

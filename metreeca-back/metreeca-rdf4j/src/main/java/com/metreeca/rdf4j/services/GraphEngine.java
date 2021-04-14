@@ -23,12 +23,9 @@ import com.metreeca.rest.Setup;
 import com.metreeca.rest.services.Engine;
 
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
 
-import java.util.Collection;
 import java.util.Optional;
 
-import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Toolbox.service;
@@ -64,11 +61,7 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 	}
 
 	@Override public Optional<Frame> relate(final Frame frame, final Query query) {
-		return Optional
-
-				.of(query.map(new QueryProbe(this, frame.focus())))
-
-				.map(model -> frame(frame.focus(), model));
+		return Optional.of(query.map(new QueryProbe(this, frame.focus())));
 	}
 
 	@Override public Optional<Frame> update(final Frame frame, final Shape shape) {
@@ -76,11 +69,11 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 
 				.of(items(shape).map(new QueryProbe(this, frame.focus())))
 
-				.filter(model -> !model.isEmpty())
+				.filter(current -> !current.empty())
 
-				.map(model -> {
+				.map(current -> {
 
-					connection.remove(model);
+					connection.remove(current.model());
 					connection.add(frame.model());
 
 					return frame;
@@ -94,13 +87,13 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 
 				.of(items(shape).map(new QueryProbe(this, frame.focus())))
 
-				.filter(model -> !model.isEmpty())
+				.filter(current -> !current.empty())
 
-				.map(model -> {
+				.map(current -> {
 
-					connection.remove(model);
+					connection.remove(current.model());
 
-					return frame(frame.focus(), model);
+					return current;
 
 				})
 		);
@@ -109,7 +102,7 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private static final class QueryProbe extends Query.Probe<Collection<Statement>> {
+	private static final class QueryProbe extends Query.Probe<Frame> {
 
 		private final Config config;
 		private final Resource resource;
@@ -121,15 +114,15 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 		}
 
 
-		@Override public Collection<Statement> probe(final Items items) {
+		@Override public Frame probe(final Items items) {
 			return new GraphItems(config).process(resource, items);
 		}
 
-		@Override public Collection<Statement> probe(final Terms terms) {
+		@Override public Frame probe(final Terms terms) {
 			return new GraphTerms(config).process(resource, terms);
 		}
 
-		@Override public Collection<Statement> probe(final Stats stats) {
+		@Override public Frame probe(final Stats stats) {
 			return new GraphStats(config).process(resource, stats);
 		}
 

@@ -16,6 +16,7 @@
 
 package com.metreeca.rdf4j.services;
 
+import com.metreeca.json.Frame;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Stats;
 import com.metreeca.rest.Config;
@@ -30,6 +31,7 @@ import org.eclipse.rdf4j.query.BindingSet;
 import java.math.BigInteger;
 import java.util.*;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.is;
@@ -51,7 +53,7 @@ final class GraphStats extends GraphFacts {
 	}
 
 
-	Collection<Statement> process(final Resource resource, final Stats stats) {
+	Frame process(final Resource resource, final Stats stats) {
 
 		final Shape shape=stats.shape();
 		final List<IRI> path=stats.path();
@@ -203,7 +205,7 @@ final class GraphStats extends GraphFacts {
 				.reduce((x, y) -> compare(x, y) > 0 ? x : y)
 				.ifPresent(max -> model.add(statement(resource, Engine.max, max)));
 
-		return model;
+		return frame(resource, model);
 	}
 
 }

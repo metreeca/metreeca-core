@@ -16,6 +16,7 @@
 
 package com.metreeca.rdf4j.services;
 
+import com.metreeca.json.Frame;
 import com.metreeca.json.Shape;
 import com.metreeca.json.queries.Terms;
 import com.metreeca.rest.Config;
@@ -29,6 +30,7 @@ import org.eclipse.rdf4j.query.*;
 import java.math.BigInteger;
 import java.util.*;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
@@ -49,7 +51,7 @@ final class GraphTerms extends GraphFacts {
 	}
 
 
-	Collection<Statement> process(final Resource resource, final Terms terms) {
+	Frame process(final Resource resource, final Terms terms) {
 
 		final Shape shape=terms.shape();
 		final List<IRI> path=terms.path();
@@ -137,7 +139,7 @@ final class GraphTerms extends GraphFacts {
 			});
 		})));
 
-		return model;
+		return frame(resource, model);
 	}
 
 }

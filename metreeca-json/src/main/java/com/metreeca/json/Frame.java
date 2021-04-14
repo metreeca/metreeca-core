@@ -136,6 +136,11 @@ public final class Frame {
 	}
 
 
+	public boolean empty() {
+		return model.isEmpty();
+	}
+
+
 	public Optional<String> label() {
 		return string(Labels);
 	}

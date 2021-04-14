@@ -16,8 +16,7 @@
 
 package com.metreeca.rdf4j.services;
 
-import com.metreeca.json.Order;
-import com.metreeca.json.Shape;
+import com.metreeca.json.*;
 import com.metreeca.json.queries.Items;
 import com.metreeca.json.shapes.*;
 import com.metreeca.rest.Config;
@@ -32,6 +31,7 @@ import org.eclipse.rdf4j.query.BindingSet;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.rdf4j.SPARQLScribe.*;
@@ -42,6 +42,7 @@ import static com.metreeca.rest.Xtream.task;
 
 import static org.eclipse.rdf4j.model.util.Values.triple;
 
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 
 final class GraphItems extends GraphFacts {
@@ -56,7 +57,7 @@ final class GraphItems extends GraphFacts {
 	}
 
 
-	Collection<Statement> process(final Resource resource, final Items items) {
+	Frame process(final Resource resource, final Items items) {
 
 		final Shape shape=items.shape();
 		final List<Order> orders=items.orders();
@@ -76,7 +77,7 @@ final class GraphItems extends GraphFacts {
 		final Shape follow=and(orders.stream().map(Order::path).map(path -> path(convey, path)));
 		final Collection<Triple> template=convey.map(new TemplateProbe(root)).collect(toList());
 
-		final Collection<Statement> model=new LinkedHashSet<>();
+		final Map<Value, Collection<Statement>> models=new LinkedHashMap<>();
 
 		evaluate(() -> graph.query(task(connection -> {
 			connection.prepareTupleQuery(compile(() -> code(list(
@@ -129,7 +130,15 @@ final class GraphItems extends GraphFacts {
 					if ( match != null ) {
 
 						if ( !match.equals(resource) ) {
-							model.add(statement(resource, Shape.Contains, match));
+							models.compute(resource, (key, value) -> {
+
+								final Collection<Statement> model=value != null ? value : new LinkedHashSet<>();
+
+								model.add(statement(resource, Shape.Contains, match));
+
+								return model;
+
+							});
 						}
 
 						template.forEach(statement -> {
@@ -146,7 +155,15 @@ final class GraphItems extends GraphFacts {
 									: object;
 
 							if ( source instanceof Resource && target != null ) {
-								model.add(statement((Resource)source, statement.getPredicate(), target));
+								models.compute(match, (key, value) -> {
+
+									final Collection<Statement> model=value != null ? value : new LinkedHashSet<>();
+
+									model.add(statement((Resource)source, statement.getPredicate(), target));
+
+									return model;
+
+								});
 							}
 
 						});
@@ -158,7 +175,22 @@ final class GraphItems extends GraphFacts {
 			});
 		})));
 
-		return model;
+		return frame(resource, models.getOrDefault(resource, emptySet()))
+
+				.objects(Shape.Contains, models.entrySet().stream()
+
+						.filter(entry -> !entry.getKey().equals(resource))
+
+						.map(entry -> {
+
+							final Value focus=entry.getKey();
+							final Collection<Statement> model=entry.getValue();
+
+							return focus.isResource() ? frame((Resource)focus, model) : focus;
+
+						})
+
+				);
 	}
 
 

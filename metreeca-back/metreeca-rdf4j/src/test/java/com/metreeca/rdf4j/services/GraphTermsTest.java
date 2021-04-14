@@ -51,7 +51,7 @@ import static java.util.stream.Collectors.toList;
 final class GraphTermsTest {
 
 	private Collection<Statement> query(final Terms terms) {
-		return new GraphTerms(options()).process(Values.Root, terms);
+		return new GraphTerms(options()).process(Values.Root, terms).model();
 	}
 
 
