@@ -44,7 +44,7 @@ final class ShiftEvaluatorTest {
 
 
 	private Set<Value> apply(final Shift shift) {
-		return shift.apply(singleton(x), asList(
+		return shift.map(new ShiftEvaluator(singleton(x), asList(
 
 				statement(x, p, y),
 				statement(y, p, literal(1)),
@@ -54,7 +54,7 @@ final class ShiftEvaluatorTest {
 				statement(z, p, literal(3)),
 				statement(z, q, literal(4))
 
-		)).collect(toCollection(LinkedHashSet::new));
+		))).collect(toCollection(LinkedHashSet::new));
 	}
 
 

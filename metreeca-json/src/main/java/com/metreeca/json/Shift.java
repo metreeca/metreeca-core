@@ -18,47 +18,14 @@ package com.metreeca.json;
 
 import com.metreeca.json.shifts.*;
 
-import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.Value;
-
-import java.util.Collection;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Focus shift operator.
  *
- * <p>Describes how to transform a set of focus values into a derived set.</p>
+ * <p>Describes how to navigate from a value to a set of linked values.</p>
  */
 public abstract class Shift {
-
-	/**
-	 * Applies this shift operator to a set of focus values.
-	 *
-	 * @param values     the focus values
-	 * @param statements the model statements to be used as context for the shift operation
-	 *
-	 * @return a stream of values derived by applying this shift operator to the set of focus {@code values} in the
-	 * context of the model {@code statements}
-	 *
-	 * @throws NullPointerException if either {@code values} or {@code statements} is null or contains null elements
-	 */
-	public Stream<Value> apply(final Collection<Value> values, final Collection<Statement> statements) {
-
-		if ( values == null || values.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null values");
-		}
-
-		if ( statements == null || statements.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null statements");
-		}
-
-		return map(new ShiftEvaluator(values, statements));
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	public abstract <V> V map(final Shift.Probe<V> probe);
 

@@ -43,6 +43,13 @@ import static java.util.stream.Stream.concat;
  */
 public final class Frame {
 
+	private Stream<Value> apply(final Shift shift) {
+		return shift.map(new ShiftEvaluator(singletonList(focus), model));
+	}
+
+
+	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	private static final Path Labels=alt(
 			RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name")
 	);
@@ -592,7 +599,7 @@ public final class Frame {
 			throw new NullPointerException("null shift");
 		}
 
-		return shift.apply(singleton(focus), model)
+		return values(shift)
 				.filter(Value::isLiteral)
 				.map(Literal.class::cast);
 	}
@@ -704,7 +711,7 @@ public final class Frame {
 			throw new NullPointerException("null shift");
 		}
 
-		return shift.apply(singleton(focus), model);
+		return apply(shift);
 	}
 
 
@@ -814,7 +821,7 @@ public final class Frame {
 			throw new NullPointerException("null shift");
 		}
 
-		return shift.apply(singleton(focus), model)
+		return apply(shift)
 				.filter(Value::isResource)
 				.map(value -> frame((Resource)value, model));
 	}

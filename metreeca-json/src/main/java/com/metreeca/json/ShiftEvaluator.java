@@ -60,14 +60,14 @@ public final class ShiftEvaluator extends Shift.Probe<Stream<Value>> {
 		Collection<Value> focus=values;
 
 		for (final Path path : seq.paths()) {
-			focus=path.apply(focus, statements).collect(toCollection(LinkedHashSet::new));
+			focus=path.map(new ShiftEvaluator(focus, statements)).collect(toCollection(LinkedHashSet::new));
 		}
 
 		return focus.stream();
 	}
 
 	@Override public Stream<Value> probe(final Alt alt) {
-		return alt.paths().stream().flatMap(path -> path.apply(values, statements));
+		return alt.paths().stream().flatMap(path -> path.map(new ShiftEvaluator(values, statements)));
 	}
 
 
