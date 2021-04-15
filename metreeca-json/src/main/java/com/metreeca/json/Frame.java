@@ -943,7 +943,7 @@ public final class Frame {
 		notes().ifPresent(notes -> builder.append(" / ").append(notes));
 
 		if ( !traits.isEmpty() ) {
-			builder.append(traits.entrySet().stream()
+			builder.append(' ').append(traits.entrySet().stream()
 					.map(this::format)
 					.map(Values::indent)
 					.collect(joining(",\n\t", "{\n\t", "\n}"))
@@ -954,11 +954,13 @@ public final class Frame {
 	}
 
 	private String format(final Map.Entry<IRI, Collection<Frame>> trait) {
-		return Values.format(trait.getKey())+": "+format(trait.getValue());
+		return Values.format(trait.getKey())+" : "+format(trait.getValue());
 	}
 
 	private String format(final Collection<Frame> values) {
-		return values.stream()
+		return values.isEmpty() ? "[]" // unexpected
+				: values.size() == 1 ? Values.format(values.iterator().next())
+				: values.stream()
 				.map(Frame::format)
 				.map(Values::indent)
 				.collect(joining(",\n\t", "[\n\t", "\n]"));

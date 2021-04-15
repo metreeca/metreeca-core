@@ -38,6 +38,7 @@ import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.*;
 import static com.metreeca.json.queries.Items.items;
+import static com.metreeca.json.queries.Stats.stats;
 import static com.metreeca.json.queries.Terms.terms;
 import static com.metreeca.json.shapes.All.all;
 import static com.metreeca.json.shapes.And.and;
@@ -56,6 +57,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.Comparator.comparing;
 import static java.util.Map.Entry.comparingByKey;
+import static java.util.Map.Entry.comparingByValue;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.*;
 
@@ -115,17 +117,6 @@ public abstract class EngineTest {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	protected static final IRI container=item("/employees/");
-	protected static final IRI resource=iri(container, "/1370");
-
-	protected static final Frame delta=frame(resource) // !!! merge original frame
-			.value(RDF.TYPE, Employee)
-			.string(forename, "Tino")
-			.string(surname, "Faussone")
-			.string(email, "tfaussone@classicmodelcars.com")
-			.string(title, "Sales Rep")
-			.integer(seniority, 1);
-
 	protected static final Collection<Frame> resources=unmodifiableList(asList(
 
 			frame(item("/aliases/1002"))
@@ -134,7 +125,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1002"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Diane Murphy")
+					.values(RDFS.LABEL,
+							literal("Diane Murphy"),
+							literal("Diane Murphy", "en"),
+							literal("Diane Murphy", "it")
+					)
 					.string(code, "1002")
 					.string(forename, "Diane")
 					.string(surname, "Murphy")
@@ -153,7 +148,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1056"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Mary Patterson")
+					.values(RDFS.LABEL,
+							literal("Mary Patterson"),
+							literal("Mary Patterson", "en"),
+							literal("Mary Patterson", "it")
+					)
 					.string(code, "1056")
 					.string(forename, "Mary")
 					.string(surname, "Patterson")
@@ -175,7 +174,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1076"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Jeff Firrelli")
+					.values(RDFS.LABEL,
+							literal("Jeff Firrelli"),
+							literal("Jeff Firrelli", "en"),
+							literal("Jeff Firrelli", "it")
+					)
 					.string(code, "1076")
 					.string(forename, "Jeff")
 					.string(surname, "Firrelli")
@@ -191,7 +194,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1088"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "William Patterson")
+					.values(RDFS.LABEL,
+							literal("William Patterson"),
+							literal("William Patterson", "en"),
+							literal("William Patterson", "it")
+					)
 					.string(code, "1088")
 					.string(forename, "William")
 					.string(surname, "Patterson")
@@ -212,7 +219,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1102"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Gerard Bondur")
+					.values(RDFS.LABEL,
+							literal("Gerard Bondur"),
+							literal("Gerard Bondur", "en"),
+							literal("Gerard Bondur", "it")
+					)
 					.string(code, "1102")
 					.string(forename, "Gerard")
 					.string(surname, "Bondur")
@@ -236,7 +247,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1143"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Anthony Bow")
+					.values(RDFS.LABEL,
+							literal("Anthony Bow"),
+							literal("Anthony Bow", "en"),
+							literal("Anthony Bow", "it")
+					)
 					.string(code, "1143")
 					.string(forename, "Anthony")
 					.string(surname, "Bow")
@@ -260,7 +275,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1165"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Leslie Jennings")
+					.values(RDFS.LABEL,
+							literal("Leslie Jennings"),
+							literal("Leslie Jennings", "en"),
+							literal("Leslie Jennings", "it")
+					)
 					.string(code, "1165")
 					.string(forename, "Leslie")
 					.string(surname, "Jennings")
@@ -276,7 +295,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1166"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Leslie Thompson")
+					.values(RDFS.LABEL,
+							literal("Leslie Thompson"),
+							literal("Leslie Thompson", "en"),
+							literal("Leslie Thompson", "it")
+					)
 					.string(code, "1166")
 					.string(forename, "Leslie")
 					.string(surname, "Thompson")
@@ -292,7 +315,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1188"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Julie Firrelli")
+					.values(RDFS.LABEL,
+							literal("Julie Firrelli"),
+							literal("Julie Firrelli", "en"),
+							literal("Julie Firrelli", "it")
+					)
 					.string(code, "1188")
 					.string(forename, "Julie")
 					.string(surname, "Firrelli")
@@ -308,7 +335,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1216"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Steve Patterson")
+					.values(RDFS.LABEL,
+							literal("Steve Patterson"),
+							literal("Steve Patterson", "en"),
+							literal("Steve Patterson", "it")
+					)
 					.string(code, "1216")
 					.string(forename, "Steve")
 					.string(surname, "Patterson")
@@ -324,7 +355,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1286"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Foon Yue Tseng")
+					.values(RDFS.LABEL,
+							literal("Foon Yue Tseng"),
+							literal("Foon Yue Tseng", "en"),
+							literal("Foon Yue Tseng", "it")
+					)
 					.string(code, "1286")
 					.string(forename, "Foon Yue")
 					.string(surname, "Tseng")
@@ -340,7 +375,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1323"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "George Vanauf")
+					.values(RDFS.LABEL,
+							literal("George Vanauf"),
+							literal("George Vanauf", "en"),
+							literal("George Vanauf", "it")
+					)
 					.string(code, "1323")
 					.string(forename, "George")
 					.string(surname, "Vanauf")
@@ -356,7 +395,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1337"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Loui Bondur")
+					.values(RDFS.LABEL,
+							literal("Loui Bondur"),
+							literal("Loui Bondur", "en"),
+							literal("Loui Bondur", "it")
+					)
 					.string(code, "1337")
 					.string(forename, "Loui")
 					.string(surname, "Bondur")
@@ -372,7 +415,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1370"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Gerard Hernandez")
+					.values(RDFS.LABEL,
+							literal("Gerard Hernandez"),
+							literal("Gerard Hernandez", "en"),
+							literal("Gerard Hernandez", "it")
+					)
 					.string(code, "1370")
 					.string(forename, "Gerard")
 					.string(surname, "Hernandez")
@@ -388,7 +435,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1401"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Pamela Castillo")
+					.values(RDFS.LABEL,
+							literal("Pamela Castillo"),
+							literal("Pamela Castillo", "en"),
+							literal("Pamela Castillo", "it")
+					)
 					.string(code, "1401")
 					.string(forename, "Pamela")
 					.string(surname, "Castillo")
@@ -404,7 +455,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1501"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Larry Bott")
+					.values(RDFS.LABEL,
+							literal("Larry Bott"),
+							literal("Larry Bott", "en"),
+							literal("Larry Bott", "it")
+					)
 					.string(code, "1501")
 					.string(forename, "Larry")
 					.string(surname, "Bott")
@@ -420,7 +475,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1504"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Barry Jones")
+					.values(RDFS.LABEL,
+							literal("Barry Jones"),
+							literal("Barry Jones", "en"),
+							literal("Barry Jones", "it")
+					)
 					.string(code, "1504")
 					.string(forename, "Barry")
 					.string(surname, "Jones")
@@ -436,7 +495,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1611"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Andy Fixter")
+					.values(RDFS.LABEL,
+							literal("Andy Fixter"),
+							literal("Andy Fixter", "en"),
+							literal("Andy Fixter", "it")
+					)
 					.string(code, "1611")
 					.string(forename, "Andy")
 					.string(surname, "Fixter")
@@ -452,7 +515,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1612"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Peter Marsh")
+					.values(RDFS.LABEL,
+							literal("Peter Marsh"),
+							literal("Peter Marsh", "en"),
+							literal("Peter Marsh", "it")
+					)
 					.string(code, "1612")
 					.string(forename, "Peter")
 					.string(surname, "Marsh")
@@ -468,7 +535,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1619"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Tom King")
+					.values(RDFS.LABEL,
+							literal("Tom King"),
+							literal("Tom King", "en"),
+							literal("Tom King", "it")
+					)
 					.string(code, "1619")
 					.string(forename, "Tom")
 					.string(surname, "King")
@@ -484,7 +555,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1621"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Mami Nishi")
+					.values(RDFS.LABEL,
+							literal("Mami Nishi"),
+							literal("Mami Nishi", "en"),
+							literal("Mami Nishi", "it")
+					)
 					.string(code, "1621")
 					.string(forename, "Mami")
 					.string(surname, "Nishi")
@@ -503,7 +578,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1625"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Yoshimi Kato")
+					.values(RDFS.LABEL,
+							literal("Yoshimi Kato"),
+							literal("Yoshimi Kato", "en"),
+							literal("Yoshimi Kato", "it")
+					)
 					.string(code, "1625")
 					.string(forename, "Yoshimi")
 					.string(surname, "Kato")
@@ -519,7 +598,11 @@ public abstract class EngineTest {
 
 			frame(item("/employees/1702"))
 					.value(RDF.TYPE, Employee)
-					.string(RDFS.LABEL, "Martin Gerard")
+					.values(RDFS.LABEL,
+							literal("Martin Gerard"),
+							literal("Martin Gerard", "en"),
+							literal("Martin Gerard", "it")
+					)
 					.string(code, "1702")
 					.string(forename, "Martin")
 					.string(surname, "Gerard")
@@ -530,6 +613,20 @@ public abstract class EngineTest {
 					.value(supervisor, item("/employees/1102"))
 
 	));
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	protected static final IRI container=item("/employees/");
+	protected static final IRI resource=iri(container, "/1143");
+
+	protected static final Frame delta=frame(resource) // !!! merge original frame
+			.value(RDF.TYPE, Employee)
+			.string(forename, "Tino")
+			.string(surname, "Faussone")
+			.string(email, "tfaussone@classicmodelcars.com")
+			.string(title, "Sales Rep")
+			.integer(seniority, 1);
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -832,10 +929,12 @@ public abstract class EngineTest {
 			final Predicate<Frame> filter=f -> f.value(RDF.TYPE).filter(Employee::equals).isPresent();
 
 			final Map<Value, Frame> index=resources.stream().filter(filter).collect(toMap(
-					Frame::focus, f -> frame(f.focus()).string(RDFS.LABEL, f.label())
+					Frame::focus, f -> frame(f.focus())
+							.values(RDFS.LABEL, f.values(RDFS.LABEL))
+							.values(RDFS.COMMENT, f.values(RDFS.COMMENT))
 			));
 
-			return frame.frames(Engine.terms, resources.stream()
+			return frame(frame.focus()).frames(Engine.terms, resources.stream()
 
 					.filter(filter)
 					.flatMap(mapper)
@@ -916,7 +1015,7 @@ public abstract class EngineTest {
 		@Test void testRootFiltered() {
 			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
 
-					and(filter(all(item("employees/1143"))), field(subordinate)), // !!!
+					and(filter(all(resource)), field(subordinate)),
 
 					singletonList(subordinate),
 
@@ -925,7 +1024,7 @@ public abstract class EngineTest {
 			))).hasValueSatisfying(frame -> assertThat(frame)
 
 					.isIsomorphicTo(query(frame(container), f -> Optional.of(f)
-							.filter(v -> v.focus().equals(item("employees/1143"))) // !!!
+							.filter(v -> v.focus().equals(resource))
 							.map(v -> v.values(subordinate))
 							.orElseGet(Stream::empty)
 					))
@@ -937,7 +1036,7 @@ public abstract class EngineTest {
 			exec(dataset(), () -> assertThat(engine().relate(frame(container), terms(
 
 					and(
-							filter(clazz(term("Alias"))),
+							filter(clazz(Alias)),
 							link(OWL.SAMEAS, field(supervisor))
 					),
 
@@ -998,6 +1097,191 @@ public abstract class EngineTest {
 			));
 		}
 
+
+	}
+
+	@Nested final class RelateStats {
+
+		private Frame query(final Frame frame, final Function<Frame, Stream<Value>> mapper) {
+
+			final Predicate<Frame> filter=f -> f.value(RDF.TYPE).filter(Employee::equals).isPresent();
+
+			final Map<Value, Frame> index=resources.stream().filter(filter).collect(toMap(
+					Frame::focus, f -> frame(f.focus())
+							.values(RDFS.LABEL, f.values(RDFS.LABEL))
+							.values(RDFS.COMMENT, f.values(RDFS.COMMENT))
+			));
+
+			final IRI all=iri();
+
+			final Map<IRI, Long> count=new HashMap<>();
+			final Map<IRI, Value> min=new HashMap<>();
+			final Map<IRI, Value> max=new HashMap<>();
+
+			resources.stream().filter(filter).flatMap(mapper).sequential().forEach(value -> {
+
+				final IRI type=type(value);
+
+				count.compute(all, (t, c) -> c == null ? 1L : c+1);
+				min.compute(all, (t, m) -> m == null ? value : compare(m, value) <= 0 ? m : value);
+				max.compute(all, (t, m) -> m == null ? value : compare(m, value) >= 0 ? m : value);
+
+				count.compute(type, (t, c) -> c == null ? 1L : c+1);
+				min.compute(type, (t, m) -> m == null ? value : compare(m, value) <= 0 ? m : value);
+				max.compute(type, (t, m) -> m == null ? value : compare(m, value) >= 0 ? m : value);
+
+			});
+
+			final Function<Value, Frame> _annotate=value -> index.getOrDefault(value, frame(value));
+
+			final Function<IRI, Optional<Frame>> _min=type -> Optional.ofNullable(min.get(type)).map(_annotate);
+			final Function<IRI, Optional<Frame>> _max=type -> Optional.ofNullable(max.get(type)).map(_annotate);
+
+			final Frame stats=frame(frame.focus())
+
+					.integer(Engine.count, count.getOrDefault(all, 0L))
+					.frame(Engine.min, _min.apply(all))
+					.frame(Engine.max, _max.apply(all));
+
+			return count.entrySet().stream()
+
+					.filter(entry -> !entry.getKey().equals(all))
+					.max(comparingByValue())
+					.map(Map.Entry::getKey)
+
+					.map(type -> stats.frame(Engine.stats, frame(type)
+
+							.integer(Engine.count, count.getOrDefault(type, 0L))
+							.frame(Engine.min, _min.apply(type))
+							.frame(Engine.max, _max.apply(type))
+
+					))
+
+					.orElse(stats);
+		}
+
+
+		@Test void testEmptyResultSet() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), stats(
+
+					field(RDF.TYPE, filter(all(RDF.NIL))), emptyList(), 0, 0
+
+			))).hasValue(frame(container)
+					.integer(Engine.count, 0)
+			));
+		}
+
+
+		@Test void testEmptyProjection() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), stats(
+
+					filter(clazz(Employee)), emptyList(), 0, 0
+
+			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), f -> Stream.of(f.focus())))
+
+			));
+		}
+
+		@Test void testFiltered() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), stats(
+
+					and(
+							filter(clazz(Employee)),
+							filter(field(seniority, minInclusive(literal(3)))),
+							field(seniority)
+					),
+
+					singletonList(seniority),
+
+					0, 0
+
+			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), f -> Optional.of(f)
+							.filter(v -> v.integer(seniority)
+									.filter(s -> s.compareTo(BigInteger.valueOf(3)) >= 0)
+									.isPresent()
+							)
+							.map(v -> v.values(seniority))
+							.orElseGet(Stream::empty)
+					))
+
+			));
+		}
+
+		@Test void testRootFiltered() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), stats(
+
+					and(filter(all(resource)), field(subordinate)),
+
+					singletonList(subordinate),
+
+					0, 0
+
+			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), f -> Optional.of(f)
+							.filter(v -> v.focus().equals(resource))
+							.map(v -> v.values(subordinate))
+							.orElseGet(Stream::empty)
+					))
+
+			));
+		}
+
+		@Test void testTraversingLink() {
+			exec(dataset(), () -> assertThat(engine().relate(frame(container), stats(
+
+					and(
+							filter(clazz(Alias)),
+							link(OWL.SAMEAS, field(supervisor))
+					),
+
+					singletonList(supervisor),
+
+					0, 0
+
+			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+
+					.isIsomorphicTo(query(frame(container), v -> v.values(supervisor)))
+
+			));
+		}
+
+
+		@Test void testReportUnknownSteps() {
+			exec(() -> {
+
+				assertThatIllegalArgumentException().isThrownBy(() -> engine().relate(frame(container), stats(
+						field(office),
+						singletonList(unknown),
+						0, 0
+				)));
+
+				assertThatIllegalArgumentException().isThrownBy(() -> engine().relate(frame(container), stats(
+						field(office),
+						asList(office, unknown),
+						0, 0
+				)));
+
+			});
+		}
+
+		@Test void testReportFilteringSteps() {
+			exec(() -> assertThatIllegalArgumentException().isThrownBy(() -> engine().relate(frame(container), stats(
+
+					and(
+							filter(field(office)),
+							field(seniority)
+					),
+
+					singletonList(office),
+
+					0, 0
+			))));
+		}
 
 	}
 
