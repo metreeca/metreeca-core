@@ -16,16 +16,19 @@
 
 package com.metreeca.json;
 
-import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.*;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.impl.TreeModel;
 import org.eclipse.rdf4j.model.util.Models;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.Values.indent;
 import static com.metreeca.json.ValuesTest.encode;
+
+import static org.eclipse.rdf4j.model.util.Models.isomorphic;
 
 import static java.util.stream.Collectors.toList;
 
@@ -34,6 +37,12 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 
 	public static FrameAssert assertThat(final Frame frame) {
 		return new FrameAssert(frame);
+	}
+
+	public static OptionalAssert<Frame> assertThat(final Optional<Frame> frame) {
+		return Assertions.assertThat(frame).usingValueComparator((x, y) ->
+				isomorphic(() -> model(x).iterator(), () -> model(y).iterator()) ? 0 : -1
+		);
 	}
 
 

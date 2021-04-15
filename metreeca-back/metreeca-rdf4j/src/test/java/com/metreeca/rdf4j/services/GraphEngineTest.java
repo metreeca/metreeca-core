@@ -16,16 +16,23 @@
 
 package com.metreeca.rdf4j.services;
 
+import com.metreeca.rest.Toolbox;
 import com.metreeca.rest.services.EngineTest;
+
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
+
+import static com.metreeca.rdf4j.services.Graph.graph;
+import static com.metreeca.rest.services.Engine.engine;
 
 final class GraphEngineTest extends EngineTest {
 
 	@Override protected void exec(final Runnable... tasks) {
-		GraphTest.exec(tasks);
-	}
-
-	@Override protected GraphEngine engine() {
-		return new GraphEngine();
+		new Toolbox()
+				.set(graph(), () -> new Graph(new SailRepository(new MemoryStore())))
+				.set(engine(), GraphEngine::new)
+				.exec(tasks)
+				.clear();
 	}
 
 }
