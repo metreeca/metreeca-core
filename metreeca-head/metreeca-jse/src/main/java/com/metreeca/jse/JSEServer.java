@@ -32,7 +32,6 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.metreeca.json.Values.IRIPattern;
 import static com.metreeca.rest.Request.HEAD;
 import static com.metreeca.rest.Response.NotFound;
 import static com.metreeca.rest.Xtream.guarded;
@@ -65,6 +64,10 @@ public final class JSEServer {
 
 	private static final String DefaultHost="localhost";
 	private static final int DefaultPort=8080;
+
+	private static final Pattern ContextPattern=Pattern.compile(
+			"(?<base>(?:\\w+://[^/?#]*)?)(?<path>.*)"
+	);
 
 	private static final Pattern AddressPattern=Pattern.compile(
 			"(?<host>^|[-+._a-zA-Z0-9]*[-+._a-zA-Z][-+._a-zA-Z0-9]*)(?:^:?|:)(?<port>\\d{1,4}|$)"
@@ -154,7 +157,7 @@ public final class JSEServer {
 	/**
 	 * Configures the context.
 	 *
-	 * @param context the context IRI for the root resource of this server
+	 * @param context the context IRI for the root resource of this server; accepts root-relative paths
 	 *
 	 * @return this server
 	 *
@@ -167,14 +170,13 @@ public final class JSEServer {
 			throw new NullPointerException("null context");
 		}
 
-		final Matcher matcher=IRIPattern.matcher(context);
+		final Matcher matcher=ContextPattern.matcher(context);
 
 		if ( !matcher.matches() ) {
 			throw new IllegalArgumentException(format("malformed context IRI <%s>", context));
 		}
 
-		this.base=matcher.group("schemeall")
-				+matcher.group("hostall");
+		this.base=matcher.group("base");
 
 		this.path=Optional
 				.of(matcher.group("path"))
