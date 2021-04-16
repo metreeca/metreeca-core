@@ -44,6 +44,7 @@ public final class EngineData {
 	public static final IRI base=iri("http://example.com/");
 	public static final IRI term=item("/terms/");
 
+
 	public static IRI item(final String name) {
 		return iri(base, name);
 	}
@@ -65,6 +66,11 @@ public final class EngineData {
 	public static final IRI office=term("office");
 	public static final IRI supervisor=term("supervisor");
 	public static final IRI subordinate=term("subordinate");
+
+
+	public static final IRI aliases=item("/aliases/");
+	public static final IRI employees=item("/employees/");
+	public static final IRI container=item("/container/");
 
 
 	public static final Shape EmployeeShape=and(
@@ -96,11 +102,11 @@ public final class EngineData {
 
 	public static final Collection<Frame> resources=unmodifiableList(asList(
 
-			frame(item("/aliases/1002"))
+			frame(iri(aliases, "1002"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1002")),
+					.value(OWL.SAMEAS, iri(employees, "1002")),
 
-			frame(item("/employees/1002"))
+			frame(iri(employees, "1002"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Diane Murphy"),
@@ -115,15 +121,15 @@ public final class EngineData {
 					.integer(seniority, 5)
 					.value(office, item("/offices/1"))
 					.values(subordinate,
-							item("/employees/1056"),
-							item("/employees/1076")
+							iri(employees, "1056"),
+							iri(employees, "1076")
 					),
 
-			frame(item("/aliases/1056"))
+			frame(iri(aliases, "1056"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1056")),
+					.value(OWL.SAMEAS, iri(employees, "1056")),
 
-			frame(item("/employees/1056"))
+			frame(iri(employees, "1056"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Mary Patterson"),
@@ -137,19 +143,19 @@ public final class EngineData {
 					.string(title, "VP Sales")
 					.integer(seniority, 4)
 					.value(office, item("/offices/1"))
-					.value(supervisor, item("/employees/1002"))
+					.value(supervisor, iri(employees, "1002"))
 					.values(subordinate,
-							item("/employees/1088"),
-							item("/employees/1102"),
-							item("/employees/1143"),
-							item("/employees/1621")
+							iri(employees, "1088"),
+							iri(employees, "1102"),
+							iri(employees, "1143"),
+							iri(employees, "1621")
 					),
 
-			frame(item("/aliases/1076"))
+			frame(iri(aliases, "1076"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1076")),
+					.value(OWL.SAMEAS, iri(employees, "1076")),
 
-			frame(item("/employees/1076"))
+			frame(iri(employees, "1076"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Jeff Firrelli"),
@@ -163,13 +169,13 @@ public final class EngineData {
 					.string(title, "VP Marketing")
 					.integer(seniority, 4)
 					.value(office, item("/offices/1"))
-					.value(supervisor, item("/employees/1002")),
+					.value(supervisor, iri(employees, "1002")),
 
-			frame(item("/aliases/1088"))
+			frame(iri(aliases, "1088"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1088")),
+					.value(OWL.SAMEAS, iri(employees, "1088")),
 
-			frame(item("/employees/1088"))
+			frame(iri(employees, "1088"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("William Patterson"),
@@ -183,18 +189,18 @@ public final class EngineData {
 					.string(title, "Sales Manager (APAC)")
 					.integer(seniority, 3)
 					.value(office, item("/offices/6"))
-					.value(supervisor, item("/employees/1056"))
+					.value(supervisor, iri(employees, "1056"))
 					.values(subordinate,
-							item("/employees/1611"),
-							item("/employees/1612"),
-							item("/employees/1619")
+							iri(employees, "1611"),
+							iri(employees, "1612"),
+							iri(employees, "1619")
 					),
 
-			frame(item("/aliases/1102"))
+			frame(iri(aliases, "1102"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1102")),
+					.value(OWL.SAMEAS, iri(employees, "1102")),
 
-			frame(item("/employees/1102"))
+			frame(iri(employees, "1102"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Gerard Bondur"),
@@ -208,21 +214,21 @@ public final class EngineData {
 					.string(title, "Sale Manager (EMEA)")
 					.integer(seniority, 4)
 					.value(office, item("/offices/4"))
-					.value(supervisor, item("/employees/1056"))
+					.value(supervisor, iri(employees, "1056"))
 					.values(subordinate,
-							item("/employees/1337"),
-							item("/employees/1370"),
-							item("/employees/1401"),
-							item("/employees/1501"),
-							item("/employees/1504"),
-							item("/employees/1702")
+							iri(employees, "1337"),
+							iri(employees, "1370"),
+							iri(employees, "1401"),
+							iri(employees, "1501"),
+							iri(employees, "1504"),
+							iri(employees, "1702")
 					),
 
-			frame(item("/aliases/1143"))
+			frame(iri(aliases, "1143"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1143")),
+					.value(OWL.SAMEAS, iri(employees, "1143")),
 
-			frame(item("/employees/1143"))
+			frame(iri(employees, "1143"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Anthony Bow"),
@@ -236,21 +242,21 @@ public final class EngineData {
 					.string(title, "Sales Manager (NA)")
 					.integer(seniority, 3)
 					.value(office, item("/offices/1"))
-					.value(supervisor, item("/employees/1056"))
+					.value(supervisor, iri(employees, "1056"))
 					.values(subordinate,
-							item("/employees/1165"),
-							item("/employees/1166"),
-							item("/employees/1188"),
-							item("/employees/1216"),
-							item("/employees/1286"),
-							item("/employees/1323")
+							iri(employees, "1165"),
+							iri(employees, "1166"),
+							iri(employees, "1188"),
+							iri(employees, "1216"),
+							iri(employees, "1286"),
+							iri(employees, "1323")
 					),
 
-			frame(item("/aliases/1165"))
+			frame(iri(aliases, "1165"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1165")),
+					.value(OWL.SAMEAS, iri(employees, "1165")),
 
-			frame(item("/employees/1165"))
+			frame(iri(employees, "1165"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Leslie Jennings"),
@@ -264,13 +270,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/1"))
-					.value(supervisor, item("/employees/1143")),
+					.value(supervisor, iri(employees, "1143")),
 
-			frame(item("/aliases/1166"))
+			frame(iri(aliases, "1166"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1166")),
+					.value(OWL.SAMEAS, iri(employees, "1166")),
 
-			frame(item("/employees/1166"))
+			frame(iri(employees, "1166"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Leslie Thompson"),
@@ -284,13 +290,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/1"))
-					.value(supervisor, item("/employees/1143")),
+					.value(supervisor, iri(employees, "1143")),
 
-			frame(item("/aliases/1188"))
+			frame(iri(aliases, "1188"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1188")),
+					.value(OWL.SAMEAS, iri(employees, "1188")),
 
-			frame(item("/employees/1188"))
+			frame(iri(employees, "1188"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Julie Firrelli"),
@@ -304,13 +310,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/2"))
-					.value(supervisor, item("/employees/1143")),
+					.value(supervisor, iri(employees, "1143")),
 
-			frame(item("/aliases/1216"))
+			frame(iri(aliases, "1216"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1216")),
+					.value(OWL.SAMEAS, iri(employees, "1216")),
 
-			frame(item("/employees/1216"))
+			frame(iri(employees, "1216"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Steve Patterson"),
@@ -324,13 +330,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/2"))
-					.value(supervisor, item("/employees/1143")),
+					.value(supervisor, iri(employees, "1143")),
 
-			frame(item("/aliases/1286"))
+			frame(iri(aliases, "1286"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1286")),
+					.value(OWL.SAMEAS, iri(employees, "1286")),
 
-			frame(item("/employees/1286"))
+			frame(iri(employees, "1286"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Foon Yue Tseng"),
@@ -344,13 +350,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/3"))
-					.value(supervisor, item("/employees/1143")),
+					.value(supervisor, iri(employees, "1143")),
 
-			frame(item("/aliases/1323"))
+			frame(iri(aliases, "1323"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1323")),
+					.value(OWL.SAMEAS, iri(employees, "1323")),
 
-			frame(item("/employees/1323"))
+			frame(iri(employees, "1323"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("George Vanauf"),
@@ -364,13 +370,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/3"))
-					.value(supervisor, item("/employees/1143")),
+					.value(supervisor, iri(employees, "1143")),
 
-			frame(item("/aliases/1337"))
+			frame(iri(aliases, "1337"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1337")),
+					.value(OWL.SAMEAS, iri(employees, "1337")),
 
-			frame(item("/employees/1337"))
+			frame(iri(employees, "1337"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Loui Bondur"),
@@ -384,13 +390,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/4"))
-					.value(supervisor, item("/employees/1102")),
+					.value(supervisor, iri(employees, "1102")),
 
-			frame(item("/aliases/1370"))
+			frame(iri(aliases, "1370"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1370")),
+					.value(OWL.SAMEAS, iri(employees, "1370")),
 
-			frame(item("/employees/1370"))
+			frame(iri(employees, "1370"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Gerard Hernandez"),
@@ -404,13 +410,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/4"))
-					.value(supervisor, item("/employees/1102")),
+					.value(supervisor, iri(employees, "1102")),
 
-			frame(item("/aliases/1401"))
+			frame(iri(aliases, "1401"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1401")),
+					.value(OWL.SAMEAS, iri(employees, "1401")),
 
-			frame(item("/employees/1401"))
+			frame(iri(employees, "1401"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Pamela Castillo"),
@@ -424,13 +430,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/4"))
-					.value(supervisor, item("/employees/1102")),
+					.value(supervisor, iri(employees, "1102")),
 
-			frame(item("/aliases/1501"))
+			frame(iri(aliases, "1501"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1501")),
+					.value(OWL.SAMEAS, iri(employees, "1501")),
 
-			frame(item("/employees/1501"))
+			frame(iri(employees, "1501"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Larry Bott"),
@@ -444,13 +450,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/7"))
-					.value(supervisor, item("/employees/1102")),
+					.value(supervisor, iri(employees, "1102")),
 
-			frame(item("/aliases/1504"))
+			frame(iri(aliases, "1504"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1504")),
+					.value(OWL.SAMEAS, iri(employees, "1504")),
 
-			frame(item("/employees/1504"))
+			frame(iri(employees, "1504"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Barry Jones"),
@@ -464,13 +470,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/7"))
-					.value(supervisor, item("/employees/1102")),
+					.value(supervisor, iri(employees, "1102")),
 
-			frame(item("/aliases/1611"))
+			frame(iri(aliases, "1611"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1611")),
+					.value(OWL.SAMEAS, iri(employees, "1611")),
 
-			frame(item("/employees/1611"))
+			frame(iri(employees, "1611"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Andy Fixter"),
@@ -484,13 +490,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/6"))
-					.value(supervisor, item("/employees/1088")),
+					.value(supervisor, iri(employees, "1088")),
 
-			frame(item("/aliases/1612"))
+			frame(iri(aliases, "1612"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1612")),
+					.value(OWL.SAMEAS, iri(employees, "1612")),
 
-			frame(item("/employees/1612"))
+			frame(iri(employees, "1612"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Peter Marsh"),
@@ -504,13 +510,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 1)
 					.value(office, item("/offices/6"))
-					.value(supervisor, item("/employees/1088")),
+					.value(supervisor, iri(employees, "1088")),
 
-			frame(item("/aliases/1619"))
+			frame(iri(aliases, "1619"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1619")),
+					.value(OWL.SAMEAS, iri(employees, "1619")),
 
-			frame(item("/employees/1619"))
+			frame(iri(employees, "1619"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Tom King"),
@@ -524,13 +530,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/6"))
-					.value(supervisor, item("/employees/1088")),
+					.value(supervisor, iri(employees, "1088")),
 
-			frame(item("/aliases/1621"))
+			frame(iri(aliases, "1621"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1621")),
+					.value(OWL.SAMEAS, iri(employees, "1621")),
 
-			frame(item("/employees/1621"))
+			frame(iri(employees, "1621"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Mami Nishi"),
@@ -544,16 +550,16 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/5"))
-					.value(supervisor, item("/employees/1056"))
+					.value(supervisor, iri(employees, "1056"))
 					.values(subordinate,
-							item("/employees/1625")
+							iri(employees, "1625")
 					),
 
-			frame(item("/aliases/1625"))
+			frame(iri(aliases, "1625"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1625")),
+					.value(OWL.SAMEAS, iri(employees, "1625")),
 
-			frame(item("/employees/1625"))
+			frame(iri(employees, "1625"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Yoshimi Kato"),
@@ -567,13 +573,13 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/5"))
-					.value(supervisor, item("/employees/1621")),
+					.value(supervisor, iri(employees, "1621")),
 
-			frame(item("/aliases/1702"))
+			frame(iri(aliases, "1702"))
 					.value(RDF.TYPE, Alias)
-					.value(OWL.SAMEAS, item("/employees/1702")),
+					.value(OWL.SAMEAS, iri(employees, "1702")),
 
-			frame(item("/employees/1702"))
+			frame(iri(employees, "1702"))
 					.value(RDF.TYPE, Employee)
 					.values(RDFS.LABEL,
 							literal("Martin Gerard"),
@@ -587,7 +593,34 @@ public final class EngineData {
 					.string(title, "Sales Rep")
 					.integer(seniority, 2)
 					.value(office, item("/offices/4"))
-					.value(supervisor, item("/employees/1102"))
+					.value(supervisor, iri(employees, "1102")),
+
+
+			frame(container).values(Contains,
+					iri(employees, "1002"),
+					iri(employees, "1056"),
+					iri(employees, "1076"),
+					iri(employees, "1088"),
+					iri(employees, "1102"),
+					iri(employees, "1143"),
+					iri(employees, "1165"),
+					iri(employees, "1166"),
+					iri(employees, "1188"),
+					iri(employees, "1216"),
+					iri(employees, "1286"),
+					iri(employees, "1323"),
+					iri(employees, "1337"),
+					iri(employees, "1370"),
+					iri(employees, "1401"),
+					iri(employees, "1501"),
+					iri(employees, "1504"),
+					iri(employees, "1611"),
+					iri(employees, "1612"),
+					iri(employees, "1619"),
+					iri(employees, "1621"),
+					iri(employees, "1625"),
+					iri(employees, "1702")
+			)
 
 	));
 
