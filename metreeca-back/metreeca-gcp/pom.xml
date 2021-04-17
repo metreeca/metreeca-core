@@ -64,9 +64,11 @@
 			<scope>test</scope>
 		</dependency>
 
+
 		<dependency>
-			<groupId>org.eclipse.rdf4j</groupId>
-			<artifactId>rdf4j-rio-turtle</artifactId>
+			<groupId>com.metreeca</groupId>
+			<artifactId>metreeca-rest</artifactId>
+			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 

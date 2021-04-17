@@ -96,29 +96,29 @@ final class DatastoreCodec { // !!! review/refactor
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	private Value<?> resource(final Resource resource, final Shape shape) {
+	private Value<?> resource(final org.eclipse.rdf4j.model.Value value, final Shape shape) {
 
 		final IRI datatype=datatype(shape).orElse(null);
 
 		return Values.resource(datatype)
-				? StringValue.of(id(resource))
-				: KeyValue.of(key(resource));
+				? StringValue.of(id(value))
+				: KeyValue.of(key(value));
 	}
 
-	private Key key(final Resource resource) {
+	private Key key(final org.eclipse.rdf4j.model.Value value) {
 		return datastore.newKeyFactory()
 				.setKind(Resource)
 				.addAncestor(context)
-				.newKey(id(resource));
+				.newKey(id(value));
 	}
 
-	private String id(final Resource resource) {
+	private String id(final org.eclipse.rdf4j.model.Value value) {
 
-		final String id=resource.stringValue();
+		final String id=value.stringValue();
 
-		return resource.isBNode() ? id
-				: resource.isIRI() ? id.startsWith(base) ? id.substring(base.length()-1) : id
-				: unsupported(resource.getClass());
+		return value.isBNode() ? id
+				: value.isIRI() ? id.startsWith(base) ? id.substring(base.length()-1) : id
+				: unsupported(value.getClass());
 	}
 
 
@@ -259,12 +259,9 @@ final class DatastoreCodec { // !!! review/refactor
 
 			} else {
 
-				final List<Value<?>> values=Stream.concat(
-
-						frame.frames(field.iri()).map(f -> entity(f, shape)),
-						frame.literals(field.iri()).map(v -> value(v, shape))
-
-				).collect(toList());
+				final List<Value<?>> values=frame.frames(field.iri())
+						.map(f -> f.focus().isLiteral() ? value((Literal)f.focus(), shape) : entity(f, shape))
+						.collect(toList());
 
 				if ( values.size() == 1 ) {
 
@@ -389,9 +386,9 @@ final class DatastoreCodec { // !!! review/refactor
 							? ((ListValue)value).get().stream()
 							: Stream.of(value);
 
-					frame=frame.objects(field.iri(), values.map(v -> entity(v)
-							.map(e -> (Object)frame(e, field.shape()))
-							.orElseGet(() -> value(v, field.shape()))
+					frame=frame.frames(field.iri(), values.map(v -> entity(v)
+							.map(e -> frame(e, field.shape()))
+							.orElseGet(() -> Frame.frame(value(v, field.shape())))
 					));
 
 				}

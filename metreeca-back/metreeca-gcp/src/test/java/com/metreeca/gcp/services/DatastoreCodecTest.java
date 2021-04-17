@@ -19,6 +19,7 @@ package com.metreeca.gcp.services;
 import com.metreeca.json.Frame;
 import com.metreeca.json.Shape;
 import com.metreeca.json.shapes.Lang;
+import com.metreeca.rest.Toolbox;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Value;
@@ -34,7 +35,6 @@ import java.math.BigInteger;
 import java.time.*;
 
 import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.gcp.services.DatastoreTest.exec;
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Shape.*;
 import static com.metreeca.json.Values.*;
@@ -59,6 +59,13 @@ final class DatastoreCodecTest {
 	private final IRI y=iri(base, "y");
 	private final IRI z=iri(base, "z");
 
+	private void exec(final Runnable... tasks) {
+		DatastoreTest.exec(datastore -> new Toolbox()
+				.set(datastore(), () -> datastore)
+				.exec(tasks)
+				.clear()
+		);
+	}
 
 	private Key key(final String id) {
 		return service(datastore()).query(datastore -> datastore
@@ -152,6 +159,7 @@ final class DatastoreCodecTest {
 			exec(() -> {
 
 				final Literal external=literal(1L, true);
+
 				final Value<?> internal=EntityValue.of(FullEntity.newBuilder()
 						.set("@value", "1")
 						.set("@type", XSD.LONG.stringValue())

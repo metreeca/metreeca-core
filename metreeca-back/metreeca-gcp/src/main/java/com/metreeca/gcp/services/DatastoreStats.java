@@ -17,39 +17,19 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.json.Frame;
-import com.metreeca.json.queries.*;
+import com.metreeca.json.queries.Stats;
 import com.metreeca.rest.Config;
-import com.metreeca.rest.Response;
 
-import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.Query;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.gcp.services._Compare.compare;
-import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.Toolbox.service;
-import static com.metreeca.rest.formats.JSONLDFormat.shape;
-
-import static java.util.Map.Entry.comparingByKey;
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.Collectors.*;
-import static java.util.stream.StreamSupport.stream;
+import java.util.Optional;
 
 final class DatastoreStats {
 
 	DatastoreStats(final Config config) {}
 
 
-	Optional<Frame> process(final Resource resource, final Stats stats) {
+	Optional<Frame> process(final org.eclipse.rdf4j.model.Value value, final Stats stats) {
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 	}
-
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

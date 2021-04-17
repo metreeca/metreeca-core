@@ -173,7 +173,7 @@ public final class GraphTest {
 								.path("/test/request"))
 
 								.status(Response.OK)
-								.header("Location", Root+"test/response"),
+								.header("Location", Base+"test/response"),
 
 						frame(iri(Base, "/test/request"))
 								.value(RDF.VALUE, RDF.NIL)

@@ -17,23 +17,15 @@
 package com.metreeca.gcp.services;
 
 import com.metreeca.json.*;
-import com.metreeca.json.Query;
 import com.metreeca.json.queries.*;
-import com.metreeca.rest.*;
+import com.metreeca.rest.Config;
+import com.metreeca.rest.Setup;
 import com.metreeca.rest.services.Engine;
 
-import com.google.cloud.datastore.*;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
-
-import java.util.Collection;
 import java.util.Optional;
 
 import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.json.Frame.frame;
 import static com.metreeca.rest.Toolbox.service;
-
-import static com.google.cloud.datastore.StructuredQuery.PropertyFilter.eq;
 
 
 /**
@@ -165,25 +157,25 @@ public final class DatastoreEngine extends Setup<DatastoreEngine> implements Eng
 	private static final class QueryProbe extends Query.Probe<Optional<Frame>> {
 
 		private final Config config;
-		private final Resource resource;
+		private final org.eclipse.rdf4j.model.Value focus;
 
 
-		QueryProbe(final Config config, final Resource resource) {
+		QueryProbe(final Config config, final org.eclipse.rdf4j.model.Value focus) {
 			this.config=config;
-			this.resource=resource;
+			this.focus=focus;
 		}
 
 
 		@Override public Optional<Frame> probe(final Items items) {
-			return new DatastoreItems(config).process(resource, items);
+			return new DatastoreItems(config).process(focus, items);
 		}
 
 		@Override public Optional<Frame> probe(final Terms terms) {
-			return new DatastoreTerms(config).process(resource, terms);
+			return new DatastoreTerms(config).process(focus, terms);
 		}
 
 		@Override public Optional<Frame> probe(final Stats stats) {
-			return new DatastoreStats(config).process(resource, stats);
+			return new DatastoreStats(config).process(focus, stats);
 		}
 
 	}

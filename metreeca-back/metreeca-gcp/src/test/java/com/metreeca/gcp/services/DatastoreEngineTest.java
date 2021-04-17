@@ -16,16 +16,22 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.rest.services.Engine;
+import com.metreeca.rest.Toolbox;
+import com.metreeca.rest.services.EngineTest;
 
-final class DatastoreEngineTest {
+import static com.metreeca.gcp.services.Datastore.datastore;
+import static com.metreeca.rest.services.Engine.engine;
 
-	private Engine engine() {
-		return new DatastoreEngine();
-	}
+final class DatastoreEngineTest extends EngineTest {
 
-	private void exec(final Runnable... tasks) {
-		DatastoreTest.exec(tasks);
+	protected void exec(final Runnable... tasks) {
+		DatastoreTest.exec(datastore -> new Toolbox()
+
+				.set(datastore(), () -> datastore)
+				.set(engine(), DatastoreEngine::new)
+				.exec(tasks)
+				.clear()
+		);
 	}
 
 }

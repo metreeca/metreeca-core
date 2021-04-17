@@ -16,37 +16,17 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.json.*;
-import com.metreeca.json.queries.*;
-import com.metreeca.rest.*;
+import com.metreeca.json.Frame;
+import com.metreeca.json.queries.Items;
+import com.metreeca.rest.Config;
 
-import com.google.cloud.datastore.*;
-import com.google.cloud.datastore.Query;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import static com.metreeca.gcp.services.Datastore.datastore;
-import static com.metreeca.json.shapes.Clazz.clazz;
-import static com.metreeca.json.shapes.Field.field;
-import static com.metreeca.json.shapes.Guard.convey;
-import static com.metreeca.rest.Response.NotFound;
-import static com.metreeca.rest.Response.OK;
-import static com.metreeca.rest.Toolbox.service;
-import static com.metreeca.rest.formats.JSONLDFormat.shape;
-
-import static java.util.Spliterators.spliteratorUnknownSize;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
+import java.util.Optional;
 
 final class DatastoreItems {
 
 	DatastoreItems(final Config config) {}
 
-	Optional<Frame> process(final Resource resource, final Items items) {
+	Optional<Frame> process(final org.eclipse.rdf4j.model.Value value, final Items items) {
 
 		throw new UnsupportedOperationException("to be implemented"); // !!! tbi
 

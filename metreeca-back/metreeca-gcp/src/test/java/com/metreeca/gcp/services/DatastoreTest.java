@@ -16,17 +16,15 @@
 
 package com.metreeca.gcp.services;
 
-import com.metreeca.rest.Toolbox;
-
 import com.google.cloud.datastore.DatastoreOptions;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.ProcessBuilder.Redirect;
 import java.net.*;
+import java.util.Arrays;
 import java.util.Optional;
-
-import static com.metreeca.gcp.services.Datastore.datastore;
+import java.util.function.Consumer;
 
 import static java.lang.String.format;
 
@@ -77,7 +75,7 @@ public final class DatastoreTest {
 		}
 	}
 
-	public static void exec(final Runnable... tasks) {
+	public static void exec(final Consumer<Datastore>... tasks) {
 
 		final DatastoreOptions options=DatastoreOptions.newBuilder()
 				.setProjectId(TestProject)
@@ -97,13 +95,11 @@ public final class DatastoreTest {
 
 			Thread.sleep(100);
 
-			new Toolbox().set(datastore(), () -> new Datastore(options)).exec(tasks).clear();
+			Arrays.stream(tasks).forEach(task -> task.accept(new Datastore(options)));
 
 		} catch ( final ConnectException e ) { // start test datastore and retry
 
-			if ( run() ) {
-				new Toolbox().set(datastore(), () -> new Datastore(options)).exec(tasks).clear();
-			}
+			if ( run() ) { Arrays.stream(tasks).forEach(task -> task.accept(new Datastore(options))); }
 
 		} catch ( final InterruptedException ignored ) {
 

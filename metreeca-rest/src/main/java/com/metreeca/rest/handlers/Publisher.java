@@ -187,9 +187,8 @@ public final class Publisher extends Delegator {
 	/**
 	 * Configures the fallback path.
 	 *
-	 * @param path the path of the resource to be served for {@linkplain Request#route() route} requests that don't
-	 *                match
-	 *             any available resource path; ignored if empty
+	 * @param path the path of the resource to be served for browser {@linkplain Request#route() route} requests that
+	 *             don't match any available resource path; ignored if empty
 	 *
 	 * @return this publisher
 	 *
