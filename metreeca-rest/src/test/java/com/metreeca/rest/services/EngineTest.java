@@ -765,8 +765,8 @@ public abstract class EngineTest {
 			)))).hasValue(frame(employees).frames(Contains, resources.stream()
 					.filter(frame -> frame.values(RDF.TYPE).anyMatch(Employee::equals))
 					.map(frame -> frame(frame.focus())
-							.literals(RDFS.LABEL, frame.literals(RDFS.LABEL)
-									.filter(literal -> literal.getLanguage().orElse("").equals("en"))
+							.values(RDFS.LABEL, frame.values(RDFS.LABEL)
+									.filter(value -> "en".equals(lang(value)))
 							)
 					)
 			)));

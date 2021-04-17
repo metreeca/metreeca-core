@@ -26,7 +26,6 @@ import org.eclipse.rdf4j.model.*;
 
 import java.util.Optional;
 
-import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.rdf4j.services.Graph.graph;
 import static com.metreeca.rest.Toolbox.service;
@@ -43,7 +42,7 @@ public final class GraphEngine extends Setup<GraphEngine> implements Engine {
 
 
 	private Iterable<Statement> statements(final Frame frame) {
-		return () -> model(frame).iterator();
+		return () -> frame.model().iterator();
 	}
 
 

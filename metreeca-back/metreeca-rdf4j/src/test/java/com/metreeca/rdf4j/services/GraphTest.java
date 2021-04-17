@@ -75,7 +75,7 @@ public final class GraphTest {
 	@Test void testConfigureRequest() {
 		exec(() -> assertThat(
 
-				Frame.model(Graph
+				Graph
 
 						.<Request>query(
 
@@ -110,7 +110,7 @@ public final class GraphTest {
 								frame(iri(Base, "/test/request"))
 										.value(RDF.VALUE, RDF.NIL)
 
-						)).collect(toList())
+						).model().collect(toList())
 
 		)
 
@@ -139,7 +139,7 @@ public final class GraphTest {
 
 	@Test void testConfigureResponse() {
 		exec(() ->
-						assertThat(Frame.model(Graph
+						assertThat(Graph
 
 								.<Response>query(
 
@@ -178,7 +178,7 @@ public final class GraphTest {
 						frame(iri(Base, "/test/request"))
 								.value(RDF.VALUE, RDF.NIL)
 
-				)).collect(toList())
+				).model().collect(toList())
 		)
 
 				.as("bindings configured")

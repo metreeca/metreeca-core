@@ -29,7 +29,6 @@ import java.util.function.Supplier;
 import javax.json.*;
 
 import static com.metreeca.json.Frame.frame;
-import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
@@ -267,7 +266,7 @@ public final class JSONLDFormat extends Format<Frame> {
 						final Map<String, String> keywords=service(keywords());
 
 						final Collection<Statement> model=
-								scan(shape, value.focus(), model(value).collect(toList())).fold(trace -> {
+								scan(shape, value.focus(), value.model().collect(toList())).fold(trace -> {
 
 									service(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
 

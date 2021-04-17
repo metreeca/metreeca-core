@@ -24,20 +24,17 @@ import org.eclipse.rdf4j.rio.helpers.StatementCollector;
 import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
 import java.io.*;
-import java.net.URL;
-import java.util.*;
+import java.util.Map;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
-import static com.metreeca.json.Values.literal;
-import static com.metreeca.json.Values.statement;
 
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.logging.Level.ALL;
 import static java.util.logging.Level.FINE;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toMap;
 
 
 public final class ValuesTest {
@@ -51,8 +48,6 @@ public final class ValuesTest {
 
 	).collect(toMap(Namespace::getPrefix, Namespace::getName)));
 
-
-	private static final Map<String, Model> DatasetCache=new HashMap<>();
 
 	private static final Logger logger=Logger.getLogger("com.metreeca"); // retain reference to prevent gc
 
@@ -70,63 +65,6 @@ public final class ValuesTest {
 
 		}
 
-	}
-
-
-	//// Datasets //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	public static Model small() {
-		return dataset(ValuesTest.class.getResource(ValuesTest.class.getSimpleName()+".ttl"));
-	}
-
-
-	public static Model dataset(final URL resource) {
-		return dataset(resource, Values.Base);
-	}
-
-	public static Model dataset(final URL resource, final String base) {
-
-		if ( resource == null ) {
-			throw new NullPointerException("null resource");
-		}
-
-		if ( base == null ) {
-			throw new NullPointerException("null base");
-		}
-
-		return DatasetCache.computeIfAbsent(resource.toExternalForm(), key -> {
-			try ( final InputStream input=resource.openStream() ) {
-				return Rio.parse(input, base, RDFFormat.TURTLE).unmodifiable();
-			} catch ( final IOException e ) {
-				throw new UncheckedIOException(e);
-			}
-		});
-	}
-
-
-	public static Model localize(final Collection<Statement> model, final String... tags) {
-		return model.stream()
-
-				.flatMap(s -> Optional
-
-						.of(s.getObject())
-
-						.filter(o -> s.getPredicate().equals(RDFS.LABEL) || s.getPredicate().equals(RDFS.COMMENT))
-
-						.filter(Literal.class::isInstance)
-						.map(Literal.class::cast)
-
-						.filter(l -> l.getDatatype().equals(XSD.STRING))
-						.map(Literal::getLabel)
-
-						.map(l -> Arrays.stream(tags).map(lang -> statement(s.getSubject(), s.getPredicate(),
-								lang.isEmpty() ? literal(l) : literal(l, lang))
-						))
-
-						.orElseGet(() -> Stream.of(s))
-				)
-
-				.collect(toCollection(LinkedHashModel::new));
 	}
 
 

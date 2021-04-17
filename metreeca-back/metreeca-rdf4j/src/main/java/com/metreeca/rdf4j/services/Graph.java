@@ -31,7 +31,6 @@ import java.util.*;
 import java.util.function.*;
 
 import static com.metreeca.json.Frame.frame;
-import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.rest.Toolbox.service;
@@ -116,7 +115,7 @@ public final class Graph implements AutoCloseable {
 
 		return query.isEmpty() ? (message, frame) -> frame : (message, frame) -> graph.query(connection -> {
 
-			final ArrayList<Statement> model=model(frame).collect(toCollection(ArrayList::new));
+			final ArrayList<Statement> model=frame.model().collect(toCollection(ArrayList::new));
 
 			configure(
 					message, connection.prepareGraphQuery(SPARQL, query, message.request().base()), customizers

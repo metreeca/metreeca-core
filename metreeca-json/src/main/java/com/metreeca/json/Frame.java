@@ -43,81 +43,6 @@ import static java.util.stream.Collectors.*;
  */
 public final class Frame {
 
-	public static Frame frame(final Value focus, final Collection<Statement> model) {
-
-		if ( focus == null ) {
-			throw new NullPointerException("null focus");
-		}
-
-		if ( model == null || model.stream().anyMatch(Objects::isNull) ) {
-			throw new NullPointerException("null model or model statement");
-		}
-
-		return frame(focus, model, value -> false);
-	}
-
-	private static Frame frame(final Value focus, final Collection<Statement> model, final Predicate<Value> visited) {
-		return visited.test(focus) ? frame(focus) : new Frame(focus, Stream.<Map.Entry<IRI, Value>>concat(
-
-				model.stream()
-						.filter(pattern(focus, null, null))
-						.map(s -> new SimpleImmutableEntry<>(s.getPredicate(), s.getObject())),
-
-				model.stream()
-						.filter(pattern(null, null, focus))
-						.filter(s -> !visited.test(s.getSubject()))
-						.map(s -> new SimpleImmutableEntry<>(inverse(s.getPredicate()), s.getSubject()))
-
-		).collect(groupingBy(Map.Entry::getKey, collectingAndThen(
-
-				mapping(entry -> frame(entry.getValue(), model, visited.or(focus::equals)), toSet()),
-				Collections::unmodifiableSet
-
-		))));
-	}
-
-
-	public static Stream<Statement> model(final Frame frame) {
-
-		if ( frame == null ) {
-			throw new NullPointerException("null frame");
-		}
-
-		return frame.traits().entrySet().stream().flatMap(trait -> {
-
-			final IRI predicate=trait.getKey();
-			final Collection<Frame> frames=trait.getValue();
-
-			return frames.stream().flatMap(_frame -> {
-
-				final Statement statement=traverse(predicate,
-						direct -> statement((Resource)frame.focus, direct, _frame.focus),
-						inverse -> statement((Resource)_frame.focus, inverse, frame.focus)
-				);
-
-				return Stream.concat(Stream.of(statement), model(_frame));
-
-			});
-
-		});
-	}
-
-	public Frame objects(final IRI predicate, final Stream<Object> objects) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		if ( objects == null ) {
-			throw new NullPointerException("null objects");
-		}
-
-		return frames(predicate, objects.map(object -> object instanceof Frame ? (Frame)object : frame((Value)object)));
-	}
-
-
-	//// !!! ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	private static final Path Labels=alt(
 			RDFS.LABEL, DC.TITLE, iri("http://schema.org/", "name")
 	);
@@ -145,6 +70,40 @@ public final class Frame {
 		return new Frame(focus, traits.entrySet().stream().collect(toMap(
 				Map.Entry::getKey, e -> unmodifiableSet(new LinkedHashSet<>(e.getValue()))
 		)));
+	}
+
+	public static Frame frame(final Value focus, final Collection<Statement> model) {
+
+		if ( focus == null ) {
+			throw new NullPointerException("null focus");
+		}
+
+		if ( model == null || model.stream().anyMatch(Objects::isNull) ) {
+			throw new NullPointerException("null model or model statement");
+		}
+
+		return frame(focus, model, value -> false);
+	}
+
+
+	private static Frame frame(final Value focus, final Collection<Statement> model, final Predicate<Value> visited) {
+		return visited.test(focus) ? frame(focus) : new Frame(focus, Stream.<Map.Entry<IRI, Value>>concat(
+
+				model.stream()
+						.filter(pattern(focus, null, null))
+						.map(s -> new SimpleImmutableEntry<>(s.getPredicate(), s.getObject())),
+
+				model.stream()
+						.filter(pattern(null, null, focus))
+						.filter(s -> !visited.test(s.getSubject()))
+						.map(s -> new SimpleImmutableEntry<>(inverse(s.getPredicate()), s.getSubject()))
+
+		).collect(groupingBy(Map.Entry::getKey, collectingAndThen(
+
+				mapping(entry -> frame(entry.getValue(), model, visited.or(focus::equals)), toSet()),
+				Collections::unmodifiableSet
+
+		))));
 	}
 
 
@@ -192,6 +151,28 @@ public final class Frame {
 	public Map<IRI, Collection<Frame>> traits() {
 		return traits;
 	}
+
+
+	public Stream<Statement> model() {
+		return traits.entrySet().stream().flatMap(trait -> {
+
+			final IRI predicate=trait.getKey();
+			final Collection<Frame> frames=trait.getValue();
+
+			return frames.stream().flatMap(frame -> {
+
+				final Statement statement=traverse(predicate,
+						direct -> statement((Resource)focus, direct, frame.focus),
+						inverse -> statement((Resource)frame.focus, inverse, this.focus)
+				);
+
+				return Stream.concat(Stream.of(statement), frame.model());
+
+			});
+
+		});
+	}
+
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -561,111 +542,6 @@ public final class Frame {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	public Optional<Literal> literal(final IRI predicate) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		return literal(seq(predicate));
-	}
-
-	public Optional<Literal> literal(final Shift shift) {
-
-		if ( shift == null ) {
-			throw new NullPointerException("null shift");
-		}
-
-		return literals(shift).findFirst();
-	}
-
-
-	public Stream<Literal> literals(final IRI predicate) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		return literals(seq(predicate));
-	}
-
-	public Stream<Literal> literals(final Shift shift) {
-
-		if ( shift == null ) {
-			throw new NullPointerException("null shift");
-		}
-
-		return values(shift)
-				.filter(Value::isLiteral)
-				.map(Literal.class::cast);
-	}
-
-
-	public Frame literal(final IRI predicate, final Literal literal) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		return literal == null ? this : literals(predicate, Stream.of(literal));
-	}
-
-	public Frame literal(final IRI predicate, final Optional<? extends Literal> literal) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		if ( literal == null ) {
-			throw new NullPointerException("null literal");
-		}
-
-		return literal.map(object -> literals(predicate, Stream.of(object))).orElse(this);
-	}
-
-
-	public Frame literals(final IRI predicate, final Literal... literals) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		if ( literals == null ) {
-			throw new NullPointerException("null literals");
-		}
-
-		return literals.length == 0 ? this : literals(predicate, Arrays.stream(literals));
-	}
-
-	public Frame literals(final IRI predicate, final Collection<? extends Literal> literals) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		if ( literals == null ) {
-			throw new NullPointerException("null literals");
-		}
-
-		return literals.isEmpty() ? this : literals(predicate, literals.stream());
-	}
-
-	public Frame literals(final IRI predicate, final Stream<? extends Literal> literals) {
-
-		if ( predicate == null ) {
-			throw new NullPointerException("null predicate");
-		}
-
-		if ( literals == null ) {
-			throw new NullPointerException("null literals");
-		}
-
-		return values(predicate, literals);
-	}
-
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 	public Optional<Value> value(final IRI predicate) {
 
 		if ( predicate == null ) {
@@ -953,6 +829,7 @@ public final class Frame {
 		return builder.toString();
 	}
 
+
 	private String format(final Map.Entry<IRI, Collection<Frame>> trait) {
 		return Values.format(trait.getKey())+" : "+format(trait.getValue());
 	}
@@ -967,6 +844,8 @@ public final class Frame {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	@Override public boolean equals(final Object object) {
 		return this == object || object instanceof Frame
 				&& focus.equals(((Frame)object).focus)
@@ -979,11 +858,10 @@ public final class Frame {
 	}
 
 	@Override public String toString() {
-		return format();
-		//return Values.format(focus)
-		//		+label().map(l -> " : "+l).orElse("")
-		//		+notes().map(l -> " / "+l).orElse("")
-		//		+(traits.isEmpty() ? "" : String.format(" { [%d] }", size()));
+		return Values.format(focus)
+				+label().map(l -> " : "+l).orElse("")
+				+notes().map(l -> " / "+l).orElse("")
+				+(traits.isEmpty() ? "" : String.format(" { [%d] }", size()));
 	}
 
 }

@@ -18,15 +18,11 @@ package com.metreeca.json;
 
 import org.assertj.core.api.*;
 import org.eclipse.rdf4j.model.Statement;
-import org.eclipse.rdf4j.model.impl.TreeModel;
-import org.eclipse.rdf4j.model.util.Models;
 
 import java.util.List;
 import java.util.Optional;
 
-import static com.metreeca.json.Frame.model;
 import static com.metreeca.json.Values.indent;
-import static com.metreeca.json.ValuesTest.encode;
 
 import static org.eclipse.rdf4j.model.util.Models.isomorphic;
 
@@ -41,7 +37,7 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 
 	public static OptionalAssert<Frame> assertThat(final Optional<Frame> frame) {
 		return Assertions.assertThat(frame).usingValueComparator((x, y) ->
-				isomorphic(() -> model(x).iterator(), () -> model(y).iterator()) ? 0 : -1
+				isomorphic(() -> x.model().iterator(), () -> y.model().iterator()) ? 0 : -1
 		);
 	}
 
@@ -86,13 +82,13 @@ public final class FrameAssert extends AbstractAssert<FrameAssert, Frame> {
 
 		isNotNull();
 
-		final List<Statement> a=model(actual).collect(toList());
-		final List<Statement> f=model(frame).collect(toList());
+		final List<Statement> a=actual.model().collect(toList());
+		final List<Statement> f=frame.model().collect(toList());
 
-		if ( !Models.isomorphic(a, f) ) {
+		if ( !isomorphic(a, f) ) {
 			failWithMessage(
 					"expected frame <\n%s\n> to be isomorphic to <\n%s\n>",
-					indent(encode(new TreeModel(a))), indent(encode(new TreeModel(f)))
+					indent(actual.format()), indent(frame.format())
 			);
 		}
 
