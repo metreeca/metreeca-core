@@ -266,11 +266,11 @@ public final class Values {
 				: value instanceof BNode ? BNodeType
 				: value instanceof IRI ? IRIType
 				: value instanceof Literal ? ((Literal)value).getDatatype()
-				: null; // unexpected
+				: ValueType;
 	}
 
 	public static String lang(final Value value) {
-		return value instanceof Literal ? ((Literal)value).getLanguage().orElse(null) : null;
+		return value instanceof Literal ? ((Literal)value).getLanguage().orElse("") : "";
 	}
 
 

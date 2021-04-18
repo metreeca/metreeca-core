@@ -134,7 +134,7 @@ final class JSONLDScanner extends Shape.Probe<Either<Trace, Stream<Statement>>> 
 		return report(trace(group.stream()
 
 				.filter(negate(tags.isEmpty()
-						? value -> lang(value) != null
+						? value -> !lang(value).isEmpty()
 						: value -> tags.contains(lang(value))
 				))
 

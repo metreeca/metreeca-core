@@ -287,7 +287,7 @@ public final class JSONLDFormat extends Format<Frame> {
 
 							final String lang=lang(statement.getObject());
 
-							return lang == null || langs.contains(lang);
+							return lang.isEmpty() || langs.contains(lang);
 
 						}).collect(toList())));
 
