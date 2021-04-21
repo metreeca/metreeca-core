@@ -31,5 +31,6 @@
 
 # Fixed
 
+- REST / `JSONLDFormat.query()` now correctly resolve aliased JSON-LD keywords
 - REST / Hardened `Vault.get()` method against empty parameter identifiers
 - Head / Hardened `JSEServer` and `JEEServer` against empty header names

@@ -68,6 +68,7 @@ final class JSONLDParser {
 
 	private final Shape shape;
 	private final Shape baseline;
+	private final Map<String, String> keywords;
 
 	private final JSONLDDecoder decoder;
 
@@ -76,6 +77,7 @@ final class JSONLDParser {
 
 		this.shape=driver(shape);
 		this.baseline=shape;
+		this.keywords=keywords;
 
 		this.decoder=new JSONLDDecoder(focus, shape, keywords);
 	}
@@ -429,7 +431,7 @@ final class JSONLDParser {
 			final String head=steps.get(0);
 			final List<String> tail=steps.subList(1, steps.size());
 
-			final Map<String, Field> labels=labels(shape);
+			final Map<String, Field> labels=labels(shape, keywords);
 
 			return Optional.ofNullable(labels.get(head))
 
