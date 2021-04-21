@@ -29,6 +29,7 @@ import org.eclipse.rdf4j.model.IRI;
 import static com.metreeca.json.Frame.frame;
 import static com.metreeca.json.Shape.Contains;
 import static com.metreeca.json.Values.iri;
+import static com.metreeca.json.shapes.And.and;
 import static com.metreeca.json.shapes.Field.field;
 import static com.metreeca.json.shapes.Guard.*;
 import static com.metreeca.rest.Response.NotFound;
@@ -131,17 +132,17 @@ public final class Relator extends Delegator {
 			final IRI item=iri(request.item());
 			final Shape shape=request.get(shape());
 
-			return query(item, shape, request.query()).fold(request::reply, query ->
-					request.reply(response -> engine.relate(frame(item), query)
+			return query(item, shape, request.query()).fold(request::reply, query -> engine.relate(frame(item), query)
 
-							.map(frame -> response.status(OK)
-									.set(shape(), query.map(new ShapeProbe(collection)))
-									.body(jsonld(), frame)
-							)
+					.map(frame -> request.reply(response -> response.status(OK)
+							.set(shape(), query.map(new ShapeProbe(collection)))
+							.body(jsonld(), frame)
+					))
 
-							.orElseGet(() -> response.status(collection ? OK : NotFound)) // collections are virtual
-					)
-			);
+					.orElseGet(() -> request.reply(response -> collection
+							? response.status(OK).set(shape(), and()).body(jsonld(), frame(item)) // virtual container
+							: response.status(NotFound)
+					)));
 		};
 	}
 
