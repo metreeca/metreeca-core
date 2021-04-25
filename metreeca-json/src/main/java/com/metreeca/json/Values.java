@@ -83,6 +83,7 @@ public final class Values {
 	);
 
 	private static final char[] HexDigits="0123456789abcdef".toCharArray();
+	private static final int NameLengthLimit=80; // log args length limit
 
 
 	//// Constants /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -665,6 +666,8 @@ public final class Values {
 	}
 
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	public static String quote(final CharSequence text) {
 
 		if ( text == null ) {
@@ -710,6 +713,21 @@ public final class Values {
 		}
 
 		return NewlinePattern.matcher(text).replaceAll("\n\t");
+	}
+
+	/**
+	 * Clips a string.
+	 *
+	 * @param string the string to be clipped
+	 *
+	 * @return the input {@code string} clipped to a maximum length limit, or {@code null} if {@code string} is null
+	 */
+	public static String clip(final String string) {
+		return string == null || string.isEmpty() ? "?"
+				: string.indexOf('\n') >= 0 ? clip(string.substring(0, string.indexOf('\n')))
+				: string.length() > NameLengthLimit ?
+				string.substring(0, NameLengthLimit/2)+" … "+string.substring(string.length()-NameLengthLimit/2)
+				: string;
 	}
 
 

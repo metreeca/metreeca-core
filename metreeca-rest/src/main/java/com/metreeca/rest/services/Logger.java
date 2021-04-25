@@ -37,8 +37,6 @@ import static java.util.Arrays.stream;
  */
 public abstract class Logger {
 
-	private static final int NameLengthLimit=80; // log args length limit
-
 	private static final Map<String, java.util.logging.Logger> loggers=new HashMap<>(); // retain to prevent gc
 
 
@@ -123,34 +121,6 @@ public abstract class Logger {
 
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Clips the textual representation of an object
-	 *
-	 * @param object the object whose textual representation is to be clipped
-	 *
-	 * @return the  textual representation of {@code object} clipped to a maximum length limit, or {@code null} if
-	 * {@code
-	 * object} is null
-	 */
-	public static String clip(final Object object) {
-		return clip(object == null ? null : object.toString());
-	}
-
-	/**
-	 * Clips a string.
-	 *
-	 * @param string the string to be clipped
-	 *
-	 * @return the input {@code string} clipped to a maximum length limit, or {@code null} if {@code string} is null
-	 */
-	public static String clip(final String string) {
-		return string == null || string.isEmpty() ? "?"
-				: string.indexOf('\n') >= 0 ? clip(string.substring(0, string.indexOf('\n')))
-				: string.length() > NameLengthLimit ?
-				string.substring(0, NameLengthLimit/2)+" … "+string.substring(string.length()-NameLengthLimit/2)
-				: string;
-	}
 
 
 	/**

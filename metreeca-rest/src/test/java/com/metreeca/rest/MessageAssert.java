@@ -18,7 +18,6 @@ package com.metreeca.rest;
 
 import com.metreeca.rest.formats.DataFormat;
 import com.metreeca.rest.formats.TextFormat;
-import com.metreeca.rest.services.Logger;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
@@ -27,6 +26,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static com.metreeca.json.Values.clip;
 
 import static org.assertj.core.api.Assertions.fail;
 
@@ -249,7 +250,7 @@ public abstract class MessageAssert<A extends MessageAssert<A, T>, T extends Mes
 			if ( !text.isEmpty() ) {
 				failWithMessage(
 						"expected empty body but had textual body of length <%d> (%s)",
-						text.length(), Logger.clip(text)
+						text.length(), clip(text)
 				);
 			}
 

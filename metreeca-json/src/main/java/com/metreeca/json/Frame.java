@@ -859,8 +859,8 @@ public final class Frame {
 
 	@Override public String toString() {
 		return Values.format(focus)
-				+label().map(l -> " : "+l).orElse("")
-				+notes().map(l -> " / "+l).orElse("")
+				+label().map(l -> String.format(" : %s", clip(l))).orElse("")
+				+notes().map(n -> String.format(" / %s", clip(n))).orElse("")
 				+(traits.isEmpty() ? "" : String.format(" { [%d] }", size()));
 	}
 
