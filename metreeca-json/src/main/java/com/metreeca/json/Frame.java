@@ -87,7 +87,8 @@ public final class Frame {
 
 
 	private static Frame frame(final Value focus, final Collection<Statement> model, final Predicate<Value> visited) {
-		return visited.test(focus) ? frame(focus) : new Frame(focus, Stream.<Map.Entry<IRI, Value>>concat(
+		return new Frame(focus, visited.test(focus) || !focus.isResource() ? emptyMap() :
+				Stream.<Map.Entry<IRI, Value>>concat(
 
 				model.stream()
 						.filter(pattern(focus, null, null))
@@ -163,7 +164,7 @@ public final class Frame {
 
 				final Statement statement=traverse(predicate,
 						direct -> statement((Resource)focus, direct, frame.focus),
-						inverse -> statement((Resource)frame.focus, inverse, this.focus)
+						inverse -> statement((Resource)frame.focus, inverse, focus)
 				);
 
 				return Stream.concat(Stream.of(statement), frame.model());
