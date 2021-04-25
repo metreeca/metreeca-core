@@ -29,6 +29,7 @@ import static com.metreeca.rest.Either.Left;
 import static com.metreeca.rest.Either.Right;
 import static com.metreeca.rest.MessageException.status;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
+import static com.metreeca.rest.Xtream.task;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
 
@@ -94,7 +95,8 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	 * Creates a multipart message format.
 	 *
 	 * @param part the size limit for individual message parts; includes boundary and headers and applies also to
-	 *             message preamble and epilogue
+	 *                message
+	 *             preamble and epilogue
 	 * @param body the size limit for the complete message body
 	 *
 	 * @return a new read/write multipart message format with the given {@code part}/{@code body} size limits
@@ -135,9 +137,9 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Decodes the multipart {@code message} body from the input stream supplied by the {@code message}
-	 * {@link InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is
-	 * either missing or matched by {@link #MIMEPattern}
+	 * Decodes the multipart {@code message} body from the input stream supplied by the {@code message} {@link
+	 * InputFormat} body, if one is available and the {@code message} {@code Content-Type} header is either missing or
+	 * matched by {@link #MIMEPattern}
 	 */
 	@Override public Either<MessageException, Map<String, Message<?>>> decode(final Message<?> message) {
 		return message
@@ -216,8 +218,8 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 	/**
 	 * Configures {@code message} {@code Content-Type} header to {@value #MIME}, unless already defined, defines the
-	 * multipart message boundary, unless already defined and encodes the multipart {@code value} into the output
-	 * stream accepted by the {@code message} {@link OutputFormat} body
+	 * multipart message boundary, unless already defined and encodes the multipart {@code value} into the output stream
+	 * accepted by the {@code message} {@link OutputFormat} body
 	 */
 	@Override public <M extends Message<M>> M encode(final M message, final Map<String, Message<?>> value) {
 
@@ -268,13 +270,10 @@ public final class MultipartFormat extends Format<Map<String, Message<?>>> {
 
 					output.write(CRLF);
 
-					part.body(output()).fold(unexpected -> { throw unexpected; }, target -> {
-
-						target.accept(output);
-
-						return null;
-
-					});
+					part.body(output()).fold(
+							unexpected -> { throw unexpected; },
+							task(target -> target.accept(output))
+					);
 
 					output.write(CRLF);
 				}

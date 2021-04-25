@@ -86,7 +86,7 @@ public final class DataFormat extends Format<byte[]> {
 				.header("~Content-Type", MIME)
 				.header("~Content-Length", valueOf(value.length))
 
-				.body(output(), output -> { Xtream.data(output, value); });
+				.body(output(), output -> Xtream.data(output, value));
 	}
 
 }

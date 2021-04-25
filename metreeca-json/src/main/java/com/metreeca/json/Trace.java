@@ -16,12 +16,13 @@
 
 package com.metreeca.json;
 
-import javax.json.*;
-import javax.json.stream.JsonGenerator;
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
+
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
 
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toCollection;
@@ -47,8 +48,8 @@ public final class Trace {
 		);
 	}
 
-	public static Trace trace(final String issue) {
-		return new Trace(Stream.of(issue), Stream.empty());
+	public static Trace trace(final String... issues) {
+		return new Trace(Arrays.stream(issues), Stream.empty());
 	}
 
 	public static Trace trace(final Stream<String> issues) {

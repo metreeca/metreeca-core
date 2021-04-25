@@ -177,7 +177,7 @@ public final class MessageException extends RuntimeException implements Handler,
 		this.report=response
 				-> redirect(status) ? response.status(status).header("Location", fill(details, response))
 				: status < 500 ? response.status(status).body(text(), details)
-				: response.status(status).cause(new Exception(details));
+				: response.status(status).cause(this);
 	}
 
 	private MessageException(final int status, final JsonObject details) {
@@ -187,7 +187,7 @@ public final class MessageException extends RuntimeException implements Handler,
 		this.status=status;
 		this.report=response -> status < 500
 				? response.status(status).body(json(), details)
-				: response.status(status).cause(new Exception(details.toString()));
+				: response.status(status).cause(this);
 	}
 
 	private MessageException(final int status, final Throwable cause) {

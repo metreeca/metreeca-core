@@ -29,13 +29,14 @@ import org.eclipse.rdf4j.rio.*;
 import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.eclipse.rdf4j.rio.helpers.ParseErrorCollector;
 
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.rest.Either.Left;
@@ -45,6 +46,7 @@ import static com.metreeca.rest.Response.BadRequest;
 import static com.metreeca.rest.Response.UnsupportedMediaType;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.OutputFormat.output;
+
 import static org.eclipse.rdf4j.rio.RDFFormat.TURTLE;
 
 
@@ -251,6 +253,9 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 		final RDFWriterRegistry registry=RDFWriterRegistry.getInstance();
 		final RDFWriterFactory factory=service(registry, TURTLE, types);
 
+		final IRI focus=iri(message.item());
+		final String base=focus.stringValue(); // relativize IRIs wrt the response focus
+
 		return message
 
 				// try to set content type to the actual type requested even if it's not the default one
@@ -262,9 +267,6 @@ public final class RDFFormat extends Format<Collection<Statement>> {
 				)
 
 				.body(output(), output -> {
-
-					final IRI focus=iri(message.item());
-					final String base=focus.stringValue(); // relativize IRIs wrt the response focus
 
 					try {
 

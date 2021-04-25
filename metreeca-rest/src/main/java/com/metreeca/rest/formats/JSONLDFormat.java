@@ -29,6 +29,7 @@ import java.util.function.Supplier;
 import javax.json.*;
 
 import static com.metreeca.json.Frame.frame;
+import static com.metreeca.json.Trace.trace;
 import static com.metreeca.json.Values.format;
 import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.lang;
@@ -40,7 +41,6 @@ import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.formats.InputFormat.input;
 import static com.metreeca.rest.formats.JSONLDScanner.scan;
 import static com.metreeca.rest.formats.OutputFormat.output;
-import static com.metreeca.rest.services.Logger.logger;
 
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
@@ -234,6 +234,11 @@ public final class JSONLDFormat extends Format<Frame> {
 			));
 		}
 
+		final Shape shape=message.get(shape());
+		final List<String> langs=message.request().langs();
+
+		final boolean global=langs.isEmpty() || langs.contains("*");
+
 		final String mime=message
 
 				.header("Content-Type") // content-type explicitly defined by handler
@@ -250,52 +255,52 @@ public final class JSONLDFormat extends Format<Frame> {
 
 				);
 
-		final List<String> langs=message.request().langs();
+
+		final Collection<Statement> model=value.model().collect(toList());
+
+		final Collection<Statement> validated=scan(shape, value.focus(), model).fold(trace -> {
+
+			throw status(InternalServerError, trace(trace("invalid JSON-LD payload"), trace).toJSON());
+
+		});
+
+		final Collection<Statement> localized=global ? validated : validated.stream().filter(statement -> {
+
+			// retain only tagged literals with an accepted language
+
+			final String lang=lang(statement.getObject());
+
+			return lang.isEmpty() || langs.contains(lang);
+
+		}).collect(toList());
+
 
 		return message
 
 				.header("~Content-Type", mime)
 
 				.body(output(), output -> {
+
 					try (
 							final Writer writer=new OutputStreamWriter(output, message.charset());
 							final JsonWriter jsonWriter=JsonWriters.createWriter(writer)
 					) {
 
-						final Shape shape=message.get(shape());
-						final Map<String, String> keywords=service(keywords());
-
-						final Collection<Statement> model=
-								scan(shape, value.focus(), value.model().collect(toList())).fold(trace -> {
-
-									service(logger()).error(this, format("invalid JSON-LD payload %s", trace.toJSON()));
-
-									throw new RuntimeException("invalid JSON-LD payload");
-
-								});
-
 						jsonWriter.writeObject(new JSONLDEncoder(
 
 								iri(item),
 								shape.localize(langs),
-								keywords,
-								mime.equals(MIME) // include context objects for application/ld+json?
+								service(keywords()),
+								mime.equals(MIME) // include context objects for application/ld+json
 
-						).encode(langs.isEmpty() || langs.contains("*") ? model : model.stream().filter(statement -> {
-
-							// retain only tagged literals with an accepted language
-
-							final String lang=lang(statement.getObject());
-
-							return lang.isEmpty() || langs.contains(lang);
-
-						}).collect(toList())));
+						).encode(localized));
 
 					} catch ( final IOException e ) {
 
 						throw new UncheckedIOException(e);
 
 					}
+
 				});
 	}
 
