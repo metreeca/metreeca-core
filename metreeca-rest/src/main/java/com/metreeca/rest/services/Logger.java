@@ -452,7 +452,11 @@ public abstract class Logger {
 					: source instanceof Class ? ((Class<?>)source).getName()
 					: source.getClass().getName();
 
-			final LogRecord record=new LogRecord(level.level, message.get());
+			final String text=message.get();
+
+			final LogRecord record=new LogRecord(level.level,
+					text.indexOf('\n') >= 0 && !text.endsWith("\n") ? text+"\n" : text
+			);
 
 			record.setLoggerName(logger);
 			record.setSourceClassName(logger);

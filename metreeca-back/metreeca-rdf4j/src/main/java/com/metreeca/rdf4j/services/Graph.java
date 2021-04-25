@@ -18,6 +18,7 @@ package com.metreeca.rdf4j.services;
 
 import com.metreeca.json.Frame;
 import com.metreeca.rest.*;
+import com.metreeca.rest.services.Logger;
 
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.vocabulary.RDF;
@@ -35,9 +36,12 @@ import static com.metreeca.json.Values.iri;
 import static com.metreeca.json.Values.literal;
 import static com.metreeca.rest.Toolbox.service;
 import static com.metreeca.rest.Xtream.task;
+import static com.metreeca.rest.services.Logger.logger;
+import static com.metreeca.rest.services.Logger.time;
 
 import static org.eclipse.rdf4j.query.QueryLanguage.SPARQL;
 
+import static java.lang.String.format;
 import static java.time.ZoneOffset.UTC;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.stream.Collectors.toCollection;
@@ -112,15 +116,26 @@ public final class Graph implements AutoCloseable {
 		}
 
 		final Graph graph=service(graph());
+		final Logger logger=service(logger());
 
 		return query.isEmpty() ? (message, frame) -> frame : (message, frame) -> graph.query(connection -> {
 
+			logger.debug(Graph.class, () -> format("evaluating query %s", query));
+
 			final ArrayList<Statement> model=frame.model().collect(toCollection(ArrayList::new));
 
-			configure(
+			time(() -> configure(
+
 					message, connection.prepareGraphQuery(SPARQL, query, message.request().base()), customizers
+
 			).evaluate(
+
 					new StatementCollector(model)
+
+			)).apply(elapsed ->
+
+					logger.debug(Graph.class, () -> format("evaluated in <%,d> ms", elapsed))
+
 			);
 
 			return frame(frame.focus(), model);
@@ -155,10 +170,21 @@ public final class Graph implements AutoCloseable {
 		}
 
 		final Graph graph=service(graph());
+		final Logger logger=service(logger());
 
 		return update.isEmpty() ? message -> message : message -> graph.update(connection -> {
 
-			configure(message, connection.prepareUpdate(SPARQL, update, message.request().base()), customizers).execute();
+			logger.debug(Graph.class, () -> format("evaluating update %s", update));
+
+			time(() -> configure(
+
+					message, connection.prepareUpdate(SPARQL, update, message.request().base()), customizers
+
+			).execute()).apply(elapsed ->
+
+					logger.debug(Graph.class, () -> format("evaluated in <%,d> ms", elapsed))
+
+			);
 
 			return message;
 

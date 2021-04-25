@@ -129,7 +129,7 @@ abstract class GraphFacts {
 	String compile(final Supplier<String> generator) {
 		return time(generator).apply((t, v) -> logger
 
-				.debug(this, () -> format("executing %s", v.endsWith("\n") ? v : v+"\n"))
+				.debug(this, () -> format("executing %s", v))
 				.debug(this, () -> format("generated in <%,d> ms", t))
 
 		);
