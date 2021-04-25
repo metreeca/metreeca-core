@@ -47,12 +47,16 @@ public final class Request extends Message<Request> {
 	public static final String TRACE="TRACE"; // https://tools.ietf.org/html/rfc7231#section-4.3.8
 
 
+	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
+	private static final Pattern FilePattern=Pattern.compile("\\.\\w+$");
+
 	private static final Collection<String> Safe=new HashSet<>(asList(
 			GET, HEAD, OPTIONS, TRACE // https://tools.ietf.org/html/rfc7231#section-4.2.1
 	));
 
-	private static final Pattern HTMLPattern=Pattern.compile("\\btext/x?html\\b");
-	private static final Pattern FilePattern=Pattern.compile("\\.\\w+$");
+	private static final Collection<String> Remote=new HashSet<>(asList(
+			"feed:", "ftp:", "http:", "https", "imap", "ldap:", "ldaps", "message:", "pop:", "s3:"
+	));
 
 
 	public static Map<String, List<String>> search(final String query) {
@@ -105,6 +109,7 @@ public final class Request extends Message<Request> {
 	private String method=GET;
 	private String base=Values.Base;
 	private String path="/";
+	private String item=base;
 	private String query="";
 
 	private final Map<String, List<String>> parameters=new LinkedHashMap<>();
@@ -113,13 +118,13 @@ public final class Request extends Message<Request> {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
-	 * Retrieves the focus item IRI of this request.
+	 * Retrieves the focus IRI of this request.
 	 *
 	 * @return the absolute IRI obtained by concatenating {@linkplain #base() base} and {@linkplain #path() path} for
 	 * this request
 	 */
 	@Override public String item() {
-		return base+path.substring(1);
+		return item;
 	}
 
 	/**
@@ -163,6 +168,17 @@ public final class Request extends Message<Request> {
 	 */
 	public boolean safe() {
 		return Safe.contains(method);
+	}
+
+	/**
+	 * Checks if this request is remote.
+	 *
+	 * @return {@code true} if the {@link #item() focus IRI} of this request is based on a remote dereferenceable
+	 * <a href="https://www.iana.org/assignments/uri-schemes/uri-schemes.xhtml#uri-schemes-1">URI scheme</a>; {@code
+	 * false} otherwise
+	 */
+	public boolean remote() {
+		return Remote.stream().anyMatch(item::startsWith);
 	}
 
 	/**
@@ -371,6 +387,7 @@ public final class Request extends Message<Request> {
 		}
 
 		this.base=base;
+		this.item=base+path.substring(1);
 
 		return this;
 	}
@@ -408,6 +425,7 @@ public final class Request extends Message<Request> {
 		}
 
 		this.path=path;
+		this.item=base+path.substring(1);
 
 		return this;
 	}
