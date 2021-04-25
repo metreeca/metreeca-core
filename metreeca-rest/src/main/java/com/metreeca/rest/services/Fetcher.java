@@ -297,7 +297,7 @@ import static java.util.stream.Collectors.toMap;
 
 
 		@Override public Response apply(final Request request) {
-			return request.safe() ? cache.retrieve(
+			return request.safe() && request.remote() ? cache.retrieve(
 
 					format("%s %s", request.method(), request.resource()),
 
