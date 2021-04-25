@@ -25,8 +25,7 @@ import org.eclipse.rdf4j.rio.turtle.TurtleParser;
 
 import java.io.*;
 import java.util.Map;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
+import java.util.logging.*;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -51,20 +50,20 @@ public final class ValuesTest {
 
 	private static final Logger logger=Logger.getLogger("com.metreeca"); // retain reference to prevent gc
 
+	static { log(FINE); }
 
-	static { // logging not configured: reset and enable fine console logging
 
+	public static void log(final Level level) { // logging not configured: reset and configure console logging level
 		if ( System.getProperty("java.util.logging.config.file") == null
 				&& System.getProperty("java.util.logging.config.class") == null ) {
 
-			logger.setLevel(FINE);
+			logger.setLevel(level);
 
 			for (final Handler handler : Logger.getLogger("").getHandlers()) {
 				handler.setLevel(ALL); // enable detailed reporting from children loggers
 			}
 
 		}
-
 	}
 
 

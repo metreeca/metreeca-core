@@ -39,6 +39,7 @@ import static com.metreeca.json.Order.decreasing;
 import static com.metreeca.json.Order.increasing;
 import static com.metreeca.json.Shape.Contains;
 import static com.metreeca.json.Values.*;
+import static com.metreeca.json.ValuesTest.log;
 import static com.metreeca.json.queries.Items.items;
 import static com.metreeca.json.queries.Stats.stats;
 import static com.metreeca.json.queries.Terms.terms;
@@ -76,9 +77,13 @@ import static java.util.Comparator.comparing;
 import static java.util.Map.Entry.comparingByKey;
 import static java.util.Map.Entry.comparingByValue;
 import static java.util.function.Function.identity;
+import static java.util.logging.Level.FINE;
 import static java.util.stream.Collectors.*;
 
 public abstract class EngineTest {
+
+	static { log(FINE); }
+
 
 	protected static final Map<Value, Frame> index=resources.stream().collect(toMap(Frame::focus, identity()));
 
@@ -643,7 +648,7 @@ public abstract class EngineTest {
 
 					filter(clazz(Employee)), emptyList(), 0, 0
 
-			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+			))).hasValueSatisfying(frame -> assertThat(frame)
 
 					.isIsomorphicTo(query(frame(employees), f -> Stream.of(f.focus())))
 
@@ -663,7 +668,7 @@ public abstract class EngineTest {
 
 					0, 0
 
-			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+			))).hasValueSatisfying(frame -> assertThat(frame)
 
 					.isIsomorphicTo(query(frame(employees), f -> Optional.of(f)
 							.filter(v -> v.integer(seniority)
@@ -686,7 +691,7 @@ public abstract class EngineTest {
 
 					0, 0
 
-			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+			))).hasValueSatisfying(frame -> assertThat(frame)
 
 					.isIsomorphicTo(query(frame(employees), f -> Optional.of(f)
 							.filter(v -> v.focus().equals(resource))
@@ -709,7 +714,7 @@ public abstract class EngineTest {
 
 					0, 0
 
-			))).hasValueSatisfying(frame -> FrameAssert.assertThat(frame)
+			))).hasValueSatisfying(frame -> assertThat(frame)
 
 					.isIsomorphicTo(query(frame(employees), v -> v.values(supervisor)))
 
