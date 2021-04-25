@@ -188,7 +188,7 @@ public final class SPARQLScribe {
 	}
 
 	public static Scribe count(final boolean distinct, final Scribe expression) {
-		return list(text(" count(", distinct ? text("distinct") : nothing()), expression, text(")"));
+		return list(text(" count("), distinct ? text("distinct ") : nothing(), expression, text(")"));
 	}
 
 

@@ -98,7 +98,7 @@ final class GraphStats extends GraphFacts {
 												var("type"),
 												as("min", min(var(hook))),
 												as("max", max(var(hook))),
-												as("count", count(true, var(hook)))
+												as("count", count(false, var(hook)))
 
 										)))),
 
