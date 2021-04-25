@@ -85,22 +85,9 @@ public final class Server implements Wrapper {
 						.map(this::logging)
 						.map(this::charset)
 
-						.accept(response -> {
-							try {
+						.accept(consumer);
 
-								consumer.accept(response);
-
-							} catch ( final RuntimeException e ) { // after prolog is possibly sent >> logging only
-
-								logger.error(this,
-										format("%s %s > %d", request.method(), request.item(), InternalServerError),
-										e
-								);
-
-							}
-						});
-
-			} catch ( final RuntimeException e ) { // before prolog is possibly sent >> new response
+			} catch ( final RuntimeException e ) { // try to send a new response
 
 				request
 

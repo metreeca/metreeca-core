@@ -347,7 +347,6 @@ public final class JSEServer {
 			exchange.close();
 
 		}
-
 	}
 
 }
